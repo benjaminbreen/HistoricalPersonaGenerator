@@ -1,0 +1,37 @@
+{
+  "name": "historical-persona-generator",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "history",
+    "character",
+    "generator",
+    "procedural",
+    "portrait"
+  ],
+  "author": "Benjamin Breen",
+  "license": "MIT",
+  "description": "Standalone historical persona generator with procedural portraits",
+  "devDependencies": {
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4"
+  },
+  "dependencies": {
+    "framer-motion": "^12.23.24",
+    "prop-types": "^15.8.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-icons": "^5.5.0",
+    "react-simple-maps": "^3.0.0",
+    "uuid": "^13.0.0"
+  }
+}

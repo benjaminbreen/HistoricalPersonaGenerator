@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Historical Persona Generator</title>
+    <style>
+      /* Loading screen styles - hidden once React mounts */
+      #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #1a1410 0%, #2d2318 50%, #1a1410 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        opacity: 1;
+        transition: opacity 0.4s ease-out;
+      }
+      #loading-screen.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .loading-hourglass {
+        animation: pulse 2s ease-in-out infinite, spin 8s linear infinite;
+      }
+      .loading-title {
+        margin-top: 24px;
+        font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+        font-size: 1.5rem;
+        color: #c4a574;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        opacity: 0.9;
+      }
+      .loading-subtitle {
+        margin-top: 8px;
+        font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+        font-size: 0.9rem;
+        color: #8b7355;
+        font-style: italic;
+      }
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(196, 165, 116, 0.3)); }
+        50% { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(196, 165, 116, 0.5)); }
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg) scale(1); }
+        25% { transform: rotate(0deg) scale(1.05); }
+        50% { transform: rotate(180deg) scale(1); }
+        75% { transform: rotate(180deg) scale(1.05); }
+        100% { transform: rotate(360deg) scale(1); }
+      }
+      @keyframes sandFall {
+        0% { transform: translateY(0); opacity: 1; }
+        100% { transform: translateY(18px); opacity: 0; }
+      }
+      .sand-stream {
+        animation: sandFall 1.5s linear infinite;
+      }
+      @keyframes topSandDrain {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(16px); }
+      }
+      @keyframes bottomSandFill {
+        0% { transform: translateY(16px); }
+        100% { transform: translateY(0); }
+      }
+      .top-sand-loading {
+        animation: topSandDrain 8s linear infinite;
+      }
+      .bottom-sand-loading {
+        animation: bottomSandFill 8s linear infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading screen shown before React mounts -->
+    <div id="loading-screen">
+      <svg
+        class="loading-hourglass"
+        viewBox="0 0 50 50"
+        width="120"
+        height="120"
+        aria-label="Loading..."
+      >
+        <defs>
+          <linearGradient id="loadingHourglassGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#c4a574" />
+            <stop offset="50%" stop-color="#a08060" />
+            <stop offset="100%" stop-color="#8b7355" />
+          </linearGradient>
+          <linearGradient id="loadingSandGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#e8d5a8" />
+            <stop offset="100%" stop-color="#d4c090" />
+          </linearGradient>
+          <clipPath id="loadingTopBulbClip">
+            <path d="M15 7 L35 7 L35 14 Q35 20 25 25 Q15 20 15 14 Z" />
+          </clipPath>
+          <clipPath id="loadingBottomBulbClip">
+            <path d="M15 43 L35 43 L35 36 Q35 30 25 25 Q15 30 15 36 Z" />
+          </clipPath>
+        </defs>
+
+        <!-- Outer ring -->
+        <circle cx="25" cy="25" r="23" fill="none" stroke="url(#loadingHourglassGradient)" stroke-width="2.5" />
+
+        <!-- Hourglass glass body - filled background -->
+        <path d="M16 8 L34 8 L34 13 Q34 19 25 25 Q16 19 16 13 Z" fill="rgba(255,250,240,0.2)" />
+        <path d="M16 42 L34 42 L34 37 Q34 31 25 25 Q16 31 16 37 Z" fill="rgba(255,250,240,0.2)" />
+
+        <!-- Top sand -->
+        <g clip-path="url(#loadingTopBulbClip)">
+          <rect class="top-sand-loading" x="15" y="7" width="20" height="16" fill="url(#loadingSandGradient)" />
+        </g>
+
+        <!-- Falling sand stream -->
+        <line class="sand-stream" x1="25" y1="23" x2="25" y2="27" stroke="url(#loadingSandGradient)" stroke-width="2" stroke-linecap="round" />
+
+        <!-- Bottom sand -->
+        <g clip-path="url(#loadingBottomBulbClip)">
+          <rect class="bottom-sand-loading" x="15" y="27" width="20" height="16" fill="url(#loadingSandGradient)" />
+        </g>
+
+        <!-- Hourglass frame - top bulb outline -->
+        <path d="M15 7 L35 7 L35 14 Q35 20 25 25 Q15 20 15 14 Z"
+              fill="none" stroke="url(#loadingHourglassGradient)" stroke-width="2" stroke-linecap="round" />
+
+        <!-- Hourglass frame - bottom bulb outline -->
+        <path d="M15 43 L35 43 L35 36 Q35 30 25 25 Q15 30 15 36 Z"
+              fill="none" stroke="url(#loadingHourglassGradient)" stroke-width="2" stroke-linecap="round" />
+
+        <!-- Glass shine effects -->
+        <path d="M18 10 Q19 16 25 22" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+        <path d="M18 40 Q19 34 25 28" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
+
+        <!-- Frame end caps -->
+        <rect x="13" y="5.5" width="24" height="3" rx="1.5" fill="url(#loadingHourglassGradient)" />
+        <rect x="13" y="41.5" width="24" height="3" rx="1.5" fill="url(#loadingHourglassGradient)" />
+      </svg>
+      <div class="loading-title">Historical Persona Generator</div>
+      <div class="loading-subtitle">Summoning spirits from the past...</div>
+    </div>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
