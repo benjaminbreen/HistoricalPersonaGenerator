@@ -1332,7 +1332,21 @@ export function determineSocialRole(
         }
         
         if (possibleRoles.length > 0) {
-            const chosen = possibleRoles[Math.floor(Math.random() * possibleRoles.length)];
+            // Separate outlaw/revolutionary roles from regular roles
+            // These should be very rare (~1% of characters)
+            const outlawClasses = ['OUTLAWS_AND_REVOLUTIONARIES', 'OUTLAWS_AND_ACTIVISTS', 'WAR_ERA'];
+            const regularRoles = possibleRoles.filter(r => !outlawClasses.includes(r.socialClass));
+            const outlawRoles = possibleRoles.filter(r => outlawClasses.includes(r.socialClass));
+
+            // 99% chance to pick from regular roles if available, 1% for outlaws
+            let chosen;
+            if (regularRoles.length > 0 && (outlawRoles.length === 0 || Math.random() > 0.01)) {
+                chosen = regularRoles[Math.floor(Math.random() * regularRoles.length)];
+            } else if (outlawRoles.length > 0) {
+                chosen = outlawRoles[Math.floor(Math.random() * outlawRoles.length)];
+            } else {
+                chosen = possibleRoles[Math.floor(Math.random() * possibleRoles.length)];
+            }
             return { socialClass: chosen.socialClass, role: chosen.role, emoji: chosen.roleDef.emoji || '🧑', nameKey: chosen.roleDef.nameKey };
         }
 
