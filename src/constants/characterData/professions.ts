@@ -38,6 +38,7 @@ export interface ProfessionDefinition {
     keywords?: string;
     emoji: string;
     nameKey?: string;          // culture‑specific name lists (optional)
+    decadeRange?: [number, number];  // [startDecade, endDecade] for temporal filtering (e.g., [1940, 2019])
 }
 
 /* ---------- Helper alias types ----------------------------------------- */
@@ -51,288 +52,1422 @@ export type ProfessionData = { [key in CulturalZone]?: EraMap };
 /* ======================================================================= */
 
 /* ======================================================================= */
-/*                      SHARED MODERN/FUTURE PROFESSIONS                   */
+/*                      MODERN ERA PROFESSIONS (1900-2019)                 */
 /* ======================================================================= */
-const SHARED_MODERN_PROFESSIONS = {
+
+/* ---------- BASE MODERN PROFESSIONS (Universal with temporal filtering) --- */
+const BASE_MODERN_UPPER_CLASS = {
+    'CEO': {
+        statRequirements: { minIntelligence: 7, minPersuasion: 8, minCraftiness: 7 },
+        socialRequirements: { minPrivilege: 0.9, minAmbition: 0.8 },
+        keywords: 'corporate leadership business',
+        emoji: '💼',
+        decadeRange: [1920, 2019] as [number, number]
+    },
+    'Politician': {
+        statRequirements: { minPersuasion: 8, minIntelligence: 6, minCraftiness: 7 },
+        socialRequirements: { minPrivilege: 0.7, minAmbition: 0.9 },
+        keywords: 'government power statecraft',
+        emoji: '🗳️'
+    },
+    'Surgeon': {
+        statRequirements: { minIntelligence: 8, minDexterity: 9, minStamina: 6 },
+        socialRequirements: { minPrivilege: 0.8 },
+        keywords: 'medicine specialist hospital',
+        emoji: '⚕️'
+    },
+    'Judge': {
+        statRequirements: { minIntelligence: 8, minPersuasion: 6 },
+        socialRequirements: { minPrivilege: 0.8 },
+        keywords: 'law justice court',
+        emoji: '⚖️'
+    },
+    'Bank President': {
+        statRequirements: { minIntelligence: 8, minCraftiness: 7 },
+        socialRequirements: { minPrivilege: 0.85, minAmbition: 0.7 },
+        keywords: 'finance capital money',
+        emoji: '🏦'
+    },
+    'University Professor': {
+        statRequirements: { minIntelligence: 9, minPersuasion: 6 },
+        socialRequirements: { minPrivilege: 0.7 },
+        keywords: 'academia research education',
+        emoji: '🎓'
+    },
+    'Industrialist': {
+        statRequirements: { minIntelligence: 7, minCraftiness: 8, minPersuasion: 6 },
+        socialRequirements: { minPrivilege: 0.85, minAmbition: 0.8 },
+        keywords: 'manufacturing tycoon factory owner',
+        emoji: '🏭',
+        decadeRange: [1900, 1970] as [number, number]
+    },
+    'Oil Baron': {
+        statRequirements: { minCraftiness: 8, minPersuasion: 7 },
+        socialRequirements: { minPrivilege: 0.9, minAmbition: 0.9 },
+        keywords: 'petroleum energy wealth',
+        emoji: '🛢️',
+        decadeRange: [1900, 2019] as [number, number]
+    }
+};
+
+const BASE_MODERN_MIDDLE_CLASS = {
+    'Teacher': {
+        statRequirements: { minIntelligence: 6, minPersuasion: 6, minStamina: 5 },
+        keywords: 'education school learning',
+        emoji: '👩‍🏫'
+    },
+    'Nurse': {
+        statRequirements: { minStamina: 6, minDexterity: 6, minPersuasion: 5 },
+        socialRequirements: { maxPrivilege: 0.7 },
+        genderBias: 'Female' as const,
+        keywords: 'healthcare hospital medicine',
+        emoji: '👩‍⚕️'
+    },
+    'Accountant': {
+        statRequirements: { minIntelligence: 6, minPerception: 6 },
+        keywords: 'finance taxes bookkeeping',
+        emoji: '🧮'
+    },
+    'Police Officer': {
+        statRequirements: { minStrength: 6, minPerception: 6, minStamina: 6 },
+        keywords: 'law enforcement security',
+        emoji: '👮'
+    },
+    'Office Manager': {
+        statRequirements: { minIntelligence: 5, minPersuasion: 6 },
+        keywords: 'administration business paperwork',
+        emoji: '📊'
+    },
+    'Civil Engineer': {
+        statRequirements: { minIntelligence: 7, minCraftiness: 6 },
+        socialRequirements: { minPrivilege: 0.5 },
+        keywords: 'building infrastructure design',
+        emoji: '🏗️'
+    },
+    'Mechanic': {
+        statRequirements: { minCraftiness: 7, minStrength: 5, minIntelligence: 5 },
+        keywords: 'repair engine automobile',
+        emoji: '🛠️'
+    },
+    'Journalist': {
+        statRequirements: { minIntelligence: 6, minPersuasion: 6 },
+        socialRequirements: { minWanderlust: 0.4 },
+        keywords: 'news writing reporting',
+        emoji: '📰'
+    },
+    'Librarian': {
+        statRequirements: { minIntelligence: 6, minPerception: 5 },
+        keywords: 'books records archive',
+        emoji: '📚'
+    },
+    'Secretary': {
+        statRequirements: { minDexterity: 6, minPerception: 5 },
+        socialRequirements: { maxPrivilege: 0.6 },
+        genderBias: 'Female' as const,
+        keywords: 'typing office administration',
+        emoji: '📊'
+    },
+    'Salesman': {
+        statRequirements: { minPersuasion: 7, minStamina: 5 },
+        socialRequirements: { minWanderlust: 0.5, minAmbition: 0.5 },
+        keywords: 'retail commerce travel',
+        emoji: '📈'
+    },
+    'Small Business Owner': {
+        statRequirements: { minCraftiness: 6, minPersuasion: 5 },
+        socialRequirements: { minAmbition: 0.6 },
+        keywords: 'shopkeeper retail entrepreneur',
+        emoji: '🏪'
+    },
+    'Radio Broadcaster': {
+        statRequirements: { minPersuasion: 7, minIntelligence: 5 },
+        keywords: 'radio media entertainment',
+        emoji: '📻',
+        decadeRange: [1920, 2019] as [number, number]
+    },
+    'Television Presenter': {
+        statRequirements: { minPersuasion: 7, minIntelligence: 5 },
+        keywords: 'television media entertainment',
+        emoji: '📺',
+        decadeRange: [1950, 2019] as [number, number]
+    },
+    'Computer Programmer': {
+        statRequirements: { minIntelligence: 8, minCraftiness: 6 },
+        keywords: 'programming coding software',
+        emoji: '💻',
+        decadeRange: [1960, 2019] as [number, number]
+    },
+    'Airline Pilot': {
+        statRequirements: { minPerception: 8, minIntelligence: 7, minStamina: 6 },
+        socialRequirements: { minPrivilege: 0.6 },
+        genderBias: 'Male' as const,
+        keywords: 'aviation flying aircraft',
+        emoji: '✈️',
+        decadeRange: [1930, 2019] as [number, number]
+    }
+};
+
+const BASE_MODERN_WORKING_CLASS = {
+    'Factory Worker': {
+        statRequirements: { minStamina: 6, minConstitution: 6 },
+        keywords: 'manufacturing assembly line labor',
+        emoji: '🏭'
+    },
+    'Truck Driver': {
+        statRequirements: { minStamina: 7, minPerception: 6 },
+        keywords: 'transport logistics driving',
+        emoji: '🚚',
+        decadeRange: [1920, 2019] as [number, number]
+    },
+    'Construction Worker': {
+        statRequirements: { minStrength: 7, minStamina: 7, minConstitution: 7 },
+        keywords: 'building labor trades',
+        emoji: '👷'
+    },
+    'Cashier': {
+        statRequirements: { minStamina: 5, minPersuasion: 4 },
+        keywords: 'retail service money',
+        emoji: '🛒'
+    },
+    'Janitor': {
+        statRequirements: { minStamina: 6, minConstitution: 5 },
+        keywords: 'cleaning maintenance custodian',
+        emoji: '🧹'
+    },
+    'Security Guard': {
+        statRequirements: { minStrength: 5, minPerception: 6 },
+        keywords: 'protection safety watchman',
+        emoji: '🛡️'
+    },
+    'Farm Worker': {
+        statRequirements: { minStamina: 7, minConstitution: 6, minStrength: 5 },
+        keywords: 'agriculture harvest farming',
+        emoji: '🌾'
+    },
+    'Warehouse Worker': {
+        statRequirements: { minStrength: 6, minStamina: 6 },
+        keywords: 'logistics shipping stocking',
+        emoji: '📦'
+    },
+    'Cook': {
+        statRequirements: { minDexterity: 6, minStamina: 6 },
+        keywords: 'restaurant food service',
+        emoji: '👨‍🍳'
+    },
+    'Miner': {
+        statRequirements: { minStrength: 7, minStamina: 8, minConstitution: 7 },
+        genderBias: 'Male' as const,
+        keywords: 'coal extraction digging labor',
+        emoji: '⛏️'
+    },
+    'Railroad Worker': {
+        statRequirements: { minStrength: 7, minStamina: 6, minConstitution: 6 },
+        genderBias: 'Male' as const,
+        keywords: 'transport tracks railway labor',
+        emoji: '🚂'
+    },
+    'Dock Worker': {
+        statRequirements: { minStrength: 8, minStamina: 7 },
+        genderBias: 'Male' as const,
+        keywords: 'shipping cargo port longshoreman',
+        emoji: '⚓'
+    },
+    'Textile Worker': {
+        statRequirements: { minDexterity: 6, minStamina: 6 },
+        genderBias: 'Female' as const,
+        keywords: 'mill sewing garment factory',
+        emoji: '🧵'
+    },
+    'Telephone Operator': {
+        statRequirements: { minDexterity: 2, minPersuasion: 2 },
+        genderBias: 'Female' as const,
+        keywords: 'communication switchboard service',
+        emoji: '📞',
+        decadeRange: [1900, 1980] as [number, number]
+    },
+    'Postal Worker': {
+        statRequirements: { minStamina: 6, minPerception: 3 },
+        keywords: 'mail delivery postman',
+        emoji: '📮'
+    },
+    'Butcher': {
+        statRequirements: { minStrength: 6, minDexterity: 3 },
+        keywords: 'meat food processing',
+        emoji: '🔪'
+    },
+    'Baker': {
+        statRequirements: { minStamina: 5, minCraftiness: 5 },
+        keywords: 'bread food baking',
+        emoji: '🍞'
+    },
+    'Waiter': {
+        statRequirements: { minStamina: 5, minDexterity: 5, minPersuasion: 3 },
+        keywords: 'service restaurant food',
+        emoji: '🤵'
+    },
+    'Bartender': {
+        statRequirements: { minPersuasion: 7, minStamina: 1 },
+        keywords: 'service drinks alcohol',
+        emoji: '🍺'
+    },
+    'Taxi Driver': {
+        statRequirements: { minStamina: 6, minPerception: 6 },
+        keywords: 'driving transport service',
+        emoji: '🚕',
+        decadeRange: [1910, 2019] as [number, number]
+    },
+    'Welder': {
+        statRequirements: { minDexterity: 7, minConstitution: 6 },
+        keywords: 'trades metalwork manufacturing',
+        emoji: '🔥'
+    },
+    'Lumberjack': {
+        statRequirements: { minStrength: 8, minStamina: 7 },
+        genderBias: 'Male' as const,
+        keywords: 'forestry logging wood',
+        emoji: '🪓'
+    },
+    'Fisherman': {
+        statRequirements: { minStrength: 5, minConstitution: 6, minPerception: 6 },
+        genderBias: 'Male' as const,
+        keywords: 'fishing sea food',
+        emoji: '🎣'
+    },
+    'Assembly Line Worker': {
+        statRequirements: { minStamina: 6, minDexterity: 5 },
+        keywords: 'manufacturing mass production',
+        emoji: '🔧',
+        decadeRange: [1910, 2019] as [number, number]
+    },
+    'Gas Station Attendant': {
+        statRequirements: { minStamina: 5, minPersuasion: 4 },
+        keywords: 'automotive service fuel',
+        emoji: '⛽',
+        decadeRange: [1920, 2019] as [number, number]
+    }
+};
+
+const BASE_MODERN_OUTLAWS = {
+    'Mobster': {
+        statRequirements: { minStrength: 3, minCraftiness: 3 },
+        socialRequirements: { maxPrivilege: 0.4 },
+        genderBias: 'Male' as const,
+        keywords: 'organized crime mafia',
+        emoji: '🚬'
+    },
+    'Numbers Runner': {
+        statRequirements: { minCraftiness: 3, minPersuasion: 3 },
+        socialRequirements: { maxPrivilege: 0.3 },
+        keywords: 'illegal gambling',
+        emoji: '🎲'
+    },
+    'Pickpocket': {
+        statRequirements: { minDexterity: 4, minPerception: 3 },
+        socialRequirements: { maxPrivilege: 0.2 },
+        keywords: 'street crime theft',
+        emoji: '👤'
+    },
+    'Militant': {
+        statRequirements: { minStrength: 3, minPersuasion: 4 },
+        socialRequirements: { maxPrivilege: 0.3, minAmbition: 0.6 },
+        keywords: 'revolutionary militant',
+        emoji: '✊'
+    },
+    'Guerrilla Fighter': {
+        statRequirements: { minStamina: 3, minCraftiness: 3 },
+        socialRequirements: { maxPrivilege: 0.3, minWanderlust: 0.5 },
+        keywords: 'insurgent rebel',
+        emoji: '🔫'
+    },
+    'Smuggler': {
+        statRequirements: { minCraftiness: 4, minPersuasion: 2 },
+        socialRequirements: { maxPrivilege: 0.4, minWanderlust: 0.5 },
+        keywords: 'contraband illegal trade',
+        emoji: '📦'
+    },
+    'Bootlegger': {
+        statRequirements: { minCraftiness: 5, minPersuasion: 4 },
+        socialRequirements: { maxPrivilege: 0.4 },
+        keywords: 'prohibition alcohol smuggling',
+        emoji: '🥃',
+        decadeRange: [1920, 1933] as [number, number]
+    }
+};
+
+/* ---------- EUROPEAN MODERN PROFESSIONS ----------------------------------- */
+const EUROPEAN_MODERN_PROFESSIONS = {
     UPPER_CLASS: {
-        'CEO': {
-            statRequirements: { minIntelligence: 7, minPersuasion: 8, minCraftiness: 7 },
-            socialRequirements: { minPrivilege: 0.9, minAmbition: 0.8 },
-            keywords: 'corporate leadership business',
-            emoji: '💼'
+        ...BASE_MODERN_UPPER_CLASS,
+        'Aristocrat': {
+            statRequirements: { minPersuasion: 5, minIntelligence: 4 },
+            socialRequirements: { minPrivilege: 0.95 },
+            keywords: 'nobility landed gentry estate',
+            emoji: '👑',
+            decadeRange: [1900, 1950] as [number, number]
         },
-        'Politician': {
-            statRequirements: { minPersuasion: 8, minIntelligence: 6, minCraftiness: 7 },
-            socialRequirements: { minPrivilege: 0.7, minAmbition: 0.9 },
-            keywords: 'government power statecraft',
-            emoji: '🗳️'
-        },
-        'Surgeon': {
-            statRequirements: { minIntelligence: 8, minDexterity: 9, minStamina: 6 },
-            socialRequirements: { minPrivilege: 0.8 },
-            keywords: 'medicine specialist hospital',
-            emoji: '⚕️'
-        },
-        'Judge': {
-            statRequirements: { minIntelligence: 8, minPersuasion: 6 },
-            socialRequirements: { minPrivilege: 0.8 },
-            keywords: 'law justice court',
-            emoji: '⚖️'
-        },
-        'Bank President': {
-            statRequirements: { minIntelligence: 8, minCraftiness: 7 },
-            socialRequirements: { minPrivilege: 0.85, minAmbition: 0.7 },
-            keywords: 'finance capital money',
-            emoji: '🏦'
-        },
-        'University Professor': {
-            statRequirements: { minIntelligence: 9, minPersuasion: 6 },
-            socialRequirements: { minPrivilege: 0.7 },
-            keywords: 'academia research education',
-            emoji: '🎓'
+        'Film Director': {
+            statRequirements: { minIntelligence: 7, minPersuasion: 7, minCraftiness: 6 },
+            socialRequirements: { minPrivilege: 0.7, minAmbition: 0.8 },
+            keywords: 'cinema movies auteur',
+            emoji: '🎬',
+            decadeRange: [1920, 2019] as [number, number]
         }
     },
     MIDDLE_CLASS: {
-        'Teacher': {
-            statRequirements: { minIntelligence: 6, minPersuasion: 6, minStamina: 5 },
-            keywords: 'education school learning',
-            emoji: '👩‍🏫'
+        ...BASE_MODERN_MIDDLE_CLASS,
+        'Pharmacist': {
+            statRequirements: { minIntelligence: 7, minPerception: 6 },
+            keywords: 'medicine drugs apothecary',
+            emoji: '💊'
         },
-        'Nurse': {
-            statRequirements: { minStamina: 6, minDexterity: 6, minPersuasion: 5 },
-            socialRequirements: { maxPrivilege: 0.7 },
-            genderBias: 'Female',
-            keywords: 'healthcare hospital medicine',
-            emoji: '👩‍⚕️'
-        },
-        'Accountant': {
-            statRequirements: { minIntelligence: 6, minPerception: 6 },
-            keywords: 'finance taxes bookkeeping',
-            emoji: '🧮'
-        },
-        'Police Officer': {
-            statRequirements: { minStrength: 6, minPerception: 6, minStamina: 6 },
-            keywords: 'law enforcement security',
-            emoji: '👮'
-        },
-        'Office Manager': {
-            statRequirements: { minIntelligence: 5, minPersuasion: 6 },
-            keywords: 'administration business paperwork',
-            emoji: '📊'
-        },
-        'Civil Engineer': {
-            statRequirements: { minIntelligence: 7, minCraftiness: 6 },
-            socialRequirements: { minPrivilege: 0.5 },
-            keywords: 'building infrastructure design',
-            emoji: '🏗️'
-        },
-        'Mechanic': {
-            statRequirements: { minCraftiness: 7, minStrength: 5, minIntelligence: 5 },
-            keywords: 'repair engine automobile',
-            emoji: '🛠️'
-        },
-        'Journalist': {
-            statRequirements: { minIntelligence: 6, minPersuasion: 6 },
-            socialRequirements: { minWanderlust: 0.4 },
-            keywords: 'news writing reporting',
-            emoji: '📰'
-        },
-        'Librarian': {
-            statRequirements: { minIntelligence: 6, minPerception: 5 },
-            keywords: 'books records archive',
-            emoji: '📚'
-        },
-        'Secretary': {
-            statRequirements: { minDexterity: 6, minPerception: 5 },
-            socialRequirements: { maxPrivilege: 0.6 },
-            genderBias: 'Female',
-            keywords: 'typing office administration',
-            emoji: '📊'
-        },
-        'Salesman': {
-            statRequirements: { minPersuasion: 7, minStamina: 5 },
-            socialRequirements: { minWanderlust: 0.5, minAmbition: 0.5 },
-            keywords: 'retail commerce travel',
-            emoji: '📈'
-        },
-        'Small Business Owner': {
-            statRequirements: { minCraftiness: 6, minPersuasion: 5 },
-            socialRequirements: { minAmbition: 0.6 },
-            keywords: 'shopkeeper retail entrepreneur',
-            emoji: '🏪'
+        'Bank Clerk': {
+            statRequirements: { minIntelligence: 5, minPerception: 6 },
+            keywords: 'banking finance money',
+            emoji: '🏦'
         }
     },
     WORKING_CLASS: {
-        'Factory Worker': {
-            statRequirements: { minStamina: 6, minConstitution: 6 },
-            keywords: 'manufacturing assembly line labor',
-            emoji: '🏭'
-        },
-        'Truck Driver': {
-            statRequirements: { minStamina: 7, minPerception: 6 },
-            keywords: 'transport logistics driving',
-            emoji: '🚚'
-        },
-        'Construction Worker': {
-            statRequirements: { minStrength: 7, minStamina: 7, minConstitution: 7 },
-            keywords: 'building labor trades',
-            emoji: '👷'
-        },
-        'Cashier': {
-            statRequirements: { minStamina: 5, minPersuasion: 4 },
-            keywords: 'retail service money',
-            emoji: '🛒'
-        },
-        'Janitor': {
-            statRequirements: { minStamina: 6, minConstitution: 5 },
-            keywords: 'cleaning maintenance custodian',
-            emoji: '🧹'
-        },
-        'Security Guard': {
-            statRequirements: { minStrength: 5, minPerception: 6 },
-            keywords: 'protection safety watchman',
-            emoji: '🛡️'
-        },
-        'Farm Worker': {
-            statRequirements: { minStamina: 7, minConstitution: 6, minStrength: 5 },
-            keywords: 'agriculture harvest farming',
-            emoji: '🌾'
-        },
-        'Warehouse Worker': {
-            statRequirements: { minStrength: 6, minStamina: 6 },
-            keywords: 'logistics shipping stocking',
-            emoji: '📦'
-        },
-        'Cook': {
+        ...BASE_MODERN_WORKING_CLASS,
+        'Chimney Sweep': {
             statRequirements: { minDexterity: 6, minStamina: 6 },
-            keywords: 'restaurant food service',
-            emoji: '👨‍🍳'
-        },
-        'Miner': {
-            statRequirements: { minStrength: 7, minStamina: 8, minConstitution: 7 },
-            genderBias: 'Male',
-            keywords: 'coal extraction digging labor',
-            emoji: '⛏️'
-        },
-        'Railroad Worker': {
-            statRequirements: { minStrength: 7, minStamina: 6, minConstitution: 6 },
-            genderBias: 'Male',
-            keywords: 'transport tracks railway labor',
-            emoji: '🚂'
-        },
-        'Dock Worker': {
-            statRequirements: { minStrength: 8, minStamina: 7 },
-            genderBias: 'Male',
-            keywords: 'shipping cargo port longshoreman',
-            emoji: '⚓'
-        },
-        'Textile Worker': {
-            statRequirements: { minDexterity: 6, minStamina: 6 },
-            genderBias: 'Female',
-            keywords: 'mill sewing garment factory',
-            emoji: '🧵'
-        },
-        'Telephone Operator': {
-            statRequirements: { minDexterity: 2, minPersuasion: 2 },
-            genderBias: 'Female',
-            keywords: 'communication switchboard service',
-            emoji: '📞'
-        },
-        'Postal Worker': {
-            statRequirements: { minStamina: 6, minPerception: 3 },
-            keywords: 'mail delivery postman',
-            emoji: '📮'
-        },
-        'Butcher': {
-            statRequirements: { minStrength: 6, minDexterity: 3 },
-            keywords: 'meat food processing',
-            emoji: '🔪'
-        },
-        'Baker': {
-            statRequirements: { minStamina: 5, minCraftiness: 5 },
-            keywords: 'bread food baking',
-            emoji: '🍞'
-        },
-        'Waiter': {
-            statRequirements: { minStamina: 5, minDexterity: 5, minPersuasion: 3 },
-            keywords: 'service restaurant food',
-            emoji: '🤵'
-        },
-        'Bartender': {
-            statRequirements: { minPersuasion: 7, minStamina: 1 },
-            keywords: 'service drinks alcohol',
-            emoji: '🍺'
-        },
-        'Taxi Driver': {
-            statRequirements: { minStamina: 6, minPerception: 6 },
-            keywords: 'driving transport service',
-            emoji: '🚕'
-        },
-        'Welder': {
-            statRequirements: { minDexterity: 7, minConstitution: 6 },
-            keywords: 'trades metalwork manufacturing',
-            emoji: '🔥'
-        },
-        'Lumberjack': {
-            statRequirements: { minStrength: 8, minStamina: 7 },
-            genderBias: 'Male',
-            keywords: 'forestry logging wood',
-            emoji: '🪓'
-        },
-        'Fisherman': {
-            statRequirements: { minStrength: 5, minConstitution: 6, minPerception: 6 },
-            genderBias: 'Male',
-            keywords: 'fishing sea food',
-            emoji: '🎣'
+            genderBias: 'Male' as const,
+            keywords: 'cleaning soot chimneys',
+            emoji: '🧹',
+            decadeRange: [1900, 1960] as [number, number]
         }
     },
     OUTLAWS_AND_REVOLUTIONARIES: {
-        'Mobster': {
-            statRequirements: { minStrength: 3, minCraftiness: 3 },
-            socialRequirements: { maxPrivilege: 0.4 },
-            genderBias: 'Male',
-            keywords: 'organized crime mafia',
-            emoji: '🚬'
-        },
-        'Numbers Runner': {
-            statRequirements: { minCraftiness: 3, minPersuasion: 3 },
-            socialRequirements: { maxPrivilege: 0.3 },
-            keywords: ' illegal ',
-            emoji: '💊'
-        },
-        'Pickpocket': {
-            statRequirements: { minDexterity: 4, minPerception: 3 },
-            socialRequirements: { maxPrivilege: 0.2 },
-            keywords: 'street crime theft',
-            emoji: '👤'
-        },
-        'Militant': {
-            statRequirements: { minStrength: 3, minPersuasion: 4 },
-            socialRequirements: { maxPrivilege: 0.3, minAmbition: 0.6 },
-            keywords: 'revolutionary militant',
-            emoji: '✊'
-        },
-      
+        ...BASE_MODERN_OUTLAWS,
         'Red Brigade': {
             statRequirements: { minIntelligence: 3, minCraftiness: 3 },
             socialRequirements: { maxPrivilege: 0.3, minAmbition: 0.6 },
-            keywords: 'communist militant',
-            emoji: '⭐'
+            keywords: 'communist militant terrorism',
+            emoji: '⭐',
+            decadeRange: [1960, 1990] as [number, number]
         },
-        'Guerrilla Fighter': {
-            statRequirements: { minStamina: 3, minCraftiness: 3 },
-            socialRequirements: { maxPrivilege: 0.3, minWanderlust: 0.5 },
-            keywords: 'insurgent rebel',
-            emoji: '🔫'
+        'Anarchist': {
+            statRequirements: { minIntelligence: 5, minPersuasion: 5 },
+            socialRequirements: { maxPrivilege: 0.4, minAmbition: 0.7 },
+            keywords: 'anti-state revolutionary',
+            emoji: 'Ⓐ',
+            decadeRange: [1900, 1940] as [number, number]
         },
-        'Smuggler': {
-            statRequirements: { minCraftiness: 4, minPersuasion: 2 },
-            socialRequirements: { maxPrivilege: 0.4, minWanderlust: 0.5 },
-            keywords: 'contraband illegal trade',
-            emoji: '📦'
+        'Resistance Fighter': {
+            statRequirements: { minStamina: 6, minCraftiness: 6, minStrength: 5 },
+            socialRequirements: { maxPrivilege: 0.5, minAmbition: 0.7 },
+            keywords: 'underground partisan nazi occupation',
+            emoji: '🎖️',
+            decadeRange: [1939, 1945] as [number, number]
+        },
+        'IRA Member': {
+            statRequirements: { minCraftiness: 5, minStrength: 4 },
+            socialRequirements: { maxPrivilege: 0.4 },
+            keywords: 'irish republican militant',
+            emoji: '☘️',
+            decadeRange: [1919, 2000] as [number, number]
+        }
+    },
+    WAR_ERA: {
+        'Trench Soldier': {
+            statRequirements: { minStamina: 7, minConstitution: 7, minStrength: 5 },
+            genderBias: 'Male' as const,
+            keywords: 'world war infantry trenches',
+            emoji: '⚔️',
+            decadeRange: [1914, 1918] as [number, number]
+        },
+        'Munitions Worker': {
+            statRequirements: { minStamina: 6, minDexterity: 5 },
+            genderBias: 'Female' as const,
+            keywords: 'factory shells bombs war',
+            emoji: '💣',
+            decadeRange: [1914, 1945] as [number, number]
+        },
+        'Air Raid Warden': {
+            statRequirements: { minPerception: 6, minStamina: 5 },
+            keywords: 'civil defense blitz blackout',
+            emoji: '🔦',
+            decadeRange: [1939, 1945] as [number, number]
+        },
+        'Bletchley Codebreaker': {
+            statRequirements: { minIntelligence: 9, minPerception: 7 },
+            keywords: 'cryptography enigma intelligence',
+            emoji: '🔐',
+            decadeRange: [1939, 1945] as [number, number]
         }
     }
 };
+
+/* ---------- EAST ASIAN MODERN PROFESSIONS ---------------------------------- */
+const EAST_ASIAN_MODERN_PROFESSIONS = {
+    UPPER_CLASS: {
+        ...BASE_MODERN_UPPER_CLASS,
+        'Zaibatsu Executive': {
+            statRequirements: { minIntelligence: 7, minCraftiness: 7, minPersuasion: 6 },
+            socialRequirements: { minPrivilege: 0.85, minAmbition: 0.8 },
+            keywords: 'conglomerate japan business',
+            emoji: '🏢',
+            decadeRange: [1900, 1945] as [number, number]
+        },
+        'Chaebol Chairman': {
+            statRequirements: { minIntelligence: 7, minCraftiness: 8, minPersuasion: 6 },
+            socialRequirements: { minPrivilege: 0.9, minAmbition: 0.85 },
+            keywords: 'korean conglomerate samsung hyundai',
+            emoji: '🏢',
+            decadeRange: [1960, 2019] as [number, number]
+        },
+        'Party Secretary': {
+            statRequirements: { minPersuasion: 7, minCraftiness: 7, minIntelligence: 5 },
+            socialRequirements: { minPrivilege: 0.8, minAmbition: 0.8 },
+            keywords: 'communist party cadre official',
+            emoji: '⭐',
+            decadeRange: [1949, 2019] as [number, number]
+        }
+    },
+    MIDDLE_CLASS: {
+        ...BASE_MODERN_MIDDLE_CLASS,
+        'Salaryman': {
+            statRequirements: { minStamina: 6, minIntelligence: 5, minPersuasion: 4 },
+            genderBias: 'Male' as const,
+            keywords: 'office corporate japan work',
+            emoji: '👔',
+            decadeRange: [1950, 2019] as [number, number]
+        },
+        'Office Lady': {
+            statRequirements: { minDexterity: 5, minPersuasion: 5 },
+            genderBias: 'Female' as const,
+            keywords: 'office clerical japan work',
+            emoji: '👩‍💼',
+            decadeRange: [1960, 2019] as [number, number]
+        },
+        'Barefoot Doctor': {
+            statRequirements: { minIntelligence: 5, minStamina: 6, minPersuasion: 5 },
+            keywords: 'rural medicine china healthcare',
+            emoji: '🩺',
+            decadeRange: [1965, 1985] as [number, number]
+        },
+        'Traditional Medicine Practitioner': {
+            statRequirements: { minIntelligence: 7, minPerception: 6 },
+            keywords: 'acupuncture herbal chinese medicine',
+            emoji: '🌿'
+        }
+    },
+    WORKING_CLASS: {
+        ...BASE_MODERN_WORKING_CLASS,
+        'Rice Farmer': {
+            statRequirements: { minStamina: 7, minConstitution: 6, minStrength: 5 },
+            keywords: 'paddy agriculture rural',
+            emoji: '🌾'
+        },
+        'Rickshaw Puller': {
+            statRequirements: { minStrength: 7, minStamina: 8, minConstitution: 7 },
+            genderBias: 'Male' as const,
+            keywords: 'transport labor urban',
+            emoji: '🛺',
+            decadeRange: [1900, 1970] as [number, number]
+        },
+        'Tea Picker': {
+            statRequirements: { minDexterity: 6, minStamina: 6 },
+            genderBias: 'Female' as const,
+            keywords: 'plantation harvest agriculture',
+            emoji: '🍵'
+        },
+        'Commune Worker': {
+            statRequirements: { minStamina: 6, minConstitution: 6 },
+            keywords: 'collective farm mao china',
+            emoji: '🚜',
+            decadeRange: [1958, 1980] as [number, number]
+        },
+        'Steel Mill Worker': {
+            statRequirements: { minStrength: 7, minStamina: 7, minConstitution: 7 },
+            genderBias: 'Male' as const,
+            keywords: 'industry backyard furnace great leap',
+            emoji: '🔥',
+            decadeRange: [1958, 1962] as [number, number]
+        },
+        'Electronics Factory Worker': {
+            statRequirements: { minDexterity: 6, minStamina: 6 },
+            keywords: 'assembly manufacturing shenzhen',
+            emoji: '📱',
+            decadeRange: [1980, 2019] as [number, number]
+        }
+    },
+    OUTLAWS_AND_REVOLUTIONARIES: {
+        ...BASE_MODERN_OUTLAWS,
+        'Red Guard': {
+            statRequirements: { minStrength: 4, minPersuasion: 5 },
+            socialRequirements: { maxPrivilege: 0.5, minAmbition: 0.6 },
+            keywords: 'cultural revolution mao youth',
+            emoji: '📕',
+            decadeRange: [1966, 1976] as [number, number]
+        },
+        'Yakuza': {
+            statRequirements: { minStrength: 5, minCraftiness: 6 },
+            socialRequirements: { maxPrivilege: 0.4 },
+            genderBias: 'Male' as const,
+            keywords: 'organized crime japan syndicate',
+            emoji: '🔪',
+            decadeRange: [1900, 2019] as [number, number]
+        },
+        'Triad Member': {
+            statRequirements: { minStrength: 5, minCraftiness: 5 },
+            socialRequirements: { maxPrivilege: 0.4 },
+            genderBias: 'Male' as const,
+            keywords: 'organized crime chinese gang',
+            emoji: '🐉'
+        },
+        'Tiananmen Protester': {
+            statRequirements: { minPersuasion: 5, minStamina: 5 },
+            socialRequirements: { maxPrivilege: 0.5, minAmbition: 0.7 },
+            keywords: 'democracy student protest beijing',
+            emoji: '🕯️',
+            decadeRange: [1989, 1989] as [number, number]
+        }
+    },
+    WAR_ERA: {
+        'Imperial Japanese Soldier': {
+            statRequirements: { minStrength: 6, minStamina: 7, minConstitution: 6 },
+            genderBias: 'Male' as const,
+            keywords: 'military war pacific',
+            emoji: '🎌',
+            decadeRange: [1930, 1945] as [number, number]
+        },
+        'Comfort Woman': {
+            statRequirements: { minStamina: 5 },
+            genderBias: 'Female' as const,
+            keywords: 'war victim forced labor',
+            emoji: '😢',
+            decadeRange: [1937, 1945] as [number, number]
+        },
+        'Kamikaze Pilot': {
+            statRequirements: { minPerception: 7, minStamina: 6 },
+            genderBias: 'Male' as const,
+            socialRequirements: { minAmbition: 0.7 },
+            keywords: 'suicide divine wind japan',
+            emoji: '🌸',
+            decadeRange: [1944, 1945] as [number, number]
+        },
+        'Chinese Nationalist Soldier': {
+            statRequirements: { minStrength: 6, minStamina: 6 },
+            genderBias: 'Male' as const,
+            keywords: 'kuomintang civil war military',
+            emoji: '🇹🇼',
+            decadeRange: [1927, 1949] as [number, number]
+        },
+        'PLA Soldier': {
+            statRequirements: { minStrength: 6, minStamina: 7 },
+            genderBias: 'Male' as const,
+            keywords: 'communist revolution military',
+            emoji: '⭐',
+            decadeRange: [1927, 2019] as [number, number]
+        }
+    }
+};
+
+/* ---------- SOUTH ASIAN MODERN PROFESSIONS --------------------------------- */
+const SOUTH_ASIAN_MODERN_PROFESSIONS = {
+    UPPER_CLASS: {
+        ...BASE_MODERN_UPPER_CLASS,
+        'IAS Officer': {
+            statRequirements: { minIntelligence: 8, minPersuasion: 6 },
+            socialRequirements: { minPrivilege: 0.7, minAmbition: 0.8 },
+            keywords: 'civil service bureaucracy government india',
+            emoji: '🏛️',
+            decadeRange: [1947, 2019] as [number, number]
+        },
+        'Maharaja': {
+            statRequirements: { minPersuasion: 6, minIntelligence: 5 },
+            socialRequirements: { minPrivilege: 0.95 },
+            keywords: 'royalty princely state india',
+            emoji: '👑',
+            decadeRange: [1900, 1971] as [number, number]
+        },
+        'Nawab': {
+            statRequirements: { minPersuasion: 5, minCraftiness: 5 },
+            socialRequirements: { minPrivilege: 0.9 },
+            keywords: 'muslim nobility india pakistan',
+            emoji: '🕌',
+            decadeRange: [1900, 1947] as [number, number]
+        },
+        'Bollywood Producer': {
+            statRequirements: { minCraftiness: 7, minPersuasion: 7 },
+            socialRequirements: { minPrivilege: 0.75, minAmbition: 0.8 },
+            keywords: 'cinema film industry mumbai',
+            emoji: '🎬',
+            decadeRange: [1950, 2019] as [number, number]
+        }
+    },
+    MIDDLE_CLASS: {
+        ...BASE_MODERN_MIDDLE_CLASS,
+        'Software Engineer': {
+            statRequirements: { minIntelligence: 8, minCraftiness: 6 },
+            keywords: 'IT coding bangalore outsourcing',
+            emoji: '💻',
+            decadeRange: [1990, 2019] as [number, number]
+        },
+        'Call Center Worker': {
+            statRequirements: { minPersuasion: 5, minStamina: 5, minIntelligence: 5 },
+            keywords: 'BPO outsourcing phone support',
+            emoji: '📞',
+            decadeRange: [1995, 2019] as [number, number]
+        },
+        'Ayurvedic Doctor': {
+            statRequirements: { minIntelligence: 7, minPerception: 6 },
+            keywords: 'traditional medicine herbs healing',
+            emoji: '🌿'
+        },
+        'Railway Clerk': {
+            statRequirements: { minIntelligence: 5, minPerception: 5 },
+            keywords: 'trains booking tickets government',
+            emoji: '🚂'
+        }
+    },
+    WORKING_CLASS: {
+        ...BASE_MODERN_WORKING_CLASS,
+        'Rickshaw Puller': {
+            statRequirements: { minStrength: 7, minStamina: 8, minConstitution: 7 },
+            genderBias: 'Male' as const,
+            keywords: 'transport labor calcutta urban',
+            emoji: '🛺'
+        },
+        'Chai Wallah': {
+            statRequirements: { minStamina: 5, minPersuasion: 4 },
+            genderBias: 'Male' as const,
+            keywords: 'tea vendor street food',
+            emoji: '☕'
+        },
+        'Dhobi': {
+            statRequirements: { minStamina: 6, minStrength: 5 },
+            keywords: 'laundry washing clothes caste',
+            emoji: '👕'
+        },
+        'Jute Mill Worker': {
+            statRequirements: { minStamina: 7, minConstitution: 6 },
+            keywords: 'textile factory bengal labor',
+            emoji: '🧵',
+            decadeRange: [1900, 1980] as [number, number]
+        },
+        'Coolie': {
+            statRequirements: { minStrength: 7, minStamina: 8 },
+            genderBias: 'Male' as const,
+            keywords: 'porter labor station cargo',
+            emoji: '📦'
+        },
+        'Auto-Rickshaw Driver': {
+            statRequirements: { minPerception: 6, minStamina: 5 },
+            genderBias: 'Male' as const,
+            keywords: 'transport urban india three-wheeler',
+            emoji: '🛺',
+            decadeRange: [1960, 2019] as [number, number]
+        }
+    },
+    OUTLAWS_AND_REVOLUTIONARIES: {
+        ...BASE_MODERN_OUTLAWS,
+        'Independence Fighter': {
+            statRequirements: { minStamina: 6, minPersuasion: 6 },
+            socialRequirements: { maxPrivilege: 0.6, minAmbition: 0.8 },
+            keywords: 'freedom struggle british raj',
+            emoji: '🇮🇳',
+            decadeRange: [1900, 1947] as [number, number]
+        },
+        'Naxalite': {
+            statRequirements: { minStamina: 6, minCraftiness: 5 },
+            socialRequirements: { maxPrivilege: 0.3, minAmbition: 0.7 },
+            keywords: 'maoist communist insurgent',
+            emoji: '⭐',
+            decadeRange: [1967, 2019] as [number, number]
+        },
+        'Dacoit': {
+            statRequirements: { minStrength: 6, minCraftiness: 5 },
+            socialRequirements: { maxPrivilege: 0.2 },
+            genderBias: 'Male' as const,
+            keywords: 'bandit outlaw ravine',
+            emoji: '🔫'
+        },
+        'Tamil Tiger': {
+            statRequirements: { minStrength: 5, minStamina: 6 },
+            socialRequirements: { maxPrivilege: 0.4, minAmbition: 0.6 },
+            keywords: 'LTTE separatist sri lanka',
+            emoji: '🐯',
+            decadeRange: [1976, 2009] as [number, number]
+        }
+    }
+};
+
+/* ---------- MENA MODERN PROFESSIONS ---------------------------------------- */
+const MENA_MODERN_PROFESSIONS = {
+    UPPER_CLASS: {
+        ...BASE_MODERN_UPPER_CLASS,
+        'Ottoman Pasha': {
+            statRequirements: { minPersuasion: 7, minCraftiness: 6 },
+            socialRequirements: { minPrivilege: 0.9 },
+            keywords: 'ottoman empire official governor',
+            emoji: '🕌',
+            decadeRange: [1900, 1922] as [number, number]
+        },
+        'Sheikh': {
+            statRequirements: { minPersuasion: 7, minIntelligence: 5 },
+            socialRequirements: { minPrivilege: 0.85 },
+            keywords: 'arab tribal leader gulf',
+            emoji: '🏜️'
+        },
+        'Oil Minister': {
+            statRequirements: { minIntelligence: 7, minCraftiness: 7, minPersuasion: 6 },
+            socialRequirements: { minPrivilege: 0.85, minAmbition: 0.8 },
+            keywords: 'petroleum OPEC government',
+            emoji: '🛢️',
+            decadeRange: [1950, 2019] as [number, number]
+        },
+        'Ayatollah': {
+            statRequirements: { minIntelligence: 8, minPersuasion: 8 },
+            socialRequirements: { minPrivilege: 0.8, minReligiosity: 0.9 },
+            genderBias: 'Male' as const,
+            keywords: 'shia cleric iran religious',
+            emoji: '📿',
+            decadeRange: [1900, 2019] as [number, number]
+        }
+    },
+    MIDDLE_CLASS: {
+        ...BASE_MODERN_MIDDLE_CLASS,
+        'Bazaari Merchant': {
+            statRequirements: { minPersuasion: 6, minCraftiness: 6 },
+            keywords: 'commerce trade market iran',
+            emoji: '🛒'
+        },
+        'Imam': {
+            statRequirements: { minIntelligence: 6, minPersuasion: 7 },
+            socialRequirements: { minReligiosity: 0.8 },
+            genderBias: 'Male' as const,
+            keywords: 'mosque prayer religious leader',
+            emoji: '🕌'
+        },
+        'Effendi': {
+            statRequirements: { minIntelligence: 6, minPersuasion: 5 },
+            socialRequirements: { minPrivilege: 0.5 },
+            keywords: 'educated professional ottoman',
+            emoji: '🎩',
+            decadeRange: [1900, 1950] as [number, number]
+        }
+    },
+    WORKING_CLASS: {
+        ...BASE_MODERN_WORKING_CLASS,
+        'Oil Field Worker': {
+            statRequirements: { minStrength: 7, minStamina: 7, minConstitution: 6 },
+            genderBias: 'Male' as const,
+            keywords: 'petroleum drilling extraction',
+            emoji: '🛢️',
+            decadeRange: [1930, 2019] as [number, number]
+        },
+        'Fellahin': {
+            statRequirements: { minStamina: 7, minConstitution: 6 },
+            keywords: 'peasant farmer egypt agriculture',
+            emoji: '🌾'
+        },
+        'Suez Canal Worker': {
+            statRequirements: { minStrength: 7, minStamina: 7 },
+            genderBias: 'Male' as const,
+            keywords: 'shipping canal labor',
+            emoji: '🚢'
+        },
+        'Migrant Construction Worker': {
+            statRequirements: { minStrength: 7, minStamina: 8, minConstitution: 7 },
+            genderBias: 'Male' as const,
+            keywords: 'gulf dubai labor foreign',
+            emoji: '👷',
+            decadeRange: [1970, 2019] as [number, number]
+        },
+        'Carpet Weaver': {
+            statRequirements: { minDexterity: 7, minPerception: 6, minStamina: 5 },
+            keywords: 'persian rug textile artisan',
+            emoji: '🧶'
+        }
+    },
+    OUTLAWS_AND_REVOLUTIONARIES: {
+        ...BASE_MODERN_OUTLAWS,
+        'Young Turk': {
+            statRequirements: { minIntelligence: 6, minPersuasion: 6 },
+            socialRequirements: { maxPrivilege: 0.6, minAmbition: 0.7 },
+            keywords: 'ottoman reform nationalist',
+            emoji: '🌙',
+            decadeRange: [1900, 1922] as [number, number]
+        },
+        'PLO Fighter': {
+            statRequirements: { minStrength: 5, minStamina: 6 },
+            socialRequirements: { maxPrivilege: 0.4, minAmbition: 0.6 },
+            keywords: 'palestinian liberation resistance',
+            emoji: '🇵🇸',
+            decadeRange: [1964, 2019] as [number, number]
+        },
+        'Hashishin': {
+            statRequirements: { minDexterity: 7, minCraftiness: 7 },
+            socialRequirements: { maxPrivilege: 0.3 },
+            genderBias: 'Male' as const,
+            keywords: 'assassin secret hashish',
+            emoji: '🗡️'
+        },
+        'Mujahedeen': {
+            statRequirements: { minStrength: 6, minStamina: 7 },
+            socialRequirements: { maxPrivilege: 0.4, minReligiosity: 0.7 },
+            genderBias: 'Male' as const,
+            keywords: 'holy warrior afghanistan soviet',
+            emoji: '⚔️',
+            decadeRange: [1979, 2001] as [number, number]
+        },
+        'Iranian Revolutionary': {
+            statRequirements: { minPersuasion: 5, minStamina: 5 },
+            socialRequirements: { maxPrivilege: 0.5, minAmbition: 0.7 },
+            keywords: 'khomeini revolution iran',
+            emoji: '✊',
+            decadeRange: [1978, 1979] as [number, number]
+        }
+    }
+};
+
+/* ---------- SUB-SAHARAN AFRICAN MODERN PROFESSIONS ------------------------- */
+const SUB_SAHARAN_AFRICAN_MODERN_PROFESSIONS = {
+    UPPER_CLASS: {
+        ...BASE_MODERN_UPPER_CLASS,
+        'Colonial Administrator': {
+            statRequirements: { minIntelligence: 6, minPersuasion: 6 },
+            socialRequirements: { minPrivilege: 0.8 },
+            keywords: 'empire british french belgian',
+            emoji: '🏛️',
+            decadeRange: [1900, 1970] as [number, number]
+        },
+        'Paramount Chief': {
+            statRequirements: { minPersuasion: 7, minIntelligence: 5 },
+            socialRequirements: { minPrivilege: 0.85 },
+            keywords: 'traditional leader tribe authority',
+            emoji: '👑'
+        },
+        'Independence Leader': {
+            statRequirements: { minPersuasion: 8, minIntelligence: 7, minStamina: 6 },
+            socialRequirements: { minPrivilege: 0.6, minAmbition: 0.9 },
+            keywords: 'nationalist freedom uhuru',
+            emoji: '✊',
+            decadeRange: [1945, 1980] as [number, number]
+        },
+        'Big Man': {
+            statRequirements: { minPersuasion: 7, minCraftiness: 7 },
+            socialRequirements: { minPrivilege: 0.8, minAmbition: 0.8 },
+            genderBias: 'Male' as const,
+            keywords: 'patron politician wealthy corrupt',
+            emoji: '💰',
+            decadeRange: [1960, 2019] as [number, number]
+        }
+    },
+    MIDDLE_CLASS: {
+        ...BASE_MODERN_MIDDLE_CLASS,
+        'Mission School Teacher': {
+            statRequirements: { minIntelligence: 6, minPersuasion: 6 },
+            socialRequirements: { minReligiosity: 0.5 },
+            keywords: 'education christian colonial',
+            emoji: '✝️',
+            decadeRange: [1900, 1970] as [number, number]
+        },
+        'Cocoa Farmer': {
+            statRequirements: { minStamina: 6, minCraftiness: 5 },
+            keywords: 'plantation agriculture ghana',
+            emoji: '🍫'
+        },
+        'Safari Guide': {
+            statRequirements: { minPerception: 7, minStamina: 6, minPersuasion: 5 },
+            keywords: 'tourism wildlife conservation',
+            emoji: '🦁',
+            decadeRange: [1950, 2019] as [number, number]
+        }
+    },
+    WORKING_CLASS: {
+        ...BASE_MODERN_WORKING_CLASS,
+        'Rubber Tapper': {
+            statRequirements: { minStamina: 7, minDexterity: 5 },
+            keywords: 'plantation colonial congo',
+            emoji: '🌳',
+            decadeRange: [1900, 1960] as [number, number]
+        },
+        'Diamond Miner': {
+            statRequirements: { minStrength: 7, minStamina: 8, minConstitution: 7 },
+            genderBias: 'Male' as const,
+            keywords: 'mining extraction labor',
+            emoji: '💎'
+        },
+        'Migrant Mine Worker': {
+            statRequirements: { minStrength: 7, minStamina: 8 },
+            genderBias: 'Male' as const,
+            keywords: 'gold compound labor apartheid',
+            emoji: '⛏️'
+        },
+        'Coffee Picker': {
+            statRequirements: { minStamina: 6, minDexterity: 5 },
+            keywords: 'plantation agriculture ethiopia kenya',
+            emoji: '☕'
+        },
+        'Township Worker': {
+            statRequirements: { minStamina: 6, minConstitution: 5 },
+            keywords: 'urban labor soweto apartheid',
+            emoji: '🏚️',
+            decadeRange: [1948, 1994] as [number, number]
+        }
+    },
+    OUTLAWS_AND_REVOLUTIONARIES: {
+        ...BASE_MODERN_OUTLAWS,
+        'Mau Mau Fighter': {
+            statRequirements: { minStrength: 6, minStamina: 7, minCraftiness: 5 },
+            socialRequirements: { maxPrivilege: 0.3, minAmbition: 0.7 },
+            keywords: 'kenya independence rebellion british',
+            emoji: '⚔️',
+            decadeRange: [1952, 1960] as [number, number]
+        },
+        'ANC Activist': {
+            statRequirements: { minPersuasion: 6, minStamina: 5 },
+            socialRequirements: { maxPrivilege: 0.4, minAmbition: 0.7 },
+            keywords: 'apartheid resistance south africa',
+            emoji: '✊',
+            decadeRange: [1912, 1994] as [number, number]
+        },
+        'Child Soldier': {
+            statRequirements: { minStrength: 4, minStamina: 5 },
+            socialRequirements: { maxPrivilege: 0.1 },
+            keywords: 'conflict forced war trauma',
+            emoji: '😢',
+            decadeRange: [1980, 2019] as [number, number]
+        },
+        'Blood Diamond Smuggler': {
+            statRequirements: { minCraftiness: 6, minPersuasion: 5 },
+            socialRequirements: { maxPrivilege: 0.4, minWanderlust: 0.6 },
+            keywords: 'conflict gems illegal trade',
+            emoji: '💎',
+            decadeRange: [1990, 2019] as [number, number]
+        }
+    }
+};
+
+/* ---------- NORTH AMERICAN COLONIAL MODERN PROFESSIONS --------------------- */
+const NORTH_AMERICAN_COLONIAL_MODERN_PROFESSIONS = {
+    UPPER_CLASS: {
+        ...BASE_MODERN_UPPER_CLASS,
+        'Hollywood Producer': {
+            statRequirements: { minCraftiness: 7, minPersuasion: 7 },
+            socialRequirements: { minPrivilege: 0.8, minAmbition: 0.8 },
+            keywords: 'film movies entertainment',
+            emoji: '🎬',
+            decadeRange: [1920, 2019] as [number, number]
+        },
+        'Wall Street Banker': {
+            statRequirements: { minIntelligence: 8, minCraftiness: 7 },
+            socialRequirements: { minPrivilege: 0.85, minAmbition: 0.8 },
+            keywords: 'finance stocks bonds',
+            emoji: '📈'
+        },
+        'Robber Baron': {
+            statRequirements: { minCraftiness: 8, minPersuasion: 6 },
+            socialRequirements: { minPrivilege: 0.9, minAmbition: 0.9 },
+            keywords: 'monopoly railroad steel oil',
+            emoji: '💰',
+            decadeRange: [1900, 1920] as [number, number]
+        },
+        'Tech Entrepreneur': {
+            statRequirements: { minIntelligence: 8, minCraftiness: 7, minPersuasion: 6 },
+            socialRequirements: { minPrivilege: 0.7, minAmbition: 0.9 },
+            keywords: 'silicon valley startup innovation',
+            emoji: '💻',
+            decadeRange: [1970, 2019] as [number, number]
+        }
+    },
+    MIDDLE_CLASS: {
+        ...BASE_MODERN_MIDDLE_CLASS,
+        'Real Estate Agent': {
+            statRequirements: { minPersuasion: 7, minCraftiness: 5 },
+            keywords: 'property housing sales',
+            emoji: '🏠'
+        },
+        'Automobile Worker': {
+            statRequirements: { minStrength: 6, minStamina: 6, minDexterity: 5 },
+            genderBias: 'Male' as const,
+            keywords: 'detroit ford assembly line',
+            emoji: '🚗',
+            decadeRange: [1910, 2019] as [number, number]
+        },
+        'Jazz Musician': {
+            statRequirements: { minDexterity: 7, minCraftiness: 6, minPersuasion: 5 },
+            keywords: 'music swing bebop harlem',
+            emoji: '🎺',
+            decadeRange: [1920, 2019] as [number, number]
+        },
+        'Civil Rights Organizer': {
+            statRequirements: { minPersuasion: 7, minStamina: 6 },
+            socialRequirements: { minAmbition: 0.7 },
+            keywords: 'equality march protest',
+            emoji: '✊',
+            decadeRange: [1950, 1970] as [number, number]
+        }
+    },
+    WORKING_CLASS: {
+        ...BASE_MODERN_WORKING_CLASS,
+        'Sharecropper': {
+            statRequirements: { minStamina: 7, minConstitution: 6 },
+            keywords: 'farming tenant cotton south',
+            emoji: '🌾',
+            decadeRange: [1900, 1950] as [number, number]
+        },
+        'Pullman Porter': {
+            statRequirements: { minStamina: 6, minPersuasion: 5 },
+            genderBias: 'Male' as const,
+            keywords: 'railroad service african american',
+            emoji: '🚂',
+            decadeRange: [1900, 1970] as [number, number]
+        },
+        'Migrant Farm Worker': {
+            statRequirements: { minStamina: 8, minConstitution: 7 },
+            keywords: 'agriculture harvest california bracero',
+            emoji: '🍇'
+        },
+        'Steel Mill Worker': {
+            statRequirements: { minStrength: 7, minStamina: 7, minConstitution: 7 },
+            genderBias: 'Male' as const,
+            keywords: 'industry pittsburgh labor',
+            emoji: '🔥',
+            decadeRange: [1900, 1980] as [number, number]
+        },
+        'Fast Food Worker': {
+            statRequirements: { minStamina: 5, minPersuasion: 4 },
+            keywords: 'restaurant service minimum wage',
+            emoji: '🍔',
+            decadeRange: [1950, 2019] as [number, number]
+        }
+    },
+    OUTLAWS_AND_REVOLUTIONARIES: {
+        ...BASE_MODERN_OUTLAWS,
+        'Prohibition Gangster': {
+            statRequirements: { minCraftiness: 6, minStrength: 5 },
+            socialRequirements: { maxPrivilege: 0.4 },
+            genderBias: 'Male' as const,
+            keywords: 'chicago speakeasy bootleg',
+            emoji: '🔫',
+            decadeRange: [1920, 1933] as [number, number]
+        },
+        'Black Panther': {
+            statRequirements: { minPersuasion: 6, minStrength: 5 },
+            socialRequirements: { maxPrivilege: 0.3, minAmbition: 0.7 },
+            keywords: 'revolutionary black power oakland',
+            emoji: '🐆',
+            decadeRange: [1966, 1982] as [number, number]
+        },
+        'Moonshiner': {
+            statRequirements: { minCraftiness: 6, minPerception: 5 },
+            socialRequirements: { maxPrivilege: 0.3 },
+            keywords: 'appalachia alcohol illegal',
+            emoji: '🥃'
+        },
+        'Labor Organizer': {
+            statRequirements: { minPersuasion: 7, minStamina: 6 },
+            socialRequirements: { maxPrivilege: 0.5, minAmbition: 0.7 },
+            keywords: 'union strike workers rights',
+            emoji: '✊'
+        },
+        'Weatherman': {
+            statRequirements: { minIntelligence: 6, minCraftiness: 6 },
+            socialRequirements: { maxPrivilege: 0.5, minAmbition: 0.7 },
+            keywords: 'radical leftist bombing',
+            emoji: '💥',
+            decadeRange: [1969, 1977] as [number, number]
+        }
+    }
+};
+
+/* ---------- SOUTH AMERICAN MODERN PROFESSIONS ------------------------------ */
+const SOUTH_AMERICAN_MODERN_PROFESSIONS = {
+    UPPER_CLASS: {
+        ...BASE_MODERN_UPPER_CLASS,
+        'Hacienda Owner': {
+            statRequirements: { minPersuasion: 6, minCraftiness: 5 },
+            socialRequirements: { minPrivilege: 0.85 },
+            keywords: 'estate land agriculture patron',
+            emoji: '🏰',
+            decadeRange: [1900, 1970] as [number, number]
+        },
+        'Caudillo': {
+            statRequirements: { minStrength: 5, minPersuasion: 7, minCraftiness: 6 },
+            socialRequirements: { minPrivilege: 0.8, minAmbition: 0.9 },
+            genderBias: 'Male' as const,
+            keywords: 'strongman military dictator',
+            emoji: '⚔️'
+        },
+        'Mining Magnate': {
+            statRequirements: { minCraftiness: 7, minPersuasion: 6 },
+            socialRequirements: { minPrivilege: 0.85, minAmbition: 0.8 },
+            keywords: 'copper silver tin extraction',
+            emoji: '⛏️'
+        }
+    },
+    MIDDLE_CLASS: {
+        ...BASE_MODERN_MIDDLE_CLASS,
+        'Liberation Theologian': {
+            statRequirements: { minIntelligence: 7, minPersuasion: 7 },
+            socialRequirements: { minReligiosity: 0.7 },
+            keywords: 'catholic poor justice priest',
+            emoji: '✝️',
+            decadeRange: [1960, 2019] as [number, number]
+        },
+        'Coffee Plantation Manager': {
+            statRequirements: { minIntelligence: 5, minPersuasion: 5, minStamina: 5 },
+            keywords: 'agriculture export brazil colombia',
+            emoji: '☕'
+        },
+        'Tango Musician': {
+            statRequirements: { minDexterity: 7, minCraftiness: 6 },
+            keywords: 'music argentina buenos aires',
+            emoji: '🎵'
+        }
+    },
+    WORKING_CLASS: {
+        ...BASE_MODERN_WORKING_CLASS,
+        'Banana Plantation Worker': {
+            statRequirements: { minStamina: 7, minConstitution: 6 },
+            keywords: 'fruit labor united fruit company',
+            emoji: '🍌'
+        },
+        'Favela Resident': {
+            statRequirements: { minStamina: 5, minCraftiness: 5 },
+            socialRequirements: { maxPrivilege: 0.2 },
+            keywords: 'urban slum rio informal',
+            emoji: '🏚️',
+            decadeRange: [1950, 2019] as [number, number]
+        },
+        'Rubber Tapper': {
+            statRequirements: { minStamina: 7, minDexterity: 5, minPerception: 5 },
+            keywords: 'amazon latex extraction',
+            emoji: '🌳'
+        },
+        'Gaucho': {
+            statRequirements: { minStrength: 6, minStamina: 7, minPerception: 6 },
+            genderBias: 'Male' as const,
+            keywords: 'cowboy cattle pampas argentina',
+            emoji: '🤠'
+        },
+        'Tin Miner': {
+            statRequirements: { minStrength: 7, minStamina: 8, minConstitution: 7 },
+            genderBias: 'Male' as const,
+            keywords: 'bolivia extraction labor',
+            emoji: '⛏️'
+        }
+    },
+    OUTLAWS_AND_REVOLUTIONARIES: {
+        ...BASE_MODERN_OUTLAWS,
+        'FARC Guerrilla': {
+            statRequirements: { minStrength: 5, minStamina: 7 },
+            socialRequirements: { maxPrivilege: 0.3, minAmbition: 0.6 },
+            keywords: 'colombia revolutionary communist',
+            emoji: '🔫',
+            decadeRange: [1964, 2017] as [number, number]
+        },
+        'Cartel Member': {
+            statRequirements: { minStrength: 5, minCraftiness: 6 },
+            socialRequirements: { maxPrivilege: 0.4 },
+            genderBias: 'Male' as const,
+            keywords: 'drug cocaine medellin',
+            emoji: '💀',
+            decadeRange: [1970, 2019] as [number, number]
+        },
+        'Dirty War Victim': {
+            statRequirements: { minIntelligence: 5 },
+            socialRequirements: { maxPrivilege: 0.5 },
+            keywords: 'disappeared argentina military junta',
+            emoji: '😢',
+            decadeRange: [1976, 1983] as [number, number]
+        },
+        'Sandinista': {
+            statRequirements: { minStrength: 5, minPersuasion: 5 },
+            socialRequirements: { maxPrivilege: 0.4, minAmbition: 0.7 },
+            keywords: 'nicaragua revolution contra',
+            emoji: '✊',
+            decadeRange: [1961, 1990] as [number, number]
+        },
+        'Zapatista': {
+            statRequirements: { minStamina: 6, minPersuasion: 5 },
+            socialRequirements: { maxPrivilege: 0.3, minAmbition: 0.6 },
+            keywords: 'chiapas indigenous rights',
+            emoji: '🎭',
+            decadeRange: [1994, 2019] as [number, number]
+        }
+    }
+};
+
+/* ---------- OCEANIA MODERN PROFESSIONS ------------------------------------- */
+const OCEANIA_MODERN_PROFESSIONS = {
+    UPPER_CLASS: {
+        ...BASE_MODERN_UPPER_CLASS,
+        'Station Owner': {
+            statRequirements: { minCraftiness: 6, minPersuasion: 5 },
+            socialRequirements: { minPrivilege: 0.8 },
+            keywords: 'cattle sheep outback ranch',
+            emoji: '🐑'
+        },
+        'Mining Executive': {
+            statRequirements: { minIntelligence: 7, minCraftiness: 7 },
+            socialRequirements: { minPrivilege: 0.8, minAmbition: 0.7 },
+            keywords: 'resources iron ore coal',
+            emoji: '⛏️',
+            decadeRange: [1950, 2019] as [number, number]
+        }
+    },
+    MIDDLE_CLASS: {
+        ...BASE_MODERN_MIDDLE_CLASS,
+        'Jackaroo': {
+            statRequirements: { minStrength: 6, minStamina: 7, minPerception: 5 },
+            genderBias: 'Male' as const,
+            keywords: 'ranch cattle outback trainee',
+            emoji: '🤠'
+        },
+        'Jillaroo': {
+            statRequirements: { minStrength: 5, minStamina: 7, minPerception: 5 },
+            genderBias: 'Female' as const,
+            keywords: 'ranch cattle outback trainee',
+            emoji: '🤠'
+        },
+        'Surf Instructor': {
+            statRequirements: { minStrength: 6, minStamina: 6, minPersuasion: 5 },
+            keywords: 'beach waves ocean tourism',
+            emoji: '🏄',
+            decadeRange: [1960, 2019] as [number, number]
+        }
+    },
+    WORKING_CLASS: {
+        ...BASE_MODERN_WORKING_CLASS,
+        'Cane Cutter': {
+            statRequirements: { minStrength: 7, minStamina: 8 },
+            genderBias: 'Male' as const,
+            keywords: 'sugar queensland agriculture',
+            emoji: '🌿',
+            decadeRange: [1900, 1970] as [number, number]
+        },
+        'Pearl Diver': {
+            statRequirements: { minStamina: 7, minConstitution: 7, minDexterity: 6 },
+            keywords: 'ocean lugger pearls broome',
+            emoji: '🦪',
+            decadeRange: [1900, 1960] as [number, number]
+        },
+        'Opal Miner': {
+            statRequirements: { minStrength: 6, minStamina: 7, minPerception: 6 },
+            genderBias: 'Male' as const,
+            keywords: 'mining coober pedy outback',
+            emoji: '💎'
+        },
+        'Aboriginal Stockman': {
+            statRequirements: { minStrength: 6, minStamina: 7, minPerception: 6 },
+            genderBias: 'Male' as const,
+            keywords: 'cattle indigenous outback',
+            emoji: '🐄'
+        }
+    },
+    OUTLAWS_AND_REVOLUTIONARIES: {
+        ...BASE_MODERN_OUTLAWS,
+        'Bushranger': {
+            statRequirements: { minStrength: 5, minCraftiness: 6, minStamina: 6 },
+            socialRequirements: { maxPrivilege: 0.3 },
+            genderBias: 'Male' as const,
+            keywords: 'outlaw bandit kelly gang',
+            emoji: '🔫',
+            decadeRange: [1900, 1930] as [number, number]
+        },
+        'Indigenous Rights Activist': {
+            statRequirements: { minPersuasion: 6, minStamina: 5 },
+            socialRequirements: { maxPrivilege: 0.4, minAmbition: 0.6 },
+            keywords: 'aboriginal land rights mabo',
+            emoji: '✊',
+            decadeRange: [1960, 2019] as [number, number]
+        },
+        'Maori Land Protester': {
+            statRequirements: { minPersuasion: 6, minStamina: 5 },
+            socialRequirements: { maxPrivilege: 0.4, minAmbition: 0.6 },
+            keywords: 'waitangi treaty protest new zealand',
+            emoji: '🇳🇿',
+            decadeRange: [1970, 2019] as [number, number]
+        }
+    }
+};
+
+/* ---------- NORTH AMERICAN PRE-COLUMBIAN MODERN PROFESSIONS ---------------- */
+const NORTH_AMERICAN_PRE_COLUMBIAN_MODERN_PROFESSIONS = {
+    UPPER_CLASS: {
+        ...BASE_MODERN_UPPER_CLASS,
+        'Tribal Chairman': {
+            statRequirements: { minPersuasion: 7, minIntelligence: 6 },
+            socialRequirements: { minPrivilege: 0.7, minAmbition: 0.6 },
+            keywords: 'reservation council leader',
+            emoji: '🪶',
+            decadeRange: [1934, 2019] as [number, number]
+        },
+        'Casino Owner': {
+            statRequirements: { minCraftiness: 7, minPersuasion: 6 },
+            socialRequirements: { minPrivilege: 0.7, minAmbition: 0.7 },
+            keywords: 'gaming tribal business',
+            emoji: '🎰',
+            decadeRange: [1988, 2019] as [number, number]
+        }
+    },
+    MIDDLE_CLASS: {
+        ...BASE_MODERN_MIDDLE_CLASS,
+        'Bureau of Indian Affairs Agent': {
+            statRequirements: { minIntelligence: 5, minPersuasion: 5 },
+            keywords: 'government federal reservation',
+            emoji: '🏛️',
+            decadeRange: [1900, 2019] as [number, number]
+        },
+        'Navajo Code Talker': {
+            statRequirements: { minIntelligence: 7, minStamina: 6 },
+            genderBias: 'Male' as const,
+            keywords: 'military language wwii marine',
+            emoji: '📻',
+            decadeRange: [1942, 1945] as [number, number]
+        },
+        'Native American Artist': {
+            statRequirements: { minCraftiness: 7, minDexterity: 6 },
+            keywords: 'art traditional contemporary indigenous',
+            emoji: '🎨',
+            decadeRange: [1960, 2019] as [number, number]
+        }
+    },
+    WORKING_CLASS: {
+        ...BASE_MODERN_WORKING_CLASS,
+        'Reservation Rancher': {
+            statRequirements: { minStamina: 7, minStrength: 5, minPerception: 5 },
+            keywords: 'cattle horses indigenous land',
+            emoji: '🐴'
+        },
+        'Uranium Miner': {
+            statRequirements: { minStrength: 7, minStamina: 7, minConstitution: 6 },
+            genderBias: 'Male' as const,
+            keywords: 'navajo radiation extraction',
+            emoji: '☢️',
+            decadeRange: [1940, 1990] as [number, number]
+        },
+        'Salmon Fisher': {
+            statRequirements: { minStrength: 5, minStamina: 6, minPerception: 6 },
+            keywords: 'pacific northwest treaty rights',
+            emoji: '🐟'
+        }
+    },
+    OUTLAWS_AND_REVOLUTIONARIES: {
+        ...BASE_MODERN_OUTLAWS,
+        'AIM Activist': {
+            statRequirements: { minPersuasion: 6, minStamina: 6 },
+            socialRequirements: { maxPrivilege: 0.4, minAmbition: 0.7 },
+            keywords: 'american indian movement wounded knee',
+            emoji: '✊',
+            decadeRange: [1968, 2019] as [number, number]
+        },
+        'Standing Rock Protector': {
+            statRequirements: { minStamina: 6, minPersuasion: 5 },
+            socialRequirements: { maxPrivilege: 0.4, minAmbition: 0.6 },
+            keywords: 'water pipeline dakota',
+            emoji: '💧',
+            decadeRange: [2016, 2017] as [number, number]
+        }
+    }
+};
+
+/* ---------- Legacy alias for backwards compatibility ----------------------- */
+const SHARED_MODERN_PROFESSIONS = EUROPEAN_MODERN_PROFESSIONS;
 
 const SHARED_FUTURE_PROFESSIONS = {
     UPPER_CLASS: {
@@ -1614,7 +2749,7 @@ export const PROFESSIONS: ProfessionData = {
             }
         },
         /* ------- MODERN ERA ------------------------------------------------ */
-        [HistoricalEra.MODERN_ERA]: SHARED_MODERN_PROFESSIONS,
+        [HistoricalEra.MODERN_ERA]: EUROPEAN_MODERN_PROFESSIONS,
         /* ------- FUTURE ERA (2025) ---------------------------------------- */
         [HistoricalEra.FUTURE_ERA]: SHARED_FUTURE_PROFESSIONS
     },
@@ -2287,7 +3422,7 @@ export const PROFESSIONS: ProfessionData = {
                 }
             }
         },
-        [HistoricalEra.MODERN_ERA]: SHARED_MODERN_PROFESSIONS,
+        [HistoricalEra.MODERN_ERA]: EAST_ASIAN_MODERN_PROFESSIONS,
         [HistoricalEra.FUTURE_ERA]: SHARED_FUTURE_PROFESSIONS
     },
 
@@ -2825,7 +3960,7 @@ export const PROFESSIONS: ProfessionData = {
                 }
             }
         },
-        [HistoricalEra.MODERN_ERA]: SHARED_MODERN_PROFESSIONS,
+        [HistoricalEra.MODERN_ERA]: SOUTH_ASIAN_MODERN_PROFESSIONS,
         [HistoricalEra.FUTURE_ERA]: SHARED_FUTURE_PROFESSIONS
     },
 
@@ -3262,7 +4397,7 @@ export const PROFESSIONS: ProfessionData = {
                 }
             }
         },
-        [HistoricalEra.MODERN_ERA]: SHARED_MODERN_PROFESSIONS,
+        [HistoricalEra.MODERN_ERA]: MENA_MODERN_PROFESSIONS,
         [HistoricalEra.FUTURE_ERA]: SHARED_FUTURE_PROFESSIONS
     },
 
@@ -3663,7 +4798,7 @@ export const PROFESSIONS: ProfessionData = {
                 }
             }
         },
-        [HistoricalEra.MODERN_ERA]: SHARED_MODERN_PROFESSIONS,
+        [HistoricalEra.MODERN_ERA]: NORTH_AMERICAN_PRE_COLUMBIAN_MODERN_PROFESSIONS,
         [HistoricalEra.FUTURE_ERA]: SHARED_FUTURE_PROFESSIONS
     },
 
@@ -3913,7 +5048,7 @@ export const PROFESSIONS: ProfessionData = {
                 }
             }
         },
-        [HistoricalEra.MODERN_ERA]: SHARED_MODERN_PROFESSIONS,
+        [HistoricalEra.MODERN_ERA]: NORTH_AMERICAN_COLONIAL_MODERN_PROFESSIONS,
         [HistoricalEra.FUTURE_ERA]: SHARED_FUTURE_PROFESSIONS
     },
 
@@ -4379,7 +5514,7 @@ export const PROFESSIONS: ProfessionData = {
                 }
             }
         },
-        [HistoricalEra.MODERN_ERA]: SHARED_MODERN_PROFESSIONS,
+        [HistoricalEra.MODERN_ERA]: OCEANIA_MODERN_PROFESSIONS,
         [HistoricalEra.FUTURE_ERA]: SHARED_FUTURE_PROFESSIONS
     },
 
@@ -4744,7 +5879,7 @@ export const PROFESSIONS: ProfessionData = {
                 }
             }
         },
-        [HistoricalEra.MODERN_ERA]: SHARED_MODERN_PROFESSIONS,
+        [HistoricalEra.MODERN_ERA]: SUB_SAHARAN_AFRICAN_MODERN_PROFESSIONS,
         [HistoricalEra.FUTURE_ERA]: SHARED_FUTURE_PROFESSIONS
     },
 
@@ -5085,7 +6220,7 @@ export const PROFESSIONS: ProfessionData = {
                 }
             }
         },
-        [HistoricalEra.MODERN_ERA]: SHARED_MODERN_PROFESSIONS,
+        [HistoricalEra.MODERN_ERA]: SOUTH_AMERICAN_MODERN_PROFESSIONS,
         [HistoricalEra.FUTURE_ERA]: SHARED_FUTURE_PROFESSIONS
     }
 };

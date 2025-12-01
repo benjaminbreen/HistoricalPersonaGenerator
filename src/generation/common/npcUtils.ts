@@ -1173,7 +1173,7 @@ function getFallbackRole(wealth: WealthLevel, gender: Gender): { socialClass: st
 
 export function determineSocialRole(
     profile: Omit<NpcEntity, 'id' | 'name' | 'class' | 'role' | 'descriptions' | 'movement' | 'x' | 'y' | 'emoji' | 'activity' | 'birthplace' | 'workplaceId' | 'workplaceName' | 'ideology' | 'beliefs'>,
-    context: { era: HistoricalEra, culturalZone: CulturalZone, factionData?: FactionData, region?: string, citySize?: number },
+    context: { era: HistoricalEra, culturalZone: CulturalZone, factionData?: FactionData, region?: string, citySize?: number, birthYear?: number },
     preferredRole?: string,
     structureType?: TerrainStructureType
 ): { socialClass: string, role: string, emoji: string, nameKey?: string } {
@@ -1186,9 +1186,11 @@ export function determineSocialRole(
         }
 
         let eraForProfessions: HistoricalEra;
+        let currentYear: number | undefined = context.birthYear;
 
         if (context.era.endsWith('s')) { // This is a decade string like "1940s"
             const year = parseInt(context.era.slice(0, 4), 10);
+            currentYear = currentYear || year; // Use birthYear if provided, otherwise decade start
             if (year >= 1900) {
                 eraForProfessions = HistoricalEra.MODERN_ERA;
             } else {
@@ -1199,6 +1201,13 @@ export function determineSocialRole(
         }
 
         const eraRoles: SocialClassMap | undefined = PROFESSIONS[context.culturalZone]?.[eraForProfessions];
+
+        // Helper function to check if a profession is valid for the current year based on decadeRange
+        const isProfessionValidForYear = (roleDef: ProfessionDefinition): boolean => {
+            if (!roleDef.decadeRange || !currentYear) return true;
+            const [startYear, endYear] = roleDef.decadeRange;
+            return currentYear >= startYear && currentYear <= endYear;
+        };
 
         if (!eraRoles) return getFallbackRole(profile.wealthLevel, profile.gender);
 
@@ -1232,8 +1241,12 @@ export function determineSocialRole(
 
                 if (eraRoles[socialClass]?.[preferredRole]) {
                     const roleDef = eraRoles[socialClass][preferredRole];
-                     if (roleDef.genderBias && profile.gender !== 'Non-binary' && roleDef.genderBias !== profile.gender) {
-                        continue; 
+                    if (roleDef.genderBias && profile.gender !== 'Non-binary' && roleDef.genderBias !== profile.gender) {
+                        continue;
+                    }
+                    // Check if profession is valid for the current year (decade filtering)
+                    if (!isProfessionValidForYear(roleDef)) {
+                        continue;
                     }
                     return { socialClass, role: preferredRole, emoji: roleDef.emoji || '🧑', nameKey: roleDef.nameKey };
                 }
@@ -1263,6 +1276,11 @@ export function determineSocialRole(
 
                 // Check if this profession is valid for the specific region
                 if (!isProfessionValidForRegion(roleName, context.region, context.culturalZone)) {
+                    continue;
+                }
+
+                // Check if profession is valid for the current year (decade filtering)
+                if (!isProfessionValidForYear(roleDef)) {
                     continue;
                 }
 
