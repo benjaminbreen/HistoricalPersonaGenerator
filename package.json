@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
+    "start": "node server.js",
     "preview": "vite preview"
   },
   "keywords": [
@@ -26,6 +27,7 @@
     "vite": "^7.2.4"
   },
   "dependencies": {
+    "ajv": "^8.20.0",
     "framer-motion": "^12.23.24",
     "prop-types": "^15.8.1",
     "react": "^19.2.0",

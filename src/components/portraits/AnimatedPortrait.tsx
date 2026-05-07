@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import ProceduralPortrait from './ProceduralPortrait';
 import { PortraitExpression, mapTileToExpr, mapStatusToExpr } from '../../hooks/usePortraitExpression';
 import { BiomeType } from '../../types';
+import { seededRng } from './portraitUtils';
+
+type ProceduralPortraitExpression = Exclude<PortraitExpression, 'neutral' | 'angry'>;
 
 interface AnimatedPortraitProps {
   character: any;
@@ -30,7 +33,7 @@ const AnimatedPortrait: React.FC<AnimatedPortraitProps> = ({
   temperature,
   isInCombat
 }) => {
-  const [temporaryExpression, setTemporaryExpression] = useState<PortraitExpression | null>(null);
+  const [temporaryExpression, setTemporaryExpression] = useState<ProceduralPortraitExpression | null>(null);
   
   // Track previous values to detect changes
   const prevReputationRef = useRef(character?.mapReputation);
@@ -38,7 +41,7 @@ const AnimatedPortrait: React.FC<AnimatedPortraitProps> = ({
   const prevHealthRef = useRef(character?.health);
   
   // Queue for expressions to avoid overlapping
-  const expressionQueueRef = useRef<Array<PortraitExpression>>([]);
+  const expressionQueueRef = useRef<Array<ProceduralPortraitExpression>>([]);
   const isShowingExpressionRef = useRef(false);
   
   // Track previous values for new features
@@ -46,6 +49,25 @@ const AnimatedPortrait: React.FC<AnimatedPortraitProps> = ({
   const prevTemperatureRef = useRef(temperature);
   const prevTimeRef = useRef(gameTimeHours);
   const prevCombatRef = useRef(isInCombat);
+  const expressionRngRef = useRef<() => number>(() => 0.5);
+
+  useEffect(() => {
+    const baseSeed = character?.portraitSeed ?? character?.id ?? character?.name ?? 12345;
+    const seedString = String(baseSeed);
+    let hash = 0;
+    for (let i = 0; i < seedString.length; i++) {
+      hash = ((hash << 5) - hash) + seedString.charCodeAt(i);
+      hash |= 0;
+    }
+    expressionRngRef.current = seededRng((hash || 12345) ^ 0x85ebca6b);
+  }, [character?.portraitSeed, character?.id, character?.name]);
+
+  const nextExpressionRandom = () => expressionRngRef.current();
+
+  const queueExpression = (expression: PortraitExpression | null) => {
+    if (!expression || expression === 'neutral' || expression === 'angry') return;
+    expressionQueueRef.current.push(expression);
+  };
   
   // Process expression queue
   const processExpressionQueue = () => {
@@ -78,7 +100,7 @@ const AnimatedPortrait: React.FC<AnimatedPortraitProps> = ({
     if (previousReputation !== undefined && currentReputation !== undefined) {
       if (currentReputation > previousReputation) {
         // Reputation increased - add smile to queue
-        expressionQueueRef.current.push('smile');
+        queueExpression('smile');
         processExpressionQueue();
       }
     }
@@ -97,8 +119,8 @@ const AnimatedPortrait: React.FC<AnimatedPortraitProps> = ({
       // Check if we got new items (not just reorganization)
       if (currentInventoryLength > previousInventoryLength) {
         // New item found - add surprise then smile to queue
-        expressionQueueRef.current.push('surprise');
-        expressionQueueRef.current.push('smile');
+        queueExpression('surprise');
+        queueExpression('smile');
         processExpressionQueue();
       }
     }
@@ -117,11 +139,11 @@ const AnimatedPortrait: React.FC<AnimatedPortraitProps> = ({
       // Significant health increase (more than 10 points)
       if (currentHealth > previousHealth + 10) {
         // Healed significantly - add smile
-        expressionQueueRef.current.push('smile');
+        queueExpression('smile');
         processExpressionQueue();
       } else if (currentHealth < previousHealth - 10) {
         // Hurt significantly - add concern
-        expressionQueueRef.current.push('concern');
+        queueExpression('concern');
         processExpressionQueue();
       }
     }
@@ -140,7 +162,7 @@ const AnimatedPortrait: React.FC<AnimatedPortraitProps> = ({
       // Get expression for new tile type
       const tileExpression = mapTileToExpr(currentBiome);
       if (tileExpression) {
-        expressionQueueRef.current.push(tileExpression);
+        queueExpression(tileExpression);
         processExpressionQueue();
       }
     }
@@ -157,10 +179,10 @@ const AnimatedPortrait: React.FC<AnimatedPortraitProps> = ({
     if (prevTemp !== undefined && prevTemp !== temperature) {
       // Check for extreme temperatures
       if (temperature < -10 || temperature > 40) {
-        expressionQueueRef.current.push('tired');
+        queueExpression('tired');
         processExpressionQueue();
       } else if ((temperature < 0 || temperature > 30) && Math.abs(temperature - prevTemp) > 5) {
-        expressionQueueRef.current.push('annoyed');
+        queueExpression('annoyed');
         processExpressionQueue();
       }
     }
@@ -177,11 +199,11 @@ const AnimatedPortrait: React.FC<AnimatedPortraitProps> = ({
     if (wasCombat !== undefined && wasCombat !== isInCombat) {
       if (isInCombat) {
         // Entering combat
-        expressionQueueRef.current.push('scowl');
+        queueExpression('scowl');
         processExpressionQueue();
       } else if (wasCombat) {
         // Exiting combat (survived)
-        expressionQueueRef.current.push('excited');
+        queueExpression('excited');
         processExpressionQueue();
       }
     }
@@ -199,8 +221,8 @@ const AnimatedPortrait: React.FC<AnimatedPortraitProps> = ({
     if (prevTime !== undefined && prevTime !== gameTimeHours) {
       if ((gameTimeHours >= 0 && gameTimeHours <= 5) || gameTimeHours >= 23) {
         // Late night - occasionally show tired
-        if (Math.random() < 0.3) { // 30% chance to show tired at night
-          expressionQueueRef.current.push('tired');
+        if (nextExpressionRandom() < 0.3) { // 30% chance to show tired at night
+          queueExpression('tired');
           processExpressionQueue();
         }
       }
@@ -224,8 +246,8 @@ const AnimatedPortrait: React.FC<AnimatedPortraitProps> = ({
     
     if (statusExpression) {
       // Add status expression but don't spam (only occasionally)
-      if (Math.random() < 0.1) { // 10% chance per check
-        expressionQueueRef.current.push(statusExpression);
+      if (nextExpressionRandom() < 0.1) { // 10% chance per check
+        queueExpression(statusExpression);
         processExpressionQueue();
       }
     }

@@ -2,7 +2,7 @@
  * types/playerCharacter.ts - Defines the core data structure for the player character and shared character traits.
  */
 import { Item } from './itemTypes';
-import { Gender, WealthLevel, CulturalZone, Appearance } from './characterData';
+import { Gender, WealthLevel, CulturalZone, Appearance, PortraitVisualOverrides } from './characterData';
 import { HistoricalEra } from './ambiance';
 import { StatusEffect } from './combat';
 import { FamilyMember, LifeEvent } from './npcTypes';
@@ -125,6 +125,7 @@ export interface PlayerCharacter {
     portraitSeed?: number;
 
     appearance: Appearance;
+    portraitVisualOverrides?: PortraitVisualOverrides;
     birthplace: string;
     birthYear?: string | number; // Year the character was born
 

@@ -46,7 +46,10 @@ import {
   IoWoman,
   IoHome,
   IoChevronForward,
-  IoLogoGithub
+  IoLogoGithub,
+  IoDocumentText,
+  IoDownload,
+  IoAlertCircle
 } from 'react-icons/io5';
 import {
   FaDumbbell,
@@ -76,13 +79,32 @@ import { EventImportance, EventKind } from '../constants/characterData/lifeHisto
 import { getRegionalHistory } from '../constants/gameData/regionalHistory';
 import { getWikipediaImageForContext } from '../services/wikipediaService';
 import { CachedWikipediaData } from '../types/wikipedia';
+import { HistoricalPersonaAnnotationRecord } from '../types/personaAnnotation';
+import {
+  annotationRecordToJsonl,
+  createAnnotationRecordFromSource,
+  generateRandomPersonaAnnotationRecord,
+} from '../services/personaAnnotationService';
+import {
+  generatePersonaAnnotationWithGemini,
+  generatePersonaSketchWithGemini,
+  normalizePersonaAnnotationRecord,
+  PersonaGenerationTarget,
+  validatePersonaAnnotationRecord,
+} from '../services/geminiPersonaMaterialService';
+import { createPastedTextSource, ingestUrlSource } from '../services/sourceIngestionService';
 import ProceduralPortrait from './portraits/ProceduralPortrait';
 import { generateStatDescription } from '../utils/statToText';
 import MiniLocationMap from './MiniLocationMap';
-// LANGUAGES import removed - using persona.languageData directly
 import { RARITY_COLORS } from '../types/attributeTypes';
 import { PERSONAL_BELIEFS, IDEOLOGIES, getProfessionEmoji } from '../constants';
 import { WikipediaPanel } from './WikipediaPanel';
+import {
+  adaptPersonaMaterialRecord,
+  MaterialSupportTag,
+  normalizeMaterialText,
+} from '../services/personaMaterialAdapter';
+import { checkPersonaConsistency, ConsistencyIssue } from '../services/personaConsistencyService';
 import './PersonaGenerator.css';
 
 const ERAS: { value: HistoricalEra; label: string }[] = [
@@ -389,6 +411,79 @@ const SOCIAL_CLASSES = [
 
 type BiographyTab = 'biography' | 'family' | 'lifeEvents' | 'innerLife';
 
+const SOURCE_FIELD_LABELS: Record<MaterialSupportTag, string> = {
+  explicit: 'source-supported',
+  'strong-inference': 'strong inference',
+  'weak-inference': 'weak inference',
+  'synthetic-fill': 'synthetic fill',
+  uncertain: 'uncertain',
+};
+
+const sourceSupportLabel = (tag?: MaterialSupportTag | string): string =>
+  tag && tag in SOURCE_FIELD_LABELS
+    ? SOURCE_FIELD_LABELS[tag as MaterialSupportTag]
+    : 'uncertain';
+
+type AnnotationCategory = {
+  id: string;
+  label: string;
+  path: Array<string | number>;
+};
+
+const ANNOTATION_CATEGORIES: AnnotationCategory[] = [
+  { id: 'source', label: 'Source', path: ['source'] },
+  { id: 'annotation', label: 'Annotation Metadata', path: ['annotation'] },
+  { id: 'summary', label: 'Persona Summary', path: ['persona_seed', 'summary'] },
+  { id: 'identity_name', label: 'Identity Name', path: ['persona_seed', 'identity_name'] },
+  { id: 'temporal', label: 'Temporal Setting', path: ['persona_seed', 'temporal'] },
+  { id: 'place', label: 'Place', path: ['persona_seed', 'place'] },
+  { id: 'social_identity', label: 'Social Identity', path: ['persona_seed', 'social_identity'] },
+  { id: 'social_position', label: 'Social Position', path: ['persona_seed', 'social_position'] },
+  { id: 'constraint_regimes', label: 'Constraint Regimes', path: ['persona_seed', 'constraint_regimes'] },
+  { id: 'family', label: 'Family', path: ['persona_seed', 'family'] },
+  { id: 'work', label: 'Work', path: ['persona_seed', 'work'] },
+  { id: 'household_economy', label: 'Household Economy', path: ['persona_seed', 'household_economy'] },
+  { id: 'material_life', label: 'Material Life', path: ['persona_seed', 'material_life'] },
+  { id: 'mobility_and_horizon', label: 'Mobility And Horizon', path: ['persona_seed', 'mobility_and_horizon'] },
+  { id: 'public_world', label: 'Public World', path: ['persona_seed', 'public_world'] },
+  { id: 'religious_practice', label: 'Religious Practice', path: ['persona_seed', 'religious_practice'] },
+  { id: 'normative_world', label: 'Normative World', path: ['persona_seed', 'normative_world'] },
+  { id: 'temperament_and_voice', label: 'Temperament And Voice', path: ['persona_seed', 'temperament_and_voice'] },
+  { id: 'interaction_style', label: 'Interaction Style', path: ['persona_seed', 'interaction_style'] },
+  { id: 'field_evidence', label: 'Field Evidence', path: ['field_evidence'] },
+  { id: 'evidence', label: 'Evidence Summary', path: ['evidence'] },
+  { id: 'export_targets', label: 'Export Targets', path: ['export_targets'] },
+];
+
+const isPopulatedValue = (value: unknown): boolean => {
+  if (value === undefined || value === null) return false;
+  if (typeof value === 'string') return value.trim().length > 0;
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === 'object') return Object.values(value).some(isPopulatedValue);
+  return true;
+};
+
+const getPathValue = (source: unknown, path: Array<string | number>): unknown =>
+  path.reduce((current: any, key) => current?.[key], source as any);
+
+const setPathValue = (source: any, path: Array<string | number>, value: unknown): any => {
+  const clone = Array.isArray(source) ? [...source] : { ...source };
+  let cursor = clone;
+  path.forEach((key, index) => {
+    if (index === path.length - 1) {
+      cursor[key] = value;
+      return;
+    }
+    const next = cursor[key];
+    cursor[key] = Array.isArray(next) ? [...next] : { ...(next || {}) };
+    cursor = cursor[key];
+  });
+  return clone;
+};
+
+const supportLevelLabel = (supportLevel: string): string =>
+  supportLevel.replace(/_/g, ' ');
+
 export default function PersonaGenerator() {
   const [persona, setPersona] = useState<HistoricalPersona | null>(null);
   const [params, setParams] = useState<Partial<GenerationParams>>({});
@@ -403,9 +498,63 @@ export default function PersonaGenerator() {
   const [mainPortraitHoverExpression, setMainPortraitHoverExpression] = useState<string | undefined>(undefined);
   const [showGreetingBubble, setShowGreetingBubble] = useState(false);
   const [bubblePosition, setBubblePosition] = useState({ top: 0, left: 0 });
+  const [annotationRecord, setAnnotationRecord] = useState<HistoricalPersonaAnnotationRecord | null>(null);
+  const [sourceText, setSourceText] = useState('');
+  const [sourceTitle, setSourceTitle] = useState('');
+  const [sourceUrl, setSourceUrl] = useState('');
+  const [sourceIngestionStatus, setSourceIngestionStatus] = useState<string | null>(null);
+  const [showMaterialJson, setShowMaterialJson] = useState(false);
+  const [sourceTarget, setSourceTarget] = useState<PersonaGenerationTarget>('named_subject');
+  const [preferredMoment, setPreferredMoment] = useState('');
+  const [useGeminiExtraction, setUseGeminiExtraction] = useState(true);
+  const [sourcePortraitUrl, setSourcePortraitUrl] = useState<string | null>(null);
+  const [sourcePortraitAttribution, setSourcePortraitAttribution] = useState<string | null>(null);
+  const [personaSketch, setPersonaSketch] = useState<string | null>(null);
+  const [editableJsonl, setEditableJsonl] = useState('');
+  const [fieldEditStatus, setFieldEditStatus] = useState<string | null>(null);
+  const [isSourceGenerating, setIsSourceGenerating] = useState(false);
+  const [categoryEditDrafts, setCategoryEditDrafts] = useState<Record<string, string>>({});
+  const [sourcePanelCollapsed, setSourcePanelCollapsed] = useState(false);
+
+  const materialAdapter = annotationRecord ? adaptPersonaMaterialRecord(annotationRecord, {
+    useSourceTitleAsName: sourceTarget === 'named_subject',
+  }) : null;
+  const materialOverrides = materialAdapter?.displayOverrides;
+
+  const sourceFieldTag = (fieldPath: string): MaterialSupportTag | null =>
+    materialAdapter?.provenanceForField(fieldPath) || null;
+
+  const renderSourceFieldTag = (fieldPath: string) => {
+    const tag = sourceFieldTag(fieldPath);
+    if (!tag) return null;
+    return <span className={`source-field-tag source-field-tag-${tag}`}>{sourceSupportLabel(tag)}</span>;
+  };
+
+  const sourceLanguageLabel = materialOverrides?.languageLabel;
+  const sourceLanguageData = materialOverrides?.languageData;
+  const sourcePossessions = materialOverrides?.possessions || [];
+  const sourceClothingDetail = materialOverrides?.clothingDetail || '';
+  const sourceAttributes = materialOverrides?.attributes || [];
+  const sourceIdeology = materialOverrides?.worldviewDescription || '';
+  const consistencyIssues = useMemo<ConsistencyIssue[]>(() => (
+    persona && annotationRecord
+      ? checkPersonaConsistency({ record: annotationRecord, persona, target: sourceTarget })
+      : []
+  ), [annotationRecord, persona, sourceTarget]);
+  const populatedAnnotationCategories = useMemo(() => {
+    if (!annotationRecord) return [];
+    return ANNOTATION_CATEGORIES
+      .map(category => ({ ...category, value: getPathValue(annotationRecord, category.path) }))
+      .filter(category => isPopulatedValue(category.value));
+  }, [annotationRecord]);
 
   // Ref for portrait container to calculate bubble position
   const portraitContainerRef = useRef<HTMLDivElement>(null);
+  const personaCardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setCategoryEditDrafts({});
+  }, [annotationRecord?.record_id]);
 
   // Expression options for portrait cycling in character details modal
   const expressionCycle = [
@@ -543,8 +692,248 @@ export default function PersonaGenerator() {
       diseases: newPersona.character.diseaseHealth?.currentDiseases,
     });
     setPersona(newPersona);
+    setAnnotationRecord(null);
+    setSourcePortraitUrl(null);
+    setSourcePortraitAttribution(null);
+    setPersonaSketch(null);
+    setEditableJsonl('');
     setDeathRevealState('prompt'); // Reset death reveal for new persona
     setDeathInfo(null);
+  };
+
+  const localPersonaSketch = (record: HistoricalPersonaAnnotationRecord): string => {
+    const seed = record.persona_seed;
+    return [
+      `${record.source.title} is rendered here as ${seed.summary || `a persona in ${seed.place.region} around ${seed.temporal.specific_year || seed.temporal.decade}`}.`,
+      `${seed.social_position?.local_status_detail || seed.social_identity.status_detail || seed.social_identity.status_group} status, ${seed.work.primary_occupation} work, and ${seed.household_economy.household_composition} shape the daily frame of this life. The material setting includes ${seed.material_life.dwelling_detail || seed.material_life.dwelling_type}, ${seed.material_life.clothing_detail || seed.material_life.clothing_level} clothing, and ${seed.material_life.food_security.replace(/_/g, ' ')} food security.`,
+      `${seed.public_world?.detail || seed.mobility_and_horizon.knowledge_horizon || 'Their knowledge horizon remains bounded by the institutions, routes, and obligations named in the source.'} ${seed.normative_world?.detail || seed.temperament_and_voice.voice_notes || ''}`.trim(),
+      `Evidence confidence is ${record.evidence.confidence}. ${record.evidence.basis_summary}`,
+    ].join('\n\n');
+  };
+
+  const generateFromAnnotationRecord = async (
+    record: HistoricalPersonaAnnotationRecord,
+    options: { useSourceTitleAsName?: boolean; portraitUrl?: string; portraitAttribution?: string; generateSketch?: boolean } = {}
+  ) => {
+    const adaptedMaterial = adaptPersonaMaterialRecord(record, options);
+    const generationParams = adaptedMaterial.generationParams;
+    const newPersona = generateHistoricalPersona(generationParams);
+    const summary = record.persona_seed.summary;
+    newPersona.character = adaptedMaterial.applyToCharacter(newPersona.character);
+    newPersona.enhancedLifeEvents = adaptedMaterial.lifeEvents;
+
+    if (summary) {
+      newPersona.character.backstory = `${newPersona.character.backstory} Source-grounded seed: ${summary}`;
+    }
+
+    if (adaptedMaterial.displayOverrides.languageData) {
+      newPersona.languageData = adaptedMaterial.displayOverrides.languageData;
+    }
+
+    setParams(generationParams);
+    setAnnotationRecord(record);
+    setEditableJsonl(annotationRecordToJsonl(record));
+    setSourcePortraitUrl(options.portraitUrl || null);
+    setSourcePortraitAttribution(options.portraitAttribution || null);
+    setFieldEditStatus(null);
+    setPersona(newPersona);
+    setPersonaStack([newPersona]);
+    setCurrentPersonaIndex(0);
+    setBreadcrumbPath([{ name: newPersona.character.name, index: 0 }]);
+    setActiveTab('biography');
+    setDeathRevealState('prompt');
+    setDeathInfo(null);
+    window.setTimeout(() => {
+      personaCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
+
+    if (options.generateSketch && useGeminiExtraction) {
+      setPersonaSketch('Writing source-grounded sketch...');
+      try {
+        const sketch = await generatePersonaSketchWithGemini(record);
+        setPersonaSketch(sketch || localPersonaSketch(record));
+      } catch (error) {
+        setPersonaSketch(localPersonaSketch(record));
+        setSourceIngestionStatus(error instanceof Error ? `${error.message} Showing local sketch fallback.` : 'Sketch generation failed. Showing local sketch fallback.');
+      }
+    } else {
+      setPersonaSketch(localPersonaSketch(record));
+    }
+  };
+
+  const generateRandomAnnotationPersona = () => {
+    generateFromAnnotationRecord(generateRandomPersonaAnnotationRecord());
+  };
+
+  const recordFromSource = async (source: ReturnType<typeof createPastedTextSource>) => {
+    if (!useGeminiExtraction) {
+      return createAnnotationRecordFromSource(source);
+    }
+
+    return generatePersonaAnnotationWithGemini(source, {
+      target: sourceTarget,
+      preferredMoment: preferredMoment.trim() || undefined,
+    });
+  };
+
+  const ingestPastedSource = async () => {
+    if (isSourceGenerating) return;
+    if (!sourceText.trim()) {
+      if (sourceUrl.trim()) {
+        await ingestUrl();
+        return;
+      }
+      setSourceIngestionStatus('Paste source text or enter a Wikipedia/readable URL before generating.');
+      return;
+    }
+
+    setIsSourceGenerating(true);
+    setSourcePanelCollapsed(true);
+    setSourceIngestionStatus(useGeminiExtraction ? 'Asking Gemini to populate the annotation schema...' : 'Generating a heuristic annotation record...');
+    try {
+      const source = createPastedTextSource(sourceText, sourceTitle.trim() || 'Pasted source text');
+      const record = await recordFromSource(source);
+      setSourceIngestionStatus(useGeminiExtraction ? 'Generated a Gemini-filled annotation record from pasted text.' : 'Generated a heuristic annotation record from pasted text.');
+      await generateFromAnnotationRecord(record, { useSourceTitleAsName: sourceTarget === 'named_subject', generateSketch: true });
+    } catch (error) {
+      setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to generate from pasted text.');
+    } finally {
+      setIsSourceGenerating(false);
+    }
+  };
+
+  const ingestUrl = async () => {
+    if (isSourceGenerating) return;
+    if (!sourceUrl.trim()) {
+      setSourceIngestionStatus('Enter a Wikipedia or readable URL first.');
+      return;
+    }
+
+    setIsSourceGenerating(true);
+    setSourcePanelCollapsed(true);
+    setSourceIngestionStatus('Fetching source text...');
+    try {
+      const source = await ingestUrlSource(sourceUrl.trim());
+      setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking Gemini to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
+      const record = await recordFromSource(source);
+      setSourceTitle(source.title);
+      setSourceText(source.text);
+      setSourceIngestionStatus(useGeminiExtraction ? `Generated a Gemini-filled annotation record from ${source.citationLabel}.` : `Generated a heuristic annotation record from ${source.citationLabel}.`);
+      await generateFromAnnotationRecord(record, {
+        useSourceTitleAsName: sourceTarget === 'named_subject',
+        portraitUrl: source.imageUrl,
+        portraitAttribution: source.imageAttribution,
+        generateSketch: true,
+      });
+    } catch (error) {
+      setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to ingest that URL.');
+    } finally {
+      setIsSourceGenerating(false);
+    }
+  };
+
+  const generateFromAvailableSource = async () => {
+    if (sourceText.trim()) {
+      await ingestPastedSource();
+      return;
+    }
+    await ingestUrl();
+  };
+
+  const applyEditedJsonl = async () => {
+    try {
+      const parsed = normalizePersonaAnnotationRecord(JSON.parse(editableJsonl)) as HistoricalPersonaAnnotationRecord;
+      const validationErrors = validatePersonaAnnotationRecord(parsed);
+      if (validationErrors.length > 0) {
+        setFieldEditStatus(`Schema validation failed: ${validationErrors.slice(0, 4).join('; ')}`);
+        return;
+      }
+      setEditableJsonl(annotationRecordToJsonl(parsed));
+      setFieldEditStatus('Applied edited schema fields.');
+      await generateFromAnnotationRecord(parsed, {
+        useSourceTitleAsName: sourceTarget === 'named_subject',
+        portraitUrl: sourcePortraitUrl || undefined,
+        portraitAttribution: sourcePortraitAttribution || undefined,
+      });
+    } catch (error) {
+      setFieldEditStatus(error instanceof Error ? error.message : 'Edited JSONL is not valid JSON.');
+    }
+  };
+
+  const exportCharacterSheet = () => {
+    if (!persona || !annotationRecord) return;
+
+    const sheet = {
+      exported_at: new Date().toISOString(),
+      persona: {
+        name: persona.character.name,
+        year: persona.year,
+        location: persona.location,
+        region: persona.region,
+        era: persona.era,
+        cultural_zone: persona.culturalZone,
+        age: persona.character.age,
+        gender: persona.character.gender,
+        profession: persona.character.profession,
+        religion: persona.character.religion,
+        portrait_url: sourcePortraitUrl,
+      },
+      sketch: personaSketch,
+      annotation_record: annotationRecord,
+      adapter_overrides: materialAdapter ? {
+        ...materialAdapter.adapterOverrides,
+        display_overrides: materialAdapter.displayOverrides,
+        life_events: materialAdapter.lifeEvents.map(event => ({
+          year: event.year,
+          kind: event.kind,
+          importance: event.importance,
+          title: event.title,
+          text: event.text,
+          cultural_context: event.culturalContext,
+          source_support: (event as any).sourceSupport,
+          source_note: (event as any).sourceNote,
+        })),
+      } : undefined,
+      field_provenance: annotationRecord.field_evidence || [],
+      generated_character: persona.character,
+    };
+
+    const blob = new Blob([JSON.stringify(sheet, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${persona.character.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-character-sheet.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportAnnotationJsonl = () => {
+    if (!annotationRecord) return;
+    const blob = new Blob([annotationRecordToJsonl(annotationRecord)], { type: 'application/x-ndjson' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${annotationRecord.record_id || 'persona-material'}.jsonl`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const applyCategoryEdit = (category: AnnotationCategory, rawValue: string) => {
+    try {
+      const current = JSON.parse(editableJsonl || annotationRecordToJsonl(annotationRecord as HistoricalPersonaAnnotationRecord));
+      const parsedValue = JSON.parse(rawValue);
+      const nextRecord = normalizePersonaAnnotationRecord(setPathValue(current, category.path, parsedValue)) as HistoricalPersonaAnnotationRecord;
+      const validationErrors = validatePersonaAnnotationRecord(nextRecord);
+      if (validationErrors.length > 0) {
+        setFieldEditStatus(`${category.label} edit did not validate: ${validationErrors.slice(0, 3).join('; ')}`);
+        return;
+      }
+      setEditableJsonl(annotationRecordToJsonl(nextRecord));
+      setCategoryEditDrafts(prev => ({ ...prev, [category.id]: JSON.stringify(parsedValue, null, 2) }));
+      setFieldEditStatus(`Updated ${category.label}. Apply edited fields to regenerate the persona.`);
+    } catch (error) {
+      setFieldEditStatus(error instanceof Error ? `${category.label} edit is invalid JSON: ${error.message}` : `${category.label} edit is invalid JSON.`);
+    }
   };
 
   // ===========================================================================
@@ -1014,6 +1403,11 @@ export default function PersonaGenerator() {
       diseases: newPersona.character.diseaseHealth?.currentDiseases,
     });
     setPersona(newPersona);
+    setAnnotationRecord(null);
+    setSourcePortraitUrl(null);
+    setSourcePortraitAttribution(null);
+    setPersonaSketch(null);
+    setEditableJsonl('');
     setActiveTab('biography'); // Reset to biography tab on new generation
     setDeathRevealState('prompt'); // Reset death reveal for new persona
     setDeathInfo(null);
@@ -3325,6 +3719,10 @@ export default function PersonaGenerator() {
             <IoOptions aria-hidden="true" />
             {showAdvanced ? 'Hide' : 'Show'} Advanced Options
           </button>
+          <button className="btn btn-secondary" onClick={generateRandomAnnotationPersona} aria-label="Generate a random schema-backed historical persona">
+            <IoDocumentText aria-hidden="true" />
+            Generate Schema Persona
+          </button>
           <span className="controls-disclaimer">
             Prototype – may contain errors
           </span>
@@ -3334,6 +3732,133 @@ export default function PersonaGenerator() {
             <a href="#" onClick={(e) => { e.preventDefault(); setShowDonate(true); }}>Donate</a>{' · '}
             <a href="https://github.com/benjaminbreen/HistoricalPersonaGenerator" target="_blank" rel="noopener noreferrer">GitHub</a>
           </span>
+        </div>
+
+        <div className={`source-ingestion-panel ${sourcePanelCollapsed ? 'source-ingestion-panel-collapsed' : ''}`} role="region" aria-label="Source-based persona generation">
+          <div className="source-ingestion-header">
+            <IoDocumentText aria-hidden="true" />
+            <div>
+              <h2>Source Material</h2>
+              <p>
+                {isSourceGenerating
+                  ? (sourceIngestionStatus || 'Generating source-backed persona...')
+                  : annotationRecord && sourcePanelCollapsed
+                    ? `${annotationRecord.source.citation_label} loaded.`
+                    : 'Paste text or load a Wikipedia URL to populate the annotation schema before persona generation.'}
+              </p>
+            </div>
+            <button
+              className="source-panel-toggle"
+              onClick={() => setSourcePanelCollapsed(!sourcePanelCollapsed)}
+              aria-expanded={!sourcePanelCollapsed}
+              aria-label={sourcePanelCollapsed ? 'Expand source material inputs' : 'Collapse source material inputs'}
+            >
+              <IoChevronForward aria-hidden="true" />
+            </button>
+          </div>
+          {sourcePanelCollapsed ? (
+            <div className="source-collapsed-body">
+              <div className="source-collapsed-summary">
+                <span>{sourceTitle || annotationRecord?.source.title || 'No source title yet'}</span>
+                {sourceUrl && <code>{sourceUrl}</code>}
+              </div>
+              {isSourceGenerating && (
+                <div className="source-loading-state" aria-live="polite">
+                  <div className="source-loading-bar" />
+                  <span>{sourceIngestionStatus || 'Generating annotation record...'}</span>
+                </div>
+              )}
+              {!isSourceGenerating && (
+                <button className="btn btn-secondary" onClick={() => setSourcePanelCollapsed(false)}>
+                  Edit Source
+                </button>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="source-input-grid">
+                <label>
+                  Source title
+                  <input
+                    type="text"
+                    value={sourceTitle}
+                    onChange={(event) => setSourceTitle(event.target.value)}
+                    placeholder="Probate inventory, court testimony, Wikipedia article..."
+                  />
+                </label>
+                <label>
+                  Wikipedia or readable URL
+                  <div className="source-url-row">
+                    <input
+                      type="url"
+                      value={sourceUrl}
+                      onChange={(event) => setSourceUrl(event.target.value)}
+                      placeholder="https://en.wikipedia.org/wiki/..."
+                    />
+                    <button className="btn btn-secondary" onClick={ingestUrl} disabled={isSourceGenerating}>
+                      {isSourceGenerating ? 'Working...' : 'Load URL'}
+                    </button>
+                  </div>
+                </label>
+                <label>
+                  Persona target
+                  <select
+                    value={sourceTarget}
+                    onChange={(event) => setSourceTarget(event.target.value as PersonaGenerationTarget)}
+                  >
+                    <option value="named_subject">Named subject</option>
+                    <option value="ordinary_person_from_source_world">Ordinary person from source world</option>
+                  </select>
+                </label>
+                <label>
+                  Preferred moment
+                  <input
+                    type="text"
+                    value={preferredMoment}
+                    onChange={(event) => setPreferredMoment(event.target.value)}
+                    placeholder="e.g. Tolstoy in the 1870s, before Anna Karenina"
+                  />
+                </label>
+              </div>
+              <label className="source-toggle-row">
+                <input
+                  type="checkbox"
+                  checked={useGeminiExtraction}
+                  onChange={(event) => setUseGeminiExtraction(event.target.checked)}
+                />
+                Use Gemini 3.1 Flash Lite Preview to fill inferred and synthesized schema fields
+              </label>
+              <label className="source-text-label">
+                Source text
+                <textarea
+                  value={sourceText}
+                  onChange={(event) => setSourceText(event.target.value)}
+                  placeholder="Paste a document excerpt here, then generate a persona from the extracted annotation record."
+                  rows={5}
+                />
+              </label>
+              <div className="source-actions">
+                <button className="btn btn-primary" onClick={generateFromAvailableSource} disabled={isSourceGenerating}>
+                  {isSourceGenerating
+                    ? 'Generating...'
+                    : sourceText.trim()
+                      ? 'Generate from Source Text'
+                      : sourceUrl.trim()
+                        ? 'Generate from URL'
+                        : 'Generate from Source'}
+                </button>
+                {annotationRecord && (
+                  <button className="btn btn-secondary" onClick={() => setShowMaterialJson(!showMaterialJson)}>
+                    {showMaterialJson ? 'Hide JSONL' : 'Show JSONL'}
+                  </button>
+                )}
+                {sourceIngestionStatus && <span className="source-status">{sourceIngestionStatus}</span>}
+              </div>
+              {annotationRecord && showMaterialJson && (
+                <pre className="annotation-jsonl">{annotationRecordToJsonl(annotationRecord)}</pre>
+              )}
+            </>
+          )}
         </div>
 
         <AnimatePresence>
@@ -3497,6 +4022,7 @@ export default function PersonaGenerator() {
 
             <motion.div
               className="persona-card"
+              ref={personaCardRef}
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.3, delay: 0.1 }}
@@ -3527,6 +4053,15 @@ export default function PersonaGenerator() {
                     {getSeasonInfo(persona.month, persona.day).description}
                   </span> in the {formatEraLabel(persona.era)} in {formatCulturalZone(persona.culturalZone)}
                 </div>
+                {annotationRecord && (
+                  <div className="schema-evidence-strip">
+                    <div>
+                      <strong>{annotationRecord.source.citation_label}</strong>
+                      <span>{annotationRecord.evidence.confidence} confidence · {annotationRecord.source.source_basis.replace(/_/g, ' ')}</span>
+                    </div>
+                    <p>{annotationRecord.evidence.basis_summary}</p>
+                  </div>
+                )}
               </div>
               <div className="header-center">
                 <div className="map-pill">
@@ -3555,12 +4090,23 @@ export default function PersonaGenerator() {
                       onMouseLeave={handleMainPortraitLeave}
                       title="Click to reveal character secrets"
                     >
-                      <ProceduralPortrait
-                        character={persona.character}
-                        size={192}
-                        temporaryExpression={mainPortraitHoverExpression}
-                      />
+                      {sourcePortraitUrl ? (
+                        <img
+                          className="source-portrait-image"
+                          src={sourcePortraitUrl}
+                          alt={`Portrait of ${persona.character.name}`}
+                        />
+                      ) : (
+                        <ProceduralPortrait
+                          character={persona.character}
+                          size={192}
+                          temporaryExpression={mainPortraitHoverExpression}
+                        />
+                      )}
                     </div>
+                    {sourcePortraitAttribution && (
+                      <div className="source-portrait-credit">{sourcePortraitAttribution}</div>
+                    )}
                     <div className="appearance-text">
                       <div className="age-gender-display">
                         <div className="age-block">
@@ -3607,12 +4153,13 @@ export default function PersonaGenerator() {
                           onClick={() => setShowLanguageModal(true)}
                           title="Click for detailed language information"
                         >
-                          {persona.languageData.name}
-                          {persona.languageData.nativeName && (
+                          {sourceLanguageData?.name || sourceLanguageLabel || persona.languageData.name}
+                          {(sourceLanguageData?.nativeName || persona.languageData.nativeName) && (
                             <span style={{ fontSize: '0.85em', marginLeft: '4px', opacity: 0.7 }}>
-                              ({persona.languageData.nativeName})
+                              ({sourceLanguageData?.nativeName || persona.languageData.nativeName})
                             </span>
                           )}
+                          {annotationRecord && renderSourceFieldTag('/persona_seed/social_identity/languages')}
                         </span>
                       </div>
                     )}
@@ -3690,7 +4237,15 @@ export default function PersonaGenerator() {
                           }
                         }}
                       >
-                        <p>{memoizedBiographyWithFamilyLinks}</p>
+                        {annotationRecord && personaSketch ? (
+                          <div className="source-sketch">
+                            {personaSketch.split(/\n{2,}/).map((paragraph, index) => (
+                              <p key={index}>{paragraph}</p>
+                            ))}
+                          </div>
+                        ) : (
+                          <p>{memoizedBiographyWithFamilyLinks}</p>
+                        )}
                       </div>
                     )}
 
@@ -3724,6 +4279,11 @@ export default function PersonaGenerator() {
                                           <div className="parent-label">Father</div>
                                         </div>
                                         <div className="parent-name">{father.name}</div>
+                                        {(father as any).sourceSupport && (
+                                          <span className={`source-field-tag source-field-tag-${(father as any).sourceSupport}`}>
+                                            {sourceSupportLabel((father as any).sourceSupport)}
+                                          </span>
+                                        )}
                                         {father.profession && <div className="parent-profession">{getProfessionEmoji(father.profession)} {father.profession}</div>}
                                         {father.birthYear && (
                                           <div className="parent-dates">
@@ -3748,6 +4308,11 @@ export default function PersonaGenerator() {
                                           <div className="parent-label">Mother</div>
                                         </div>
                                         <div className="parent-name">{mother.name}</div>
+                                        {(mother as any).sourceSupport && (
+                                          <span className={`source-field-tag source-field-tag-${(mother as any).sourceSupport}`}>
+                                            {sourceSupportLabel((mother as any).sourceSupport)}
+                                          </span>
+                                        )}
                                         {mother.profession && <div className="parent-profession">{getProfessionEmoji(mother.profession)} {mother.profession}</div>}
                                         {mother.birthYear && (
                                           <div className="parent-dates">
@@ -3772,6 +4337,11 @@ export default function PersonaGenerator() {
                                           <div className="parent-label">Spouse</div>
                                         </div>
                                         <div className="parent-name">{spouse.name}</div>
+                                        {(spouse as any).sourceSupport && (
+                                          <span className={`source-field-tag source-field-tag-${(spouse as any).sourceSupport}`}>
+                                            {sourceSupportLabel((spouse as any).sourceSupport)}
+                                          </span>
+                                        )}
                                         {spouse.profession && <div className="parent-profession">{getProfessionEmoji(spouse.profession)} {spouse.profession}</div>}
                                         {spouse.age && <div className="parent-dates">Age {spouse.age}</div>}
                                       </motion.div>
@@ -3914,6 +4484,14 @@ export default function PersonaGenerator() {
                                   <span className="event-title" style={{ borderLeftColor: getEventColor(event.importance) }}>
                                     {makeLifeEventTextClickable(event.title)}
                                   </span>
+                                  {(event as any).sourceSupport && (
+                                    <span
+                                      className={`source-field-tag source-field-tag-${(event as any).sourceSupport}`}
+                                      title={(event as any).sourceNote || undefined}
+                                    >
+                                      {sourceSupportLabel((event as any).sourceSupport)}
+                                    </span>
+                                  )}
                                 </div>
                                 <p className="event-text">{makeLifeEventTextClickable(event.text)}</p>
                                 {event.impacts && (event.impacts.wealth || event.impacts.reputation || event.impacts.health) && (
@@ -4261,19 +4839,42 @@ export default function PersonaGenerator() {
                 >
                   <h3>Equipment and Items</h3>
                   <div className="equipment-grid">
-                    {Object.entries(persona.character.equippedItems || {})
-                      .filter(([slot]) => ['head', 'torso', 'feet'].includes(slot.toLowerCase()))
-                      .map(([slot, item]) => (
-                        item && (
-                          <div key={slot} className="equipment-item">
-                            <span className="equipment-slot">{formatItemName(slot)}</span>
-                            <span className="equipment-name">{formatItemName(item.name)}</span>
+                    {annotationRecord ? (
+                      <>
+                        {sourceClothingDetail && (
+                          <div className="equipment-item source-equipment-item">
+                            <span className="equipment-slot">Clothing</span>
+                            <span className="equipment-name">
+                              {sourceClothingDetail}
+                              {renderSourceFieldTag('/persona_seed/material_life/clothing_detail') || renderSourceFieldTag('/persona_seed/material_life/clothing_level')}
+                            </span>
                           </div>
-                        )
-                      ))}
+                        )}
+                        {sourcePossessions.slice(0, 5).map((possession, idx) => (
+                          <div key={`source-possession-${idx}`} className="equipment-item source-equipment-item">
+                            <span className="equipment-slot">{idx === 0 ? 'Possessions' : 'Item'}</span>
+                            <span className="equipment-name">
+                              {normalizeMaterialText(possession)}
+                              {renderSourceFieldTag('/persona_seed/material_life/possessions')}
+                            </span>
+                          </div>
+                        ))}
+                      </>
+                    ) : (
+                      Object.entries(persona.character.equippedItems || {})
+                        .filter(([slot]) => ['head', 'torso', 'feet'].includes(slot.toLowerCase()))
+                        .map(([slot, item]) => (
+                          item && (
+                            <div key={slot} className="equipment-item">
+                              <span className="equipment-slot">{formatItemName(slot)}</span>
+                              <span className="equipment-name">{formatItemName(item.name)}</span>
+                            </div>
+                          )
+                        ))
+                    )}
 
                     {/* Add jewelry items if present */}
-                    {persona.character.appearance.jewelry && persona.character.appearance.jewelry.length > 0 && (
+                    {!annotationRecord && persona.character.appearance.jewelry && persona.character.appearance.jewelry.length > 0 && (
                       persona.character.appearance.jewelry.map((piece, idx) => (
                         <div key={`jewelry-${idx}`} className="equipment-item jewelry-equipment">
                           <span className="equipment-slot">{piece.type}</span>
@@ -4286,7 +4887,7 @@ export default function PersonaGenerator() {
                     )}
 
                     {/* Add markings/scars if present */}
-                    {persona.character.appearance.markings && persona.character.appearance.markings.length > 0 && (
+                    {!annotationRecord && persona.character.appearance.markings && persona.character.appearance.markings.length > 0 && (
                       persona.character.appearance.markings.map((marking, idx) => (
                         <div key={`marking-${idx}`} className="equipment-item marking-equipment">
                           <span className="equipment-slot">{getMarkingTypeLabel(marking.type)}</span>
@@ -4300,7 +4901,7 @@ export default function PersonaGenerator() {
                 </motion.div>
 
                 {/* Accessories section for non-standard equipment slots */}
-                {Object.entries(persona.character.equippedItems || {})
+                {!annotationRecord && Object.entries(persona.character.equippedItems || {})
                   .filter(([slot]) => !['head', 'torso', 'feet'].includes(slot.toLowerCase()))
                   .filter(([_, item]) => item).length > 0 && (
                   <motion.div
@@ -4416,7 +5017,7 @@ export default function PersonaGenerator() {
                   </motion.div>
                 )}
 
-                {persona.character.attributes && persona.character.attributes.length > 0 && (
+                {(sourceAttributes.length > 0 || (persona.character.attributes && persona.character.attributes.length > 0)) && (
                   <motion.div
                     className="attributes-section"
                     initial={{ opacity: 0, x: 10 }}
@@ -4425,7 +5026,30 @@ export default function PersonaGenerator() {
                   >
                     <h3>Attributes</h3>
                     <div className="attribute-list">
-                      {persona.character.attributes.map((attr, idx) => {
+                      {sourceAttributes.map((attr, idx) => {
+                        const IconComponent = attr.icon;
+                        return (
+                          <motion.div
+                            key={`source-attribute-${idx}`}
+                            className="attribute-item source-derived-item"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.45 + idx * 0.08 }}
+                          >
+                            <div className="attribute-icon-wrapper">
+                              <IconComponent className="attribute-icon" />
+                            </div>
+                            <div className="attribute-text">
+                              <div className="attribute-name">
+                                {attr.name}
+                                {renderSourceFieldTag(attr.fieldPath)}
+                              </div>
+                              <div className="attribute-description">{attr.description}</div>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                      {(annotationRecord ? [] : (persona.character.attributes || [])).map((attr, idx) => {
                         const IconComponent = getIconComponent(attr.icon);
                         return (
                           <motion.div
@@ -4453,7 +5077,7 @@ export default function PersonaGenerator() {
                   </motion.div>
                 )}
 
-                {persona.character.ideology && persona.character.ideology !== 'Pragmatism' && (
+                {(sourceIdeology || (persona.character.ideology && persona.character.ideology !== 'Pragmatism')) && (
                   <motion.div
                     className="attributes-section"
                     initial={{ opacity: 0, x: 10 }}
@@ -4473,10 +5097,11 @@ export default function PersonaGenerator() {
                         </div>
                         <div className="attribute-text">
                           <div className="attribute-name">
-                            {IDEOLOGIES.find((i: any) => i.id === persona.character.ideology)?.name || persona.character.ideology}
+                            {sourceIdeology ? (materialOverrides?.worldviewLabel || 'Worldview') : (IDEOLOGIES.find((i: any) => i.id === persona.character.ideology)?.name || persona.character.ideology)}
+                            {sourceIdeology && (renderSourceFieldTag('/persona_seed/normative_world') || renderSourceFieldTag('/persona_seed/religious_practice') || renderSourceFieldTag('/persona_seed/mobility_and_horizon/religious_or_moral_world'))}
                           </div>
                           <div className="attribute-description">
-                            {IDEOLOGIES.find((i: any) => i.id === persona.character.ideology)?.description || ''}
+                            {sourceIdeology ? sourceIdeology : (IDEOLOGIES.find((i: any) => i.id === persona.character.ideology)?.description || '')}
                           </div>
                         </div>
                       </motion.div>
@@ -4485,6 +5110,107 @@ export default function PersonaGenerator() {
                 )}
               </div>
             </div>
+            {annotationRecord && (
+              <div className="character-sheet-editor">
+                <div className="character-sheet-editor-header">
+                  <div>
+                    <h3>Export as JSONL or PDF</h3>
+                    <p>Export the generated persona, inspect consistency warnings, or edit populated JSONL categories.</p>
+                  </div>
+                  <div className="export-action-panel" aria-label="Export persona">
+                    <button className="btn btn-primary" onClick={exportAnnotationJsonl}>
+                      <IoDownload aria-hidden="true" />
+                      Export JSONL
+                    </button>
+                    <button className="btn btn-secondary" onClick={handleSavePDF}>
+                      <IoSave aria-hidden="true" />
+                      Export PDF
+                    </button>
+                    <button className="btn btn-secondary" onClick={exportCharacterSheet}>
+                      <IoDocumentText aria-hidden="true" />
+                      Full JSON
+                    </button>
+                  </div>
+                </div>
+                {consistencyIssues.length > 0 && (
+                  <div className="consistency-panel">
+                    <div className="consistency-panel-header">
+                      <IoAlertCircle aria-hidden="true" />
+                      <strong>{consistencyIssues.length} consistency {consistencyIssues.length === 1 ? 'check' : 'checks'}</strong>
+                    </div>
+                    <div className="consistency-list">
+                      {consistencyIssues.map(issue => (
+                        <div key={issue.id} className={`consistency-item consistency-item-${issue.severity}`}>
+                          <div>
+                            <span>{issue.severity}</span>
+                            {issue.fieldPath && <code>{issue.fieldPath}</code>}
+                          </div>
+                          <p>{issue.message}</p>
+                          {issue.suggestedFix && <small>{issue.suggestedFix}</small>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="source-field-summary">
+                  <div><span>Year</span><strong>{annotationRecord.persona_seed.temporal.specific_year || annotationRecord.persona_seed.temporal.decade}</strong></div>
+                  <div><span>Region</span><strong>{annotationRecord.persona_seed.place.region}</strong></div>
+                  <div><span>Status</span><strong>{(annotationRecord.persona_seed.social_position?.local_status_detail || annotationRecord.persona_seed.social_identity.status_detail || annotationRecord.persona_seed.social_identity.status_group).replace(/_/g, ' ')}</strong></div>
+                  <div><span>Work</span><strong>{annotationRecord.persona_seed.work.primary_occupation}</strong></div>
+                  <div><span>Confidence</span><strong>{annotationRecord.evidence.confidence}</strong></div>
+                </div>
+                <div className="jsonl-category-grid">
+                  {populatedAnnotationCategories.map(category => {
+                    const fieldEvidenceCount = annotationRecord.field_evidence?.filter(item =>
+                      item.field_path.startsWith(`/${category.path.join('/')}`)
+                    ).length || 0;
+                    const draftValue = categoryEditDrafts[category.id] ?? JSON.stringify(category.value, null, 2);
+                    return (
+                      <section key={category.id} className="jsonl-category-card">
+                        <div className="jsonl-category-header">
+                          <div>
+                            <h4>{category.label}</h4>
+                            <code>/{category.path.join('/')}</code>
+                          </div>
+                          {fieldEvidenceCount > 0 && <span>{fieldEvidenceCount} evidence {fieldEvidenceCount === 1 ? 'entry' : 'entries'}</span>}
+                        </div>
+                        <textarea
+                          value={draftValue}
+                          onChange={(event) => setCategoryEditDrafts(prev => ({ ...prev, [category.id]: event.target.value }))}
+                          onBlur={(event) => applyCategoryEdit(category, event.target.value)}
+                          rows={Math.min(14, Math.max(4, draftValue.split('\n').length + 1))}
+                          spellCheck={false}
+                        />
+                        {category.id === 'field_evidence' && Array.isArray(category.value) && (
+                          <div className="field-evidence-chip-row">
+                            {category.value.slice(0, 10).map((item: any, index: number) => (
+                              <span key={`${item.field_path || 'field'}-${index}`}>
+                                {supportLevelLabel(item.support_level || 'unknown')}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </section>
+                    );
+                  })}
+                </div>
+                <details className="raw-jsonl-editor">
+                  <summary>Raw JSONL</summary>
+                <textarea
+                  value={editableJsonl}
+                  onChange={(event) => setEditableJsonl(event.target.value)}
+                  rows={14}
+                  spellCheck={false}
+                />
+                </details>
+                <div className="source-actions">
+                  <button className="btn btn-primary" onClick={applyEditedJsonl}>
+                    Apply Edited Fields
+                  </button>
+                  {fieldEditStatus && <span className="source-status">{fieldEditStatus}</span>}
+                </div>
+              </div>
+            )}
             </motion.div>
           </motion.div>
         )}

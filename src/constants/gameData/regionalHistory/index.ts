@@ -38,44 +38,44 @@ export function getRegionalHistory(
 
   if (!zoneData) return null;
 
-  const regionData = zoneData[region];
+  const regionAliases: Record<string, string> = {
+    'New England': 'Northeastern Seaboard',
+    'Hartford, Connecticut': 'Northeastern Seaboard',
+    'Connecticut': 'Northeastern Seaboard',
+    'Massachusetts': 'Northeastern Seaboard',
+    'Cambridge, Massachusetts': 'Northeastern Seaboard',
+  };
+  const resolvedRegion = zoneData[region] ? region : (regionAliases[region] || region);
+  const regionData = zoneData[resolvedRegion];
   if (!regionData) return null;
 
-  // Convert year to century key
-  // For negative years, round toward more negative (e.g., -1234 -> -1300)
-  // For positive years, round down to century (e.g., 1234 -> 1200)
-  let centuryKey: string;
-  if (year < 0) {
-    const century = Math.floor(year / 100) * 100;
-    centuryKey = century.toString();
-  } else {
-    const century = Math.floor(year / 100) * 100;
-    centuryKey = century.toString();
+  const exactYearKey = year.toString();
+  if (regionData[exactYearKey]) {
+    return regionData[exactYearKey];
   }
 
-  // Try exact match first
+  const centuryKey = (Math.floor(year / 100) * 100).toString();
   if (regionData[centuryKey]) {
     return regionData[centuryKey];
   }
 
-  // If no exact match, find the closest earlier century
-  const availableCenturies = Object.keys(regionData)
+  // If no exact match, find the closest earlier dated entry.
+  const availableYears = Object.keys(regionData)
     .map(k => parseInt(k))
     .sort((a, b) => a - b);
 
-  const targetCentury = parseInt(centuryKey);
-  let closestCentury: number | null = null;
+  let closestYear: number | null = null;
 
-  for (const century of availableCenturies) {
-    if (century <= targetCentury) {
-      closestCentury = century;
+  for (const availableYear of availableYears) {
+    if (availableYear <= year) {
+      closestYear = availableYear;
     } else {
       break;
     }
   }
 
-  if (closestCentury !== null) {
-    return regionData[closestCentury.toString()];
+  if (closestYear !== null) {
+    return regionData[closestYear.toString()];
   }
 
   return null;

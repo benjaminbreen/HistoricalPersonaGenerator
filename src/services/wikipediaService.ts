@@ -12,7 +12,7 @@ import {
 import { getAllWikipediaMappings } from '../constants/gameData/wikipediaMapping';
 
 const WIKIPEDIA_API_BASE = 'https://en.wikipedia.org/api/rest_v1/page/summary/';
-const CACHE_PREFIX = 'wiki_cache_';
+const CACHE_PREFIX = 'wiki_cache_v2_';
 const CACHE_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 /**

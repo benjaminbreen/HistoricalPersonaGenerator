@@ -1,0 +1,959 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/historical-persona-annotation.schema.json",
+  "title": "Historical Persona Annotation JSONL Record",
+  "description": "One JSONL record describing source-grounded material for a plausible historical persona. Designed for human annotators, document extraction, and model-assisted completion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_id",
+    "source",
+    "annotation",
+    "persona_seed",
+    "evidence"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.0.0", "1.1.0"]
+    },
+    "record_id": {
+      "type": "string",
+      "description": "Stable ID for this JSONL row."
+    },
+    "persona_id": {
+      "type": "string",
+      "description": "Optional stable persona ID if this source material has already been assigned to a persona."
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "source_basis", "title", "citation_label"],
+      "properties": {
+        "source_id": {
+          "type": "string"
+        },
+        "source_basis": {
+          "$ref": "#/$defs/source_basis"
+        },
+        "title": {
+          "type": "string"
+        },
+        "citation_label": {
+          "type": "string",
+          "description": "Short human-readable label used in UI and evidence displays."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "creator_or_author": {
+          "type": "string"
+        },
+        "source_date": {
+          "type": "string",
+          "description": "Date or date range for the source as written, including approximate dates."
+        },
+        "language": {
+          "type": "string"
+        },
+        "translation_status": {
+          "type": "string",
+          "enum": ["original_language", "human_translation", "machine_translation", "mixed_or_unclear", "unknown"]
+        },
+        "repository_or_collection": {
+          "type": "string"
+        },
+        "document_genre": {
+          "type": "string",
+          "description": "Probate inventory, court deposition, travel narrative, census schedule, Wikipedia article, etc."
+        },
+        "extraction_method": {
+          "type": "string",
+          "enum": ["manual_transcription", "paste", "wikipedia_api", "html_readability", "ocr", "pdf_text_layer", "llm_extraction", "mixed", "unknown"]
+        },
+        "source_reliability_notes": {
+          "type": "string"
+        }
+      }
+    },
+    "annotation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["annotator_type", "created_at", "overall_confidence"],
+      "properties": {
+        "annotator_id": {
+          "type": "string"
+        },
+        "annotator_type": {
+          "type": "string",
+          "enum": ["human", "model", "human_reviewed_model", "imported", "unknown"]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "overall_confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "completion_status": {
+          "type": "string",
+          "enum": ["draft", "needs_review", "reviewed", "approved", "rejected"]
+        },
+        "annotation_notes": {
+          "type": "string"
+        }
+      }
+    },
+    "persona_seed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "temporal",
+        "place",
+        "social_identity",
+        "work",
+        "household_economy",
+        "material_life",
+        "mobility_and_horizon",
+        "temperament_and_voice"
+      ],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "Two or three sentences describing the plausible persona seed and its relationship to the source."
+        },
+        "identity_name": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional persona name supplied by source evidence or model inference, especially for ordinary fictional personas.",
+          "required": ["support_level", "confidence"],
+          "properties": {
+            "given_name": { "type": "string" },
+            "family_name": { "type": "string" },
+            "full_name": { "type": "string" },
+            "name_basis": { "type": "string" },
+            "support_level": { "$ref": "#/$defs/support_level" },
+            "confidence": { "$ref": "#/$defs/confidence" }
+          }
+        },
+        "temporal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["period_bucket", "within_decade_position"],
+          "properties": {
+            "period_bucket": {
+              "$ref": "#/$defs/period_bucket"
+            },
+            "decade": {
+              "type": "integer",
+              "minimum": 1400,
+              "maximum": 1930,
+              "multipleOf": 10
+            },
+            "within_decade_position": {
+              "$ref": "#/$defs/within_decade_position"
+            },
+            "specific_year": {
+              "type": "integer",
+              "minimum": 1400,
+              "maximum": 1930
+            },
+            "date_basis": {
+              "type": "string",
+              "enum": ["explicit_source_date", "inferred_from_event", "inferred_from_lifespan", "inferred_from_context", "synthetic_within_period", "unclear"]
+            },
+            "temporal_notes": {
+              "type": "string"
+            }
+          }
+        },
+        "place": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["region", "residence_locale", "activity_locale"],
+          "properties": {
+            "region": {
+              "type": "string",
+              "description": "Historically meaningful region or locality."
+            },
+            "polity": {
+              "type": "string",
+              "description": "State, empire, colony, city-state, kingdom, confederation, or jurisdiction when known."
+            },
+            "settlement_or_locality": {
+              "type": "string"
+            },
+            "residence_locale": {
+              "$ref": "#/$defs/residence_locale"
+            },
+            "activity_locale": {
+              "$ref": "#/$defs/activity_locale"
+            },
+            "environment": {
+              "type": "array",
+              "maxItems": 5,
+              "items": {
+                "type": "string",
+                "enum": ["coastal", "riverine", "mountain", "forest", "grassland_or_steppe", "desert_or_arid", "wetland", "island", "agrarian_lowland", "industrial_urban", "mixed_or_unclear"]
+              }
+            },
+            "historical_pressures": {
+              "type": "array",
+              "maxItems": 6,
+              "items": {
+                "type": "string",
+                "enum": ["war_or_militarization", "colonial_rule", "state_expansion", "religious_conflict", "economic_crisis", "famine_or_food_shortage", "epidemic_disease", "migration_or_displacement", "slavery_or_forced_labor", "market_integration", "industrialization", "urban_growth", "environmental_stress", "legal_reform", "social_unrest", "none_apparent", "other"]
+              }
+            },
+            "place_notes": {
+              "type": "string"
+            }
+          }
+        },
+        "social_identity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "age_band",
+            "gender_role",
+            "status_group",
+            "legal_condition",
+            "household_role",
+            "marital_status",
+            "literacy",
+            "numeracy"
+          ],
+          "properties": {
+            "age_band": {
+              "$ref": "#/$defs/age_band"
+            },
+            "estimated_age": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "gender_role": {
+              "type": "string",
+              "description": "Historically situated gender role or presentation, using source language where helpful."
+            },
+            "status_group": {
+              "$ref": "#/$defs/status_group"
+            },
+            "status_detail": {
+              "type": "string",
+              "description": "Class, caste, rank, estate, ethnic, communal, occupational, or stigma position in more specific terms."
+            },
+            "legal_condition": {
+              "$ref": "#/$defs/legal_condition"
+            },
+            "household_role": {
+              "$ref": "#/$defs/household_role"
+            },
+            "marital_status": {
+              "$ref": "#/$defs/marital_status"
+            },
+            "children_status": {
+              "$ref": "#/$defs/children_status"
+            },
+            "religious_or_communal_identity": {
+              "type": "string"
+            },
+            "languages": {
+              "type": "array",
+              "maxItems": 5,
+              "items": {
+                "type": "string"
+              }
+            },
+            "literacy": {
+              "$ref": "#/$defs/literacy"
+            },
+            "numeracy": {
+              "$ref": "#/$defs/numeracy"
+            },
+            "identity_notes": {
+              "type": "string"
+            }
+          }
+        },
+        "social_position": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Compact cross-cultural social position. Use local terms in detail fields rather than forcing a universal class taxonomy.",
+          "required": ["economic_security", "autonomy"],
+          "properties": {
+            "economic_security": {
+              "$ref": "#/$defs/economic_security"
+            },
+            "autonomy": {
+              "$ref": "#/$defs/social_autonomy"
+            },
+            "local_status_detail": {
+              "type": "string",
+              "description": "Source-specific status language: tenant farmer, gentry widow, registered courtesan, merchant caste, enslaved field hand, literatus, court eunuch, etc."
+            }
+          }
+        },
+        "constraint_regimes": {
+          "type": "array",
+          "description": "A small list of major structural constraints shaping the persona's daily life. Prefer concrete source/context details over exhaustive categorization.",
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "detail", "support_level", "confidence"],
+            "properties": {
+              "type": {
+                "$ref": "#/$defs/constraint_regime_type"
+              },
+              "detail": {
+                "type": "string"
+              },
+              "support_level": {
+                "$ref": "#/$defs/support_level"
+              },
+              "confidence": {
+                "$ref": "#/$defs/confidence"
+              }
+            }
+          }
+        },
+        "family": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Optional source-aware family assertions. Use when family is known from the source or can be conservatively inferred.",
+          "properties": {
+            "members": {
+              "type": "array",
+              "maxItems": 12,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["relation", "name", "support_level", "confidence"],
+                "properties": {
+                  "relation": {
+                    "type": "string",
+                    "enum": ["father", "mother", "spouse", "son", "daughter", "sibling", "brother", "sister"]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "profession": {
+                    "type": "string"
+                  },
+                  "birth_year": {
+                    "type": "integer",
+                    "minimum": 1300,
+                    "maximum": 1930
+                  },
+                  "death_year": {
+                    "type": "integer",
+                    "minimum": 1300,
+                    "maximum": 2000
+                  },
+                  "is_deceased": {
+                    "type": "boolean"
+                  },
+                  "support_level": {
+                    "$ref": "#/$defs/support_level"
+                  },
+                  "confidence": {
+                    "$ref": "#/$defs/confidence"
+                  },
+                  "notes": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "family_notes": {
+              "type": "string"
+            }
+          }
+        },
+        "work": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["primary_occupation", "labor_relation", "skill_level", "workplace", "work_rhythm"],
+          "properties": {
+            "primary_occupation": {
+              "type": "string"
+            },
+            "secondary_occupations": {
+              "type": "array",
+              "maxItems": 5,
+              "items": {
+                "type": "string"
+              }
+            },
+            "labor_relation": {
+              "$ref": "#/$defs/labor_relation"
+            },
+            "skill_level": {
+              "$ref": "#/$defs/skill_level"
+            },
+            "workplace": {
+              "$ref": "#/$defs/workplace"
+            },
+            "work_rhythm": {
+              "$ref": "#/$defs/work_rhythm"
+            },
+            "tools_materials_techniques": {
+              "type": "array",
+              "maxItems": 8,
+              "items": {
+                "type": "string"
+              }
+            },
+            "work_notes": {
+              "type": "string"
+            }
+          }
+        },
+        "household_economy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["household_composition", "property_relation", "cash_position"],
+          "properties": {
+            "household_composition": {
+              "type": "string"
+            },
+            "children_status": {
+              "$ref": "#/$defs/children_status"
+            },
+            "dependents": {
+              "type": "string"
+            },
+            "income_sources": {
+              "type": "array",
+              "maxItems": 6,
+              "items": {
+                "type": "string"
+              }
+            },
+            "debts_dues_taxes_or_rents": {
+              "type": "array",
+              "maxItems": 6,
+              "items": {
+                "type": "string"
+              }
+            },
+            "property_relation": {
+              "$ref": "#/$defs/property_relation"
+            },
+            "cash_position": {
+              "$ref": "#/$defs/cash_position"
+            },
+            "economic_notes": {
+              "type": "string"
+            }
+          }
+        },
+        "material_life": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dwelling_type", "clothing_level", "food_security"],
+          "properties": {
+            "dwelling_type": {
+              "$ref": "#/$defs/dwelling_type"
+            },
+            "dwelling_detail": {
+              "type": "string"
+            },
+            "possessions": {
+              "type": "array",
+              "maxItems": 12,
+              "items": {
+                "type": "string"
+              }
+            },
+            "clothing_level": {
+              "$ref": "#/$defs/clothing_level"
+            },
+            "clothing_detail": {
+              "type": "string"
+            },
+            "food_security": {
+              "$ref": "#/$defs/food_security"
+            },
+            "foods_or_consumables": {
+              "type": "array",
+              "maxItems": 8,
+              "items": {
+                "type": "string"
+              }
+            },
+            "body_conditions": {
+              "type": "array",
+              "maxItems": 6,
+              "items": {
+                "type": "string",
+                "enum": ["hunger", "fatigue", "chronic_pain", "occupational_injury", "infectious_disease", "disability", "pregnancy_or_postpartum", "old_age_frailty", "malnutrition", "exposure_to_cold_or_heat", "violence_or_trauma", "none_apparent", "other"]
+              }
+            },
+            "material_notes": {
+              "type": "string"
+            }
+          }
+        },
+        "mobility_and_horizon": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mobility", "political_horizon"],
+          "properties": {
+            "mobility": {
+              "$ref": "#/$defs/mobility"
+            },
+            "political_horizon": {
+              "$ref": "#/$defs/political_horizon"
+            },
+            "knowledge_horizon": {
+              "type": "string",
+              "description": "What places, institutions, languages, religions, technologies, and conflicts this person would likely know about."
+            },
+            "religious_or_moral_world": {
+              "type": "string"
+            },
+            "mobility_notes": {
+              "type": "string"
+            }
+          }
+        },
+        "public_world": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "The social and institutional scale of the persona's public world, using portable categories plus specific local detail.",
+          "required": ["scale"],
+          "properties": {
+            "scale": {
+              "$ref": "#/$defs/public_world_scale"
+            },
+            "detail": {
+              "type": "string"
+            }
+          }
+        },
+        "religious_practice": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Specific religious, ritual, or skeptical practice/affiliation. Broad tradition is controlled; local terminology belongs in specific_label and practice_context.",
+          "required": ["tradition"],
+          "properties": {
+            "tradition": {
+              "$ref": "#/$defs/religious_tradition"
+            },
+            "specific_label": {
+              "type": "string"
+            },
+            "practice_context": {
+              "type": "string"
+            }
+          }
+        },
+        "normative_world": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "The dominant moral/social frame shaping choices. This deliberately cuts across religious affiliation, legal order, kinship, honor, debt, and survival.",
+          "required": ["primary_frame"],
+          "properties": {
+            "primary_frame": {
+              "$ref": "#/$defs/normative_frame"
+            },
+            "detail": {
+              "type": "string"
+            }
+          }
+        },
+        "temperament_and_voice": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "dominant_temperament",
+            "how_they_react_to_strangers",
+            "how_they_handle_conflict",
+            "speech_style",
+            "abstraction_level",
+            "self_narration_style"
+          ],
+          "properties": {
+            "dominant_temperament": {
+              "$ref": "#/$defs/dominant_temperament"
+            },
+            "how_they_react_to_strangers": {
+              "$ref": "#/$defs/how_they_react_to_strangers"
+            },
+            "how_they_handle_conflict": {
+              "$ref": "#/$defs/how_they_handle_conflict"
+            },
+            "speech_style": {
+              "$ref": "#/$defs/speech_style"
+            },
+            "abstraction_level": {
+              "$ref": "#/$defs/abstraction_level"
+            },
+            "self_narration_style": {
+              "$ref": "#/$defs/self_narration_style"
+            },
+            "public_concerns": {
+              "type": "array",
+              "maxItems": 5,
+              "items": {
+                "type": "string"
+              }
+            },
+            "private_concerns": {
+              "type": "array",
+              "maxItems": 5,
+              "items": {
+                "type": "string"
+              }
+            },
+            "hopes": {
+              "type": "array",
+              "maxItems": 5,
+              "items": {
+                "type": "string"
+              }
+            },
+            "small_pleasures": {
+              "type": "array",
+              "maxItems": 5,
+              "items": {
+                "type": "string"
+              }
+            },
+            "voice_sample": {
+              "type": "string",
+              "description": "Optional one- or two-sentence first-person voice sample."
+            },
+            "personality_traits": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "Big Five personality assessment from source evidence and conservative inference. Values are 0 to 1.",
+              "required": ["openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism"],
+              "properties": {
+                "openness": { "type": "number", "minimum": 0, "maximum": 1 },
+                "conscientiousness": { "type": "number", "minimum": 0, "maximum": 1 },
+                "extraversion": { "type": "number", "minimum": 0, "maximum": 1 },
+                "agreeableness": { "type": "number", "minimum": 0, "maximum": 1 },
+                "neuroticism": { "type": "number", "minimum": 0, "maximum": 1 },
+                "notes": { "type": "string" }
+              }
+            },
+            "anachronism_guards": {
+              "type": "array",
+              "maxItems": 8,
+              "items": {
+                "type": "string"
+              }
+            },
+            "voice_notes": {
+              "type": "string"
+            }
+          }
+        },
+        "interaction_style": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Behavior under social conditions, preferred over broad temperament labels when evidence is thin.",
+          "properties": {
+            "with_authorities": {
+              "$ref": "#/$defs/authority_interaction"
+            },
+            "with_peers": {
+              "$ref": "#/$defs/peer_interaction"
+            },
+            "under_stress": {
+              "$ref": "#/$defs/stress_response"
+            },
+            "detail": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "field_evidence": {
+      "type": "array",
+      "description": "Optional field-level evidence for human annotation and audit. Use JSON pointers such as /persona_seed/work/primary_occupation.",
+      "maxItems": 80,
+      "items": {
+        "$ref": "#/$defs/field_evidence"
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["confidence", "basis_summary", "bias_flags"],
+      "properties": {
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "basis_summary": {
+          "type": "string",
+          "description": "Short explanation of why this persona seed is justified by the source."
+        },
+        "bias_flags": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "enum": ["elite_source", "state_or_administrative_source", "colonial_source", "hostile_or_criminalizing_source", "translated_source", "retrospective_source", "literary_or_stylized_source", "fragmentary_source", "ocr_uncertain", "gender_bias", "racial_or_ethnic_bias", "religious_polemical_bias", "named_elites_overrepresented", "ordinary_people_indirectly_observed", "model_synthesized_gaps", "none_apparent", "other"]
+          }
+        },
+        "source_snippets": {
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "$ref": "#/$defs/source_snippet"
+          }
+        },
+        "inference_notes": {
+          "type": "string"
+        },
+        "synthetic_gap_notes": {
+          "type": "string",
+          "description": "List important persona details that were plausibly added rather than directly evidenced."
+        }
+      }
+    },
+    "export_targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "compatible_with_compact_material_schema": {
+          "type": "boolean"
+        },
+        "generation_priority": {
+          "type": "string",
+          "enum": ["use_as_strong_constraints", "use_as_soft_constraints", "use_as_inspiration_only"]
+        },
+        "suggested_persona_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        }
+      }
+    }
+  },
+  "$defs": {
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low", "speculative"]
+    },
+    "support_level": {
+      "type": "string",
+      "enum": ["explicit", "strong_inference", "weak_inference", "synthetic_fill", "contradicted_or_uncertain"]
+    },
+    "source_basis": {
+      "type": "string",
+      "enum": ["will_or_inventory", "tax_or_census", "parish_or_temple_register", "court_testimony", "wage_data", "social_history", "material_culture", "oral_history", "diary_or_letter", "newspaper_or_periodical", "travel_account", "ship_log_or_manifest", "legal_code_or_regulation", "map_or_gazetteer", "image_or_artifact", "wikipedia_or_reference", "secondary_synthesis", "synthetic_composite", "other"]
+    },
+    "period_bucket": {
+      "type": "string",
+      "enum": ["1400_1499", "1500_1599", "1600_1699", "1700_1749", "1750_1849", "1850_1914", "1915_1930"]
+    },
+    "within_decade_position": {
+      "type": "string",
+      "enum": ["early", "mid", "late", "unspecified"]
+    },
+    "residence_locale": {
+      "type": "string",
+      "enum": ["isolated_rural_holding", "hamlet", "village", "market_town", "provincial_town", "urban_neighborhood", "metropolitan_center", "port_town", "port_city", "court_capital", "administrative_center", "religious_center", "frontier_settlement", "estate_or_manor", "plantation_or_forced_labor_settlement", "pastoral_or_nomadic_camp", "monastic_or_cloistered_community", "military_garrison_town", "displacement_or_refugee_settlement", "mobile_or_no_fixed_residence"]
+    },
+    "activity_locale": {
+      "type": "string",
+      "enum": ["household_compound", "fields_or_pasture", "workshop_or_small_shop", "market_or_bazaar", "street_or_public_square", "dock_or_waterside", "ship_or_boat", "warehouse_or_storehouse", "office_or_countinghouse", "court_or_law_site", "religious_building_or_precinct", "school_or_scholarly_site", "estate_grounds", "factory_or_mill", "mine_or_extraction_site", "plantation_fields_or_processing_site", "military_installation", "road_or_travel_route", "domestic_service_in_others_household", "mixed_or_itinerant"]
+    },
+    "age_band": {
+      "type": "string",
+      "enum": ["child", "adolescent", "young_adult", "adult", "middle_aged", "elder"]
+    },
+    "status_group": {
+      "type": "string",
+      "enum": ["ruling_or_high_elite", "local_elite_or_gentry", "clerical_or_religious_elite", "scholarly_or_learned", "merchant_or_commercial", "artisanal_or_craft", "peasant_or_smallholder", "wage_laboring", "servile_or_bonded", "enslaved", "military", "administrative_or_bureaucratic", "domestic_service", "marginalized_or_stigmatized", "mixed_or_unclear"]
+    },
+    "economic_security": {
+      "type": "string",
+      "enum": ["destitute", "precarious", "subsistence", "modest", "comfortable", "wealthy", "elite", "uncertain"]
+    },
+    "social_autonomy": {
+      "type": "string",
+      "enum": ["high_autonomy", "household_dependent", "client_retainer_or_dependent", "tenant_sharecropper_or_rent_bound", "wage_dependent", "apprenticed_indentured_or_bound", "enslaved_or_owned", "incarcerated_confined_or_institutionalized", "uncertain"]
+    },
+    "constraint_regime_type": {
+      "type": "string",
+      "enum": ["household_authority", "gendered_law_or_custom", "age_or_life_stage", "debt_rent_or_tax", "labor_coercion", "enslavement", "caste_descent_or_status_order", "racial_or_colonial_law", "religious_minority_restriction", "migration_pass_or_residency_control", "war_occupation_or_displacement", "health_disability_or_body_constraint", "other"]
+    },
+    "legal_condition": {
+      "type": "string",
+      "enum": ["free", "subject_without_full_rights", "citizen_or_corporate_member", "serf_or_bound_to_land", "indentured_or_contract_bound", "bonded_or_debt_bound", "enslaved", "dependent_without_clear_status", "criminalized_or_outlawed", "unclear"]
+    },
+    "household_role": {
+      "type": "string",
+      "enum": ["household_head", "spouse", "widow_or_widower", "child", "elder_dependent", "other_dependent_kin", "servant", "apprentice", "lodger_or_boarder", "religious_member", "institutional_inmate_or_resident", "itinerant_or_detached"]
+    },
+    "marital_status": {
+      "type": "string",
+      "enum": ["single", "married", "widowed", "separated", "divorced", "concubinage_or_secondary_union", "celibate_religious", "uncertain"]
+    },
+    "literacy": {
+      "type": "string",
+      "enum": ["nonliterate", "name_or_signature_only", "basic_practical", "religious_text_literate", "full_practical", "advanced_literary", "scholarly_multilingual"]
+    },
+    "numeracy": {
+      "type": "string",
+      "enum": ["none", "basic", "practical", "commercial", "advanced"]
+    },
+    "mobility": {
+      "type": "string",
+      "enum": ["sedentary", "locally_mobile", "seasonally_mobile", "regionally_mobile", "long_distance_mobile", "forced_mobile", "maritime_mobile"]
+    },
+    "labor_relation": {
+      "type": "string",
+      "enum": ["household_subsistence_labor", "unpaid_family_labor", "family_enterprise_or_spousal_collaboration", "wage_labor", "self_employed", "tenant_labor", "owner_operator", "guild_or_corporate_craft", "domestic_service", "clerical_or_salaried", "military_service", "religious_office", "enslaved_labor", "bonded_labor", "illicit_or_informal", "mixed"]
+    },
+    "skill_level": {
+      "type": "string",
+      "enum": ["unskilled", "semi_skilled", "skilled", "master", "clerical", "scholarly", "managerial"]
+    },
+    "workplace": {
+      "type": "string",
+      "enum": ["household", "field", "workshop", "shop", "street", "dock", "office", "kitchen", "ship", "barracks", "court", "religious_house", "factory", "mixed"]
+    },
+    "work_rhythm": {
+      "type": "string",
+      "enum": ["seasonal", "daily_wage", "task_based", "clock_regulated", "prayer_regulated", "market_regulated", "irregular"]
+    },
+    "children_status": {
+      "type": "string",
+      "enum": ["none", "infant_children", "young_children", "older_children", "grown_children", "mixed", "unknown"]
+    },
+    "dwelling_type": {
+      "type": "string",
+      "enum": ["hut_or_shack", "cottage", "farmhouse", "rented_room", "apartment_or_tenement", "courtyard_house", "rowhouse", "manor_or_estate", "barracks", "monastic_cell", "ship_quarters", "improvised_shelter", "other"]
+    },
+    "property_relation": {
+      "type": "string",
+      "enum": ["landless", "tenant", "renter", "owner", "tied_housing", "communal_access", "no_formal_claim", "mixed"]
+    },
+    "clothing_level": {
+      "type": "string",
+      "enum": ["ragged", "plain_working", "decent", "respectable", "fine", "luxurious"]
+    },
+    "food_security": {
+      "type": "string",
+      "enum": ["starving", "chronically_precarious", "seasonally_precarious", "uneven_but_adequate", "adequate", "secure", "abundant"]
+    },
+    "cash_position": {
+      "type": "string",
+      "enum": ["none", "minimal", "irregular", "modest", "comfortable", "wealthy"]
+    },
+    "political_horizon": {
+      "type": "string",
+      "enum": ["household_local", "village_or_community", "dynastic_or_monarchical", "confessional", "imperial", "anti_imperial", "national", "labor_or_class", "reformist", "apolitical_or_not_articulated", "mixed"]
+    },
+    "public_world_scale": {
+      "type": "string",
+      "enum": ["household", "kin_or_lineage", "local_community", "occupational_network", "market_or_trade_network", "ritual_or_scholarly_network", "cultural_or_reform_network", "patronage_or_clientage", "state_or_legal_authority", "military_or_frontier", "maritime_or_long_distance_network", "imperial_or_colonial_system", "diaspora_or_migrant_network", "multiple", "uncertain"]
+    },
+    "religious_tradition": {
+      "type": "string",
+      "enum": ["christian", "islamic", "jewish", "hindu", "buddhist", "sikh", "jain", "confucian_or_literati", "daoist", "shinto", "indigenous_or_local_ritual", "african_diasporic", "spirit_mediumship_or_shamanic", "ancestor_veneration", "syncretic_or_plural", "secular_freethinking_or_skeptical", "public_conformity_unclear_private_belief", "none_apparent", "uncertain", "other"]
+    },
+    "normative_frame": {
+      "type": "string",
+      "enum": ["household_obligation", "kinship_or_lineage_duty", "honor_reputation_or_shame", "reciprocity_patronage_or_debt", "law_custom_or_official_order", "ritual_purity_or_pollution", "salvation_sin_or_moral_discipline", "karma_fate_or_cosmic_order", "ancestral_spirit_or_land_obligation", "communal_survival_or_mutual_aid", "commercial_credit_or_reputation", "scholarly_cultivation_or_learning", "reform_revolt_or_deliverance", "pragmatic_survival", "multiple", "uncertain"]
+    },
+    "dominant_temperament": {
+      "type": "string",
+      "enum": ["patient", "anxious", "irritable", "dutiful", "suspicious", "hopeful", "melancholy", "proud", "sociable", "guarded", "volatile", "mixed"]
+    },
+    "how_they_react_to_strangers": {
+      "type": "string",
+      "enum": ["warm", "cautious", "suspicious", "deferential", "curious", "dismissive", "strategic", "variable"]
+    },
+    "how_they_handle_conflict": {
+      "type": "string",
+      "enum": ["avoidant", "indirect", "explosive", "stubborn", "conciliatory", "strategic", "appeals_to_authority", "variable"]
+    },
+    "authority_interaction": {
+      "type": "string",
+      "enum": ["deferential", "strategic", "avoidant", "assertive", "defiant", "uncertain"]
+    },
+    "peer_interaction": {
+      "type": "string",
+      "enum": ["guarded", "cooperative", "competitive", "gregarious", "isolated", "uncertain"]
+    },
+    "stress_response": {
+      "type": "string",
+      "enum": ["enduring", "withdrawn", "angry", "pragmatic", "ritualized_or_prayerful", "uncertain"]
+    },
+    "speech_style": {
+      "type": "string",
+      "enum": ["terse", "concrete", "proverb_rich", "formal", "deferential", "rhetorical", "devotional", "earthy", "bureaucratic", "story_driven", "direct", "mixed"]
+    },
+    "abstraction_level": {
+      "type": "string",
+      "enum": ["very_concrete", "mostly_concrete", "mixed", "fairly_abstract"]
+    },
+    "self_narration_style": {
+      "type": "string",
+      "enum": ["relational", "duty_focused", "honor_focused", "fatalistic", "introspective", "guarded", "boastful", "practical", "mixed"]
+    },
+    "source_snippet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["snippet", "relevance"],
+      "properties": {
+        "snippet": {
+          "type": "string",
+          "description": "Short source quotation or close paraphrase."
+        },
+        "relevance": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string",
+          "description": "Page, folio, paragraph, timestamp, character offsets, or URL fragment when available."
+        }
+      }
+    },
+    "field_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field_path", "support_level", "confidence"],
+      "properties": {
+        "field_path": {
+          "type": "string",
+          "description": "JSON pointer to the field being supported, such as /persona_seed/place/region."
+        },
+        "support_level": {
+          "type": "string",
+          "enum": ["explicit", "strong_inference", "weak_inference", "synthetic_fill", "contradicted_or_uncertain"]
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "snippet": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

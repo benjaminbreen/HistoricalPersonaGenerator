@@ -4,7 +4,7 @@
 import { Point } from './core/geometry';
 import { CharacterStats, CharacterPersonality, CharacterSocialContext, StatusEffect, Item, EquipmentSlot } from './index';
 import { HistoricalEra } from './ambiance';
-import { CulturalZone, Gender, WealthLevel, Appearance } from './characterData'; // Use centralized types
+import { CulturalZone, Gender, WealthLevel, Appearance, PortraitVisualOverrides } from './characterData'; // Use centralized types
 import { Allegiance } from './structures';
 import { GoalArchetype, GoalTargetType } from './goals';
 import { CharacterHealth } from './diseaseTypes';
@@ -101,6 +101,7 @@ export interface NpcEntity {
     originalQuestData?: any; // Original quest NPC data for reference
 
     appearance: Appearance;
+    portraitVisualOverrides?: PortraitVisualOverrides;
     
     // Descriptions (procedurally generated first, then potentially enhanced)
     descriptions: {

@@ -105,6 +105,20 @@ interface ProceduralPortraitProps {
     culturalZone?: 'EUROPEAN' | 'EAST_ASIAN' | 'MENA' | 'NORTH_AMERICAN_PRE_COLUMBIAN' | 'NORTH_AMERICAN_COLONIAL' | 'OCEANIA' | 'SOUTH_ASIAN' | 'SOUTH_AMERICAN' | 'SUB_SAHARAN_AFRICAN';
     ethnicCulturalZone?: 'EUROPEAN' | 'EAST_ASIAN' | 'MENA' | 'NORTH_AMERICAN_PRE_COLUMBIAN' | 'NORTH_AMERICAN_COLONIAL' | 'OCEANIA' | 'SOUTH_ASIAN' | 'SOUTH_AMERICAN' | 'SUB_SAHARAN_AFRICAN';
     portraitSeed?: number;
+    portraitVisualOverrides?: {
+      appearance?: Partial<ProceduralPortraitProps['character']['appearance']>;
+      garment?: { name: string; material: string };
+      headgear?: { name: string; material: string };
+      palette?: Partial<ProceduralPortraitProps['character']['appearance']['palette']>;
+      background?: {
+        base?: string;
+        accent?: string;
+        vignette?: boolean;
+        texture?: 'none' | 'subtle' | 'grain';
+        sourceBasis?: string;
+      };
+      notes?: string[];
+    };
   };
   size?: number;
   className?: string;
@@ -177,6 +191,7 @@ const ProceduralPortrait: React.FC<ProceduralPortraitProps> = ({
   const culturalZone = (character as any).ethnicCulturalZone || character.culturalZone || 'EUROPEAN';
 
   // Provide defaults for appearance properties
+  const portraitOverrides = character.portraitVisualOverrides;
   const defaultAppearance = {
     skinColor: '#f4d1ae',
     hairColor: '#8B4513',
@@ -184,16 +199,20 @@ const ProceduralPortrait: React.FC<ProceduralPortraitProps> = ({
     hairstyle: 'short',
     build: 'average' as const,
     facialHair: false,
-    garment: { name: 'simple tunic', material: 'linen' },
-    headgear: { name: 'none', material: 'none' },
+    hairLength: 'medium' as const,
+    faceShape: 'oval' as const,
+    ...appearance,
+    ...portraitOverrides?.appearance,
+    garment: portraitOverrides?.garment || portraitOverrides?.appearance?.garment || appearance.garment || { name: 'simple tunic', material: 'linen' },
+    headgear: portraitOverrides?.headgear || portraitOverrides?.appearance?.headgear || appearance.headgear || { name: 'none', material: 'none' },
     palette: {
       primary: '#8B7355',
       secondary: '#A0826D',
-      accent: '#D2691E'
+      accent: '#D2691E',
+      ...appearance.palette,
+      ...portraitOverrides?.appearance?.palette,
+      ...portraitOverrides?.palette,
     },
-    hairLength: 'medium' as const,
-    faceShape: 'oval' as const,
-    ...appearance
   };
 
   const appearanceWithDefaults = defaultAppearance;
@@ -616,14 +635,6 @@ const parseHairstyle = (
     }
   }, [temporaryExpression, onExpressionComplete]);
 
-  // Debug: Log expression changes
-  useEffect(() => {
-    if (temporaryExpression) {
-      console.log('[ProceduralPortrait] Expression changed to:', temporaryExpression);
-    }
-  }, [temporaryExpression]);
-
-
   // ---------- Blink / Gaze / Expression Animation ----------
   const [blinkProgress, setBlinkProgress] = useState(0);
   const animRef = useRef<number | null>(null);
@@ -631,13 +642,20 @@ const parseHairstyle = (
   const nextGazeTimeout = useRef<number | null>(null);
   const nextExpressionTimeout = useRef<number | null>(null);
   const blinkCountRef = useRef(0); // Track blinks for double-blink
+  const animationRngRef = useRef<() => number>(() => 0.5);
+
+  useEffect(() => {
+    animationRngRef.current = seededRng(seed ^ 0x9e3779b9);
+  }, [seed]);
+
+  const nextAnimationRandom = () => animationRngRef.current();
 
   const jitter = (min: number, max: number) =>
     min + (max - min) * (0.5 + (Math.sin(seed * 13.37 + (performance.now?.() || 0) / 1e4) * 0.5));
 
   useEffect(() => {
     // Determine if this should be a double blink (20% chance)
-    const shouldDoubleBlink = () => Math.random() < 0.2;
+    const shouldDoubleBlink = () => nextAnimationRandom() < 0.2;
 
     const pickBlinkDelay = () => {
       const r = rand(Math.floor((performance.now?.() || 0)) % 10007);
@@ -646,7 +664,7 @@ const parseHairstyle = (
       return (r > 0.9) ? base + 8000 * r : base + jitter(-300, 300);
     };
 
-    const pickDoubleBlinkDelay = () => 150 + Math.random() * 100; // 150-250ms between double blinks
+    const pickDoubleBlinkDelay = () => 150 + nextAnimationRandom() * 100; // 150-250ms between double blinks
 
     let closing = true;
     let start = 0;
@@ -699,14 +717,14 @@ const parseHairstyle = (
       // Gaze changes every 8-25 seconds
       const delay = 8000 + r * 17000;
       nextGazeTimeout.current = window.setTimeout(() => {
-        const roll = Math.random();
+        const roll = nextAnimationRandom();
         // 30% look left, 30% look right, 40% center
         const dir: 0 | 1 | 2 = roll < 0.3 ? 0 : roll < 0.6 ? 2 : 1;
         setGazeDirection(dir);
 
         // If looking left or right, return to center after a random duration
         if (dir !== 1) {
-          const gazeDuration = 2000 + Math.random() * 4000; // 2-6 seconds
+          const gazeDuration = 2000 + nextAnimationRandom() * 4000; // 2-6 seconds
           window.setTimeout(() => {
             setGazeDirection(1); // Return to center
           }, gazeDuration);
@@ -731,21 +749,21 @@ const parseHairstyle = (
 
     const scheduleExpression = () => {
       // Change expression every 15-45 seconds
-      const delay = 15000 + Math.random() * 30000;
+      const delay = 15000 + nextAnimationRandom() * 30000;
       nextExpressionTimeout.current = window.setTimeout(() => {
         // Only change if no external temporaryExpression is set
         if (!temporaryExpression) {
-          const roll = Math.random();
+          const roll = nextAnimationRandom();
           // 60% chance to stay/return to neutral, 40% chance for an expression
           if (roll < 0.6) {
             setAutoExpression(null);
           } else {
-            const expr = expressionOptions[Math.floor(Math.random() * expressionOptions.length)];
+            const expr = expressionOptions[Math.floor(nextAnimationRandom() * expressionOptions.length)];
             setAutoExpression(expr);
 
             // If we set an expression, clear it after 3-8 seconds
             if (expr) {
-              const exprDuration = 3000 + Math.random() * 5000;
+              const exprDuration = 3000 + nextAnimationRandom() * 5000;
               window.setTimeout(() => {
                 setAutoExpression(null);
               }, exprDuration);
@@ -879,6 +897,7 @@ const parseHairstyle = (
 
   // ---------- Background ----------
   const bgGradientId = `bgGradient-${uniqueId}`;
+  const bgVignetteId = `bgVignette-${uniqueId}`;
   const textureId = `texture-${uniqueId}`;
 
   const BackgroundDefs = useMemo(() => {
@@ -887,81 +906,73 @@ const parseHairstyle = (
     const isHighStatus = isWealthy || stats.charisma >= 8;
 
     // Cultural color themes: [premodern-male, premodern-female, modern-male, modern-female]
-    // More vivid pastels with stronger gender differentiation
+    // Kept intentionally muted so the portrait silhouette and clothing stay dominant.
     const culturalThemes: Record<NonNullable<typeof culturalZone>, string[]> = {
-      // Blue/lavender family - European
       EUROPEAN: [
-        '#A8C8F0',  // Premodern male: sky blue pastel
-        '#F0B8F0',  // Premodern female: bright lavender
-        '#98B8E8',  // Modern male: steel blue
-        '#E8A8E8',  // Modern female: violet pastel
+        '#9AAFC2',
+        '#B8A5B7',
+        '#8F9FB1',
+        '#A897AA',
       ],
-      // Jade/peach family - East Asian
       EAST_ASIAN: [
-        '#B8E8C8',  // Premodern male: jade green
-        '#FFD0C0',  // Premodern female: bright peach
-        '#A8E0B8',  // Modern male: mint green
-        '#FFB8B0',  // Modern female: coral peach
+        '#9EB7A7',
+        '#C5A99E',
+        '#94AA9C',
+        '#B99C96',
       ],
-      // Sand/terracotta family - MENA
       MENA: [
-        '#F0D8A8',  // Premodern male: golden sand
-        '#F0B8A8',  // Premodern female: rose clay
-        '#E8D0A0',  // Modern male: desert sand
-        '#F0A898',  // Modern female: terracotta pink
+        '#C2AD87',
+        '#BE9A8C',
+        '#B7A482',
+        '#B78E82',
       ],
-      // Saffron/teal family - South Asian
       SOUTH_ASIAN: [
-        '#F8E0A0',  // Premodern male: bright saffron
-        '#A8E8E8',  // Premodern female: bright teal
-        '#F0D890',  // Modern male: golden yellow
-        '#98E0E8',  // Modern female: aqua teal
+        '#C5B27D',
+        '#8FB8B6',
+        '#B7A675',
+        '#86AEB4',
       ],
-      // Earth/amber family - Sub-Saharan African
       SUB_SAHARAN_AFRICAN: [
-        '#E0C8A0',  // Premodern male: earth brown
-        '#F8D8B0',  // Premodern female: golden amber
-        '#D8C098',  // Modern male: deep earth
-        '#F0C8A8',  // Modern female: honey gold
+        '#A99173',
+        '#B89B78',
+        '#9C876C',
+        '#AD9073',
       ],
-      // Turquoise/ochre family - North American Pre-Columbian
       NORTH_AMERICAN_PRE_COLUMBIAN: [
-        '#98E8E8',  // Premodern male: bright turquoise
-        '#F0C890',  // Premodern female: ochre gold
-        '#88E0E0',  // Modern male: deep turquoise
-        '#E8B888',  // Modern female: adobe orange
+        '#83B2B1',
+        '#B99A70',
+        '#7AA5A6',
+        '#AA8A68',
       ],
-      // Slate/rose family - North American Colonial
       NORTH_AMERICAN_COLONIAL: [
-        '#B0C0D8',  // Premodern male: blue slate
-        '#F8C0D0',  // Premodern female: rose pink
-        '#A8B8D0',  // Modern male: gray slate
-        '#F0B8C8',  // Modern female: dusty rose
+        '#9BA8BA',
+        '#B9A0AA',
+        '#909BAD',
+        '#AA949E',
       ],
-      // Jungle green/coral family - South American
       SOUTH_AMERICAN: [
-        '#A8E8B8',  // Premodern male: bright jungle green
-        '#F8B8A8',  // Premodern female: coral orange
-        '#98E0A8',  // Modern male: deep green
-        '#F0A898',  // Modern female: bright coral
+        '#8DB39A',
+        '#BA9485',
+        '#82A88F',
+        '#AD897D',
       ],
-      // Seafoam/sunset family - Oceania
       OCEANIA: [
-        '#A8F0D8',  // Premodern male: bright seafoam
-        '#F8C0B8',  // Premodern female: sunset orange
-        '#98E8D0',  // Modern male: ocean green
-        '#F0B8B0',  // Modern female: coral sunset
+        '#8BB7A9',
+        '#B99A92',
+        '#82AB9F',
+        '#AA8F88',
       ]
     };
 
     // Select color based on era and gender
     const colors = culturalThemes[culturalZone] || culturalThemes.EUROPEAN;
     const colorIndex = (isModernEra ? 2 : 0) + (isFemale ? 1 : 0);
-    const baseColor = colors[colorIndex];
+    const baseColor = portraitOverrides?.background?.base || colors[colorIndex];
 
     // Create gradient colors
     const bg1 = baseColor;
-    const bg2 = createShadow(baseColor, 0.95);  // Subtle gradient
+    const bg2 = portraitOverrides?.background?.accent || createShadow(baseColor, 0.95);  // Subtle gradient
+    const vignetteOpacity = portraitOverrides?.background?.vignette === false ? 0 : (isHighStatus ? 0.18 : 0.16);
 
     // Special gradient for high-status characters - simple top to bottom
     if (isHighStatus) {
@@ -977,6 +988,10 @@ const parseHairstyle = (
             <stop offset="60%" stopColor={bg2} />
             <stop offset="100%" stopColor={bottomColor} />
           </linearGradient>
+          <radialGradient id={bgVignetteId} cx="50%" cy="42%" r="62%">
+            <stop offset="55%" stopColor="#000000" stopOpacity="0" />
+            <stop offset="100%" stopColor="#000000" stopOpacity={vignetteOpacity} />
+          </radialGradient>
           <filter id={textureId}>
             <feTurbulence baseFrequency="0.9" numOctaves="4" result="noise" seed={seed} />
             <feComposite operator="over" in2="noise" />
@@ -993,6 +1008,10 @@ const parseHairstyle = (
           <stop offset="50%" stopColor={createHighlight(bg1, 0.98)} />
           <stop offset="100%" stopColor={bg2} />
         </linearGradient>
+        <radialGradient id={bgVignetteId} cx="50%" cy="42%" r="62%">
+          <stop offset="55%" stopColor="#000000" stopOpacity="0" />
+          <stop offset="100%" stopColor="#000000" stopOpacity={vignetteOpacity} />
+        </radialGradient>
         <filter id={textureId}>
           <feTurbulence baseFrequency="0.9" numOctaves="4" result="noise" seed={seed} />
           <feComposite operator="over" in2="noise" />
@@ -1000,7 +1019,12 @@ const parseHairstyle = (
       </>
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bgGradientId, textureId, culturalZone, seed, era, isFemale, isWealthy, stats.charisma]);
+  }, [bgGradientId, bgVignetteId, textureId, culturalZone, seed, era, isFemale, isWealthy, stats.charisma, portraitOverrides?.background]);
+
+  const backgroundTextureOpacity =
+    portraitOverrides?.background?.texture === 'none' ? 0 :
+    portraitOverrides?.background?.texture === 'grain' ? 0.08 :
+    0.05;
 
   // ========================= RENDERERS =========================
 
@@ -3588,16 +3612,6 @@ if (defaultCapStyles.has(hairStyle)) {
       }
     }
 
-    // Debug logging - commented out for production
-    /*
-    console.log('[Portrait] Garment Debug:', {
-      useEquippedItems,
-      hasEquippedItems: !!character.equippedItems,
-      equippedTorso: character.equippedItems?.torso,
-      appearanceGarment: appearanceWithDefaults.garment,
-    });
-    */
-    
     // If we should use equipped items and equippedItems exists, use that (even if slot is empty)
     // Only fall back to appearance if equippedItems doesn't exist at all
     let garment = null;
@@ -5400,11 +5414,6 @@ if (defaultCapStyles.has(hairStyle)) {
       const specialType = (accessory as any).specialType;
       const name = accessory.name.toLowerCase();
       
-      // Debug logging for special accessories
-      if (specialType) {
-        console.log('[Portrait] Rendering special accessory:', specialType, name, 'for culture:', culturalZone);
-      }
-      
       // Check for structural modifications first (neck rings, lip plates, etc.)
       if (name.includes('neck ring') || name.includes('neck coil') || name.includes('dzilla')) {
         accessoryMarkings.push({
@@ -5668,7 +5677,6 @@ if (defaultCapStyles.has(hairStyle)) {
               );
             } else {
               // Default tattoo rendering for any unrecognized patterns
-              console.log(`[Portrait] Rendering fallback tattoo pattern: ${pattern} at ${marking.location}`);
               const tattooY = headY + Math.floor(headDim.height * 0.4);
               const tattooX = centerX - 1;
               
@@ -6114,7 +6122,8 @@ if (defaultCapStyles.has(hairStyle)) {
 
       {/* Background */}
       <rect x="0" y="0" width="64" height="64" fill={`url(#${bgGradientId})`} />
-      <rect x="0" y="0" width="64" height="64" fill={`url(#${bgGradientId})`} style={{ filter: `url(#${textureId})`, opacity: 0.05 }} />
+      <rect x="0" y="0" width="64" height="64" fill={`url(#${bgGradientId})`} style={{ filter: `url(#${textureId})`, opacity: backgroundTextureOpacity }} />
+      <rect x="0" y="0" width="64" height="64" fill={`url(#${bgVignetteId})`} />
 
       {/* Body then head so the jaw sits above the collar */}
       {renderBody}

@@ -236,7 +236,7 @@ export const HairRenderer: React.FC<HairRendererProps> = ({
 
             if (!inFace && !masked) {
               // Use density for hairline edge rendering
-              if (isHairlineEdge && Math.random() > hairlineDensity) continue;
+              if (isHairlineEdge && rand(41000 + x * 97 + y * 193 + layer * 389) > hairlineDensity) continue;
 
               const p = getHairPattern(x, y);
 
@@ -270,7 +270,7 @@ export const HairRenderer: React.FC<HairRendererProps> = ({
 
         for (let i = 0; i < numFlyaways; i++) {
           const angle = (i / numFlyaways) * Math.PI * 2;
-          const distance = 0.5 + Math.random();
+          const distance = 0.5 + rand(42000 + i * 251);
           const fx = Math.round(cx + Math.cos(angle) * (headDim.width / 2 + distance));
           const fy = Math.round(headY + Math.sin(angle) * distance);
 
@@ -336,7 +336,7 @@ export const HairRenderer: React.FC<HairRendererProps> = ({
       if (hairTexture === 'straight' || hairTexture === 'wavy') {
         const highlightY = headY - 2;
         for (let x = -3; x <= 3; x++) {
-          if (Math.abs(x) <= 1 || Math.random() > 0.5) {
+          if (Math.abs(x) <= 1 || rand(43000 + x * 313) > 0.5) {
             elements.push(
               <rect key={`crown-highlight-${x}`} x={centerX + x} y={highlightY}
                    width="1" height="1" fill={naturalHairBrightHighlight} opacity="0.6" className="pixel" />

@@ -41,10 +41,10 @@ export const getAgeGroup = (age?: number): AgeGroup => {
 };
 
 // Check if character has gray hair based on age
-export const hasGrayHair = (age?: number): boolean => {
+export const hasGrayHair = (age?: number, seed = 0): boolean => {
   if (!age) return false;
   if (age > 60) return true;
-  if (age > 45) return Math.random() > 0.7; // 30% chance
+  if (age > 45) return seededRandom(seed + age * 17) > 0.7; // 30% chance
   return false;
 };
 

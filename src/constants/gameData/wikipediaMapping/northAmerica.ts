@@ -549,22 +549,23 @@ export const NORTH_AMERICA_MAPPINGS: WikipediaImageMapping[] = [
 
   // ========== CANADIAN HISTORY ==========
 
-  // British North America
+  // Gilded Age New England / Northeastern United States
   {
     culturalZone: 'NORTH_AMERICAN_COLONIAL',
     region: 'New England',
-    centuryRange: [1763, 1867],
-    article: 'British_North_America',
-    priority: 9,
+    centuryRange: [1865, 1900],
+    article: 'Gilded_Age',
+    fallbackArticle: 'History_of_New_England',
+    priority: 12,
   },
 
-  // Confederation of Canada
+  // Colonial and early republican New England
   {
     culturalZone: 'NORTH_AMERICAN_COLONIAL',
     region: 'New England',
-    centuryRange: [1867, 1900],
-    article: 'Canadian_Confederation',
-    fallbackArticle: 'History_of_Canada',
+    centuryRange: [1600, 1864],
+    article: 'History_of_New_England',
+    fallbackArticle: 'Colonial_history_of_the_United_States',
     priority: 9,
   },
 

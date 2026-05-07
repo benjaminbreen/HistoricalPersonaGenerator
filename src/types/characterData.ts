@@ -32,6 +32,26 @@ export interface ClothingSet {
     };
 }
 
+export interface PortraitVisualOverrides {
+    /**
+     * A narrow visual override channel for source-derived or user-edited portrait cues.
+     * This keeps the procedural Appearance object intact while allowing evidence-aware
+     * overlays to steer the live renderer.
+     */
+    appearance?: Partial<Appearance>;
+    garment?: ClothingPiece;
+    headgear?: ClothingPiece;
+    palette?: Partial<ClothingPalette>;
+    background?: {
+        base?: string;
+        accent?: string;
+        vignette?: boolean;
+        texture?: 'none' | 'subtle' | 'grain';
+        sourceBasis?: string;
+    };
+    notes?: string[];
+}
+
 // The new single source of truth structure, combining all visual data.
 export interface Appearance {
     // Base physical features - core identity

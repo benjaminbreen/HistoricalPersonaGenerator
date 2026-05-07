@@ -22,6 +22,15 @@ interface MiniLocationMapProps {
 // Map regions to approximate coordinates
 const regionCoordinates: Record<string, [number, number]> = {
   // Europe
+  'Europe': [10, 50],
+  'EUROPEAN': [10, 50],
+  'London': [-0.1, 51.5],
+  'London, England': [-0.1, 51.5],
+  'England': [-1.5, 52.5],
+  'Warwickshire': [-1.6, 52.3],
+  'Stratford-upon-Avon': [-1.7, 52.2],
+  'Stratford–Upon–Avon': [-1.7, 52.2],
+  'Newcastle-upon-Tyne': [-1.6, 55.0],
   'Western Europe': [2, 48],
   'Eastern Europe': [30, 52],
   'Mediterranean': [15, 40],
@@ -92,6 +101,12 @@ const regionCoordinates: Record<string, [number, number]> = {
   'Nubian Corridor': [32, 20],
   
   // Americas
+  'NORTH AMERICAN COLONIAL': [-75, 42],
+  'NORTH_AMERICAN_COLONIAL': [-75, 42],
+  'United States': [-95, 38],
+  'Massachusetts': [-71.8, 42.3],
+  'Cambridge, Massachusetts': [-71.1, 42.4],
+  'New England': [-71.5, 43],
   'North America': [-100, 45],
   'Central America': [-90, 15],
   'South America': [-60, -15],
@@ -114,6 +129,13 @@ const regionCoordinates: Record<string, [number, number]> = {
   'Northern California': [-122, 40],
   'Central California Coast': [-121, 36],
   'Southern California': [-118, 34],
+  'California': [-119.5, 37.2],
+  'Central Valley': [-119.4, 36.8],
+  'Central Valley, California': [-119.4, 36.8],
+  'Fresno': [-119.8, 36.7],
+  'Fresno, California': [-119.8, 36.7],
+  'San Joaquin Valley': [-120.0, 36.6],
+  'Sacramento Valley': [-121.6, 39.2],
   
   // South America regions
   'Patagonia': [-68, -45],
@@ -164,16 +186,37 @@ const regionCoordinates: Record<string, [number, number]> = {
 // GeoJSON URL for world topology
 const geoUrl = "https://unpkg.com/world-atlas@2/countries-110m.json";
 
+const normalizeRegionKey = (value?: string): string =>
+  (value || '')
+    .normalize('NFKD')
+    .replace(/[–—]/g, '-')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/gi, ' ')
+    .trim()
+    .toLowerCase();
+
 const MiniLocationMap: React.FC<MiniLocationMapProps> = ({ continent, region }) => {
   const playerCoords = useMemo(() => {
+    const normalizedRegion = normalizeRegionKey(region);
+    const normalizedContinent = normalizeRegionKey(continent);
+
     // First try exact match
     if (regionCoordinates[region]) {
       return regionCoordinates[region];
     }
+
+    const normalizedCoordinateEntries = Object.entries(regionCoordinates)
+      .map(([key, coords]) => ({ key, normalizedKey: normalizeRegionKey(key), coords }))
+      .sort((a, b) => b.normalizedKey.length - a.normalizedKey.length);
+
+    const exactNormalizedMatch = normalizedCoordinateEntries.find(entry => entry.normalizedKey === normalizedRegion);
+    if (exactNormalizedMatch) {
+      return exactNormalizedMatch.coords;
+    }
     
-    // Then try partial match - check if any key includes the region string
-    for (const [key, coords] of Object.entries(regionCoordinates)) {
-      if (region && (key.includes(region) || region.includes(key))) {
+    // Then try partial match against normalized labels, preferring more specific keys.
+    for (const { normalizedKey, coords } of normalizedCoordinateEntries) {
+      if (normalizedRegion && (normalizedKey.includes(normalizedRegion) || normalizedRegion.includes(normalizedKey))) {
         return coords;
       }
     }
@@ -181,6 +224,11 @@ const MiniLocationMap: React.FC<MiniLocationMapProps> = ({ continent, region }) 
     // Fall back to continent
     if (regionCoordinates[continent]) {
       return regionCoordinates[continent];
+    }
+
+    const continentMatch = normalizedCoordinateEntries.find(entry => entry.normalizedKey === normalizedContinent);
+    if (continentMatch) {
+      return continentMatch.coords;
     }
     
     // Default fallback
@@ -195,6 +243,9 @@ const MiniLocationMap: React.FC<MiniLocationMapProps> = ({ continent, region }) 
     }
     if (region?.includes('Japan') || region?.includes('Korea') || region?.includes('Philippines')) {
       return 12;
+    }
+    if (region?.includes('Central Valley') || region?.includes('Fresno') || region?.includes('California')) {
+      return 10;
     }
     if (region?.includes('British Isles') || region?.includes('Italy') || region?.includes('Greece')) {
       return 10;

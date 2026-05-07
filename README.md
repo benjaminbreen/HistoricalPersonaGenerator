@@ -47,6 +47,25 @@ npm run dev
 
 The app will be available at `http://localhost:3001`
 
+### Source-backed persona generation
+
+The prototype can ingest pasted text or Wikipedia URLs and use Gemini to fill the historical persona annotation schema. For local development, add a Gemini key to `.env.local`:
+
+```bash
+GEMINI_API_KEY=your_key_here
+```
+
+The Vite dev server exposes a local `/api/gemini-persona` middleware and keeps this key server-side during development. The production server exposes the same route after a build:
+
+```bash
+npm run build
+GEMINI_API_KEY=your_key_here npm start
+```
+
+The static browser bundle does not call Gemini directly.
+
+Current source-backed records use annotation schema `1.1.0`. The schema keeps `1.0.0` records valid, but new generation prefers compact cross-cultural fields for social position, constraint regimes, public world, religious practice, normative world, and interaction style.
+
 ### Build
 
 ```bash
