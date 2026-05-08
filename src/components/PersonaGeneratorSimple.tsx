@@ -2640,6 +2640,26 @@ export default function PersonaGenerator() {
     const pronounPossCap = character.gender === 'Male' ? 'His' : character.gender === 'Female' ? 'Her' : 'Their';
     const pronounVerb = character.gender === 'Non-binary' ? 'have' : 'has';
     const pronounBe = character.gender === 'Non-binary' ? 'are' : 'is';
+    let biographyChoiceIndex = 0;
+    const biographySeed = [
+      character.name,
+      persona.year,
+      persona.location,
+      persona.region,
+      character.profession,
+      character.age,
+      character.portraitSeed,
+    ].join('|');
+    const seededIndex = (length: number): number => {
+      let hash = 2166136261 + biographyChoiceIndex;
+      biographyChoiceIndex += 1;
+      for (let i = 0; i < biographySeed.length; i += 1) {
+        hash ^= biographySeed.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return Math.abs(hash) % Math.max(1, length);
+    };
+    const pickBiography = <T,>(values: T[]): T => values[seededIndex(values.length)];
 
     // Get proper wealth description
     const wealthDescriptions: Record<string, string> = {
@@ -2663,16 +2683,13 @@ export default function PersonaGenerator() {
     const openingTemplates = [
       `Born in ${formatYear(birthYear)} in ${persona.location}, ${styledName} `,
       `It was in ${persona.location}, in the year ${formatYear(birthYear)}, that ${styledName} came into the world, and ${pronounPoss} `,
-      `In ${formatYear(birthYear)}, ${styledName} entered existence in ${persona.location}; ${pronoun} `,
       `In ${formatYear(birthYear)}, ${styledName} began life in ${persona.location}. ${pronounPossCap} `,
-      `In ${formatYear(birthYear)}, when little was yet expected of ${styledName}, the child first came into the world in ${persona.location}. ${pronounPossCap} `,
       `The year ${formatYear(birthYear)} saw the birth of ${styledName} in ${persona.location}. ${pronounPossCap} `,
-      `It was in ${persona.location}, in ${formatYear(birthYear)}, that ${styledName} made a modest debut upon the stage of life; ${pronoun} `,
       `${styledName} first drew breath in ${formatYear(birthYear)}, in ${persona.location}, where ${pronoun} `,
       `In ${formatYear(birthYear)}, ${styledName} entered the world in ${persona.location}. ${pronounPossCap} `
     ];
 
-    const selectedOpening = Math.floor(Math.random() * openingTemplates.length);
+    const selectedOpening = seededIndex(openingTemplates.length);
     let narrative = openingTemplates[selectedOpening];
 
     // Family context
@@ -2684,8 +2701,8 @@ export default function PersonaGenerator() {
     ) || [];
 
     // Adjust verb based on which opening template was used
-    // Templates 1 and 3 end with possessive pronoun (His/Her), so need different verb structure
-    const needsPossessiveForm = selectedOpening === 1 || selectedOpening === 3;
+    // These openings end with a possessive pronoun ("his/her/their"), so they need noun-led phrasing.
+    const needsPossessiveForm = [1, 2, 3, 5].includes(selectedOpening);
 
     if (siblings.length > 0) {
       if (needsPossessiveForm) {
@@ -2710,7 +2727,7 @@ export default function PersonaGenerator() {
     // Religion and cultural context with varied religiosity
     if (character.religion && character.religion !== 'Local Beliefs' && character.religion !== 'Agnostic') {
       // Use character's religiosity score if available, otherwise random
-      const religiosity = character.socialContext?.religiosity ?? Math.random();
+      const religiosity = character.socialContext?.religiosity ?? (seededIndex(100) / 100);
 
       let religionPhrase = '';
       if (religiosity > 0.8) {
@@ -2721,7 +2738,7 @@ export default function PersonaGenerator() {
           `grew up surrounded by the fervent practice of ${character.religion}`,
           `was immersed in the teachings of ${character.religion} from an early age`
         ];
-        religionPhrase = veryReligiousTemplates[Math.floor(Math.random() * veryReligiousTemplates.length)];
+        religionPhrase = pickBiography(veryReligiousTemplates);
       } else if (religiosity > 0.5) {
         // Moderately religious
         const moderateTemplates = [
@@ -2730,7 +2747,7 @@ export default function PersonaGenerator() {
           `was brought up within the ${character.religion} tradition`,
           `learned the customs of ${character.religion} from ${pronounPoss} family`
         ];
-        religionPhrase = moderateTemplates[Math.floor(Math.random() * moderateTemplates.length)];
+        religionPhrase = pickBiography(moderateTemplates);
       } else if (religiosity > 0.25) {
         // Nominally religious
         const nominalTemplates = [
@@ -2739,7 +2756,7 @@ export default function PersonaGenerator() {
           `grew up with some knowledge of ${character.religion}`,
           `was familiar with ${character.religion}, though not particularly devout`
         ];
-        religionPhrase = nominalTemplates[Math.floor(Math.random() * nominalTemplates.length)];
+        religionPhrase = pickBiography(nominalTemplates);
       } else {
         // Barely religious/cultural only
         const culturalTemplates = [
@@ -2748,7 +2765,7 @@ export default function PersonaGenerator() {
           `was culturally ${character.religion}, though not particularly observant`,
           `knew of ${character.religion} mainly as a cultural background, not a daily practice`
         ];
-        religionPhrase = culturalTemplates[Math.floor(Math.random() * culturalTemplates.length)];
+        religionPhrase = pickBiography(culturalTemplates);
       }
 
       narrative += `, where ${pronoun} ${religionPhrase}`;
@@ -2762,16 +2779,15 @@ export default function PersonaGenerator() {
                         app.height && app.height < 165 ? 'short' : '';
       const buildDesc = app.build ? app.build : '';
 
-      if (heightDesc || buildDesc) {
+      if (heightDesc || (buildDesc && buildDesc !== 'average')) {
         const physicalTemplates = [
           `${pronounPossCap} ${buildDesc}${heightDesc && buildDesc ? ', ' : ''}${heightDesc} frame ${pronounVerb} become well-suited to the rigors of ${pronounPoss} profession. `,
           `${pronounPossCap} ${buildDesc} build serves ${pronounObj} well in ${pronounPoss} line of work. `,
           `Standing ${heightDesc ? heightDesc : 'at average height'}, ${pronoun} cut${pronounBe === 'are' ? '' : 's'} ${buildDesc ? `a ${buildDesc} figure` : 'a distinctive figure'} among ${pronounPoss} peers. `,
-          `${heightDesc ? pronounPossCap + ' ' + heightDesc + ' stature' : pronounPossCap + ' appearance'} ${buildDesc ? 'and ' + buildDesc + ' build' : ''} ${pronounVerb} shaped ${pronounPoss} life in subtle ways. `
+          `${heightDesc ? pronounPossCap + ' ' + heightDesc + ' stature' : pronounPossCap + 'bearing'} ${pronounVerb} affected how neighbors and employers read ${pronounObj}. `
         ];
 
-        const selectedPhysical = Math.floor(Math.random() * physicalTemplates.length);
-        narrative += physicalTemplates[selectedPhysical];
+        narrative += pickBiography(physicalTemplates);
       }
     }
 
@@ -2854,35 +2870,28 @@ export default function PersonaGenerator() {
           ];
 
           if (yearsAgo > character.age * 0.7) {
-            const selectedIntro = Math.floor(Math.random() * tragedyIntros.length);
-            narrative += tragedyIntros[selectedIntro];
+            narrative += pickBiography(tragedyIntros);
           } else {
             narrative += `${pronounPossCap} path was profoundly altered when `;
           }
           narrative += keyEvent.text.charAt(0).toLowerCase() + keyEvent.text.slice(1);
-          const selectedOutro = Math.floor(Math.random() * tragedyOutros.length);
-          narrative += tragedyOutros[selectedOutro];
+          narrative += pickBiography(tragedyOutros);
         } else if (keyEvent.importance === EventImportance.MILESTONE) {
           const milestoneIntros = [
             `A turning point arrived at age ${ageAtEvent}, when ${pronoun} `,
             `At ${ageAtEvent}, a new chapter began: `,
-            `Everything changed at age ${ageAtEvent}, when ${pronoun} had `,
             `By ${ageAtEvent}, ${pronoun} ${pronounVerb === 'have' ? 'had' : 'had'} `
           ];
           const milestoneOutros = [
-            `, opening new paths that ${pronoun} ${pronounVerb} walked ever since`,
-            `. ${pronounPossCap} life would never be the same`,
-            `. ${pronounPossCap} experience of the world and of life was strongly shaped by this`,
-            `. For ${pronounPossCap}, this was a significant turning point`,
-            `—a change that redefined everything that followed`,
-            `, and ${pronoun} seized the moment with both hands`
+            `, a step that changed the shape of ${pronounPoss} working life`,
+            `. The memory remained a marker between childhood and adult duty`,
+            `. Afterward, ${pronounPoss} obligations were harder to set aside`,
+            `, and the household came to expect more from ${pronounObj}`
           ];
 
-          const selectedIntro = Math.floor(Math.random() * milestoneIntros.length);
-          narrative += milestoneIntros[selectedIntro];
+          narrative += pickBiography(milestoneIntros);
           narrative += keyEvent.text.charAt(0).toLowerCase() + keyEvent.text.slice(1);
-          const selectedOutro = Math.floor(Math.random() * milestoneOutros.length);
-          narrative += milestoneOutros[selectedOutro];
+          narrative += pickBiography(milestoneOutros);
         } else {
           const opportunityIntros = [
             `Fortune smiled upon ${pronounObj} when `,
@@ -2897,11 +2906,9 @@ export default function PersonaGenerator() {
             `. ${pronounPossCap} future brightened considerably`
           ];
 
-          const selectedIntro = Math.floor(Math.random() * opportunityIntros.length);
-          narrative += opportunityIntros[selectedIntro];
+          narrative += pickBiography(opportunityIntros);
           narrative += keyEvent.text.charAt(0).toLowerCase() + keyEvent.text.slice(1);
-          const selectedOutro = Math.floor(Math.random() * opportunityOutros.length);
-          narrative += opportunityOutros[selectedOutro];
+          narrative += pickBiography(opportunityOutros);
         }
         narrative += '. ';
       }
@@ -2923,34 +2930,24 @@ export default function PersonaGenerator() {
       `${pronoun} work${pronounBe === 'are' ? '' : 's'} as ${professionArticle} ${character.profession || 'laborer'}`,
       `${pronoun} earn${pronounBe === 'are' ? '' : 's'} bread as ${professionArticle} ${character.profession || 'laborer'}`,
       `${pronoun} earn${pronounBe === 'are' ? '' : 's'} a living as ${professionArticle} ${character.profession || 'laborer'}`,
-      `${pronoun} earn${pronounBe === 'are' ? '' : 's'} toils ${professionArticle} ${character.profession || 'laborer'}`,
-           `${pronoun} earn${pronounBe === 'are' ? '' : 's'} labors ${professionArticle} ${character.profession || 'laborer'}`,
-                `${pronoun} earn${pronounBe === 'are' ? '' : 's'} works ${professionArticle} ${character.profession || 'laborer'}`,
       `${pronoun === 'they' ? 'they practice' : pronoun === 'she' ? 'she practices' : 'he practices'} the trade of ${character.profession || 'laborer'}`
     ];
 
     // Add transitional phrase to profession section
     const professionTransitions = [
       'Life went on. Today, ',
-      'Life continued, as it always must. Today, ',
       'The years rolled on. Now, ',
-       'Sand through the hourglass. At present, ',
-       'Such is life, is it not? At present, ',
-       'Today, ',
+      'Today, ',
       'Now, ',
-       'Currently, ',
       'Time passed. Now, '
     ];
 
-    const useTransition = Math.random() < 0.4; // 40% chance of using a transition
+    const useTransition = seededIndex(10) < 4; // 40% chance of using a transition
     if (useTransition) {
-      const selectedTransition = professionTransitions[Math.floor(Math.random() * professionTransitions.length)];
-      narrative += selectedTransition;
-      const selectedPhrasing = professionPhrasingsNoTime[Math.floor(Math.random() * professionPhrasingsNoTime.length)];
-      narrative += selectedPhrasing;
+      narrative += pickBiography(professionTransitions);
+      narrative += pickBiography(professionPhrasingsNoTime);
     } else {
-      const selectedPhrasing = professionPhrasingsWithTime[Math.floor(Math.random() * professionPhrasingsWithTime.length)];
-      narrative += selectedPhrasing;
+      narrative += pickBiography(professionPhrasingsWithTime);
     }
 
     // Add work context based on stats
@@ -2967,7 +2964,7 @@ export default function PersonaGenerator() {
     // Health status
     if (character.diseaseHealth?.currentDiseases && character.diseaseHealth.currentDiseases.length > 0) {
       const diseaseName = character.diseaseHealth.currentDiseases[0].disease.name;
-      narrative += `. Though ${pronoun} ${pronounBe} afflicted with ${diseaseName}, ${pronoun} ${character.gender === 'Non-binary' ? 'continue' : 'continues'} to work each day`;
+      narrative += `. ${diseaseName} has made ordinary labor more uncertain, but ${pronoun} ${character.gender === 'Non-binary' ? 'continue' : 'continues'} as circumstances allow`;
     }
 
     narrative += '. ';
@@ -3023,9 +3020,15 @@ export default function PersonaGenerator() {
     // Social standing and beliefs - more sophisticated integration
     const beliefText = getBeliefDescription(character.beliefs);
 
-    if (character.ideology && character.ideology !== 'Pragmatism') {
+    const professionText = (character.profession || '').toLowerCase();
+    const canCarryAbstractIdeology = /merchant|banker|lawyer|clerk|scribe|scholar|teacher|operator|official|administrator|printer|journalist|student|activist|politician|priest|monk|imam|rabbi|minister|reformer|writer|artist|entrepreneur|shopkeeper|trader/.test(professionText);
+    const ideologyLooksModern = /CAPITALIST|SOCIALIST|LIBERAL|NATIONALIST/i.test(character.ideology || '');
+
+    if (character.ideology && character.ideology !== 'Pragmatism' && (!ideologyLooksModern || canCarryAbstractIdeology)) {
       const ideologyDesc = getIdeologyDescription(character.ideology);
-      narrative += `${pronounPossCap} core ideology is ${ideologyDesc}. `;
+      if (ideologyDesc) {
+        narrative += `${pronounPossCap} public opinions tend toward ${ideologyDesc}. `;
+      }
     } else if (beliefText) {
       // If no ideology but has beliefs, mention them
       narrative += `${pronounPossCap} worldview ${pronounBe} shaped by the conviction that ${beliefText}. `;
@@ -3083,8 +3086,7 @@ export default function PersonaGenerator() {
           `${pronoun === 'they' ? 'They are' : pronoun === 'she' ? 'She is' : 'He is'} known for ${traits[0]}`
         ];
 
-        const selectedIntro = Math.floor(Math.random() * personalityIntros.length);
-        narrative += personalityIntros[selectedIntro];
+        narrative += pickBiography(personalityIntros);
 
         if (traits.length > 1) {
           narrative += `, as well as ${traits[1]}`;
@@ -3099,11 +3101,11 @@ export default function PersonaGenerator() {
       const mother = character.family.find(m => m.relation === 'mother');
 
       if (father && mother) {
-        narrative += ` ${pronounPossCap} parents are <strong>${father.name}</strong> and <strong>${mother.name}</strong>.`;
+        narrative += ` In the household record of ${pronounPoss} life, the names <strong>${father.name}</strong> and <strong>${mother.name}</strong> stand closest to the beginning.`;
       } else if (father) {
-        narrative += ` ${pronounPossCap} father is <strong>${father.name}</strong>.`;
+        narrative += ` ${pronounPossCap} father, <strong>${father.name}</strong>, remains part of the story ${pronoun} carries.`;
       } else if (mother) {
-        narrative += ` ${pronounPossCap} mother is <strong>${mother.name}</strong>.`;
+        narrative += ` ${pronounPossCap} mother, <strong>${mother.name}</strong>, remains part of the story ${pronoun} carries.`;
       }
     }
 
