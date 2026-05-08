@@ -89,6 +89,9 @@ const buildAnnotationPrompt = (source, options) => {
     '- Do not give modern concepts, later hindsight, or broad omniscience to the persona.',
     '- If the named subject is elite or famous, household economy and material life should reflect their actual social position rather than ordinary defaults.',
     '- Choose a specific_year between 1400 and 1930. For biography pages, choose a meaningful living-year moment supported by the page.',
+    source?.sourceBasis === 'synthetic_composite'
+      ? '- This source is a synthetic procedural seed, not a documentary archive. Preserve the seed name, year, place, gender, age, religion, profession, and social position exactly when present. Fill missing schema fields only, mark all unsupported details as synthetic_fill or weak_inference, and do not write as if archival evidence or a historical record proves the persona.'
+      : '',
     '',
     'Source metadata:',
     JSON.stringify({
@@ -111,9 +114,12 @@ const buildSketchPrompt = record => [
   'Do not write a generic encyclopedia biography. Write a vivid but sober character sheet sketch anchored to the selected year, social position, work, household economy, material life, concerns, and worldview.',
   'Distinguish direct evidence from plausible inference in natural prose without footnotes.',
   'Avoid modern hindsight and anachronistic vocabulary.',
+  record?.source?.source_basis === 'synthetic_composite'
+    ? 'This is a synthetic procedural seed, not a real archival source. Do not use phrases like "the historical record", "the archive", "evidence shows", or "thin trace". Present it as a plausible generated persona, with uncertainty kept modest and unobtrusive.'
+    : '',
   'Return plain text only.',
   JSON.stringify(record),
-].join('\n\n');
+].filter(Boolean).join('\n\n');
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

@@ -95,6 +95,7 @@ import { generateStatDescription } from '../utils/statToText';
 import MiniLocationMap from './MiniLocationMap';
 import { RARITY_COLORS } from '../types/attributeTypes';
 import { PERSONAL_BELIEFS, IDEOLOGIES, getProfessionEmoji } from '../constants';
+import { getLanguageForCharacter } from '../constants/gameData/languages';
 import { WikipediaPanel } from './WikipediaPanel';
 import {
   adaptPersonaMaterialRecord,
@@ -536,6 +537,162 @@ const sourceFromProceduralPersona = (generatedPersona: HistoricalPersona): Retur
   };
 };
 
+const splitFullName = (fullName: string): { givenName?: string; familyName?: string } => {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return {};
+  if (parts.length === 1) return { givenName: parts[0] };
+  return {
+    givenName: parts.slice(0, -1).join(' '),
+    familyName: parts[parts.length - 1],
+  };
+};
+
+const periodBucketForYear = (year: number): HistoricalPersonaAnnotationRecord['persona_seed']['temporal']['period_bucket'] => {
+  if (year < 1500) return '1400_1499';
+  if (year < 1600) return '1500_1599';
+  if (year < 1700) return '1600_1699';
+  if (year < 1750) return '1700_1749';
+  if (year < 1850) return '1750_1849';
+  if (year < 1915) return '1850_1914';
+  return '1915_1930';
+};
+
+const ageBandForAge = (age: number): string => {
+  if (age < 13) return 'child';
+  if (age < 18) return 'adolescent';
+  if (age < 30) return 'young_adult';
+  if (age < 45) return 'adult';
+  if (age < 60) return 'middle_aged';
+  return 'elder';
+};
+
+const genderRoleForCharacter = (gender: string, age: number): string => {
+  const ageLabel = age < 18 ? 'adolescent' : 'adult';
+  if (gender === 'Female') return `${ageLabel} woman`;
+  if (gender === 'Male') return `${ageLabel} man`;
+  return `${ageLabel} person`;
+};
+
+const normalizeDisplayZone = (zone: string): CulturalZone | undefined => {
+  const normalized = zone.toUpperCase().replace(/[\s-]+/g, '_') as CulturalZone;
+  const allowed: CulturalZone[] = [
+    'EUROPEAN',
+    'EAST_ASIAN',
+    'MENA',
+    'NORTH_AMERICAN_PRE_COLUMBIAN',
+    'NORTH_AMERICAN_COLONIAL',
+    'OCEANIA',
+    'SOUTH_ASIAN',
+    'SOUTH_AMERICAN',
+    'SUB_SAHARAN_AFRICAN',
+  ];
+  return allowed.includes(normalized) ? normalized : undefined;
+};
+
+const appendSyntheticEvidence = (
+  record: HistoricalPersonaAnnotationRecord,
+  fieldPath: string,
+  notes: string
+) => {
+  record.field_evidence = [
+    ...(record.field_evidence || []).filter(item => item.field_path !== fieldPath),
+    {
+      field_path: fieldPath,
+      support_level: 'synthetic_fill',
+      confidence: 'speculative',
+      notes,
+    },
+  ];
+};
+
+const lockProceduralSeedRecord = (
+  record: HistoricalPersonaAnnotationRecord,
+  proceduralPersona: HistoricalPersona
+): HistoricalPersonaAnnotationRecord => {
+  const locked = structuredClone(record) as HistoricalPersonaAnnotationRecord;
+  const character = proceduralPersona.character;
+  const { givenName, familyName } = splitFullName(character.name);
+  const culturalZone = normalizeDisplayZone(proceduralPersona.culturalZone);
+  const languageData = culturalZone
+    ? getLanguageForCharacter(
+      culturalZone,
+      proceduralPersona.year,
+      proceduralPersona.region,
+      proceduralPersona.location,
+      character.name,
+      character.profession
+    )
+    : undefined;
+
+  locked.source.title = `Procedural seed: ${character.name}, ${proceduralPersona.region}, ${proceduralPersona.year}`;
+  locked.source.citation_label = `Procedural seed: ${character.name}`;
+  locked.source.source_basis = 'synthetic_composite';
+  locked.source.source_date = String(proceduralPersona.year);
+  locked.source.source_reliability_notes = 'Synthetic procedural seed generated inside the application; not an external historical document.';
+  locked.annotation.overall_confidence = 'speculative';
+  locked.annotation.completion_status = 'draft';
+  locked.annotation.annotation_notes = 'Gemini filled schema gaps from a locked procedural seed. Seed identity, date, place, profession, religion, and demographic fields were preserved by the application.';
+
+  locked.persona_seed.identity_name = {
+    ...locked.persona_seed.identity_name,
+    given_name: givenName,
+    family_name: familyName,
+    full_name: character.name,
+    name_basis: 'locked_procedural_seed',
+    support_level: 'synthetic_fill',
+    confidence: 'speculative',
+  };
+  locked.persona_seed.temporal = {
+    ...locked.persona_seed.temporal,
+    period_bucket: periodBucketForYear(proceduralPersona.year),
+    decade: Math.floor(proceduralPersona.year / 10) * 10,
+    specific_year: proceduralPersona.year,
+    date_basis: 'synthetic_within_period',
+  };
+  locked.persona_seed.place = {
+    ...locked.persona_seed.place,
+    region: proceduralPersona.region,
+    settlement_or_locality: proceduralPersona.location,
+    place_notes: `Locked to procedural seed location ${proceduralPersona.location}, ${proceduralPersona.region}. ${locked.persona_seed.place.place_notes || ''}`.trim(),
+  };
+  locked.persona_seed.social_identity = {
+    ...locked.persona_seed.social_identity,
+    age_band: ageBandForAge(character.age),
+    estimated_age: character.age,
+    gender_role: genderRoleForCharacter(character.gender, character.age),
+    religious_or_communal_identity: character.religion,
+    languages: languageData?.name ? [languageData.name] : locked.persona_seed.social_identity.languages,
+  };
+  locked.persona_seed.work = {
+    ...locked.persona_seed.work,
+    primary_occupation: character.profession,
+  };
+  locked.persona_seed.social_position = {
+    economic_security: locked.persona_seed.social_position?.economic_security || 'uncertain',
+    autonomy: locked.persona_seed.social_position?.autonomy || 'uncertain',
+    local_status_detail: character.socialClass || character.class || locked.persona_seed.social_position?.local_status_detail,
+  };
+  locked.persona_seed.summary = `${character.name} is a synthetic procedural persona seed: a ${character.age}-year-old ${character.gender.toLowerCase()} ${character.profession} in ${proceduralPersona.location}, ${proceduralPersona.region}, in ${proceduralPersona.year}.`;
+  locked.evidence = {
+    ...locked.evidence,
+    confidence: 'speculative',
+    basis_summary: 'Synthetic procedural seed converted into a schema record; identity and core constraints were locked to the original generated persona.',
+    bias_flags: Array.from(new Set([...(locked.evidence.bias_flags || []), 'synthetic_composite', 'model_synthesized_gaps', 'not_documentary_evidence'])),
+    inference_notes: 'Use as a schema-complete procedural persona, not as archival evidence.',
+  };
+
+  [
+    '/persona_seed/identity_name',
+    '/persona_seed/temporal',
+    '/persona_seed/place',
+    '/persona_seed/social_identity',
+    '/persona_seed/work/primary_occupation',
+    '/source/title',
+  ].forEach(path => appendSyntheticEvidence(locked, path, 'Locked from the original procedural random persona seed.'));
+
+  return normalizePersonaAnnotationRecord(locked) as HistoricalPersonaAnnotationRecord;
+};
+
 export default function PersonaGenerator() {
   const [persona, setPersona] = useState<HistoricalPersona | null>(null);
   const [params, setParams] = useState<Partial<GenerationParams>>({});
@@ -770,9 +927,27 @@ export default function PersonaGenerator() {
     if (generationParams.culturalZone) newPersona.culturalZone = String(generationParams.culturalZone).replace(/_/g, ' ');
     if (generationParams.region) newPersona.region = generationParams.region;
     if (generationParams.location) newPersona.location = generationParams.location;
+    if (generationParams.name) newPersona.character.name = generationParams.name;
+    if (generationParams.gender) newPersona.character.gender = generationParams.gender;
+    if (generationParams.age !== undefined) newPersona.character.age = generationParams.age;
+    if (generationParams.profession) {
+      newPersona.character.profession = generationParams.profession;
+      newPersona.character.occupation = generationParams.profession;
+    }
+    if (generationParams.religion) newPersona.character.religion = generationParams.religion;
+    if (generationParams.socialClass) {
+      newPersona.character.socialClass = generationParams.socialClass;
+      newPersona.character.class = generationParams.socialClass;
+    }
+    if (generationParams.culturalZone) {
+      newPersona.character.culturalZone = generationParams.culturalZone;
+    }
 
     if (summary) {
-      newPersona.character.backstory = `${newPersona.character.backstory} Source-grounded seed: ${summary}`;
+      const summaryLabel = record.source.source_basis === 'synthetic_composite'
+        ? 'Synthetic schema seed'
+        : 'Source-grounded seed';
+      newPersona.character.backstory = `${newPersona.character.backstory} ${summaryLabel}: ${summary}`;
     }
 
     if (adaptedMaterial.displayOverrides.languageData) {
@@ -1559,12 +1734,18 @@ export default function PersonaGenerator() {
 
   const generateCompletelyRandom = async () => {
     if (isSourceGenerating) return;
-    const proceduralPersona = generateHistoricalPersona({});
-    applyProceduralPersona(proceduralPersona);
-    const source = sourceFromProceduralPersona(proceduralPersona);
     setIsSourceGenerating(true);
     setSourcePanelCollapsed(true);
     setSourceTarget('named_subject');
+    setPersona(null);
+    setAnnotationRecord(null);
+    setPersonaSketch(null);
+    setEditableJsonl('');
+    setDeathRevealState('prompt');
+    setDeathInfo(null);
+    const proceduralYear = 1400 + Math.floor(Math.random() * 531);
+    const proceduralPersona = generateHistoricalPersona({ year: proceduralYear });
+    const source = sourceFromProceduralPersona(proceduralPersona);
     setSourceTitle(source.title);
     setSourceText(source.text);
     setSourceUrl('');
@@ -1573,7 +1754,10 @@ export default function PersonaGenerator() {
       ? `Generated ${proceduralPersona.character.name} as a procedural seed. Asking Gemini to populate the schema...`
       : `Generated ${proceduralPersona.character.name} as a procedural seed. Building a heuristic schema record...`);
     try {
-      const record = await recordFromSource(source, { target: 'named_subject' });
+      const record = lockProceduralSeedRecord(
+        await recordFromSource(source, { target: 'named_subject' }),
+        proceduralPersona
+      );
       setSourceIngestionStatus(useGeminiExtraction
         ? `Generated a Gemini-filled schema record from procedural seed ${proceduralPersona.character.name}.`
         : `Generated a heuristic schema record from procedural seed ${proceduralPersona.character.name}.`);
@@ -1582,7 +1766,7 @@ export default function PersonaGenerator() {
       setSourceIngestionStatus(error instanceof Error
         ? `${error.message} Showing local source-based fallback instead.`
         : 'Schema generation failed. Showing local source-based fallback instead.');
-      const record = createAnnotationRecordFromSource(source);
+      const record = lockProceduralSeedRecord(createAnnotationRecordFromSource(source), proceduralPersona);
       await generateFromAnnotationRecord(record, { useSourceTitleAsName: true, generateSketch: false });
     } finally {
       setIsSourceGenerating(false);
