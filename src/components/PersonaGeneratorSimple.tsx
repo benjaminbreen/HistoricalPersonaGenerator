@@ -75,6 +75,8 @@ import {
 } from 'react-icons/gi';
 import { generateHistoricalPersona, GenerationParams, HistoricalPersona } from '../services/personaGenerator';
 import { HistoricalEra, CulturalZone, Gender } from '../types';
+import { generateNpcName } from '../generation/common/npcUtils';
+import { ValueNoise } from '../utils/noise';
 import { EventImportance, EventKind } from '../constants/characterData/lifeHistoryService';
 import { HistoricalPersonaAnnotationRecord } from '../types/personaAnnotation';
 import {
@@ -624,6 +626,53 @@ const normalizeDisplayZone = (zone: string): CulturalZone | undefined => {
     'SUB_SAHARAN_AFRICAN',
   ];
   return allowed.includes(normalized) ? normalized : undefined;
+};
+
+const EUROPEAN_FALLBACK_NAME_PATTERN = /^(john|william|james|robert|thomas|edward|henry|charles|george|richard|joseph|david|michael|daniel|matthew|christopher|andrew|joshua|samuel|benjamin|mary|elizabeth|margaret|anne|sarah|jane|alice|catherine|helen|emma|emily|frances|harriet)\b|\b(harris|smith|brown|jones|williams|taylor|miller|wilson|moore|clark|walker)\b/i;
+
+const looksLikeEuropeanFallbackName = (name?: string): boolean =>
+  Boolean(name && EUROPEAN_FALLBACK_NAME_PATTERN.test(name.trim()));
+
+const seedFromPersonaContext = (persona: HistoricalPersona): number => {
+  const seedText = [
+    persona.year,
+    persona.region,
+    persona.location,
+    persona.character.gender,
+    persona.character.profession,
+  ].join('|');
+  let hash = 2166136261;
+  for (let i = 0; i < seedText.length; i++) {
+    hash ^= seedText.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+};
+
+const repairSyntheticSeedName = (persona: HistoricalPersona): HistoricalPersona => {
+  const culturalZone = normalizeDisplayZone(persona.culturalZone);
+  if (!culturalZone || culturalZone === 'EUROPEAN') return persona;
+  if (!looksLikeEuropeanFallbackName(persona.character.name)) return persona;
+
+  const repaired = structuredClone(persona) as HistoricalPersona;
+  const gender = repaired.character.gender === 'Female' ? 'Female' : 'Male';
+  const baseSeed = seedFromPersonaContext(repaired);
+
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const candidate = generateNpcName(
+      gender,
+      culturalZone,
+      repaired.region,
+      repaired.year,
+      new ValueNoise(baseSeed + attempt * 7919)
+    );
+    if (candidate && !looksLikeEuropeanFallbackName(candidate)) {
+      repaired.character.name = candidate;
+      return repaired;
+    }
+  }
+
+  return repaired;
 };
 
 const appendSyntheticEvidence = (
@@ -1783,7 +1832,7 @@ export default function PersonaGenerator() {
     setDeathRevealState('prompt');
     setDeathInfo(null);
     const proceduralYear = 1400 + Math.floor(Math.random() * 531);
-    const proceduralPersona = generateHistoricalPersona({ year: proceduralYear });
+    const proceduralPersona = repairSyntheticSeedName(generateHistoricalPersona({ year: proceduralYear }));
     const source = sourceFromProceduralPersona(proceduralPersona);
     setSourceTitle(source.title);
     setSourceText(source.text);
@@ -5319,7 +5368,7 @@ export default function PersonaGenerator() {
                   </motion.div>
                 )}
 
-                {persona.character.inventory && persona.character.inventory.length > 0 && (
+                {!annotationRecord && persona.character.inventory && persona.character.inventory.length > 0 && (
                   <motion.div
                     className="inventory-section"
                     initial={{ opacity: 0, x: 10 }}

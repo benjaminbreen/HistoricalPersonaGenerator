@@ -51,6 +51,8 @@ const leakedEnumValues = [
   'strong inference',
 ];
 
+const europeanFallbackNamePattern = /^(john|william|james|robert|thomas|edward|henry|charles|george|richard|joseph|david|michael|daniel|matthew|christopher|andrew|joshua|samuel|benjamin|mary|elizabeth|margaret|anne|sarah|jane|alice|catherine|helen|emma|emily|frances|harriet)\b|\b(harris|smith|brown|jones|williams|taylor|miller|wilson|moore|clark|walker)\b/i;
+
 const periodBucketRanges: Record<string, [number, number]> = {
   '1400_1499': [1400, 1499],
   '1500_1599': [1500, 1599],
@@ -78,6 +80,32 @@ export function checkPersonaConsistency(input: {
   ].filter(Boolean).join(' '));
   const year = seed.temporal.specific_year || seed.temporal.decade;
   const bucketRange = periodBucketRanges[seed.temporal.period_bucket];
+  const sourceBasis = normalize(record.source.source_basis);
+
+  if (sourceBasis === 'synthetic composite' && !/europe/.test(normalize(persona.culturalZone)) && europeanFallbackNamePattern.test(persona.character.name || '')) {
+    issues.push({
+      id: 'synthetic-european-name-fallback',
+      severity: 'warning',
+      fieldPath: '/persona_seed/identity_name',
+      message: `Synthetic seed name "${persona.character.name}" looks like a generic European fallback for ${persona.region}.`,
+      suggestedFix: 'Regenerate the synthetic seed name from the region-specific name table before locking it into the schema record.',
+      autofixable: true,
+    });
+  }
+
+  if (sourceBasis === 'synthetic composite' && /(sri lanka|ceylon|galle|kandy|jaffna|anuradhapura|trincomalee)/.test(regionContext)) {
+    const languages = (seed.social_identity.languages || []).map(normalize).join(' ');
+    if (/mughal urdu|urdu/.test(languages)) {
+      issues.push({
+        id: 'sri-lanka-language-fallback',
+        severity: 'warning',
+        fieldPath: '/persona_seed/social_identity/languages',
+        message: 'Sri Lanka/Galle synthetic seed fell back to Mughal Urdu instead of a Sri Lankan language.',
+        suggestedFix: 'Use the Sri Lanka regional language mapping before the broad South Asian fallback.',
+        autofixable: true,
+      });
+    }
+  }
 
   if (year && bucketRange && (year < bucketRange[0] || year > bucketRange[1])) {
     issues.push({

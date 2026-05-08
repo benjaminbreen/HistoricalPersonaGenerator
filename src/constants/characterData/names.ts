@@ -1727,8 +1727,10 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         ],
         "Sri Lanka": [
             { before: 1505, keys: ['DRAVIDIAN', 'TAMIL', 'SANSKRIT_CLASSICAL'] },
-            { after: 1505, before: 1948, keys: ['TAMIL', 'PORTUGUESE', 'DUTCH', 'ENGLISH'] },
-            { after: 1948, keys: ['TAMIL', 'ENGLISH'] }
+            { after: 1505, before: 1658, keys: ['TAMIL', 'DRAVIDIAN', 'PORTUGUESE'] },
+            { after: 1658, before: 1796, keys: ['TAMIL', 'DRAVIDIAN', 'DUTCH', 'PORTUGUESE'] },
+            { after: 1796, before: 1948, keys: ['TAMIL', 'DRAVIDIAN', 'ENGLISH', 'DUTCH'] },
+            { after: 1948, keys: ['TAMIL', 'DRAVIDIAN', 'ENGLISH'] }
         ],
         // Southeast Asia
         "Mainland Southeast Asia": [

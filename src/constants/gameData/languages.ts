@@ -722,6 +722,48 @@ export const LANGUAGES: Record<string, LanguageData> = {
     isReconstructed: false,
   },
 
+  SINHALA: {
+    id: 'SINHALA',
+    name: 'Sinhala',
+    nativeName: 'සිංහල',
+    family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
+    script: 'Sinhala',
+    period: [300, 2025],
+    regions: ['Sri Lanka', 'Anuradhapura', 'Kandy', 'Galle Coast', 'Ceylon'],
+    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    predecessors: ['PRAKRITS'],
+    greetings: {
+      hello: 'Ayubowan',
+      goodbye: 'Suba gaman',
+      yes: 'Ov',
+      no: 'Nae',
+      thanks: 'Istuti',
+    },
+    llmPrompt: 'Emulate Sinhala as a Sri Lankan Indo-Aryan language. Use SOV word order, honorific phrasing, and vocabulary shaped by Buddhist, royal, village, and Indian Ocean trade contexts. For early modern coastal settings, allow limited Portuguese or Dutch loanwords when socially plausible.',
+    historicalContext: 'Sinhala developed on Sri Lanka from Indo-Aryan Prakrit roots and was the main language of Sinhalese communities and kingdoms such as Kotte and Kandy.',
+  },
+
+  TAMIL: {
+    id: 'TAMIL',
+    name: 'Tamil',
+    nativeName: 'தமிழ்',
+    family: LANGUAGE_FAMILIES.DRAVIDIAN,
+    script: 'Tamil',
+    period: [-300, 2025],
+    regions: ['Tamilakam', 'Tamil Nadu', 'Sri Lanka', 'Jaffna', 'Coromandel Coast'],
+    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    predecessors: ['PROTO_DRAVIDIAN'],
+    greetings: {
+      hello: 'Vanakkam',
+      goodbye: 'Poi varugiren',
+      yes: 'Aam',
+      no: 'Illai',
+      thanks: 'Nandri',
+    },
+    llmPrompt: 'Emulate Tamil with SOV word order, agglutinative morphology, honorific forms, and vocabulary suited to temple, household, agricultural, craft, and Indian Ocean trade contexts. Keep the register local and practical unless the character is literate or attached to temple institutions.',
+    historicalContext: 'Tamil is a classical Dravidian language with a long literary tradition and deep historical presence in South India and northern and eastern Sri Lanka.',
+  },
+
   HINDI: {
     id: 'HINDI',
     name: 'Hindi',
@@ -5548,6 +5590,21 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { pattern: /Singh|Sharma|Gupta|Agarwal|Mishra|Yadav|Verma|Srivastava|Rai|Jha/i, language: 'VEDIC_SANSKRIT', period: [-1500, -500], weight: 95 },
       { pattern: /Singh|Sharma|Gupta|Agarwal|Mishra|Yadav|Verma|Srivastava|Rai|Jha/i, language: 'CLASSICAL_SANSKRIT', period: [-500, 1000], weight: 95 },
       { pattern: /Singh|Sharma|Gupta|Agarwal|Mishra|Yadav|Verma|Srivastava|Rai|Jha/i, language: 'HINDI', period: [1000, 2025], weight: 95 },
+    ],
+  },
+  // Sri Lanka/Ceylon - keep coastal and island contexts from falling back to North Indian defaults
+  {
+    patterns: ['sri lanka', 'ceylon', 'galle', 'kandy', 'jaffna', 'anuradhapura', 'trincomalee', 'galle coast', 'kotte'],
+    languages: [
+      { id: 'SINHALA', period: [300, 2025], weight: 60 },
+      { id: 'TAMIL', period: [-300, 2025], weight: 35 },
+      { id: 'EARLY_PORTUGUESE', period: [1505, 1658], weight: 12 },
+      { id: 'DUTCH', period: [1658, 1796], weight: 12 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1796, 2025], weight: 10 },
+    ],
+    namePatterns: [
+      { pattern: /Perera|Fernando|Silva|De Silva|Dias|Fonseka|Mendis/i, language: 'SINHALA', weight: 85 },
+      { pattern: /Arul|Kumar|Nadarajah|Siv|Subramani|Pillai|Raman|Lakshmi|Meena/i, language: 'TAMIL', weight: 90 },
     ],
   },
   // Vietnam
