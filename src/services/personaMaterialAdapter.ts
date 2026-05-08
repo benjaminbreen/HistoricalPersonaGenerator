@@ -44,42 +44,62 @@ export interface PersonaMaterialAdapterResult {
   applyToCharacter: (character: PlayerCharacter) => PlayerCharacter;
 }
 
+const VALID_CULTURAL_ZONES = new Set<CulturalZone>([
+  'EUROPEAN',
+  'EAST_ASIAN',
+  'MENA',
+  'NORTH_AMERICAN_PRE_COLUMBIAN',
+  'NORTH_AMERICAN_COLONIAL',
+  'OCEANIA',
+  'SOUTH_ASIAN',
+  'SOUTH_AMERICAN',
+  'SUB_SAHARAN_AFRICAN',
+]);
+
+const normalizeCulturalZone = (zone?: string): CulturalZone | undefined => {
+  if (!zone) return undefined;
+  const normalized = zone.toUpperCase().replace(/[\s-]+/g, '_') as CulturalZone | 'OCEANIAN' | 'MESOAMERICAN';
+  if (normalized === 'OCEANIAN') return 'OCEANIA' as CulturalZone;
+  if (normalized === 'MESOAMERICAN') return 'NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone;
+  return VALID_CULTURAL_ZONES.has(normalized as CulturalZone) ? normalized as CulturalZone : undefined;
+};
+
 const regionZoneHints: Array<{ pattern: RegExp; zone: CulturalZone }> = [
   {
-    pattern: /\b(massachusetts|united states|america|american colonies|new england|virginia|new york|pennsylvania|cambridge, massachusetts)\b/i,
+    pattern: /\b(oceania|pacific islands?|polynesia|melanesia|micronesia|australia|new guinea|papua|solomon islands?|vanuatu|fiji|tonga|samoa|hawai'?i|hawaiian|tahiti|maori|new zealand)\b/i,
+    zone: 'OCEANIA' as CulturalZone,
+  },
+  {
+    pattern: /\b(saint[-\s]?domingue|haiti|jamaica|barbados|caribbean|west indies|new france|canada|quebec|nova scotia|new spain|mexico|mexican|central america|guatemala|yucatan|cuba|puerto rico|united states|america|american colonies|new england|massachusetts|virginia|new york|pennsylvania|carolina|georgia|maryland|cambridge, massachusetts)\b/i,
     zone: 'NORTH_AMERICAN_COLONIAL' as CulturalZone,
   },
   {
-    pattern: /\b(british isles|england|english|warwickshire|stratford|stratford-upon-avon|london|oxford|cambridge university|cambridge, england|shakespeare|low countries|dutch republic|france|spain|italy|germany|europe)\b/i,
-    zone: 'EUROPEAN' as CulturalZone,
+    pattern: /\b(mesoamerica|aztec|mexica|maya|nahua|iroquois|haudenosaunee|algonquian|cherokee|powhatan|pueblo|mississippian|pre[-\s]?columbian north america)\b/i,
+    zone: 'NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone,
   },
   {
-    pattern: /\b(bengal|india|mughal|delhi|south asia|hindu|sanskrit|persianate)\b/i,
-    zone: 'SOUTH_ASIAN' as CulturalZone,
-  },
-  {
-    pattern: /\b(china|lower yangzi|ming|qing|japan|korea|east asia)\b/i,
-    zone: 'EAST_ASIAN' as CulturalZone,
-  },
-  {
-    pattern: /\b(ottoman|syria|egypt|levant|maghreb|arabia|middle east|north africa|mena)\b/i,
-    zone: 'MENA' as CulturalZone,
-  },
-  {
-    pattern: /\b(gold coast|akan|kongo|ethiopia|sub-saharan|west africa|east africa)\b/i,
-    zone: 'SUB_SAHARAN_AFRICAN' as CulturalZone,
-  },
-  {
-    pattern: /\b(new spain|peru|andes|brazil|south america|rio de la plata)\b/i,
+    pattern: /\b(peru|andean|andes|inca|quechua|aymara|brazil|rio de la plata|argentina|chile|colombia|venezuela|ecuador|bolivia|paraguay|uruguay|guiana|amazon|south america)\b/i,
     zone: 'SOUTH_AMERICAN' as CulturalZone,
   },
   {
-    pattern: /\b(saint-domingue|haiti|caribbean|new france|canada)\b/i,
-    zone: 'NORTH_AMERICAN_COLONIAL' as CulturalZone,
+    pattern: /\b(gold coast|akan|asante|ashanti|ghana|benin|dahomey|yoruba|igbo|hausa|kongo|congo|ethiopia|abyssinia|swahili|zanzibar|mali|songhai|senegal|gambia|sierra leone|liberia|angola|mozambique|madagascar|cape colony|south africa|sub[-\s]?saharan|west africa|east africa|central africa|southern africa)\b/i,
+    zone: 'SUB_SAHARAN_AFRICAN' as CulturalZone,
   },
   {
-    pattern: /\b(oceania|polynesia|melanesia|australia|new zealand|maori)\b/i,
-    zone: 'OCEANIA' as CulturalZone,
+    pattern: /\b(ottoman|turkey|turkish|anatolia|constantinople|istanbul|syria|damascus|levant|palestine|jerusalem|lebanon|iraq|mesopotamia|baghdad|arabia|arabian|yemen|persia|persian|iran|isfahan|egypt|cairo|nile|maghreb|morocco|algeria|tunisia|libya|middle east|north africa|mena)\b/i,
+    zone: 'MENA' as CulturalZone,
+  },
+  {
+    pattern: /\b(india|indian subcontinent|bengal|punjab|sindh|mughal|delhi|deccan|gujarat|maratha|rajput|sri lanka|ceylon|nepal|kashmir|south asia|hindu|sanskrit|urdu|persianate)\b/i,
+    zone: 'SOUTH_ASIAN' as CulturalZone,
+  },
+  {
+    pattern: /\b(china|chinese|lower yangzi|ming|qing|japan|japanese|edo|tokugawa|korea|korean|joseon|mongolia|mongol|manchuria|taiwan|vietnam|annam|tonkin|cochinchina|thailand|siam|burma|myanmar|cambodia|khmer|laos|philippines|java|indonesia|malay|malacca|east asia|southeast asia)\b/i,
+    zone: 'EAST_ASIAN' as CulturalZone,
+  },
+  {
+    pattern: /\b(british isles|england|english|scotland|scottish|wales|welsh|ireland|irish|warwickshire|stratford|stratford-upon-avon|london|oxford|cambridge university|cambridge, england|shakespeare|low countries|dutch republic|netherlands|belgium|france|french|spain|spanish|portugal|portuguese|italy|italian|germany|german|austria|switzerland|denmark|norway|sweden|finland|iceland|poland|hungary|bohemia|czech|russia|russian|ukraine|lithuania|greece|greek|balkans|europe)\b/i,
+    zone: 'EUROPEAN' as CulturalZone,
   },
 ];
 
@@ -556,6 +576,7 @@ const inferCulturalZone = (record: HistoricalPersonaAnnotationRecord): CulturalZ
     seed.work.workplace,
     record.source.title,
     record.source.citation_label,
+    record.source.url,
     record.source.document_genre,
     record.evidence.basis_summary,
   ].filter(Boolean).join(' ');
@@ -582,7 +603,7 @@ export function adaptPersonaMaterialRecord(
   const age = seed.social_identity.estimated_age || ageFromBand(seed.social_identity.age_band, recordKey);
   const sourceLanguageLabel = seed.social_identity.languages?.[0] || record.source.language;
   const sourceLanguageData = findLanguageDataForMaterial(sourceLanguageLabel);
-  const culturalZone = inferCulturalZone(record) || sourceLanguageData?.culturalZones?.[0];
+  const culturalZone = inferCulturalZone(record) || normalizeCulturalZone(sourceLanguageData?.culturalZones?.[0]);
   const name = materialName(record) || (
     options.useSourceTitleAsName && record.source.source_basis === 'wikipedia_or_reference'
       ? record.source.title.replace(/\s*\([^)]*\)\s*$/, '')

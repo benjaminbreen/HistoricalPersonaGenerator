@@ -759,6 +759,11 @@ export default function PersonaGenerator() {
     const summary = record.persona_seed.summary;
     newPersona.character = adaptedMaterial.applyToCharacter(newPersona.character);
     newPersona.enhancedLifeEvents = adaptedMaterial.lifeEvents;
+    if (generationParams.year) newPersona.year = generationParams.year;
+    if (generationParams.era) newPersona.era = String(generationParams.era).replace(/_/g, ' ');
+    if (generationParams.culturalZone) newPersona.culturalZone = String(generationParams.culturalZone).replace(/_/g, ' ');
+    if (generationParams.region) newPersona.region = generationParams.region;
+    if (generationParams.location) newPersona.location = generationParams.location;
 
     if (summary) {
       newPersona.character.backstory = `${newPersona.character.backstory} Source-grounded seed: ${summary}`;
