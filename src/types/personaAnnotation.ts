@@ -36,7 +36,7 @@ export interface HistoricalPersonaAnnotationRecord {
     translation_status?: 'original_language' | 'human_translation' | 'machine_translation' | 'mixed_or_unclear' | 'unknown';
     repository_or_collection?: string;
     document_genre?: string;
-    extraction_method?: 'manual_transcription' | 'paste' | 'wikipedia_api' | 'html_readability' | 'ocr' | 'pdf_text_layer' | 'llm_extraction' | 'mixed' | 'unknown';
+    extraction_method?: 'manual_transcription' | 'paste' | 'wikipedia_api' | 'structured_api' | 'html_readability' | 'ocr' | 'pdf_text_layer' | 'llm_extraction' | 'mixed' | 'unknown';
     source_reliability_notes?: string;
   };
   annotation: {

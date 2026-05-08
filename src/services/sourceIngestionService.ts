@@ -33,6 +33,47 @@ export function createPastedTextSource(text: string, title = 'Pasted source text
   };
 }
 
+export interface OldBaileyRandomFilters {
+  gender?: 'any' | 'female' | 'male';
+  decade?: string;
+  crime?: 'any' | 'theft' | 'violent_theft' | 'deception' | 'killing' | 'sexual' | 'royal' | 'damage' | 'miscellaneous';
+  personaAngle?: 'named_subject' | 'ordinary_person_from_source_world';
+}
+
+export interface WikidataRandomPerson {
+  qid: string;
+  label: string;
+  description?: string;
+  birthYear?: number;
+  deathYear?: number;
+  wikipediaTitle: string;
+  wikipediaUrl: string;
+}
+
+export async function ingestRandomOldBaileySource(filters: OldBaileyRandomFilters = {}): Promise<IngestedPersonaSource> {
+  const query = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value && value !== 'any') query.set(key, String(value));
+  });
+
+  const response = await fetch(`/api/old-bailey/random?${query.toString()}`);
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(errorBody.error || `Old Bailey returned ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function getRandomWikidataPerson(): Promise<WikidataRandomPerson> {
+  const response = await fetch('/api/wikidata/random-person');
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(errorBody.error || `Wikidata returned ${response.status}`);
+  }
+  return response.json();
+}
+
 export async function ingestUrlSource(url: string): Promise<IngestedPersonaSource> {
   const parsed = new URL(url);
   const isWikipedia = parsed.hostname.includes('wikipedia.org') && parsed.pathname.includes('/wiki/');

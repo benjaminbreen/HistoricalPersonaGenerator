@@ -132,7 +132,21 @@ const genderFromRole = (genderRole: string): Gender | undefined => {
   return undefined;
 };
 
-const ageFromBand = (band: string): number => {
+const stableHash = (value: string): number => {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+};
+
+const deterministicInt = (min: number, max: number, key: string): number => {
+  const span = max - min + 1;
+  return min + (stableHash(key) % span);
+};
+
+const ageFromBand = (band: string, seedKey = ''): number => {
   const ranges: Record<string, [number, number]> = {
     child: [8, 12],
     adolescent: [13, 17],
@@ -142,7 +156,7 @@ const ageFromBand = (band: string): number => {
     elder: [60, 76],
   };
   const [min, max] = ranges[band] || [18, 65];
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+  return deterministicInt(min, max, `${seedKey}|age-band|${band}`);
 };
 
 export const normalizeMaterialText = (value: string): string =>
@@ -181,6 +195,54 @@ const sourceSkinTexture = (bodyConditions: string[] = []) => {
   if (/scar|wound|pox|burn|injur/.test(text)) return 'scarred' as const;
   if (/weather|sun|labor|field|sail|mine|hardship/.test(text)) return 'weathered' as const;
   return undefined;
+};
+
+const isSpecificClothingDetail = (value?: string): boolean => {
+  const text = normalizedForMatch(value);
+  if (!text) return false;
+  if (/^(fine|plain|plain working|plain working clothing|respectable|decent|luxurious|ragged|worn or ragged clothing|modest|poor|coarse)$/.test(text)) {
+    return false;
+  }
+  return /\b(tunic|robe|habit|cassock|gown|dress|shirt|blouse|coat|jacket|doublet|waistcoat|jerkin|armor|mail|cuirass|apron|sari|kimono|hanfu|kaftan|cloak|mantle|veil|wimple|turban|cap|hat|hood|helmet|bonnet)\b/.test(text);
+};
+
+const sourceHeadgearForRecord = (
+  record: HistoricalPersonaAnnotationRecord,
+  clothingDetail?: string
+): { name: string; material: string } | undefined => {
+  const seed = record.persona_seed;
+  const context = [
+    clothingDetail,
+    seed.material_life.clothing_level,
+    seed.social_identity.status_group,
+    seed.social_identity.status_detail,
+    seed.social_identity.legal_condition,
+    seed.social_identity.religious_or_communal_identity,
+    seed.religious_practice?.specific_label,
+    seed.religious_practice?.tradition,
+    seed.work.primary_occupation,
+  ].filter(Boolean).join(' ').toLowerCase();
+
+  if (/\b(turban|pagri)\b/.test(context)) return { name: 'Turban', material: 'cloth' };
+  if (/\b(veil|wimple|nun|widow)\b/.test(context)) return { name: 'Veil', material: 'linen' };
+  if (/\b(monastic|monk|friar|hood|cowl)\b/.test(context)) return { name: 'Hood', material: 'wool' };
+  if (/\b(priest|cleric|imam|rabbi|scholar|scribe|clerk)\b/.test(context)) return { name: 'Scholar Cap', material: 'cloth' };
+  if (/\b(soldier|guard|militia|armor|helmet)\b/.test(context)) return { name: 'Helmet', material: 'iron' };
+  if (/\b(sailor|dock|ship|fisher)\b/.test(context)) return { name: 'Work Cap', material: 'wool' };
+  if (/\b(field|farm|peasant|laborer|labourer|market seller|vendor)\b/.test(context)) return { name: 'Work Hat', material: 'straw' };
+  return undefined;
+};
+
+const sourceMarkingsForBodyConditions = (bodyConditions: string[] = []) => {
+  const text = bodyConditions.join(' ').toLowerCase();
+  if (!/scar|wound|pox|burn|injur/.test(text)) return undefined;
+  return [{
+    type: 'scar' as const,
+    location: 'cheek',
+    color: '#8A5A4A',
+    size: 'small' as const,
+    pattern: 'source_body_condition',
+  }];
 };
 
 const displayValue = (value?: string): string => {
@@ -239,9 +301,9 @@ const materialName = (record: HistoricalPersonaAnnotationRecord): string | undef
 const createMaterialItem = (
   name: string,
   category: Item['category'],
-  options: Partial<Item> = {}
+  options: Partial<Item> & { idSeed?: string } = {}
 ): Item => ({
-  id: `material-${slug(name)}-${Math.random().toString(36).slice(2, 8)}`,
+  id: `material-${slug(name)}-${stableHash(`${options.idSeed || ''}|${category}|${name}`).toString(36).slice(0, 8)}`,
   baseId: `material-${slug(name)}`,
   name: titleCase(name),
   description: options.description || `Source material item: ${normalizeMaterialText(name)}.`,
@@ -507,7 +569,17 @@ export function adaptPersonaMaterialRecord(
 ): PersonaMaterialAdapterResult {
   const seed = record.persona_seed;
   const year = seed.temporal.specific_year || seed.temporal.decade || 1800;
-  const age = seed.social_identity.estimated_age || ageFromBand(seed.social_identity.age_band);
+  const recordKey = [
+    record.source.title,
+    record.source.url,
+    record.source.filename,
+    record.source.citation_label,
+    seed.temporal.specific_year || seed.temporal.decade,
+    seed.place.region,
+    seed.social_identity.age_band,
+    seed.work.primary_occupation,
+  ].filter(Boolean).join('|');
+  const age = seed.social_identity.estimated_age || ageFromBand(seed.social_identity.age_band, recordKey);
   const sourceLanguageLabel = seed.social_identity.languages?.[0] || record.source.language;
   const sourceLanguageData = findLanguageDataForMaterial(sourceLanguageLabel);
   const culturalZone = inferCulturalZone(record) || sourceLanguageData?.culturalZones?.[0];
@@ -589,19 +661,35 @@ export function adaptPersonaMaterialRecord(
 
   const applyToCharacter = (character: PlayerCharacter): PlayerCharacter => {
     const sourceAttributes = displayOverrides.attributes.map(displayAttributeToBadge);
-    const sourceInventory = displayOverrides.possessions.map(possession =>
-      createMaterialItem(possession, /book|letter|paper|manuscript|ledger|correspondence|journal|diary/i.test(possession) ? 'Document' : 'Special')
+    const sourceInventory = displayOverrides.possessions.map((possession, index) =>
+      createMaterialItem(possession, /book|letter|paper|manuscript|ledger|correspondence|journal|diary/i.test(possession) ? 'Document' : 'Special', {
+        idSeed: `${recordKey}|possession|${index}`,
+      })
     );
     const sourceEquippedItems = { ...character.equippedItems };
+    const sourceBodyConditions = seed.material_life.body_conditions || [];
+    const clothingIsSpecific = isSpecificClothingDetail(displayOverrides.clothingDetail);
+    const sourceHeadgear = sourceHeadgearForRecord(record, displayOverrides.clothingDetail);
+    const sourceSkinTextureValue = sourceSkinTexture(sourceBodyConditions);
+    const sourceMarkings = sourceMarkingsForBodyConditions(sourceBodyConditions);
+    const sourcePalette = sourcePaletteForClothing(seed.material_life.clothing_detail || seed.material_life.clothing_level);
 
-    if (displayOverrides.clothingDetail) {
+    if (displayOverrides.clothingDetail && clothingIsSpecific) {
       sourceEquippedItems.torso = createMaterialItem(displayOverrides.clothingDetail, 'Apparel', {
         equipmentSlot: 'torso',
         description: `Clothing from the source material record: ${displayOverrides.clothingDetail}.`,
         material: 'cloth',
+        idSeed: `${recordKey}|torso`,
       });
     }
-    const sourceBodyConditions = seed.material_life.body_conditions || [];
+    if (sourceHeadgear && !sourceEquippedItems.head) {
+      sourceEquippedItems.head = createMaterialItem(sourceHeadgear.name, 'Apparel', {
+        equipmentSlot: 'head',
+        description: `Head covering inferred from the source material record.`,
+        material: sourceHeadgear.material,
+        idSeed: `${recordKey}|headgear`,
+      });
+    }
     const shouldPreserveProceduralDisease = sourceBodyConditions.some(condition =>
       /infectious_disease|epidemic|plague|typhus|cholera|smallpox|tuberculosis|malaria/i.test(condition)
     );
@@ -628,25 +716,29 @@ export function adaptPersonaMaterialRecord(
       isLlmEnhanced: true,
       appearance: {
         ...character.appearance,
-        skinTexture: sourceSkinTexture(sourceBodyConditions) || character.appearance.skinTexture,
+        skinTexture: sourceSkinTextureValue || character.appearance.skinTexture,
+        markings: sourceMarkings || character.appearance.markings,
         palette: {
           ...character.appearance.palette,
-          ...sourcePaletteForClothing(seed.material_life.clothing_detail || seed.material_life.clothing_level),
+          ...sourcePalette,
         },
-        garment: displayOverrides.clothingDetail
+        garment: displayOverrides.clothingDetail && clothingIsSpecific
           ? { name: titleCase(displayOverrides.clothingDetail), material: 'cloth' }
           : character.appearance.garment,
+        headgear: sourceHeadgear || character.appearance.headgear,
       },
       portraitVisualOverrides: {
         ...(character as any).portraitVisualOverrides,
         appearance: {
           ...((character as any).portraitVisualOverrides?.appearance || {}),
-          skinTexture: sourceSkinTexture(sourceBodyConditions) || character.appearance.skinTexture,
+          skinTexture: sourceSkinTextureValue || character.appearance.skinTexture,
+          markings: sourceMarkings || character.appearance.markings,
         },
-        garment: displayOverrides.clothingDetail
+        garment: displayOverrides.clothingDetail && clothingIsSpecific
           ? { name: titleCase(displayOverrides.clothingDetail), material: 'cloth' }
           : undefined,
-        palette: sourcePaletteForClothing(seed.material_life.clothing_detail || seed.material_life.clothing_level),
+        headgear: sourceHeadgear,
+        palette: sourcePalette,
         background: {
           ...sourceBackgroundForRecord(record),
           sourceBasis: record.source.source_basis,
@@ -654,6 +746,8 @@ export function adaptPersonaMaterialRecord(
         },
         notes: [
           `Source visual profile from ${record.source.source_basis.replace(/_/g, ' ')}.`,
+          ...(displayOverrides.clothingDetail && !clothingIsSpecific ? ['Clothing level adjusted palette without replacing the procedural garment.'] : []),
+          ...(sourceHeadgear ? [`Head covering inferred as ${sourceHeadgear.name}.`] : []),
           ...(sourceBodyConditions.length ? ['Body condition cues applied to skin texture.'] : []),
         ],
       },

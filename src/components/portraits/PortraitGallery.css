@@ -1,0 +1,139 @@
+.portrait-gallery {
+  min-height: 100vh;
+  padding: 32px;
+  background: #f4f1ea;
+  color: #25211b;
+}
+
+.portrait-gallery__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 1280px;
+  margin: 0 auto 28px;
+  border-bottom: 1px solid #d2c8b8;
+  padding-bottom: 18px;
+}
+
+.portrait-gallery__eyebrow {
+  margin: 0 0 6px;
+  color: #6f6656;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.portrait-gallery h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1;
+}
+
+.portrait-gallery__back {
+  color: #5d4a35;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.portrait-gallery__back:hover {
+  text-decoration: underline;
+}
+
+.portrait-gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 18px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.portrait-gallery__card {
+  display: grid;
+  grid-template-columns: 224px minmax(0, 1fr);
+  gap: 16px;
+  min-height: 260px;
+  padding: 16px;
+  border: 1px solid #d8cebf;
+  border-radius: 8px;
+  background: #fffaf1;
+}
+
+.portrait-gallery__portrait {
+  width: 224px;
+  height: 224px;
+  border: 1px solid #2d2922;
+  background: #ddd2c0;
+}
+
+.portrait-gallery__portrait svg {
+  display: block;
+}
+
+.portrait-gallery__body {
+  min-width: 0;
+}
+
+.portrait-gallery__body h2 {
+  margin: 0 0 6px;
+  font-size: 1.18rem;
+  line-height: 1.15;
+}
+
+.portrait-gallery__body p {
+  margin: 0 0 12px;
+  color: #5e564b;
+}
+
+.portrait-gallery__body dl {
+  display: grid;
+  gap: 7px;
+  margin: 0 0 12px;
+  font-size: 0.86rem;
+}
+
+.portrait-gallery__body dl div {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.portrait-gallery__body dt {
+  color: #7a6e5d;
+  font-weight: 700;
+}
+
+.portrait-gallery__body dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.portrait-gallery__body ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+  color: #4b4338;
+  font-size: 0.88rem;
+}
+
+@media (max-width: 760px) {
+  .portrait-gallery {
+    padding: 20px;
+  }
+
+  .portrait-gallery__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .portrait-gallery__card {
+    grid-template-columns: 1fr;
+  }
+
+  .portrait-gallery__portrait {
+    justify-self: center;
+  }
+}

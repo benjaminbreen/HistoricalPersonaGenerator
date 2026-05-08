@@ -361,6 +361,57 @@ body.dark-mode .top-bar {
   gap: var(--sp-md);
 }
 
+.old-bailey-source-box {
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: var(--sp-lg);
+  display: grid;
+  gap: var(--sp-md);
+  background: var(--color-surface-elevated);
+}
+
+.old-bailey-source-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-md);
+}
+
+.old-bailey-source-heading span {
+  color: var(--color-text-primary);
+  font: 700 0.875rem var(--font-serif);
+}
+
+.old-bailey-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--sp-md);
+}
+
+.old-bailey-filter-grid label {
+  display: grid;
+  gap: var(--sp-xs);
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-sans);
+}
+
+.old-bailey-filter-grid select {
+  width: 100%;
+  min-width: 0;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  padding: var(--sp-md);
+  border-radius: 4px;
+  font: 0.875rem var(--font-sans);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .source-actions {
   display: flex;
   align-items: center;
@@ -538,7 +589,7 @@ body.dark-mode .top-bar {
 
 .source-field-summary {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: var(--sp-md);
 }
 
@@ -570,48 +621,118 @@ body.dark-mode .top-bar {
 
 .jsonl-category-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--sp-md);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-sm);
 }
 
 .jsonl-category-card {
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   border-radius: 4px;
-  padding: var(--sp-md);
+  padding: var(--sp-sm);
   display: grid;
   gap: var(--sp-sm);
   min-width: 0;
+  align-content: start;
+}
+
+.jsonl-category-card-empty {
+  background: var(--color-bg);
 }
 
 .jsonl-category-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--sp-md);
+  gap: var(--sp-sm);
 }
 
 .jsonl-category-header h4 {
   margin: 0;
   color: var(--color-text-primary);
   font-family: var(--font-sans);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
 }
 
-.jsonl-category-header span {
+.jsonl-category-badges {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--sp-xs);
+}
+
+.jsonl-category-badges span {
   flex: 0 0 auto;
   color: var(--color-accent-secondary);
   border: 1px solid var(--color-accent-secondary);
   border-radius: 999px;
-  padding: 0.16rem 0.45rem;
-  font-size: 0.625rem;
+  padding: 0.1rem 0.36rem;
+  font-size: 0.54rem;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+.jsonl-category-card-empty .jsonl-category-badges span:first-child {
+  color: var(--color-text-tertiary);
+  border-color: var(--color-border);
+}
+
+.schema-field-table {
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  overflow: auto;
+  max-height: 14rem;
+  background: var(--color-bg);
+}
+
+.schema-field-row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.9fr) minmax(0, 1.4fr);
+  gap: var(--sp-sm);
+  padding: 0.22rem 0.42rem;
+  border-bottom: 1px solid var(--color-border);
+  align-items: baseline;
+}
+
+.schema-field-row:last-child {
+  border-bottom: 0;
+}
+
+.schema-field-row code {
+  color: var(--color-text-tertiary);
+  font: 0.62rem/1.25 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.schema-field-row span {
+  color: var(--color-text-primary);
+  font: 0.68rem/1.28 var(--font-sans);
+  overflow-wrap: anywhere;
+}
+
+.schema-field-row-empty span {
+  color: var(--color-text-tertiary);
+}
+
+.jsonl-category-edit {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--sp-xs);
+}
+
+.jsonl-category-edit summary {
+  cursor: pointer;
+  color: var(--color-text-tertiary);
+  font: 700 0.62rem var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .jsonl-category-card textarea {
   min-height: 7rem;
   padding: var(--sp-md);
+  margin-top: var(--sp-sm);
 }
 
 .field-evidence-chip-row {
@@ -721,6 +842,7 @@ body.dark-mode .top-bar {
 
 @media (max-width: 760px) {
   .source-input-grid,
+  .old-bailey-filter-grid,
   .source-url-row,
   .character-sheet-editor-header,
   .source-field-summary,

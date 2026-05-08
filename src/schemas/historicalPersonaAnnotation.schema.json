@@ -74,7 +74,7 @@
         },
         "extraction_method": {
           "type": "string",
-          "enum": ["manual_transcription", "paste", "wikipedia_api", "html_readability", "ocr", "pdf_text_layer", "llm_extraction", "mixed", "unknown"]
+          "enum": ["manual_transcription", "paste", "wikipedia_api", "structured_api", "html_readability", "ocr", "pdf_text_layer", "llm_extraction", "mixed", "unknown"]
         },
         "source_reliability_notes": {
           "type": "string"

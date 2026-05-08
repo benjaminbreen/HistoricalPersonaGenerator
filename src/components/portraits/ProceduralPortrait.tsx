@@ -95,8 +95,6 @@ interface ProceduralPortraitProps {
         size: 'small' | 'medium' | 'large';
         pattern?: string;
       }>;
-      // Some builds used height in the original body calc (keep permissive)
-      // @ts-ignore
       height?: number;
     };
     wealthLevel: 'poor' | 'modest' | 'comfortable' | 'wealthy' | 'noble';
@@ -147,6 +145,16 @@ interface ProceduralPortraitProps {
 
 type AgeGroup = 'young' | 'adult' | 'old';
 
+type PortraitStats = ProceduralPortraitProps['character']['stats'];
+type PortraitAppearance = ProceduralPortraitProps['character']['appearance'];
+
+const DEFAULT_STATS: PortraitStats = {
+  strength: 5,
+  intelligence: 5,
+  charisma: 5,
+  constitution: 5,
+};
+
 const ProceduralPortrait: React.FC<ProceduralPortraitProps> = ({
   character,
   size = 192,
@@ -185,7 +193,12 @@ const ProceduralPortrait: React.FC<ProceduralPortraitProps> = ({
   const uniqueId = useMemo(() => 'pp-' + seed.toString(36), [seed]);
 
   // ---------- Extracted Character Data ----------
-  const { age = 30, gender, stats = {}, appearance = {}, wealthLevel, era } = character;
+  const { age = 30, gender, wealthLevel, era } = character;
+  const appearance = (character.appearance || {}) as Partial<PortraitAppearance>;
+  const stats: PortraitStats = {
+    ...DEFAULT_STATS,
+    ...character.stats,
+  };
 
   // Use ethnicCulturalZone if available, otherwise fall back to geographic culturalZone
   const culturalZone = (character as any).ethnicCulturalZone || character.culturalZone || 'EUROPEAN';
@@ -452,7 +465,7 @@ const parseHairstyle = (
   const headY = 10;
 
   // ---------- Disease Analysis & Visual Effects ----------
-  const diseaseRestrictions = calculateDiseaseGameplayRestrictions(character.diseaseHealth);
+  const diseaseRestrictions = calculateDiseaseGameplayRestrictions(character.diseaseHealth as any);
   const currentDiseases = character.diseaseHealth?.currentDiseases || [];
 
   // Get specific disease effects
@@ -854,11 +867,9 @@ const parseHairstyle = (
         break;
     }
 
-    // Optional height support (kept from your original usage)
-    // @ts-ignore
+    // Optional height support (kept from the original body metric usage)
     if (appearanceWithDefaults.height) {
       const avgHeight = isFemale ? 165 : 175;
-      // @ts-ignore
       heightMod *= (appearanceWithDefaults.height / avgHeight);
     }
 
@@ -1035,7 +1046,7 @@ const renderHead = useMemo(() => {
   const jawline = (appearanceWithDefaults.jawline || 'soft').toLowerCase();
   const cheekbones = (appearanceWithDefaults.cheekbones || 'average').toLowerCase();
   const skinTexture = (appearanceWithDefaults.skinTexture || 'smooth').toLowerCase();
-  const isMale = appearanceWithDefaults.gender === 'male' || appearanceWithDefaults.gender === 'm';
+  const isMale = gender === 'Male';
 
   // ── helpers ────────────────────────────────────────────────
   const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
@@ -1551,7 +1562,7 @@ const renderHead = useMemo(() => {
   const maxHealth = character.maxHealth || 100;
   const fatigue = character.fatigue || 0;
   const maxFatigue = character.maxFatigue || 100;
-  const affect = appearanceWithDefaults.affect || 'neutral';
+  const affect = expr || 'neutral';
 
   const healthPercent = health / maxHealth;
   const fatiguePercent = fatigue / maxFatigue;
@@ -1613,7 +1624,6 @@ const renderHead = useMemo(() => {
   appearanceWithDefaults.faceShape,
   appearanceWithDefaults.jawline,
   appearanceWithDefaults.skinTexture,
-  appearanceWithDefaults.affect,
   character.health,
   character.maxHealth,
   character.fatigue,
@@ -1637,7 +1647,7 @@ const renderHead = useMemo(() => {
   useEquippedItems,
   character.equippedItems,
   appearanceWithDefaults.headgear,
-  appearanceWithDefaults.gender
+  gender
 ]);
 
 
@@ -1647,7 +1657,7 @@ const renderHair = useMemo(() => {
   const elements: JSX.Element[] = [];
   const hairLen = hairLength;
   const centerX = headX + headDim.width / 2; // Move centerX to the top
-  const isMale = appearanceWithDefaults.gender === 'male' || appearanceWithDefaults.gender === 'm';
+  const isMale = gender === 'Male';
 
   const CLIP_HAIR_TO_HEADGEAR = true;
 
@@ -2633,7 +2643,7 @@ if (defaultCapStyles.has(hairStyle)) {
     }
 
     return <g key="hair">{elements}</g>;
-  }, [hairTexture, hairStyle, baseHair, hairBrightHighlight, hairDeepShadow, hairHighlight, hairShadow, headDim.width, headX, headY, hairLength, isOld, isYoung, skinTone, isFemale, headgearName, appearanceWithDefaults.gender]);
+  }, [hairTexture, hairStyle, baseHair, hairBrightHighlight, hairDeepShadow, hairHighlight, hairShadow, headDim.width, headX, headY, hairLength, isOld, isYoung, skinTone, isFemale, headgearName, gender]);
 
   // ----- EYES (with expression tweaks) -----
   const renderEyes = () => {
