@@ -620,7 +620,7 @@ export default function PersonaGenerator() {
 
   useEffect(() => {
     setCategoryEditDrafts({});
-  }, [annotationRecord?.record_id]);
+  }, [annotationRecord]);
 
   // Expression options for portrait cycling in character details modal
   const expressionCycle = [
@@ -751,7 +751,13 @@ export default function PersonaGenerator() {
 
   const generateFromAnnotationRecord = async (
     record: HistoricalPersonaAnnotationRecord,
-    options: { useSourceTitleAsName?: boolean; portraitUrl?: string; portraitAttribution?: string; generateSketch?: boolean } = {}
+    options: {
+      useSourceTitleAsName?: boolean;
+      portraitUrl?: string;
+      portraitAttribution?: string;
+      generateSketch?: boolean;
+      fieldEditStatus?: string | null;
+    } = {}
   ) => {
     const adaptedMaterial = adaptPersonaMaterialRecord(record, options);
     const generationParams = adaptedMaterial.generationParams;
@@ -778,7 +784,7 @@ export default function PersonaGenerator() {
     setEditableJsonl(annotationRecordToJsonl(record));
     setSourcePortraitUrl(options.portraitUrl || null);
     setSourcePortraitAttribution(options.portraitAttribution || null);
-    setFieldEditStatus(null);
+    setFieldEditStatus(options.fieldEditStatus ?? null);
     setPersona(newPersona);
     setPersonaStack([newPersona]);
     setCurrentPersonaIndex(0);
@@ -943,7 +949,9 @@ export default function PersonaGenerator() {
       setOldBaileySelectionActive(false);
       setSourceTarget(filters.personaAngle === 'named_subject' ? 'named_subject' : 'ordinary_person_from_source_world');
       setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking Gemini to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
-      const record = await recordFromSource(source);
+      const record = await recordFromSource(source, {
+        target: filters.personaAngle === 'named_subject' ? 'named_subject' : 'ordinary_person_from_source_world',
+      });
       setSourceIngestionStatus(useGeminiExtraction ? `Generated a Gemini-filled annotation record from ${source.citationLabel}.` : `Generated a heuristic annotation record from ${source.citationLabel}.`);
       await generateFromAnnotationRecord(record, {
         useSourceTitleAsName: filters.personaAngle === 'named_subject',
@@ -963,11 +971,14 @@ export default function PersonaGenerator() {
       await ingestRandomOldBailey();
       return;
     }
+    if (sourceUrl.trim()) {
+      await ingestUrl();
+      return;
+    }
     if (sourceText.trim()) {
       await ingestPastedSource();
       return;
     }
-    await ingestUrl();
   };
 
   const applyEditedJsonl = async () => {
@@ -979,11 +990,11 @@ export default function PersonaGenerator() {
         return;
       }
       setEditableJsonl(annotationRecordToJsonl(parsed));
-      setFieldEditStatus('Applied edited schema fields.');
       await generateFromAnnotationRecord(parsed, {
         useSourceTitleAsName: sourceTarget === 'named_subject',
         portraitUrl: sourcePortraitUrl || undefined,
         portraitAttribution: sourcePortraitAttribution || undefined,
+        fieldEditStatus: 'Applied edited schema fields.',
       });
     } catch (error) {
       setFieldEditStatus(error instanceof Error ? error.message : 'Edited JSONL is not valid JSON.');
@@ -3953,6 +3964,7 @@ export default function PersonaGenerator() {
                       onChange={(event) => {
                         setOldBaileySelectionActive(false);
                         setSourceUrl(event.target.value);
+                        setSourceText('');
                       }}
                       placeholder="https://en.wikipedia.org/wiki/..."
                     />
@@ -4055,6 +4067,7 @@ export default function PersonaGenerator() {
                   value={sourceText}
                   onChange={(event) => {
                     setOldBaileySelectionActive(false);
+                    setSourceUrl('');
                     setSourceText(event.target.value);
                   }}
                   placeholder="Paste a document excerpt here, then generate a persona from the extracted annotation record."
@@ -4067,11 +4080,11 @@ export default function PersonaGenerator() {
                     ? 'Generating...'
                     : oldBaileySelectionActive || (!sourceText.trim() && !sourceUrl.trim())
                       ? 'Generate from Old Bailey'
-                      : sourceText.trim()
-                      ? 'Generate from Source Text'
                       : sourceUrl.trim()
                         ? 'Generate from URL'
-                        : 'Generate from Source'}
+                        : sourceText.trim()
+                          ? 'Generate from Source Text'
+                          : 'Generate from Source'}
                 </button>
                 {annotationRecord && (
                   <button className="btn btn-secondary" onClick={() => setShowMaterialJson(!showMaterialJson)}>
