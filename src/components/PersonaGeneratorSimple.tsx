@@ -482,6 +482,43 @@ const setPathValue = (source: any, path: Array<string | number>, value: unknown)
 const supportLevelLabel = (supportLevel: string): string =>
   supportLevel.replace(/_/g, ' ');
 
+const titleCaseDisplay = (value?: string): string =>
+  normalizeMaterialText(value || '')
+    .split(' ')
+    .filter(Boolean)
+    .map((word, index) => {
+      const lower = word.toLowerCase();
+      if (index > 0 && ['and', 'or', 'of', 'in', 'to', 'for', 'with', 'from', 'the', 'a', 'an'].includes(lower)) {
+        return lower;
+      }
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+    })
+    .join(' ');
+
+const sourceBasisLabel = (basis?: string): string => {
+  const labels: Record<string, string> = {
+    synthetic_composite: 'Synthetic Seed',
+    wikipedia_or_reference: 'Wikipedia / Reference',
+    court_testimony: 'Court Testimony',
+    will_or_inventory: 'Will or Inventory',
+    tax_or_census: 'Tax or Census',
+    parish_or_temple_register: 'Register',
+    social_history: 'Social History',
+    material_culture: 'Material Culture',
+    oral_history: 'Oral History',
+    diary_or_letter: 'Diary or Letter',
+    newspaper_or_periodical: 'Newspaper',
+    travel_account: 'Travel Account',
+    ship_log_or_manifest: 'Ship Log',
+    legal_code_or_regulation: 'Legal Source',
+    map_or_gazetteer: 'Map or Gazetteer',
+    image_or_artifact: 'Image or Artifact',
+    secondary_synthesis: 'Secondary Synthesis',
+    other: 'Source',
+  };
+  return labels[basis || ''] || titleCaseDisplay(basis);
+};
+
 const formatSchemaScalar = (value: unknown): string => {
   if (value === undefined || value === null || value === '') return '—';
   if (typeof value === 'boolean') return value ? 'true' : 'false';
@@ -740,9 +777,10 @@ export default function PersonaGenerator() {
   const sourceFieldTag = (fieldPath: string): MaterialSupportTag | null =>
     materialAdapter?.provenanceForField(fieldPath) || null;
 
-  const renderSourceFieldTag = (fieldPath: string) => {
+  const renderSourceFieldTag = (fieldPath: string, options: { suppressSynthetic?: boolean } = {}) => {
     const tag = sourceFieldTag(fieldPath);
     if (!tag) return null;
+    if (options.suppressSynthetic && tag === 'synthetic-fill') return null;
     return <span className={`source-field-tag source-field-tag-${tag}`}>{sourceSupportLabel(tag)}</span>;
   };
 
@@ -752,6 +790,7 @@ export default function PersonaGenerator() {
   const sourceClothingDetail = materialOverrides?.clothingDetail || '';
   const sourceAttributes = materialOverrides?.attributes || [];
   const sourceIdeology = materialOverrides?.worldviewDescription || '';
+  const isSyntheticAnnotation = annotationRecord?.source.source_basis === 'synthetic_composite';
   const updateOldBaileyFilters = (updater: (filters: OldBaileyRandomFilters) => OldBaileyRandomFilters) => {
     setOldBaileySelectionActive(true);
     setOldBaileyFilters(updater);
@@ -4059,10 +4098,6 @@ export default function PersonaGenerator() {
             <IoInformationCircle aria-hidden="true" />
             About
           </button>
-          <button onClick={handleDonate} aria-label="Support the project via Res Obscura Substack">
-            <IoHeart aria-hidden="true" />
-            Support
-          </button>
         </div>
       </div>
 
@@ -4072,7 +4107,7 @@ export default function PersonaGenerator() {
         <div className="control-buttons">
           <button className="btn btn-primary" onClick={generateCompletelyRandom} aria-label="Generate a random historical persona">
             <IoShuffle aria-hidden="true" />
-            {isSourceGenerating ? 'Generating Schema...' : 'Generate Random Persona'}
+            {isSourceGenerating ? 'Generating Schema...' : 'Generate Synthetic Persona'}
           </button>
           <button className="btn btn-secondary" onClick={generateRandomAnnotationPersona} disabled={isSourceGenerating} aria-label="Generate a surprise Wikipedia-backed schema persona">
             <IoDocumentText aria-hidden="true" />
@@ -4098,7 +4133,7 @@ export default function PersonaGenerator() {
                 {isSourceGenerating
                   ? (sourceIngestionStatus || 'Generating source-backed persona...')
                   : annotationRecord && sourcePanelCollapsed
-                    ? `${annotationRecord.source.citation_label} loaded.`
+                    ? `${sourceBasisLabel(annotationRecord.source.source_basis)} loaded.`
                     : 'Paste text, load a URL, or draw a real Old Bailey trial to populate the annotation schema before persona generation.'}
               </p>
             </div>
@@ -4114,6 +4149,9 @@ export default function PersonaGenerator() {
           {sourcePanelCollapsed ? (
             <div className="source-collapsed-body">
               <div className="source-collapsed-summary">
+                {annotationRecord && (
+                  <span className="source-type-badge">{sourceBasisLabel(annotationRecord.source.source_basis)}</span>
+                )}
                 <span>{sourceTitle || annotationRecord?.source.title || 'No source title yet'}</span>
                 {sourceUrl && <code>{sourceUrl}</code>}
               </div>
@@ -4481,8 +4519,8 @@ export default function PersonaGenerator() {
                 {annotationRecord && (
                   <div className="schema-evidence-strip">
                     <div>
-                      <strong>{annotationRecord.source.citation_label}</strong>
-                      <span>{annotationRecord.evidence.confidence} confidence · {annotationRecord.source.source_basis.replace(/_/g, ' ')}</span>
+                      <strong>{sourceBasisLabel(annotationRecord.source.source_basis)}</strong>
+                      <span>{annotationRecord.evidence.confidence} confidence · {annotationRecord.source.citation_label}</span>
                     </div>
                     <p>{annotationRecord.evidence.basis_summary}</p>
                   </div>
@@ -5193,12 +5231,15 @@ export default function PersonaGenerator() {
                   <div className="equipment-grid">
                     {annotationRecord ? (
                       <>
+                        {isSyntheticAnnotation && (
+                          <div className="source-section-note">Synthetic Fill</div>
+                        )}
                         {sourceClothingDetail && (
                           <div className="equipment-item source-equipment-item">
                             <span className="equipment-slot">Clothing</span>
                             <span className="equipment-name">
-                              {sourceClothingDetail}
-                              {renderSourceFieldTag('/persona_seed/material_life/clothing_detail') || renderSourceFieldTag('/persona_seed/material_life/clothing_level')}
+                              {titleCaseDisplay(sourceClothingDetail)}
+                              {renderSourceFieldTag('/persona_seed/material_life/clothing_detail', { suppressSynthetic: isSyntheticAnnotation }) || renderSourceFieldTag('/persona_seed/material_life/clothing_level', { suppressSynthetic: isSyntheticAnnotation })}
                             </span>
                           </div>
                         )}
@@ -5206,8 +5247,8 @@ export default function PersonaGenerator() {
                           <div key={`source-possession-${idx}`} className="equipment-item source-equipment-item">
                             <span className="equipment-slot">{idx === 0 ? 'Possessions' : 'Item'}</span>
                             <span className="equipment-name">
-                              {normalizeMaterialText(possession)}
-                              {renderSourceFieldTag('/persona_seed/material_life/possessions')}
+                              {titleCaseDisplay(possession)}
+                              {renderSourceFieldTag('/persona_seed/material_life/possessions', { suppressSynthetic: isSyntheticAnnotation })}
                             </span>
                           </div>
                         ))}
@@ -5378,6 +5419,9 @@ export default function PersonaGenerator() {
                   >
                     <h3>Attributes</h3>
                     <div className="attribute-list">
+                      {isSyntheticAnnotation && sourceAttributes.length > 0 && (
+                        <div className="source-section-note">Synthetic Fill</div>
+                      )}
                       {sourceAttributes.map((attr, idx) => {
                         const IconComponent = attr.icon;
                         return (
@@ -5393,8 +5437,8 @@ export default function PersonaGenerator() {
                             </div>
                             <div className="attribute-text">
                               <div className="attribute-name">
-                                {attr.name}
-                                {renderSourceFieldTag(attr.fieldPath)}
+                                {titleCaseDisplay(attr.name)}
+                                {renderSourceFieldTag(attr.fieldPath, { suppressSynthetic: isSyntheticAnnotation })}
                               </div>
                               <div className="attribute-description">{attr.description}</div>
                             </div>
@@ -5436,8 +5480,11 @@ export default function PersonaGenerator() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5 }}
                   >
-                    <h3>Ideology</h3>
+                    <h3>Worldview</h3>
                     <div className="attribute-list">
+                      {sourceIdeology && isSyntheticAnnotation && (
+                        <div className="source-section-note">Synthetic Fill</div>
+                      )}
                       <motion.div
                         className="attribute-item"
                         initial={{ opacity: 0, y: 10 }}
@@ -5449,8 +5496,8 @@ export default function PersonaGenerator() {
                         </div>
                         <div className="attribute-text">
                           <div className="attribute-name">
-                            {sourceIdeology ? (materialOverrides?.worldviewLabel || 'Worldview') : (IDEOLOGIES.find((i: any) => i.id === persona.character.ideology)?.name || persona.character.ideology)}
-                            {sourceIdeology && (renderSourceFieldTag('/persona_seed/normative_world') || renderSourceFieldTag('/persona_seed/religious_practice') || renderSourceFieldTag('/persona_seed/mobility_and_horizon/religious_or_moral_world'))}
+                            {sourceIdeology ? titleCaseDisplay(materialOverrides?.worldviewLabel || 'Worldview') : (IDEOLOGIES.find((i: any) => i.id === persona.character.ideology)?.name || persona.character.ideology)}
+                            {sourceIdeology && (renderSourceFieldTag('/persona_seed/normative_world', { suppressSynthetic: isSyntheticAnnotation }) || renderSourceFieldTag('/persona_seed/religious_practice', { suppressSynthetic: isSyntheticAnnotation }) || renderSourceFieldTag('/persona_seed/mobility_and_horizon/religious_or_moral_world', { suppressSynthetic: isSyntheticAnnotation }))}
                           </div>
                           <div className="attribute-description">
                             {sourceIdeology ? sourceIdeology : (IDEOLOGIES.find((i: any) => i.id === persona.character.ideology)?.description || '')}
@@ -5586,8 +5633,8 @@ export default function PersonaGenerator() {
 
       {!persona && (
         <div className="empty-state">
-          <p>Click "Generate Random Persona" to create your first historical character!</p>
-          <p className="empty-subtitle">Choose from 9 cultural zones and 6 historical eras</p>
+          <p>No persona record is currently loaded.</p>
+          <p className="empty-subtitle">Generate a procedural seed or load a historical source to begin.</p>
         </div>
       )}
     </div>
