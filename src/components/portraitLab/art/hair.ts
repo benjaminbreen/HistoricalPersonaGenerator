@@ -78,9 +78,9 @@ function hairlineAt(context: RenderContext, dx: number): number {
   const t = Math.min(1, Math.abs(dx) / Math.max(1, anatomy.headHalfWidth));
   const base = anatomy.browY - 8 + spec.recession * 4;
   const templeDip = 3.4 * t * t;
-  const recessionBump = spec.recession * 11 * Math.exp(-((t - 0.66) ** 2) / 0.075);
+  const recessionBump = spec.recession * 8 * Math.exp(-((t - 0.66) ** 2) / 0.09);
   // A slight widow's peak keeps the centre from reading as a straight cut.
-  const peak = Math.exp(-(t ** 2) / 0.02) * 1.2;
+  const peak = Math.exp(-(t ** 2) / 0.03) * 0.9;
   return base + templeDip - recessionBump + peak;
 }
 
@@ -176,10 +176,30 @@ export function computeHairMasks(context: RenderContext): HairMasks {
   const hair = maskSubtract(silhouette, faceOpening);
 
   // Below the jaw, hair parts around the neck and falls to either side rather
-  // than swallowing the chest — otherwise long hair reads as a black bib.
+  // than swallowing the chest.
+  //
+  // The parting has to be clamped against the hair's own outer edge. An
+  // unbounded opening curve eventually overtakes the silhouette and leaves a
+  // pair of one-pixel crescents floating at the shoulders — which read as a
+  // strange little cape rather than as hair.
+  const MIN_FALL_WIDTH = 7;
   for (let y = Math.max(0, anatomy.chinY - 3); y < size; y += 1) {
-    const t = (y - (anatomy.chinY - 3)) / 20;
-    const open = anatomy.neckHalf + 1 + Math.max(0, t) * 15;
+    let outer = 0;
+    for (let x = 0; x < size; x += 1) {
+      if (!hair[y * size + x]) continue;
+      outer = Math.max(outer, Math.abs(x + 0.5 - centerX));
+    }
+    const t = Math.max(0, (y - (anatomy.chinY - 3)) / 26);
+    const curve = anatomy.neckHalf + 1 + t * 9;
+    // Two rules, and the order matters. Keep a solid fall on each side where
+    // the hair is wide enough to have one — but never let the parting close in
+    // past the neck, or a shoulder-length cut ends with its two tips meeting
+    // across the throat and reading as a collar.
+    const open = Math.max(
+      anatomy.neckHalf + 1,
+      outer > MIN_FALL_WIDTH ? Math.min(curve, outer - MIN_FALL_WIDTH) : curve
+    );
+
     for (let x = 0; x < size; x += 1) {
       if (Math.abs(x + 0.5 - centerX) <= open) hair[y * size + x] = 0;
     }
@@ -220,8 +240,10 @@ function fillHair(context: RenderContext, mask: Mask): void {
   );
   const dither = spec.hairTexture === 'coily' || spec.hairTexture === 'kinky' ? 0.6 : 0.25;
   fillMask(raster, mask, ramps.hair, MAT.HAIR, (x, y) => {
-    // Hair falling past the jaw loses the light quickly.
-    const drop = y > anatomy.chinY ? Math.min(2, (y - anatomy.chinY) / 12) : 0;
+    // Hair falling past the jaw loses some light — but only about a step, or
+    // ginger hair turns brown on the way down and stops reading as the same
+    // head of hair.
+    const drop = y > anatomy.chinY ? Math.min(1.1, (y - anatomy.chinY) / 18) : 0;
     return shader(x, y) + drop;
   }, { dither });
 }

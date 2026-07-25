@@ -16,6 +16,11 @@ import { generatePersonalGoal } from '../../services/goalService';
 import { getProfessionContext, getFallbackContext, ProfessionContext } from '../../services/professionContextService';
 import { getMarkingsForCharacter, selectRandomMarking, getRandomPattern, convertToAppearanceMarking, getMarkingProbability } from '../../constants/characterData/culturalMarkings';
 import { isClergyRoleCompatible } from '../../constants/characterData/religionClergyRoles';
+import { createHistoricalContext } from '../../services/historicalContextService';
+import { getProfessionSelectionWeight, isProfessionHistoricallyAvailable } from '../../services/professionAvailabilityService';
+import { isMaterialAvailable } from '../../services/demographyService';
+import { getZoneReligionFallback, isReligionHistoricallyAvailable } from '../../services/religionFallbackService';
+import type { HistoricalContext } from '../../types/historicalContext';
 
 /**
  * Create safe NPC memory to avoid proxy revocation issues
@@ -128,26 +133,21 @@ export function determineReligion(
             band => year >= band.startYear && year <= band.endYear
         );
 
-    let eraData: ReligionDistributionEntry[] | undefined =
-        transitionBand?.religions || RELIGION_DATA[culturalZone]?.[region]?.[era];
+    const regionalEraData = RELIGION_DATA[culturalZone]?.[region]?.[era];
+    const regionalContainsAnachronism = year !== undefined &&
+        regionalEraData?.some(item => !isReligionHistoricallyAvailable(item.religion, year));
+    let eraData: ReligionDistributionEntry[] | undefined = transitionBand?.religions ||
+        (regionalContainsAnachronism ? undefined : regionalEraData);
     console.log('[Religion] First lookup result:', eraData ? `Found ${eraData.length} options` : 'Not found');
 
     if (!eraData || eraData.length === 0) {
-        // Fallback to a broader era definition if specific one not found
-        const fallbackEra = era.includes('s') ? HistoricalEra.MODERN_ERA : era > HistoricalEra.RENAISSANCE_EARLY_MODERN ? HistoricalEra.INDUSTRIAL_ERA : HistoricalEra.MEDIEVAL;
-        console.log('[Religion] Trying fallback era:', fallbackEra);
-        eraData = RELIGION_DATA[culturalZone]?.[region]?.[fallbackEra];
-        console.log('[Religion] Fallback era result:', eraData ? `Found ${eraData.length} options` : 'Not found');
+        // Missing local data must never borrow an arbitrary region. Use an
+        // explicit broad-zone distribution for the exact year instead.
+        eraData = getZoneReligionFallback(culturalZone, year ?? 0, place);
+        console.log('[Religion] Using explicit zone/year fallback:', eraData);
     }
-
-    if (!eraData || eraData.length === 0) {
-        // Fallback to a major region within the cultural zone if specific one not found
-        console.log('[Religion] Checking available regions in RELIGION_DATA for zone:', culturalZone);
-        console.log('[Religion] Available regions:', Object.keys(RELIGION_DATA[culturalZone] || {}));
-        const fallbackRegionKey = Object.keys(RELIGION_DATA[culturalZone] || {})[0] || 'British Isles';
-        console.log('[Religion] Using fallback region:', fallbackRegionKey);
-        eraData = RELIGION_DATA[culturalZone]?.[fallbackRegionKey]?.[era];
-        console.log('[Religion] Fallback region result:', eraData ? `Found ${eraData.length} options` : 'Not found');
+    if (year !== undefined) {
+        eraData = eraData.filter(item => isReligionHistoricallyAvailable(item.religion, year));
     }
 
     if (!eraData || eraData.length === 0) {
@@ -594,7 +594,16 @@ function getNeighboringMapAreas(currentRegion: string, currentZone: CulturalZone
     return neighbors;
 }
 
-function generateBirthplace(noise: ValueNoise, context: { region: string, culturalZone: CulturalZone }): string {
+function generateBirthplace(
+    noise: ValueNoise,
+    context: { region: string, culturalZone: CulturalZone, localArea?: string, historicalContext?: HistoricalContext }
+): string {
+    if (context.localArea && context.historicalContext?.localeType === 'city') {
+        return `the city of ${context.localArea}`;
+    }
+    if (context.localArea && context.historicalContext?.localeType === 'town') {
+        return `the town of ${context.localArea}`;
+    }
     const roll = noise.random();
 
     // 20% chance to be from a neighboring region's city
@@ -631,7 +640,8 @@ export function generateCompleteOutfit(
     wealthLevel: WealthLevel,
     gender: Gender,
     occupation?: string,
-    region?: string
+    region?: string,
+    year?: number
 ): {
     garment: ClothingPiece;
     headgear: ClothingPiece;
@@ -640,6 +650,36 @@ export function generateCompleteOutfit(
     accessory: ClothingPiece;
 } {
     const clothingSet = clothingModule.getClothingData(culturalZone, era, wealthLevel, gender);
+
+    // Material culture gate. The clothing tables were written for periods with
+    // looms; now that deep prehistory is reachable, anything woven has to be
+    // removed before it can be offered. Hide, fur, bark and plant fibre remain.
+    const filterByMaterialEra = (items: ClothingPiece[], category: string): ClothingPiece[] => {
+        if (year === undefined) return items;
+        const available = items.filter(item =>
+            isMaterialAvailable(`${item.name} ${item.material}`, year)
+        );
+        if (available.length > 0) return available;
+
+        // Nothing in the table is possible this early: fall back to what people
+        // actually wore before weaving.
+        const preTextile: Record<string, ClothingPiece[]> = {
+            garment: [
+                { name: 'Hide Wrap', material: 'Hide' },
+                { name: 'Fur Cloak', material: 'Fur' },
+                { name: 'Skin Tunic', material: 'Hide and Sinew' },
+            ],
+            headgear: [{ name: 'None', material: 'None' }, { name: 'Fur Hood', material: 'Fur' }],
+            footwear: [{ name: 'Hide Foot Wrappings', material: 'Hide' }, { name: 'Barefoot', material: 'None' }],
+            belt: [{ name: 'Sinew Cord', material: 'Sinew' }, { name: 'Hide Thong', material: 'Hide' }],
+            accessory: [
+                { name: 'Shell Pendant', material: 'Shell' },
+                { name: 'Bone Bead Necklace', material: 'Bone' },
+                { name: 'None', material: 'None' },
+            ],
+        };
+        return preTextile[category] || [{ name: 'None', material: 'None' }];
+    };
 
     // Region-based filtering for items that are inappropriate for specific regions within a cultural zone
     const filterByRegion = (items: ClothingPiece[], category: string): ClothingPiece[] => {
@@ -825,11 +865,11 @@ export function generateCompleteOutfit(
     };
     
     // Apply filters to each category - first by region, then by occupation
-    const filteredGarments = filterByOccupation(filterByRegion(clothingSet.garments, 'garment'), 'garment');
-    const filteredHeadgear = filterByOccupation(filterByRegion(clothingSet.headgear, 'headgear'), 'headgear');
-    const filteredFootwear = filterByOccupation(filterByRegion(clothingSet.footwear, 'footwear'), 'footwear');
-    const filteredBelts = filterByOccupation(filterByRegion(clothingSet.belts, 'belt'), 'belt');
-    const filteredAccessories = filterByOccupation(filterByRegion(clothingSet.accessories, 'accessory'), 'accessory');
+    const filteredGarments = filterByMaterialEra(filterByOccupation(filterByRegion(clothingSet.garments, 'garment'), 'garment'), 'garment');
+    const filteredHeadgear = filterByMaterialEra(filterByOccupation(filterByRegion(clothingSet.headgear, 'headgear'), 'headgear'), 'headgear');
+    const filteredFootwear = filterByMaterialEra(filterByOccupation(filterByRegion(clothingSet.footwear, 'footwear'), 'footwear'), 'footwear');
+    const filteredBelts = filterByMaterialEra(filterByOccupation(filterByRegion(clothingSet.belts, 'belt'), 'belt'), 'belt');
+    const filteredAccessories = filterByMaterialEra(filterByOccupation(filterByRegion(clothingSet.accessories, 'accessory'), 'accessory'), 'accessory');
     
     // Convert wealth level for clothing variations
     const simplifiedWealth =
@@ -951,7 +991,8 @@ export function generateBaseProfile(
             wealthLevel,
             gender,
             overrides.occupation,
-            context.region
+            context.region,
+            context.year
         );
 
         
@@ -981,7 +1022,8 @@ export function generateBaseProfile(
                 constrainedWealthLevel,
                 gender,
                 overrides.occupation,
-                context.region
+                context.region,
+                context.year
             );
             finalCurrency = 5 + Math.floor(noise.random() * (constrainedWealthLevel === 'poor' ? 10 : constrainedWealthLevel === 'modest' ? 30 : 100));
 
@@ -1292,40 +1334,107 @@ function isSocialClassValidForRegion(socialClass: string, region: string | undef
     return true;
 }
 
-function getFallbackRole(wealth: WealthLevel, gender: Gender): { socialClass: string, role: string, emoji: string, nameKey?: string } {
-    const commonerRoles = [
+/**
+ * The role a persona receives when the profession tables produce no candidate.
+ *
+ * This path matters far more than its name suggests: an audit over 1,000
+ * generated personas found it supplying well over half of all professions, so
+ * whatever it contains is effectively the app's default picture of human work.
+ * Left as a uniform pick over nine roles, it put a "Wanderer" in one persona in
+ * eleven and produced a world only a third of whose people fed it.
+ *
+ * It is now weighted by era: overwhelmingly food-producing before
+ * industrialisation, with the household, craft and labouring roles that
+ * genuinely surrounded subsistence agriculture making up the rest.
+ *
+ * (The frequency with which this fires at all is a separate problem — the
+ * profession tables are failing to match more often than they should — but the
+ * distribution here should be defensible regardless.)
+ */
+function getFallbackRole(
+    wealth: WealthLevel,
+    gender: Gender,
+    historicalContext?: HistoricalContext
+): { socialClass: string, role: string, emoji: string, nameKey?: string } {
+    const year = historicalContext?.year ?? 1500;
+    const foraging = year < -8000;
+
+    // Share of the workforce producing food, matching
+    // professionAvailabilityService.subsistenceShare.
+    const subsistence =
+        year < 1500 ? 0.88 :
+        year < 1750 ? 0.82 :
+        year < 1850 ? 0.68 :
+        year < 1900 ? 0.55 :
+        year < 1950 ? 0.45 : 0.28;
+
+    const foodRoles = foraging
+        ? [
+            { role: 'Forager', emoji: '🌿', gender: 'any' },
+            { role: 'Hunter', emoji: '🏹', gender: 'any' },
+            { role: 'Fisher', emoji: '🎣', gender: 'any' },
+        ]
+        : [
+            { role: 'Farmer', emoji: '🧑‍🌾', gender: 'any' },
+            { role: 'Field Hand', emoji: '🌾', gender: 'any' },
+            { role: 'Herder', emoji: '🐐', gender: 'any' },
+            { role: 'Shepherd', emoji: '🐑', gender: 'any' },
+            { role: 'Fisher', emoji: '🎣', gender: 'any' },
+        ];
+
+    const otherRoles = [
         { role: 'Laborer', emoji: '🧑‍🔧', gender: 'any' },
-        { role: 'Wanderer', emoji: '🚶', gender: 'any' },
-        { role: 'Farmer', emoji: '🧑‍🌾', gender: 'any' },
-        { role: 'Shepherd', emoji: '🐑', gender: 'any' },
-        { role: 'Potter', emoji: '🏺', gender: 'Male' },
-        { role: 'Weaver', emoji: '🧶', gender: 'Female' },
-        { role: 'Caretaker', emoji: '🧑‍⚕️', gender: 'Female' },
+        { role: 'Servant', emoji: '🧹', gender: 'any' },
+        { role: 'Weaver', emoji: '🧶', gender: 'any' },
+        { role: 'Potter', emoji: '🏺', gender: 'any' },
+        { role: 'Water Carrier', emoji: '🏺', gender: 'any' },
+        { role: 'Caretaker', emoji: '🧑‍⚕️', gender: 'any' },
         { role: 'Child Watcher', emoji: '👶', gender: 'Female' },
-        { role: 'Mother', emoji: '🤱', gender: 'Female' },
     ];
 
-    const suitableRoles = commonerRoles.filter(r => r.gender === 'any' || r.gender === gender);
+    const usable = (r: { role: string }) =>
+        !historicalContext || isProfessionHistoricallyAvailable(r.role, historicalContext);
+    const suits = (r: { gender: string }) => r.gender === 'any' || r.gender === gender;
 
-    if (suitableRoles.length > 0) {
-        const chosen = suitableRoles[Math.floor(Math.random() * suitableRoles.length)];
+    const food = foodRoles.filter(r => usable(r) && suits(r));
+    const other = otherRoles.filter(r => usable(r) && suits(r));
+
+    const pool = Math.random() < subsistence && food.length > 0 ? food
+        : other.length > 0 ? other
+        : food;
+
+    if (pool.length > 0) {
+        const chosen = pool[Math.floor(Math.random() * pool.length)];
         return { socialClass: 'COMMONER', role: chosen.role, emoji: chosen.emoji };
     }
-    
-    // Ultimate fallback if no suitable role found (e.g. for Non-binary gender)
+
+    // Ultimate fallback if nothing at all was usable.
     if (wealth === 'poor' || wealth === 'modest') {
         return { socialClass: 'COMMONER', role: 'Laborer', emoji: '🧑‍🔧' };
     }
-    return { socialClass: 'COMMONER', role: 'Wanderer', emoji: '🚶' };
+    return { socialClass: 'COMMONER', role: 'Householder', emoji: '🏠' };
 }
 
 export function determineSocialRole(
     profile: Omit<NpcEntity, 'id' | 'name' | 'class' | 'role' | 'descriptions' | 'movement' | 'x' | 'y' | 'emoji' | 'activity' | 'birthplace' | 'workplaceId' | 'workplaceName' | 'ideology' | 'beliefs'>,
-    context: { era: HistoricalEra, culturalZone: CulturalZone, factionData?: FactionData, region?: string, citySize?: number, year?: number, birthYear?: number, preferredSocialClass?: string },
+    context: { era: HistoricalEra, culturalZone: CulturalZone, factionData?: FactionData, region?: string, localArea?: string, citySize?: number, year?: number, birthYear?: number, preferredSocialClass?: string, historicalContext?: HistoricalContext },
     preferredRole?: string,
     structureType?: TerrainStructureType
 ): { socialClass: string, role: string, emoji: string, nameKey?: string } {
     try {
+        let roleHistoricalContext = context.historicalContext;
+        const pickWeightedRole = <T extends { role: string, selectionWeight?: number }>(roles: T[]): T => {
+            const weights = roles.map(item =>
+                item.selectionWeight ?? getProfessionSelectionWeight(item.role, roleHistoricalContext)
+            );
+            const total = weights.reduce((sum, weight) => sum + weight, 0);
+            let roll = Math.random() * total;
+            for (let index = 0; index < roles.length; index += 1) {
+                roll -= weights[index];
+                if (roll <= 0) return roles[index];
+            }
+            return roles[roles.length - 1];
+        };
         // If a specific role is requested (e.g., from a court or anchor), use it directly.
         if (preferredRole && context.factionData?.courtRoles && structureType && context.factionData.courtRoles[structureType]) {
             const courtRoles = context.factionData.courtRoles[structureType]!;
@@ -1352,6 +1461,14 @@ export function determineSocialRole(
         }
 
         const eraRoles: SocialClassMap | undefined = PROFESSIONS[context.culturalZone]?.[eraForProfessions];
+        const historicalContext = context.historicalContext || createHistoricalContext({
+            year: currentYear ?? 0,
+            era: eraForProfessions,
+            culturalZone: context.culturalZone,
+            region: context.region || 'Unknown',
+            location: context.localArea || context.region || 'Unknown',
+        });
+        roleHistoricalContext = historicalContext;
 
         // Helper function to check if a profession is valid for the current year based on decadeRange
         const isProfessionValidForYear = (roleDef: ProfessionDefinition): boolean => {
@@ -1359,8 +1476,11 @@ export function determineSocialRole(
             const [startYear, endYear] = roleDef.decadeRange;
             return currentYear >= startYear && currentYear <= endYear;
         };
+        const isProfessionAvailable = (roleName: string, roleDef: ProfessionDefinition): boolean =>
+            isProfessionValidForYear(roleDef) &&
+            isProfessionHistoricallyAvailable(roleName, historicalContext);
 
-        if (!eraRoles) return getFallbackRole(profile.wealthLevel, profile.gender);
+        if (!eraRoles) return getFallbackRole(profile.wealthLevel, profile.gender, historicalContext);
 
         // Get the appropriate profession context based on location
         let professionContext: ProfessionContext | null = null;
@@ -1399,7 +1519,7 @@ export function determineSocialRole(
                         continue;
                     }
                     // Check if profession is valid for the current year (decade filtering)
-                    if (!isProfessionValidForYear(roleDef)) {
+                    if (!isProfessionAvailable(preferredRole, roleDef)) {
                         continue;
                     }
                     return { socialClass, role: preferredRole, emoji: roleDef.emoji || '🧑', nameKey: roleDef.nameKey };
@@ -1407,7 +1527,7 @@ export function determineSocialRole(
             }
         }
         
-        const possibleRoles: { socialClass: string, role: string, roleDef: ProfessionDefinition }[] = [];
+        const possibleRoles: { socialClass: string, role: string, roleDef: ProfessionDefinition, selectionWeight: number }[] = [];
 
         const normalizedPreferredClass = context.preferredSocialClass?.toUpperCase().replace(/[\s-]+/g, '_');
         const allowedClassGroups: Record<string, string[]> = {
@@ -1455,7 +1575,7 @@ export function determineSocialRole(
                 }
 
                 // Check if profession is valid for the current year (decade filtering)
-                if (!isProfessionValidForYear(roleDef)) {
+                if (!isProfessionAvailable(roleName, roleDef)) {
                     continue;
                 }
 
@@ -1466,8 +1586,12 @@ export function determineSocialRole(
                 let score = 100;
                 
                 const checkStat = (value: number, min?: number, max?: number): number => {
-                    if (min !== undefined && value < min) return -1000;
-                    if (max !== undefined && value > max) return -1000;
+                    // Randomly rolled RPG stats should influence occupation, not
+                    // erase it from the historical labor pool. A mismatch lowers
+                    // the weight without allowing a random pre-profession roll
+                    // to dominate the historical labor distribution.
+                    if (min !== undefined && value < min) return -15 * (min - value);
+                    if (max !== undefined && value > max) return -15 * (value - max);
                     let closeness = 0;
                     if (min !== undefined) closeness += 10 - (value - min);
                     if (max !== undefined) closeness += 10 - (max - value);
@@ -1500,8 +1624,14 @@ export function determineSocialRole(
                      }
                 }
 
-                if (score > 0) {
-                     possibleRoles.push({ socialClass, role: roleName, roleDef });
+                if (score > -100) {
+                     const fitMultiplier = Math.max(0.1, Math.min(1.5, score / 100));
+                     possibleRoles.push({
+                         socialClass,
+                         role: roleName,
+                         roleDef,
+                         selectionWeight: getProfessionSelectionWeight(roleName, historicalContext) * fitMultiplier,
+                     });
                 }
             }
         }
@@ -1516,11 +1646,11 @@ export function determineSocialRole(
             // 99% chance to pick from regular roles if available, 1% for outlaws
             let chosen;
             if (regularRoles.length > 0 && (outlawRoles.length === 0 || Math.random() > 0.01)) {
-                chosen = regularRoles[Math.floor(Math.random() * regularRoles.length)];
+                chosen = pickWeightedRole(regularRoles);
             } else if (outlawRoles.length > 0) {
-                chosen = outlawRoles[Math.floor(Math.random() * outlawRoles.length)];
+                chosen = pickWeightedRole(outlawRoles);
             } else {
-                chosen = possibleRoles[Math.floor(Math.random() * possibleRoles.length)];
+                chosen = pickWeightedRole(possibleRoles);
             }
             return { socialClass: chosen.socialClass, role: chosen.role, emoji: chosen.roleDef.emoji || '🧑', nameKey: chosen.roleDef.nameKey };
         }
@@ -1538,14 +1668,14 @@ export function determineSocialRole(
                 for (const [roleName, roleDef] of Object.entries(eraRoles[socialClass])) {
                     if (!isClergyRoleCompatible(roleName, profile.religion, socialClass)) continue;
                     if (!isProfessionValidForRegion(roleName, context.region, context.culturalZone)) continue;
-                    if (!isProfessionValidForYear(roleDef)) continue;
+                    if (!isProfessionAvailable(roleName, roleDef)) continue;
                     if (roleDef.genderBias && profile.gender !== 'Non-binary' && roleDef.genderBias !== profile.gender) continue;
                     classFallbackRoles.push({ socialClass, role: roleName, roleDef });
                 }
             }
 
             if (classFallbackRoles.length > 0) {
-                const chosen = classFallbackRoles[Math.floor(Math.random() * classFallbackRoles.length)];
+                const chosen = pickWeightedRole(classFallbackRoles);
                 return {
                     socialClass: chosen.socialClass,
                     role: chosen.role,
@@ -1555,10 +1685,17 @@ export function determineSocialRole(
             }
         }
 
-        return getFallbackRole(profile.wealthLevel, profile.gender);
+        return getFallbackRole(profile.wealthLevel, profile.gender, historicalContext);
     } catch (error) {
         console.error("Error determining social role:", error);
-        return getFallbackRole(profile.wealthLevel, profile.gender);
+        const fallbackContext = createHistoricalContext({
+            year: context.year ?? context.birthYear ?? 0,
+            era: context.era,
+            culturalZone: context.culturalZone,
+            region: context.region || 'Unknown',
+            location: context.localArea || context.region || 'Unknown',
+        });
+        return getFallbackRole(profile.wealthLevel, profile.gender, fallbackContext);
     }
 }
 

@@ -150,30 +150,33 @@ export function drawNose(options: DrawNoseOptions): void {
 /**
  * The nasolabial fold — the single most age-legible line on a face, and the
  * one thing that turns a 60-year-old from "a 20-year-old with grey hair" into
- * someone who has lived. Strength ramps with age.
+ * someone who has lived.
+ *
+ * It is drawn rather than stamped because its length and depth both need to
+ * scale continuously: a faint crease at forty, a deep bracket around the mouth
+ * at seventy. It runs from beside the nostril, out and down, curving in toward
+ * the corner of the mouth.
  */
-const NASOLABIAL = stamp(
-  `
-  ..-
-  .=.
-  .=.
-  -=.
-  -..
-  `,
-  { anchor: { x: 2, y: 0 } }
-);
-
 export function drawNasolabialFold(
   raster: Raster,
   book: RampBook,
-  paints: PaintTable,
   centerX: number,
-  y: number,
-  offset: number,
-  side: -1 | 1
+  topY: number,
+  side: -1 | 1,
+  strength: number
 ): void {
-  drawStamp(raster, NASOLABIAL, centerX + side * offset, y, paints, book, {
-    flipX: side === -1,
-    onlyOver: SKIN_ONLY,
-  });
+  const length = 4 + Math.round(strength * 6);
+  const deep = strength > 0.7;
+  for (let i = 0; i < length; i += 1) {
+    const t = i / Math.max(1, length - 1);
+    // Bows outward at the top, then tucks back toward the mouth corner.
+    const out = 4 + Math.sin(t * Math.PI * 0.75) * 2.6;
+    const x = Math.round(centerX + side * out);
+    const y = topY + i;
+    if (raster.matAt(x, y) !== MAT.SKIN) continue;
+    raster.shift(x, y, deep ? 2 : 1, book);
+    // A lit ridge on the cheek side is what makes it a fold and not a scratch.
+    if (deep && raster.matAt(x + side, y) === MAT.SKIN) raster.shift(x + side, y, -1, book);
+    if (deep && i > 1 && raster.matAt(x - side, y) === MAT.SKIN) raster.shift(x - side, y, 1, book);
+  }
 }

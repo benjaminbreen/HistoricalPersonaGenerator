@@ -7,12 +7,32 @@ import { GEOGRAPHICAL_DATA } from '../constants/gameData/geography';
 import { generateLifeHistory, EnhancedLifeEvent, EventImportance } from '../constants/characterData/lifeHistoryService';
 import { getLanguageForCharacter, LanguageData } from '../constants/gameData/languages';
 import { applyPortraitAuthenticity } from './portraitAuthenticityService';
+import {
+  DEFAULT_SAMPLING_MODE,
+  DrawOdds,
+  ERA_BOUNDS,
+  SamplingMode,
+  describeOdds,
+  sampleAdultAge,
+  sampleBirthSex,
+  sampleCulturalZone,
+  sampleEra,
+  sampleGenderRole,
+  sampleWealthLevel,
+  sampleYearInEra,
+  socialGender,
+} from './demographyService';
 import { sampleSocialStatus } from './socialStatusService';
+import { describeLifeEventSecondPerson } from './narrativeTextService';
+import { createHistoricalContext } from './historicalContextService';
+import type { HistoricalContext } from '../types/historicalContext';
 
 // Generate a backstory sentence based on a significant life event
 function generateLifeEventBackstorySentence(
   events: EnhancedLifeEvent[],
-  characterName: string
+  characterAge: number,
+  currentYear: number,
+  random: () => number = Math.random,
 ): string | null {
   if (!events || events.length === 0) return null;
 
@@ -35,92 +55,21 @@ function generateLifeEventBackstorySentence(
   );
 
   const eventToUse = priorityEvents.length > 0
-    ? priorityEvents[Math.floor(Math.random() * priorityEvents.length)]
-    : significantEvents[Math.floor(Math.random() * significantEvents.length)];
+    ? priorityEvents[Math.floor(random() * priorityEvents.length)]
+    : significantEvents[Math.floor(random() * significantEvents.length)];
 
-  // Generate evocative sentence based on event type
-  const templates: Record<string, string[]> = {
-    battle: [
-      "You still dream of the fighting—the chaos, the screams, the smell of blood.",
-      "The battle left its mark on you, in ways both visible and hidden.",
-      "You've seen combat. It changed something in you.",
-      "War taught you lessons no book ever could."
-    ],
-    tragedy: [
-      "Loss has visited you more than once. It no longer surprises you.",
-      "There are griefs you carry that you've learned not to speak of.",
-      "You know what it is to lose everything and start again.",
-      "Some wounds heal. Others you learn to live with."
-    ],
-    injury: [
-      "Your body remembers what your mind tries to forget.",
-      "The old injury still aches when the weather turns.",
-      "You carry a reminder of how quickly things can change.",
-      "Pain has been a teacher, though a harsh one."
-    ],
-    plague: [
-      "You survived when many did not. The guilt of it lingers.",
-      "The sickness took so many. You were spared, though you're not sure why.",
-      "You remember the smell of death, the empty streets, the prayers that went unanswered.",
-      "The plague years haunt you still."
-    ],
-    romance: [
-      "You once loved someone deeply. It ended, as such things do.",
-      "There is a name you no longer speak, though you think of it often.",
-      "Your heart has known both great joy and great sorrow.",
-      "Love found you once. You're not sure it will again."
-    ],
-    journey: [
-      "Travel has broadened your mind and thinned your purse.",
-      "You've seen places most only dream of.",
-      "The road has been your home more than once.",
-      "Wandering has taught you that home is more idea than place."
-    ],
-    trade: [
-      "Fortune has smiled on you, and frowned, in equal measure.",
-      "You've learned that opportunity knocks softly and leaves quickly.",
-      "Commerce has its own rhythms. You've learned to dance to them.",
-      "Money comes and goes. You try not to hold too tightly."
-    ],
-    achievement: [
-      "You've accomplished things you once thought impossible.",
-      "Success came, eventually, though the path was never straight.",
-      "You've proven yourself, at least to those who matter.",
-      "Recognition found you. Whether you deserved it is another question."
-    ],
-    religious: [
-      "Faith has sustained you through dark times.",
-      "You've had moments of doubt, and moments of profound certainty.",
-      "The divine works in ways you've stopped trying to understand.",
-      "Your spiritual journey has been anything but simple."
-    ],
-    family: [
-      "Family can be both burden and blessing. Yours has been both.",
-      "Blood ties run deep, though they sometimes chafe.",
-      "Your family shaped you more than you care to admit.",
-      "Home and family—complicated words, for you."
-    ],
-    discovery: [
-      "You've seen things that changed how you understand the world.",
-      "Knowledge, once gained, cannot be ungained. You know this well.",
-      "Curiosity has led you to strange places.",
-      "What you've learned has set you apart from others."
-    ],
-    legal: [
-      "You've had dealings with authorities that left their mark.",
-      "Justice is not always just. You learned this the hard way.",
-      "The law has touched your life in ways you'd rather forget.",
-      "You know what it is to be judged, fairly or not."
-    ]
-  };
-
-  const eventKind = eventToUse.kind as string;
-  const eventTemplates = templates[eventKind] || templates['achievement'];
-
-  return eventTemplates[Math.floor(Math.random() * eventTemplates.length)];
+  const ageAtEvent = characterAge - (currentYear - eventToUse.year);
+  if (ageAtEvent < 0 || ageAtEvent > characterAge) return null;
+  return describeLifeEventSecondPerson(eventToUse, ageAtEvent);
 }
 
 export interface GenerationParams {
+  /**
+   * Explore (default) keeps the whole world reachable; true-frequency samples
+   * eras and regions in proportion to how many people actually lived in them.
+   * See docs/DEMOGRAPHY.md §4.
+   */
+  samplingMode?: SamplingMode;
   era?: HistoricalEra;
   culturalZone?: CulturalZone;
   gender?: Gender;
@@ -136,6 +85,7 @@ export interface GenerationParams {
   birthYear?: number;
   age?: number;
   profession?: string;
+  seed?: number;
 }
 
 export interface HistoricalPersona {
@@ -149,35 +99,20 @@ export interface HistoricalPersona {
   day: number; // 1-31
   enhancedLifeEvents?: EnhancedLifeEvent[]; // New enhanced life events
   languageData?: LanguageData; // Native language data
+  historicalContext: HistoricalContext;
+  /** How representative this draw actually was. Never hidden from the reader. */
+  odds?: DrawOdds;
+  samplingMode?: SamplingMode;
 }
 
 // Helper to get random element from array
-function randomElement<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
+function randomElement<T>(arr: T[], random: () => number = Math.random): T {
+  return arr[Math.floor(random() * arr.length)];
 }
 
 // Helper to get random integer in range
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function randomWealthLevel(era: HistoricalEra): WealthLevel {
-  const roll = Math.random();
-  const modern = era === HistoricalEra.MODERN_ERA || era === HistoricalEra.FUTURE_ERA;
-
-  if (modern) {
-    if (roll < 0.12) return 'poor';
-    if (roll < 0.45) return 'modest';
-    if (roll < 0.87) return 'comfortable';
-    if (roll < 0.98) return 'wealthy';
-    return 'noble';
-  }
-
-  if (roll < 0.25) return 'poor';
-  if (roll < 0.60) return 'modest';
-  if (roll < 0.85) return 'comfortable';
-  if (roll < 0.97) return 'wealthy';
-  return 'noble';
+function randomInt(min: number, max: number, random: () => number = Math.random): number {
+  return Math.floor(random() * (max - min + 1)) + min;
 }
 
 // Map cultural zones to geography data keys
@@ -195,7 +130,7 @@ const culturalZoneToGeographyKey: Record<CulturalZone, string> = {
 
 // Get a random location from a cultural zone, returns both region and specific area
 // Filters out locations that have minYear constraints not met by the given year
-function getRandomLocation(culturalZone: CulturalZone, year?: number): { area: string; region: string } {
+function getRandomLocation(culturalZone: CulturalZone, year?: number, random: () => number = Math.random): { area: string; region: string } {
   const geographyKey = culturalZoneToGeographyKey[culturalZone];
   if (!geographyKey) return { area: 'Unknown', region: 'Unknown' };
 
@@ -217,7 +152,7 @@ function getRandomLocation(culturalZone: CulturalZone, year?: number): { area: s
 
   if (regionNames.length === 0) return { area: 'Unknown', region: 'Unknown' };
 
-  const randomRegion = randomElement(regionNames);
+  const randomRegion = randomElement(regionNames, random);
   const areas = regions[randomRegion];
   if (!areas || typeof areas !== 'object') return { area: randomRegion, region: randomRegion };
 
@@ -229,26 +164,12 @@ function getRandomLocation(culturalZone: CulturalZone, year?: number): { area: s
 
   if (areaNames.length === 0) return { area: randomRegion, region: randomRegion };
 
-  const randomAreaKey = randomElement(areaNames);
+  const randomAreaKey = randomElement(areaNames, random);
   const randomArea = areas[randomAreaKey];
   return {
     area: randomArea?.name || randomRegion,
     region: randomRegion
   };
-}
-
-// Get year range for an era
-function getEraYearRange(era: HistoricalEra): { min: number; max: number } {
-  const ranges: Record<HistoricalEra, { min: number; max: number }> = {
-    PREHISTORY: { min: -4000, max: -3000 },
-    ANTIQUITY: { min: -3000, max: 500 },
-    MEDIEVAL: { min: 500, max: 1450 },
-    RENAISSANCE_EARLY_MODERN: { min: 1450, max: 1750 },
-    INDUSTRIAL_ERA: { min: 1750, max: 1900 },
-    MODERN_ERA: { min: 1900, max: 2000 },
-    FUTURE_ERA: { min: 2000, max: 2100 },
-  };
-  return ranges[era] || { min: 1500, max: 1800 };
 }
 
 // Get era from year
@@ -263,30 +184,30 @@ function getEraFromYear(year: number): HistoricalEra {
 }
 
 export function generateHistoricalPersona(params: Partial<GenerationParams> = {}): HistoricalPersona {
+  const samplingMode: SamplingMode = params.samplingMode ?? DEFAULT_SAMPLING_MODE;
+  let seedState = (params.seed ?? (Date.now() ^ Math.floor(Math.random() * 0x7fffffff))) >>> 0;
+  const random = (): number => {
+    seedState += 0x6D2B79F5;
+    let value = seedState;
+    value = Math.imul(value ^ value >>> 15, value | 1);
+    value ^= value + Math.imul(value ^ value >>> 7, value | 61);
+    return ((value ^ value >>> 14) >>> 0) / 4294967296;
+  };
   // Determine era
   let era: HistoricalEra;
   let year: number;
 
-  if (params.year) {
+  if (params.year !== undefined) {
     year = params.year;
     era = params.era || getEraFromYear(year);
   } else if (params.era) {
     era = params.era;
-    const range = getEraYearRange(era);
-    year = randomInt(range.min, range.max);
+    year = sampleYearInEra(era, samplingMode, random);
   } else {
-    // Random era
-    const eras: HistoricalEra[] = [
-      'PREHISTORY' as HistoricalEra,
-      'ANTIQUITY' as HistoricalEra,
-      'MEDIEVAL' as HistoricalEra,
-      'RENAISSANCE_EARLY_MODERN' as HistoricalEra,
-      'INDUSTRIAL_ERA' as HistoricalEra,
-      'MODERN_ERA' as HistoricalEra,
-    ];
-    era = randomElement(eras);
-    const range = getEraYearRange(era);
-    year = randomInt(range.min, range.max);
+    // Weighted by how many human lives began in each era, then flattened for
+    // explorability unless true-frequency was asked for.
+    era = sampleEra(samplingMode, random);
+    year = sampleYearInEra(era, samplingMode, random);
   }
 
   // Determine cultural zone (respecting era for colonial vs pre-columbian)
@@ -312,33 +233,55 @@ export function generateHistoricalPersona(params: Partial<GenerationParams> = {}
       validZones.push('NORTH_AMERICAN_PRE_COLUMBIAN');
     }
 
-    culturalZone = randomElement(validZones);
+    culturalZone = sampleCulturalZone(year, samplingMode, validZones, random);
   }
 
   // Determine location (both region and specific area)
   // Pass year to filter out locations that weren't settled yet (e.g., New Zealand before 1280)
-  const locationData = getRandomLocation(culturalZone, year);
+  const locationData = getRandomLocation(culturalZone, year, random);
   const location = params.location || locationData.area;
   const region = params.region || locationData.region;
 
-  // Determine gender
-  const gender = params.gender || randomElement(['Male', 'Female', 'Non-binary'] as Gender[]);
+  // Sex, and — rarely, and only where one is attested — a recognised
+  // third-gender social role held by someone of that sex. See
+  // docs/DEMOGRAPHY.md; the previous code picked uniformly from three genders
+  // and then silently collapsed the third into Female.
+  const requestedSex =
+    params.gender === 'Male' || params.gender === 'Female' ? params.gender : undefined;
+  const birthSex = requestedSex || sampleBirthSex(random);
+  const genderRole = params.gender
+    ? null
+    : sampleGenderRole(birthSex, culturalZone, `${region} ${location}`, year, random);
+  const gender: Gender = socialGender(birthSex, genderRole);
 
-  // Determine age
-  const age = params.age !== undefined ? params.age : randomInt(params.minAge || 18, params.maxAge || 70);
+  // Age, drawn from a survivorship curve rather than uniformly across 18-70.
+  const age = params.age !== undefined
+    ? params.age
+    : sampleAdultAge(year, random, params.minAge, params.maxAge);
 
   // Determine wealth level
-  const wealthLevel = params.wealthLevel || randomWealthLevel(era);
+  const wealthLevel = params.wealthLevel || sampleWealthLevel(era, random);
 
   // Generate random month and day
-  const month = randomInt(1, 12);
-  const day = randomInt(1, 28);
+  const month = randomInt(1, 12, random);
+  const day = randomInt(1, 28, random);
   const dateString = `${month}/${day}/${year}`;
 
-  // Status and wealth are related but distinct. A weighted draw preserves the
-  // expected correlation while allowing poor nobles, prosperous commoners,
-  // wealthy non-merchants, and other historically ordinary combinations.
-  const socialClass = params.socialClass || sampleSocialStatus(era, wealthLevel);
+  const historicalContext = createHistoricalContext({
+    year,
+    era,
+    culturalZone,
+    region,
+    location,
+  });
+  // Status and wealth are related but distinct. Locale type changes their
+  // distribution without making unusual combinations impossible.
+  const socialClass = params.socialClass || sampleSocialStatus(
+    era,
+    wealthLevel,
+    random,
+    historicalContext.localeType,
+  );
 
   // Generate the character
   const generatedCharacter = generateCharacterWithSpec(
@@ -348,10 +291,12 @@ export function generateHistoricalPersona(params: Partial<GenerationParams> = {}
       region: region,     // Broader region like "British Isles"
       era: era,          // Historical era for religion/culture lookup
       culturalZone: culturalZone, // Cultural zone for name/religion lookup
+      historicalContext,
+      seed: params.seed === undefined ? Math.floor(random() * 0x7fffffff) : params.seed,
     },
     {
       name: params.name, // Use provided name if available
-      gender: gender.toLowerCase() as 'male' | 'female',
+      gender: birthSex.toLowerCase() as 'male' | 'female',
       age,
       socialClass: socialClass,
       wealthLevel,
@@ -367,6 +312,13 @@ export function generateHistoricalPersona(params: Partial<GenerationParams> = {}
     location,
   });
 
+  // The character generator builds the body from birth sex; the social gender
+  // is layered back on afterwards so a third-gender persona keeps a coherent
+  // appearance while being presented as who they were in their own society.
+  character.birthSex = birthSex;
+  character.gender = gender;
+  if (genderRole) character.genderRole = genderRole;
+
   // Generate enhanced life events using the new service
   const enhancedLifeEvents = generateLifeHistory(
     character,
@@ -376,7 +328,7 @@ export function generateHistoricalPersona(params: Partial<GenerationParams> = {}
   );
 
   // Append life event-based sentence to backstory if there's a significant event
-  const lifeEventSentence = generateLifeEventBackstorySentence(enhancedLifeEvents, character.name);
+  const lifeEventSentence = generateLifeEventBackstorySentence(enhancedLifeEvents, character.age, year, random);
   if (lifeEventSentence && character.backstory) {
     character.backstory = character.backstory + ' ' + lifeEventSentence;
   }
@@ -402,5 +354,8 @@ export function generateHistoricalPersona(params: Partial<GenerationParams> = {}
     day,
     enhancedLifeEvents,
     languageData,
+    historicalContext,
+    odds: describeOdds(era, culturalZone, year),
+    samplingMode,
   };
 }

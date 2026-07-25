@@ -74,7 +74,9 @@ export function drawBrow(options: DrawBrowOptions): void {
   } = options;
 
   const rng = makeRng(seed);
-  const weight = THICKNESS[thickness] + ageLines * 0.5;
+  // Brows thin and go sparse with age rather than getting heavier — but they
+  // also throw the occasional long stray hair, which is its own ageing cue.
+  const weight = THICKNESS[thickness] * (1 - ageLines * 0.3);
   const half = (length - 1) / 2;
 
   for (let i = 0; i < length; i += 1) {
@@ -103,8 +105,14 @@ export function drawBrow(options: DrawBrowOptions): void {
     if (thickness === 'bushy' && rng() > 0.55 && onSkin(top - 1)) {
       raster.set(px, top - 1, ramps.brow.steps[4], MAT.BROW, 4);
     }
-    if (thickness === 'bushy' && ageLines > 0.6 && rng() > 0.7 && onSkin(top + rows)) {
-      raster.set(px, top + rows, ramps.brow.steps[4], MAT.BROW, 4);
+    // Old brows go patchy, and shed a few long wiry hairs upward.
+    if (ageLines > 0.55) {
+      if (rng() < ageLines * 0.28 && rows > 1) {
+        raster.shift(px, top + rows - 1, -2, book);
+      }
+      if (rng() < ageLines * 0.16 && onSkin(top - 2)) {
+        raster.set(px, top - 2, ramps.brow.steps[4], MAT.BROW, 4);
+      }
     }
   }
 }

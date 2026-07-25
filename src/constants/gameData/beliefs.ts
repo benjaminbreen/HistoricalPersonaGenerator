@@ -1436,7 +1436,7 @@ export const IDEOLOGIES: Ideology[] = [
   {
     id: 'TECHNOCRATIC_FUTURIST',
     name: 'Technocratic Futurist',
-    description: 'Believes technology and expertise will solve humanitys problems',
+    description: 'Believes technology and expertise will solve humanity’s problems',
     eras: [HistoricalEra.INDUSTRIAL_ERA, HistoricalEra.MODERN_ERA, HistoricalEra.FUTURE_ERA],
     culturalZones: ALL_CULTURES,
     religions: ['Atheism', 'Buddhism', 'Protestantism', 'Judaism', 'Hinduism'],

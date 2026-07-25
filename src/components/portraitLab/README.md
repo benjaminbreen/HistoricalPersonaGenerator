@@ -12,9 +12,21 @@ both can be worked on at the same time without conflicts.
 - **`/#portrait-lab`** is the A/B bench: both engines drawing the *same*
   personas, side by side, with the spec the adapter produced printed underneath.
 - **`?portraitEngine=lab`** forces an engine via the URL.
-- **`npm run portrait-sheet`** renders a PNG contact sheet from the command
-  line, with no browser involved. Add a sheet id or a fixture-name substring to
-  narrow it, and a scale factor to zoom:
+- **`npm run portrait-audit -- 300 7`** is the important one. It runs the app's
+  *real* persona generator, renders every result, and reports on what it found:
+  which garment kinds, coverings, ages and context packs actually occur, which
+  names the adapter failed to recognise, which markings it has no case for, and
+  which portraits came out structurally broken. Fixtures can only test what you
+  already thought of; this tests what the app actually produces.
+
+  The first run flagged 97 structural problems in 200 personas — 80 faces whose
+  eyes were down to two visible pixels of white, and 25 whose entire garment was
+  buried under a veil. Neither was reachable from the fixture set. Keep running
+  it after changes; the counts at the top of the report are the regression test.
+
+- **`npm run portrait-sheet`** renders a PNG contact sheet from the fixture set,
+  with no browser involved. Add a sheet id or a fixture-name substring to narrow
+  it, and a scale factor to zoom:
 
   ```bash
   node node_modules/.cache/renderSheet.mjs out.png context 4
@@ -107,10 +119,35 @@ plain rather than confidently wrong, matching the posture
 Adding a sixth pack means one `case` in `art/garments.ts` and, if it needs one, a
 covering in `art/headwear.ts`.
 
+## Ageing
+
+Worth calling out separately, because it is the axis most procedural portraits
+fail: a sixty-year-old rendered as a twenty-year-old wearing grey hair. What
+actually reads at this size, roughly in order of how much work each one does:
+
+1. Grey hair, and a hairline receding from the temples inward
+2. The upper lid folding down over the lash line (`lidDroop`), which also
+   narrows the aperture — a fold without a narrower eye leaves an old face
+   wearing a young stare
+3. The nasolabial fold, drawn rather than stamped so its length and depth both
+   scale continuously, with a lit ridge on the cheek side so it reads as a fold
+   and not a scratch
+4. Marionette lines, jowls, and a slackening neck
+5. Thinning lips — the vermillion shrinks, so an old mouth is a narrower band
+   whatever shape it started as
+6. Brows going sparse and patchy (not heavier), with the odd long wiry hair
+7. Under-eye bags with a lit pouch and a crease beneath, not just a dark patch
+8. A few distinct age spots on the temples and cheekbones
+
+Crow's feet are two short rays per eye. Longer horizontal lines there stop
+reading as wrinkles and start reading as scratches across the temple, and age
+spots past about four stop reading as age and start reading as pox — both were
+mistakes made and corrected here, so resist turning either back up.
+
 ## Known rough edges
 
-- Very long hair falls as two solid masses; it could use more internal shape.
 - The helmet is the least developed covering.
+- The Sahel headcloth is serviceable rather than good.
 - `compilePortrait` allocates a lot of full-canvas masks; at ~30ms for the
   heaviest persona it is fine for a page, but a large gallery would want mask
   pooling.

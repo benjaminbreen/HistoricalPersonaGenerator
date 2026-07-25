@@ -5301,3 +5301,66 @@ body.dark-mode .death-stat {
     border-right: 8px solid var(--color-surface-elevated);
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Sampling mode, and the odds of the draw
+
+   Explore mode deliberately flattens eras and regions so the whole world is
+   reachable in a sitting. That distortion is legitimate for a teaching tool but
+   must never be silent, so the real rarity of every draw is printed alongside
+   it. See docs/DEMOGRAPHY.md.
+   --------------------------------------------------------------------------- */
+
+.sampling-mode {
+  display: inline-flex;
+  margin-left: var(--sp-sm);
+  border: 1px solid var(--color-border, #d8cec0);
+  border-radius: 999px;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.sampling-mode button {
+  padding: 0.22rem 0.7rem;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.sampling-mode button:hover {
+  color: var(--color-text, #2a2320);
+}
+
+.sampling-mode button.is-active {
+  background: var(--color-accent, #c4663f);
+  color: #fff;
+}
+
+.draw-odds {
+  margin-top: 0.3rem;
+  font-size: 0.76rem;
+  font-style: italic;
+  opacity: 0.72;
+  cursor: help;
+}
+
+.draw-odds strong {
+  font-style: normal;
+  font-weight: 600;
+}
+
+.draw-odds-mode {
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+}
+
+body.dark-mode .sampling-mode {
+  border-color: rgba(255, 255, 255, 0.16);
+}

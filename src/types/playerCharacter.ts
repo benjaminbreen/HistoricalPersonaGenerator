@@ -126,6 +126,23 @@ export interface PlayerCharacter {
 
     appearance: Appearance;
     portraitVisualOverrides?: PortraitVisualOverrides;
+
+    /**
+     * Birth sex, kept separately from `gender` because they are not always the
+     * same thing. Anatomy, clothing fit and portrait proportions follow this;
+     * `gender` is how the persona was known in their own society.
+     */
+    birthSex?: 'Male' | 'Female';
+
+    /**
+     * Set only when the persona holds a recognised third-gender or
+     * gender-crossing social role. See services/demographyService.ts.
+     */
+    genderRole?: {
+        term?: string;
+        description: string;
+        birthSex: 'Male' | 'Female';
+    };
     birthplace: string;
     birthYear?: string | number; // Year the character was born
 

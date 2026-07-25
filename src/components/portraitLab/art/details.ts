@@ -8,9 +8,16 @@
  * patterns (three_lines, eye_band, scarification, dots, geometric, and the
  * rest) — so cultural body art that the app has already researched and placed
  * renders as itself rather than as a generic smudge.
+ *
+ * Painted, pierced and modified faces are ordinary across human societies and
+ * across the whole span this app covers, so they get drawn properly rather than
+ * softened away. The rule that matters is that pigment applied to a face is
+ * still on a *face*: it takes the light, so it is recoloured along the skin's
+ * own shading rather than laid down as a flat patch. Bold and modelled, not
+ * timid and not pasted on.
  */
 
-import { hexToRgb } from '../core/color';
+import { buildRamp, hexToRgb, Ramp } from '../core/color';
 import { MAT, Raster } from '../core/raster';
 import { makeNoise1D, makeRng } from '../core/rng';
 import { RenderContext } from '../render/context';
@@ -47,18 +54,29 @@ function anchorFor(context: RenderContext, location: string): Anchor {
   }
 }
 
+/**
+ * Lay pigment on skin.
+ *
+ * The pigment is built into its own ramp and sampled at whatever shade step the
+ * skin underneath was already sitting at, so a stripe of ochre across a cheek
+ * keeps the cheek's highlight and the cheek's shadow. Alpha-blending one flat
+ * colour instead — the obvious implementation — flattens the face into a
+ * sticker wherever the paint falls, which is what this used to do.
+ */
 function paint(
   raster: Raster,
+  ramp: Ramp,
   x: number,
   y: number,
-  color: { r: number; g: number; b: number },
   alpha: number,
   material = MAT.PAINT
 ): void {
   if (raster.alphaAt(x, y) === 0) return;
   const under = raster.matAt(x, y);
   if (under !== MAT.SKIN && under !== MAT.PAINT) return;
-  raster.blend(x, y, color, alpha, material, raster.shadeAt(x, y));
+  const shade = raster.shadeAt(x, y);
+  const index = shade === 255 ? 3 : shade;
+  raster.blend(x, y, ramp.steps[index], alpha, material, index);
 }
 
 export function drawMarkings(context: RenderContext): void {
@@ -69,11 +87,16 @@ export function drawMarkings(context: RenderContext): void {
     if (marking.type === 'freckles') return; // handled with the complexion
     const anchor = anchorFor(context, marking.location);
     const scale = SIZE_SCALE[marking.size] ?? 1;
-    const color = hexToRgb(marking.color || '#8b5a3c');
+    const pigment = buildRamp(marking.color || '#8b5a3c', { contrast: 0.9, shift: 0.3, saturation: 1.05 });
     const pattern = marking.pattern || 'solid';
     const rng = makeRng(spec.seed ^ (0x300 + index * 37));
 
-    const strokeAlpha = marking.type === 'paint' ? 0.92 : marking.type === 'tattoo' ? 0.75 : 0.6;
+    // Pigment sits on the skin at close to full strength — it is meant to be
+    // seen. The form is preserved by the ramp, not by thinning the paint.
+    const strokeAlpha =
+      marking.type === 'paint' ? 0.94 :
+      marking.type === 'henna' ? 0.66 :
+      marking.type === 'tattoo' ? 0.82 : 0.7;
 
     switch (marking.type) {
       case 'beauty_mark':
@@ -107,15 +130,42 @@ export function drawMarkings(context: RenderContext): void {
           for (let dx = -Math.ceil(rx); dx <= Math.ceil(rx); dx += 1) {
             const wobble = noise(dx * 0.8 + dy * 1.3 + index * 5) * 0.3;
             if ((dx / rx) ** 2 + (dy / ry) ** 2 > 1 + wobble) continue;
-            paint(raster, Math.round(cx + dx), anchor.y + dy, color, 0.42);
+            paint(raster, pigment, Math.round(cx + dx), anchor.y + dy, 0.55);
           }
         }
         break;
       }
 
+      case 'piercing': {
+        drawPiercing(context, marking, anchor, scale);
+        break;
+      }
+
+      // Ochre and butterfat worked through the hair — Himba otjize and its
+      // relatives. It belongs in the hair, not as a stripe on the face.
+      case 'paint' as const:
+        if (pattern === 'hair_ochre') {
+          for (let y = 0; y < anatomy.size; y += 1) {
+            for (let x = 0; x < anatomy.size; x += 1) {
+              if (raster.matAt(x, y) !== MAT.HAIR) continue;
+              const shade = raster.shadeAt(x, y);
+              const step = shade === 255 ? 3 : shade;
+              raster.blend(x, y, pigment.steps[step], 0.72, MAT.HAIR, step);
+            }
+          }
+          break;
+        }
+        drawPattern(context, pattern, anchor, pigment, scale, strokeAlpha, rng);
+        break;
+
+      case 'structural': {
+        drawStructural(context, marking, scale);
+        break;
+      }
+
       default: {
-        // Paint, tattoo, and scarification share a pattern vocabulary.
-        drawPattern(context, pattern, anchor, color, scale, strokeAlpha, rng);
+        // Paint, tattoo, henna and scarification share a pattern vocabulary.
+        drawPattern(context, pattern, anchor, pigment, scale, strokeAlpha, rng);
         break;
       }
     }
@@ -126,7 +176,7 @@ function drawPattern(
   context: RenderContext,
   pattern: string,
   anchor: Anchor,
-  color: { r: number; g: number; b: number },
+  pigment: Ramp,
   scale: number,
   alpha: number,
   rng: () => number
@@ -138,7 +188,7 @@ function drawPattern(
     const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
     for (let i = 0; i <= steps; i += 1) {
       const t = steps === 0 ? 0 : i / steps;
-      paint(raster, Math.round(x0 + (x1 - x0) * t), Math.round(y0 + (y1 - y0) * t), color, alpha);
+      paint(raster, pigment, Math.round(x0 + (x1 - x0) * t), Math.round(y0 + (y1 - y0) * t), alpha);
     }
   };
 
@@ -165,7 +215,7 @@ function drawPattern(
               raster.shift(x, y, 2, book);
               raster.shift(x + side, y, -1, book);
             } else {
-              paint(raster, x, y, color, alpha);
+              paint(raster, pigment, x, y, alpha);
             }
           }
         }
@@ -203,7 +253,7 @@ function drawPattern(
       for (let i = 0; i < count; i += 1) {
         const angle = (i / Math.max(1, count)) * Math.PI * 2;
         const r = count === 1 ? 0 : half * 0.6 * (0.4 + rng() * 0.6);
-        paint(raster, Math.round(anchor.x + Math.cos(angle) * r), Math.round(anchor.y + Math.sin(angle) * r * 0.6), color, alpha);
+        paint(raster, pigment, Math.round(anchor.x + Math.cos(angle) * r), Math.round(anchor.y + Math.sin(angle) * r * 0.6), alpha);
       }
       break;
     }
@@ -247,20 +297,112 @@ function drawPattern(
           const t = i / steps;
           const angle = t * Math.PI * 2 * turns;
           const r = t * 5 * scale;
-          paint(raster, Math.round(cx + Math.cos(angle) * r * side), Math.round(anchor.y + Math.sin(angle) * r * 0.75), color, alpha);
+          paint(raster, pigment, Math.round(cx + Math.cos(angle) * r * side), Math.round(anchor.y + Math.sin(angle) * r * 0.75), alpha);
         }
       }
       break;
     }
     case 'solid': {
-      for (let dy = -Math.round(3 * scale); dy <= Math.round(3 * scale); dy += 1) {
-        line(anchor.x - half * 0.7, anchor.y + dy, anchor.x + half * 0.7, anchor.y + dy);
+      // Solid pigment is applied to a *region* — both cheeks, or the forehead —
+      // not as a band straight across the middle of the face.
+      const rows = Math.max(2, Math.round(2.5 * scale));
+      for (const side of [-1, 1] as const) {
+        const cx = anchor.x + side * half * 0.55;
+        const rx = Math.max(2, half * 0.34);
+        for (let dy = -rows; dy <= rows; dy += 1) {
+          const spread = rx * Math.sqrt(Math.max(0, 1 - (dy / (rows + 0.5)) ** 2));
+          line(cx - spread, anchor.y + dy, cx + spread, anchor.y + dy);
+        }
       }
       break;
     }
     default: {
       line(anchor.x - half * 0.6, anchor.y, anchor.x + half * 0.6, anchor.y);
       break;
+    }
+  }
+}
+
+/**
+ * A stud, ring or bar through the nose, lip, ear or brow. This is the most
+ * common marking the app generates by a wide margin, and it needs to be a
+ * two-pixel piece of metal, not a stroke drawn across the cheek.
+ */
+function drawPiercing(
+  context: RenderContext,
+  marking: MarkingSpec,
+  anchor: Anchor,
+  scale: number
+): void {
+  const { raster, anatomy, ramps } = context;
+  const { centerX } = anatomy;
+  const metal = /gold|brass/i.test(marking.color || '') ? ramps.metal : ramps.metal;
+
+  const place = (x: number, y: number) => {
+    if (raster.alphaAt(x, y) === 0) return;
+    raster.set(x, y, metal.steps[1], MAT.METAL, 1);
+    if (scale > 1.2) raster.set(x, y + 1, metal.steps[4], MAT.METAL, 4);
+  };
+
+  switch (marking.location) {
+    case 'nose':
+      // Through the nostril wing, off to one side.
+      place(centerX - 3, anatomy.noseBaseY);
+      break;
+    case 'ear':
+      for (const side of [-1, 1] as const) place(centerX + side * (anatomy.earX - 1), anatomy.earBottomY - 1);
+      break;
+    case 'chin':
+      place(centerX, anatomy.mouthY + 5);
+      break;
+    case 'forehead':
+      place(centerX, anatomy.browY - 4);
+      break;
+    default:
+      place(centerX - 4, anatomy.mouthY + 2);
+      break;
+  }
+  void anchor;
+}
+
+/**
+ * Lip plates, ear plugs and neck coils.
+ *
+ * Cranial elongation and dental modification are deliberately not drawn:
+ * the first needs a different skull, and the second needs an open mouth. A
+ * marking rendered wrongly is worse than one left out, and both are rare.
+ */
+function drawStructural(context: RenderContext, marking: MarkingSpec, scale: number): void {
+  const { raster, anatomy, ramps } = context;
+  const { centerX } = anatomy;
+  const pattern = marking.pattern || '';
+
+  if (/plate|plug|disc/.test(pattern)) {
+    const radius = Math.max(2, Math.round((pattern === 'plate' ? 4 : 2.5) * scale));
+    const lip = marking.location === 'ear';
+    const cx = lip ? centerX + anatomy.earX - 1 : centerX;
+    const cy = lip ? anatomy.earBottomY : anatomy.mouthY + 2;
+    for (let dy = -radius; dy <= radius; dy += 1) {
+      for (let dx = -radius; dx <= radius; dx += 1) {
+        if (dx * dx + dy * dy > radius * radius) continue;
+        const rim = dx * dx + dy * dy > (radius - 1) * (radius - 1);
+        const index = rim ? 5 : dx + dy < 0 ? 2 : 3;
+        raster.set(cx + dx, cy + dy, ramps.leather.steps[index], MAT.LEATHER, index);
+      }
+    }
+    return;
+  }
+
+  if (/coil|ring/.test(pattern)) {
+    const rings = Math.max(2, Math.round(3 * scale));
+    for (let r = 0; r < rings; r += 1) {
+      const y = anatomy.neckTop + 3 + r * 2;
+      for (let dx = -anatomy.neckHalf; dx <= anatomy.neckHalf; dx += 1) {
+        const x = centerX + dx;
+        if (raster.matAt(x, y) !== MAT.SKIN) continue;
+        const index = Math.abs(dx) > anatomy.neckHalf - 2 ? 5 : dx < 0 ? 1 : 3;
+        raster.set(x, y, ramps.metal.steps[index], MAT.METAL, index);
+      }
     }
   }
 }

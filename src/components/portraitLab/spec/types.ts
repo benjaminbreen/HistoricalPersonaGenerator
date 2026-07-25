@@ -28,7 +28,8 @@ export type GarmentKind =
   | 'tunic' | 'robe' | 'gown' | 'doublet' | 'work_shirt' | 'wrapped_garment' | 'jacket' | 'bare';
 
 export type HeadwearKind =
-  | 'none' | 'cap' | 'brimmed_hat' | 'wrapped_cloth' | 'veil' | 'hood' | 'helmet' | 'coronet';
+  | 'none' | 'cap' | 'brimmed_hat' | 'wrapped_cloth' | 'veil' | 'hood'
+  | 'helmet' | 'coronet' | 'band';
 
 export type FacialHairStyle =
   | 'full_beard' | 'goatee' | 'mustache' | 'stubble' | 'van_dyke' | 'soul_patch'
@@ -75,7 +76,14 @@ export interface JewelrySpec {
 }
 
 export interface MarkingSpec {
-  type: 'scar' | 'tattoo' | 'paint' | 'beauty_mark' | 'freckles' | 'mole' | 'birthmark';
+  /**
+   * `culturalMarkings.ts` emits more than the portrait vocabulary originally
+   * assumed — piercings are the single most common marking in real output, and
+   * structural modifications (lip plates, ear plugs, neck coils) appear too.
+   */
+  type:
+    | 'scar' | 'tattoo' | 'paint' | 'beauty_mark' | 'freckles' | 'mole'
+    | 'birthmark' | 'piercing' | 'structural' | 'henna' | 'scarification';
   location: string;
   color: string;
   size: 'small' | 'medium' | 'large';
@@ -141,6 +149,8 @@ export interface PortraitSpec {
   build: Build;
   /** 0..1, drives crow's feet, nasolabial folds, and jowls. */
   ageLines: number;
+  /** 0..1, how far the upper lid has folded down over the lash line. */
+  lidDroop: number;
 
   garment: GarmentSpec;
   headwear: HeadwearSpec | null;

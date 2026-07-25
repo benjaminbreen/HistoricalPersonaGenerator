@@ -9,24 +9,16 @@ function mulberry32(seed: number) {
   }
 }
 
-// Store random generators for different seeds to allow multiple noise instances
-const randomGenerators: { [seed: number]: () => number } = {};
-
-function getSeededRandom(seed: number): () => number {
-  if (!randomGenerators[seed]) {
-    randomGenerators[seed] = mulberry32(seed);
-  }
-  return randomGenerators[seed];
-}
-
-
 // Simple 2D Value Noise
 export class ValueNoise {
   private permutation: number[] = [];
   public random: () => number; // Changed from private to public
 
   constructor(seed: number) {
-    this.random = getSeededRandom(seed);
+    // Each instance owns its PRNG state. Creating two ValueNoise instances with
+    // the same seed must reproduce the same sequence rather than continuing a
+    // process-global cached generator.
+    this.random = mulberry32(seed);
     this.permutation = [];
     for (let i = 0; i < 256; i++) {
       this.permutation[i] = i;

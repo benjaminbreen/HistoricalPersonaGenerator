@@ -41,3 +41,6 @@ dist-ssr
 # Generated portrait contact sheets (npm run portrait-sheet)
 portrait-sheet*.png
 portrait-lab-sheet*.png
+portrait-audit-*.png
+portrait-audit-report.txt
+portrait-audit-sample.png

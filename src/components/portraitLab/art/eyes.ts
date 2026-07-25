@@ -194,18 +194,27 @@ export function makeEyePaints(ramps: PortraitRamps): PaintTable {
   };
 }
 
-function lidStamp(shape: EyeShape, state: EyeState): Stamp {
+function lidStamp(shape: EyeShape, state: EyeState, droop: number): Stamp {
   if (state === 'closed') return CLOSED;
   if (state === 'half') return ALMOND_HALF;
   if (state === 'squint') return SQUINT;
   if (state === 'wide') return STARTLED;
+  // Age closes the aperture. A *hooded* shape does not — it is a heavy fold
+  // above a normal eye, and treating the two the same put a quarter of all
+  // personas behind slits with two pixels of visible white.
+  if (droop > 0.62) return NARROW_OPEN;
   switch (shape) {
     case 'round': return ROUND_OPEN;
     case 'narrow': return NARROW_OPEN;
     case 'wide': return WIDE_OPEN;
-    case 'hooded': return ALMOND_OPEN;
     default: return ALMOND_OPEN;
   }
+}
+
+/** A narrow aperture shows a narrower slice of iris, or there is no white left. */
+function irisFor(lid: Stamp, dilated: boolean): Stamp {
+  if (dilated) return IRIS_SMALL;
+  return lid === NARROW_OPEN || lid === ALMOND_HALF ? IRIS_SMALL : IRIS;
 }
 
 export interface DrawEyeOptions {
@@ -224,6 +233,8 @@ export interface DrawEyeOptions {
   eyelashes?: 'short' | 'medium' | 'long';
   /** Pupils widen in low light and with strong feeling; 0..1. */
   dilation?: number;
+  /** 0..1 age-related hooding; high values get the fold regardless of shape. */
+  droop?: number;
 }
 
 const SCLERA_ONLY = new Set<number>([MAT.SCLERA]);
@@ -234,20 +245,20 @@ export function drawEye(options: DrawEyeOptions): void {
   const {
     raster, book, paints, shape, state,
     centerX, centerY, side, gazeX = 0, gazeY = 0,
-    eyelashes = 'medium', dilation = 0,
+    eyelashes = 'medium', dilation = 0, droop = 0,
   } = options;
 
   const flip = side === 1;
-  const lid = lidStamp(shape, state);
+  const lid = lidStamp(shape, state, droop);
 
-  if (shape === 'hooded' && state !== 'closed') {
+  if ((shape === 'hooded' || droop > 0.45) && state !== 'closed') {
     drawStamp(raster, HOOD_FOLD, centerX, centerY - 4, paints, book, { flipX: flip });
   }
 
   drawStamp(raster, lid, centerX, centerY, paints, book, { flipX: flip, onlyOver: EYE_SURFACE });
 
   if (state !== 'closed') {
-    const iris = dilation > 0.5 || state === 'wide' ? IRIS_SMALL : IRIS;
+    const iris = irisFor(lid, dilation > 0.5 || state === 'wide');
     drawStamp(raster, iris, centerX + gazeX, centerY + gazeY, paints, book, {
       flipX: flip,
       onlyOver: SCLERA_ONLY,

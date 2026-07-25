@@ -331,10 +331,10 @@ const CRAFTSMAN_EVENTS: EventTemplate[] = [
     importance: EventImportance.MILESTONE,
     titles: ['Guild Advancement', 'Master Status'],
     templates: [
-      'Admitted to [CRAFT] guild after presenting masterwork',
-      'Elected guild treasurer, managing communal funds',
+      'Admitted to the [CRAFT] guild after presenting masterwork',
+      'Elected as guild treasurer, managing communal funds',
       'Achieved master status, allowed to take apprentices',
-      'Guild selected work for noble commission'
+      'The guild selected a piece of work for a noble commission'
     ],
     minAge: 20,
     weight: 1.0,
@@ -990,7 +990,7 @@ const FAMILY_EVENTS: EventTemplate[] = [
     importance: EventImportance.MILESTONE,
     titles: ['Sibling\'s Marriage', 'Family Alliance'],
     templates: [
-      'A sister married into a well-connected [SOCIAL_GROUP] family, improving the family\'s social standing',
+      'A sister married into a well-connected [SOCIAL_GROUP], improving the family\'s social standing',
       'A brother\'s marriage brought valuable new trade connections and opportunities',
       'Arranged a sibling\'s marriage carefully to strengthen the family\'s position in society'
     ],
@@ -1061,9 +1061,9 @@ function generateEarlyLifeEvent(
   if (farmProfessions.some(p => profLower.includes(p))) {
     const variants = [
       `Began working family fields, learning crop rotation from elders`,
-      `First season helping with harvest, proved capable despite young age`,
-      `Trusted to tend livestock alone for first time`,
-      `Learned to read weather signs and predict harvest yields from father`
+      `Helped with the harvest for the first season and proved capable despite a young age`,
+      `Trusted to tend livestock alone for the first time`,
+      `Learned to read weather signs and predict harvest yields from a parent`
     ];
     return {
       kind: 'agricultural',
@@ -1078,7 +1078,7 @@ function generateEarlyLifeEvent(
   if (merchantProfessions.some(p => profLower.includes(p))) {
     const variants = [
       `Sent to apprentice with trading company, learning accounts and negotiation`,
-      `First journey with merchant caravan, carrying valuable goods`,
+      `Made a first journey with a merchant caravan, carrying valuable goods`,
       `Began managing family stall at market, handling coins and customers`
     ];
     return {
@@ -1130,10 +1130,10 @@ function generateEarlyLifeEvent(
   if (domesticProfessions.some(p => profLower.includes(p))) {
     if (gender.toLowerCase() === 'female') {
       const variants = [
-        `Began learning household management and domestic skills from mother`,
-        `Placed in service at manor house, training in household duties`,
-        `A first child to care for, learning skills that would define daily life forever afterward`,
-        `Apprenticed to midwife, witnessing first birth at tender age`
+        `Began learning household management and domestic skills from a parent`,
+        `Placed in service at a manor house, training in household duties`,
+        `Began caring for a first child, learning skills that would define daily life afterward`,
+        `Apprenticed to a midwife, witnessing a first birth at a young age`
       ];
       return {
         kind: 'family',
@@ -1228,7 +1228,7 @@ function generateEarlyLifeEvent(
   return {
     kind: 'apprenticeship',
     title: 'Early Training',
-    text: `Began learning trade of ${profession} from experienced practitioner`
+    text: `Began learning the trade of ${profession} from an experienced practitioner`
   };
 }
 
@@ -1527,24 +1527,33 @@ export function generateLifeHistory(
       } else {
         causeOfDeath = causesOfDeath[Math.floor(Math.random() * causesOfDeath.length)];
       }
+      const deathPhrase = /^died\b/i.test(causeOfDeath)
+        ? causeOfDeath
+        : /^(?:murdered|killed|executed|burned|drowned|struck|worked|enslaved)\b/i.test(causeOfDeath)
+          ? `was ${causeOfDeath}`
+          : causeOfDeath === 'suicide'
+            ? 'died by suicide'
+            : /(?:accident|collapse|attack|shipwreck)$/i.test(causeOfDeath)
+              ? `died in a ${causeOfDeath}`
+              : `died from ${causeOfDeath}`;
 
       // Only proceed if this parent hasn't already died
       if (!deceasedFamilyMembers.has(parentType)) {
         // Vary sentence structures for parent death (with proper capitalization)
         const fatherTemplates = [
-          `The father died of ${causeOfDeath}, leaving the family to manage affairs alone`,
-          `The family lost their father to ${causeOfDeath} during a difficult winter`,
-          `A father's death from ${causeOfDeath} changed everything for the household`,
-          `His father passed away from ${causeOfDeath} despite seeking help from healers`,
-          `Tragedy struck when his father succumbed to ${causeOfDeath}`,
+          `Father ${deathPhrase}, leaving the family to manage affairs alone`,
+          `The family lost their father when he ${deathPhrase}`,
+          `A father's death changed everything for the household`,
+          `Father ${deathPhrase} despite seeking help`,
+          `Tragedy struck when a parent ${deathPhrase}`,
         ];
 
         const motherTemplates = [
-          `Mother died from ${causeOfDeath}, and the family struggled with grief and new responsibilities`,
-          `Mother passed away from ${causeOfDeath}, leaving an emptiness never filled`,
-          `The family lost their mother to ${causeOfDeath}`,
-          `Her mother succumbed to ${causeOfDeath} despite all efforts to save her`,
-          `The family was devastated by the mother's death from ${causeOfDeath}`
+          `Mother ${deathPhrase}, and the family faced new responsibilities`,
+          `Mother ${deathPhrase}, leaving the household in grief`,
+          `The family lost their mother when she ${deathPhrase}`,
+          `Mother ${deathPhrase} despite efforts to save her`,
+          `The mother's death changed the household`
         ];
 
         const templates = isMotherDeath ? motherTemplates : fatherTemplates;
@@ -1814,10 +1823,10 @@ function getCrop(zone: CulturalZone, era: HistoricalEra): string {
 }
 
 function getAsset(era: HistoricalEra): string {
-  const assets = ['new plow', 'draft animals', 'storage barn', 'mill share', 'market stall'];
+  const assets = ['a new plow', 'draft animals', 'a storage barn', 'a mill share', 'a market stall'];
 
   if (era === HistoricalEra.INDUSTRIAL_ERA || era === HistoricalEra.MODERN_ERA) {
-    assets.push('tractor', 'delivery truck', 'shop', 'machinery');
+    assets.push('a tractor', 'a delivery truck', 'a shop', 'machinery');
   }
 
   return assets[Math.floor(Math.random() * assets.length)];

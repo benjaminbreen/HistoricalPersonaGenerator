@@ -16,6 +16,10 @@ import { AttributeBadgeService } from './attributeBadgeService';
 import { getMarkingsForCharacter, selectRandomMarking, getRandomPattern, convertToAppearanceMarking, getMarkingProbability } from '../constants/characterData/culturalMarkings';
 import { formatSocialStatusForEra, sampleSocialStatus } from './socialStatusService';
 import { isClergyRoleCompatible } from '../constants/characterData/religionClergyRoles';
+import { illnessRate, pickByPrevalence } from './diseasePrevalenceService';
+import { describeBeliefSecondPerson, withIndefiniteArticle } from './narrativeTextService';
+import { createHistoricalContext } from './historicalContextService';
+import type { HistoricalContext } from '../types/historicalContext';
 
 let characterIdCounter = 0;
 
@@ -143,6 +147,8 @@ interface GenerationContext {
     region: string;
     era?: HistoricalEra; // Optional: if provided, overrides era from date parsing
     culturalZone?: CulturalZone; // Optional: if provided, overrides zone from location mapping
+    historicalContext?: HistoricalContext;
+    seed?: number;
 }
 
 const isSoutheastAsianContext = (context: Pick<GenerationContext, 'region' | 'location'>): boolean =>
@@ -251,6 +257,7 @@ const RELIGION_DESCRIPTIONS: Record<string, string> = {
     // Asian Traditions
     'Buddhism': 'seeking liberation from suffering through the Noble Eightfold Path',
     'Hinduism': 'honoring the eternal dharma and countless manifestations of the divine',
+    'Vedic Religion': 'maintaining sacrificial rites and hymns to the Vedic gods',
     'Confucianism': 'cultivating virtue through ritual propriety and filial devotion',
     'Taoism': 'following the natural way and seeking harmony with the Dao',
     'Shinto': 'maintaining purity and honoring the kami of land and ancestors',
@@ -267,6 +274,7 @@ const RELIGION_DESCRIPTIONS: Record<string, string> = {
     'Santería': 'working with the orishas through ritual and sacrifice',
     'Tengrism': 'revering the Eternal Blue Sky and the spirits of the steppe',
     'Zoroastrianism': 'supporting the cosmic battle of light against darkness',
+    'Arabian Polytheism': 'honoring the local gods, sacred places, and ancestral customs of Arabia',
 
     // Modern/Secular
     'Atheism': 'trusting in reason and human capability rather than divine intervention',
@@ -291,20 +299,31 @@ const ATTRIBUTE_DESCRIPTIONS: Record<string, string> = {
     'frail': 'physically frail',
     'blind': 'completely blind',
     'deaf': 'deaf',
+    'mute': 'unable to speak',
+    'lame': 'walking with a limp',
+    'one_armed': 'one-armed',
     'nearsighted': 'nearsighted',
     'athletic': 'naturally athletic',
     'limping': 'walking with a limp',
     'scarred': 'covered in scars',
     'giant': 'unusually tall',
     'tiny': 'remarkably small',
+    'towering': 'unusually tall',
+    'diminutive': 'remarkably small',
+    'beautiful': 'strikingly attractive',
+    'disfigured': 'visibly disfigured',
 
     // Mental
     'genius': 'brilliant',
     'simple': 'simple-minded',
+    'slow_witted': 'slow-witted',
     'scholar': 'well-educated',
-    'polyglot': 'speak many languages',
+    'educated': 'educated',
+    'polyglot': 'fluent in many languages',
+    'sharp_memory': 'gifted with a prodigious memory',
     'forgetful': 'terribly forgetful',
     'sharp_eyed': 'have keen eyesight',
+    'keen_eyed': 'keen-eyed',
     'dreamer': 'prone to daydreaming',
 
     // Personality
@@ -318,6 +337,7 @@ const ATTRIBUTE_DESCRIPTIONS: Record<string, string> = {
     'greedy': 'consumed by greed',
     'brave': 'fearless',
     'coward': 'cowardly',
+    'hot_tempered': 'hot-tempered',
 
     // Spiritual
     'spiritual': 'deeply spiritual',
@@ -381,7 +401,15 @@ const ATTRIBUTE_DESCRIPTIONS: Record<string, string> = {
     'insomniac': 'an insomniac',
     'foreigner': 'a foreigner here',
     'local': 'a local',
-    'wanderer': 'a wanderer'
+    'wanderer': 'a wanderer',
+    'eldest_child': 'the eldest child',
+    'youngest_child': 'the youngest child',
+    'eldest': 'the eldest child',
+    'youngest': 'the youngest child',
+    'exile': 'an exile',
+    'former_slave': 'formerly enslaved',
+    'skilled_hands': 'skilled with your hands',
+    'storyteller': 'a storyteller'
 };
 
 // Generate attribute sentence for a character
@@ -453,22 +481,37 @@ function _generateProceduralBackstory(character: Omit<PlayerCharacter, 'backstor
     const heightStr = cmToFeetAndInches(character.appearance.height);
 
     // Sentence 1: Origin and basic identity (fixed grammar)
-    sentences.push(`Hailing from ${character.birthplace}, you are ${character.name}, a ${character.age}-year-old ${character.gender.toLowerCase()}.`);
+    sentences.push(`Hailing from ${character.birthplace}, you are ${character.name}, ${withIndefiniteArticle(`${character.age}-year-old ${character.gender.toLowerCase()}`)}.`);
 
     // Sentence 2: Profession with calculated years
     const professionYears = Math.max(1, Math.min(
         character.age - 14, // Can't work before age 14
         Math.floor((character.age - 14) * 0.7) // Not their entire adult life
     ));
-    sentences.push(`You have been a ${character.profession.toLowerCase()} for ${professionYears} year${professionYears === 1 ? '' : 's'}.`);
+    sentences.push(`You have been ${withIndefiniteArticle(character.profession.toLowerCase())} for ${professionYears} year${professionYears === 1 ? '' : 's'}.`);
 
     // Sentence 3: Physical Description
-    const eyeColorName = hexToColorName(character.appearance.eyeColor);
-    const hairColorName = hexToColorName(character.appearance.hairColor);
+    const rawEyeColorName = hexToColorName(character.appearance.eyeColor).toLowerCase().replace(/\b(\w+)\s+\1\b/g, '$1');
+    const rawHairColorName = hexToColorName(character.appearance.hairColor).toLowerCase().replace(/\b(\w+)\s+\1\b/g, '$1');
+    const eyeColorName = /blue|navy|cobalt/.test(rawEyeColorName) ? 'blue'
+        : /green|olive/.test(rawEyeColorName) ? 'green'
+        : /gray|grey|silver|slate/.test(rawEyeColorName) ? 'gray'
+        : /hazel|amber|gold|yellow/.test(rawEyeColorName) ? 'hazel'
+        : /black/.test(rawEyeColorName) ? 'dark brown'
+        : 'brown';
+    const hairColorName = /gray|grey|silver/.test(rawHairColorName) ? 'gray'
+        : /gold|goldenrod|yellow|blond/.test(rawHairColorName) ? 'golden blond'
+        : /red|crimson|auburn|copper/.test(rawHairColorName) ? 'auburn'
+        : /black|nearly black/.test(rawHairColorName) ? 'black'
+        : 'brown';
     const hairstyleDesc = formatHairstyle(character.appearance.hairstyle);
-    let physicalDesc = `You have a ${character.appearance.build} build, standing at ${heightStr}. Your eyes are a shade of ${eyeColorName} and your hair is ${hairColorName}, worn ${hairstyleDesc}.`;
+    let physicalDesc = `You have ${withIndefiniteArticle(character.appearance.build)} build, standing at ${heightStr}. Your eyes are a shade of ${eyeColorName} and your hair is ${hairColorName}, worn ${hairstyleDesc}.`;
     if (character.appearance.facialHair && character.appearance.facialHairStyle) {
-        physicalDesc += ` You wear a ${character.appearance.facialHairStyle.replace(/_/g, ' ')}.`;
+        const facialHair = character.appearance.facialHairStyle.replace(/_/g, ' ');
+        const facialHairPhrase = /^(?:stubble|mutton chops)$/i.test(facialHair)
+            ? facialHair
+            : withIndefiniteArticle(facialHair);
+        physicalDesc += ` You wear ${facialHairPhrase}.`;
     }
     sentences.push(physicalDesc);
 
@@ -485,13 +528,13 @@ function _generateProceduralBackstory(character: Omit<PlayerCharacter, 'backstor
     }
 
     // Sentence 5: Personality/Demeanor
-    let demeanorSentence = `You carry yourself with a ${character.appearance.affect} demeanor.`;
+    let demeanorSentence = `You carry yourself with ${withIndefiniteArticle(character.appearance.affect)} demeanor.`;
     if (character.personality.agreeableness < 0.3) {
-        demeanorSentence = `You carry yourself with a ${character.appearance.affect} demeanor. Few would call you approachable, but many respect your directness.`;
+        demeanorSentence = `You carry yourself with ${withIndefiniteArticle(character.appearance.affect)} demeanor. Few would call you approachable, but many respect your directness.`;
     } else if (character.personality.openness > 0.8) {
-        demeanorSentence = `You carry yourself with a ${character.appearance.affect} demeanor. Your curiosity about the world and its mysteries is palpable.`;
+        demeanorSentence = `You carry yourself with ${withIndefiniteArticle(character.appearance.affect)} demeanor. Your curiosity about the world and its mysteries is palpable.`;
     } else if (character.personality.conscientiousness > 0.8) {
-        demeanorSentence = `You are known for your meticulous and reliable nature. You carry yourself with a ${character.appearance.affect} demeanor.`;
+        demeanorSentence = `You are known for your meticulous and reliable nature. You carry yourself with ${withIndefiniteArticle(character.appearance.affect)} demeanor.`;
     }
     sentences.push(demeanorSentence);
 
@@ -500,47 +543,7 @@ function _generateProceduralBackstory(character: Omit<PlayerCharacter, 'backstor
         const coreBeliefEntry = [...character.beliefs].sort((a,b) => b.conviction - a.conviction)[0];
         const coreBelief = PERSONAL_BELIEFS.find(b => b.id === coreBeliefEntry.beliefId);
         if (coreBelief) {
-             let beliefText = coreBelief.text.toLowerCase().replace('believes that', '').replace('believes in', '').replace('believes', '').trim();
-             let consequence = '';
-             switch(coreBelief.id) {
-                case 'DIVINE_RIGHT_OF_KINGS':
-                    consequence = "a conviction that has earned you both powerful friends and determined enemies";
-                    break;
-                case 'MIGHT_IS_RIGHT':
-                    consequence = "a worldview that has served you well in avoiding conflict, though some find it callous";
-                    break;
-                case 'INDIVIDUAL_LIBERTY':
-                case 'INDIVIDUAL_FREEDOM':
-                    consequence = "a philosophy that often puts you at odds with figures of authority";
-                    break;
-                case 'HONOR_IS_ALL':
-                case 'HONOR_CULTURE':
-                    consequence = "a principle that has both opened and closed many doors for you";
-                    break;
-                case 'FATE_IS_INEXORABLE':
-                    consequence = "a belief that brings you peace in trying times, even if others call it passivity";
-                    break;
-                case 'EMPIRICAL_KNOWLEDGE':
-                    consequence = "an approach that has made you skeptical of untested claims";
-                    break;
-                case 'REVEALED_TRUTH':
-                    consequence = "a faith that provides certainty in an uncertain world";
-                    break;
-                case 'ANCESTOR_WORSHIP':
-                    consequence = "a practice that keeps you connected to your lineage";
-                    break;
-                case 'COMMERCIAL_ACUMEN':
-                    consequence = "a mindset that helps you see opportunity where others see only difficulty";
-                    break;
-                case 'TRIBAL_LOYALTY':
-                    consequence = "bonds that define both your greatest strengths and your limits";
-                    break;
-                default:
-                     consequence = "a guiding principle that shapes your interactions with the world";
-                     break;
-             }
-             // Remove the verbose consequence part - just state the belief simply
-             sentences.push(`You believe that ${beliefText}.`);
+             sentences.push(describeBeliefSecondPerson(coreBelief.text));
         }
     } else {
         if (character.socialContext && character.socialContext.wanderlust > 0.8) {
@@ -839,18 +842,26 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         return generateCharacter(context);
     }
     
-    const noise = new ValueNoise(Date.now() + Math.random() * 10000);
+    const noise = new ValueNoise(context.seed ?? (Date.now() + Math.random() * 10000));
     const dateInfo = parseDateString(context.date);
     // Use ethnicity from spec if provided, then context, then fall back to geographic cultural zone
     const culturalZone = (spec as any).ethnicity || context.culturalZone || mapLocationToCulture(context.location, dateInfo.year);
     // Use era from context if provided, otherwise from date parsing
     const era = context.era || (dateInfo.era as HistoricalEra);
+    const historicalContext = context.historicalContext || createHistoricalContext({
+        year: dateInfo.year,
+        era,
+        culturalZone,
+        region: context.region,
+        location: context.location,
+    });
     const generationContext = {
         era,
         culturalZone,
         region: context.region,
         year: dateInfo.year,
         localArea: context.location,
+        historicalContext,
     };
 
     // Log ethnicity usage for debugging
@@ -858,8 +869,13 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         console.log(`[Character Generator] Using ethnicity '${(spec as any).ethnicity}' for character generation (geographic zone would be: ${mapLocationToCulture(context.location, dateInfo.year)})`);
     }
     
-    const requestedGender: Gender | undefined = spec.gender
-        ? spec.gender === 'male' ? 'Male' : 'Female'
+    // Anything that was not exactly 'male' used to fall through to 'Female',
+    // which turned every non-binary request into a woman and skewed the whole
+    // population 2:1. Callers now pass a birth sex; anything else is left for
+    // the profile generator to roll rather than being silently rewritten.
+    const requestedGender: Gender | undefined =
+        spec.gender === 'male' ? 'Male'
+        : spec.gender === 'female' ? 'Female'
         : undefined;
     const exactRequestedWealth = (spec as CharacterSpecification & { wealthLevel?: WealthLevel }).wealthLevel;
 
@@ -875,8 +891,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     });
     
     // Apply custom specifications
-    if (spec.gender) {
-        baseProfile.gender = spec.gender === 'male' ? 'Male' : 'Female';
+    if (requestedGender) {
+        baseProfile.gender = requestedGender;
     }
     
     if (spec.age !== undefined && spec.age !== null) {
@@ -921,7 +937,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     const sampledStatus = sampleSocialStatus(
         generationContext.era,
         baseProfile.wealthLevel,
-        () => noise.random()
+        () => noise.random(),
+        historicalContext.localeType,
     );
     const socialClass = formatSocialStatusForEra(
         spec.socialClass || sampledStatus,
@@ -934,8 +951,10 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             era: generationContext.era,
             culturalZone: generationContext.culturalZone,
             region: context.region,
+            localArea: context.location,
             year: dateInfo.year,
             preferredSocialClass: socialClass,
+            historicalContext,
         }
     ).role;
     
@@ -974,7 +993,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         baseProfile.wealthLevel,
         baseProfile.gender,
         role,
-        context.region
+        context.region,
+        dateInfo.year
     );
     baseProfile.appearance = {
         ...baseProfile.appearance,
@@ -1567,9 +1587,9 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     
     // If no specific disease requested or assignment failed, use random chance
     if (!diseaseHealth) {
-        // SIMPLIFIED: Base 33% chance (1 in 3) like NPCs
-        // Health specification affects disease chance
-        let diseaseChance = 0.33;
+        // Weighted by period rather than a flat third: sanitation, antibiotics
+        // and dentistry moved this a long way. See diseasePrevalenceService.
+        let diseaseChance = illnessRate(dateInfo.year);
 
         if (spec.health === 'sick') {
             diseaseChance = 1.0; // 100% chance for sick characters
@@ -1593,17 +1613,22 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             );
             
             if (availableDiseases.length > 0) {
-                // Check for epidemic diseases first (like plague in 1348)
-                let selectedDisease = availableDiseases[Math.floor(Math.random() * availableDiseases.length)];
-                
-                // During epidemics, increase chance of epidemic disease
+                // Is there an outbreak running in this time and place?
                 const epidemicDisease = diseaseService.getEpidemicDisease(
-                    availableDiseases, 
-                    generationContext.era, 
-                    culturalZone, 
+                    availableDiseases,
+                    generationContext.era,
+                    culturalZone,
                     dateInfo.year
                 );
-                
+
+                // Drawn by how often a condition would actually be encountered
+                // rather than uniformly from the table — uniform sampling made
+                // anthrax the second most common human ailment and buried
+                // intestinal worms beneath it.
+                let selectedDisease =
+                    pickByPrevalence(availableDiseases, Math.random, { inEpidemic: Boolean(epidemicDisease) })
+                    || availableDiseases[0];
+
                 if (epidemicDisease && Math.random() < 0.8) {
                     selectedDisease = epidemicDisease;
                     console.log(`[Character Generator] Custom character spawning during ${epidemicDisease.name} epidemic in ${dateInfo.year}`);
@@ -1749,15 +1774,23 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
         }
     }
     
-    const noise = new ValueNoise(Date.now() + Math.random() * 10000);
+    const noise = new ValueNoise(finalContext.seed ?? (Date.now() + Math.random() * 10000));
     const dateInfo = parseDateString(finalContext.date);
-    const culturalZone = mapLocationToCulture(finalContext.location, dateInfo.year);
+    const culturalZone = finalContext.culturalZone || mapLocationToCulture(finalContext.location, dateInfo.year);
+    const historicalContext = finalContext.historicalContext || createHistoricalContext({
+        year: dateInfo.year,
+        era: (finalContext.era || dateInfo.era) as HistoricalEra,
+        culturalZone,
+        region: finalContext.region,
+        location: finalContext.location,
+    });
     const generationContext = { 
-        era: dateInfo.era as HistoricalEra, 
+        era: (finalContext.era || dateInfo.era) as HistoricalEra,
         culturalZone,
         region: finalContext.region,
         year: dateInfo.year,
         localArea: finalContext.location,
+        historicalContext,
     };
     
     const baseProfile = generateBaseProfile(noise, generationContext);

@@ -172,11 +172,39 @@ export function drawGarment(context: RenderContext): BodyMasks {
   drawCollar(context, body, opening);
   drawContextDetails(context, body);
 
+  drawUndergarment(context, opening, body);
+
   // The garment sits behind the neck, so the neck casts onto it.
-  applyContactShadow(raster, opening, book, { dx: 0, dy: 0, strength: 0 });
   applyContactShadow(raster, maskSubtract(shoulders, body), book, { dx: 0, dy: 1, strength: 1, depth: 1 });
 
   return { body, neckline: opening };
+}
+
+/**
+ * The linen showing at the neck of a wool garment. Almost everyone in almost
+ * every period wore something under the outer layer, and a sliver of a paler,
+ * plainer cloth at the neckline does more to make clothing read as clothing
+ * than any amount of trim.
+ */
+function drawUndergarment(context: RenderContext, opening: Mask, body: Mask): void {
+  const { raster, spec, anatomy, ramps } = context;
+  const { size } = anatomy;
+  if (spec.garment.kind === 'bare' || spec.garment.kind === 'wrapped_garment') return;
+
+  // Sits inside the neckline opening, below the neck itself.
+  const under = makeMask(size, size);
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (!opening[y * size + x]) continue;
+      if (raster.matAt(x, y) === MAT.SKIN) continue;
+      if (body[y * size + x]) continue;
+      under[y * size + x] = 1;
+    }
+  }
+  fillMask(raster, under, ramps.clothB, MAT.CLOTH_B, (x, y) => {
+    const dx = (x + 0.5 - anatomy.centerX) / Math.max(1, anatomy.neckHalf + 6);
+    return 3.4 + Math.abs(dx) * 1.2 + (y > anatomy.collarY ? 0.6 : 0);
+  }, { dither: 0.4 });
 }
 
 /** A few soft vertical folds, dithered so they read as cloth and not as stripes. */
@@ -204,10 +232,18 @@ function drawCollar(context: RenderContext, body: Mask, opening: Mask): void {
   const { size } = anatomy;
   const edge = maskIntersect(maskDilate(maskDilate(opening, size, size, true), size, size, true), body);
 
-  const useAccent = spec.garment.ornament > 0.3;
-  const ramp = useAccent ? ramps.clothC : ramps.clothB;
-  const material = useAccent ? MAT.CLOTH_C : MAT.CLOTH_B;
-  fillMask(raster, edge, ramp, material, (x, y) => (y < anatomy.collarY ? 2.4 : 3.4));
+  // Only genuinely well-off dress gets a contrasting trim. Everyone else gets
+  // the same cloth turned under, which is what an ordinary neckline is — a
+  // bright accent line on every single garment made the whole population look
+  // like it was wearing the same piped uniform.
+  const useAccent = spec.garment.ornament > 0.55;
+  const ramp = useAccent ? ramps.clothC : ramps.clothA;
+  const material = useAccent ? MAT.CLOTH_C : MAT.CLOTH_A;
+  fillMask(raster, edge, ramp, material, (x, y) => {
+    // A turned edge reads as a lit lip above a shadowed fold.
+    const lit = y < anatomy.collarY;
+    return (useAccent ? (lit ? 2.4 : 3.6) : (lit ? 1.8 : 4.6));
+  });
 
   // The garment's own edge always reads darker where it turns under.
   applyContactShadow(raster, opening, book, { dx: 0, dy: 1, strength: 1, depth: 1 });

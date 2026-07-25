@@ -95,9 +95,9 @@ export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
     baseY: anatomy.noseBaseY,
     ageLines: spec.ageLines,
   });
-  if (spec.ageLines > 0.42) {
+  if (spec.ageLines > 0.4) {
     for (const side of [-1, 1] as const) {
-      drawNasolabialFold(base, ramps.book, skinPaints, anatomy.centerX, anatomy.noseBaseY - 1, 6, side);
+      drawNasolabialFold(base, ramps.book, anatomy.centerX, anatomy.noseBaseY - 2, side, spec.ageLines);
     }
   }
   drawAgeLines(context, head);
@@ -257,6 +257,7 @@ export function renderFrame(
       gazeY: state.gazeY,
       eyelashes: spec.eyelashes,
       dilation: pose.dilation,
+      droop: spec.lidDroop,
     });
   }
 
@@ -269,6 +270,7 @@ export function renderFrame(
     lipShape: spec.lipShape,
     centerX: anatomy.centerX,
     y: anatomy.mouthY,
+    ageThinning: spec.ageLines,
   });
 
   const smiling = state.expression === 'smile' || state.expression === 'grin' || state.expression === 'content';

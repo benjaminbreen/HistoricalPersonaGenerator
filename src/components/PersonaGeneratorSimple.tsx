@@ -74,6 +74,7 @@ import {
   GiBattleGear
 } from 'react-icons/gi';
 import { generateHistoricalPersona, GenerationParams, HistoricalPersona } from '../services/personaGenerator';
+import type { SamplingMode } from '../services/demographyService';
 import { HistoricalEra, CulturalZone, Gender } from '../types';
 import { generateNpcName } from '../generation/common/npcUtils';
 import { ValueNoise } from '../utils/noise';
@@ -105,6 +106,13 @@ import {
   normalizeMaterialText,
 } from '../services/personaMaterialAdapter';
 import { checkPersonaConsistency, ConsistencyIssue } from '../services/personaConsistencyService';
+import {
+  describeIdeology,
+  describeLifeEvent,
+  describeParents,
+  describePhysicalAppearance,
+  getNarrativePronouns,
+} from '../services/narrativeTextService';
 import { getDisplayZone } from '../utils/zoneDisplayUtils';
 import './PersonaGenerator.css';
 
@@ -1820,8 +1828,13 @@ export default function PersonaGenerator() {
     setDeathInfo(null);
   };
 
+  // Explore mode keeps the whole world reachable; true frequency samples eras
+  // and regions by how many people actually lived in them. The flattening is
+  // deliberate but never silent — see docs/DEMOGRAPHY.md.
+  const [samplingMode, setSamplingMode] = useState<SamplingMode>('explore');
+
   const generateProceduralOnly = () => {
-    applyProceduralPersona(generateHistoricalPersona({}));
+    applyProceduralPersona(generateHistoricalPersona({ samplingMode }));
   };
 
   const generateCompletelyRandom = async () => {
@@ -1836,7 +1849,7 @@ export default function PersonaGenerator() {
     setDeathRevealState('prompt');
     setDeathInfo(null);
     const proceduralYear = 1400 + Math.floor(Math.random() * 531);
-    const proceduralPersona = repairSyntheticSeedName(generateHistoricalPersona({ year: proceduralYear }));
+    const proceduralPersona = repairSyntheticSeedName(generateHistoricalPersona({ year: proceduralYear, samplingMode }));
     const source = sourceFromProceduralPersona(proceduralPersona);
     setSourceTitle(source.title);
     setSourceText(source.text);
@@ -2959,7 +2972,7 @@ export default function PersonaGenerator() {
 
     // Get proper wealth description
     const wealthDescriptions: Record<string, string> = {
-      'poor': 'impoverished',
+      'poor': 'poor',
       'modest': 'humble',
       'comfortable': 'respectable',
       'wealthy': 'prosperous',
@@ -3068,24 +3081,9 @@ export default function PersonaGenerator() {
     }
     narrative += '. ';
 
-    // Physical description with varied phrasing
-    if (character.appearance) {
-      const app = character.appearance;
-      const heightDesc = app.height && app.height > 180 ? 'tall' :
-                        app.height && app.height < 165 ? 'short' : '';
-      const buildDesc = app.build ? app.build : '';
-
-      if (heightDesc || (buildDesc && buildDesc !== 'average')) {
-        const physicalTemplates = [
-          `${pronounPossCap} ${buildDesc}${heightDesc && buildDesc ? ', ' : ''}${heightDesc} frame ${pronounVerb} become well-suited to the rigors of ${pronounPoss} profession. `,
-          `${pronounPossCap} ${buildDesc} build serves ${pronounObj} well in ${pronounPoss} line of work. `,
-          `Standing ${heightDesc ? heightDesc : 'at average height'}, ${pronoun} cut${pronounBe === 'are' ? '' : 's'} ${buildDesc ? `a ${buildDesc} figure` : 'a distinctive figure'} among ${pronounPoss} peers. `,
-          `${heightDesc ? pronounPossCap + ' ' + heightDesc + ' stature' : pronounPossCap + 'bearing'} ${pronounVerb} affected how neighbors and employers read ${pronounObj}. `
-        ];
-
-        narrative += pickBiography(physicalTemplates);
-      }
-    }
+    const narrativePronouns = getNarrativePronouns(character.gender);
+    const physicalDescription = describePhysicalAppearance(character.appearance, narrativePronouns);
+    if (physicalDescription) narrative += `${physicalDescription} `;
 
     // Add transitional phrase before foundational attributes (if needed)
     const foundationalAttributes = character.attributes?.filter((attr: any) => attr.foundational === true) || [];
@@ -3150,63 +3148,7 @@ export default function PersonaGenerator() {
         console.warn(`Skipping event with invalid age ${ageAtEvent} (event year: ${keyEvent.year}, birth year: ${persona.year - character.age})`);
       } else {
         // Only add event narrative if the age is valid
-        if (keyEvent.importance === EventImportance.TRAGEDY) {
-          const tragedyIntros = [
-            `Life's harsh realities struck early when, at just ${ageAtEvent}, `,
-            `Tragedy marked ${pronounObj} early. At age ${ageAtEvent}, `,
-            `Hardship came calling when, at ${ageAtEvent}, `,
-            `Fate dealt a cruel blow at age ${ageAtEvent}: `
-          ];
-          const tragedyOutros = [
-            `—a loss that would cast a long shadow over the years to come`,
-            `. The wound would never fully heal`,
-            `. This was when ${pronoun} realized life is not fair`,
-            `, forever altering ${pronounPoss} path through life`,
-            `. It was a sorrow ${pronoun} would carry always`
-          ];
-
-          if (yearsAgo > character.age * 0.7) {
-            narrative += pickBiography(tragedyIntros);
-          } else {
-            narrative += `${pronounPossCap} path was profoundly altered when `;
-          }
-          narrative += keyEvent.text.charAt(0).toLowerCase() + keyEvent.text.slice(1);
-          narrative += pickBiography(tragedyOutros);
-        } else if (keyEvent.importance === EventImportance.MILESTONE) {
-          const milestoneIntros = [
-            `A turning point arrived at age ${ageAtEvent}, when ${pronoun} `,
-            `At ${ageAtEvent}, a new chapter began: `,
-            `By ${ageAtEvent}, ${pronoun} ${pronounVerb === 'have' ? 'had' : 'had'} `
-          ];
-          const milestoneOutros = [
-            `, a step that changed the shape of ${pronounPoss} working life`,
-            `. The memory remained a marker between childhood and adult duty`,
-            `. Afterward, ${pronounPoss} obligations were harder to set aside`,
-            `, and the household came to expect more from ${pronounObj}`
-          ];
-
-          narrative += pickBiography(milestoneIntros);
-          narrative += keyEvent.text.charAt(0).toLowerCase() + keyEvent.text.slice(1);
-          narrative += pickBiography(milestoneOutros);
-        } else {
-          const opportunityIntros = [
-            `Fortune smiled upon ${pronounObj} when `,
-            `Good luck arrived unexpectedly: `,
-            `Opportunity knocked at age ${ageAtEvent}, when `,
-            `Providence intervened when `
-          ];
-          const opportunityOutros = [
-            `, an opportunity ${pronoun} seized with both hands`,
-            `—a stroke of fortune ${pronoun} would not squander`,
-            `, and ${pronoun} ${pronounVerb === 'have' ? 'made' : 'made'} the most of it`,
-            `. ${pronounPossCap} future brightened considerably`
-          ];
-
-          narrative += pickBiography(opportunityIntros);
-          narrative += keyEvent.text.charAt(0).toLowerCase() + keyEvent.text.slice(1);
-          narrative += pickBiography(opportunityOutros);
-        }
-        narrative += '. ';
+        narrative += `${describeLifeEvent(keyEvent, ageAtEvent, narrativePronouns)} `;
       }
     }
 
@@ -3231,11 +3173,9 @@ export default function PersonaGenerator() {
 
     // Add transitional phrase to profession section
     const professionTransitions = [
-      'Life went on. Today, ',
-      'The years rolled on. Now, ',
       'Today, ',
       'Now, ',
-      'Time passed. Now, '
+      `At ${character.age}, `
     ];
 
     const useTransition = seededIndex(10) < 4; // 40% chance of using a transition
@@ -3321,10 +3261,9 @@ export default function PersonaGenerator() {
     const ideologyLooksModern = /CAPITALIST|SOCIALIST|LIBERAL|NATIONALIST/i.test(character.ideology || '');
 
     if (character.ideology && character.ideology !== 'Pragmatism' && (!ideologyLooksModern || canCarryAbstractIdeology)) {
-      const ideologyDesc = getIdeologyDescription(character.ideology);
-      if (ideologyDesc) {
-        narrative += `${pronounPossCap} public opinions tend toward ${ideologyDesc}. `;
-      }
+      const ideology = IDEOLOGIES.find((i: any) => i.id === character.ideology);
+      const ideologySentence = describeIdeology(ideology, narrativePronouns);
+      if (ideologySentence) narrative += `${ideologySentence} `;
     } else if (beliefText) {
       // If no ideology but has beliefs, mention them
       narrative += `${pronounPossCap} worldview ${pronounBe} shaped by the conviction that ${beliefText}. `;
@@ -3396,13 +3335,8 @@ export default function PersonaGenerator() {
       const father = character.family.find(m => m.relation === 'father');
       const mother = character.family.find(m => m.relation === 'mother');
 
-      if (father && mother) {
-        narrative += ` In the household record of ${pronounPoss} life, the names <strong>${father.name}</strong> and <strong>${mother.name}</strong> stand closest to the beginning.`;
-      } else if (father) {
-        narrative += ` ${pronounPossCap} father, <strong>${father.name}</strong>, remains part of the story ${pronoun} carries.`;
-      } else if (mother) {
-        narrative += ` ${pronounPossCap} mother, <strong>${mother.name}</strong>, remains part of the story ${pronoun} carries.`;
-      }
+      const parentSentence = describeParents(father?.name, mother?.name, narrativePronouns, true);
+      if (parentSentence) narrative += ` ${parentSentence}`;
     }
 
     // Clean up any double periods or extra spaces
@@ -4182,6 +4116,24 @@ export default function PersonaGenerator() {
             <IoShuffle aria-hidden="true" />
             {isSourceGenerating ? 'Generating Schema...' : 'Generate Random Persona'}
           </button>
+          <div className="sampling-mode" role="group" aria-label="How personas are sampled">
+            <button
+              type="button"
+              className={samplingMode === 'explore' ? 'is-active' : ''}
+              onClick={() => setSamplingMode('explore')}
+              title="Flattened across eras and regions so the whole world is reachable. Not representative."
+            >
+              Explore
+            </button>
+            <button
+              type="button"
+              className={samplingMode === 'true-frequency' ? 'is-active' : ''}
+              onClick={() => setSamplingMode('true-frequency')}
+              title="Weighted by how many people actually lived in each era and region."
+            >
+              True frequency
+            </button>
+          </div>
           <span className="controls-disclaimer">
             Prototype – may contain errors
           </span>
@@ -4701,6 +4653,19 @@ export default function PersonaGenerator() {
                     {getSeasonInfo(persona.month, persona.day).description}
                   </span> in the {formatEraLabel(persona.era)} in {formatCulturalZone(persona.culturalZone, persona.region, persona.location)}
                 </div>
+                {persona.odds && (
+                  <div
+                    className="draw-odds"
+                    title={
+                      persona.samplingMode === 'true-frequency'
+                        ? 'Sampled in proportion to how many people actually lived in each era and region.'
+                        : 'Explore mode deliberately flattens eras and regions so the whole world is reachable — this is how rare the draw would really have been.'
+                    }
+                  >
+                    Roughly <strong>{persona.odds.phrase}</strong> were lived in this era and region
+                    {persona.samplingMode === 'explore' && <span className="draw-odds-mode"> · explore mode</span>}
+                  </div>
+                )}
                 {annotationRecord && (
                   <div className="schema-evidence-strip">
                     <div>

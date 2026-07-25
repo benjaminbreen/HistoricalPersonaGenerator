@@ -10,8 +10,8 @@
  */
 
 import {
-  applyContactShadow, ellipsoidShader, fillMask, makeMask, MAT, Mask, maskEllipse,
-  maskFromProfile, maskUnion,
+  applyContactShadow, bayer, ellipsoidShader, fillMask, makeMask, MAT, Mask,
+  maskEllipse, maskFromProfile, maskUnion,
 } from '../core/raster';
 import { makeNoise1D, unit } from '../core/rng';
 import { RenderContext } from '../render/context';
@@ -213,7 +213,7 @@ export function drawComplexion(context: RenderContext, head: Mask): void {
 
   const texture = String((spec as any).skinTexture || '');
   const freckled = /freckled/.test(texture) || spec.markings.some(m => m.type === 'freckles');
-  const weathered = /weathered|rough/.test(texture) || spec.ageLines > 0.7;
+  const weathered = /weathered|rough/.test(texture);
 
   if (freckled) {
     for (let i = 0; i < 34; i += 1) {
@@ -231,11 +231,42 @@ export function drawComplexion(context: RenderContext, head: Mask): void {
   }
 
   if (weathered) {
-    // Sun-exposed planes go a step warmer and darker: forehead, nose, cheeks.
-    for (let y = anatomy.headTop + 6; y < anatomy.browY - 2; y += 2) {
-      for (let x = centerX - 12; x <= centerX + 12; x += 3) {
-        if (inHead(x, y) && noise(x * 0.4 + y) > 0.1) raster.shift(x, y, 1, book);
+    // Sun-exposed planes darken a step: the brow ridge, the bridge of the nose,
+    // the tops of the cheekbones. Applied as three soft patches rather than as
+    // a scatter over the whole forehead — a scatter reads as dirt, not as a
+    // life spent outdoors.
+    const patches: Array<[number, number, number, number]> = [
+      [centerX, anatomy.browY - 5, 13, 3],
+      [centerX, anatomy.noseBaseY - 8, 4, 5],
+      [centerX - anatomy.headHalfWidth * 0.55, anatomy.cheekY - 2, 6, 3],
+      [centerX + anatomy.headHalfWidth * 0.55, anatomy.cheekY - 2, 6, 3],
+    ];
+    for (const [px, py, rx, ry] of patches) {
+      for (let dy = -ry; dy <= ry; dy += 1) {
+        for (let dx = -rx; dx <= rx; dx += 1) {
+          const x = Math.round(px + dx);
+          const y = Math.round(py + dy);
+          if (!inHead(x, y)) continue;
+          const falloff = 1 - Math.hypot(dx / (rx + 0.5), dy / (ry + 0.5));
+          if (falloff <= 0) continue;
+          if (bayer(x, y) > falloff * 0.32) continue;
+          raster.shift(x, y, 1, book);
+        }
       }
+    }
+  }
+
+  // Age spots. Few and distinct, on the temples and cheekbones where the sun
+  // reaches — three or four read as age, a dozen read as pox.
+  if (spec.ageLines > 0.7) {
+    const spots = 2 + Math.round((spec.ageLines - 0.7) * 6);
+    for (let i = 0; i < spots; i += 1) {
+      const side = noise(i * 3.7) > -0.15 ? -1 : 1;
+      const x = Math.round(centerX + side * (10 + Math.abs(noise(i * 2.1)) * (anatomy.headHalfWidth - 13)));
+      const y = Math.round(anatomy.browY - 4 + Math.abs(noise(i * 1.3 + 60)) * (anatomy.cheekY - anatomy.browY + 4));
+      if (!inHead(x, y)) continue;
+      raster.shift(x, y, 2, book);
+      if (noise(i * 5.1) > 0.35 && inHead(x + 1, y)) raster.shift(x + 1, y, 1, book);
     }
   }
 
@@ -288,24 +319,32 @@ export function drawAgeLines(context: RenderContext, head: Mask): void {
     }
   }
 
-  // Crow's feet fan out from the outer corner of each eye.
+  // Crow's feet: two short rays fanning from the outer corner of each eye, one
+  // angling up and one down. Longer horizontal lines here stop reading as
+  // wrinkles and start reading as scratches across the temple.
   if (strength > 0.34) {
-    const lines = strength > 0.7 ? 3 : 2;
+    const length = 2 + Math.round(strength * 2);
     for (const side of [-1, 1] as const) {
-      const x0 = centerX + side * (anatomy.eyeDX + 7);
-      for (let l = 0; l < lines; l += 1) {
-        const y = anatomy.eyeY - 2 + l * 3;
-        const length = 2 + Math.round(strength * 2.5);
-        for (let i = 0; i < length; i += 1) {
+      const x0 = centerX + side * (anatomy.eyeDX + 5);
+      for (const slope of [-0.55, 0.55]) {
+        for (let i = 1; i <= length; i += 1) {
           const x = x0 + side * i;
-          const yy = y + Math.round(i * (l - 1) * 0.45);
-          if (inHead(x, yy)) raster.shift(x, yy, 1, book);
+          const y = anatomy.eyeY + Math.round(i * slope);
+          if (inHead(x, y)) raster.shift(x, y, 1, book);
+        }
+      }
+      if (strength > 0.78) {
+        for (let i = 1; i <= length - 1; i += 1) {
+          const x = x0 + side * i;
+          if (inHead(x, anatomy.eyeY)) raster.shift(x, anatomy.eyeY, 1, book);
         }
       }
     }
   }
 
-  // Under-eye hollows deepen with age and with exhaustion.
+  // Under-eye hollows deepen with age and with exhaustion. Past middle age they
+  // become a defined bag — a lit pouch with a crease beneath it — rather than
+  // just a darker patch.
   const tired = Math.max(strength - 0.4, spec.condition.fatigueRatio - 0.3);
   if (tired > 0.1) {
     for (const side of [-1, 1] as const) {
@@ -315,6 +354,66 @@ export function drawAgeLines(context: RenderContext, head: Mask): void {
         const y = anatomy.eyeY + 5;
         if (inHead(x, y)) raster.shift(x, y, 1, book);
         if (tired > 0.35 && inHead(x, y + 1)) raster.shift(x, y + 1, 1, book);
+      }
+    }
+  }
+  if (strength > 0.6) {
+    for (const side of [-1, 1] as const) {
+      const x0 = centerX + side * anatomy.eyeDX;
+      for (let dx = -4; dx <= 4; dx += 1) {
+        const x = x0 + dx;
+        const taper = 1 - Math.abs(dx) / 5;
+        if (taper <= 0.2) continue;
+        if (inHead(x, anatomy.eyeY + 4)) raster.shift(x, anatomy.eyeY + 4, -1, book);
+        if (inHead(x, anatomy.eyeY + 6)) raster.shift(x, anatomy.eyeY + 6, 1, book);
+      }
+    }
+  }
+
+  // The upper lid loses its crease and folds down over the lash line. After
+  // grey hair this is the strongest single ageing cue on a face, and it is the
+  // one most procedural portraits never draw.
+  if (spec.lidDroop > 0.15) {
+    const rows = spec.lidDroop > 0.6 ? 2 : 1;
+    for (const side of [-1, 1] as const) {
+      const x0 = centerX + side * anatomy.eyeDX;
+      for (let dx = -5; dx <= 5; dx += 1) {
+        const x = x0 + dx;
+        const taper = 1 - Math.abs(dx) / 6;
+        if (taper <= 0.15) continue;
+        // The fold hangs lower at the outer corner, which is what gives an old
+        // eye its downward cast.
+        const sag = side * dx > 2 ? 1 : 0;
+        for (let r = 0; r < rows; r += 1) {
+          const y = anatomy.eyeY - 5 + r + sag;
+          if (inHead(x, y)) raster.shift(x, y, r === 0 ? 1 : 2, book);
+        }
+        if (inHead(x, anatomy.eyeY - 6 + sag)) raster.shift(x, anatomy.eyeY - 6 + sag, -1, book);
+      }
+    }
+  }
+
+  // Marionette lines, running down from the corners of the mouth. They arrive
+  // later than the nasolabial fold and they are what make a face look tired of
+  // holding itself up.
+  if (strength > 0.66) {
+    const length = 2 + Math.round((strength - 0.66) * 9);
+    for (const side of [-1, 1] as const) {
+      const x0 = centerX + side * 7;
+      for (let i = 0; i < length; i += 1) {
+        const x = x0 + side * Math.round(i * 0.3);
+        const y = anatomy.mouthY + 3 + i;
+        if (inHead(x, y)) raster.shift(x, y, 1, book);
+      }
+    }
+  }
+
+  // The neck goes first. A soft vertical cord and a slackening under the jaw.
+  if (strength > 0.7) {
+    for (const side of [-1, 1] as const) {
+      const x = centerX + side * Math.round(anatomy.neckHalf * 0.55);
+      for (let y = anatomy.neckTop + 4; y < anatomy.neckTop + 11; y += 1) {
+        if (raster.matAt(x, y) === MAT.SKIN) raster.shift(x, y, 1, book);
       }
     }
   }

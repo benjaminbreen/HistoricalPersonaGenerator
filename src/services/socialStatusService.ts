@@ -33,11 +33,27 @@ const isModernStatusSystem = (era: HistoricalEra): boolean =>
 export function sampleSocialStatus(
   era: HistoricalEra,
   wealth: WealthLevel,
-  random: () => number = Math.random
+  random: () => number = Math.random,
+  localeType?: 'rural' | 'town' | 'city' | 'mobile' | 'unknown',
 ): ProceduralSocialStatus {
-  const table = isModernStatusSystem(era)
+  const baseTable = isModernStatusSystem(era)
     ? MODERN_STATUS_BY_WEALTH[wealth]
     : PREMODERN_STATUS_BY_WEALTH[wealth];
+  const table = { ...baseTable };
+  if (localeType === 'rural' || localeType === 'mobile') {
+    const reducedMerchant = table.merchant * 0.5;
+    const reducedNoble = table.noble * 0.15;
+    const released = (table.merchant - reducedMerchant) + (table.noble - reducedNoble);
+    table.merchant = reducedMerchant;
+    table.noble = reducedNoble;
+    table.peasant += released * 0.7;
+    table.commoner += released * 0.3;
+    if (isModernStatusSystem(era)) {
+      const shiftedCommoner = table.commoner * 0.5;
+      table.commoner -= shiftedCommoner;
+      table.peasant += shiftedCommoner;
+    }
+  }
   const total = STATUS_ORDER.reduce((sum, status) => sum + table[status], 0);
   let roll = Math.max(0, Math.min(0.999999, random())) * total;
 

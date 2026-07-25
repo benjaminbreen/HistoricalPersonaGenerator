@@ -65,25 +65,40 @@ const WEALTH_ORNAMENT: Record<string, number> = {
 // Garment / headwear classification
 // ---------------------------------------------------------------------------
 
+/**
+ * Order matters: the first match wins. Extended from an audit over the app's
+ * real output, where roughly one garment name in seven was matching nothing and
+ * silently falling back to a tunic — skirts, cloaks, loincloths and most of the
+ * South Asian vocabulary among them.
+ */
 const GARMENT_KEYWORDS: Array<[RegExp, GarmentKind]> = [
-  [/(robe|kaftan|caftan|jama|hanfu|cassock|habit|abaya|thobe|dishdasha|boubou)/i, 'robe'],
-  [/(gown|dress|kirtle|frock|sari|saree|lehenga)/i, 'gown'],
-  [/(doublet|jerkin|waistcoat|bodice|breastplate|surcoat|tabard)/i, 'doublet'],
-  [/(coat|jacket|suit|blazer|overcoat|parka|anorak|chapan)/i, 'jacket'],
-  [/(wrap|wrapper|sarong|pagne|barkcloth|bark cloth|drape|toga|himation|shawl|mantle|blanket|lavalava|kain)/i, 'wrapped_garment'],
-  [/(shirt|blouse|smock|chemise|shift|tee|kurta top)/i, 'work_shirt'],
-  [/(tunic|kurta|chiton|dashiki|kaross)/i, 'tunic'],
-  [/(bare|none|naked|nude)/i, 'bare'],
+  [/(bare|naked|nude|loincloth|breechcloth|breechclout)/i, 'bare'],
+  [/(robe|kaftan|caftan|jama|hanfu|cassock|habit|abaya|thobe|dishdasha|boubou|agbada|achkan|sherwani|toga|houppelande|senator wear)/i, 'robe'],
+  [/(gown|dress|kirtle|frock|sari|saree|lehenga|anarkali|farthingale|cotehardie|kimono|ghagra|stola|peplos|peshwaz|haute couture)/i, 'gown'],
+  [/(doublet|jerkin|waistcoat|bodice|breastplate|surcoat|tabard|vest|choli|corset)/i, 'doublet'],
+  [/(coat|jacket|suit|blazer|overcoat|parka|anorak|chapan|cape|cloak|poncho|cardigan)/i, 'jacket'],
+  [/(wrap|wrapper|sarong|pagne|barkcloth|bark cloth|tapa|drape|himation|shawl|mantle|blanket|lavalava|kain|lungi|dhoti|skirt|breast band|hide|skin garment|fur|pelt|odhani|dupatta|traditional cloth|leaf covering|slit|upper cloth|woven cloth)/i, 'wrapped_garment'],
+  [/(shirt|blouse|smock|chemise|shift|tee|kurti|kameez|pants|trousers|breeches|leggings|apron|top|guayabera|chinos|shorts|overalls|churidar|jumper|sweater|jeans|kaba|denim|resort wear)/i, 'work_shirt'],
+  [/(tunic|kurta|chiton|dashiki|kaross|salwar)/i, 'tunic'],
+  [/(none|nothing)/i, 'bare'],
 ];
 
+/**
+ * Same story as the garments: the audit turned up fezzes, hijabs, feathered
+ * headdresses, beaded bands and a laurel wreath all being drawn as skullcaps.
+ * A plain band across the brow is common enough to deserve its own form.
+ */
 const HEADWEAR_KEYWORDS: Array<[RegExp, HeadwearKind]> = [
-  [/(veil|wimple|mantilla|dupatta|niqab|chador)/i, 'veil'],
-  [/(hood|cowl|capuche)/i, 'hood'],
+  // Eyewear filed under the head slot is not a head covering at all.
+  [/(sunglasses|spectacles|eyeglasses)/i, 'none'],
+  [/(veil|wimple|mantilla|dupatta|niqab|chador|hijab|barbette)/i, 'veil'],
+  [/(hood|cowl|capuche|zukin|chaperon)/i, 'hood'],
   [/(helmet|helm|casque|morion|sallet|kabuto)/i, 'helmet'],
-  [/(crown|circlet|diadem|coronet|tiara)/i, 'coronet'],
-  [/(turban|headcloth|head cloth|headwrap|head wrap|gele|keffiyeh|shemagh|pagri|scarf|kerchief|tignon)/i, 'wrapped_cloth'],
-  [/(cap|coif|bonnet|kufi|taqiyah|biretta|skullcap|futou|headband|fillet|beret|toque)/i, 'cap'],
-  [/(brim|tricorn|bicorne|sombrero|straw|petasos|boater|bowler|top hat|wide[- ]?hat|conical|douli|hat)/i, 'brimmed_hat'],
+  [/(crown|diadem|coronet|tiara|headdress|headpiece|sacred feather)/i, 'coronet'],
+  [/(circlet|band|fillet|wreath|garland|ornament|passa|jadai|chaplet|hairpin|hair pin|comb|hair flower|laurel|tikka|patti|rakhdi|fascinator|hairpiece|bindi)/i, 'band'],
+  [/(turban|headcloth|head cloth|headwrap|head wrap|head tie|gele|keffiyeh|shemagh|pagri|scarf|kerchief|tignon|wrap|duku|gele)/i, 'wrapped_cloth'],
+  [/(cap|coif|bonnet|kufi|taqiyah|biretta|skullcap|futou|beret|toque|fez|tarboosh|hennin|topi|snapback|beanie|biggins|kofia|mitre|songkok)/i, 'cap'],
+  [/(brim|tricorn|bicorne|sombrero|straw|petasos|boater|bowler|fedora|homburg|visor|top hat|wide[- ]?hat|conical|douli|sugegasa|cheese-cutter|hat)/i, 'brimmed_hat'],
 ];
 
 function classify<T>(name: string, table: Array<[RegExp, T]>, fallback: T): T {
@@ -91,6 +106,28 @@ function classify<T>(name: string, table: Array<[RegExp, T]>, fallback: T): T {
     if (pattern.test(name)) return value;
   }
   return fallback;
+}
+
+/**
+ * Same classification, but reporting whether anything actually matched.
+ *
+ * The adapter's keyword tables are the part of this system most likely to be
+ * wrong, because the app's clothing data is far larger than any list I can
+ * write by hand — so the audit harness needs to be able to ask "which garment
+ * names did you fail to recognise?" rather than silently taking the fallback.
+ */
+export function classifyGarmentName(name: string): { kind: GarmentKind; matched: boolean } {
+  for (const [pattern, kind] of GARMENT_KEYWORDS) {
+    if (pattern.test(name)) return { kind, matched: true };
+  }
+  return { kind: 'tunic', matched: false };
+}
+
+export function classifyHeadwearName(name: string): { kind: HeadwearKind; matched: boolean } {
+  for (const [pattern, kind] of HEADWEAR_KEYWORDS) {
+    if (pattern.test(name)) return { kind, matched: true };
+  }
+  return { kind: 'cap', matched: false };
 }
 
 interface Piece {
@@ -263,10 +300,14 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
 
   // --- hair colour, greyed by age ------------------------------------------
   const baseHair = appearance.hairColor || '#4b2f21';
+  // Greying is near-universal by the sixties and well underway through the
+  // fifties; the old curve left too many fifty-somethings with the hair colour
+  // they had at twenty.
   let grayAmount = 0;
-  if (age > 62) grayAmount = 0.55 + unit(seed, 'gray-old') * 0.4;
-  else if (age > 46) grayAmount = unit(seed, 'gray-mid') > 0.45 ? 0.18 + unit(seed, 'gray-amt') * 0.4 : 0.05;
-  else if (age > 35) grayAmount = unit(seed, 'gray-early') > 0.8 ? 0.12 : 0;
+  if (age > 66) grayAmount = 0.7 + unit(seed, 'gray-old') * 0.3;
+  else if (age > 54) grayAmount = 0.22 + unit(seed, 'gray-late') * 0.4;
+  else if (age > 44) grayAmount = 0.12 + unit(seed, 'gray-mid') * 0.38;
+  else if (age > 33) grayAmount = unit(seed, 'gray-early') > 0.62 ? 0.06 + unit(seed, 'gray-amt') * 0.14 : 0;
   const hairColor = grayAmount > 0.01
     ? rgbToHex(mixRgb(hexToRgb(baseHair), hexToRgb('#b7b2ab'), grayAmount))
     : baseHair;
@@ -317,8 +358,9 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     headwear = null;
   } else if (!isEmptyPiece(headPiece) || explicitKind) {
     const name = headPiece?.name || 'Cap';
-    headwear = {
-      kind: explicitKind || classify(`${name} ${headPiece?.material || ''}`, HEADWEAR_KEYWORDS, 'cap'),
+    const kind = explicitKind || classify(`${name} ${headPiece?.material || ''}`, HEADWEAR_KEYWORDS, 'cap');
+    headwear = kind === 'none' ? null : {
+      kind,
       name,
       material: (headPiece?.material || 'cloth').toLowerCase(),
       color: headPiece?.color || colorForMaterial(headPiece?.material) || palette.secondary || '#5c5347',
@@ -369,6 +411,7 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
 
     build: (appearance.build || 'average') as Build,
     ageLines: clamp01((age - 26) / 46),
+    lidDroop: clamp01((age - 44) / 32),
 
     garment,
     headwear,

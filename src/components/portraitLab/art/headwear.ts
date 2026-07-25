@@ -37,6 +37,26 @@ function faceOpening(context: RenderContext, topY: number): Mask {
   );
 }
 
+/**
+ * Cloth that falls past the shoulders parts at the front, the same way hair
+ * does. Without this a veil is simply wider than the shoulders and buries the
+ * whole garment — which is how twenty-five personas in a two-hundred-portrait
+ * audit ended up apparently wearing nothing.
+ */
+function partAtChest(context: RenderContext, mask: Mask): Mask {
+  const { anatomy } = context;
+  const { size, centerX } = anatomy;
+  const out = mask.slice();
+  for (let y = anatomy.collarY - 4; y < size; y += 1) {
+    const t = Math.max(0, (y - (anatomy.collarY - 4)) / 18);
+    const open = anatomy.neckHalf + 3 + t * 16;
+    for (let x = 0; x < size; x += 1) {
+      if (Math.abs(x + 0.5 - centerX) <= open) out[y * size + x] = 0;
+    }
+  }
+  return out;
+}
+
 /** The skull profile, inflated, for anything that wraps the head. */
 function crownMask(context: RenderContext, puff: number, rise: number, bottomY: number): Mask {
   const { anatomy } = context;
@@ -97,6 +117,7 @@ export function drawHeadwear(context: RenderContext): Mask | null {
     case 'hood': return drawHood(context);
     case 'helmet': return drawHelmet(context);
     case 'coronet': return drawCoronet(context);
+    case 'band': return drawBand(context);
     default: return null;
   }
 }
@@ -239,10 +260,14 @@ function drawWrappedCloth(context: RenderContext): Mask {
   if (!turban) {
     const tailSide = spec.seed % 2 === 0 ? -1 : 1;
     let tail = makeMask(size, size);
-    for (let y = anatomy.earTopY - 2; y < anatomy.chinY + 10; y += 1) {
-      const t = (y - (anatomy.earTopY - 2)) / 30;
-      const outer = anatomy.headHalfWidth + 1.5 + t * 4;
-      const inner = outer - 4 - t * 2.5;
+    // Stops at the collar rather than running to the frame edge: a tail that
+    // hangs the full height reads as a straight curtain, not as cloth.
+    for (let y = anatomy.earTopY - 2; y < anatomy.collarY + 2; y += 1) {
+      const t = (y - (anatomy.earTopY - 2)) / 24;
+      // Swings outward as it falls, and narrows to a point at the end.
+      const taper = Math.max(0, 1 - Math.pow(Math.max(0, t - 0.55) / 0.45, 2));
+      const outer = anatomy.headHalfWidth + 1.5 + t * 5;
+      const inner = outer - (3.5 + t * 2) * taper;
       for (let d = inner; d <= outer; d += 1) {
         const x = Math.round(centerX + tailSide * d);
         if (x < 0 || x >= size) continue;
@@ -281,7 +306,7 @@ function drawVeil(context: RenderContext): Mask {
       }
     }
   }
-  const mask = maskSubtract(maskUnion(cap, drape), faceOpening(context, anatomy.browY - 4));
+  const mask = partAtChest(context, maskSubtract(maskUnion(cap, drape), faceOpening(context, anatomy.browY - 4)));
 
   fillMask(raster, mask, ramps.headwear, MAT.HEADWEAR, (x, y) => {
     const dx = (x - centerX) / (anatomy.headHalfWidth + 8);
@@ -321,7 +346,7 @@ function drawHood(context: RenderContext): Mask {
 
   // The opening: a rounded arch the face looks out of.
   const opening = maskEllipse(size, size, centerX, anatomy.eyeY + 2, anatomy.headHalfWidth * 0.98, anatomy.headHeight * 0.44);
-  const mask = maskSubtract(outer, opening);
+  const mask = partAtChest(context, maskSubtract(outer, opening));
 
   fillMask(raster, mask, ramps.headwear, MAT.HEADWEAR, (x, y) => {
     const dx = (x - centerX) / (anatomy.headHalfWidth + 6);
@@ -374,32 +399,110 @@ function drawHelmet(context: RenderContext): Mask {
   return dome;
 }
 
+/**
+ * A band across the brow — beaded, woven, a laurel wreath, a bone or shell
+ * ornament. Common enough in the app's output to deserve its own form; drawing
+ * these as skullcaps hid the whole top of the head under a bowl.
+ */
+function drawBand(context: RenderContext): Mask {
+  const { anatomy, raster, ramps, spec, book } = context;
+  const { size, centerX } = anatomy;
+  const mask = makeMask(size, size);
+  const name = spec.headwear!.name.toLowerCase();
+  const leafy = /wreath|garland/.test(name);
+  const beaded = /bead|pearl|shell|bone/.test(name);
+
+  // A hairpin, comb or flower is worn *in* the hair, not around the brow. A
+  // full band for these would cover a third of the head for a two-pixel object.
+  if (/pin|comb|flower/.test(name)) {
+    const side = spec.seed % 2 === 0 ? -1 : 1;
+    const x0 = centerX + side * Math.round(anatomy.headHalfWidth * 0.62);
+    const y0 = anatomy.headTop + 8;
+    for (let i = 0; i < 3; i += 1) {
+      const x = x0 + side * i;
+      const y = y0 + (i % 2);
+      if (raster.matAt(x, y) !== MAT.HAIR && raster.matAt(x, y) !== MAT.SKIN) continue;
+      raster.set(x, y, ramps.headwear.steps[i === 1 ? 0 : 2], MAT.HEADWEAR, i === 1 ? 0 : 2);
+      mask[y * size + x] = 1;
+    }
+    return mask;
+  }
+
+  const top = anatomy.browY - 7;
+  const rows = /wide|broad/.test(name) ? 4 : 3;
+
+  for (let y = top; y < top + rows; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      // Follow the head, and let the band pass over hair as well as skin.
+      const material = raster.matAt(x, y);
+      if (material !== MAT.SKIN && material !== MAT.HAIR) continue;
+      const dx = (x - centerX) / anatomy.headHalfWidth;
+      const index = y === top ? 2 : y === top + rows - 1 ? 5 : 3 + (dx > 0.15 ? 1 : 0);
+      raster.set(x, y, ramps.headwear.steps[index], MAT.HEADWEAR, index);
+      mask[y * size + x] = 1;
+    }
+  }
+
+  if (beaded) {
+    // Individual beads, alternating value so they read as separate objects.
+    for (let x = 0; x < size; x += 1) {
+      if (!mask[(top + 1) * size + x]) continue;
+      if ((x + centerX) % 3 !== 0) continue;
+      raster.set(x, top + 1, ramps.headwear.steps[0], MAT.HEADWEAR, 0);
+      if (mask[(top + 2) * size + x]) raster.set(x, top + 2, ramps.headwear.steps[6], MAT.HEADWEAR, 6);
+    }
+  }
+
+  if (leafy) {
+    // A ragged upper edge reads as leaves rather than as a machined ring.
+    const noise = makeNoise1D(spec.seed ^ 0x4411);
+    for (let x = 0; x < size; x += 1) {
+      if (!mask[top * size + x]) continue;
+      if (noise(x * 0.8) < 0.15) continue;
+      const y = top - 1;
+      if (raster.matAt(x, y) === MAT.SKIN || raster.matAt(x, y) === MAT.HAIR) {
+        raster.set(x, y, ramps.headwear.steps[1], MAT.HEADWEAR, 1);
+        mask[y * size + x] = 1;
+      }
+    }
+  }
+
+  applyContactShadow(raster, mask, book, { dx: 0, dy: 1, strength: 1, depth: 1 });
+  return mask;
+}
+
 function drawCoronet(context: RenderContext): Mask {
   const { anatomy, raster, ramps, spec } = context;
   const { size, centerX } = anatomy;
   const mask = makeMask(size, size);
   const y0 = anatomy.headTop + 4;
+  // A feathered or cloth headdress classifies here too, so the band takes the
+  // covering's own material rather than always being cast in metal.
+  const ramp = ramps.headwear;
+  const material = /gold|silver|bronze|brass|steel|iron/.test(spec.headwear!.material) ? MAT.METAL : MAT.HEADWEAR;
 
   for (let x = centerX - anatomy.headHalfWidth; x <= centerX + anatomy.headHalfWidth; x += 1) {
     for (let y = y0; y < y0 + 3; y += 1) {
       if (x < 0 || x >= size) continue;
       if (Math.abs(x - centerX) > anatomy.headHalfWidth * 0.94) continue;
       const index = y === y0 ? 1 : y === y0 + 2 ? 5 : 3;
-      raster.set(x, y, ramps.metal.steps[index], MAT.METAL, index);
+      raster.set(x, y, ramp.steps[index], material, index);
       mask[y * size + x] = 1;
     }
   }
-  // Points.
+  // Points — feathers, spikes, or a crown's fleurons depending on the material.
+  const tall = /feather|plume/.test(spec.headwear!.name.toLowerCase()) ? 7 : 3;
   for (let i = -2; i <= 2; i += 1) {
     const x = centerX + i * 9;
-    for (let y = y0 - 3; y < y0; y += 1) {
+    for (let y = y0 - tall; y < y0; y += 1) {
       if (x < 0 || x >= size) continue;
-      raster.set(x, y, ramps.metal.steps[2], MAT.METAL, 2);
+      const index = y < y0 - tall + 2 ? 1 : 3;
+      raster.set(x, y, ramp.steps[index], material, index);
       mask[y * size + x] = 1;
     }
-    if (spec.headwear!.ornament > 0.6) {
-      raster.set(x, y0 - 4, ramps.gem.steps[2], MAT.GEM, 2);
-      mask[(y0 - 4) * size + x] = 1;
+    if (spec.headwear!.ornament > 0.6 && material === MAT.METAL) {
+      raster.set(x, y0 - tall - 1, ramps.gem.steps[2], MAT.GEM, 2);
+      mask[(y0 - tall - 1) * size + x] = 1;
     }
   }
   castOntoFace(context, mask, 1, 1);

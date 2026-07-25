@@ -113,9 +113,15 @@ function poseFor(expression: Expression): MouthPose {
 }
 
 /** Lip fullness and width, applied to whichever base the expression picked. */
-function shapeMouth(art: Stamp, lipShape: LipShape): Stamp {
+function shapeMouth(art: Stamp, lipShape: LipShape, ageThinning = 0): Stamp {
+  // The vermillion of the lip shrinks steadily with age, so an old mouth is a
+  // narrower band no matter what shape it started as.
+  const shape: LipShape =
+    ageThinning > 0.62 && lipShape !== 'thin'
+      ? (lipShape === 'full' ? 'medium' : 'thin')
+      : lipShape;
   const lowerLipRow = art.rows.findIndex(row => row.includes('D'));
-  switch (lipShape) {
+  switch (shape) {
     case 'thin':
       return lowerLipRow >= 0 ? removeRow(art, lowerLipRow + 1) : art;
     case 'full':
@@ -141,6 +147,8 @@ export interface DrawMouthOptions {
   y: number;
   /** Extra bend, e.g. from mood on top of the expression. */
   bendBias?: number;
+  /** 0..1; thins the lips the way age does. */
+  ageThinning?: number;
 }
 
 /**
@@ -150,9 +158,9 @@ export interface DrawMouthOptions {
 const MOUTH_SURFACE = new Set<number>([MAT.SKIN, MAT.LIP, MAT.TEETH, MAT.PAINT]);
 
 export function drawMouth(options: DrawMouthOptions): void {
-  const { raster, book, paints, expression, lipShape, centerX, y, bendBias = 0 } = options;
+  const { raster, book, paints, expression, lipShape, centerX, y, bendBias = 0, ageThinning = 0 } = options;
   const pose = poseFor(expression);
-  const art = shapeMouth(pose.base, lipShape);
+  const art = shapeMouth(pose.base, lipShape, ageThinning);
   const bend = pose.bend + bendBias;
 
   drawStamp(raster, art, centerX, y, paints, book, {
