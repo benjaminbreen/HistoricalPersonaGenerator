@@ -11,6 +11,7 @@ export interface ClothingPiece {
     name: string;
     material: string;
     adjectives?: string[];
+    color?: string;
 }
 
 export interface ClothingPalette {
@@ -41,6 +42,27 @@ export interface PortraitVisualOverrides {
     appearance?: Partial<Appearance>;
     garment?: ClothingPiece;
     headgear?: ClothingPiece;
+    footwear?: ClothingPiece;
+    contextPackId?: string;
+    headgearKind?: 'none' | 'cap' | 'brimmed_hat' | 'wrapped_cloth' | 'veil' | 'hood' | 'helmet';
+    garmentKind?: 'tunic' | 'robe' | 'gown' | 'doublet' | 'work_shirt' | 'wrapped_garment' | 'jacket';
+    identity?: {
+        placeTrack: string;
+        periodTrack: string;
+        culturalTrack: string;
+        occupationTrack: string;
+        statusTrack: string;
+        garmentFamily: string;
+        paletteFamily: string;
+        confidence: 'high' | 'medium' | 'low';
+        forbiddenTerms: string[];
+    };
+    displayEquipment?: Partial<Record<'head' | 'torso' | 'feet', ClothingPiece>>;
+    authenticity?: {
+        confidence: 'high' | 'medium' | 'low';
+        rationale: string;
+        references?: string[];
+    };
     palette?: Partial<ClothingPalette>;
     background?: {
         base?: string;

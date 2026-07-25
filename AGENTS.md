@@ -11,7 +11,7 @@ The generator should treat sources as evidence, not flavor. Every generated pers
 - fields plausibly synthesized to complete the persona
 - fields too uncertain to state confidently
 
-Gemini `gemini-3.1-flash-lite-preview` is the intended low-cost completion model for schema filling and plausible gap completion. Use it after extraction and normalization, not as a substitute for source handling.
+Gemini `gemini-3.1-flash-lite` is the intended low-cost completion model for schema filling and plausible gap completion. Use it after extraction and normalization, not as a substitute for source handling.
 
 ## Core Product Flow
 
@@ -237,4 +237,3 @@ A source-first persona feature is not done until:
 - uncertainty and bias are preserved
 - failures are clear and recoverable
 - the user can export or inspect the JSONL material used to generate the persona
-

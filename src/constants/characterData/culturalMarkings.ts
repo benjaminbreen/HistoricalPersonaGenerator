@@ -1303,8 +1303,9 @@ export function getMarkingProbability(
   // Base probabilities by culture - historically accurate
   // These reflect actual anthropological data on body modification prevalence
   const baseProbabilities: Record<CulturalZone, number> = {
-    // Oceania: Ta moko, pe'a, and other tattoos were near-universal markers of adulthood
-    OCEANIA: 0.95,
+    // Oceania is too internally diverse for a zone-wide "near universal" assumption.
+    // Keep generic generation conservative until markings can be selected by community.
+    OCEANIA: 0.35,
     
     // Pre-Columbian Americas: Face/body paint was daily wear, tattoos/piercings very common
     NORTH_AMERICAN_PRE_COLUMBIAN: 0.90,

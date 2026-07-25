@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PlayerCharacter, NpcEntity } from '../../types';
-import { ProceduralPortrait } from './index';
+import PortraitSwitch from '../portraitLab/PortraitSwitch';
 import AnimatedPortrait from './AnimatedPortrait';
 
 interface PortraitModalProps {
@@ -137,7 +137,7 @@ const PortraitModal: React.FC<PortraitModalProps> = ({ character, onClose }) => 
                         title="Click to test smile/surprise animation"
                     >
                         <div className="w-full h-full transform scale-110 relative">
-                            <ProceduralPortrait 
+                            <PortraitSwitch
                                 character={character} 
                                 size={500}
                                 temporaryExpression={temporaryExpression}

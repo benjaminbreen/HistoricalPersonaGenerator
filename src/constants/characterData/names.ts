@@ -88,6 +88,14 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         female: ['Hildegard', 'Bertrada', 'Liutgard', 'Fastrada', 'Ermengarde', 'Judith', 'Engelberge', 'Richildis', 'Irmengard', 'Gisela', 'Bertha', 'Rotrude', 'Adalheid', 'Cunigunde', 'Hemma', 'Matilda', 'Edgitha', 'Gerberga', 'Adelheid', 'Emma'],
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
+    // Continental Saxon and neighboring North Sea Germanic names. People in
+    // this period normally appear as mononyms here; modern hereditary German
+    // and Ashkenazi surnames are deliberately excluded.
+    SAXON_EARLY_MEDIEVAL: {
+        male: ['Widukind', 'Bruno', 'Wichmann', 'Thankmar', 'Ekbert', 'Bernhard', 'Adalgar', 'Hessi', 'Cobbo', 'Immed', 'Hathugaut', 'Theoderic', 'Liudolf', 'Reginbert', 'Bernlef', 'Osdag', 'Walbert', 'Boso', 'Gerward', 'Wulfhard'],
+        female: ['Oda', 'Ida', 'Gisla', 'Hathumod', 'Liutgard', 'Mathilda', 'Adela', 'Bertrada', 'Gerberga', 'Hildegard', 'Eila', 'Thiadsvind', 'Hrotsvit', 'Imma', 'Wulfhild', 'Adelheid', 'Alfrida', 'Theodrada', 'Brunhild', 'Reginlind'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
+    },
     NORMAN_FRENCH: {
         male: ['Guillaume', 'Robert', 'Richard', 'Henri', 'Hugues', 'Gautier', 'Roger', 'Raoul', 'Godefroy', 'Baudouin', 'Foulques', 'Drogon', 'Gilbert', 'Eudes', 'Etienne', 'Alain', 'Geoffroy', 'Raoul', 'Etienne', 'Tancrede'],
         female: ['Mathilde', 'Judith', 'Emma', 'Adele', 'Agnes', 'Constance', 'Herleve', 'Sibille', 'Gundrade', 'Isabelle', 'Alix', 'Beatrice', 'Cecile', 'Alienor', 'Giselle', 'Havoise', 'Muriel', 'Orabile', 'Richilde', 'Sybille'],
@@ -872,6 +880,14 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         female: ['Siti', 'Fatimah', 'Aminah', 'Khadijah', 'Zainab', 'Hafsah', 'Aishah', 'Maryam', 'Halimah', 'Ruqayyah', 'Safiyyah', 'Ummu', 'Raudhah', 'Wardina', 'Nur', 'Farah', 'Sarah', 'Laila', 'Aisyah', 'Nabila', 'Salma', 'Huda', 'Iman', 'Hidayah', 'Syahirah', 'Alya', 'Syafiqah', 'Widad', 'Zara', 'Qistina'],
         surname: ['Abdullah', 'Rahman', 'Ibrahim', 'Ahmad', 'Hassan', 'Ali', 'Muhammad', 'Yusof', 'Ismail', 'Omar', 'Zakaria', 'Mahmud', 'Salleh', 'Sulaiman', 'Rashid', 'Hamid', 'Karim', 'Rahim', 'Latif', 'Halim', 'Razak', 'Aziz', 'Nasir', 'Hakim', 'Farid', 'Nizam', 'Zain', 'Bakar', 'Azman', 'Rosli']
     },
+    // Conservative given-name pool for Muslim communities in the pre-1945
+    // Malay-Indonesian archipelago. A single given name is safer here than
+    // inventing a modern hereditary surname for an ordinary historical person.
+    MALAY_ISLAMIC_HISTORICAL: {
+        male: ['Ahmad', 'Muhammad', 'Ali', 'Hasan', 'Husain', 'Ibrahim', 'Ismail', 'Umar', 'Yusuf', 'Zakaria', 'Mahmud', 'Sulaiman', 'Hamzah', 'Jafar', 'Abdullah', 'Abdul Rahman'],
+        female: ['Siti', 'Fatimah', 'Aminah', 'Khadijah', 'Zainab', 'Aishah', 'Maryam', 'Halimah', 'Safiyyah', 'Salmah', 'Nur', 'Ruqayyah'],
+        surname: ['(No Surname)']
+    },
     INDONESIAN: {
         male: ['Budi', 'Agus', 'Hendra', 'Dedi', 'Eko', 'Rudi', 'Joko', 'Wahyu', 'Bambang', 'Yudi', 'Andi', 'Indra', 'Yanto', 'Hadi', 'Slamet', 'Tono', 'Dwi', 'Rizki', 'Adi', 'Bayu', 'Dimas', 'Fajar', 'Gilang', 'Heri', 'Irfan', 'Kuncoro', 'Lutfi', 'Maulana', 'Nova', 'Ozi'],
         female: ['Sri', 'Sari', 'Dewi', 'Ratna', 'Indah', 'Maya', 'Rina', 'Yuni', 'Wati', 'Lestari', 'Fitri', 'Nur', 'Ayu', 'Dian', 'Eka', 'Farida', 'Gita', 'Hani', 'Ika', 'Jihan', 'Kania', 'Lia', 'Mega', 'Nina', 'Olivia', 'Putri', 'Qory', 'Rani', 'Sinta', 'Tyas'],
@@ -1105,7 +1121,7 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         { before: -500, keys: ['PREHISTORIC_PROTO_INDO_EUROPEAN'] }, // Pre-Germanic
         { after: -500, before: 200, keys: ['PREHISTORIC_PROTO_GERMANIC'] }, // Core Proto-Germanic period
         { after: 200, before: 486, keys: ['GERMAN', 'ANCIENT_ROMAN'] }, // Migration Period
-        { after: 486, before: 843, keys: ['FRANKISH_MEROVINGIAN', 'FRANKISH_CAROLINGIAN', 'GERMAN'] },
+        { after: 486, before: 843, keys: ['FRANKISH_MEROVINGIAN', 'FRANKISH_CAROLINGIAN'] },
         { after: 843, before: 1945, keys: ['GERMAN'] },
         { after: 1945, before: 1990, keys: ['GERMAN', 'EAST_GERMAN', 'TURKISH'] },
         { after: 1990, keys: ['GERMAN', 'TURKISH'] }
@@ -1745,7 +1761,11 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         "Maritime Southeast Asia": [
            { before: 800, keys: ['INDONESIAN', 'VIETNAMESE'] },
             { before: 1300, keys: ['MALAY', 'INDONESIAN', 'DRAVIDIAN', 'VIETNAMESE'] },
-            { after: 1300, before: 1945, keys: ['MALAY', 'INDONESIAN', 'ARABIC_TRADITIONAL', 'PORTUGUESE', 'DUTCH', 'ENGLISH'] },
+            // Ordinary-person generation defaults to local naming. Colonial and
+            // merchant-diaspora identities need a coordinated explicit track;
+            // selecting a European name here by itself also changed appearance
+            // while leaving religion and household context local.
+            { after: 1300, before: 1945, keys: ['MALAY_ISLAMIC_HISTORICAL', 'MALAY', 'INDONESIAN', 'JAVANESE'] },
             { after: 1945, keys: ['MALAY', 'INDONESIAN', 'CHINESE_CANTONESE'] }
         ],
         "Philippines": [
@@ -1852,7 +1872,9 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         ],
         "New Guinea and Melanesia": [
             { before: 1884, keys: ['MELANESIAN'] },
-            { after: 1884, keys: ['MELANESIAN', 'ENGLISH', 'GERMAN', 'DUTCH'] }
+            // Cultural zone OCEANIA denotes a local persona; colonial presence alone
+            // should not randomly replace that person's naming tradition.
+            { after: 1884, keys: ['MELANESIAN'] }
         ],
         "Polynesia": [
             { before: 1767, keys: ['TAHITIAN', 'TONGAN', 'SAMOAN', 'POLYNESIAN'] },
@@ -2329,7 +2351,7 @@ export function getCulturalGroupsByZone(zone: CulturalZone): string[] {
     switch (zone) {
         case 'EUROPEAN':
             return groups.filter(g => 
-                ['ANCIENT_GREEK', 'ANCIENT_ROMAN', 'FRANKISH_MEROVINGIAN', 'FRANKISH_CAROLINGIAN', 'NORMAN_FRENCH', 'FRENCH_MEDIEVAL', 'ENGLISH_ANGLO_SAXON', 'ENGLISH_MEDIEVAL', 'ENGLISH', 'SPANISH_CASTILIAN', 'PORTUGUESE', 'ITALIAN', 'FRENCH', 'GERMAN', 'RUSSIAN', 'GREEK', 'CELTIC_IRISH', 'WELSH', 'SCOTTISH', 'DUTCH', 'SCANDINAVIAN', 'BYZANTINE', 'SLAVIC_MEDIEVAL', 'HUNGARIAN', 'POLISH', 'CZECH', 'ROMANIAN', 'BULGARIAN', 'SERBIAN', 'CROATIAN', 'ICELANDIC', 'BOHEMIAN', 'ARMENIAN', 'GEORGIAN', 'EUROPEAN'].includes(g)
+                ['ANCIENT_GREEK', 'ANCIENT_ROMAN', 'FRANKISH_MEROVINGIAN', 'FRANKISH_CAROLINGIAN', 'SAXON_EARLY_MEDIEVAL', 'NORMAN_FRENCH', 'FRENCH_MEDIEVAL', 'ENGLISH_ANGLO_SAXON', 'ENGLISH_MEDIEVAL', 'ENGLISH', 'SPANISH_CASTILIAN', 'PORTUGUESE', 'ITALIAN', 'FRENCH', 'GERMAN', 'RUSSIAN', 'GREEK', 'CELTIC_IRISH', 'WELSH', 'SCOTTISH', 'DUTCH', 'SCANDINAVIAN', 'BYZANTINE', 'SLAVIC_MEDIEVAL', 'HUNGARIAN', 'POLISH', 'CZECH', 'ROMANIAN', 'BULGARIAN', 'SERBIAN', 'CROATIAN', 'ICELANDIC', 'BOHEMIAN', 'ARMENIAN', 'GEORGIAN', 'EUROPEAN'].includes(g)
             );
         case 'EAST_ASIAN':
             return groups.filter(g => 

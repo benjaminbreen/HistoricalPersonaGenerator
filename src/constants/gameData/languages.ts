@@ -1048,6 +1048,30 @@ export const LANGUAGES: Record<string, LanguageData> = {
     isReconstructed: false,
   },
 
+  OLD_SAXON: {
+    id: 'OLD_SAXON',
+    name: 'Old Saxon',
+    nativeName: 'Sahsisk',
+    family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
+    script: ['Runic', 'Latin'],
+    period: [500, 1150],
+    regions: ['Saxony', 'Lower Saxony', 'Hamburg', 'Lower Elbe', 'Northern Germany', 'Westphalia'],
+    culturalZones: ['EUROPEAN' as CulturalZone],
+    predecessors: ['PROTO_GERMANIC'],
+    successors: ['MIDDLE_LOW_GERMAN'],
+    description: 'Early Low German language of the continental Saxons',
+    greetings: {
+      hello: 'Hail',
+      goodbye: 'Far gisund',
+      yes: 'Ia',
+      no: 'Ne',
+      thanks: 'Thank',
+    },
+    llmPrompt: 'Emulate Old Saxon, the early Low German language of the continental Saxons. Use a Germanic vocabulary and inflected grammar with four cases, strong and weak verbs, and flexible but often verb-second word order. Avoid the later High German consonant shift. Keep everyday speech concrete and direct; literacy and Latin vocabulary should be limited to clerical settings.',
+    historicalContext: 'Old Saxon was spoken in northern Germany from roughly the 6th to 12th centuries. It is the best period-appropriate language track for an ordinary person around the lower Elbe and Hamburg in the early Middle Ages.',
+    isReconstructed: false,
+  },
+
   FRANKISH: {
     id: 'FRANKISH',
     name: 'Frankish',
@@ -4896,6 +4920,25 @@ interface RegionLanguageMapping {
 // Comprehensive regional language mappings
 const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   // === EUROPE ===
+  // Northern German coast and continental Saxon country
+  {
+    patterns: ['hamburg coast', 'lower elbe', 'saxon uplands', 'lower saxony', 'northern germany'],
+    languages: [
+      { id: 'OLD_SAXON', period: [500, 1150], weight: 95 },
+      { id: 'GERMAN', period: [1150, 2025], weight: 90 },
+    ],
+    namePatterns: [
+      { pattern: /Widukind|Wichmann|Thankmar|Ekbert|Hathugaut|Liudolf|Hathumod|Thiadsvind/i, language: 'OLD_SAXON', weight: 98 },
+    ],
+  },
+  {
+    patterns: ['germanic lands', 'brandenburg plain', 'bavarian highlands', 'black forest', 'rhine valley'],
+    languages: [
+      { id: 'FRANKISH', period: [400, 900], weight: 45 },
+      { id: 'OLD_HIGH_GERMAN', period: [700, 1050], weight: 55 },
+      { id: 'GERMAN', period: [1050, 2025], weight: 90 },
+    ],
+  },
   // Low Countries
   {
     patterns: ['low countries', 'scheldt', 'flanders', 'brabant', 'antwerp', 'bruges', 'ghent'],
@@ -5101,6 +5144,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'OLD_MALAY', period: [600, 1500], weight: 70 },
       { id: 'OLD_JAVANESE', period: [800, 1500], weight: 20 },
+      { id: 'CLASSICAL_MALAY', period: [1500, 2025], weight: 80 },
       { id: 'CLASSICAL_ARABIC', period: [1200, 2025], weight: 10 }, // Islamic influence
     ],
     namePatterns: [
@@ -5168,7 +5212,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
 
   // Pagan Kingdom (Burma)
   {
-    patterns: ['pagan kingdom', 'bagan', 'pagan', 'burma empire', 'irrawaddy valley', 'myanmar', 'ava kingdom', 'mandalay', 'rangoon', 'yangon'],
+    patterns: ['pagan kingdom', 'bagan', 'pagan', 'burma empire', 'irrawaddy valley', 'irrawaddy delta', 'myanmar', 'ava kingdom', 'mandalay', 'rangoon', 'yangon'],
     languages: [
       { id: 'BURMESE', period: [1000, 2025], weight: 90 },
       { id: 'MON', period: [500, 1757], weight: 50 }, // Mon influence
@@ -5835,10 +5879,13 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'KAZAKH', period: [1000, 2025], weight: 60 },
       { id: 'PROTO_TURKIC', period: [-1000, 1000], weight: 25 },
       { id: 'MIDDLE_MONGOLIAN', period: [1200, 1700], weight: 10 },
-      { id: 'RUSSIAN', period: [1730, 2025], weight: 5 },
+      { id: 'RUSSIAN', period: [1730, 1916], weight: 20 },
+      { id: 'RUSSIAN', period: [1917, 1991], weight: 65 },
+      { id: 'RUSSIAN', period: [1992, 2025], weight: 35 },
     ],
     namePatterns: [
-      { pattern: /bek$|bay$|khan$/i, language: 'KAZAKH', weight: 85 },
+      { pattern: /^(Abai|Almas|Arman|Askhat|Baurzhan|Beibit|Damir|Dias|Dinmukhamed|Erlan|Galymzhan|Kanat|Marat|Nurasyl|Olzhas|Rustem|Samat|Serik|Talgat|Timur|Askar|Bakhytzhan|Darkhan|Eldos|Farabi|Kairat|Maksut|Nurlan|Yerzhan|Aida|Aigerim|Aizhan|Akmaral|Assel|Bakhyt|Daniya|Gulnara|Indira|Kamila|Karlygash|Kundyz|Madina|Nazgul|Raushan|Saule|Symbat|Togzhan|Ulbala|Zhansaya|Ainur|Balzhan|Dinara|Elmira|Fariza|Gaukhar|Kamshat|Meruyert|Perizat|Saltanat)\b|bek$|bay$|khan$/i, language: 'KAZAKH', weight: 95 },
+      { pattern: /^(Leonid|Ivan|Nikolai|Sergei|Aleksandr|Alexei|Mikhail|Dmitri|Vladimir|Boris|Yuri|Svetlana|Tatiana|Natalia|Irina|Olga|Yelena)\b/i, language: 'RUSSIAN', weight: 95 },
     ],
   },
   {
@@ -6525,6 +6572,48 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
 /**
  * Get the appropriate language for a character based on context
  */
+const normalizeRegionLabel = (value: string): string =>
+  value.toLowerCase().replace(/[–—·,/]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+const getRegionalMappingScore = (
+  mapping: RegionLanguageMapping,
+  searchTerms: string[]
+): number => {
+  let bestScore = 0;
+
+  for (let termIndex = 0; termIndex < searchTerms.length; termIndex++) {
+    const rawTerm = searchTerms[termIndex];
+    const term = normalizeRegionLabel(rawTerm);
+    // Callers pass the specific local area before the broad region. Preserve
+    // that hierarchy: an exact "Hamburg Coast" mapping must outrank the longer
+    // but less specific "Germanic Lands" label.
+    const specificityBonus = (searchTerms.length - termIndex) * 100_000;
+    for (const rawPattern of mapping.patterns) {
+      const pattern = normalizeRegionLabel(rawPattern);
+      if (!term || !pattern) continue;
+
+      // Exact place labels must outrank incidental substring matches. This keeps
+      // "Tian Shan Range" in Central Asia instead of matching the earlier,
+      // Southeast Asian "Shan" keyword.
+      if (term === pattern) {
+        bestScore = Math.max(bestScore, specificityBonus + 10_000 + pattern.length);
+      } else if (term.includes(pattern)) {
+        bestScore = Math.max(bestScore, specificityBonus + pattern.length);
+      }
+    }
+  }
+
+  return bestScore;
+};
+
+const getRankedRegionalMappings = (
+  searchTerms: string[]
+): Array<{ mapping: RegionLanguageMapping; score: number }> =>
+  REGIONAL_LANGUAGE_MAPPINGS
+    .map(mapping => ({ mapping, score: getRegionalMappingScore(mapping, searchTerms) }))
+    .filter(result => result.score > 0)
+    .sort((a, b) => b.score - a.score);
+
 export function getLanguageForCharacter(
   culturalZone: CulturalZone | string,
   year: number,
@@ -6541,17 +6630,19 @@ export function getLanguageForCharacter(
 
     // Check against regional name patterns
     const searchTerms = [
-      localArea?.toLowerCase(),
-      region?.toLowerCase()
-    ].filter(Boolean);
+      localArea,
+      region
+    ].filter((term): term is string => Boolean(term));
 
-    for (const mapping of REGIONAL_LANGUAGE_MAPPINGS) {
-      // Check if this region matches
-      const regionMatches = searchTerms.some(term =>
-        term && mapping.patterns.some(pattern => term.includes(pattern))
-      );
+    const rankedRegionalMappings = getRankedRegionalMappings(searchTerms);
+    const strongestRegionalScore = rankedRegionalMappings[0]?.score || 0;
 
-      if (regionMatches && mapping.namePatterns) {
+    for (const { mapping, score } of rankedRegionalMappings) {
+      // Do not let a weak incidental substring (for example "Shan" inside
+      // "Tian Shan") supply a name-language match after an exact place mapping
+      // has already been found.
+      if (score < strongestRegionalScore) break;
+      if (mapping.namePatterns) {
         for (const namePattern of mapping.namePatterns) {
           if (namePattern.pattern.test(fullName) || namePattern.pattern.test(surname)) {
             const lang = LANGUAGES[namePattern.language];
@@ -6604,16 +6695,11 @@ export function getLanguageForCharacter(
 
   // STEP 3: Regional override mappings
   const searchTerms = [
-    localArea?.toLowerCase(),
-    region?.toLowerCase()
-  ].filter(Boolean);
+    localArea,
+    region
+  ].filter((term): term is string => Boolean(term));
 
-  for (const mapping of REGIONAL_LANGUAGE_MAPPINGS) {
-    const matches = searchTerms.some(term =>
-      term && mapping.patterns.some(pattern => term.includes(pattern))
-    );
-
-    if (matches) {
+  for (const { mapping } of getRankedRegionalMappings(searchTerms)) {
       // Find the appropriate language for this time period
       const validLanguages = mapping.languages
         .filter(lang => {
@@ -6631,7 +6717,6 @@ export function getLanguageForCharacter(
         const selected = validLanguages[0];
         return LANGUAGES[selected.id];
       }
-    }
   }
 
   // STEP 4: Check exact language region matches (original logic)

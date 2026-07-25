@@ -12,28 +12,51 @@ const clamp = (val: number) => Math.max(0, Math.min(255, val));
 // Convert RGB object to CSS rgb string
 export const rgbStr = ({ r, g, b }: RGB) => `rgb(${clamp(Math.round(r))}, ${clamp(Math.round(g))}, ${clamp(Math.round(b))})`;
 
+const parseColor = (color: string): RGB | null => {
+  const value = color.trim();
+  if (/^#[0-9a-f]{3}$/i.test(value)) {
+    return {
+      r: parseInt(value[1] + value[1], 16),
+      g: parseInt(value[2] + value[2], 16),
+      b: parseInt(value[3] + value[3], 16),
+    };
+  }
+  if (/^#[0-9a-f]{6}$/i.test(value)) {
+    return {
+      r: parseInt(value.slice(1, 3), 16),
+      g: parseInt(value.slice(3, 5), 16),
+      b: parseInt(value.slice(5, 7), 16),
+    };
+  }
+  const channels = value.match(/[\d.]+/g);
+  if (!channels || channels.length < 3) return null;
+  return {
+    r: Number(channels[0]),
+    g: Number(channels[1]),
+    b: Number(channels[2]),
+  };
+};
+
 // Create shadow by darkening a color
 export const createShadow = (color: string, amount = 0.8): string => {
-  const rgb = color.match(/\d+/g);
-  if (!rgb || rgb.length < 3) return color;
-  return rgbStr({ r: parseInt(rgb[0]) * amount, g: parseInt(rgb[1]) * amount, b: parseInt(rgb[2]) * amount });
+  const rgb = parseColor(color);
+  if (!rgb) return color;
+  return rgbStr({ r: rgb.r * amount, g: rgb.g * amount, b: rgb.b * amount });
 };
 
 // Create highlight by lightening a color
 export const createHighlight = (color: string, amount = 1.2): string => {
-  const rgb = color.match(/\d+/g);
-  if (!rgb || rgb.length < 3) return color;
-  return rgbStr({ r: parseInt(rgb[0]) * amount, g: parseInt(rgb[1]) * amount, b: parseInt(rgb[2]) * amount });
+  const rgb = parseColor(color);
+  if (!rgb) return color;
+  return rgbStr({ r: rgb.r * amount, g: rgb.g * amount, b: rgb.b * amount });
 };
 
 // Create complementary shadow with slight hue shift
 export const createComplementaryShadow = (color: string, amount = 0.7): string => {
-  const rgb = color.match(/\d+/g);
-  if (!rgb || rgb.length < 3) return createShadow(color, amount);
+  const rgb = parseColor(color);
+  if (!rgb) return createShadow(color, amount);
 
-  const r = parseInt(rgb[0]);
-  const g = parseInt(rgb[1]);
-  const b = parseInt(rgb[2]);
+  const { r, g, b } = rgb;
 
   // Slight hue shift for more natural shadows
   const shadowR = r * amount + 5;

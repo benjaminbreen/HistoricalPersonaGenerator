@@ -7,7 +7,8 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "start": "node server.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "portrait-sheet": "esbuild src/components/portraitLab/devtools/renderSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/renderSheet.mjs && node node_modules/.cache/renderSheet.mjs portrait-sheet.png"
   },
   "keywords": [
     "history",

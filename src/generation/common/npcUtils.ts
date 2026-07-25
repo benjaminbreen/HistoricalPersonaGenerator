@@ -2,7 +2,7 @@
  * generation/common/npcUtils.ts - Enhanced NPC utility functions with portrait generation.
  */
 import { NpcEntity, NpcStats, NpcPersonality, NpcSocialContext, HistoricalEra, CharacterStats, CharacterPersonality, CharacterSocialContext, WealthLevel, Gender, TerrainStructure, PlayerCharacter, Ideology, Appearance, ClothingPiece, ClothingPalette, MapAreaDefinition, FactionData, TerrainStructureType, PersonalGoal } from '../../types';
-import { PROFESSIONS, CulturalZone, SocialClassMap, ProfessionDefinition, CHARACTER_NAMES, REGION_NAME_MAPPING, RELIGION_DATA, IDEOLOGIES, PERSONAL_BELIEFS, getEraSpecificFallback } from '../../constants/index';
+import { PROFESSIONS, CulturalZone, SocialClassMap, ProfessionDefinition, CHARACTER_NAMES, REGION_NAME_MAPPING, RELIGION_DATA, RELIGION_YEAR_TRANSITIONS, ReligionDistributionEntry, IDEOLOGIES, PERSONAL_BELIEFS, getEraSpecificFallback } from '../../constants/index';
 // Heavy data files - import directly to avoid loading on app startup
 import { GEOGRAPHICAL_DATA } from '../../constants/gameData/geography';
 import { ADJACENCIES } from '../../constants/gameData/adjacencies';
@@ -15,6 +15,7 @@ import { ValueNoise } from '../../utils/noise';
 import { generatePersonalGoal } from '../../services/goalService';
 import { getProfessionContext, getFallbackContext, ProfessionContext } from '../../services/professionContextService';
 import { getMarkingsForCharacter, selectRandomMarking, getRandomPattern, convertToAppearanceMarking, getMarkingProbability } from '../../constants/characterData/culturalMarkings';
+import { isClergyRoleCompatible } from '../../constants/characterData/religionClergyRoles';
 
 /**
  * Create safe NPC memory to avoid proxy revocation issues
@@ -101,10 +102,34 @@ export function determineReligion(
     culturalZone: CulturalZone,
     region: string,
     era: HistoricalEra,
-    noise: ValueNoise
+    noise: ValueNoise,
+    year?: number,
+    localArea?: string
 ): string {
     console.log('[Religion] Looking up religion:', { culturalZone, region, era });
-    let eraData = RELIGION_DATA[culturalZone]?.[region]?.[era];
+
+    // Era buckets are too coarse for a conversion frontier. In 685 the lower
+    // Elbe was still overwhelmingly outside Latin Christianity; treating the
+    // entire 500–1400 "medieval" bucket as 92% Catholic erases that transition.
+    const place = `${region || ''} ${localArea || ''}`;
+    const isNorthernGermanFrontier =
+        culturalZone === 'EUROPEAN' &&
+        /(hamburg coast|lower elbe|saxon|brandenburg|jutland|north sea)/i.test(place);
+    if (isNorthernGermanFrontier && year !== undefined && year >= 500 && year < 775) {
+        return noise.random() < 0.94 ? 'Germanic Paganism' : 'Early Christianity';
+    }
+    if (isNorthernGermanFrontier && year !== undefined && year >= 775 && year < 850) {
+        return noise.random() < 0.58 ? 'Germanic Paganism' : 'Roman Catholicism';
+    }
+
+    const transitionBand = year === undefined
+        ? undefined
+        : RELIGION_YEAR_TRANSITIONS[culturalZone]?.[region]?.find(
+            band => year >= band.startYear && year <= band.endYear
+        );
+
+    let eraData: ReligionDistributionEntry[] | undefined =
+        transitionBand?.religions || RELIGION_DATA[culturalZone]?.[region]?.[era];
     console.log('[Religion] First lookup result:', eraData ? `Found ${eraData.length} options` : 'Not found');
 
     if (!eraData || eraData.length === 0) {
@@ -617,10 +642,71 @@ export function generateCompleteOutfit(
     const clothingSet = clothingModule.getClothingData(culturalZone, era, wealthLevel, gender);
 
     // Region-based filtering for items that are inappropriate for specific regions within a cultural zone
-    const filterByRegion = (items: ClothingPiece[]): ClothingPiece[] => {
+    const filterByRegion = (items: ClothingPiece[], category: string): ClothingPiece[] => {
         if (!region) return items;
 
         const regionLower = region.toLowerCase();
+
+        // EAST_ASIAN is a map grouping, not a usable clothing culture. Central
+        // Asian regions must not inherit Chinese court dress, qipao, or imperial
+        // accessories from the broad zone-level table.
+        if (
+            culturalZone === 'EAST_ASIAN' &&
+            /(kazakh|tian shan|altai|aral sea|dzungarian|central asia)/.test(regionLower)
+        ) {
+            if (era === HistoricalEra.MODERN_ERA || era === HistoricalEra.FUTURE_ERA) {
+                const officeWork = /(office|manager|clerk|administrator|teacher|engineer|account|secretar)/i.test(
+                    occupation || ''
+                );
+                if (category === 'garment') {
+                    if (gender === 'Female') {
+                        return [{
+                            name: officeWork ? 'Wool Jacket and Plain Blouse' : 'Plain Wool Dress or Work Blouse',
+                            material: 'Wool and Cotton',
+                        }];
+                    }
+                    return [{
+                        name: officeWork ? 'Wool Suit Jacket and Collared Shirt' : 'Wool Jacket and Shirt',
+                        material: 'Wool and Cotton',
+                    }];
+                }
+                if (category === 'headgear') {
+                    return officeWork
+                        ? [{ name: 'None', material: 'None' }]
+                        : [
+                            { name: 'Plain Wool Cap', material: 'Wool' },
+                            { name: 'Fur Winter Hat', material: 'Fur' },
+                            { name: 'None', material: 'None' },
+                        ];
+                }
+                if (category === 'footwear') {
+                    return [{ name: officeWork ? 'Leather Shoes' : 'Leather Boots', material: 'Leather' }];
+                }
+                if (category === 'belt') {
+                    return [{ name: 'Plain Leather Belt', material: 'Leather' }];
+                }
+                if (category === 'accessory') {
+                    return [{ name: 'Simple Wristwatch', material: 'Steel and Glass' }, { name: 'None', material: 'None' }];
+                }
+            }
+
+            const panChineseTerms = [
+                'qipao', 'changshan', 'zhongshan', 'dou li', 'mao cap',
+                'imperial', 'court robe', 'court dress', 'phoenix',
+                'jade', 'brocade cap', 'silk headdress', 'golden slippers',
+                'golden boots', 'jeweled shoes', 'diamond tiara',
+            ];
+            const filtered = items.filter(item => {
+                const text = `${item.name} ${item.material}`.toLowerCase();
+                return !panChineseTerms.some(term => text.includes(term));
+            });
+
+            if (filtered.length > 0) return filtered;
+
+            return category === 'headgear' || category === 'belt' || category === 'accessory'
+                ? [{ name: 'None', material: 'None' }]
+                : items;
+        }
 
         // OCEANIA: Australian regions should NOT have Polynesian items
         if (culturalZone === 'OCEANIA') {
@@ -739,11 +825,11 @@ export function generateCompleteOutfit(
     };
     
     // Apply filters to each category - first by region, then by occupation
-    const filteredGarments = filterByOccupation(filterByRegion(clothingSet.garments), 'garment');
-    const filteredHeadgear = filterByOccupation(filterByRegion(clothingSet.headgear), 'headgear');
-    const filteredFootwear = filterByOccupation(filterByRegion(clothingSet.footwear), 'footwear');
-    const filteredBelts = filterByOccupation(filterByRegion(clothingSet.belts), 'belt');
-    const filteredAccessories = filterByOccupation(filterByRegion(clothingSet.accessories), 'accessory');
+    const filteredGarments = filterByOccupation(filterByRegion(clothingSet.garments, 'garment'), 'garment');
+    const filteredHeadgear = filterByOccupation(filterByRegion(clothingSet.headgear, 'headgear'), 'headgear');
+    const filteredFootwear = filterByOccupation(filterByRegion(clothingSet.footwear, 'footwear'), 'footwear');
+    const filteredBelts = filterByOccupation(filterByRegion(clothingSet.belts, 'belt'), 'belt');
+    const filteredAccessories = filterByOccupation(filterByRegion(clothingSet.accessories, 'accessory'), 'accessory');
     
     // Convert wealth level for clothing variations
     const simplifiedWealth =
@@ -783,7 +869,18 @@ export function generateCompleteOutfit(
 /**
  * Enhanced base profile generation with improved error handling and logging
  */
-export function generateBaseProfile(noise: ValueNoise, context: { era: HistoricalEra, culturalZone: CulturalZone, region: string }): Omit<NpcEntity, 'id' | 'name' | 'class' | 'role' | 'descriptions' | 'movement' | 'x' | 'y' | 'emoji' | 'activity' | 'workplaceId' | 'workplaceName'> {
+interface BaseProfileOverrides {
+    gender?: Gender;
+    age?: number;
+    wealthLevel?: WealthLevel;
+    occupation?: string;
+}
+
+export function generateBaseProfile(
+    noise: ValueNoise,
+    context: { era: HistoricalEra, culturalZone: CulturalZone, region: string, year?: number, localArea?: string },
+    overrides: BaseProfileOverrides = {}
+): Omit<NpcEntity, 'id' | 'name' | 'class' | 'role' | 'descriptions' | 'movement' | 'x' | 'y' | 'emoji' | 'activity' | 'workplaceId' | 'workplaceName'> {
     try {
         if (!noise || typeof noise.random !== 'function') {
             noise = { random: () => Math.random() } as ValueNoise;
@@ -821,23 +918,51 @@ export function generateBaseProfile(noise: ValueNoise, context: { era: Historica
             entrepreneurial: Math.max(0, Math.min(1, noise.random())),
         };
 
-        const gender: Gender = noise.random() > 0.5 ? 'Male' : 'Female';
-        const age = Math.max(18, Math.min(80, 18 + Math.floor(noise.random() * 50)));
+        const gender: Gender = overrides.gender || (noise.random() > 0.5 ? 'Male' : 'Female');
+        const age = overrides.age !== undefined
+            ? Math.max(0, Math.min(100, overrides.age))
+            : Math.max(18, Math.min(80, 18 + Math.floor(noise.random() * 50)));
 
         const p = socialContext.privilege;
-        const wealthLevel: WealthLevel = p > 0.95 ? 'noble' : p > 0.8 ? 'wealthy' : p > 0.5 ? 'comfortable' : p > 0.2 ? 'modest' : 'poor';
+        const wealthLevel: WealthLevel = overrides.wealthLevel ||
+            (p > 0.95 ? 'noble' : p > 0.8 ? 'wealthy' : p > 0.5 ? 'comfortable' : p > 0.2 ? 'modest' : 'poor');
+
+        if (overrides.wealthLevel) {
+            const wealthToPrivilege: Record<WealthLevel, number> = {
+                poor: 0.1,
+                modest: 0.35,
+                comfortable: 0.6,
+                wealthy: 0.85,
+                noble: 0.95,
+            };
+            socialContext.privilege = wealthToPrivilege[overrides.wealthLevel];
+        }
         
         const currency = 5 + Math.floor(noise.random() * (wealthLevel === 'poor' ? 10 : wealthLevel === 'modest' ? 30 : 100));
 
-        const culturalAppearance = generateCulturalAppearance(context.culturalZone, noise);
+        const culturalAppearance = generateCulturalAppearance(context.culturalZone, noise, context.region);
         const facialFeatures = generateFacialFeatures(noise, gender, context.culturalZone, age);
         const bodyMetrics = generateBodyMetrics(gender, stats, noise);
         
         const clothingPalette = generateClothingPalette(wealthLevel, context.era, context.culturalZone, gender, noise);
-        const clothingPieces = generateCompleteOutfit(context.culturalZone, context.era, wealthLevel, gender, undefined, context.region);
+        const clothingPieces = generateCompleteOutfit(
+            context.culturalZone,
+            context.era,
+            wealthLevel,
+            gender,
+            overrides.occupation,
+            context.region
+        );
 
         
-        const religion = determineReligion(context.culturalZone, context.region, context.era, noise);
+        const religion = determineReligion(
+            context.culturalZone,
+            context.region,
+            context.era,
+            noise,
+            context.year,
+            context.localArea
+        );
 
         // Apply historical plausibility constraints for religion-based social class restrictions
         const maxWealthForReligion = getMaxWealthLevelForReligion(religion, context.culturalZone, context.era);
@@ -850,7 +975,14 @@ export function generateBaseProfile(noise: ValueNoise, context: { era: Historica
 
         if (constrainedWealthLevel !== wealthLevel) {
             finalClothingPalette = generateClothingPalette(constrainedWealthLevel, context.era, context.culturalZone, gender, noise);
-            finalClothingPieces = generateCompleteOutfit(context.culturalZone, context.era, constrainedWealthLevel, gender, undefined, context.region);
+            finalClothingPieces = generateCompleteOutfit(
+                context.culturalZone,
+                context.era,
+                constrainedWealthLevel,
+                gender,
+                overrides.occupation,
+                context.region
+            );
             finalCurrency = 5 + Math.floor(noise.random() * (constrainedWealthLevel === 'poor' ? 10 : constrainedWealthLevel === 'modest' ? 30 : 100));
 
             // Update social context privilege to match constrained wealth
@@ -883,7 +1015,7 @@ export function generateBaseProfile(noise: ValueNoise, context: { era: Historica
                 context.era,
                 undefined, // Will be set later when role is determined
                 gender.toLowerCase() as 'male' | 'female',
-                wealthLevel,
+                constrainedWealthLevel,
                 age,
                 'daily'
             );
@@ -978,7 +1110,16 @@ export function generateBaseProfile(noise: ValueNoise, context: { era: Historica
     }
 }
 
-export function generateCulturalAppearance(culturalZone: CulturalZone, noise: ValueNoise) {
+export function generateCulturalAppearance(
+    culturalZone: CulturalZone,
+    noise: ValueNoise,
+    region?: string
+) {
+    const regionalText = (region || '').toLowerCase();
+    const isSoutheastAsianRegion =
+        culturalZone === 'SOUTH_ASIAN' &&
+        /(southeast asia|indochina|maritime|philippines|malay|java|sumatra|borneo|sulawesi|spice islands|malacca|vietnam|tonkin|annam|cochinchina|siam|thailand|ayutthaya|cambodia|khmer|angkor|burma|myanmar|irrawaddy)/.test(regionalText);
+
     const appearances: Record<string, {skinTones: string[], hairColors: string[], eyeColors: string[]}> = {
         'EAST_ASIAN': { skinTones: ['#fdbcb4', '#f4d1ae', '#e8c5a0', '#deb887', '#f0dcc4'], hairColors: ['#000000', '#1a0a05', '#2c1810', '#0f0f0f'], eyeColors: ['#2c1810', '#000000', '#1a1a1a', '#342c24'] },
         'EUROPEAN': { skinTones: ['#fde2d1', '#f4d1ae', '#e8c5a0', '#deb887', '#d2b48c', '#f5e6d3'], hairColors: ['#8b4513', '#654321', '#d4af37', '#dc7633', '#000000', '#696969', '#2c1810', '#f4d03f', '#b22222', '#daa520'], eyeColors: ['#4169e1', '#006400', '#8b4513', '#2c1810', '#654321', '#708090', '#87ceeb', '#228b22'] },
@@ -989,7 +1130,14 @@ export function generateCulturalAppearance(culturalZone: CulturalZone, noise: Va
         'NORTH_AMERICAN_PRE_COLUMBIAN': { skinTones: ['#bc9a6a', '#a0835a', '#d2b48c', '#8d5524'], hairColors: ['#000000', '#2c1810', '#1a1a1a'], eyeColors: ['#2c1810', '#000000', '#654321'] },
         'OCEANIA': { skinTones: ['#8d5524', '#a0835a', '#bc9a6a', '#654321', '#4a3018'], hairColors: ['#000000', '#2c1810', '#654321', '#1a1a1a'], eyeColors: ['#2c1810', '#000000', '#654321'] }
     };
-    const appearance = appearances[culturalZone] || appearances['EUROPEAN'];
+    const southeastAsianAppearance = {
+        skinTones: ['#c18b62', '#ae7650', '#98613f', '#c99a72', '#855437'],
+        hairColors: ['#090807', '#17120f', '#241a15', '#2c1810'],
+        eyeColors: ['#17120f', '#241a15', '#30231c', '#000000'],
+    };
+    const appearance = isSoutheastAsianRegion
+        ? southeastAsianAppearance
+        : appearances[culturalZone] || appearances['EUROPEAN'];
     return {
         skinColor: appearance.skinTones[Math.floor(noise.random() * appearance.skinTones.length)],
         hairColor: appearance.hairColors[Math.floor(noise.random() * appearance.hairColors.length)],
@@ -1173,7 +1321,7 @@ function getFallbackRole(wealth: WealthLevel, gender: Gender): { socialClass: st
 
 export function determineSocialRole(
     profile: Omit<NpcEntity, 'id' | 'name' | 'class' | 'role' | 'descriptions' | 'movement' | 'x' | 'y' | 'emoji' | 'activity' | 'birthplace' | 'workplaceId' | 'workplaceName' | 'ideology' | 'beliefs'>,
-    context: { era: HistoricalEra, culturalZone: CulturalZone, factionData?: FactionData, region?: string, citySize?: number, birthYear?: number },
+    context: { era: HistoricalEra, culturalZone: CulturalZone, factionData?: FactionData, region?: string, citySize?: number, year?: number, birthYear?: number, preferredSocialClass?: string },
     preferredRole?: string,
     structureType?: TerrainStructureType
 ): { socialClass: string, role: string, emoji: string, nameKey?: string } {
@@ -1186,7 +1334,10 @@ export function determineSocialRole(
         }
 
         let eraForProfessions: HistoricalEra;
-        let currentYear: number | undefined = context.birthYear;
+        // Validate a current occupation against the year in which the persona is
+        // being observed. birthYear remains a backwards-compatible fallback for
+        // older NPC callers that do not yet provide the current year.
+        let currentYear: number | undefined = context.year ?? context.birthYear;
 
         if (context.era.endsWith('s')) { // This is a decade string like "1940s"
             const year = parseInt(context.era.slice(0, 4), 10);
@@ -1241,6 +1392,9 @@ export function determineSocialRole(
 
                 if (eraRoles[socialClass]?.[preferredRole]) {
                     const roleDef = eraRoles[socialClass][preferredRole];
+                    if (!isClergyRoleCompatible(preferredRole, profile.religion, socialClass)) {
+                        continue;
+                    }
                     if (roleDef.genderBias && profile.gender !== 'Non-binary' && roleDef.genderBias !== profile.gender) {
                         continue;
                     }
@@ -1255,7 +1409,24 @@ export function determineSocialRole(
         
         const possibleRoles: { socialClass: string, role: string, roleDef: ProfessionDefinition }[] = [];
 
+        const normalizedPreferredClass = context.preferredSocialClass?.toUpperCase().replace(/[\s-]+/g, '_');
+        const allowedClassGroups: Record<string, string[]> = {
+            PEASANT: ['COMMONER', 'PEASANT', 'PEASANTS', 'LABORER', 'LABORERS', 'AGRICULTURAL', 'WORKING_CLASS'],
+            COMMONER: ['COMMONER', 'ARTISAN', 'CRAFT', 'MIDDLE_CLASS'],
+            MERCHANT: ['MERCHANT', 'MERCHANTS', 'TRADER', 'TRADERS', 'UPPER_CLASS'],
+            NOBLE: ['NOBILITY', 'NOBLE', 'ELITE', 'UPPER_CLASS'],
+            WORKING_CLASS: ['COMMONER', 'LABORER', 'LABORERS', 'WORKING_CLASS'],
+            MIDDLE_CLASS: ['COMMONER', 'ARTISAN', 'PROFESSIONAL', 'MIDDLE_CLASS'],
+            UPPER_CLASS: ['MERCHANT', 'MERCHANTS', 'PROFESSIONAL', 'NOBILITY', 'UPPER_CLASS'],
+        };
+        const allowedClasses = normalizedPreferredClass
+            ? allowedClassGroups[normalizedPreferredClass]
+            : undefined;
+
         for (const socialClass in eraRoles) {
+            if (allowedClasses && !allowedClasses.includes(socialClass.toUpperCase())) {
+                continue;
+            }
             // Apply context filtering for Industrial Era
             if (professionContext && socialClass !== professionContext) {
                 // Allow fallback contexts
@@ -1273,6 +1444,10 @@ export function determineSocialRole(
             const rolesInClass = eraRoles[socialClass];
             for (const roleName in rolesInClass) {
                 const roleDef = rolesInClass[roleName];
+
+                if (!isClergyRoleCompatible(roleName, profile.religion, socialClass)) {
+                    continue;
+                }
 
                 // Check if this profession is valid for the specific region
                 if (!isProfessionValidForRegion(roleName, context.region, context.culturalZone)) {
@@ -1348,6 +1523,36 @@ export function determineSocialRole(
                 chosen = possibleRoles[Math.floor(Math.random() * possibleRoles.length)];
             }
             return { socialClass: chosen.socialClass, role: chosen.role, emoji: chosen.roleDef.emoji || '🧑', nameKey: chosen.roleDef.nameKey };
+        }
+
+        // An explicit class is a stronger constraint than a random stat roll.
+        // If no role in that class cleared every soft stat/social threshold,
+        // choose a valid role from the requested class rather than silently
+        // returning a shepherd, laborer, or merchant from another class.
+        if (allowedClasses) {
+            const classFallbackRoles: { socialClass: string, role: string, roleDef: ProfessionDefinition }[] = [];
+            for (const socialClass of Object.keys(eraRoles)) {
+                if (!allowedClasses.includes(socialClass.toUpperCase())) continue;
+                if (!isSocialClassValidForRegion(socialClass, context.region, context.culturalZone)) continue;
+
+                for (const [roleName, roleDef] of Object.entries(eraRoles[socialClass])) {
+                    if (!isClergyRoleCompatible(roleName, profile.religion, socialClass)) continue;
+                    if (!isProfessionValidForRegion(roleName, context.region, context.culturalZone)) continue;
+                    if (!isProfessionValidForYear(roleDef)) continue;
+                    if (roleDef.genderBias && profile.gender !== 'Non-binary' && roleDef.genderBias !== profile.gender) continue;
+                    classFallbackRoles.push({ socialClass, role: roleName, roleDef });
+                }
+            }
+
+            if (classFallbackRoles.length > 0) {
+                const chosen = classFallbackRoles[Math.floor(Math.random() * classFallbackRoles.length)];
+                return {
+                    socialClass: chosen.socialClass,
+                    role: chosen.role,
+                    emoji: chosen.roleDef.emoji || '🧑',
+                    nameKey: chosen.roleDef.nameKey,
+                };
+            }
         }
 
         return getFallbackRole(profile.wealthLevel, profile.gender);

@@ -174,3 +174,72 @@ export function getClergyRoles(religion: string): string[] {
   // Default fallback
   return RELIGION_CLERGY_ROLES['DEFAULT'];
 }
+
+const RELIGIOUS_VOCATION_ROLES = new Set([
+  'priest',
+  'monk',
+  'nun',
+  'pilgrim',
+  'friar',
+  'pardoner',
+  'hermit',
+  'oracle',
+  'temple keeper',
+  'temple servant',
+  'buddhist monk',
+  'shinto priest',
+  'zen master',
+  'hindu priest',
+  'imam',
+  'muezzin',
+  'quranic teacher',
+  'ascetic',
+  'temple dancer',
+]);
+
+/**
+ * Restrict only clearly religious vocations. Some profession tables place
+ * physicians, herbalists, and craftspeople in a RELIGIOUS/CLERGY section for
+ * organizational convenience; those occupations should not be rejected merely
+ * because the character follows a different religion.
+ */
+export function isClergyRoleCompatible(
+  role: string,
+  religion: string,
+  professionGroup?: string
+): boolean {
+  const normalizedRole = role.trim().toLowerCase();
+  if (!RELIGIOUS_VOCATION_ROLES.has(normalizedRole)) return true;
+
+  const normalizedReligion = religion.trim().toLowerCase();
+  if (/(atheis|agnostic|secular)/.test(normalizedReligion)) return false;
+
+  const compatibleRoles = getClergyRoles(religion).map(value => value.toLowerCase());
+  if (compatibleRoles.includes(normalizedRole)) return true;
+
+  const isChristian = /(christ|cathol|orthodox|protest|puritan|quaker|method|cathar)/.test(normalizedReligion);
+  const isMuslim = /(islam|sufi)/.test(normalizedReligion);
+  const isBuddhist = /(buddh|zen)/.test(normalizedReligion);
+  const isHindu = /(hindu|vedic)/.test(normalizedReligion);
+  const isJain = /jain/.test(normalizedReligion);
+  const isShinto = /shinto/.test(normalizedReligion);
+  const isJewish = /(judai|jewish)/.test(normalizedReligion);
+
+  if (normalizedRole === 'buddhist monk' || normalizedRole === 'zen master') return isBuddhist;
+  if (normalizedRole === 'shinto priest') return isShinto;
+  if (normalizedRole === 'hindu priest' || normalizedRole === 'temple dancer') return isHindu;
+  if (normalizedRole === 'imam' || normalizedRole === 'muezzin' || normalizedRole === 'quranic teacher') return isMuslim;
+  if (normalizedRole === 'friar' || normalizedRole === 'pardoner') return isChristian;
+  if (normalizedRole === 'monk' || normalizedRole === 'nun') return isChristian || isBuddhist || isJain;
+  if (normalizedRole === 'ascetic') return isHindu || isBuddhist || isJain;
+  if (normalizedRole === 'pilgrim' || normalizedRole === 'hermit') return true;
+
+  // Generic "Priest", "Oracle", and temple roles are suitable for many
+  // traditions, but not as substitutes for specifically Jewish, Muslim,
+  // Buddhist, or Hindu offices.
+  if (normalizedRole === 'priest') {
+    return !isMuslim && !isBuddhist && !isHindu && !isJain && !isJewish;
+  }
+
+  return true;
+}

@@ -3,7 +3,8 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite-preview';
+const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite';
+const DEFAULT_OPENAI_MODEL = 'gpt-5-nano';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, 'dist');
 const schemaPath = path.join(__dirname, 'src/schemas/historicalPersonaAnnotation.schema.json');
@@ -43,17 +44,18 @@ const readRequestBody = req => new Promise((resolve, reject) => {
 });
 
 const sendJson = (res, statusCode, body) => {
-  res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+  res.writeHead(statusCode, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
   res.end(JSON.stringify(body));
 };
 
 const geminiText = async (prompt, options = {}) => {
-  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.VITE_GOOGLE_AI_API_KEY;
+  // VITE_* variables are public at build time, so they must never be used for secrets.
+  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
   if (!key) {
     throw new Error('Missing Gemini API key. Set GEMINI_API_KEY before starting the server.');
   }
 
-  const model = process.env.GEMINI_MODEL || process.env.VITE_GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
+  const model = process.env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -73,6 +75,30 @@ const geminiText = async (prompt, options = {}) => {
 
   const data = await response.json();
   return data?.candidates?.[0]?.content?.parts?.map(part => part.text).join('\n') || '';
+};
+
+const openaiText = async (prompt, options = {}) => {
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) throw new Error('Missing OPENAI_API_KEY.');
+  const response = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      model: process.env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL,
+      input: prompt,
+      ...(options.json ? { text: { format: { type: 'json_object' } } } : {}),
+    }),
+  });
+  if (!response.ok) throw new Error(`OpenAI returned ${response.status}.`);
+  const data = await response.json();
+  return data?.output_text || '';
+};
+
+const llmText = (prompt, options) => {
+  const provider = (process.env.LLM_PROVIDER || 'gemini').toLowerCase();
+  if (provider === 'openai') return openaiText(prompt, options);
+  if (provider === 'gemini') return geminiText(prompt, options);
+  throw new Error('Unsupported LLM_PROVIDER.');
 };
 
 const buildAnnotationPrompt = (source, options) => {
@@ -128,7 +154,8 @@ const buildAnnotationPrompt = (source, options) => {
 
 const buildSketchPrompt = record => [
   'Write a historically grounded persona sketch from this annotation record.',
-  'Use 4-6 compact paragraphs.',
+  'Write exactly two compact paragraphs, totaling 120-170 words.',
+  'Each paragraph should earn its place: prioritize source-specific circumstances, work, stakes, and voice over general historical atmosphere.',
   'Do not write a generic encyclopedia biography. Write a vivid but sober character sheet sketch anchored to the selected year, social position, work, household economy, material life, concerns, and worldview.',
   'Distinguish direct evidence from plausible inference in natural prose without footnotes.',
   'Avoid modern hindsight and anachronistic vocabulary.',
@@ -386,20 +413,21 @@ const handleGeminiRoute = async (req, res) => {
   try {
     const body = await readRequestBody(req);
     if (body.action === 'generate_annotation') {
-      const text = await geminiText(buildAnnotationPrompt(body.source, body.options), { json: true, temperature: 0.35 });
+      const text = await llmText(buildAnnotationPrompt(body.source, body.options), { json: true, temperature: 0.35 });
       sendJson(res, 200, { record: parseJsonObject(text) });
       return;
     }
 
     if (body.action === 'generate_sketch') {
-      const sketch = await geminiText(buildSketchPrompt(body.record), { temperature: 0.45 });
+      const sketch = await llmText(buildSketchPrompt(body.record), { temperature: 0.45 });
       sendJson(res, 200, { sketch: sketch.trim() });
       return;
     }
 
     sendJson(res, 400, { error: 'Unknown Gemini action.' });
   } catch (error) {
-    sendJson(res, 500, { error: error instanceof Error ? error.message : 'Gemini route failed.' });
+    console.error('Persona generation failed:', error);
+    sendJson(res, 500, { error: 'Persona generation is temporarily unavailable. Please try again.' });
   }
 };
 

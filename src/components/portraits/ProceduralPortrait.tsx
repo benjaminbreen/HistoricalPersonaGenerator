@@ -105,8 +105,13 @@ interface ProceduralPortraitProps {
     portraitSeed?: number;
     portraitVisualOverrides?: {
       appearance?: Partial<ProceduralPortraitProps['character']['appearance']>;
-      garment?: { name: string; material: string };
-      headgear?: { name: string; material: string };
+      garment?: { name: string; material: string; color?: string };
+      headgear?: { name: string; material: string; color?: string };
+      footwear?: { name: string; material: string; color?: string };
+      contextPackId?: string;
+      headgearKind?: 'none' | 'cap' | 'brimmed_hat' | 'wrapped_cloth' | 'veil' | 'hood' | 'helmet';
+      garmentKind?: 'tunic' | 'robe' | 'gown' | 'doublet' | 'work_shirt' | 'wrapped_garment' | 'jacket';
+      displayEquipment?: Partial<Record<'head' | 'torso' | 'feet', { name: string; material: string; color?: string }>>;
       palette?: Partial<ProceduralPortraitProps['character']['appearance']['palette']>;
       background?: {
         base?: string;
@@ -141,6 +146,8 @@ interface ProceduralPortraitProps {
 
   onExpressionComplete?: () => void;
   useEquippedItems?: boolean;
+  /** Disable idle blinking, gaze changes, and expression cycling for deterministic QA renders. */
+  animated?: boolean;
 }
 
 type AgeGroup = 'young' | 'adult' | 'old';
@@ -161,7 +168,8 @@ const ProceduralPortrait: React.FC<ProceduralPortraitProps> = ({
   className = '',
   temporaryExpression = null,
   onExpressionComplete,
-  useEquippedItems = true
+  useEquippedItems = true,
+  animated = true
 }) => {
   // ---------- Seeded RNG ----------
   const seededRandom = (seed: number): number => {
@@ -232,9 +240,10 @@ const ProceduralPortrait: React.FC<ProceduralPortraitProps> = ({
 
   const headgearName =
   (
-    useEquippedItems
+    portraitOverrides?.headgear?.name ||
+    (useEquippedItems
       ? character.equippedItems?.head?.name
-      : appearanceWithDefaults.headgear?.name
+      : appearanceWithDefaults.headgear?.name)
   ) || 'none';
 
   // Utility function to get item color from equipped items
@@ -358,9 +367,12 @@ const parseHairstyle = (
   const ageGroup = getAgeGroup();
   const isYoung = ageGroup === 'young';
   const isOld = ageGroup === 'old';
-  const hasWrinkles = isOld && rand(200) > 0.2;
-  const hasGrayHair = isOld && rand(201) > 0.3;
-  const hasAgeSpots = isOld && rand(202) > 0.5;
+  const grayChance = Math.max(0, Math.min(0.92, (age - 38) / 42));
+  const wrinkleChance = Math.max(0, Math.min(0.95, (age - 42) / 35));
+  const ageSpotChance = Math.max(0, Math.min(0.72, (age - 50) / 38));
+  const hasWrinkles = rand(200) < wrinkleChance;
+  const hasGrayHair = rand(201) < grayChance;
+  const hasAgeSpots = rand(202) < ageSpotChance;
 
   // ---------- Color Utilities ----------
   type RGB = { r: number; g: number; b: number };
@@ -439,7 +451,14 @@ const parseHairstyle = (
     let height = isFemale ? 34 : 36;  // Increased from 28/30 to 34/36 for better proportions
 
     if (isYoung) { width += 2; height -= 1; }
-    if (isOld)   { height += 3; width -= 1; }
+    const ageShapeProgress = Math.max(0, Math.min(1, (age - 45) / 35));
+    height += Math.round(ageShapeProgress * 3);
+    width -= Math.round(ageShapeProgress);
+
+    const widthVariation = rand(301) > 0.67 ? 1 : rand(301) < 0.33 ? -1 : 0;
+    const heightVariation = rand(302) > 0.72 ? 1 : rand(302) < 0.28 ? -1 : 0;
+    width += widthVariation;
+    height += heightVariation;
 
     if (stats.strength >= 8) width += isFemale ? 1 : 3;
     else if (stats.strength <= 3) width -= isFemale ? 0 : 2;
@@ -448,8 +467,8 @@ const parseHairstyle = (
     if (appearanceWithDefaults.build === 'slight') width -= 2;
     if (appearanceWithDefaults.build === 'average') width -= 1;  // Additional reduction for average build
 
-    if (hairLength === 'bald') height += 4;
-    if (hairLength === 'very_short') height += 2;
+    // Hair changes the pixels drawn over the skull, not the skull's anatomy.
+    // Making bald heads four pixels taller exposed a tall, flat-topped capsule.
 
     switch (faceShape) {
       case 'round':  width += 2; height -= 2; break;
@@ -459,7 +478,7 @@ const parseHairstyle = (
       case 'diamond': width += 1; break;  // Added width for diamond faces
     }
     return { width, height, shape: faceShape as NonNullable<typeof appearanceWithDefaults.faceShape> };
-  }, [appearanceWithDefaults.build, appearanceWithDefaults.faceShape, hairLength, isFemale, isOld, isYoung, stats.strength]);
+  }, [age, appearanceWithDefaults.build, appearanceWithDefaults.faceShape, hairLength, isFemale, isYoung, seed, stats.strength]);
 
   const headX = 32 - (headDim.width / 2);
   const headY = 10;
@@ -642,11 +661,13 @@ const parseHairstyle = (
 
   // Temporary expression timer - extended to 30 seconds
   useEffect(() => {
+    if (!animated) return;
+
     if (temporaryExpression && onExpressionComplete) {
       const timer = setTimeout(() => onExpressionComplete(), 30000);
       return () => clearTimeout(timer);
     }
-  }, [temporaryExpression, onExpressionComplete]);
+  }, [animated, temporaryExpression, onExpressionComplete]);
 
   // ---------- Blink / Gaze / Expression Animation ----------
   const [blinkProgress, setBlinkProgress] = useState(0);
@@ -667,6 +688,12 @@ const parseHairstyle = (
     min + (max - min) * (0.5 + (Math.sin(seed * 13.37 + (performance.now?.() || 0) / 1e4) * 0.5));
 
   useEffect(() => {
+    if (!animated) {
+      setBlinkProgress(0);
+      setAutoExpression(null);
+      return;
+    }
+
     // Determine if this should be a double blink (20% chance)
     const shouldDoubleBlink = () => nextAnimationRandom() < 0.2;
 
@@ -795,7 +822,7 @@ const parseHairstyle = (
       if (nextExpressionTimeout.current) clearTimeout(nextExpressionTimeout.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOld, isYoung, stats.constitution, temporaryExpression]);
+  }, [animated, isOld, isYoung, stats.constitution, temporaryExpression]);
 
   // ---------- Lip Color ----------
   const lipColor = useMemo(() => {
@@ -1094,21 +1121,14 @@ const renderHead = useMemo(() => {
   if (jawline === 'square') chinW += 0.10;
   else if (jawline === 'sharp') chinW -= 0.08;
 
-  // Gender-specific jaw modifications - make female jaws more delicate
+  // Keep sex-linked variation restrained. The former 42% reduction plus
+  // another jawline subtraction produced pinched, almost triangular faces.
   if (!isMale) {
-    chinW *= 0.58; // Reduce overall chin width for women by 42% (was 0.65/35%)
-    cheekW *= 0.88; // Reduce cheek width more for better tapering (was 0.90)
-
-    // Additional reductions based on jawline type for women
-    if (jawline === 'square') chinW -= 0.15; // Much more reduction for square jaws (was 0.12)
-    else if (jawline === 'sharp') chinW -= 0.10; // More reduction for sharp jaws (was 0.08)
-    else if (jawline === 'round') chinW -= 0.12; // More reduction for round jaws (was 0.10)
-    else if (jawline === 'oval') chinW -= 0.08; // More reduction for oval (was 0.06)
-
-    // Make chin more pointed/tapered for women (lower chinTaper = more pointed)
-    curve.chinTaper *= 0.75; // Reduce by 25% to make chin taper more sharply
-    // Increase jaw softness for women (softer transition from cheek to chin)
-    curve.jawSoftness *= 1.4; // Increase by 40% for softer, more rounded transition
+    chinW *= 0.80;
+    cheekW *= 0.95;
+    if (jawline === 'sharp') chinW -= 0.04;
+    else if (jawline === 'round') chinW += 0.02;
+    curve.jawSoftness *= 1.15;
   }
 
   // cheekbones -> cheek anchor
@@ -1121,10 +1141,10 @@ const renderHead = useMemo(() => {
   // clamp anchors
   topW = clamp(topW, 0.45, 0.70);
   cheekW = clamp(cheekW, 0.94, 1.10);
-  chinW = clamp(chinW, isMale ? 0.52 : 0.42, 0.90); // Lower minimum for women (0.42 vs 0.52)
+  chinW = clamp(chinW, isMale ? 0.52 : 0.54, 0.90);
 
   // lightweight PRNG for stable asymmetry
-  const seedVal = ((headX << 2) ^ (headY << 1) ^ (W * 31) ^ (H * 17)) >>> 0;
+  const seedVal = (seed ^ ((headX << 2) ^ (headY << 1) ^ (W * 31) ^ (H * 17))) >>> 0;
   const makeRng = (s: number) => {
     let n = s || 1;
     return () => ((n = Math.imul(n ^ 0x9e3779b9, 0x85ebca6b)) >>> 0) / 0xffffffff;
@@ -1139,10 +1159,11 @@ const renderHead = useMemo(() => {
     let wNorm: number;
 
     if (t < curve.crownRoundness) {
-      const u = smooth01(t / curve.crownRoundness);
-      // Add extra curvature for the very top rows for more natural crown
-      const crownCurve = t < 0.1 ? Math.pow(t / 0.1, 0.6) : 1.0;
-      wNorm = lerp(topW, cheekW, u) * crownCurve;
+      const u = clamp(t / curve.crownRoundness, 0, 1);
+      // Start with a small crown apex and expand along an ellipse. The former
+      // minimum-width clamp turned every exposed scalp into a flat platform.
+      const crownArc = Math.sqrt(Math.max(0, 1 - Math.pow(1 - u, 2)));
+      wNorm = lerp(0.10, cheekW, crownArc);
     } else if (t < curve.cheekBot) {
       const u = (t - curve.crownRoundness) / (curve.cheekBot - curve.crownRoundness);
       const bulge = 1 - 0.06 * Math.cos(u * Math.PI); // gentle cheek swelling
@@ -1150,12 +1171,19 @@ const renderHead = useMemo(() => {
     } else {
       const u = smooth01((t - curve.cheekBot) / (1 - curve.cheekBot));
       wNorm = lerp(cheekW, chinW, u);
-      // soften jaw near very bottom to avoid a straight bottom edge
-      let jawSoftnessMultiplier = isMale ? 1.0 : 1.5; // Increase softness for women by 50%
-      wNorm -= curve.jawSoftness * jawSoftnessMultiplier * Math.pow(Math.max(0, t - 0.80), 1.8) * (W / Math.max(W, 24));
+      // The jaw narrows into a distinct chin during the final rows. Keeping
+      // chinW all the way to t=1 produced a perfectly horizontal jaw shelf.
+      if (t > 0.82) {
+        const chinProgress = smooth01((t - 0.82) / 0.18);
+        const chinTipW =
+          jawline === 'square' ? (isMale ? 0.36 : 0.32) :
+          faceShape === 'round' ? (isMale ? 0.33 : 0.29) :
+          isMale ? 0.28 : 0.25;
+        wNorm = lerp(wNorm, chinTipW, chinProgress);
+      }
     }
 
-    wNorm = clamp(wNorm, 0.50, 1.12);
+    wNorm = clamp(wNorm, 0.08, 1.12);
     const full = Math.max(6, Math.round(W * wNorm * 1.15));  // Increased by 15% for wider heads
     return Math.floor(full / 2);
   };
@@ -1194,15 +1222,6 @@ const renderHead = useMemo(() => {
     const t = H > 1 ? yi / (H - 1) : 0;
     let hw = halfWidthAtT(t);
 
-    // For women: taper the chin more aggressively in the bottom 3-4 rows for a pointed chin
-    if (!isMale && t > 0.85) {
-      // Calculate how close to the bottom we are (0 at t=0.85, 1 at t=1.0)
-      const bottomProgress = (t - 0.85) / 0.15;
-      // Apply aggressive taper: reduce width quadratically as we approach bottom
-      const taper = 1 - (bottomProgress * bottomProgress * 0.6); // Reduce by up to 60% at the very bottom
-      hw *= taper;
-    }
-
     // asymmetry strength varies with height (more below the cheeks)
     const asymCurve = (t - 0.25) * 1.2;
     const leftX = Math.round(
@@ -1210,22 +1229,27 @@ const renderHead = useMemo(() => {
     );
     const rightX = Math.round(cx + hw + rightBias * asymCurve);
 
-    // side outlines with better rim lighting on left
-    // Right side keeps original shadow outline
-    elements.push(
-      <rect key={`outline-outer-r-${yi}`} x={rightX + 2} y={y} width="1" height="1" fill={createShadow(outlineColor, 0.7)} className="pixel" />,
-      <rect key={`outline-r-${yi}`}        x={rightX + 1} y={y} width="1" height="1" fill={outlineColor} className="pixel" />
-    );
-
-    // Left side gets rim light gradient instead of harsh outline
-    if (t > 0.15 && t < 0.85) {  // Only in face area, not top/bottom
+    // The lower jaw uses a single skin-derived edge. Two black outline pixels
+    // on each side of a five-pixel chin looked like horizontal collar wings.
+    if (t >= 0.85) {
+      elements.push(
+        <rect key={`jaw-edge-l-${yi}`} x={leftX - 1} y={y} width="1" height="1" fill={createShadow(skinTone, 0.82)} className="pixel" />,
+        <rect key={`jaw-edge-r-${yi}`} x={rightX + 1} y={y} width="1" height="1" fill={createShadow(skinTone, 0.72)} className="pixel" />
+      );
+    } else if (t > 0.15) {
+      elements.push(
+        <rect key={`outline-outer-r-${yi}`} x={rightX + 2} y={y} width="1" height="1" fill={createShadow(outlineColor, 0.7)} className="pixel" />,
+        <rect key={`outline-r-${yi}`} x={rightX + 1} y={y} width="1" height="1" fill={outlineColor} className="pixel" />
+      );
       elements.push(
         <rect key={`rim-outer-l-${yi}`} x={leftX - 2} y={y} width="1" height="1" fill={createShadow(skinTone, 0.85)} opacity="0.5" className="pixel" />,
         <rect key={`rim-l-${yi}`}        x={leftX - 1} y={y} width="1" height="1" fill={createShadow(skinTone, 0.92)} className="pixel" />
       );
     } else {
-      // Keep original outline at top/bottom
+      // Keep a firmer outline around the crown.
       elements.push(
+        <rect key={`outline-outer-r-${yi}`} x={rightX + 2} y={y} width="1" height="1" fill={createShadow(outlineColor, 0.7)} className="pixel" />,
+        <rect key={`outline-r-${yi}`} x={rightX + 1} y={y} width="1" height="1" fill={outlineColor} className="pixel" />,
         <rect key={`outline-outer-l-${yi}`} x={leftX - 2} y={y} width="1" height="1" fill={createShadow(outlineColor, 0.7)} className="pixel" />,
         <rect key={`outline-l-${yi}`}        x={leftX - 1} y={y} width="1" height="1" fill={outlineColor} className="pixel" />
       );
@@ -1238,23 +1262,23 @@ const renderHead = useMemo(() => {
       const xRatio = rowWidth > 1 ? xLocal / (rowWidth - 1) : 0.5;
       let faceColor = skinTone;
 
-      // your existing lateral shading
-      if (xRatio < 0.15) faceColor = skinBrightHighlight;
-      else if (xRatio < 0.25) faceColor = skinHighlight;
-      else if (xRatio < 0.4) faceColor = createHighlight(skinTone, 1.08);
-      else if (xRatio > 0.85) faceColor = skinDeepShadow;
-      else if (xRatio > 0.75) faceColor = skinShadow;
-      else if (xRatio > 0.6) faceColor = skinMidtone;
+      // Broad, low-contrast planes hold up better at pixel scale than a stack of
+      // bright vertical bands. The face still reads as lit from the left.
+      if (xRatio < 0.10) faceColor = skinHighlight;
+      else if (xRatio < 0.24) faceColor = createHighlight(skinTone, 1.045);
+      else if (xRatio > 0.92) faceColor = skinDeepShadow;
+      else if (xRatio > 0.78) faceColor = createShadow(skinTone, 0.88);
+      else if (xRatio > 0.64) faceColor = skinMidtone;
 
       // Add better rim light gradient on the left edge (viewer's left)
       if (xLocal < 3 && t > 0.2 && t < 0.8) {
         // Create gradient from edge inward
         if (xLocal === 0) {
-          faceColor = skinBrightHighlight;  // Brightest at the very edge
+          faceColor = skinHighlight;
         } else if (xLocal === 1) {
-          faceColor = skinHighlight;  // Still bright
+          faceColor = createHighlight(skinTone, 1.055);
         } else if (xLocal === 2) {
-          faceColor = createHighlight(skinTone, 1.05);  // Subtle highlight
+          faceColor = createHighlight(skinTone, 1.025);
         }
       }
 
@@ -1316,14 +1340,14 @@ const renderHead = useMemo(() => {
         }
       }
 
-      // nose bridge with subtle glow
+      // Very quiet bridge plane. The dedicated nose renderer supplies the edge
+      // and tip; a strong central stripe here makes the face look mask-like.
       if (t > 0.25 && t < 0.65) {
         const noseDist = Math.abs(xLocal - rowWidth / 2);
-        if (noseDist < 2) {
-          faceColor = createHighlight(faceColor, 1.12);
-        } else if (noseDist < 3) {
-          // Subtle glow around nose bridge
-          faceColor = createHighlight(faceColor, 1.06);
+        if (noseDist < 1.1) {
+          faceColor = createHighlight(faceColor, 1.025);
+        } else if (noseDist < 2.1 && xLocal < rowWidth / 2) {
+          faceColor = createHighlight(faceColor, 1.012);
         }
       }
 
@@ -1496,9 +1520,10 @@ const renderHead = useMemo(() => {
 
   // ----- CHIN VARIATIONS & UNDER-CHIN SHADOW -----
   const chinBottomY = headY + H - 1;
-  const chinWidth = Math.floor(W * chinW);
-  const chinStartX = cx - Math.floor(chinWidth / 2);
-  const chinEndX = cx + Math.floor(chinWidth / 2);
+  const chinHalfWidth = halfWidthAtT(1);
+  const chinWidth = chinHalfWidth * 2 + 1;
+  const chinStartX = cx - chinHalfWidth;
+  const chinEndX = cx + chinHalfWidth;
 
   // Add cleft chin for some male characters (based on stable pseudo-random)
   const hasCleftChin = isMale && ((seedVal ^ 0x12345) % 100) < 25; // ~25% of males
@@ -1532,7 +1557,8 @@ const renderHead = useMemo(() => {
     );
   }
 
-  // Add shadow line under the chin where it meets the neck
+  // Add a short curved shadow under the chin where it meets the neck. A shadow
+  // spanning the old jaw anchor looked like a ruler-straight second jaw.
   for (let x = chinStartX; x <= chinEndX; x++) {
     const xLocal = x - chinStartX;
     const xRatio = chinWidth > 1 ? xLocal / (chinWidth - 1) : 0.5;
@@ -1548,7 +1574,7 @@ const renderHead = useMemo(() => {
       <rect
         key={`under-chin-shadow-${x}`}
         x={x}
-        y={chinBottomY + 1}
+        y={chinBottomY + (xRatio > 0.2 && xRatio < 0.8 ? 1 : 0)}
         width="1"
         height="1"
         fill={createShadow(skinTone, shadowIntensity)}
@@ -1660,6 +1686,12 @@ const renderHair = useMemo(() => {
   const isMale = gender === 'Male';
 
   const CLIP_HAIR_TO_HEADGEAR = true;
+  const defaultCapStyles = new Set([
+    'simple', 'flowing', 'bob', 'pixie', 'crew',
+    'wavy', 'curly', 'formal', 'parted', 'slicked',
+    'finger_waves', 'flapper', 'pin_curls', 'pompadour',
+    'professional', 'marcel_waves'
+  ]);
 
   // ⬇️ #2: ADD THIS LINE EXACTLY HERE
   const hgName = (headgearName || 'none').toLowerCase();
@@ -1899,9 +1931,12 @@ if (hairLen === 'bald') return;
     const naturalHairHighlight = createHighlight(naturalBaseHair, 1.2);
     const naturalHairBrightHighlight = createHighlight(naturalBaseHair, 1.4);
 
-    // Now it's safe to call paintScalpCap (after centerX, getHairPattern, and natural colors are defined)
+    // Special styles need a base scalp mass. Simple/flowing styles draw their own
+    // cap below; painting both was the source of the doubled temple "horns".
     const isBuzz = hairLen === 'very_short' || hairStyle === 'crew' || hairStyle === 'pixie' || hairStyle === 'finger_waves';
-    paintScalpCap({ buzz: isBuzz });
+    if (!defaultCapStyles.has(hairStyle)) {
+      paintScalpCap({ buzz: isBuzz });
+    }
 
     // Add subtle texture-specific strand patterns
     if (!isBuzz && hairLen !== 'bald' && hairTexture !== 'straight') {
@@ -2517,31 +2552,28 @@ if (hairStyle === 'braided') {
     }
     
     // Default hair rendering for simple/flowing styles - FIXED with full scalp coverage
-const defaultCapStyles = new Set([
-  'simple','flowing','bob','pixie','crew',
-  'wavy','curly','formal','parted','slicked',
-  'finger_waves','flapper','pin_curls','pompadour','professional','marcel_waves'
-]);
 if (defaultCapStyles.has(hairStyle)) {
       // Add helpers for buzz cuts
       const isBuzz = hairLen === 'very_short' || hairStyle === 'crew' || hairStyle === 'pixie';
       const coverThickness = isBuzz ? 1 : thickness;   // ignore age thinning for buzz/crew
       
-      for (let layer = 0; layer < 3; layer++) {
+      for (let layer = 0; layer < 2; layer++) {
         for (let y = hairTop - layer; y < headY + 10; y++) {
-          for (let x = headX - 7 + layer; x < headX + headDim.width + 7 - layer; x++) {
+          for (let x = headX - 4 + layer; x < headX + headDim.width + 4 - layer; x++) {
           const dist = Math.abs(x - centerX);
           let draw = false;
           let col = layer === 0 ? naturalHairDeepShadow : layer === 1 ? naturalBaseHair : naturalHairHighlight;
 
           // FULL SCALP COVERAGE - using coverThickness instead of thickness
           if (y < headY + 3) {
-            const topProgress = (headY + 3 - y) / (headY + 3 - hairTop);
-            const allowed = (headDim.width / 2 + 5) * coverThickness * (1 - topProgress * 0.3);
+            const crownProgress = Math.max(0, Math.min(1, (y - (hairTop - layer)) / Math.max(1, headY + 3 - (hairTop - layer))));
+            const crownArc = Math.sqrt(Math.max(0, 1 - Math.pow(1 - crownProgress, 2)));
+            const maxHalf = (headDim.width / 2 + 2.5) * coverThickness;
+            const allowed = 1.25 + (maxHalf - 1.25) * crownArc;
             if (dist < allowed - layer) draw = true;
           } else if (y >= headY + 3 && y < headY + 8 - layer) {
             // Ensure sides are covered too
-            if (dist <= headDim.width / 2 + 3 - layer) draw = true;
+            if (dist <= headDim.width / 2 + 2 - layer) draw = true;
           }
 
           // Only clear center facial features for non-buzz cuts
@@ -2554,14 +2586,12 @@ if (defaultCapStyles.has(hairStyle)) {
             draw = false;
           }
 
-          // Continuous cap for very short / crew cuts: no center gap at the hairline
-          if (isBuzz && y <= headY + 3) {
-            const allowed = headDim.width / 2 + 3 - layer; // full width across crown
-            if (dist < allowed) draw = true;
-          }
+          // Buzz and crew cuts use the same skull-following crown arc; forcing
+          // full width here formerly created a flat rectangular hair cap.
 
-          // Normal forehead reveal for non-buzz cuts
-          if (!isBuzz && revealForehead > 0 && y < headY + revealForehead + 2) {
+          // Reveal the forehead only below the crown. Clearing every row above
+          // this point split short hair into two horn-like temple blocks.
+          if (!isBuzz && revealForehead > 0 && y >= headY + 1 && y < headY + revealForehead + 3) {
             const inner = headDim.width / 2 - 4;
             if (Math.abs(x - centerX) < inner) draw = false;
           }
@@ -2589,7 +2619,7 @@ if (defaultCapStyles.has(hairStyle)) {
 
             
             if (!shouldSkip) {
-              elements.push(<rect key={`hair-${layer}-${x}-${y}`} x={x + p * 0.3} y={y} width="1" height="1" fill={col} className="pixel" />);
+              elements.push(<rect key={`hair-${layer}-${x}-${y}`} x={Math.round(x + p * 0.3)} y={y} width="1" height="1" fill={col} className="pixel" />);
             }
           }
         }
@@ -2618,7 +2648,7 @@ if (defaultCapStyles.has(hairStyle)) {
               const isSides = relX < 2 || relX > headDim.width - 2;
               
               if (!(coverage.sides && isSides)) {
-                elements.push(<rect key={`hair-left-${strand}-${x}-${y}`} x={x + s * 0.4 + p + flow} y={y} width="1" height="1" fill={col} className="pixel" />);
+                elements.push(<rect key={`hair-left-${strand}-${x}-${y}`} x={Math.round(x + s * 0.4 + p + flow)} y={y} width="1" height="1" fill={col} className="pixel" />);
               }
             }
           }
@@ -2634,7 +2664,7 @@ if (defaultCapStyles.has(hairStyle)) {
               const isSides = relX < 2 || relX > headDim.width - 2;
               
               if (!(coverage.sides && isSides)) {
-                elements.push(<rect key={`hair-right-${strand}-${x}-${y}`} x={x - s * 0.4 - p - flow} y={y} width="1" height="1" fill={col} className="pixel" />);
+                elements.push(<rect key={`hair-right-${strand}-${x}-${y}`} x={Math.round(x - s * 0.4 - p - flow)} y={y} width="1" height="1" fill={col} className="pixel" />);
               }
             }
           }
@@ -2657,76 +2687,78 @@ if (defaultCapStyles.has(hairStyle)) {
     const leftEyeX = centerX - eyeSpacing - 2;
     const rightEyeX = centerX + eyeSpacing - 1;
 
-    const isFatigued = character.fatigue !== undefined && character.maxFatigue !== undefined && (character.fatigue / character.maxFatigue) < 0.4;
+    const isFatigued = character.fatigue !== undefined && character.maxFatigue !== undefined && (character.fatigue / character.maxFatigue) > 0.7;
     const isIll = (character.health !== undefined && character.maxHealth !== undefined && (character.health / character.maxHealth) < 0.6) || (character.diseaseHealth?.currentDiseases && character.diseaseHealth.currentDiseases.length > 0);
 
-    // Simple eye dimensions
-    let eyeWidth = 4;
-    let eyeHeight = 2;
+    // At this resolution a large white rectangle reads as a cartoon symbol rather
+    // than an eye. Keep the sclera narrow and let the declared shape matter. Both
+    // eyes must share a baseline: a one-pixel offset reads as an injury at 64px.
+    const eyeShape = appearanceWithDefaults.eyeShape || 'almond';
+    let eyeWidth = eyeShape === 'wide' ? 5 : eyeShape === 'narrow' || eyeShape === 'hooded' ? 3 : 4;
+    let eyeHeight = eyeShape === 'round' ? 2 : 1;
+    const leftEyeY = eyeY;
+    const rightEyeY = eyeY;
 
     // Adjust for expressions
     if (exprIsSurprised) {
-      eyeWidth += 1;
-      eyeHeight += 1;
+      eyeWidth = Math.min(5, eyeWidth + 1);
+      eyeHeight = 2;
     }
 
-    // Eye whites - single rect per eye
-    const eyeWhiteColor = isIll ? '#FFF5F0' : (isFatigued ? '#FFF8F5' : '#FFFFFF');
+    // Warm, skin-influenced whites are less glaring and sit inside the face plane.
+    const eyeWhiteColor = isIll
+      ? mix(actualSkinTone, '#F1DDD6', 0.82)
+      : isFatigued
+        ? mix(actualSkinTone, '#E9DDD6', 0.84)
+        : mix(actualSkinTone, '#F3EFE6', 0.88);
     elements.push(
-      <rect key="eye-white-l" x={leftEyeX} y={eyeY} width={eyeWidth} height={eyeHeight} fill={eyeWhiteColor} className="pixel" />,
-      <rect key="eye-white-r" x={rightEyeX} y={eyeY} width={eyeWidth} height={eyeHeight} fill={eyeWhiteColor} className="pixel" />
+      <rect key="eye-white-l" x={leftEyeX} y={leftEyeY} width={eyeWidth} height={eyeHeight} fill={eyeWhiteColor} className="pixel" />,
+      <rect key="eye-white-r" x={rightEyeX} y={rightEyeY} width={eyeWidth} height={eyeHeight} fill={eyeWhiteColor} className="pixel" />
     );
 
-    // Iris - single rect per eye
+    // Iris and pupil share a one- or two-pixel mass. This leaves a small amount
+    // of sclera without producing the repeated "white blocks" seen in QA sheets.
     const irisColor = appearanceWithDefaults.eyeColor || 'rgb(101, 67, 33)';
-    const irisSize = 2;
-    let irisOffset = 1; // Center iris by default
+    const irisSize = eyeHeight > 1 && eyeWidth >= 4 ? 2 : 1;
+    let irisOffset = Math.floor((eyeWidth - irisSize) / 2);
     if (gazeDirection === 0) irisOffset = 0; // Look left
     else if (gazeDirection === 2) irisOffset = eyeWidth - irisSize; // Look right
 
     elements.push(
-      <rect key="iris-l" x={leftEyeX + irisOffset} y={eyeY} width={irisSize} height={eyeHeight} fill={irisColor} className="pixel" />,
-      <rect key="iris-r" x={rightEyeX + irisOffset} y={eyeY} width={irisSize} height={eyeHeight} fill={irisColor} className="pixel" />
+      <rect key="iris-l" x={leftEyeX + irisOffset} y={leftEyeY} width={irisSize} height={eyeHeight} fill={irisColor} className="pixel" />,
+      <rect key="iris-r" x={rightEyeX + irisOffset} y={rightEyeY} width={irisSize} height={eyeHeight} fill={irisColor} className="pixel" />
     );
 
-    // Pupil - single rect per eye
-    const pupilSize = 1;
+    const pupilOffset = irisSize > 1 ? 1 : 0;
     elements.push(
-      <rect key="pupil-l" x={leftEyeX + irisOffset + 1} y={eyeY} width={pupilSize} height={pupilSize} fill="#000000" className="pixel" />,
-      <rect key="pupil-r" x={rightEyeX + irisOffset + 1} y={eyeY} width={pupilSize} height={pupilSize} fill="#000000" className="pixel" />
+      <rect key="pupil-l" x={leftEyeX + irisOffset + pupilOffset} y={leftEyeY} width="1" height="1" fill="#151310" className="pixel" />,
+      <rect key="pupil-r" x={rightEyeX + irisOffset + pupilOffset} y={rightEyeY} width="1" height="1" fill="#151310" className="pixel" />
     );
 
-    // Eye shine - single pixel highlight for life-like appearance
+    // A shared upper-lid shadow gives the eye a socket. Highlights only appear
+    // in two-pixel-tall eyes; on a one-pixel eye they replace the iris entirely.
+    const lidShadow = createShadow(actualSkinTone, eyeShape === 'hooded' ? 0.78 : 0.84);
     elements.push(
-      <rect key="shine-l" x={leftEyeX + irisOffset} y={eyeY} width="1" height="1" fill="#FFFFFF" opacity={0.8} className="pixel" />,
-      <rect key="shine-r" x={rightEyeX + irisOffset} y={eyeY} width="1" height="1" fill="#FFFFFF" opacity={0.8} className="pixel" />
+      <rect key="upper-lid-l" x={leftEyeX - 1} y={leftEyeY - 1} width={eyeWidth + 1} height="1" fill={lidShadow} className="pixel" />,
+      <rect key="upper-lid-r" x={rightEyeX} y={rightEyeY - 1} width={eyeWidth + 1} height="1" fill={lidShadow} className="pixel" />
     );
-
-    // Add tear ducts (inner corner pink pixels)
-    const tearDuctColor = '#FFB6C1';
-    elements.push(
-      <rect key="tear-duct-l" x={leftEyeX + eyeWidth} y={eyeY} width="1" height="1" fill={tearDuctColor} className="pixel" />,
-      <rect key="tear-duct-r" x={rightEyeX - 1} y={eyeY} width="1" height="1" fill={tearDuctColor} className="pixel" />
-    );
+    if (eyeHeight > 1) {
+      elements.push(
+        <rect key="shine-l" x={leftEyeX + irisOffset} y={leftEyeY} width="1" height="1" fill="#F8F2E8" opacity="0.62" className="pixel" />,
+        <rect key="shine-r" x={rightEyeX + irisOffset} y={rightEyeY} width="1" height="1" fill="#F8F2E8" opacity="0.62" className="pixel" />
+      );
+    }
 
     // Add enhanced eyelashes for women
     if (isFemale) {
       const lashColor = hasGrayHair ? 'rgb(90,90,90)' : baseHair;
       const lashShadow = createShadow(lashColor, 0.7);
 
-      // Top lashes - more prominent with 3 pixels wide
+      // One restrained outer lash per eye; the old full-width bands made every
+      // woman read as wearing modern eyeliner.
       elements.push(
-        <rect key="lash-top-l" x={leftEyeX} y={eyeY - 1} width="3" height="1" fill={lashColor} className="pixel" />,
-        <rect key="lash-top-r" x={rightEyeX} y={eyeY - 1} width="3" height="1" fill={lashColor} className="pixel" />,
-        // Outer top lash extension for longer lashes
-        <rect key="lash-top-outer-l" x={leftEyeX + 3} y={eyeY - 1} width="1" height="1" fill={lashShadow} className="pixel" />,
-        <rect key="lash-top-outer-r" x={rightEyeX - 1} y={eyeY - 1} width="1" height="1" fill={lashShadow} className="pixel" />
-      );
-
-      // Bottom lashes - shorter and more subtle
-      elements.push(
-        <rect key="lash-bottom-l" x={leftEyeX + 1} y={eyeY + 1} width="2" height="1" fill={lashShadow} className="pixel" />,
-        <rect key="lash-bottom-r" x={rightEyeX + 1} y={eyeY + 1} width="2" height="1" fill={lashShadow} className="pixel" />
+        <rect key="lash-top-outer-l" x={leftEyeX - 1} y={leftEyeY - 1} width="1" height="1" fill={lashShadow} className="pixel" />,
+        <rect key="lash-top-outer-r" x={rightEyeX + eyeWidth} y={rightEyeY - 1} width="1" height="1" fill={lashColor} className="pixel" />
       );
     }
 
@@ -2735,8 +2767,8 @@ if (defaultCapStyles.has(hairStyle)) {
     const browShadow = createShadow(browColor, 0.8);
 
     // Base position
-    let browYLeft = eyeY - 3;
-    let browYRight = eyeY - 3;
+    let browYLeft = leftEyeY - 3;
+    let browYRight = rightEyeY - 3;
 
     // Expression-based vertical offsets
     if (exprIsSurprised) {
@@ -2850,7 +2882,7 @@ if (defaultCapStyles.has(hairStyle)) {
     const long = rL < zoneBias.longProb ? 1 : 0;
 
     const declared = appearanceWithDefaults.noseShape || 'straight';
-    let widthMul = 1, lengthMul = 1, bump = 0, tipUp = 0;
+    let widthMul = 1, lengthMul = 1, bump = 0;
     switch (declared) {
       case 'aquiline': bump = 1; lengthMul += 0.2; break;
       case 'broad': widthMul += 0.35; break;  // Increased from 0.25 to make broader noses wider
@@ -2860,118 +2892,67 @@ if (defaultCapStyles.has(hairStyle)) {
     if (wide) widthMul += 0.15;
     if (long) lengthMul += 0.15;
 
-    const noseX = headX + Math.floor(headDim.width / 2) - 1;
+    const faceCenterX = headX + Math.floor(headDim.width / 2);
     const mouthY = headY + Math.floor(headDim.height * 0.72);
     const eyeY = headY + Math.floor(headDim.height * (hairLength === 'bald' ? 0.42 : hairLength === 'very_short' ? 0.4 : hairLength === 'short' ? 0.36 : 0.35));
 
     const noseStartY = eyeY + 4;
     const maxLenToPhiltrum = Math.max(3, mouthY - 2 - noseStartY);
-    const noseLen = Math.min(maxLenToPhiltrum, Math.round((5 + (long ? 2 : 0) + (isOld ? 1 : 0)) * lengthMul));
-    const noseWidth = Math.max(3, Math.round((declared === 'broad' ? 4 : 3) * widthMul));
+    const noseLen = Math.min(maxLenToPhiltrum, Math.round((4 + (long ? 1 : 0) + (isOld ? 1 : 0)) * lengthMul));
+    const baseNoseWidth = declared === 'broad' ? 5 : declared === 'button' ? 4 : 3;
+    const noseWidth = Math.max(3, Math.min(5, Math.round(baseNoseWidth * widthMul)));
+    const noseX = faceCenterX - Math.floor(noseWidth / 2);
 
-    // Nose bridge highlights - consistent with left-side rim lighting
-    // Subtle highlight on LEFT side of nose bridge (light from left)
-    for (let i = 0; i < Math.max(1, noseLen - 2); i++) {
-      const highlightIntensity = i < 2 ? 1.08 : 1.03; // Subtle, not bright white
-      elements.push(
-        <rect key={`nbh-${i}`} x={noseX} y={noseStartY - 1 + i} width="1" height="1"
-          fill={createHighlight(skinTone, highlightIntensity)} className="pixel" />
-      );
+    // A nose this small needs one clear lighting pass. The old implementation
+    // stacked bridge, gradient, scattering, rim, and depth passes; the overlap
+    // produced a random-looking knot of pixels instead of a readable plane.
+    const bridgeRows = Math.max(2, noseLen - 2);
+    const bridgeLight = createHighlight(actualSkinTone, 1.055);
+    const bridgeShadow = createShadow(actualSkinTone, 0.84);
+    for (let i = 0; i < bridgeRows; i++) {
+      const profileOffset = bump && i >= Math.floor(bridgeRows / 2) ? 1 : 0;
+      const bridgeX = faceCenterX - 1 + profileOffset;
+      if (i === 0 || i === bridgeRows - 1) {
+        elements.push(
+          <rect key={`nose-bridge-light-${i}`} x={bridgeX} y={noseStartY + i} width="1" height="1" fill={bridgeLight} opacity="0.58" className="pixel" />
+        );
+      }
+      if (i > 0) {
+        elements.push(
+          <rect key={`nose-bridge-shadow-${i}`} x={bridgeX + 1} y={noseStartY + i} width="1" height="1" fill={bridgeShadow} opacity="0.64" className="pixel" />
+        );
+      }
     }
-
-    if (bump) {
-      elements.push(
-        <rect key="bump-1" x={noseX + 1} y={noseStartY + Math.floor(noseLen / 3)} width="2" height="1" fill={skinTone} className="pixel" />
-      );
-    }
-
-    elements.push(
-      <rect key="nose-body" x={noseX} y={noseStartY} width={Math.max(1, noseWidth - 1)} height={noseLen} fill={skinTone} className="pixel" />
-    );
-
-    // Side shadows/highlights for nose - consistent directional lighting
-    elements.push(
-      <rect key="nose-side-l" x={noseX - 1} y={noseStartY + 1} width="1" height={Math.max(1, noseLen - 1)}
-        fill={createHighlight(skinTone, 1.05)} className="pixel" />, // Left side gets subtle highlight
-      <rect key="nose-side-r" x={noseX + noseWidth} y={noseStartY + 1} width="1" height={Math.max(1, noseLen - 2)}
-        fill={skinShadow} className="pixel" /> // Right side gets shadow (moved 1px right)
-    );
 
     const tipY = noseStartY + noseLen - 1;
-    // Make nose tip as bright as the left-side highlights for consistency
-    const tipHL = createHighlight(skinTone, 1.15);
+    const tipLight = createHighlight(actualSkinTone, 1.075);
+    const wingShadow = createShadow(actualSkinTone, 0.88);
 
-    if (isIll) {
+    // One continuous tip/alar row reads as a nose plane. The old separate
+    // wings left accidental gaps, making the feature look like loose pixels.
+    for (let dx = 0; dx < noseWidth; dx++) {
+      const isEdge = dx === 0 || dx === noseWidth - 1;
+      const isTip = Math.abs((noseX + dx) - (faceCenterX - 0.5)) < 1.25;
+      const color = isIll && isTip
+        ? 'rgba(205, 112, 105, 0.55)'
+        : isEdge
+          ? wingShadow
+          : isTip
+            ? tipLight
+            : skinMidtone;
       elements.push(
-        <rect key="red-nose-tip" x={noseX + Math.floor(noseWidth / 2) - 1} y={tipY} width="2" height="1" fill="rgba(255, 120, 120, 0.6)" className="pixel" />,
-        <rect key="red-nose-area" x={noseX} y={tipY - 1} width={noseWidth} height="2" fill="rgba(255, 140, 140, 0.3)" className="pixel" />
+        <rect key={`nose-tip-plane-${dx}`} x={noseX + dx} y={tipY} width="1" height="1" fill={color} opacity={isEdge ? 0.78 : 1} className="pixel" />
       );
     }
-
-    elements.push(
-      <rect key="nose-tip" x={noseX + Math.floor(noseWidth / 2) - 1} y={tipY} width="2" height="1" fill={isIll ? "rgba(255, 180, 180, 0.8)" : tipHL} className="pixel" />,
-      // Additional bright highlight pixel for prominent nose tip
-      <rect key="nose-tip-extra" x={noseX + Math.floor(noseWidth / 2)} y={tipY} width="1" height="1" fill={skinBrightHighlight} className="pixel" />
-    );
-
-    // Subsurface scattering on nose tip (light passing through thin skin)
-    const noseTipScatter = createSubsurfaceScattering(actualSkinTone, 0.35);
-    elements.push(
-      <rect key="nose-tip-scatter-l" x={noseX} y={tipY} width="1" height="1" fill={noseTipScatter} opacity="0.4" className="pixel" />,
-      <rect key="nose-tip-scatter-r" x={noseX + noseWidth - 1} y={tipY} width="1" height="1" fill={noseTipScatter} opacity="0.4" className="pixel" />
-    );
 
     const nostrilY = Math.min(tipY + 1, mouthY - 2);
-
+    const leftNostrilX = noseX + (noseWidth > 3 ? 1 : 0);
+    const rightNostrilX = noseX + noseWidth - 1 - (noseWidth > 3 ? 1 : 0);
     elements.push(
-      <rect key="nostril-l" x={noseX} y={nostrilY} width="1" height="1" fill={skinDeepShadow} className="pixel" />,
-      <rect key="nostril-r" x={noseX + noseWidth - 2} y={nostrilY} width="1" height="1" fill={skinDeepShadow} className="pixel" />,
-      <rect key="subnasal-shadow" x={noseX + 1} y={nostrilY + 1} width={Math.max(1, noseWidth - 3)} height="1" fill={isIll ? "rgba(255, 160, 160, 0.4)" : skinShadow} className="pixel" />
+      <rect key="nostril-l" x={leftNostrilX} y={nostrilY} width="1" height="1" fill={skinDeepShadow} className="pixel" />,
+      <rect key="nostril-r" x={rightNostrilX} y={nostrilY} width="1" height="1" fill={skinDeepShadow} className="pixel" />,
+      <rect key="subnasal-shadow" x={faceCenterX - 1} y={nostrilY + 1} width="2" height="1" fill={skinShadow} opacity="0.82" className="pixel" />
     );
-
-    // ----- ENHANCED NOSTRIL DEFINITION & NOSE BRIDGE GRADIENT -----
-    const nostrilShadow = createShadow(actualSkinTone, 0.85);
-    const noseBridgeHighlight = createHighlight(actualSkinTone, 1.15);
-    const nostrilSubtle = createShadow(actualSkinTone, 0.92);
-
-    // Enhanced nostril definition with depth - positioned inside nose area
-    elements.push(
-      <rect key="nostril-depth-l" x={noseX} y={nostrilY - 1} width="1" height="1" fill={nostrilShadow} opacity="0.4" className="pixel" />,
-      <rect key="nostril-depth-r" x={noseX + noseWidth - 2} y={nostrilY - 1} width="1" height="1" fill={nostrilShadow} opacity="0.4" className="pixel" />
-    );
-
-    // Add sophisticated color-aware shadow directly under the nose (philtrum area)
-    const underNoseShadow = createShadow(actualSkinTone, 0.75);  // Darker shadow (matching lip shadow)
-    const underNoseDeepShadow = createShadow(actualSkinTone, 0.65); // Even darker for center
-
-    // Gradient shadow under nose - darker in center, lighter at edges
-    for (let dx = 0; dx < noseWidth - 1; dx++) {
-      const centerDist = Math.abs(dx - (noseWidth - 1) / 2);
-      const isCenter = centerDist < 1;
-      const shadowColor = isCenter ? underNoseDeepShadow : underNoseShadow;
-      elements.push(
-        <rect key={`under-nose-shadow-${dx}`} x={noseX + dx} y={nostrilY + 2} width="1" height="1" fill={shadowColor} className="pixel" />
-      );
-    }
-
-    // Subtle nostril rim highlighting for more realistic form
-    if (!isIll) {
-      elements.push(
-        <rect key="nostril-rim-l" x={noseX + 1} y={nostrilY} width="1" height="1" fill={nostrilSubtle} opacity="0.3" className="pixel" />,
-        <rect key="nostril-rim-r" x={noseX + noseWidth - 3} y={nostrilY} width="1" height="1" fill={nostrilSubtle} opacity="0.3" className="pixel" />
-      );
-    }
-
-    // Nose bridge highlight gradient for dimensional depth
-    const bridgeStartY = noseStartY + 1;
-    const bridgeLength = Math.min(3, Math.floor(noseLen * 0.6));
-    for (let i = 0; i < bridgeLength; i++) {
-      const intensity = 1 - (i / bridgeLength) * 0.6; // Fade from bright to subtle
-      elements.push(
-        <rect key={`bridge-highlight-${i}`} x={noseX + 1} y={bridgeStartY + i} width="1" height="1"
-          fill={noseBridgeHighlight} opacity={0.1 * intensity} className="pixel" />  // Reduced from 0.3 to 0.1
-      );
-    }
 
     return <g key="nose">{elements}</g>;
   }, [appearanceWithDefaults.noseShape, culturalZone, hairLength, headDim.height, headDim.width, headX, headY, isFemale, isOld, skinBrightHighlight, skinDeepShadow, skinHighlight, skinMidtone, skinShadow, skinTone, actualSkinTone, character.health, character.maxHealth, character.diseaseHealth]);
@@ -2987,7 +2968,7 @@ if (defaultCapStyles.has(hairStyle)) {
 
     const isFatigued =
       character.fatigue !== undefined && character.maxFatigue !== undefined &&
-      (character.fatigue / character.maxFatigue) < 0.4;
+      (character.fatigue / character.maxFatigue) > 0.7;
 
     const isIll =
       (character.health !== undefined && character.maxHealth !== undefined && (character.health / character.maxHealth) < 0.6) ||
@@ -3249,7 +3230,6 @@ if (defaultCapStyles.has(hairStyle)) {
     const mouthY = headY + Math.floor(headDim.height * 0.72);
 
     const densityBase = thickness === 'thick' ? 0.85 : thickness === 'sparse' ? 0.45 : 0.65;
-    const chinWidth = Math.floor(headDim.width * 0.55);
 
     // ENHANCED STUBBLE RENDERING
     if (style === 'stubble') {
@@ -3269,57 +3249,57 @@ if (defaultCapStyles.has(hairStyle)) {
         seed: character.portraitSeed || seed || 1234
       });
     } else if (style === 'full_beard') {
-      const mustacheY = mouthY - 2;  // Position mustache above mouth, not covering it
-      // Improved thickness for full beard mustache
-      const mustacheThickness = thickness === 'thick' ? 2 : 1;  // Reduced thickness to not cover nose
-      for (let t = 0; t < mustacheThickness; t++) {
-        const width = 13 - t; // Wider mustache
-        const startI = -Math.floor(width / 2);
-        const endI = Math.floor(width / 2);
-        for (let i = startI; i <= endI; i++) {
-          // Better color gradient
-          const centerDist = Math.abs(i);
-          const col = centerDist <= 1 ? beardHighlight :
-                     centerDist >= 4 ? beardShadow :
-                     beardColor;
-          elements.push(<rect key={`fb-m-${t}-${i}`} x={headX + Math.floor(headDim.width / 2) + i} y={mustacheY + t} width="1" height="1" fill={col} className="pixel" />);
-        }
-      }
-      // Start beard lower to leave space for mouth
-      for (let y = 2; y < 16; y++) {  // Changed from -2 to 2 to start lower
-        const rowY = baseY + y;
-        const isNearMouth = y >= 2 && y <= 4;  // Adjusted mouth gap area
-        let rowWidth;
-        if (y < 2) rowWidth = Math.floor(chinWidth * 0.8);
-        else if (y < 8) rowWidth = Math.floor(chinWidth * 1.2);  // Wider beard
-        else rowWidth = Math.max(0, Math.floor(chinWidth * (1.2 - (y - 8) / 30)));
+      const centerX = headX + Math.floor(headDim.width / 2);
+      const mustacheY = mouthY - 1;
 
-        const startX = headX + Math.floor((headDim.width - rowWidth) / 2);
-
-        for (let x = 0; x < rowWidth; x++) {
-          const xRatio = x / rowWidth;
-          if (isNearMouth) {
-            const centerDist = Math.abs(xRatio - 0.5);
-            if (centerDist < 0.25) continue;  // Wider gap for mouth visibility
-          }
-          let col = beardColor;
-          if (xRatio < 0.15 || xRatio > 0.85) col = beardDeepShadow;
-          else if (xRatio < 0.3 || xRatio > 0.7) col = beardShadow;
-          else if (xRatio > 0.45 && xRatio < 0.55) col = beardHighlight;
-          if (y > 12) col = beardDeepShadow;
-          if (y < 1) col = beardShadow;
-          elements.push(<rect key={`fb-${x}-${y}`} x={startX + x} y={rowY} width="1" height="1" fill={col} className="pixel" />);
-        }
-      }
-      for (let sy = -6; sy < 6; sy++) {
-        const sideWidth = sy < -2 ? 2 : sy < 2 ? 3 : 4;
-        for (let sx = 0; sx < sideWidth; sx++) {
-          const leftX = headX - sx - 1;
-          const rightX = headX + headDim.width + sx;
-          const col = sx === 0 ? beardColor : sx === 1 ? beardShadow : beardDeepShadow;
+      // Two separated, gently drooping halves keep the philtrum and mouth
+      // readable. The former 13px rectangle looked pasted onto the face.
+      for (let dx = -5; dx <= 5; dx++) {
+        if (Math.abs(dx) <= 1) continue;
+        const droop = Math.abs(dx) >= 4 ? 1 : 0;
+        const col = Math.abs(dx) >= 4 ? beardShadow : beardColor;
+        elements.push(
+          <rect key={`fb-m-${dx}`} x={centerX + dx} y={mustacheY + droop} width="1" height="1" fill={col} className="pixel" />
+        );
+        if (thickness === 'thick' && Math.abs(dx) === 2) {
           elements.push(
-            <rect key={`sb-l-${sy}-${sx}`} x={leftX} y={baseY + sy} width="1" height="1" fill={col} className="pixel" />,
-            <rect key={`sb-r-${sy}-${sx}`} x={rightX} y={baseY + sy} width="1" height="1" fill={col} className="pixel" />
+            <rect key={`fb-m-thick-${dx}`} x={centerX + dx} y={mustacheY + 1} width="1" height="1" fill={beardShadow} className="pixel" />
+          );
+        }
+      }
+
+      // Short sideburn-to-jaw wedges establish the beard around the face
+      // without extending into a square block outside the head silhouette.
+      const cheekStartY = baseY - 4;
+      for (let row = 0; row < 8; row++) {
+        const inset = Math.max(1, 3 - Math.floor(row / 3));
+        const sideWidth = row < 3 ? 1 : 2;
+        for (let w = 0; w < sideWidth; w++) {
+          const col = w === 0 ? beardColor : beardShadow;
+          elements.push(
+            <rect key={`fb-cheek-l-${row}-${w}`} x={headX + inset + w} y={cheekStartY + row} width="1" height="1" fill={col} className="pixel" />,
+            <rect key={`fb-cheek-r-${row}-${w}`} x={headX + headDim.width - inset - 1 - w} y={cheekStartY + row} width="1" height="1" fill={col} className="pixel" />
+          );
+        }
+      }
+
+      // A tapered jaw mass leaves a two-row mouth opening, then closes beneath
+      // the lower lip. Seeded omissions create strand texture without breaking
+      // the overall silhouette.
+      const beardTopY = mouthY + 2;
+      const beardRows = thickness === 'thick' ? 11 : thickness === 'sparse' ? 7 : 9;
+      const topHalfWidth = Math.max(6, Math.floor(headDim.width * 0.36));
+      for (let row = 0; row < beardRows; row++) {
+        const taper = Math.floor((row / Math.max(1, beardRows - 1)) * (topHalfWidth - 3));
+        const halfWidth = Math.max(3, topHalfWidth - taper);
+        for (let dx = -halfWidth; dx <= halfWidth; dx++) {
+          if (row < 2 && Math.abs(dx) < 3) continue;
+          if (thickness === 'sparse' && rand(4700 + row * 41 + dx) < 0.2) continue;
+          const edge = Math.abs(dx) >= halfWidth - 1;
+          const strand = !edge && (row + dx + Math.floor(rand(4800 + row * 53 + dx) * 3)) % 5 === 0;
+          const col = edge ? beardDeepShadow : strand ? beardHighlight : beardColor;
+          elements.push(
+            <rect key={`fb-jaw-${row}-${dx}`} x={centerX + dx} y={beardTopY + row} width="1" height="1" fill={col} className="pixel" />
           );
         }
       }
@@ -3579,15 +3559,16 @@ if (defaultCapStyles.has(hairStyle)) {
   const renderBody = useMemo(() => {
     const elements: JSX.Element[] = [];
     const neckY = headY + headDim.height - 1;  // Overlap with jaw by 1 pixel for seamless connection
-    const neckHeight = 6;  // Increased to compensate for overlap
+    const neckHeight = 5;
     const bodyStartY = neckY + neckHeight;
     const bodyHeight = 64 - bodyStartY;
 
-    const neckWidth = Math.floor(headDim.width * 0.65);
+    const neckWidth = Math.max(8, Math.floor(headDim.width * (isFemale ? 0.42 : 0.46)));
     for (let y = 0; y < neckHeight; y++) {
-      // More gradual neck widening for smoother shoulder transition
+      // The neck remains nearly vertical; the garment/shoulder silhouette takes
+      // over below it. Flaring the neck toward shoulder width made an hourglass.
       const progressToShoulder = y / neckHeight;
-      const nw = Math.floor(neckWidth + (bodyDim.shoulderWidth * 0.7 - neckWidth) * Math.pow(progressToShoulder, 2.5));
+      const nw = neckWidth + Math.round(progressToShoulder * 2);
       const nx = headX + Math.floor((headDim.width - nw) / 2);
 
       for (let x = 0; x < nw; x++) {
@@ -3624,14 +3605,15 @@ if (defaultCapStyles.has(hairStyle)) {
 
     // If we should use equipped items and equippedItems exists, use that (even if slot is empty)
     // Only fall back to appearance if equippedItems doesn't exist at all
-    let garment = null;
+    let garment: { name: string; material?: string; color?: string } | null =
+      portraitOverrides?.garment || null;
     let cloakItem = null;
-    if (useEquippedItems && character.equippedItems !== undefined) {
+    if (!garment && useEquippedItems && character.equippedItems !== undefined) {
       // Use equipped torso item (which may be undefined if nothing equipped)
       garment = character.equippedItems.torso;
       // Extract cloak from separate slot
       cloakItem = character.equippedItems.cloak || null;
-    } else {
+    } else if (!garment) {
       // Fall back to appearance only if equippedItems doesn't exist
       garment = appearanceWithDefaults.garment;
     }
@@ -3645,10 +3627,18 @@ if (defaultCapStyles.has(hairStyle)) {
     const clothingHighlight = createHighlight(clothingColor, 1.2);
     const accentColor = appearanceWithDefaults.palette.accent;
 
+    const garmentName = garment?.name?.toLowerCase() || '';
+    const garmentKind = portraitOverrides?.garmentKind;
+    const isMinimalWrap = /(minimal wrap|fibre belt|fiber belt)/.test(garmentName);
     const material = (garment?.material || '').toLowerCase();
-    const hasSheen = ['silk', 'satin', 'velvet'].includes(material);
-    const isRough = ['wool', 'burlap', 'hemp'].includes(material);
-    const isMetallic = ['mail', 'plate', 'bronze'].includes(material);
+    const hasSheen = ['silk', 'satin', 'velvet'].some(term => material.includes(term));
+    const isRough = ['wool', 'burlap', 'hemp', 'plant fibre', 'plant-fibre', 'barkcloth'].some(term =>
+      material.includes(term)
+    );
+    const isMetallic = ['mail', 'plate', 'bronze', 'iron', 'steel'].some(term => material.includes(term));
+    const hasVisiblePattern = /(embroider|brocade|pattern|narrow-strip|strip woven|decorated)/.test(
+      `${garmentName} ${material}`
+    );
 
     // If naked (no torso equipped), render bare skin instead of clothing
     for (let y = 0; y < bodyHeight; y++) {
@@ -3668,12 +3658,37 @@ if (defaultCapStyles.has(hairStyle)) {
         torsoWidth = Math.floor(bodyDim.chestWidth - (bodyDim.chestWidth - bodyDim.waistWidth) * s);
       }
 
-      const torsoX = 32 - (torsoWidth / 2);
-      for (let x = 0; x < torsoWidth + 6; x++) {
-        let col;
-        const xr = x / (torsoWidth + 6);
+      // Garment families should change the silhouette, not merely recolor the same torso.
+      // These restrained adjustments retain the existing portrait proportions while making
+      // a robe, fitted doublet, jacket, and work shirt legible at contact-sheet scale.
+      const lowerBodyProgress = Math.max(0, (y - bodyHeight * 0.42) / (bodyHeight * 0.58));
+      if (garmentKind === 'robe' || garmentKind === 'gown' || garmentKind === 'wrapped_garment') {
+        torsoWidth += Math.round(lowerBodyProgress * (garmentKind === 'wrapped_garment' ? 4 : 7));
+      } else if (garmentKind === 'doublet') {
+        if (y > bodyHeight * 0.48) torsoWidth -= Math.round(lowerBodyProgress * 3);
+      } else if (garmentKind === 'jacket') {
+        if (y > 8 && y < bodyHeight * 0.72) torsoWidth += 2;
+        if (y >= bodyHeight * 0.72) torsoWidth += 1;
+      } else if (garmentKind === 'tunic') {
+        if (y > bodyHeight * 0.58) torsoWidth += Math.round(lowerBodyProgress * 2);
+      }
+      torsoWidth = Math.max(12, torsoWidth);
 
-        if (isNaked) {
+      // Use one silhouette for the torso pixels and the sleeve anchors. The old
+      // code widened the drawn torso by six pixels but positioned both arms from
+      // the narrower pre-expansion width, creating detached horizontal "wings."
+      const renderedTorsoWidth = torsoWidth + 6;
+      const renderedTorsoX = 32 - (renderedTorsoWidth / 2);
+      for (let x = 0; x < renderedTorsoWidth; x++) {
+        const centerDistance = Math.abs(x - (renderedTorsoWidth - 1) / 2);
+        const shoulderDistance = Math.max(0, centerDistance - neckWidth * 0.48);
+        const firstVisibleRow = Math.min(4, Math.ceil(shoulderDistance / 2.2));
+        if (y < firstVisibleRow) continue;
+
+        let col;
+        const xr = x / renderedTorsoWidth;
+
+        if (isNaked || (isMinimalWrap && y < bodyHeight * 0.5)) {
           // Render bare skin
           col = skinTone;
           if (xr < 0.15) col = skinHighlight;
@@ -3693,43 +3708,46 @@ if (defaultCapStyles.has(hairStyle)) {
           else if (xr > 0.85) col = clothingDeepShadow;
           else if (xr > 0.7) col = clothingShadow;
 
-          if (hasSheen && rand(x + y * 100) > 0.7) col = createHighlight(col, 1.15);
-          else if (isRough && rand(x + y * 100) > 0.8) col = createShadow(col, 0.95);
-          else if (isMetallic && Math.sin(x * 0.5 + y * 0.3) > 0.3) col = createHighlight(col, 1.25);
+          if (hasSheen && rand(x + y * 100) > 0.88) col = createHighlight(col, 1.12);
+          else if (isRough && rand(x + y * 100) > 0.9) col = createShadow(col, 0.94);
+          else if (isMetallic && Math.sin(x * 0.5 + y * 0.3) > 0.55) col = createHighlight(col, 1.2);
 
-          if (isWealthy) {
-            if ((x + y) % 12 === 0) col = accentColor;
-            else if ((x - y) % 10 === 0) col = appearanceWithDefaults.palette.secondary;
-            if (isNoble && y > 10 && y < 20 && Math.abs(x - torsoWidth / 2) < 5 && ((x + y) % 4 === 0)) col = '#FFD700';
+          // Decoration is now driven by an explicitly decorated garment, not by wealth
+          // or a broad cultural zone. This removes the confetti-like "fantasy costume"
+          // effect while retaining a little pixel-art texture where the record supports it.
+          if (hasVisiblePattern && y > 5 && (x + y * 2) % 11 === 0) {
+            col = mix(col, accentColor, 0.38);
           }
 
-          if (culturalZone === 'EAST_ASIAN' && y % 8 === 4) col = createShadow(col, 0.9);
-          else if (culturalZone === 'SUB_SAHARAN_AFRICAN' && ((x + y) % 6 < 2)) col = accentColor;
-          else if (culturalZone === 'SOUTH_ASIAN' && isWealthy && (x % 4 === 2 && y % 4 === 2)) col = '#FFD700';
+          // High status reads through one quiet edge trim rather than random gold pixels.
+          if (isWealthy && hasVisiblePattern && y > 7 && (x === 2 || x === torsoWidth + 3)) {
+            col = mix(col, accentColor, isNoble ? 0.62 : 0.42);
+          }
         }
 
-        elements.push(<rect key={`cl-${y}-${x}`} x={torsoX + x - 3} y={bodyStartY + y} width="1" height="1" fill={col} className="pixel" />);
+        elements.push(<rect key={`cl-${y}-${x}`} x={renderedTorsoX + x} y={bodyStartY + y} width="1" height="1" fill={col} className="pixel" />);
       }
 
       // Check if garment is sleeveless or short-sleeved BEFORE rendering arms
-      const garmentName = garment?.name?.toLowerCase() || '';
       const isTankTop = garmentName.includes('tank top') || garmentName.includes('vest top') || garmentName.includes('sleeveless');
       const isSleevelessDress = garmentName.includes('sleeveless dress') || garmentName.includes('sundress');
       const isSleeveless = isTankTop || isSleevelessDress;
       const isTShirt = garmentName.includes('t-shirt') || garmentName.includes('t shirt') || garmentName.includes('tee shirt') || garmentName.includes('graphic tee');
 
-      // Reduce arm gap for tank tops to show shoulder connection
-      const armGap = isTankTop ? 0 : 2;
-      const leftArmX = torsoX - bodyDim.armWidth - armGap;
-      const rightArmX = torsoX + torsoWidth + armGap;
+      // Sleeves grow out of the same row silhouette. Keep the first shoulder
+      // rows clear and introduce only a one-pixel separation lower on the arm.
+      const armGap = y < 10 || isTankTop ? 0 : 1;
+      const leftArmX = renderedTorsoX - bodyDim.armWidth - armGap;
+      const rightArmX = renderedTorsoX + renderedTorsoWidth + armGap;
 
       // Render arms with appropriate covering
       for (let ax = 0; ax < bodyDim.armWidth; ax++) {
+        if (y < 5) continue;
         let col = clothingColor;
 
         // Determine if this part of arm should be bare
         const isShortSleeveArea = isTShirt && y > 10; // T-shirt shows bare forearms below sleeve line
-        const shouldBeBare = isNaked || isSleeveless || isShortSleeveArea;
+        const shouldBeBare = isNaked || isMinimalWrap || isSleeveless || isShortSleeveArea;
 
         if (shouldBeBare) {
           // Render bare arms
@@ -3754,7 +3772,7 @@ if (defaultCapStyles.has(hairStyle)) {
           // Render with clothing
           if (ax === 0) col = clothingHighlight;
           else if (ax === bodyDim.armWidth - 1) col = clothingShadow;
-          if (y % 6 === 0 && isWealthy) col = accentColor;
+          if (hasVisiblePattern && y % 8 === 3) col = mix(col, accentColor, 0.32);
         }
 
         elements.push(
@@ -3765,23 +3783,23 @@ if (defaultCapStyles.has(hairStyle)) {
 
       // Enhanced garment type detection and rendering
       // (garmentName, isTankTop, and isSleeveless already declared above for arm rendering)
-      const isRobe = garmentName.includes('robe') || garmentName.includes('habit') || garmentName.includes('cassock');
-      const isDress = garmentName.includes('dress') || garmentName.includes('gown');
+      const isRobe = garmentKind === 'robe' || garmentName.includes('robe') || garmentName.includes('habit') || garmentName.includes('cassock');
+      const isDress = garmentKind === 'gown' || garmentKind === 'wrapped_garment' || garmentName.includes('dress') || garmentName.includes('gown') || garmentName.includes('wrapped garment');
       const isFactoryDress = garmentName.includes('factory dress');
       const isArmor = garmentName.includes('armor') || garmentName.includes('mail') || garmentName.includes('plate') || garmentName.includes('cuirass') || garmentName.includes('breastplate') || garmentName.includes('brigandine');
       const isToga = garmentName.includes('toga');
       const isApron = garmentName.includes('apron');
       const isVest = garmentName.includes('vest') || garmentName.includes('waistcoat') || garmentName.includes('jerkin');
-      const isShirt = garmentName.includes('shirt') || garmentName.includes('blouse') || garmentName.includes('dress shirt');
-      const isTunic = garmentName.includes('tunic') || garmentName.includes('tabard');
+      const isShirt = garmentKind === 'work_shirt' || garmentName.includes('shirt') || garmentName.includes('blouse') || garmentName.includes('dress shirt');
+      const isTunic = garmentKind === 'tunic' || garmentName.includes('tunic') || garmentName.includes('tabard');
       const isLeatherJacket = garmentName.includes('leather jacket');
-      const isCoat = garmentName.includes('coat') || garmentName.includes('jacket') || garmentName.includes('doublet');
+      const isCoat = garmentKind === 'doublet' || garmentKind === 'jacket' || garmentName.includes('coat') || garmentName.includes('jacket') || garmentName.includes('doublet');
       // Note: isCape/isPoncho/isShawl now handled via separate cloak slot, not torso garment
       const isPoncho = garmentName.includes('poncho');
       const isShawl = garmentName.includes('shawl');
 
       // Modern clothing detection
-      const isBusinessSuit = garmentName.includes('business suit') || garmentName.includes('suit jacket') || garmentName === 'suit' || garmentName.includes('three-piece');
+      const isBusinessSuit = (garmentKind === 'jacket' && /suit|collared shirt/.test(garmentName)) || garmentName.includes('business suit') || garmentName.includes('suit jacket') || garmentName === 'suit' || garmentName.includes('three-piece');
       const isThreePieceSuit = garmentName.includes('three-piece');
       const isBlazer = garmentName.includes('blazer');
       const isHoodie = garmentName.includes('hoodie') || garmentName.includes('hooded sweatshirt');
@@ -3867,9 +3885,15 @@ if (defaultCapStyles.has(hairStyle)) {
             }
           }
         } else if (isCoat && y === 0) {
-          // High collar for coats
+          // Two shaped collar leaves with a neck opening. A single dark bar
+          // across the full width read as a second, perfectly flat jaw.
           for (let cx = 0; cx < collarWidth; cx++) {
-            elements.push(<rect key={`coat-collar-${cx}`} x={collarX + cx} y={bodyStartY} width="1" height="1" fill={clothingDeepShadow} className="pixel" />);
+            const centerDist = Math.abs(cx - (collarWidth - 1) / 2);
+            if (centerDist < 2.5) continue;
+            const collarDrop = centerDist < collarWidth * 0.34 ? 2 : centerDist < collarWidth * 0.44 ? 1 : 0;
+            elements.push(
+              <rect key={`coat-collar-${cx}`} x={collarX + cx} y={bodyStartY + collarDrop} width="1" height="1" fill={clothingDeepShadow} className="pixel" />
+            );
           }
         } else if ((isBusinessSuit || isBlazer)) {
           // Professional suit with dress shirt and tie - IMPROVED
@@ -3955,11 +3979,16 @@ if (defaultCapStyles.has(hairStyle)) {
             if (y === 0) elements.push(<rect key={`sweater-neck-${cx}`} x={collarX + cx} y={bodyStartY} width="1" height="1" fill={clothingDeepShadow} className="pixel" />);
           }
         } else if (isWealthy) {
-          // Decorative collar for wealthy characters
+          // Quiet split collar for wealthy garments. Status should not create a
+          // three-row rectangular block unrelated to the garment's neckline.
           for (let cx = 0; cx < collarWidth; cx++) {
-            elements.push(
-              <rect key={`collar-${y}-${cx}`} x={collarX + cx} y={bodyStartY + y} width="1" height="1" fill={y === 0 ? accentColor : appearanceWithDefaults.palette.secondary} className="pixel" />
-            );
+            const centerDist = Math.abs(cx - (collarWidth - 1) / 2);
+            const isCollarLeaf = centerDist > 2 && centerDist < collarWidth * 0.46;
+            if (isCollarLeaf && y === Math.min(2, Math.max(0, 3 - Math.floor(centerDist)))) {
+              elements.push(
+                <rect key={`collar-${y}-${cx}`} x={collarX + cx} y={bodyStartY + y} width="1" height="1" fill={mix(clothingColor, accentColor, 0.36)} className="pixel" />
+              );
+            }
           }
         }
       }
@@ -4402,7 +4431,7 @@ if (defaultCapStyles.has(hairStyle)) {
     }
 
     return <g key="body">{elements}</g>;
-  }, [appearanceWithDefaults.garment, appearanceWithDefaults.palette.accent, appearanceWithDefaults.palette.primary, appearanceWithDefaults.palette.secondary, bodyDim, culturalZone, headDim.height, headDim.width, headX, headY, isNoble, isWealthy, skinShadow, skinTone, stats?.strength, character.equippedItems, useEquippedItems]);
+  }, [appearanceWithDefaults.garment, appearanceWithDefaults.palette.accent, appearanceWithDefaults.palette.primary, appearanceWithDefaults.palette.secondary, bodyDim, headDim.height, headDim.width, headX, headY, isFemale, isNoble, isWealthy, portraitOverrides?.garment, portraitOverrides?.garmentKind, skinShadow, skinTone, stats?.strength, character.equippedItems, useEquippedItems]);
 
   // ----- HEADGEAR (using modular component) -----
   const renderHeadgear = (
@@ -6154,74 +6183,6 @@ if (defaultCapStyles.has(hairStyle)) {
       {renderNose}
       {renderMouth}
       {renderFacialHair}
-
-      {/* Final facial shadows - rendered after features to ensure visibility */}
-      {(() => {
-        const elements: JSX.Element[] = [];
-        const noseCenterX = headX + Math.floor(headDim.width / 2);
-
-        // Enhanced under-nose shadow (philtrum area between nose and upper lip)
-        const mouthY = headY + Math.floor(headDim.height * 0.72);
-        const noseBottomY = mouthY - 3;  // Position just above the mouth
-        const philtrumShadow = createShadow(actualSkinTone, 0.88);  // More visible shadow
-        const deepPhiltrumShadow = createShadow(actualSkinTone, 0.82);  // Darker for center
-
-        // Main philtrum shadow - wider and more defined with gradient
-        for (let y = 0; y < 2; y++) {
-          const width = y === 0 ? 2 : 3;  // Taper upward
-          for (let dx = -width; dx <= width; dx++) {
-            // Darker in center, lighter at edges
-            const intensity = Math.abs(dx) === 0 ? deepPhiltrumShadow :
-                            Math.abs(dx) === 1 ? philtrumShadow :
-                            skinMidtone;
-            elements.push(
-              <rect key={`philtrum-${y}-${dx}`}
-                x={noseCenterX + dx}
-                y={noseBottomY + y}
-                width="1" height="1"
-                fill={intensity}
-                className="pixel" />
-            );
-          }
-        }
-
-        // Nostril wing shadows for more depth
-        const nostrilShadow = createShadow(actualSkinTone, 0.85);
-        elements.push(
-          <rect key="nostril-wing-l" x={noseCenterX - 3} y={noseBottomY - 1} width="1" height="2" fill={nostrilShadow} className="pixel" />,
-          <rect key="nostril-wing-r" x={noseCenterX + 3} y={noseBottomY - 1} width="1" height="2" fill={nostrilShadow} className="pixel" />
-        );
-
-        // Under-lip shadow (below lower lip) - warm skin shadow, not lip color
-        const lipBottomY = mouthY + 3;
-        const lipWidth = appearanceWithDefaults.lipShape === 'wide' ? 4 : 3;
-
-        // Create a warm shadow that's darker than skin but not lip-colored (matching nose shadow intensity)
-        const underLipShadow = createShadow(actualSkinTone, 0.75);  // Darker shadow (closer to nose shadow)
-        const underLipMidtone = createShadow(actualSkinTone, 0.85);  // Lighter edge shadow
-
-        for (let dx = -lipWidth; dx <= lipWidth; dx++) {
-          // Gradient shadow - darker in center where lip casts shadow
-          const shadowIntensity = Math.abs(dx) <= 1 ? underLipShadow :
-                                 Math.abs(dx) <= 2 ? underLipMidtone :
-                                 skinMidtone;
-          elements.push(
-            <rect key={`final-shadow-lip-${dx}`}
-              x={noseCenterX + dx}
-              y={lipBottomY}
-              width="1" height="1"
-              fill={shadowIntensity}
-              className="pixel" />
-          );
-        }
-
-        // Add chin cleft shadow for more definition
-        elements.push(
-          <rect key="chin-cleft" x={noseCenterX} y={lipBottomY + 2} width="1" height="1" fill={underLipMidtone} className="pixel" />
-        );
-
-        return <g key="facial-shadows">{elements}</g>;
-      })()}
 
       {/* Disease symptoms */}
       {(() => {

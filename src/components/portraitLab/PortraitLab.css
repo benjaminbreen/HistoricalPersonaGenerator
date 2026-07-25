@@ -1,0 +1,220 @@
+/* portraitLab/PortraitLab.css — the A/B bench at #portrait-lab. */
+
+.portrait-lab {
+  --lab-ink: #221d18;
+  --lab-muted: #6d6257;
+  --lab-line: #ddd3c4;
+  --lab-paper: #f6f1e8;
+  --lab-accent: #b4623f;
+
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 28px 72px;
+  background: var(--lab-paper);
+  color: var(--lab-ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+.portrait-lab__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  border-bottom: 1px solid var(--lab-line);
+  padding-bottom: 22px;
+}
+
+.portrait-lab__eyebrow {
+  margin: 0 0 6px;
+  font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lab-accent);
+}
+
+.portrait-lab__header h1 {
+  margin: 0 0 8px;
+  font-size: 30px;
+  letter-spacing: -0.01em;
+}
+
+.portrait-lab__intro {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--lab-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.portrait-lab kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid var(--lab-line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: #fff;
+  font: 600 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.portrait-lab__back {
+  flex-shrink: 0;
+  color: var(--lab-muted);
+  font-size: 13px;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+}
+
+.portrait-lab__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  padding: 20px 0 26px;
+}
+
+.portrait-lab__group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.portrait-lab__group button {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--lab-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--lab-muted);
+  font: 500 12.5px/1.2 inherit;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.portrait-lab__group button:hover {
+  border-color: #c3b6a3;
+  color: var(--lab-ink);
+}
+
+.portrait-lab__group button.is-active {
+  background: var(--lab-ink);
+  border-color: var(--lab-ink);
+  color: var(--lab-paper);
+}
+
+.portrait-lab__group button small {
+  font-size: 10.5px;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
+.portrait-lab__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 22px;
+}
+
+.portrait-lab__card {
+  border: 1px solid var(--lab-line);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.portrait-lab__frames {
+  display: flex;
+  gap: 2px;
+  padding: 16px;
+  justify-content: center;
+  background:
+    repeating-conic-gradient(#efe8dc 0% 25%, #f7f2e9 0% 50%) 50% / 16px 16px;
+}
+
+.portrait-lab__frames figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+
+.portrait-lab__frames figure > * {
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(34, 29, 24, 0.16);
+}
+
+.portrait-lab__frames figcaption {
+  font: 600 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lab-muted);
+}
+
+.portrait-lab__body {
+  padding: 14px 16px 18px;
+  border-top: 1px solid var(--lab-line);
+}
+
+.portrait-lab__body h3 {
+  margin: 0 0 3px;
+  font-size: 15px;
+}
+
+.portrait-lab__body > p {
+  margin: 0 0 12px;
+  color: var(--lab-muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.portrait-lab__body dl {
+  margin: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.portrait-lab__body dl > div {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 10px;
+  font-size: 11.5px;
+}
+
+.portrait-lab__body dt {
+  color: var(--lab-muted);
+  font: 500 10.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.portrait-lab__body dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-color-scheme: dark) {
+  .portrait-lab {
+    --lab-ink: #f0e8dc;
+    --lab-muted: #a2968a;
+    --lab-line: #3a332c;
+    --lab-paper: #1b1815;
+    --lab-accent: #d78a63;
+  }
+
+  .portrait-lab__group button,
+  .portrait-lab__card,
+  .portrait-lab kbd {
+    background: #241f1b;
+  }
+
+  .portrait-lab__group button.is-active {
+    background: var(--lab-ink);
+    color: #1b1815;
+  }
+
+  .portrait-lab__frames {
+    background:
+      repeating-conic-gradient(#221e1a 0% 25%, #282320 0% 50%) 50% / 16px 16px;
+  }
+}

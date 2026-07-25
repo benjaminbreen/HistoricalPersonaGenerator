@@ -6,6 +6,8 @@ import { generateCharacterWithSpec } from './characterGenerator';
 import { GEOGRAPHICAL_DATA } from '../constants/gameData/geography';
 import { generateLifeHistory, EnhancedLifeEvent, EventImportance } from '../constants/characterData/lifeHistoryService';
 import { getLanguageForCharacter, LanguageData } from '../constants/gameData/languages';
+import { applyPortraitAuthenticity } from './portraitAuthenticityService';
+import { sampleSocialStatus } from './socialStatusService';
 
 // Generate a backstory sentence based on a significant life event
 function generateLifeEventBackstorySentence(
@@ -159,6 +161,25 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function randomWealthLevel(era: HistoricalEra): WealthLevel {
+  const roll = Math.random();
+  const modern = era === HistoricalEra.MODERN_ERA || era === HistoricalEra.FUTURE_ERA;
+
+  if (modern) {
+    if (roll < 0.12) return 'poor';
+    if (roll < 0.45) return 'modest';
+    if (roll < 0.87) return 'comfortable';
+    if (roll < 0.98) return 'wealthy';
+    return 'noble';
+  }
+
+  if (roll < 0.25) return 'poor';
+  if (roll < 0.60) return 'modest';
+  if (roll < 0.85) return 'comfortable';
+  if (roll < 0.97) return 'wealthy';
+  return 'noble';
+}
+
 // Map cultural zones to geography data keys
 const culturalZoneToGeographyKey: Record<CulturalZone, string> = {
   'EUROPEAN': 'Europe',
@@ -307,21 +328,20 @@ export function generateHistoricalPersona(params: Partial<GenerationParams> = {}
   const age = params.age !== undefined ? params.age : randomInt(params.minAge || 18, params.maxAge || 70);
 
   // Determine wealth level
-  const wealthLevel = params.wealthLevel || randomElement(['poor', 'modest', 'comfortable', 'wealthy', 'noble'] as WealthLevel[]);
+  const wealthLevel = params.wealthLevel || randomWealthLevel(era);
 
   // Generate random month and day
   const month = randomInt(1, 12);
   const day = randomInt(1, 28);
   const dateString = `${month}/${day}/${year}`;
 
-  // Determine social class from wealthLevel or params
-  const socialClass = params.socialClass || (
-    wealthLevel === 'noble' || wealthLevel === 'wealthy' ? 'noble' :
-    wealthLevel === 'comfortable' ? 'merchant' : 'commoner'
-  );
+  // Status and wealth are related but distinct. A weighted draw preserves the
+  // expected correlation while allowing poor nobles, prosperous commoners,
+  // wealthy non-merchants, and other historically ordinary combinations.
+  const socialClass = params.socialClass || sampleSocialStatus(era, wealthLevel);
 
   // Generate the character
-  const character = generateCharacterWithSpec(
+  const generatedCharacter = generateCharacterWithSpec(
     {
       date: dateString,
       location: location, // Specific area like "London"
@@ -334,12 +354,18 @@ export function generateHistoricalPersona(params: Partial<GenerationParams> = {}
       gender: gender.toLowerCase() as 'male' | 'female',
       age,
       socialClass: socialClass,
+      wealthLevel,
       religion: params.religion, // Use provided religion if available
       profession: params.profession, // Use provided profession if available
       birthYear: params.birthYear, // Use provided birth year if available
       ethnicity: culturalZone, // Pass cultural zone as ethnicity to ensure proper character generation
     } as any
   );
+  const character = applyPortraitAuthenticity(generatedCharacter, {
+    year,
+    region,
+    location,
+  });
 
   // Generate enhanced life events using the new service
   const enhancedLifeEvents = generateLifeHistory(

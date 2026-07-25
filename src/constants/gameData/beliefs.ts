@@ -592,6 +592,41 @@ export const IDEOLOGIES: Ideology[] = [
     }
   }),
 
+  {
+    id: 'EARLY_GERMANIC_CUSTOMARY_WORLD',
+    name: 'Germanic Customary World',
+    description: 'Early medieval North European worldview grounded in kinship, customary law, reciprocal obligation, local cult, and ancestral memory',
+    eras: [HistoricalEra.ANTIQUITY, HistoricalEra.MEDIEVAL],
+    culturalZones: ['EUROPEAN'],
+    religions: ['Germanic Paganism', 'Norse Paganism', 'Local Beliefs'],
+    associatedBeliefs: {
+      'ANCESTOR_WORSHIP': 0.82,
+      'HONOR_CULTURE': 0.8,
+      'COLLECTIVE_MEMORY': 0.78,
+      'ORAL_TRADITION': 0.76,
+      'NATURE_AS_TEACHER': 0.68,
+      'TRIBAL_LOYALTY': 0.72,
+      'LIVING_COSMOS': 0.62
+    }
+  },
+
+  {
+    id: 'EARLY_MISSION_CHRISTIANITY',
+    name: 'Early Mission Christianity',
+    description: 'Early Christian practice at a conversion frontier, shaped by household worship, oral teaching, reciprocal obligation, and older local custom',
+    eras: [HistoricalEra.ANTIQUITY, HistoricalEra.MEDIEVAL],
+    culturalZones: ['EUROPEAN'],
+    religions: ['Early Christianity'],
+    associatedBeliefs: {
+      'REVEALED_TRUTH': 0.8,
+      'COLLECTIVE_MEMORY': 0.76,
+      'ORAL_TRADITION': 0.74,
+      'HOSPITALITY_SACRED': 0.7,
+      'ANCESTOR_WORSHIP': 0.42,
+      'HIERARCHICAL_ORDER': 0.45
+    }
+  },
+
   createIdeologyVariant(BASE_EUROPEAN_MEDIEVAL, {
     id: 'RENAISSANCE_HUMANISM',
     name: 'Renaissance Humanism',

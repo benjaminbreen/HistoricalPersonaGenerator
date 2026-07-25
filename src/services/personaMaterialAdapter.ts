@@ -757,8 +757,15 @@ export function adaptPersonaMaterialRecord(
         },
         garment: displayOverrides.clothingDetail && clothingIsSpecific
           ? { name: titleCase(displayOverrides.clothingDetail), material: 'cloth' }
-          : undefined,
-        headgear: sourceHeadgear,
+          : (character as any).portraitVisualOverrides?.garment,
+        headgear: sourceHeadgear || (character as any).portraitVisualOverrides?.headgear,
+        displayEquipment: {
+          ...((character as any).portraitVisualOverrides?.displayEquipment || {}),
+          ...(displayOverrides.clothingDetail && clothingIsSpecific
+            ? { torso: { name: titleCase(displayOverrides.clothingDetail), material: 'cloth' } }
+            : {}),
+          ...(sourceHeadgear ? { head: sourceHeadgear } : {}),
+        },
         palette: sourcePalette,
         background: {
           ...sourceBackgroundForRecord(record),

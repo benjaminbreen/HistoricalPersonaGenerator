@@ -42,7 +42,9 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
   const headgearElements = useMemo(() => {
     // Choose source (equipped vs appearance) without changing your prop contract
     let headItem: { name: string; material?: string; color?: string } | null = null;
-    if (useEquippedItems && character.equippedItems !== undefined) {
+    if (character.portraitVisualOverrides?.headgear) {
+      headItem = character.portraitVisualOverrides.headgear;
+    } else if (useEquippedItems && character.equippedItems !== undefined) {
       headItem = character.equippedItems.head ?? null;
     } else {
       headItem = appearanceWithDefaults.headgear ?? null;
@@ -148,7 +150,7 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
     // ========= SHAPES =========
 
     // CROWNS / CIRCLETS / DIadems / WREATHS
-    if (nameContains('crown', 'circlet', 'tiara', 'coronet', 'diadem', 'laurel')) {
+    if (!name.includes('feather') && nameContains('crown', 'circlet', 'tiara', 'coronet', 'diadem', 'laurel')) {
       const isLaurel = name.includes('laurel');
       const gold = '#FFD700';
       const wreath = isLaurel ? '#3E8E41' : gold;
@@ -207,27 +209,24 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
       const turbanDeep = createShadow(turbanBase, 0.65);
       const turbanDarkest = createShadow(turbanBase, 0.5);
 
-      // MUCH larger turban - increased from 10 to 16 rows height
-      const turbanHeight = 16;
-      const turbanTopY = headY - 14; // Start higher up
+      // Keep the wrap substantial without turning it into a second head.
+      const turbanHeight = 10;
+      const turbanTopY = headY - 8;
 
       // Main turban body with large, prominent bulbous shape
       for (let y = 0; y < turbanHeight; y++) {
         const yPos = turbanTopY + y;
 
-        // Calculate width for much larger, more impressive shape
+        // Rounded wrapped-cloth mass, widest just above the brow.
         let width;
         const yProgress = y / turbanHeight;
-        if (yProgress < 0.25) {
-          // Top dome - gradually widening, starting narrow
-          width = headDim.width + Math.floor(y * 1.2);
-        } else if (yProgress < 0.65) {
-          // Fullest middle section - MUCH wider
-          width = headDim.width + 10;
+        if (yProgress < 0.3) {
+          width = headDim.width - 2 + Math.floor(y * 1.7);
+        } else if (yProgress < 0.7) {
+          width = headDim.width + 5;
         } else {
-          // Gradual taper at bottom where it wraps around head
-          const taperAmount = Math.floor((yProgress - 0.65) * 8);
-          width = headDim.width + 10 - taperAmount;
+          const taperAmount = Math.floor((yProgress - 0.7) * 7);
+          width = headDim.width + 4 - taperAmount;
         }
 
         const startX = centerX - Math.floor(width / 2);
@@ -244,8 +243,8 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
           let pixelColor = turbanBase;
 
           // Create visible horizontal wrap layers (cloth wraps)
-          const wrapLayer = Math.floor(y / 3); // Each wrap is ~3 pixels tall
-          const posInWrap = y % 3;
+          const wrapLayer = Math.floor(y / 2);
+          const posInWrap = y % 2;
 
           // Base color varies by wrap layer for depth
           if (wrapLayer % 2 === 0) {
@@ -255,8 +254,8 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
           }
 
           // Shadows between wraps (seams)
-          if (posInWrap === 2) {
-            pixelColor = createShadow(pixelColor, 0.88);
+          if (posInWrap === 1) {
+            pixelColor = createShadow(pixelColor, 0.91);
           }
 
           // Strong side shading for 3D roundness
@@ -290,8 +289,8 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
           }
 
           // Bottom shadow to show turban sits on head
-          if (y >= turbanHeight - 2) {
-            pixelColor = createShadow(pixelColor, 0.82);
+          if (y === turbanHeight - 1) {
+            pixelColor = createShadow(pixelColor, 0.84);
           }
 
           elements.push(<rect key={`turban-${x}-${y}`} x={xPos} y={yPos} width="1" height="1" fill={pixelColor} className="pixel" />);
@@ -306,7 +305,7 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
           const w = 4 - i;
           const px = centerX - Math.floor(w / 2);
           for (let j = 0; j < w; j++) {
-            elements.push(<rect key={`peak-${i}-${j}`} x={px + j} y={peakY - i} width="1" height="1" fill={turbanHighlight} className="pixel" />);
+            elements.push(<rect key={`peak-${i}-${j}`} x={px + j} y={peakY - i} width="1" height="1" fill={turbanLight} className="pixel" />);
           }
         }
       }
@@ -339,104 +338,55 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
 
     // COIF & MEDIEVAL FITTED CAPS (coif, biggins, topi, zukin)
     else if (nameContains('coif', 'biggins', 'topi', 'zukin')) {
-      // Use two colors for depth and texture
       const coifColor = material.includes('white') || material.includes('linen') ? '#F5F5DC' : base;
-      const coifShade = createShadow(coifColor, 0.75);
-      const coifDeepShade = createShadow(coifColor, 0.6);
-      const coifHighlight = createHighlight(coifColor, 1.15);
-      const coifBrightHighlight = createHighlight(coifColor, 1.25);
+      const coifShade = createShadow(coifColor, 0.82);
+      const coifDeepShade = createShadow(coifColor, 0.68);
+      const coifHighlight = createHighlight(coifColor, 1.08);
 
-      // Create a properly rounded bonnet shape with depth
-      // Top dome of the coif - rounded like a real bonnet
-      for (let y = headY - 5; y <= headY + headDim.height - 3; y++) {
-        const yFromTop = y - (headY - 5);
-        const yFromBottom = (headY + headDim.height - 3) - y;
-        const yNorm = yFromTop / (headDim.height + 2);
-
-        // Calculate width based on dome curvature
-        let width;
-        if (y < headY) {
-          // Top dome - narrows towards top
-          const domeProgress = (y - (headY - 5)) / 5;
-          width = Math.floor(headDim.width * (0.6 + domeProgress * 0.5));
-        } else if (y < headY + 8) {
-          // Main bonnet area - full width plus padding
-          width = headDim.width + 6;
-        } else {
-          // Lower area - tapers slightly
-          const taperProgress = (y - (headY + 8)) / (headDim.height - 11);
-          width = headDim.width + 6 - Math.floor(taperProgress * 3);
-        }
-
+      // A fitted cloth cap: rounded crown first, then narrow cheek panels. The
+      // previous full-height filled rectangle read as a rigid white helmet.
+      for (let y = headY - 4; y <= headY + 4; y++) {
+        const t = (y - (headY - 4)) / 8;
+        const curve = Math.sin(Math.max(0, Math.min(1, t)) * Math.PI / 2);
+        const width = Math.round(headDim.width * (0.58 + curve * 0.46));
         const startX = centerX - Math.floor(width / 2);
-
         for (let x = 0; x < width; x++) {
-          const xPos = startX + x;
-          const xNorm = x / width;
-
-          // Skip center area for face opening
-          if (y >= headY + 4 && y < headY + headDim.height - 4) {
-            const faceOpeningLeft = 4;
-            const faceOpeningRight = width - 4;
-            if (x > faceOpeningLeft && x < faceOpeningRight) continue;
-          }
-
-          // Calculate shading for rounded 3D effect
-          let color = coifColor;
-
-          // Top highlight for dome
-          if (y < headY && xNorm > 0.3 && xNorm < 0.7) {
-            color = coifBrightHighlight;
-          }
-          // Edge shadows for depth
-          else if (x === 0 || x === width - 1) {
-            color = coifDeepShade;
-          }
-          // Side shadows
-          else if (x === 1 || x === width - 2) {
-            color = coifShade;
-          }
-          // Top edge shadow
-          else if (y === headY - 5) {
-            color = coifShade;
-          }
-          // Center-top highlight strip
-          else if (y < headY + 2 && Math.abs(xNorm - 0.5) < 0.15) {
-            color = coifHighlight;
-          }
-          // Side panel shading
-          else if (xNorm < 0.2) {
-            color = coifShade;
-          }
-          else if (xNorm > 0.8) {
-            color = coifDeepShade;
-          }
-
-          // Add texture variation
-          const textureNoise = (x * 7 + y * 13) % 17;
-          if (textureNoise === 0 && color === coifColor) {
-            color = coifHighlight;
-          } else if (textureNoise === 8 && color === coifColor) {
-            color = coifShade;
-          }
-
-          elements.push(<rect key={`coif-${x}-${y}`} x={xPos} y={y} width="1" height="1" fill={color} className="pixel" />);
+          const edge = x === 0 || x === width - 1;
+          const litFold = x === Math.floor(width * 0.36) && y < headY + 2;
+          const color = edge ? coifDeepShade : litFold ? coifHighlight : x > width * 0.72 ? coifShade : coifColor;
+          elements.push(
+            <rect key={`coif-crown-${x}-${y}`} x={startX + x} y={y} width="1" height="1" fill={color} className="pixel" />
+          );
         }
       }
 
-      // Add subtle chin tie/string
-      if (!nameContains('biggins')) {  // Biggins don't have ties
-        const chinY = headY + headDim.height - 2;
+      const panelTop = headY + 3;
+      const panelBottom = headY + headDim.height - 5;
+      for (let y = panelTop; y <= panelBottom; y++) {
+        const lower = (y - panelTop) / Math.max(1, panelBottom - panelTop);
+        const panelWidth = lower > 0.72 ? 2 : 3;
+        const leftX = headX - 3 + Math.floor(lower * 1.5);
+        const rightX = headX + headDim.width + 1 - Math.floor(lower * 1.5);
         elements.push(
-          <rect key={`coif-tie-l`} x={headX + 2} y={chinY} width="1" height="1" fill={coifDeepShade} className="pixel" />,
-          <rect key={`coif-tie-r`} x={headX + headDim.width - 3} y={chinY} width="1" height="1" fill={coifDeepShade} className="pixel" />
+          <rect key={`coif-panel-l-${y}`} x={leftX} y={y} width={panelWidth} height="1" fill={y % 5 === 0 ? coifHighlight : coifColor} className="pixel" />,
+          <rect key={`coif-panel-l-edge-${y}`} x={leftX - 1} y={y} width="1" height="1" fill={coifShade} className="pixel" />,
+          <rect key={`coif-panel-r-${y}`} x={rightX} y={y} width={panelWidth} height="1" fill={coifShade} className="pixel" />,
+          <rect key={`coif-panel-r-edge-${y}`} x={rightX + panelWidth} y={y} width="1" height="1" fill={coifDeepShade} className="pixel" />
+        );
+      }
+
+      if (!nameContains('biggins', 'topi', 'zukin')) {
+        const tieY = panelBottom + 1;
+        elements.push(
+          <rect key="coif-tie-l-1" x={headX + 1} y={tieY} width="1" height="3" fill={coifShade} className="pixel" />,
+          <rect key="coif-tie-r-1" x={headX + headDim.width - 2} y={tieY} width="1" height="3" fill={coifDeepShade} className="pixel" />
         );
       }
     }
     
     // VEILS / HIJAB / WRAPS / SCARF - Simplified and elegant
     else if (nameContains('veil', 'hijab', 'keffiyeh', 'dupatta', 'gele', 'mantilla', 'ghoonghat',
-                          'head wrap', 'headwrap', 'scarf', 'bonnet', 'tichel')) {
+                          'head wrap', 'headwrap', 'headcloth', 'scarf', 'bonnet', 'tichel')) {
       const fullCover = nameContains('hijab', 'dupatta', 'mantilla', 'ghoonghat');
       const isHeadWrap = nameContains('head wrap', 'headwrap', 'gele');
       const isKeffiyeh = nameContains('keffiyeh');
@@ -780,7 +730,8 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
                           'tuque', 'snapback', 'petasos', 'chaperon', 'flat cap',
                           'cheese-cutter', 'gandhi cap', 'kofia', 'mao cap', 'futou',
                           'hardhat', 'hard hat', 'construction helmet', 'surgical cap', 'surgical', 'visor', 'sun visor',
-                          'coonskin', 'fur cap', 'police cap', 'fur hat', 'merchant cap', 'wool cap')) {
+                          'coonskin', 'fur cap', 'police cap', 'fur hat', 'merchant cap', 'wool cap',
+                          'brimmed hat', 'felt hat', 'work hat')) {
       const hatStyle =
         (nameContains('coonskin')) ? 'coonskin' :
         (nameContains('police cap', 'police')) ? 'police' :
@@ -793,12 +744,31 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
         (name.includes('baseball') || name.includes('snapback')) ? 'baseball' :
         name.includes('top') ? 'top' :
         name.includes('beret') ? 'beret' :
-        (name.includes('fez') || name.includes('kufi')) ? 'fez' :
-        (nameContains('fedora', 'homburg', 'petasos')) ? 'brimmed' :
+        name.includes('kufi') ? 'kufi' :
+        name.includes('fez') ? 'fez' :
+        (nameContains('fedora', 'homburg', 'petasos', 'brimmed hat', 'felt hat', 'work hat')) ? 'brimmed' :
         (nameContains('chullo', 'beanie', 'tuque')) ? 'knit' :
         'generic';
 
       switch (hatStyle) {
+        case 'kufi': {
+          // A close-fitting skullcap, not the tall cylinder used for a fez.
+          const capHeight = 5;
+          for (let y = 0; y < capHeight; y++) {
+            const rowY = headY - 4 + y;
+            const width = headDim.width - (y === 0 ? 4 : y === 1 ? 2 : 0);
+            const startX = centerX - Math.floor(width / 2);
+            for (let x = 0; x < width; x++) {
+              const edge = x === 0 || x === width - 1;
+              const weave = (x + y * 2) % 5 === 0;
+              const color = edge ? deep : weave ? hl : y === capHeight - 1 ? shade : base;
+              elements.push(
+                <rect key={`kufi-${x}-${y}`} x={startX + x} y={rowY} width="1" height="1" fill={color} className="pixel" />
+              );
+            }
+          }
+          break;
+        }
         case 'top': {
           // Tall crown - much taller and wider to cover hair
           for (let y = headY - 12; y < headY + 1; y++) {
@@ -1490,20 +1460,21 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
           const capDeep = createShadow(capBase, 0.68);
           const capDarkest = createShadow(capBase, 0.55);
 
-          // Main crown (12 rows for better proportions)
-          for (let y = 0; y < 12; y++) {
+          // A compact fitted cap. Twelve rows made ordinary caps read as helmets.
+          const capRows = 8;
+          for (let y = 0; y < capRows; y++) {
             // Proper rounded cap shape
             let w;
-            if (y < 3) {
-              w = headDim.width + Math.floor(y * 0.9); // Gradual rounded top
-            } else if (y < 8) {
-              w = headDim.width + 4; // Full crown width
+            if (y < 2) {
+              w = headDim.width - 2 + Math.floor(y * 2);
+            } else if (y < 6) {
+              w = headDim.width + 2;
             } else {
-              w = headDim.width + 5; // Slightly wider at bottom
+              w = headDim.width + 3;
             }
 
             const sx = centerX - Math.floor(w / 2);
-            const rowY = headY - 9 + y; // Adjusted to sit properly on head
+            const rowY = headY - 6 + y;
 
             for (let x = 0; x < w; x++) {
               // Soft rounded corners
@@ -1511,7 +1482,7 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
               if (y === 1 && (x === 0 || x === w - 1)) continue;
 
               const xNorm = x / w;
-              const yNorm = y / 12;
+              const yNorm = y / capRows;
 
               // Start with base shading tier based on position
               let baseShade;
@@ -1567,7 +1538,7 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
               }
 
               // Visible seam/panel lines for structure
-              if (y % 3 === 2 && xNorm > 0.15 && xNorm < 0.85) {
+              if (y === 4 && xNorm > 0.15 && xNorm < 0.85) {
                 capColor = createShadow(capColor, 0.82);
               }
 
@@ -1576,10 +1547,10 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
           }
 
           // Subtle curved brim with texture and shading
-          for (let y = 0; y < 2; y++) { // Reduced to 2 rows for subtle brim
-            const brimW = headDim.width + 4 - Math.floor(y * 0.5);
+          for (let y = 0; y < 1; y++) {
+            const brimW = headDim.width + 3;
             const brimX = centerX - Math.floor(brimW / 2);
-            const brimY = headY + 3 + y; // Start at headY + 3
+            const brimY = headY + 2 + y;
 
             for (let x = 0; x < brimW; x++) {
               const xNorm = x / brimW;
@@ -2034,19 +2005,15 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
     // HAIR ORNAMENTS / TIKKA / FLOWERS / FEATHER HEADDRESS / COMB
     else if (nameContains('flower', 'garland', 'lei', 'hairpiece', 'hairpin', 'tikka', 'maang', 'passa', 'rakhdi', 'sheesh', 'comb', 'feather crown', 'feather band', 'feather headdress')) {
       if (nameContains('feather crown', 'feather band', 'feather headdress')) {
-        // Beautiful multicolored feather headdress
-        const featherColors = [
-          '#DC143C', // Red
-          '#FF8C00', // Orange
-          '#FFD700', // Gold
-          '#32CD32', // Green
-          '#1E90FF', // Blue
-          '#9370DB', // Purple
-          '#FF1493', // Pink
-          '#8B4513', // Brown
-          '#000000', // Black
-          '#FFFFFF'  // White
-        ];
+        const isFeatherCrown = name.includes('feather crown');
+        // Honor the item's stated color. A "gray feather crown" must not fall
+        // through to the royal gold crown renderer or become rainbow regalia.
+        const featherColors = isFeatherCrown
+          ? [deep, shade, base, hl, shade]
+          : [
+              '#6F4E37', '#A0522D', '#D9C7A2', '#3F5F4A',
+              '#7A3E2E', '#C6B18B', '#343434'
+            ];
 
         // Main headband base
         for (let x = headX + 1; x < headX + headDim.width - 1; x++) {
@@ -2054,7 +2021,8 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
         }
 
         // Large upright feathers across the head
-        const numFeathers = 7;
+        const numFeathers = isFeatherCrown ? 5 : 7;
+        const featherHeight = isFeatherCrown ? 5 : 8;
         for (let i = 0; i < numFeathers; i++) {
           const featherX = headX + 2 + Math.floor(i * ((headDim.width - 4) / (numFeathers - 1)));
           const featherColor = featherColors[i % featherColors.length];
@@ -2062,13 +2030,13 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
           const featherHighlight = createHighlight(featherColor, 1.2);
 
           // Feather shaft (center spine)
-          for (let y = 0; y < 8; y++) {
+          for (let y = 0; y < featherHeight; y++) {
             elements.push(<rect key={`feather-shaft-${i}-${y}`} x={featherX} y={headY - 3 - y} width="1" height="1" fill="#654321" className="pixel" />);
           }
 
           // Feather barbs (fluffy parts on sides)
-          for (let y = 1; y < 7; y++) {
-            const barbWidth = Math.min(3, y); // Wider in middle, narrower at top/bottom
+          for (let y = 1; y < featherHeight - 1; y++) {
+            const barbWidth = isFeatherCrown ? Math.min(2, y) : Math.min(3, y);
 
             // Left side barbs
             for (let b = 1; b <= barbWidth; b++) {
@@ -2094,7 +2062,7 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
           }
 
           // Feather tip accent
-          elements.push(<rect key={`feather-tip-${i}`} x={featherX} y={headY - 11} width="1" height="1" fill={featherHighlight} className="pixel" />);
+          elements.push(<rect key={`feather-tip-${i}`} x={featherX} y={headY - 3 - featherHeight} width="1" height="1" fill={featherHighlight} className="pixel" />);
         }
 
         // Additional decorative elements
@@ -2284,6 +2252,7 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
         // Iconic features
         // Eyebrows (upward slant)
         const eyebrowY = headY + Math.floor(headDim.height * 0.25);
+        const eyeSpacing = Math.floor(headDim.width * 0.2);
         for (let ex = -4; ex <= 4; ex++) {
           const eySlant = Math.floor(Math.abs(ex) * 0.5);
           elements.push(
@@ -2294,7 +2263,6 @@ export const HeadgearRenderer: React.FC<HeadgearRendererProps> = ({
 
         // Eyes (narrow slits)
         const eyeY = headY + Math.floor(headDim.height * 0.35);
-        const eyeSpacing = Math.floor(headDim.width * 0.2);
         for (let ex = -2; ex <= 2; ex++) {
           elements.push(
             <rect key={`mask-eye-l-${ex}`} x={centerX - eyeSpacing + ex} y={eyeY} width="1" height="1" fill={lineColor} className="pixel" />,

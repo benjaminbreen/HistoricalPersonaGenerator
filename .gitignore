@@ -37,3 +37,7 @@ dist-ssr
 # Backup files
 *.bak
 *.bak*
+
+# Generated portrait contact sheets (npm run portrait-sheet)
+portrait-sheet*.png
+portrait-lab-sheet*.png

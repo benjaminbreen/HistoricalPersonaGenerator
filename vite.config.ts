@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react'
 import fs from 'node:fs'
 import path from 'node:path'
 
-const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite-preview'
+const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite'
+const DEFAULT_OPENAI_MODEL = 'gpt-5-nano'
 
 const readRequestBody = async (req: any): Promise<any> => {
   const chunks: Buffer[] = []
@@ -34,12 +35,13 @@ const parseJsonObject = (text: string): unknown => {
 }
 
 const geminiText = async (prompt: string, env: Record<string, string>, options: { json?: boolean; temperature?: number } = {}): Promise<string> => {
-  const key = env.GEMINI_API_KEY || env.GOOGLE_AI_API_KEY || env.VITE_GEMINI_API_KEY || env.VITE_GOOGLE_AI_API_KEY
+  // VITE_* variables are compiled into the browser bundle; never read secrets from them.
+  const key = env.GEMINI_API_KEY || env.GOOGLE_AI_API_KEY
   if (!key) {
     throw new Error('Missing Gemini API key. Add GEMINI_API_KEY to .env.local and restart the dev server.')
   }
 
-  const model = env.GEMINI_MODEL || env.VITE_GEMINI_MODEL || DEFAULT_GEMINI_MODEL
+  const model = env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -59,6 +61,30 @@ const geminiText = async (prompt: string, env: Record<string, string>, options: 
 
   const data = await response.json()
   return data?.candidates?.[0]?.content?.parts?.map((part: any) => part.text).join('\n') || ''
+}
+
+const openaiText = async (prompt: string, env: Record<string, string>, options: { json?: boolean } = {}): Promise<string> => {
+  const key = env.OPENAI_API_KEY
+  if (!key) throw new Error('Missing OPENAI_API_KEY.')
+  const response = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      model: env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL,
+      input: prompt,
+      ...(options.json ? { text: { format: { type: 'json_object' } } } : {}),
+    }),
+  })
+  if (!response.ok) throw new Error(`OpenAI returned ${response.status}.`)
+  const data = await response.json()
+  return data?.output_text || ''
+}
+
+const llmText = (prompt: string, env: Record<string, string>, options: { json?: boolean; temperature?: number } = {}): Promise<string> => {
+  const provider = (env.LLM_PROVIDER || 'gemini').toLowerCase()
+  if (provider === 'openai') return openaiText(prompt, env, options)
+  if (provider === 'gemini') return geminiText(prompt, env, options)
+  throw new Error('Unsupported LLM_PROVIDER.')
 }
 
 const buildAnnotationPrompt = (source: any, options: any, annotationSchema: unknown): string => {
@@ -114,7 +140,8 @@ const buildAnnotationPrompt = (source: any, options: any, annotationSchema: unkn
 
 const buildSketchPrompt = (record: unknown): string => [
   'Write a historically grounded persona sketch from this annotation record.',
-  'Use 4-6 compact paragraphs.',
+  'Write exactly two compact paragraphs, totaling 120-170 words.',
+  'Each paragraph should earn its place: prioritize source-specific circumstances, work, stakes, and voice over general historical atmosphere.',
   'Do not write a generic encyclopedia biography. Write a vivid but sober character sheet sketch anchored to the selected year, social position, work, household economy, material life, concerns, and worldview.',
   'Distinguish direct evidence from plausible inference in natural prose without footnotes.',
   'Avoid modern hindsight and anachronistic vocabulary.',
@@ -445,15 +472,17 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
         try {
           const body = await readRequestBody(req)
           if (body.action === 'generate_annotation') {
-            const text = await geminiText(buildAnnotationPrompt(body.source, body.options, annotationSchema), env, { json: true, temperature: 0.35 })
+            const text = await llmText(buildAnnotationPrompt(body.source, body.options, annotationSchema), env, { json: true, temperature: 0.35 })
             res.setHeader('Content-Type', 'application/json')
+            res.setHeader('Cache-Control', 'no-store')
             res.end(JSON.stringify({ record: parseJsonObject(text) }))
             return
           }
 
           if (body.action === 'generate_sketch') {
-            const sketch = await geminiText(buildSketchPrompt(body.record), env, { temperature: 0.45 })
+            const sketch = await llmText(buildSketchPrompt(body.record), env, { temperature: 0.45 })
             res.setHeader('Content-Type', 'application/json')
+            res.setHeader('Cache-Control', 'no-store')
             res.end(JSON.stringify({ sketch: sketch.trim() }))
             return
           }
@@ -462,9 +491,11 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
           res.setHeader('Content-Type', 'application/json')
           res.end(JSON.stringify({ error: 'Unknown Gemini action.' }))
         } catch (error) {
+          console.error('Persona generation failed:', error)
           res.statusCode = 500
           res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ error: error instanceof Error ? error.message : 'Gemini route failed.' }))
+          res.setHeader('Cache-Control', 'no-store')
+          res.end(JSON.stringify({ error: 'Persona generation is temporarily unavailable. Please try again.' }))
         }
       })
     },

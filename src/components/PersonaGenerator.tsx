@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { generateHistoricalPersona, GenerationParams, HistoricalPersona } from '../services/personaGenerator';
-import ProceduralPortrait from './portraits/ProceduralPortrait';
+import PortraitSwitch from './portraitLab/PortraitSwitch';
 import { HistoricalEra, CulturalZone, Gender } from '../types';
 import './PersonaGenerator.css';
 
@@ -171,7 +171,7 @@ export default function PersonaGenerator() {
       {persona && (
         <div className="persona-display">
           <div className="portrait-section">
-            <ProceduralPortrait character={persona.character} size={400} />
+            <PortraitSwitch character={persona.character} size={400} />
           </div>
 
           <div className="info-section">

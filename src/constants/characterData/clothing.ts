@@ -390,7 +390,7 @@ export const CLOTHING_DATA: ClothingData = {
                     garments: [
                         { name: 'Serf Tunic', material: 'Rough Wool', adjectives: ['Patched', 'Brown'] },
                         { name: 'Peasant Shirt', material: 'Hemp', adjectives: ['Coarse'] },
-                        { name: 'Work Hose', material: 'Wool', adjectives: ['Darned'] }
+                        { name: 'Tunic and Work Hose', material: 'Wool', adjectives: ['Darned'] }
                     ],
                     headgear: [
                         { name: 'Coif', material: 'Linen', adjectives: ['Simple'] },
@@ -552,7 +552,7 @@ export const CLOTHING_DATA: ClothingData = {
                     garments: [
                         { name: 'Worker Jerkin', material: 'Rough Wool', adjectives: ['Patched'] },
                         { name: 'Peasant Shirt', material: 'Coarse Linen' },
-                        { name: 'Simple Hose', material: 'Wool', adjectives: ['Darned'] }
+                        { name: 'Jerkin and Simple Hose', material: 'Wool', adjectives: ['Darned'] }
                     ],
                     headgear: [
                         { name: 'Biggins', material: 'Rough Wool', adjectives: ['Close-fitting'] },
@@ -2424,8 +2424,8 @@ OCEANIA: {
         poor: {
             Male: {
                 garments: [
-                    { name: 'Plantation Shirt', material: 'Cheap Cotton' },
-                    { name: 'Work Shorts', material: 'Canvas' }
+                    { name: 'Plain Cotton Work Shirt', material: 'Imported Cotton' },
+                    { name: 'Plant-Fibre Wrap', material: 'Woven Plant Fibre' }
                 ],
                 headgear: [
                     { name: 'Straw Hat', material: 'Local Straw' },
@@ -2445,8 +2445,8 @@ OCEANIA: {
             },
             Female: {
                 garments: [
-                    { name: 'Calico Dress', material: 'Printed Cotton' },
-                    { name: 'Work Blouse', material: 'Plain Cotton' }
+                    { name: 'Wrapped Fibre Garment', material: 'Woven Plant Fibre' },
+                    { name: 'Plain Cotton Work Dress', material: 'Imported Cotton' }
                 ],
                 headgear: [
                     { name: 'Head Wrap', material: 'Cotton Cloth' },
@@ -2468,45 +2468,45 @@ OCEANIA: {
         common: {
             Male: {
                 garments: [
-                    { name: 'White Suit', material: 'Light Cotton', adjectives: ['Colonial'] },
-                    { name: 'Aloha Shirt', material: 'Printed Cotton' }
+                    { name: 'Fine Woven Fibre Garment', material: 'Woven Plant Fibre' },
+                    { name: 'Plain Cotton Shirt and Fibre Wrap', material: 'Cotton and Plant Fibre' }
                 ],
                 headgear: [
-                    { name: 'Panama Hat', material: 'Woven Straw' },
-                    { name: 'Pith Helmet', material: 'Cork and Cloth' }
+                    { name: 'Woven Fibre Cap', material: 'Plant Fibre' },
+                    { name: 'None', material: 'None' }
                 ],
                 footwear: [
-                    { name: 'Canvas Shoes', material: 'White Canvas' },
+                    { name: 'Barefoot', material: 'None' },
                     { name: 'Leather Sandals', material: 'Brown Leather' }
                 ],
                 belts: [
-                    { name: 'Canvas Belt', material: 'Webbing' }
+                    { name: 'Woven Fibre Cord', material: 'Plant Fibre' }
                 ],
                 accessories: [
-                    { name: 'Pocket Watch', material: 'Silver' },
+                    { name: 'Shell Ornament', material: 'Local Shell' },
                     { name: 'Carved Walking Stick', material: 'Local Wood' }
                 ],
                 palette: TROPICAL_COLORS
             },
             Female: {
                 garments: [
-                    { name: 'Tea Dress', material: 'Light Cotton', adjectives: ['Floral'] },
-                    { name: 'Holoku Gown', material: 'Cotton and Lace' }
+                    { name: 'Fine Wrapped Fibre Garment', material: 'Woven Plant Fibre' },
+                    { name: 'Plain Cotton Mission Gown', material: 'Imported Cotton' }
                 ],
                 headgear: [
-                    { name: 'Sun Hat', material: 'Straw and Ribbon' },
-                    { name: 'Flower Lei', material: 'Fresh Flowers' }
+                    { name: 'Plant-Fibre Headband', material: 'Woven Plant Fibre' },
+                    { name: 'None', material: 'None' }
                 ],
                 footwear: [
-                    { name: 'Canvas Shoes', material: 'White Canvas' },
+                    { name: 'Leather Sandals', material: 'Brown Leather' },
                     { name: 'Barefoot', material: 'None' }
                 ],
                 belts: [
-                    { name: 'Ribbon Sash', material: 'Silk Ribbon' }
+                    { name: 'Woven Fibre Sash', material: 'Plant Fibre' }
                 ],
                 accessories: [
-                    { name: 'Pearl Necklace', material: 'Local Pearls' },
-                    { name: 'Coral Brooch', material: 'Pink Coral' }
+                    { name: 'Shell Necklace', material: 'Local Shells' },
+                    { name: 'Seed Bracelet', material: 'Local Seeds' }
                 ],
                 palette: TROPICAL_COLORS
             }

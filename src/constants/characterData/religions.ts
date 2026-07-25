@@ -6,6 +6,325 @@ import { ValueNoise } from '../../utils/noise';
 // Heavy data files - import directly to avoid loading on app startup
 import { GEOGRAPHICAL_DATA } from '../gameData/geography';
 
+export interface ReligionDistributionEntry {
+    religion: Religion;
+    weight: number;
+}
+
+export interface ReligionYearBand {
+    startYear: number;
+    endYear: number;
+    religions: ReligionDistributionEntry[];
+}
+
+/**
+ * Exact-year overrides for places where the broad era buckets cross a major
+ * conversion, conquest, or missionary-contact boundary. This is deliberately
+ * small and high-impact: ordinary regions still use RELIGION_DATA below, while
+ * historically sensitive transitions no longer treat a 300-year span as one
+ * static demographic snapshot.
+ */
+export const RELIGION_YEAR_TRANSITIONS: Partial<
+    Record<CulturalZone, Partial<Record<string, ReligionYearBand[]>>>
+> = {
+    EUROPEAN: {
+        'British Isles': [
+            { startYear: 500, endYear: 792, religions: [
+                { religion: 'Celtic Christianity', weight: 55 },
+                { religion: 'Germanic Paganism', weight: 30 },
+                { religion: 'Early Christianity', weight: 15 },
+            ] },
+            { startYear: 793, endYear: 1065, religions: [
+                { religion: 'Roman Catholicism', weight: 45 },
+                { religion: 'Celtic Christianity', weight: 30 },
+                { religion: 'Norse Paganism', weight: 25 },
+            ] },
+            { startYear: 1066, endYear: 1533, religions: [
+                { religion: 'Roman Catholicism', weight: 94 },
+                { religion: 'Judaism', weight: 4 },
+                { religion: 'Celtic Christianity', weight: 2 },
+            ] },
+            { startYear: 1534, endYear: 1648, religions: [
+                { religion: 'Protestantism', weight: 55 },
+                { religion: 'Roman Catholicism', weight: 30 },
+                { religion: 'Puritanism', weight: 12 },
+                { religion: 'Judaism', weight: 3 },
+            ] },
+            { startYear: 1649, endYear: 1800, religions: [
+                { religion: 'Protestantism', weight: 72 },
+                { religion: 'Roman Catholicism', weight: 20 },
+                { religion: 'Puritanism', weight: 5 },
+                { religion: 'Judaism', weight: 3 },
+            ] },
+        ],
+        France: [
+            { startYear: 500, endYear: 1149, religions: [
+                { religion: 'Roman Catholicism', weight: 94 },
+                { religion: 'Judaism', weight: 5 },
+                { religion: 'Germanic Paganism', weight: 1 },
+            ] },
+            { startYear: 1150, endYear: 1325, religions: [
+                { religion: 'Roman Catholicism', weight: 89 },
+                { religion: 'Catharism', weight: 7 },
+                { religion: 'Judaism', weight: 4 },
+            ] },
+            { startYear: 1326, endYear: 1516, religions: [
+                { religion: 'Roman Catholicism', weight: 97 },
+                { religion: 'Judaism', weight: 3 },
+            ] },
+            { startYear: 1517, endYear: 1597, religions: [
+                { religion: 'Roman Catholicism', weight: 76 },
+                { religion: 'Protestantism', weight: 21 },
+                { religion: 'Judaism', weight: 3 },
+            ] },
+            { startYear: 1598, endYear: 1800, religions: [
+                { religion: 'Roman Catholicism', weight: 87 },
+                { religion: 'Protestantism', weight: 11 },
+                { religion: 'Judaism', weight: 2 },
+            ] },
+        ],
+        'Iberian Peninsula': [
+            { startYear: 500, endYear: 710, religions: [
+                { religion: 'Roman Catholicism', weight: 87 },
+                { religion: 'Judaism', weight: 10 },
+                { religion: 'Early Christianity', weight: 3 },
+            ] },
+            { startYear: 711, endYear: 1084, religions: [
+                { religion: 'Sunni Islam', weight: 60 },
+                { religion: 'Roman Catholicism', weight: 23 },
+                { religion: 'Judaism', weight: 12 },
+                { religion: 'Mozarabic Christianity', weight: 5 },
+            ] },
+            { startYear: 1085, endYear: 1211, religions: [
+                { religion: 'Sunni Islam', weight: 45 },
+                { religion: 'Roman Catholicism', weight: 39 },
+                { religion: 'Judaism', weight: 11 },
+                { religion: 'Mozarabic Christianity', weight: 5 },
+            ] },
+            { startYear: 1212, endYear: 1491, religions: [
+                { religion: 'Roman Catholicism', weight: 67 },
+                { religion: 'Sunni Islam', weight: 19 },
+                { religion: 'Judaism', weight: 11 },
+                { religion: 'Mozarabic Christianity', weight: 3 },
+            ] },
+            { startYear: 1492, endYear: 1800, religions: [
+                { religion: 'Roman Catholicism', weight: 98 },
+                { religion: 'Conversos', weight: 2 },
+            ] },
+        ],
+        'Germanic Lands': [
+            { startYear: 500, endYear: 749, religions: [
+                { religion: 'Germanic Paganism', weight: 82 },
+                { religion: 'Early Christianity', weight: 18 },
+            ] },
+            { startYear: 750, endYear: 899, religions: [
+                { religion: 'Roman Catholicism', weight: 58 },
+                { religion: 'Germanic Paganism', weight: 39 },
+                { religion: 'Judaism', weight: 3 },
+            ] },
+            { startYear: 900, endYear: 1516, religions: [
+                { religion: 'Roman Catholicism', weight: 96 },
+                { religion: 'Judaism', weight: 4 },
+            ] },
+            { startYear: 1517, endYear: 1647, religions: [
+                { religion: 'Protestantism', weight: 52 },
+                { religion: 'Roman Catholicism', weight: 44 },
+                { religion: 'Judaism', weight: 4 },
+            ] },
+            { startYear: 1648, endYear: 1800, religions: [
+                { religion: 'Protestantism', weight: 56 },
+                { religion: 'Roman Catholicism', weight: 40 },
+                { religion: 'Judaism', weight: 4 },
+            ] },
+        ],
+        Balkans: [
+            { startYear: 500, endYear: 1203, religions: [
+                { religion: 'Eastern Orthodoxy', weight: 73 },
+                { religion: 'Roman Catholicism', weight: 24 },
+                { religion: 'Judaism', weight: 3 },
+            ] },
+            { startYear: 1204, endYear: 1353, religions: [
+                { religion: 'Eastern Orthodoxy', weight: 69 },
+                { religion: 'Roman Catholicism', weight: 27 },
+                { religion: 'Judaism', weight: 4 },
+            ] },
+            { startYear: 1354, endYear: 1452, religions: [
+                { religion: 'Eastern Orthodoxy', weight: 57 },
+                { religion: 'Roman Catholicism', weight: 23 },
+                { religion: 'Sunni Islam', weight: 17 },
+                { religion: 'Judaism', weight: 3 },
+            ] },
+            { startYear: 1453, endYear: 1800, religions: [
+                { religion: 'Sunni Islam', weight: 46 },
+                { religion: 'Eastern Orthodoxy', weight: 39 },
+                { religion: 'Roman Catholicism', weight: 12 },
+                { religion: 'Judaism', weight: 3 },
+            ] },
+        ],
+        Scandinavia: [
+            { startYear: 500, endYear: 899, religions: [
+                { religion: 'Norse Paganism', weight: 98 },
+                { religion: 'Early Christianity', weight: 2 },
+            ] },
+            { startYear: 900, endYear: 1049, religions: [
+                { religion: 'Norse Paganism', weight: 66 },
+                { religion: 'Roman Catholicism', weight: 34 },
+            ] },
+            { startYear: 1050, endYear: 1150, religions: [
+                { religion: 'Roman Catholicism', weight: 82 },
+                { religion: 'Norse Paganism', weight: 18 },
+            ] },
+            { startYear: 1151, endYear: 1535, religions: [
+                { religion: 'Roman Catholicism', weight: 98 },
+                { religion: 'Norse Paganism', weight: 2 },
+            ] },
+            { startYear: 1536, endYear: 1800, religions: [
+                { religion: 'Protestantism', weight: 98 },
+                { religion: 'Roman Catholicism', weight: 2 },
+            ] },
+        ],
+    },
+    SOUTH_AMERICAN: {
+        'Andes North': [
+            { startYear: 1400, endYear: 1531, religions: [
+                { religion: 'Inca Sun Worship', weight: 62 },
+                { religion: 'Andean Shamanism', weight: 23 },
+                { religion: 'Ancestor Worship', weight: 15 },
+            ] },
+            { startYear: 1532, endYear: 1600, religions: [
+                { religion: 'Roman Catholicism', weight: 45 },
+                { religion: 'Syncretic Christianity', weight: 30 },
+                { religion: 'Inca Sun Worship', weight: 25 },
+            ] },
+            { startYear: 1601, endYear: 1800, religions: [
+                { religion: 'Roman Catholicism', weight: 68 },
+                { religion: 'Syncretic Christianity', weight: 24 },
+                { religion: 'Inca Sun Worship', weight: 8 },
+            ] },
+        ],
+        'Andes South': [
+            { startYear: 1400, endYear: 1531, religions: [
+                { religion: 'Inca Sun Worship', weight: 68 },
+                { religion: 'Andean Shamanism', weight: 20 },
+                { religion: 'Ancestor Worship', weight: 12 },
+            ] },
+            { startYear: 1532, endYear: 1600, religions: [
+                { religion: 'Roman Catholicism', weight: 43 },
+                { religion: 'Syncretic Christianity', weight: 32 },
+                { religion: 'Inca Sun Worship', weight: 25 },
+            ] },
+            { startYear: 1601, endYear: 1800, religions: [
+                { religion: 'Roman Catholicism', weight: 72 },
+                { religion: 'Syncretic Christianity', weight: 22 },
+                { religion: 'Inca Sun Worship', weight: 6 },
+            ] },
+        ],
+    },
+    OCEANIA: {
+        'Australia – Southeast': [
+            { startYear: 1400, endYear: 1779, religions: [{ religion: 'Aboriginal Dreamtime', weight: 100 }] },
+            { startYear: 1780, endYear: 1850, religions: [
+                { religion: 'Aboriginal Dreamtime', weight: 78 },
+                { religion: 'Christianity', weight: 22 },
+            ] },
+        ],
+        'Australia – Outback and Center': [
+            { startYear: 1400, endYear: 1850, religions: [{ religion: 'Aboriginal Dreamtime', weight: 100 }] },
+        ],
+        'Australia – North and Queensland': [
+            { startYear: 1400, endYear: 1829, religions: [{ religion: 'Aboriginal Dreamtime', weight: 100 }] },
+            { startYear: 1830, endYear: 1900, religions: [
+                { religion: 'Aboriginal Dreamtime', weight: 72 },
+                { religion: 'Christianity', weight: 28 },
+            ] },
+        ],
+        'Australia – West and Desert': [
+            { startYear: 1400, endYear: 1828, religions: [{ religion: 'Aboriginal Dreamtime', weight: 100 }] },
+            { startYear: 1829, endYear: 1900, religions: [
+                { religion: 'Aboriginal Dreamtime', weight: 80 },
+                { religion: 'Christianity', weight: 20 },
+            ] },
+        ],
+        'New Zealand': [
+            { startYear: 1280, endYear: 1813, religions: [{ religion: 'Maori Traditional Religion', weight: 100 }] },
+            { startYear: 1814, endYear: 1840, religions: [
+                { religion: 'Maori Traditional Religion', weight: 90 },
+                { religion: 'Christianity', weight: 10 },
+            ] },
+            { startYear: 1841, endYear: 1900, religions: [
+                { religion: 'Christianity', weight: 68 },
+                { religion: 'Maori Traditional Religion', weight: 32 },
+            ] },
+        ],
+        'New Guinea and Melanesia': [
+            { startYear: 1400, endYear: 1849, religions: [
+                { religion: 'Melanesian Traditional Religion', weight: 95 },
+                { religion: 'Ancestor Worship', weight: 5 },
+            ] },
+            { startYear: 1850, endYear: 1900, religions: [
+                { religion: 'Melanesian Traditional Religion', weight: 72 },
+                { religion: 'Christianity', weight: 28 },
+            ] },
+        ],
+        Polynesia: [
+            { startYear: 1400, endYear: 1796, religions: [{ religion: 'Polynesian Traditional Religion', weight: 100 }] },
+            { startYear: 1797, endYear: 1850, religions: [
+                { religion: 'Polynesian Traditional Religion', weight: 62 },
+                { religion: 'Christianity', weight: 38 },
+            ] },
+        ],
+        Micronesia: [
+            { startYear: 1400, endYear: 1849, religions: [{ religion: 'Micronesian Traditional Religion', weight: 100 }] },
+            { startYear: 1850, endYear: 1900, religions: [
+                { religion: 'Micronesian Traditional Religion', weight: 65 },
+                { religion: 'Christianity', weight: 35 },
+            ] },
+        ],
+        'Hawaii and Central Pacific': [
+            { startYear: 1400, endYear: 1819, religions: [{ religion: 'Hawaiian Traditional Religion', weight: 100 }] },
+            { startYear: 1820, endYear: 1850, religions: [
+                { religion: 'Hawaiian Traditional Religion', weight: 62 },
+                { religion: 'Christianity', weight: 38 },
+            ] },
+        ],
+    },
+    NORTH_AMERICAN_COLONIAL: {
+        'Mexico and Central Highlands': [
+            { startYear: 1492, endYear: 1518, religions: [
+                { religion: 'Aztec Polytheism', weight: 62 },
+                { religion: 'Maya Polytheism', weight: 23 },
+                { religion: 'Mesoamerican Shamanism', weight: 15 },
+            ] },
+            { startYear: 1519, endYear: 1570, religions: [
+                { religion: 'Roman Catholicism', weight: 48 },
+                { religion: 'Syncretic Christianity', weight: 30 },
+                { religion: 'Aztec Polytheism', weight: 22 },
+            ] },
+            { startYear: 1571, endYear: 1800, religions: [
+                { religion: 'Roman Catholicism', weight: 79 },
+                { religion: 'Syncretic Christianity', weight: 18 },
+                { religion: 'Mesoamerican Traditional Religion', weight: 3 },
+            ] },
+        ],
+        'Central America': [
+            { startYear: 1492, endYear: 1523, religions: [
+                { religion: 'Maya Polytheism', weight: 72 },
+                { religion: 'Mesoamerican Traditional Religion', weight: 28 },
+            ] },
+            { startYear: 1524, endYear: 1600, religions: [
+                { religion: 'Roman Catholicism', weight: 48 },
+                { religion: 'Syncretic Christianity', weight: 30 },
+                { religion: 'Mayan Traditional Religion', weight: 22 },
+            ] },
+            { startYear: 1601, endYear: 1800, religions: [
+                { religion: 'Roman Catholicism', weight: 80 },
+                { religion: 'Syncretic Christianity', weight: 15 },
+                { religion: 'Mayan Traditional Religion', weight: 5 },
+            ] },
+        ],
+    },
+};
+
 /**
  * Wikipedia links for all religions used in the system
  * Provides educational context for each religious tradition

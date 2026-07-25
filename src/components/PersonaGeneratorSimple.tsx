@@ -92,7 +92,7 @@ import {
   validatePersonaAnnotationRecord,
 } from '../services/geminiPersonaMaterialService';
 import { createPastedTextSource, getRandomWikidataPerson, ingestRandomOldBaileySource, ingestUrlSource, OldBaileyRandomFilters } from '../services/sourceIngestionService';
-import ProceduralPortrait from './portraits/ProceduralPortrait';
+import PortraitSwitch from './portraitLab/PortraitSwitch';
 import { generateStatDescription } from '../utils/statToText';
 import MiniLocationMap from './MiniLocationMap';
 import { RARITY_COLORS } from '../types/attributeTypes';
@@ -105,7 +105,10 @@ import {
   normalizeMaterialText,
 } from '../services/personaMaterialAdapter';
 import { checkPersonaConsistency, ConsistencyIssue } from '../services/personaConsistencyService';
+import { getDisplayZone } from '../utils/zoneDisplayUtils';
 import './PersonaGenerator.css';
+
+type SourceStudioView = 'full' | 'wikipedia' | 'web' | 'text' | 'old_bailey';
 
 const ERAS: { value: HistoricalEra; label: string }[] = [
   { value: 'PREHISTORY' as HistoricalEra, label: 'Neolithic period (Before 3000 BCE)' },
@@ -816,7 +819,8 @@ export default function PersonaGenerator() {
   const [fieldEditStatus, setFieldEditStatus] = useState<string | null>(null);
   const [isSourceGenerating, setIsSourceGenerating] = useState(false);
   const [categoryEditDrafts, setCategoryEditDrafts] = useState<Record<string, string>>({});
-  const [sourcePanelCollapsed, setSourcePanelCollapsed] = useState(false);
+  const [sourcePanelCollapsed, setSourcePanelCollapsed] = useState(true);
+  const [sourceStudioView, setSourceStudioView] = useState<SourceStudioView>('full');
 
   const materialAdapter = annotationRecord ? adaptPersonaMaterialRecord(annotationRecord, {
     useSourceTitleAsName: sourceTarget === 'named_subject',
@@ -1889,14 +1893,33 @@ export default function PersonaGenerator() {
   const handleSavePDF = () => {
     if (!persona) return;
 
-    // Capture the portrait SVG
-    const portraitContainer = document.querySelector('.portrait-wrapper svg, .portrait-container svg');
+    // Capture whichever portrait engine is on screen: the classic renderer
+    // emits an SVG, the pixel lab a canvas.
     let portraitSvgString = '';
-    if (portraitContainer) {
-      const svgClone = portraitContainer.cloneNode(true) as SVGElement;
+    const portraitSvg = document.querySelector('.portrait-wrapper svg, .portrait-container svg');
+    if (portraitSvg) {
+      const svgClone = portraitSvg.cloneNode(true) as SVGElement;
       svgClone.setAttribute('width', '180');
       svgClone.setAttribute('height', '180');
       portraitSvgString = new XMLSerializer().serializeToString(svgClone);
+    } else {
+      const portraitCanvas = document.querySelector(
+        '.portrait-wrapper canvas, .portrait-container canvas'
+      ) as HTMLCanvasElement | null;
+      if (portraitCanvas) {
+        // Upscale with smoothing off so the print keeps hard pixel edges.
+        const scaled = document.createElement('canvas');
+        scaled.width = portraitCanvas.width * 4;
+        scaled.height = portraitCanvas.height * 4;
+        const ctx = scaled.getContext('2d');
+        if (ctx) {
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(portraitCanvas, 0, 0, scaled.width, scaled.height);
+          portraitSvgString =
+            `<img src="${scaled.toDataURL('image/png')}" width="180" height="180" ` +
+            `style="image-rendering: pixelated; display: block;" alt="Portrait" />`;
+        }
+      }
     }
 
     // Use browser's print functionality for PDF export
@@ -1914,7 +1937,7 @@ export default function PersonaGenerator() {
         : `${char.birthYear} CE`)
       : 'Unknown';
     const eraDisplay = formatEraLabel(persona.era);
-    const cultureDisplay = formatCulturalZone(persona.culturalZone);
+    const cultureDisplay = formatCulturalZone(persona.culturalZone, persona.region, persona.location);
 
     // Build life events HTML (all events, grouped by decade)
     const lifeEvents = persona.enhancedLifeEvents || persona.character.lifeEvents || [];
@@ -2764,7 +2787,7 @@ export default function PersonaGenerator() {
     return eraMap[era.toUpperCase()] || era.replace(/_/g, ' ').toLowerCase();
   };
 
-  const formatCulturalZone = (zone: string): string => {
+  const formatCulturalZone = (zone: string, region?: string, location?: string): string => {
     const zoneMap: Record<string, string> = {
       'EUROPEAN': 'Europe',
       'EAST_ASIAN': 'East Asia',
@@ -2782,7 +2805,8 @@ export default function PersonaGenerator() {
       'SOUTH_AMERICAN': 'South America',
       'SOUTH AMERICAN': 'South America',
     };
-    return zoneMap[zone.toUpperCase()] || zone.replace(/_/g, ' ').toLowerCase();
+    const baseZone = zoneMap[zone.toUpperCase()] || zone.replace(/_/g, ' ').toLowerCase();
+    return getDisplayZone(baseZone, `${region || ''} ${location || ''}`);
   };
 
   const formatYear = (year: number): string => {
@@ -4154,13 +4178,9 @@ export default function PersonaGenerator() {
 
       <div className="controls" role="region" aria-label="Persona generation controls">
         <div className="control-buttons">
-          <button className="btn btn-primary" onClick={generateCompletelyRandom} aria-label="Generate a random historical persona">
+          <button className="btn btn-primary generation-random-button" onClick={generateCompletelyRandom} aria-label="Generate a random historical persona">
             <IoShuffle aria-hidden="true" />
-            {isSourceGenerating ? 'Generating Schema...' : 'Generate Synthetic Persona'}
-          </button>
-          <button className="btn btn-secondary" onClick={generateRandomAnnotationPersona} disabled={isSourceGenerating} aria-label="Generate a surprise Wikipedia-backed schema persona">
-            <IoDocumentText aria-hidden="true" />
-            {isSourceGenerating ? 'Finding Source...' : 'Surprise Wikipedia Persona'}
+            {isSourceGenerating ? 'Generating Schema...' : 'Generate Random Persona'}
           </button>
           <span className="controls-disclaimer">
             Prototype – may contain errors
@@ -4175,190 +4195,305 @@ export default function PersonaGenerator() {
 
         <div className={`source-ingestion-panel ${sourcePanelCollapsed ? 'source-ingestion-panel-collapsed' : ''}`} role="region" aria-label="Source-based persona generation">
           <div className="source-ingestion-header">
-            <IoDocumentText aria-hidden="true" />
-            <div>
-              <h2>Source Material</h2>
+            <button
+              type="button"
+              className="source-studio-title"
+              onClick={() => {
+                setSourceStudioView('full');
+                setSourcePanelCollapsed(false);
+              }}
+              aria-label="Open the full Source Studio"
+            >
+              <span className="source-studio-eyebrow">Evidence-aware generation</span>
+              <h2>Source Studio</h2>
               <p>
                 {isSourceGenerating
                   ? (sourceIngestionStatus || 'Generating source-backed persona...')
                   : annotationRecord && sourcePanelCollapsed
                     ? `${sourceBasisLabel(annotationRecord.source.source_basis)} loaded.`
-                    : 'Paste text, load a URL, or draw a real Old Bailey trial to populate the annotation schema before persona generation.'}
+                    : 'Build a persona from a real historical source.'}
               </p>
+            </button>
+            <div className="source-mode-showcase" aria-label="Available historical source modes">
+              <button
+                type="button"
+                className={`source-mode-button ${!sourcePanelCollapsed && sourceStudioView === 'wikipedia' ? 'source-mode-button-active' : ''}`}
+                onClick={() => {
+                  setSourceStudioView('wikipedia');
+                  setSourcePanelCollapsed(false);
+                }}
+              >
+                <span>Wikipedia</span>
+                <small>Article or surprise</small>
+              </button>
+              <button
+                type="button"
+                className={`source-mode-button ${!sourcePanelCollapsed && sourceStudioView === 'web' ? 'source-mode-button-active' : ''}`}
+                onClick={() => {
+                  setSourceStudioView('web');
+                  setSourcePanelCollapsed(false);
+                }}
+              >
+                <span>Web page</span>
+                <small>Readable URL</small>
+              </button>
+              <button
+                type="button"
+                className={`source-mode-button ${!sourcePanelCollapsed && sourceStudioView === 'text' ? 'source-mode-button-active' : ''}`}
+                onClick={() => {
+                  setSourceStudioView('text');
+                  setSourcePanelCollapsed(false);
+                }}
+              >
+                <span>Pasted text</span>
+                <small>Document excerpt</small>
+              </button>
+              <button
+                type="button"
+                className={`source-mode-button ${!sourcePanelCollapsed && sourceStudioView === 'old_bailey' ? 'source-mode-button-active' : ''}`}
+                onClick={() => {
+                  setSourceStudioView('old_bailey');
+                  setSourcePanelCollapsed(false);
+                }}
+              >
+                <span>Old Bailey</span>
+                <small>Real trial record</small>
+              </button>
             </div>
             <button
               className="source-panel-toggle"
-              onClick={() => setSourcePanelCollapsed(!sourcePanelCollapsed)}
+              onClick={() => {
+                if (sourcePanelCollapsed) {
+                  setSourceStudioView('full');
+                  setSourcePanelCollapsed(false);
+                } else {
+                  setSourcePanelCollapsed(true);
+                }
+              }}
               aria-expanded={!sourcePanelCollapsed}
               aria-label={sourcePanelCollapsed ? 'Expand source material inputs' : 'Collapse source material inputs'}
             >
               <IoChevronForward aria-hidden="true" />
             </button>
           </div>
-          {sourcePanelCollapsed ? (
-            <div className="source-collapsed-body">
-              <div className="source-collapsed-summary">
-                {annotationRecord && (
-                  <span className="source-type-badge">{sourceBasisLabel(annotationRecord.source.source_basis)}</span>
-                )}
-                <span>{sourceTitle || annotationRecord?.source.title || 'No source title yet'}</span>
-                {sourceUrl && <code>{sourceUrl}</code>}
-              </div>
-              {isSourceGenerating && (
+          <AnimatePresence initial={false} mode="wait">
+            {sourcePanelCollapsed ? (
+              (annotationRecord || isSourceGenerating) && (
+              <motion.div
+                key="source-summary"
+                className="source-collapsed-body"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <div className="source-collapsed-summary">
+                  {annotationRecord && (
+                    <span className="source-type-badge">{sourceBasisLabel(annotationRecord.source.source_basis)}</span>
+                  )}
+                  <span>{sourceTitle || annotationRecord?.source.title || 'Generating source record'}</span>
+                  {sourceUrl && <code>{sourceUrl}</code>}
+                </div>
+                {isSourceGenerating && (
                 <div className="source-loading-state" aria-live="polite">
                   <div className="source-loading-bar" />
                   <span>{sourceIngestionStatus || 'Generating annotation record...'}</span>
                 </div>
-              )}
-              {!isSourceGenerating && (
-                <button className="btn btn-secondary" onClick={() => setSourcePanelCollapsed(false)}>
-                  Edit Source
-                </button>
-              )}
-            </div>
-          ) : (
-            <>
-              <div className="source-input-grid">
-                <label>
-                  Source title
-                  <input
-                    type="text"
-                    value={sourceTitle}
-                    onChange={(event) => setSourceTitle(event.target.value)}
-                    placeholder="Probate inventory, court testimony, Wikipedia article..."
-                  />
-                </label>
-                <label>
-                  Wikipedia or readable URL
-                  <div className="source-url-row">
+                )}
+                {!isSourceGenerating && (
+                  <button className="btn btn-secondary" onClick={() => setSourcePanelCollapsed(false)}>
+                    Edit Source
+                  </button>
+                )}
+              </motion.div>
+              )
+            ) : (
+            <motion.div
+              key="source-workspace"
+              className="source-expanded-content"
+              initial={{ opacity: 0, height: 0, y: -10 }}
+              animate={{ opacity: 1, height: 'auto', y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -8 }}
+              transition={{ duration: 0.32, ease: [0.2, 0.75, 0.2, 1] }}
+            >
+              <div className="source-workspace-quick-actions">
+                <span>
+                  {sourceStudioView === 'wikipedia'
+                    ? 'Generate from a specific Wikipedia article, or let the app choose a historical subject.'
+                    : sourceStudioView === 'web'
+                      ? 'Load a readable historical web page, archive entry, or museum catalogue record.'
+                      : sourceStudioView === 'text'
+                        ? 'Paste a document excerpt and use it as the evidence base for a persona.'
+                        : sourceStudioView === 'old_bailey'
+                          ? 'Draw a real Old Bailey trial using optional date, person, and offence filters.'
+                          : 'Use any supported source type, or let the app find a subject.'}
+                </span>
+                <div className="source-workspace-action-buttons">
+                  {(sourceStudioView === 'wikipedia' || sourceStudioView === 'full') && (
+                    <button className="btn btn-secondary" onClick={generateRandomAnnotationPersona} disabled={isSourceGenerating} aria-label="Generate a surprise Wikipedia-backed schema persona">
+                      <IoDocumentText aria-hidden="true" />
+                      {isSourceGenerating ? 'Finding Source...' : 'Surprise Wikipedia Persona'}
+                    </button>
+                  )}
+                  {sourceStudioView !== 'full' && (
+                    <button className="source-show-all-button" onClick={() => setSourceStudioView('full')}>
+                      Show all options
+                    </button>
+                  )}
+                </div>
+              </div>
+              {sourceStudioView !== 'old_bailey' && (
+                <div className={`source-input-grid source-input-grid-${sourceStudioView}`}>
+                  <label>
+                    Source title
                     <input
-                      type="url"
-                      value={sourceUrl}
-                      onChange={(event) => {
-                        setOldBaileySelectionActive(false);
-                        setSourceUrl(event.target.value);
-                        setSourceText('');
-                      }}
-                      placeholder="https://en.wikipedia.org/wiki/..."
+                      type="text"
+                      value={sourceTitle}
+                      onChange={(event) => setSourceTitle(event.target.value)}
+                      placeholder={sourceStudioView === 'text' ? 'Probate inventory, court testimony, parish record...' : 'Optional working title'}
                     />
-                    <button className="btn btn-secondary" onClick={ingestUrl} disabled={isSourceGenerating}>
-                      {isSourceGenerating ? 'Working...' : 'Load URL'}
+                  </label>
+                  {(sourceStudioView === 'wikipedia' || sourceStudioView === 'web' || sourceStudioView === 'full') && (
+                    <label>
+                      {sourceStudioView === 'wikipedia' ? 'Wikipedia URL' : sourceStudioView === 'web' ? 'Readable URL' : 'Wikipedia or readable URL'}
+                      <div className="source-url-row">
+                        <input
+                          type="url"
+                          value={sourceUrl}
+                          onChange={(event) => {
+                            setOldBaileySelectionActive(false);
+                            setSourceUrl(event.target.value);
+                            setSourceText('');
+                          }}
+                          placeholder={sourceStudioView === 'web' ? 'https://archive.org/...' : 'https://en.wikipedia.org/wiki/...'}
+                        />
+                        <button className="btn btn-secondary" onClick={ingestUrl} disabled={isSourceGenerating}>
+                          {isSourceGenerating ? 'Working...' : 'Load URL'}
+                        </button>
+                      </div>
+                    </label>
+                  )}
+                  <label>
+                    Persona target
+                    <select
+                      value={sourceTarget}
+                      onChange={(event) => setSourceTarget(event.target.value as PersonaGenerationTarget)}
+                    >
+                      <option value="named_subject">Named subject</option>
+                      <option value="ordinary_person_from_source_world">Ordinary person from source world</option>
+                    </select>
+                  </label>
+                  <label>
+                    Preferred moment
+                    <input
+                      type="text"
+                      value={preferredMoment}
+                      onChange={(event) => setPreferredMoment(event.target.value)}
+                      placeholder="e.g. Tolstoy in the 1870s, before Anna Karenina"
+                    />
+                  </label>
+                </div>
+              )}
+              {(sourceStudioView === 'old_bailey' || sourceStudioView === 'full') && (
+                <div className="old-bailey-source-box">
+                  <div className="old-bailey-source-heading">
+                    <span>Old Bailey Proceedings</span>
+                    <button className="btn btn-secondary" onClick={ingestRandomOldBailey} disabled={isSourceGenerating}>
+                      {isSourceGenerating ? 'Searching...' : 'Random Trial'}
                     </button>
                   </div>
-                </label>
-                <label>
-                  Persona target
-                  <select
-                    value={sourceTarget}
-                    onChange={(event) => setSourceTarget(event.target.value as PersonaGenerationTarget)}
-                  >
-                    <option value="named_subject">Named subject</option>
-                    <option value="ordinary_person_from_source_world">Ordinary person from source world</option>
-                  </select>
-                </label>
-                <label>
-                  Preferred moment
-                  <input
-                    type="text"
-                    value={preferredMoment}
-                    onChange={(event) => setPreferredMoment(event.target.value)}
-                    placeholder="e.g. Tolstoy in the 1870s, before Anna Karenina"
-                  />
-                </label>
-              </div>
-              <div className="old-bailey-source-box">
-                <div className="old-bailey-source-heading">
-                  <span>Old Bailey Proceedings</span>
-                  <button className="btn btn-secondary" onClick={ingestRandomOldBailey} disabled={isSourceGenerating}>
-                    {isSourceGenerating ? 'Searching...' : 'Random Trial'}
-                  </button>
+                  <div className="old-bailey-filter-grid">
+                    <label>
+                      Person signal
+                      <select
+                        value={oldBaileyFilters.gender || 'any'}
+                        onChange={(event) => updateOldBaileyFilters(filters => ({ ...filters, gender: event.target.value as OldBaileyRandomFilters['gender'] }))}
+                      >
+                        <option value="any">Any</option>
+                        <option value="female">Woman</option>
+                        <option value="male">Man</option>
+                      </select>
+                    </label>
+                    <label>
+                      Decade
+                      <select
+                        value={oldBaileyFilters.decade || ''}
+                        onChange={(event) => updateOldBaileyFilters(filters => ({ ...filters, decade: event.target.value }))}
+                      >
+                        <option value="">Any early indexed trials</option>
+                        {Array.from({ length: 17 }, (_, index) => 1670 + index * 10).map(decade => (
+                          <option key={decade} value={String(decade)}>{decade}s</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Offence
+                      <select
+                        value={oldBaileyFilters.crime || 'any'}
+                        onChange={(event) => updateOldBaileyFilters(filters => ({ ...filters, crime: event.target.value as OldBaileyRandomFilters['crime'] }))}
+                      >
+                        <option value="any">Any</option>
+                        <option value="theft">Theft</option>
+                        <option value="violent_theft">Violent theft</option>
+                        <option value="deception">Deception</option>
+                        <option value="killing">Killing</option>
+                        <option value="sexual">Sexual offence</option>
+                        <option value="royal">Royal offences</option>
+                        <option value="damage">Property damage</option>
+                        <option value="miscellaneous">Miscellaneous</option>
+                      </select>
+                    </label>
+                    <label>
+                      Generate as
+                      <select
+                        value={oldBaileyFilters.personaAngle || 'ordinary_person_from_source_world'}
+                        onChange={(event) => updateOldBaileyFilters(filters => ({ ...filters, personaAngle: event.target.value as OldBaileyRandomFilters['personaAngle'] }))}
+                      >
+                        <option value="ordinary_person_from_source_world">Ordinary person from trial world</option>
+                        <option value="named_subject">Named person in record</option>
+                      </select>
+                    </label>
+                  </div>
                 </div>
-                <div className="old-bailey-filter-grid">
-                  <label>
-                    Person signal
-                    <select
-                      value={oldBaileyFilters.gender || 'any'}
-                      onChange={(event) => updateOldBaileyFilters(filters => ({ ...filters, gender: event.target.value as OldBaileyRandomFilters['gender'] }))}
-                    >
-                      <option value="any">Any</option>
-                      <option value="female">Woman</option>
-                      <option value="male">Man</option>
-                    </select>
-                  </label>
-                  <label>
-                    Decade
-                    <select
-                      value={oldBaileyFilters.decade || ''}
-                      onChange={(event) => updateOldBaileyFilters(filters => ({ ...filters, decade: event.target.value }))}
-                    >
-                      <option value="">Any early indexed trials</option>
-                      {Array.from({ length: 17 }, (_, index) => 1670 + index * 10).map(decade => (
-                        <option key={decade} value={String(decade)}>{decade}s</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Offence
-                    <select
-                      value={oldBaileyFilters.crime || 'any'}
-                      onChange={(event) => updateOldBaileyFilters(filters => ({ ...filters, crime: event.target.value as OldBaileyRandomFilters['crime'] }))}
-                    >
-                      <option value="any">Any</option>
-                      <option value="theft">Theft</option>
-                      <option value="violent_theft">Violent theft</option>
-                      <option value="deception">Deception</option>
-                      <option value="killing">Killing</option>
-                      <option value="sexual">Sexual offence</option>
-                      <option value="royal">Royal offences</option>
-                      <option value="damage">Property damage</option>
-                      <option value="miscellaneous">Miscellaneous</option>
-                    </select>
-                  </label>
-                  <label>
-                    Generate as
-                    <select
-                      value={oldBaileyFilters.personaAngle || 'ordinary_person_from_source_world'}
-                      onChange={(event) => updateOldBaileyFilters(filters => ({ ...filters, personaAngle: event.target.value as OldBaileyRandomFilters['personaAngle'] }))}
-                    >
-                      <option value="ordinary_person_from_source_world">Ordinary person from trial world</option>
-                      <option value="named_subject">Named person in record</option>
-                    </select>
-                  </label>
-                </div>
-              </div>
+              )}
               <label className="source-toggle-row">
                 <input
                   type="checkbox"
                   checked={useGeminiExtraction}
                   onChange={(event) => setUseGeminiExtraction(event.target.checked)}
                 />
-                Use Gemini 3.1 Flash Lite Preview to fill inferred and synthesized schema fields
+                Use evidence-aware AI to fill inferred and synthesized schema fields
               </label>
-              <label className="source-text-label">
-                Source text
-                <textarea
-                  value={sourceText}
-                  onChange={(event) => {
-                    setOldBaileySelectionActive(false);
-                    setSourceUrl('');
-                    setSourceText(event.target.value);
-                  }}
-                  placeholder="Paste a document excerpt here, then generate a persona from the extracted annotation record."
-                  rows={5}
-                />
-              </label>
+              {(sourceStudioView === 'text' || sourceStudioView === 'full') && (
+                <label className="source-text-label">
+                  Source text
+                  <textarea
+                    value={sourceText}
+                    onChange={(event) => {
+                      setOldBaileySelectionActive(false);
+                      setSourceUrl('');
+                      setSourceText(event.target.value);
+                    }}
+                    placeholder="Paste a document excerpt here, then generate a persona from the extracted annotation record."
+                    rows={5}
+                  />
+                </label>
+              )}
               <div className="source-actions">
-                <button className="btn btn-primary" onClick={generateFromAvailableSource} disabled={isSourceGenerating}>
-                  {isSourceGenerating
-                    ? 'Generating...'
-                    : oldBaileySelectionActive || (!sourceText.trim() && !sourceUrl.trim())
-                      ? 'Generate from Old Bailey'
-                      : sourceUrl.trim()
-                        ? 'Generate from URL'
-                        : sourceText.trim()
-                          ? 'Generate from Source Text'
-                          : 'Generate from Source'}
-                </button>
+                {(sourceStudioView === 'text' || sourceStudioView === 'full') && (
+                  <button className="btn btn-primary" onClick={generateFromAvailableSource} disabled={isSourceGenerating}>
+                    {isSourceGenerating
+                      ? 'Generating...'
+                      : sourceStudioView === 'text'
+                        ? 'Generate from Source Text'
+                        : oldBaileySelectionActive || (!sourceText.trim() && !sourceUrl.trim())
+                          ? 'Generate from Old Bailey'
+                          : sourceUrl.trim()
+                            ? 'Generate from URL'
+                            : sourceText.trim()
+                              ? 'Generate from Source Text'
+                              : 'Generate from Source'}
+                  </button>
+                )}
                 {annotationRecord && (
                   <button className="btn btn-secondary" onClick={() => setShowMaterialJson(!showMaterialJson)}>
                     {showMaterialJson ? 'Hide JSONL' : 'Show JSONL'}
@@ -4369,8 +4504,9 @@ export default function PersonaGenerator() {
               {annotationRecord && showMaterialJson && (
                 <pre className="annotation-jsonl">{annotationRecordToJsonl(annotationRecord)}</pre>
               )}
-            </>
-          )}
+            </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <AnimatePresence>
@@ -4563,7 +4699,7 @@ export default function PersonaGenerator() {
                 <div className="season-narrative">
                   It is <span className="season-text" style={{ color: getSeasonInfo(persona.month, persona.day).color }}>
                     {getSeasonInfo(persona.month, persona.day).description}
-                  </span> in the {formatEraLabel(persona.era)} in {formatCulturalZone(persona.culturalZone)}
+                  </span> in the {formatEraLabel(persona.era)} in {formatCulturalZone(persona.culturalZone, persona.region, persona.location)}
                 </div>
                 {annotationRecord && (
                   <div className="schema-evidence-strip">
@@ -4609,7 +4745,7 @@ export default function PersonaGenerator() {
                           alt={`Portrait of ${persona.character.name}`}
                         />
                       ) : (
-                        <ProceduralPortrait
+                        <PortraitSwitch
                           character={persona.character}
                           size={192}
                           temporaryExpression={mainPortraitHoverExpression}
@@ -5303,16 +5439,18 @@ export default function PersonaGenerator() {
                         ))}
                       </>
                     ) : (
-                      Object.entries(persona.character.equippedItems || {})
-                        .filter(([slot]) => ['head', 'torso', 'feet'].includes(slot.toLowerCase()))
-                        .map(([slot, item]) => (
-                          item && (
-                            <div key={slot} className="equipment-item">
-                              <span className="equipment-slot">{formatItemName(slot)}</span>
-                              <span className="equipment-name">{formatItemName(item.name)}</span>
-                            </div>
-                          )
-                        ))
+                      (['head', 'torso', 'feet'] as const).map((slot) => {
+                        const item =
+                          persona.character.portraitVisualOverrides?.displayEquipment?.[slot] ||
+                          persona.character.equippedItems?.[slot];
+                        if (!item || item.name.toLowerCase() === 'none') return null;
+                        return (
+                          <div key={slot} className="equipment-item">
+                            <span className="equipment-slot">{formatItemName(slot)}</span>
+                            <span className="equipment-name">{formatItemName(item.name)}</span>
+                          </div>
+                        );
+                      })
                     )}
 
                     {/* Add jewelry items if present */}
@@ -6013,7 +6151,7 @@ export default function PersonaGenerator() {
                   onKeyDown={(e) => e.key === 'Enter' && handlePortraitClick()}
                   title="Click to cycle through expressions"
                 >
-                  <ProceduralPortrait
+                  <PortraitSwitch
                     character={persona.character}
                     size={400}
                     temporaryExpression={expressionCycle[portraitExpressionIndex].expression}

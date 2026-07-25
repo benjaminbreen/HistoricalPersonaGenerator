@@ -55,7 +55,7 @@ export const MouthRenderer: React.FC<MouthRendererProps> = ({
 
     const isFatigued =
       character.fatigue !== undefined && character.maxFatigue !== undefined &&
-      (character.fatigue / character.maxFatigue) < 0.4;
+      (character.fatigue / character.maxFatigue) > 0.7;
 
     const isIll =
       (character.health !== undefined && character.maxHealth !== undefined && (character.health / character.maxHealth) < 0.6) ||

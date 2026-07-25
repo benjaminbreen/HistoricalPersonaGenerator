@@ -109,9 +109,20 @@ Source-backed persona generation can use Gemini to fill the historical persona a
 
 ```bash
 GEMINI_API_KEY=your_key_here
+GEMINI_MODEL=gemini-3.1-flash-lite
 ```
 
-The Vite dev server exposes a local `/api/gemini-persona` middleware and keeps this key server-side during development. The static browser bundle does not call Gemini directly.
+The Vite dev server exposes a local `/api/gemini-persona` middleware and keeps this key server-side during development. The static browser bundle does not call Gemini directly. Do not use `VITE_GEMINI_API_KEY` or any other `VITE_*` variable for secrets: Vite includes those values in the browser build.
+
+To compare GPT-5 nano, use server-only environment variables instead. The client never selects the provider and cannot read either key:
+
+```bash
+LLM_PROVIDER=openai
+OPENAI_API_KEY=your_key_here
+OPENAI_MODEL=gpt-5-nano
+```
+
+On Vercel, add only the selected provider's variables in **Project Settings → Environment Variables** (Production, Preview, and/or Development as appropriate). Do not create `VITE_GEMINI_API_KEY`, `VITE_GOOGLE_AI_API_KEY`, or `VITE_OPENAI_API_KEY` variables.
 
 For production-style local serving:
 

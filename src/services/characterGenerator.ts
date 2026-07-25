@@ -1,21 +1,54 @@
 /**
  * services/characterGenerator.ts - Enhanced character service with portrait integration
  */
-import { PlayerCharacter, HistoricalEra, Item, CharacterStats, CharacterPersonality, CharacterSocialContext, Appearance, ClothingPiece, ClothingPalette, MapAreaDefinition } from '../types';
+import { PlayerCharacter, HistoricalEra, Item, CharacterStats, CharacterPersonality, CharacterSocialContext, Appearance, ClothingPiece, ClothingPalette, MapAreaDefinition, Gender, WealthLevel } from '../types';
 import { PROFESSIONS, CHARACTER_NAMES, CulturalZone, STARTING_PACKAGES, ProfessionDefinition, PERSONAL_BELIEFS } from '../constants/index';
 import { CHARACTER_NAMES as NAME_LISTS } from '../constants/characterData/names';
 import { parseDateString } from '../utils/dateUtils';
 import { createItemInstance, addItemToInventory, assembleStartingPackage } from '../utils/inventoryUtils';
 import { ValueNoise } from '../utils/noise';
-import { generateBaseProfile, determineSocialRole, generateNpcName, assignBeliefs, generateClothingPalette, generateCulturalAppearance, adjustPersonalityForProfession, validateCharacterCoherence } from '../generation/common/npcUtils';
+import { generateBaseProfile, determineSocialRole, generateNpcName, assignBeliefs, generateClothingPalette, generateCompleteOutfit, generateCulturalAppearance, adjustPersonalityForProfession, validateCharacterCoherence } from '../generation/common/npcUtils';
 import { mapLocationToCulture } from '../utils/mapUtils';
 import { hexToColorName } from '../utils/colorUtils';
 import { CharacterSpecification } from './worldWeaverService';
 import DiseaseService from './diseaseService';
 import { AttributeBadgeService } from './attributeBadgeService';
 import { getMarkingsForCharacter, selectRandomMarking, getRandomPattern, convertToAppearanceMarking, getMarkingProbability } from '../constants/characterData/culturalMarkings';
+import { formatSocialStatusForEra, sampleSocialStatus } from './socialStatusService';
+import { isClergyRoleCompatible } from '../constants/characterData/religionClergyRoles';
 
 let characterIdCounter = 0;
+
+function generateStartingCurrency(wealth: WealthLevel, noise: ValueNoise): number {
+    const ranges: Record<WealthLevel, [number, number]> = {
+        poor: [3, 12],
+        modest: [10, 29],
+        comfortable: [25, 59],
+        wealthy: [60, 129],
+        noble: [90, 199],
+    };
+    const [minimum, maximum] = ranges[wealth];
+    return minimum + Math.floor(noise.random() * (maximum - minimum + 1));
+}
+
+function detectNameListKey(name: string): string | undefined {
+    const nameParts = name.trim().split(/\s+/);
+    const firstName = nameParts[0]?.toLowerCase() || '';
+    const lastName = nameParts[nameParts.length - 1]?.toLowerCase() || '';
+    let bestMatch: { key: string; score: number } | undefined;
+
+    for (const [key, nameList] of Object.entries(NAME_LISTS)) {
+        const surnameMatch = nameList.surname.some(surname => surname.toLowerCase() === lastName);
+        const firstNameMatch = nameList.male.some(first => first.toLowerCase() === firstName) ||
+            nameList.female.some(first => first.toLowerCase() === firstName);
+        const score = surnameMatch ? 2 : firstNameMatch ? 1 : 0;
+        if (score > (bestMatch?.score || 0)) {
+            bestMatch = { key, score };
+        }
+    }
+
+    return bestMatch?.key;
+}
 
 /**
  * Detect likely ethnicity/cultural origin from a character's name
@@ -50,7 +83,7 @@ export function detectEthnicityFromName(name: string): CulturalZone | null {
             if (listKey.includes('CELTIC_IRISH') || listKey.includes('SCOTTISH') || listKey.includes('WELSH')) {
                 return 'EUROPEAN'; // Celtic peoples
             }
-            if (listKey.includes('ENGLISH') || listKey.includes('FRENCH') || listKey.includes('GERMAN') ||
+            if (listKey.includes('ENGLISH') || listKey.includes('FRENCH') || listKey.includes('GERMAN') || listKey.includes('SAXON') ||
                 listKey.includes('ITALIAN') || listKey.includes('SPANISH') || listKey.includes('PORTUGUESE') ||
                 listKey.includes('DUTCH') || listKey.includes('SCANDINAVIAN') || listKey.includes('RUSSIAN') ||
                 listKey.includes('POLISH') || listKey.includes('GREEK') || listKey.includes('FRANKISH') ||
@@ -111,6 +144,80 @@ interface GenerationContext {
     era?: HistoricalEra; // Optional: if provided, overrides era from date parsing
     culturalZone?: CulturalZone; // Optional: if provided, overrides zone from location mapping
 }
+
+const isSoutheastAsianContext = (context: Pick<GenerationContext, 'region' | 'location'>): boolean =>
+    /(southeast asia|indochina|maritime|malay|java|sumatra|borneo|sulawesi|spice islands|malacca|philippines|vietnam|tonkin|annam|cochinchina|mekong|siam|thailand|ayutthaya|cambodia|khmer|angkor|burma|myanmar|irrawaddy|bagan|rangoon)/i.test(
+        `${context.region || ''} ${context.location || ''}`
+    );
+
+const isEarlyMedievalGermanicContext = (
+    context: Pick<GenerationContext, 'region' | 'location'>,
+    year: number
+): boolean =>
+    year >= 480 &&
+    year < 900 &&
+    /(hamburg coast|saxon|brandenburg|jutland|north sea|lower elbe)/i.test(
+        `${context.region || ''} ${context.location || ''}`
+    );
+
+/**
+ * Broad cultural zones are routing keys, not identity. For the archipelago,
+ * choose a local name track from the actual place and the already-resolved
+ * religion instead of allowing an uncoordinated colonial name to repaint the
+ * character after generation.
+ */
+const resolveContextualNameKey = (
+    context: GenerationContext,
+    year: number,
+    religion: string | undefined,
+    noise: ValueNoise
+): string | undefined => {
+    // Hamburg and the lower Elbe were Saxon-speaking in this period. Resolve
+    // this before profession or broad-zone fallbacks can introduce modern
+    // surnames from an unrelated naming pool.
+    if (isEarlyMedievalGermanicContext(context, year)) {
+        return 'SAXON_EARLY_MEDIEVAL';
+    }
+
+    if (!isSoutheastAsianContext(context)) return undefined;
+
+    const place = `${context.region || ''} ${context.location || ''}`.toLowerCase();
+    if (/(vietnam|tonkin|annam|cochinchina|mekong delta|hanoi|saigon)/.test(place)) {
+        return 'VIETNAMESE';
+    }
+    if (/(siam|thailand|ayutthaya|bangkok|sukhothai)/.test(place)) {
+        return year >= 1350 && year < 1767 ? 'THAI_AYUTTHAYA' : 'THAI';
+    }
+    if (/(cambodia|khmer|angkor|phnom penh)/.test(place)) {
+        return year >= 800 && year < 1431 ? 'KHMER_ANGKOR' : 'KHMER';
+    }
+    if (/(burma|myanmar|irrawaddy|bagan|rangoon|yangon|mandalay)/.test(place)) {
+        return 'BURMESE';
+    }
+    if (/(philippines|luzon|visayas|mindanao|manila|cebu)/.test(place)) {
+        return 'FILIPINO';
+    }
+    if (place.includes('java')) return 'JAVANESE';
+    if (/(malacca|malay peninsula)/.test(place)) {
+        return year >= 1300 && /islam|muslim|sunni|shia/i.test(religion || '')
+            ? 'MALAY_ISLAMIC_HISTORICAL'
+            : 'MALAY';
+    }
+    if (
+        year >= 1300 &&
+        /(spice islands|maluku|molucca|ternate|tidore)/.test(place) &&
+        /islam|muslim|sunni|shia/i.test(religion || '')
+    ) {
+        return 'MALAY_ISLAMIC_HISTORICAL';
+    }
+    if (/(spice islands|maluku|molucca|sumatra|borneo|sulawesi|maritime)/.test(place)) {
+        if (year >= 1300 && /islam|muslim|sunni|shia/i.test(religion || '')) {
+            return 'MALAY_ISLAMIC_HISTORICAL';
+        }
+        return noise.random() < 0.5 ? 'MALAY' : 'INDONESIAN';
+    }
+    return undefined;
+};
 
 function cmToFeetAndInches(cm: number): string {
     const totalInches = cm / 2.54;
@@ -460,7 +567,8 @@ function generateProceduralFamily(
     currentYear: number,
     attributes: any[],
     noise: ValueNoise,
-    characterBirthYear?: number  // CRITICAL: Pass actual birthYear to avoid recalculation
+    characterBirthYear?: number,  // CRITICAL: Pass actual birthYear to avoid recalculation
+    familyNameKey?: string
 ): void {
     const age = character.age;
     // CRITICAL FIX: Use the passed birthYear if provided, otherwise calculate
@@ -473,14 +581,16 @@ function generateProceduralFamily(
         (characterBirthYear !== undefined ? ` (USED passed birthYear=${characterBirthYear})` : ' (calculated)'));
 
     const gender = character.gender;
+    const normalizedGender: 'male' | 'female' =
+        String(gender).toLowerCase() === 'female' ? 'female' : 'male';
 
     // ===== PARENTS =====
     const parentAge = 25 + Math.floor(noise.random() * 15); // Parents 25-40 years older
     const fatherBirthYear = birthYear - parentAge;
     const motherBirthYear = birthYear - parentAge + Math.floor(noise.random() * 5); // Mother might be slightly younger
 
-    const fatherName = generateNpcName('Male', culturalZone, region, fatherBirthYear, noise);
-    const motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise);
+    const fatherName = generateNpcName('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey);
+    const motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise, familyNameKey);
 
     // Generate father's profession
     const fatherProfession = generateParentProfession('male', culturalZone, era, noise);
@@ -521,7 +631,7 @@ function generateProceduralFamily(
 
         const siblingGender = noise.random() > 0.5 ? 'male' : 'female';
         const siblingBirthYear = currentYear - siblingAge;
-        const siblingName = generateNpcName(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, siblingBirthYear, noise);
+        const siblingName = generateNpcName(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, siblingBirthYear, noise, familyNameKey);
 
         character.family.push({
             name: siblingName,
@@ -533,8 +643,10 @@ function generateProceduralFamily(
 
     // Add twin sibling if character has Twin attribute
     if (hasTwin) {
-        const twinGender = noise.random() > 0.5 ? gender : (gender === 'male' ? 'female' : 'male');
-        const twinName = generateNpcName(twinGender === 'male' ? 'Male' : 'Female', culturalZone, region, birthYear, noise);
+        const twinGender = noise.random() > 0.5
+            ? normalizedGender
+            : (normalizedGender === 'male' ? 'female' : 'male');
+        const twinName = generateNpcName(twinGender === 'male' ? 'Male' : 'Female', culturalZone, region, birthYear, noise, familyNameKey);
         character.family.push({
             name: twinName,
             relation: 'twin',
@@ -545,14 +657,14 @@ function generateProceduralFamily(
 
     // ===== SPOUSE =====
     // Marriage age varies by era and culture
-    const marriageAge = getHistoricalMarriageAge(era, gender, noise);
+    const marriageAge = getHistoricalMarriageAge(era, normalizedGender, noise);
 
     if (age >= marriageAge && noise.random() > 0.3) { // 70% chance of being married if old enough
         const spouseAgeGap = Math.floor(noise.random() * 10) - 5; // Spouse -5 to +5 years
         const spouseAge = age + spouseAgeGap;
         const spouseBirthYear = currentYear - spouseAge;
-        const spouseGender = gender === 'male' ? 'female' : 'male';
-        const spouseName = generateNpcName(spouseGender === 'male' ? 'Male' : 'Female', culturalZone, region, spouseBirthYear, noise);
+        const spouseGender = normalizedGender === 'male' ? 'female' : 'male';
+        const spouseName = generateNpcName(spouseGender === 'male' ? 'Male' : 'Female', culturalZone, region, spouseBirthYear, noise, familyNameKey);
         const spouseProfession = spouseGender === 'male'
             ? generateParentProfession('male', culturalZone, era, noise)
             : generateMotherProfession(culturalZone, era, noise);
@@ -579,7 +691,7 @@ function generateProceduralFamily(
                 const childAge = Math.floor(noise.random() * childAgeMax);
                 const childBirthYear = currentYear - childAge;
                 const childGender = noise.random() > 0.5 ? 'male' : 'female';
-                const childName = generateNpcName(childGender === 'male' ? 'Male' : 'Female', culturalZone, region, childBirthYear, noise);
+                const childName = generateNpcName(childGender === 'male' ? 'Male' : 'Female', culturalZone, region, childBirthYear, noise, familyNameKey);
 
                 character.family.push({
                     name: childName,
@@ -737,6 +849,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         era,
         culturalZone,
         region: context.region,
+        year: dateInfo.year,
+        localArea: context.location,
     };
 
     // Log ethnicity usage for debugging
@@ -744,8 +858,21 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         console.log(`[Character Generator] Using ethnicity '${(spec as any).ethnicity}' for character generation (geographic zone would be: ${mapLocationToCulture(context.location, dateInfo.year)})`);
     }
     
-    // Generate base profile but allow overrides from spec
-    let baseProfile = generateBaseProfile(noise, generationContext);
+    const requestedGender: Gender | undefined = spec.gender
+        ? spec.gender === 'male' ? 'Male' : 'Female'
+        : undefined;
+    const exactRequestedWealth = (spec as CharacterSpecification & { wealthLevel?: WealthLevel }).wealthLevel;
+
+    // Generate appearance and clothing from the finalized inputs. Previously the
+    // profile rolled a random gender and wealth tier first, then overwrote those
+    // labels without rebuilding the portrait (e.g. a male office worker retaining
+    // a randomly generated tiara and qipao).
+    let baseProfile = generateBaseProfile(noise, generationContext, {
+        gender: requestedGender,
+        age: spec.age ?? undefined,
+        wealthLevel: exactRequestedWealth,
+        occupation: spec.profession,
+    });
     
     // Apply custom specifications
     if (spec.gender) {
@@ -759,6 +886,10 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     // Use custom name if provided
     if (spec.name) {
         baseProfile.name = spec.name;
+    }
+
+    if (spec.religion && typeof spec.religion === 'string') {
+        baseProfile.religion = spec.religion;
     }
     
     // Handle health specification
@@ -783,82 +914,72 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         }
     }
     
-    // Handle social class - derive from wealth level if not already set
-    let socialClass = baseProfile.socialContext.socialClass;
-    if (!socialClass) {
-        // Derive social class from constrained wealth level (era-aware)
-        const isModernEra = generationContext.era === HistoricalEra.MODERN_ERA || generationContext.era === HistoricalEra.FUTURE_ERA;
-        const wealthToClass: Record<string, string> = {
-            'noble': isModernEra ? 'Upper Class' : 'Noble',
-            'wealthy': isModernEra ? 'Upper Class' : 'Merchant',
-            'comfortable': isModernEra ? 'Middle Class' : 'Commoner',
-            'modest': isModernEra ? 'Working Class' : 'Commoner',
-            'poor': isModernEra ? 'Working Class' : 'Peasant'
-        };
-        socialClass = wealthToClass[baseProfile.wealthLevel] || (isModernEra ? 'Working Class' : 'Commoner');
-    }
+    // Status and wealth are separate axes. Wealth affects the probabilities but
+    // no longer dictates that every wealthy person is a merchant or every poor
+    // person a peasant. Explicit status also leaves an independently supplied
+    // wealth level intact.
+    const sampledStatus = sampleSocialStatus(
+        generationContext.era,
+        baseProfile.wealthLevel,
+        () => noise.random()
+    );
+    const socialClass = formatSocialStatusForEra(
+        spec.socialClass || sampledStatus,
+        generationContext.era
+    );
 
     let role = determineSocialRole(
         baseProfile,
         {
             era: generationContext.era,
             culturalZone: generationContext.culturalZone,
-            region: context.region
+            region: context.region,
+            year: dateInfo.year,
+            preferredSocialClass: socialClass,
         }
     ).role;
-
-    // Handle explicit social class specification
-    // Note: Religion-based constraints from generateBaseProfile already applied to wealthLevel
-    if (spec.socialClass) {
-        let requestedClass = '';
-        let requestedWealth: WealthLevel = 'modest';
-
-        const isModernEra = generationContext.era === HistoricalEra.MODERN_ERA || generationContext.era === HistoricalEra.FUTURE_ERA;
-
-        switch (spec.socialClass) {
-            case 'peasant':
-                requestedClass = isModernEra ? 'Working Class' : 'Peasant';
-                requestedWealth = 'poor';
-                break;
-            case 'commoner':
-                requestedClass = isModernEra ? 'Middle Class' : 'Commoner';
-                requestedWealth = 'comfortable';
-                break;
-            case 'merchant':
-                requestedClass = isModernEra ? 'Upper Class' : 'Merchant';
-                requestedWealth = 'wealthy';
-                break;
-            case 'noble':
-                requestedClass = isModernEra ? 'Upper Class' : 'Noble';
-                requestedWealth = 'noble';
-                break;
-        }
-
-        // Check if the requested class is compatible with religion constraints
-        // baseProfile.wealthLevel was already constrained in generateBaseProfile
-        const wealthOrder: WealthLevel[] = ['poor', 'modest', 'comfortable', 'wealthy', 'noble'];
-        const requestedIndex = wealthOrder.indexOf(requestedWealth);
-        const currentMaxIndex = wealthOrder.indexOf(baseProfile.wealthLevel);
-
-        if (requestedIndex <= currentMaxIndex) {
-            // Requested class is allowed - apply it
-            socialClass = requestedClass;
-            baseProfile.wealthLevel = requestedWealth;
-        } else {
-            // Requested class violates historical constraints - use constrained maximum instead
-            console.warn(`[Character Generator] Requested social class '${spec.socialClass}' not historically plausible for ${baseProfile.religion} in ${generationContext.culturalZone}/${generationContext.era}. Using '${socialClass}' instead.`);
-            // Keep the already-constrained socialClass and wealthLevel from baseProfile
-        }
-
-        baseProfile.socialContext.socialClass = socialClass;
-    }
     
     // Handle profession specification
     if (spec.profession && typeof spec.profession === 'string') {
-        // Just use the custom profession as-is, capitalizing first letter
-        // The assembleStartingPackage function will handle unknown professions with fallback
-        role = spec.profession.charAt(0).toUpperCase() + spec.profession.slice(1);
+        const requestedProfession = spec.profession.charAt(0).toUpperCase() + spec.profession.slice(1);
+        if (isClergyRoleCompatible(requestedProfession, baseProfile.religion)) {
+            // The assembleStartingPackage function handles unknown non-religious
+            // professions with its ordinary fallback.
+            role = requestedProfession;
+        } else {
+            console.warn(
+                `[Character Generator] Rejected religious vocation '${requestedProfession}' for religion '${baseProfile.religion}'.`
+            );
+        }
     }
+
+    // generateBaseProfile assigns beliefs before specifications are overlaid.
+    // Recompute after religion and profession are final so a pagan character
+    // cannot retain a Catholic worldview from the discarded random profile.
+    const coherentBeliefs = assignBeliefs({
+        ...baseProfile,
+        class: socialClass,
+        role,
+        profession: role,
+    } as PlayerCharacter, noise);
+    baseProfile.ideology = coherentBeliefs.ideology;
+    baseProfile.beliefs = coherentBeliefs.beliefs;
+
+    // Religion constraints or explicit social class handling may have adjusted
+    // wealth after the base profile was built. Re-resolve the outfit once, using
+    // the actual gender, wealth and occupation that will be displayed.
+    const coherentOutfit = generateCompleteOutfit(
+        culturalZone,
+        generationContext.era,
+        baseProfile.wealthLevel,
+        baseProfile.gender,
+        role,
+        context.region
+    );
+    baseProfile.appearance = {
+        ...baseProfile.appearance,
+        ...coherentOutfit,
+    };
 
     // Adjust personality to be more coherent with the assigned profession
     baseProfile.personality = adjustPersonalityForProfession(
@@ -867,8 +988,33 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         baseProfile.stats
     );
 
-    // Generate name - use custom if provided, otherwise generate
-    const name = spec.name || generateNpcName(baseProfile.gender, culturalZone, context.region, dateInfo.year, noise, undefined);
+    // Generate name - use custom if provided, otherwise prefer a coordinated
+    // place/religion track when the broad cultural-zone routing is too coarse.
+    const contextualNameKey = resolveContextualNameKey(
+        context,
+        dateInfo.year,
+        baseProfile.religion,
+        noise
+    );
+    const name = spec.name || generateNpcName(
+        baseProfile.gender,
+        culturalZone,
+        context.region,
+        dateInfo.year,
+        noise,
+        contextualNameKey
+    );
+
+    // A broad map zone is not an ethnicity. If the regional name generator selects
+    // a Russian name in Soviet Kazakhstan, use the corresponding appearance palette
+    // rather than always treating every EAST_ASIAN location as Han Chinese.
+    const detectedEthnicity = detectEthnicityFromName(name);
+    if (detectedEthnicity && detectedEthnicity !== culturalZone && !isSoutheastAsianContext(context)) {
+        baseProfile.appearance = {
+            ...baseProfile.appearance,
+            ...generateCulturalAppearance(detectedEthnicity, noise),
+        };
+    }
     
     // Create a minimal character first for companion generation
     const tempCharacter: Partial<PlayerCharacter> = {
@@ -889,7 +1035,20 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     });
     
     // Generate appearance with palette
-    const palette = generateClothingPalette(baseProfile.wealthLevel, generationContext.era, culturalZone, baseProfile.gender, noise);
+    let palette = generateClothingPalette(baseProfile.wealthLevel, generationContext.era, culturalZone, baseProfile.gender, noise);
+    const centralAsianModern =
+        culturalZone === 'EAST_ASIAN' &&
+        generationContext.era === HistoricalEra.MODERN_ERA &&
+        /(kazakh|tian shan|altai|aral sea|dzungarian|central asia)/i.test(
+            `${context.region || ''} ${context.location || ''}`
+        );
+    if (centralAsianModern) {
+        palette = {
+            primary: '#46515b',
+            secondary: '#777165',
+            accent: '#72604d',
+        };
+    }
     
     // Helper function to get color name from hex
     const getColorName = (colorHex: string | undefined): string => {
@@ -1169,7 +1328,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     let numMarkings = 0;
     if (noise.random() < markingProbability) {
         // Higher probability cultures often have multiple markings
-        if (culturalZone === 'OCEANIA' || culturalZone === 'NORTH_AMERICAN_PRE_COLUMBIAN' || 
+        if (culturalZone === 'NORTH_AMERICAN_PRE_COLUMBIAN' ||
             culturalZone === 'SUB_SAHARAN_AFRICAN' || culturalZone === 'SOUTH_AMERICAN') {
             // These cultures almost always had multiple types of body modifications
             const roll = noise.random();
@@ -1259,6 +1418,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         ...baseProfile,
         name,
         class: socialClass,
+        socialClass,
         profession: role,
         level: Math.floor(1 + Math.random() * 5), // Random level 1-5
         experience: 0,
@@ -1267,9 +1427,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         maxHealth: maxHealth,
         fatigue: Math.floor(startingFatigue),
         maxFatigue: 100,
-        currency: socialClass === 'Noble' ? 50 + Math.floor(noise.random() * 50) :
-                  socialClass === 'Merchant' ? 20 + Math.floor(noise.random() * 30) :
-                  10 + Math.floor(noise.random() * 10),
+        currency: generateStartingCurrency(baseProfile.wealthLevel, noise),
         era: generationContext.era,
         historicalEra: generationContext.era,
         culturalZone: generationContext.culturalZone,
@@ -1349,7 +1507,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         currentYear,
         attributes,
         noise,
-        birthYear  // Pass the actual birthYear to avoid recalculation
+        birthYear,  // Pass the actual birthYear to avoid recalculation
+        contextualNameKey || detectNameListKey(name)
     );
 
     // Initialize disease health with potential disease based on stats and setting
@@ -1597,6 +1756,8 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
         era: dateInfo.era as HistoricalEra, 
         culturalZone,
         region: finalContext.region,
+        year: dateInfo.year,
+        localArea: finalContext.location,
     };
     
     const baseProfile = generateBaseProfile(noise, generationContext);
@@ -1609,14 +1770,27 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
         baseProfile.stats
     );
 
-    const name = generateNpcName(baseProfile.gender, culturalZone, context.region, dateInfo.year, noise, nameKey);
+    const contextualNameKey = resolveContextualNameKey(
+        finalContext,
+        dateInfo.year,
+        baseProfile.religion,
+        noise
+    );
+    const name = generateNpcName(
+        baseProfile.gender,
+        culturalZone,
+        finalContext.region,
+        dateInfo.year,
+        noise,
+        contextualNameKey || nameKey
+    );
 
     // Detect ethnicity from name for historically accurate appearance
     const detectedEthnicity = detectEthnicityFromName(name);
     const appearanceEthnicity = detectedEthnicity || culturalZone; // Fallback to geographic zone
 
     // Regenerate appearance with correct ethnicity if ethnicity differs from geographic zone
-    if (detectedEthnicity && detectedEthnicity !== culturalZone) {
+    if (detectedEthnicity && detectedEthnicity !== culturalZone && !isSoutheastAsianContext(finalContext)) {
         const ethnicAppearance = generateCulturalAppearance(appearanceEthnicity, noise);
         baseProfile.appearance = { ...baseProfile.appearance, ...ethnicAppearance };
     }
@@ -1682,7 +1856,7 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
     let numMarkings = 0;
     if (noise.random() < markingProbability) {
         // Higher probability cultures often have multiple markings
-        if (culturalZone === 'OCEANIA' || culturalZone === 'NORTH_AMERICAN_PRE_COLUMBIAN' || 
+        if (culturalZone === 'NORTH_AMERICAN_PRE_COLUMBIAN' ||
             culturalZone === 'SUB_SAHARAN_AFRICAN' || culturalZone === 'SOUTH_AMERICAN') {
             // These cultures almost always had multiple types of body modifications
             const roll = noise.random();
@@ -1817,7 +1991,7 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
         maxHealth: maxHealth,
         fatigue: Math.floor(startingFatigue),
         maxFatigue: 100,
-        currency: 10 + Math.floor(noise.random() * 20),
+        currency: generateStartingCurrency(baseProfile.wealthLevel, noise),
         era: generationContext.era,
         historicalEra: generationContext.era,
         culturalZone: generationContext.culturalZone,
@@ -1838,7 +2012,7 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
 
     // Add attributes to character before generating backstory
     // Ethnicity already detected and applied above
-    if (detectedEthnicity) {
+    if (detectedEthnicity && !isSoutheastAsianContext(finalContext)) {
         console.log(`[Character Generator] Detected ethnicity '${detectedEthnicity}' from name '${name}' (geographic zone: ${culturalZone})`);
         // Store as ethnicCulturalZone to distinguish from geographic culturalZone
         (partialCharacter as any).ethnicCulturalZone = detectedEthnicity;
@@ -1872,26 +2046,14 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
     generateProceduralFamily(
         partialCharacter,
         culturalZone,
-        context.region,
+        finalContext.region,
         generationContext.era,
         currentYear,
         attributes,
         noise,
-        birthYear  // Pass the actual birthYear to avoid recalculation
+        birthYear,  // Pass the actual birthYear to avoid recalculation
+        contextualNameKey || detectNameListKey(name) || nameKey
     );
-
-    // Twin handling moved to generateProceduralFamily
-    const hasTwin = attributes.some(attr => attr.id === 'twin');
-    if (hasTwin) {
-        const twinGender = Math.random() > 0.5 ? partialCharacter.gender : (partialCharacter.gender === 'male' ? 'female' : 'male');
-        const twinName = generateNpcName(twinGender === 'male' ? 'Male' : 'Female', culturalZone, context.region, currentYear - partialCharacter.age, noise);
-        partialCharacter.family.push({
-            name: twinName,
-            relation: 'twin',
-            age: partialCharacter.age
-        });
-        console.log(`[Character Generator] Added twin sibling ${twinName} to family`);
-    }
 
     // Initialize disease health with potential disease based on stats and setting
     const diseaseService = DiseaseService.getInstance();

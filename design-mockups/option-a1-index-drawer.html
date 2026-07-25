@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Option A1 — Index Drawer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,500;1,8..60,600&display=swap');
+    :root {
+      --paper: #f5f3ed;
+      --panel: #fbfaf6;
+      --ink: #1e1f1c;
+      --muted: #6d6d66;
+      --line: #d8d4ca;
+      --strong-line: #b8b4aa;
+      --green: #657f73;
+      --green-pale: #e8eeea;
+      --clay: #bc704e;
+      --sand: #c59c68;
+      --navy: #253147;
+      --sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      --serif: "Source Serif 4", Georgia, serif;
+      --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+    button, input, select, textarea { font: inherit; }
+    .page { max-width: 1540px; margin: 0 auto; padding: 0 34px 48px; }
+    .site-header {
+      height: 68px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
+    .brand-mark {
+      display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 9px;
+      border: 1px solid var(--ink); border-radius: 50%; font-size: 14px;
+    }
+    .site-nav { display: flex; align-items: center; gap: 25px; color: var(--muted); font-size: 12px; }
+    .site-nav b { color: var(--ink); font-weight: 600; }
+    .plain-button {
+      border: 1px solid var(--strong-line); border-radius: 999px; background: transparent;
+      padding: 9px 13px; color: var(--ink); font-size: 10px; font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase;
+    }
+    .generator { border-bottom: 1px solid var(--line); }
+    .generator-bar {
+      min-height: 74px; display: grid; grid-template-columns: 182px minmax(0, 1fr) auto;
+      gap: 26px; align-items: center;
+    }
+    .section-label {
+      font: 600 10px/1.25 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+      color: var(--clay);
+    }
+    .mode-index { display: flex; align-items: center; min-width: 0; }
+    .mode {
+      padding: 10px 17px; border-left: 1px solid var(--line); color: var(--muted);
+      font-size: 12px; white-space: nowrap;
+    }
+    .mode.active { color: var(--ink); font-weight: 650; }
+    .mode em {
+      display: inline-grid; place-items: center; width: 18px; height: 18px; margin-right: 7px;
+      border-radius: 50%; background: var(--green-pale); color: var(--green);
+      font: normal 9px var(--mono);
+    }
+    .drawer-toggle {
+      display: flex; align-items: center; gap: 12px; border: 0; background: transparent;
+      cursor: pointer; color: var(--ink);
+    }
+    .drawer-toggle span { font-size: 11px; font-weight: 650; }
+    .chevron {
+      display: grid; place-items: center; width: 31px; height: 31px;
+      border: 1px solid var(--strong-line); border-radius: 50%;
+      transition: transform .35s cubic-bezier(.2,.75,.2,1), background .2s;
+    }
+    .generator.open .chevron { transform: rotate(180deg); background: var(--ink); color: #fff; }
+    .drawer-shell {
+      display: grid; grid-template-rows: 0fr;
+      transition: grid-template-rows .48s cubic-bezier(.2,.75,.2,1);
+    }
+    .generator.open .drawer-shell { grid-template-rows: 1fr; }
+    .drawer-clip { overflow: hidden; }
+    .drawer {
+      opacity: 0; transform: translateY(-10px); padding: 0 0;
+      transition: opacity .25s ease, transform .42s cubic-bezier(.2,.75,.2,1), padding .42s;
+    }
+    .generator.open .drawer { opacity: 1; transform: none; padding: 1px 0 26px; }
+    .drawer-grid {
+      display: grid; grid-template-columns: 182px minmax(0, 1fr); gap: 26px;
+      border-top: 1px solid var(--line); padding-top: 22px;
+    }
+    .drawer-note { color: var(--muted); font-size: 12px; line-height: 1.55; max-width: 150px; }
+    .form { display: grid; grid-template-columns: 1.15fr 1fr 1fr .85fr; gap: 12px; }
+    .field label {
+      display: block; margin: 0 0 7px; font: 600 9px var(--mono);
+      letter-spacing: .08em; color: var(--muted); text-transform: uppercase;
+    }
+    .control {
+      width: 100%; height: 39px; border: 1px solid var(--line); border-radius: 3px;
+      background: var(--panel); color: var(--ink); padding: 0 11px; font-size: 12px;
+    }
+    .source-row {
+      grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0,1fr) auto;
+      align-items: end; gap: 12px; padding-top: 2px;
+    }
+    .source-preview {
+      min-height: 55px; border: 1px solid var(--line); border-radius: 3px;
+      background: var(--panel); padding: 11px 13px; color: var(--muted);
+      font-size: 12px; line-height: 1.45;
+    }
+    .source-preview b { color: var(--ink); }
+    .primary {
+      height: 40px; border: 0; border-radius: 999px; background: var(--ink);
+      color: #fff; padding: 0 17px; font-size: 10px; font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase;
+    }
+    .persona-head {
+      display: grid; grid-template-columns: 1fr auto; align-items: end;
+      padding: 28px 0 22px; border-bottom: 1px solid var(--line);
+    }
+    .persona-kicker { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .pill {
+      border: 1px solid var(--line); border-radius: 999px; padding: 6px 9px;
+      font: 600 9px var(--mono); letter-spacing: .035em; text-transform: uppercase;
+    }
+    .pill:first-child { background: var(--green-pale); color: #416356; }
+    h1 {
+      margin: 0; font-family: var(--serif); font-size: clamp(47px, 5vw, 73px); line-height: .93;
+      letter-spacing: -.045em; font-weight: 700;
+    }
+    .date { text-align: right; }
+    .date strong {
+      display: block; font-family: var(--serif); font-size: 37px; line-height: 1;
+      letter-spacing: -.035em; font-weight: 700;
+    }
+    .date span { display: block; margin-top: 8px; color: var(--muted); font-size: 12px; }
+    .persona-grid {
+      display: grid; grid-template-columns: 240px minmax(420px, 1fr) 280px;
+      min-height: 630px;
+    }
+    .portrait-column { padding: 24px 24px 0 0; border-right: 1px solid var(--line); }
+    .portrait {
+      height: 278px; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #9db7af, #d7c292 70%);
+    }
+    .portrait::before {
+      content: ""; position: absolute; left: 52px; top: 54px; width: 130px; height: 168px;
+      background: #6d4d3a; border-radius: 60px 60px 42px 42px;
+      box-shadow: 0 -26px 0 #211d1c, 0 66px 0 31px #d5c08d;
+    }
+    .portrait::after {
+      content: "TJANDRAWATI"; position: absolute; left: 13px; bottom: 12px;
+      color: white; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+    }
+    .stat { padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .stat small {
+      display: block; margin-bottom: 4px; font: 600 9px var(--mono);
+      color: var(--muted); letter-spacing: .08em; text-transform: uppercase;
+    }
+    .stat b { font-size: 15px; letter-spacing: -.02em; }
+    .content-column { padding: 0 30px; }
+    .tabs { display: flex; gap: 26px; border-bottom: 1px solid var(--line); }
+    .tabs span { padding: 18px 0 14px; color: var(--muted); font-size: 11px; }
+    .tabs b { color: var(--ink); border-bottom: 2px solid var(--green); margin-bottom: -1px; }
+    .lede {
+      max-width: 760px; margin: 28px 0 21px; font-family: var(--serif);
+      font-size: 22px; line-height: 1.4; font-style: italic; font-weight: 500;
+      letter-spacing: -.018em;
+    }
+    .story {
+      max-width: 770px; font-family: var(--serif); font-size: 18px;
+      line-height: 1.68; letter-spacing: -.012em;
+    }
+    .story p { margin: 0 0 15px; }
+    .story p:first-child::first-letter {
+      float: left; padding: 8px 6px 0 0; font-family: var(--serif);
+      font-size: 42px; line-height: .72; color: var(--clay); font-weight: 700;
+    }
+    .detail-column { padding: 24px 0 0 26px; border-left: 1px solid var(--line); }
+    .detail-card { padding: 0 0 19px; margin-bottom: 19px; border-bottom: 1px solid var(--line); }
+    .detail-card h2 {
+      margin: 7px 0 10px; font-family: var(--serif); font-size: 23px;
+      line-height: 1.1; letter-spacing: -.025em; font-weight: 600;
+    }
+    .detail-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
+    .map {
+      height: 112px; margin: 9px 0 11px; padding: 72px 12px 0;
+      background: var(--navy); color: white; font: 600 9px var(--mono); letter-spacing: .06em;
+    }
+    @media (max-width: 920px) {
+      .mode:nth-child(n+3) { display: none; }
+      .persona-grid { grid-template-columns: 210px 1fr; }
+      .detail-column { display: none; }
+      .form { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .page { padding: 0 18px 35px; }
+      .site-nav span { display: none; }
+      .generator-bar { grid-template-columns: 1fr auto; gap: 12px; }
+      .generator-bar > .section-label { display: none; }
+      .mode-index { overflow: hidden; }
+      .mode { padding: 9px 10px; }
+      .drawer-grid, .persona-grid { grid-template-columns: 1fr; }
+      .drawer-note { display: none; }
+      .portrait-column { border-right: 0; padding-right: 0; }
+      .content-column { padding: 0; }
+      .persona-head { grid-template-columns: 1fr; }
+      .date { text-align: left; margin-top: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <div class="brand"><span class="brand-mark">⌛</span>Historical Persona Generator</div>
+      <nav class="site-nav"><b>Current persona</b><span>Saved lives</span><span>About</span><button class="plain-button">Save PDF</button></nav>
+    </header>
+
+    <section class="generator" id="generator">
+      <div class="generator-bar">
+        <div class="section-label">Create a persona</div>
+        <div class="mode-index">
+          <div class="mode active"><em>01</em>Procedural</div>
+          <div class="mode"><em>02</em>Wikipedia</div>
+          <div class="mode"><em>03</em>Web or text</div>
+          <div class="mode"><em>04</em>Old Bailey</div>
+        </div>
+        <button class="drawer-toggle" aria-expanded="false" aria-controls="drawer">
+          <span>Source options</span><i class="chevron">⌄</i>
+        </button>
+      </div>
+      <div class="drawer-shell" id="drawer">
+        <div class="drawer-clip">
+          <div class="drawer">
+            <div class="drawer-grid">
+              <p class="drawer-note">Choose a source mode and constrain the next generated life. The current persona remains visible below.</p>
+              <div class="form">
+                <div class="field"><label>Source mode</label><select class="control"><option>Old Bailey Proceedings</option><option>Wikipedia article</option><option>Web page or pasted text</option></select></div>
+                <div class="field"><label>Person signal</label><select class="control"><option>Any</option><option>Woman</option><option>Man</option></select></div>
+                <div class="field"><label>Decade</label><select class="control"><option>Any indexed trial</option><option>1690s</option><option>1750s</option></select></div>
+                <div class="field"><label>Generate as</label><select class="control"><option>Ordinary person</option><option>Named subject</option></select></div>
+                <div class="source-row">
+                  <div class="source-preview"><b>No source selected.</b> Draw a random trial, paste text, or enter a historical URL. Evidence-aware completion is on.</div>
+                  <button class="primary">Draw a trial & generate →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="persona-head">
+      <div>
+        <div class="persona-kicker"><span class="pill">North Queensland</span><span class="pill">Daintree Rainforest</span><span class="pill">Early winter</span><span class="pill">Antiquity</span></div>
+        <h1>Tjandrawati</h1>
+      </div>
+      <div class="date"><strong>1965 BCE</strong><span>December 10 · early winter</span></div>
+    </section>
+
+    <main class="persona-grid">
+      <aside class="portrait-column">
+        <div class="portrait"></div>
+        <div class="stat"><small>Age & identity</small><b>44 years · Male</b></div>
+        <div class="stat"><small>Profession</small><b>Potter</b></div>
+        <div class="stat"><small>Social position</small><b>Merchant household</b></div>
+        <div class="stat"><small>Religious world</small><b>Dreaming tradition</b></div>
+      </aside>
+      <article class="content-column">
+        <nav class="tabs"><b>Biography</b><span>Family</span><span>Life events</span><span>Inner life</span><span>Equipment</span></nav>
+        <p class="lede">A maker of useful things, rooted in family obligations and the seasonal life of rainforest country.</p>
+        <div class="story">
+          <p>At forty-four, Tjandrawati makes pottery for household use and exchange. His work is practical and social: a good firing supports the family, a well-made vessel travels through local networks, and both shape his standing among people who know his work.</p>
+          <p>His nearest concerns are tangible—weather, good clay, kin obligations, and the slow accumulation of trust. He is steady rather than showy, attentive to the ways an object, a marriage tie, or a missed obligation can alter a life.</p>
+        </div>
+      </article>
+      <aside class="detail-column">
+        <section class="detail-card"><div class="section-label">Place & moment</div><div class="map">DAINTREE · 1965 BCE</div><p>Regional and chronological constraints applied.</p></section>
+        <section class="detail-card"><div class="section-label">Material world</div><h2>Things carried</h2><p>Wheat-feather cape<br>Ear stud<br>Dark face paint<br>Fired-clay tools</p></section>
+        <section class="detail-card"><div class="section-label">Disposition</div><h2>Steadfast</h2><p>Finds security in routine and reciprocal obligation.</p></section>
+      </aside>
+    </main>
+  </div>
+  <script>
+    const generator = document.querySelector('#generator');
+    const toggle = document.querySelector('.drawer-toggle');
+    toggle.addEventListener('click', () => {
+      const isOpen = generator.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', String(isOpen));
+    });
+  </script>
+</body>
+</html>

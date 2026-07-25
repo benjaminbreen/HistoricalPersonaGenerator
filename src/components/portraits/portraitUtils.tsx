@@ -91,20 +91,8 @@ export function renderFaceMicroShades(
   plotPixel(elements, cheekX, cheekY, skin.light, 'cheek');
   plotPixel(elements, cheekX + 1, cheekY, skin.mid, 'cheek');
 
-  // nose bridge highlight (a tiny 2px vertical)
-  const noseX = cx;
-  const noseY = headY + Math.round(headH * 0.45);
-  plotPixel(elements, noseX, noseY, skin.light, 'nose');
-  plotPixel(elements, noseX, noseY + 1, skin.mid, 'nose');
-
-  // under-nose shadow (1px) for separation
-  plotPixel(elements, noseX, noseY + 3, skin.shadow, 'subnose');
-
-  // lower lip: 2px highlight + underside shadow
-  const lipY = headY + Math.round(headH * 0.64);
-  plotPixel(elements, cx - 1, lipY, skin.light, 'lipl');
-  plotPixel(elements, cx, lipY, skin.light, 'lipc');
-  plotPixel(elements, cx, lipY + 1, skin.shadow, 'lipshadow');
+  // Nose and mouth each have a single dedicated renderer. Duplicating them in
+  // this micro-shading pass created disconnected highlights and dark pixel knots.
 }
 
 // ============ ENHANCED EYE RENDERING ============
