@@ -7,16 +7,21 @@ import { CHARACTER_NAMES as NAME_LISTS } from '../constants/characterData/names'
 import { parseDateString } from '../utils/dateUtils';
 import { createItemInstance, addItemToInventory, assembleStartingPackage } from '../utils/inventoryUtils';
 import { ValueNoise } from '../utils/noise';
-import { generateBaseProfile, determineSocialRole, generateNpcName, assignBeliefs, generateClothingPalette, generateCompleteOutfit, generateCulturalAppearance, adjustPersonalityForProfession, validateCharacterCoherence } from '../generation/common/npcUtils';
+import { generateBaseProfile, determineSocialRole, generateNpcName, generateNpcNameDetailed, assignBeliefs, generateClothingPalette, generateCompleteOutfit, generateCulturalAppearance, adjustPersonalityForProfession, validateCharacterCoherence } from '../generation/common/npcUtils';
 import { mapLocationToCulture } from '../utils/mapUtils';
 import { hexToColorName } from '../utils/colorUtils';
 import { CharacterSpecification } from './worldWeaverService';
 import DiseaseService from './diseaseService';
 import { AttributeBadgeService } from './attributeBadgeService';
+import { findAttributeById } from '../constants/attributeDefinitions';
+import { hasCapability } from '../constants/societyCapabilities';
 import { getMarkingsForCharacter, selectRandomMarking, getRandomPattern, convertToAppearanceMarking, getMarkingProbability } from '../constants/characterData/culturalMarkings';
 import { formatSocialStatusForEra, sampleSocialStatus } from './socialStatusService';
+import { reconcileEpithet } from '../constants/characterData/nameConventions';
+import { applyAttributeAppearance } from './attributeAppearanceService';
 import { isClergyRoleCompatible } from '../constants/characterData/religionClergyRoles';
 import { illnessRate, pickByPrevalence } from './diseasePrevalenceService';
+import { getAreaClimate, hemisphereFor, seasonFor, thermalNeed } from './climateService';
 import { describeBeliefSecondPerson, withIndefiniteArticle } from './narrativeTextService';
 import { createHistoricalContext } from './historicalContextService';
 import type { HistoricalContext } from '../types/historicalContext';
@@ -292,7 +297,12 @@ const RELIGION_DESCRIPTIONS: Record<string, string> = {
     'Unknown': 'following your own spiritual path'
 };
 
-// Map of attribute IDs to short descriptive phrases
+/**
+ * Fallback phrases for attribute ids, keyed by id. Current definitions carry
+ * their own `phrase` field, which is what generateAttributeSentence prefers;
+ * this map only catches ids from older saved personas. Do not add to it — put
+ * the phrase on the attribute definition instead, so the two cannot drift.
+ */
 const ATTRIBUTE_DESCRIPTIONS: Record<string, string> = {
     // Physical
     'strong': 'exceptionally strong',
@@ -451,14 +461,21 @@ function formatHairstyle(hairstyle: string): string {
     return styleMap[hairstyle] || hairstyle.replace(/_/g, ' ');
 }
 
-export function generateAttributeSentence(character: { attributes?: Array<{ id: string; name: string }> }): string | null {
+export function generateAttributeSentence(
+    character: { attributes?: Array<{ id: string; name: string; phrase?: string }> }
+): string | null {
     if (!character.attributes || character.attributes.length === 0) {
         return null;
     }
 
     const attributePhrases = character.attributes
         .slice(0, 3) // Limit to 3 attributes max
-        .map(attr => ATTRIBUTE_DESCRIPTIONS[attr.id] || `a ${attr.name.toLowerCase()}`)
+        .map(attr =>
+            attr.phrase
+            || ATTRIBUTE_DESCRIPTIONS[attr.id]
+            || findAttributeById(attr.id)?.phrase
+            || `a ${attr.name.toLowerCase()}`
+        )
         .filter(phrase => phrase); // Remove any undefined
 
     if (attributePhrases.length === 0) {
@@ -571,7 +588,14 @@ function generateProceduralFamily(
     attributes: any[],
     noise: ValueNoise,
     characterBirthYear?: number,  // CRITICAL: Pass actual birthYear to avoid recalculation
-    familyNameKey?: string
+    familyNameKey?: string,
+    /**
+     * When the character's own name is a patronymic, the given name it refers
+     * to — so the father is named the person the patronymic names.
+     */
+    fathersGivenName?: string,
+    /** When the character carries a hereditary name, the family carries it too. */
+    inheritedFamilyName?: string
 ): void {
     const age = character.age;
     // CRITICAL FIX: Use the passed birthYear if provided, otherwise calculate
@@ -592,11 +616,18 @@ function generateProceduralFamily(
     const fatherBirthYear = birthYear - parentAge;
     const motherBirthYear = birthYear - parentAge + Math.floor(noise.random() * 5); // Mother might be slightly younger
 
-    const fatherName = generateNpcName('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey);
+    const fatherGenerated = generateNpcNameDetailed('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey);
+    // If the character is "Wulf son of Ket", the father is Ket. His own name is
+    // still built by his own culture's convention on top of that given name.
+    const fatherName = inheritedFamilyName
+        ? `${fathersGivenName || fatherGenerated.given} ${inheritedFamilyName}`
+        : fathersGivenName
+            ? fatherGenerated.full.replace(fatherGenerated.given, fathersGivenName)
+            : fatherGenerated.full;
     const motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise, familyNameKey);
 
     // Generate father's profession
-    const fatherProfession = generateParentProfession('male', culturalZone, era, noise);
+    const fatherProfession = generateParentProfession('male', culturalZone, era, noise, currentYear, region);
 
     // Generate mother's profession (historically accurate)
     const motherProfession = generateMotherProfession(culturalZone, era, noise);
@@ -634,7 +665,13 @@ function generateProceduralFamily(
 
         const siblingGender = noise.random() > 0.5 ? 'male' : 'female';
         const siblingBirthYear = currentYear - siblingAge;
-        const siblingName = generateNpcName(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, siblingBirthYear, noise, familyNameKey);
+        const siblingGenerated = generateNpcNameDetailed(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, siblingBirthYear, noise, familyNameKey);
+        // Siblings share a hereditary name, and share a father in a patronymic.
+        const siblingName = inheritedFamilyName
+            ? `${siblingGenerated.given} ${inheritedFamilyName}`
+            : fathersGivenName && siblingGenerated.patronymicFrom
+                ? siblingGenerated.full.replace(siblingGenerated.patronymicFrom, fathersGivenName)
+                : siblingGenerated.full;
 
         character.family.push({
             name: siblingName,
@@ -669,7 +706,7 @@ function generateProceduralFamily(
         const spouseGender = normalizedGender === 'male' ? 'female' : 'male';
         const spouseName = generateNpcName(spouseGender === 'male' ? 'Male' : 'Female', culturalZone, region, spouseBirthYear, noise, familyNameKey);
         const spouseProfession = spouseGender === 'male'
-            ? generateParentProfession('male', culturalZone, era, noise)
+            ? generateParentProfession('male', culturalZone, era, noise, currentYear, region)
             : generateMotherProfession(culturalZone, era, noise);
 
         character.family.push({
@@ -710,7 +747,14 @@ function generateProceduralFamily(
 /**
  * Generate father's profession based on cultural zone and era
  */
-function generateParentProfession(gender: 'male' | 'female', culturalZone: CulturalZone, era: HistoricalEra, noise: ValueNoise): string {
+function generateParentProfession(
+    gender: 'male' | 'female',
+    culturalZone: CulturalZone,
+    era: HistoricalEra,
+    noise: ValueNoise,
+    year?: number,
+    place?: string,
+): string {
     // Common professions by era for fathers
     const professionsByEra: Record<HistoricalEra, string[]> = {
         [HistoricalEra.PREHISTORY]: ['Hunter', 'Gatherer', 'Fisher', 'Toolmaker', 'Warrior'],
@@ -722,7 +766,22 @@ function generateParentProfession(gender: 'male' | 'female', culturalZone: Cultu
         [HistoricalEra.FUTURE_ERA]: ['Technician', 'Engineer', 'Trader', 'Programmer', 'Pilot', 'Medic', 'Administrator']
     };
 
-    const professions = professionsByEra[era] || professionsByEra[HistoricalEra.MEDIEVAL];
+    let professions = professionsByEra[era] || professionsByEra[HistoricalEra.MEDIEVAL];
+
+    // The cultural zone was accepted here and never read, which put blacksmiths
+    // in eleventh-century Rapa Nui and millers in societies with no grain.
+    if (year !== undefined) {
+        const capabilityCtx = { year, culturalZone, placeLower: (place ?? '').toLowerCase() };
+        const drop = (pattern: RegExp) => {
+            const kept = professions.filter(p => !pattern.test(p));
+            if (kept.length > 0) professions = kept;
+        };
+        if (!hasCapability('metallurgy', capabilityCtx)) drop(/blacksmith|smith|miner|mechanic|technician/i);
+        if (!hasCapability('settled_agriculture', capabilityCtx)) drop(/farmer|miller|factory/i);
+        if (!hasCapability('coinage', capabilityCtx)) drop(/merchant|trader|clerk|salesman/i);
+        if (!hasCapability('urban_settlement', capabilityCtx)) drop(/factory worker|office worker|clerk/i);
+    }
+
     return professions[Math.floor(noise.random() * professions.length)];
 }
 
@@ -980,13 +1039,27 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         class: socialClass,
         role,
         profession: role,
-    } as PlayerCharacter, noise);
+    } as PlayerCharacter, noise, {
+        year: dateInfo.year,
+        region: context.region,
+        location: context.location,
+    });
     baseProfile.ideology = coherentBeliefs.ideology;
     baseProfile.beliefs = coherentBeliefs.beliefs;
 
     // Religion constraints or explicit social class handling may have adjusted
     // wealth after the base profile was built. Re-resolve the outfit once, using
     // the actual gender, wealth and occupation that will be displayed.
+    // What the weather is doing where and when this persona lives. Without it a
+    // hunter in a cold desert basin comes out bare-chested at midwinter.
+    const outfitMonth = (() => {
+        const match = /^(\d+)\//.exec(context.date || '');
+        const parsed = match ? Number(match[1]) : NaN;
+        return Number.isFinite(parsed) && parsed >= 1 && parsed <= 12 ? parsed : 6;
+    })();
+    const areaClimate = getAreaClimate(culturalZone, context.region, context.location);
+    const outfitSeason = seasonFor(outfitMonth, hemisphereFor(culturalZone, context.region), areaClimate);
+
     const coherentOutfit = generateCompleteOutfit(
         culturalZone,
         generationContext.era,
@@ -994,7 +1067,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         baseProfile.gender,
         role,
         context.region,
-        dateInfo.year
+        dateInfo.year,
+        thermalNeed(areaClimate, outfitSeason)
     );
     baseProfile.appearance = {
         ...baseProfile.appearance,
@@ -1016,7 +1090,9 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         baseProfile.religion,
         noise
     );
-    const name = spec.name || generateNpcName(
+    // Keep the structure of the name, not just the text: if it is a patronymic
+    // the father has to actually be called that.
+    const generatedName = generateNpcNameDetailed(
         baseProfile.gender,
         culturalZone,
         context.region,
@@ -1024,6 +1100,9 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         noise,
         contextualNameKey
     );
+    const name = spec.name || generatedName.full;
+    const fathersGivenName = spec.name ? undefined : generatedName.patronymicFrom;
+    const inheritedFamilyName = spec.name ? undefined : generatedName.familyName;
 
     // A broad map zone is not an ethnicity. If the regional name generator selects
     // a Russian name in Soviet Kazakhstan, use the corresponding appearance palette
@@ -1051,7 +1130,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     const { inventory, equippedItems } = assembleStartingPackage(role, tempCharacter as PlayerCharacter, {
         culture: culturalZone,
         era: generationContext.era,
-        privilege
+        privilege,
+        year: dateInfo.year
     });
     
     // Generate appearance with palette
@@ -1380,7 +1460,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             spec?.gender?.toLowerCase() as 'male' | 'female' || 'male',
             baseProfile.wealthLevel,
             spec?.age || baseProfile.age,
-            i === 0 ? 'daily' : (noise.random() < 0.5 ? 'ceremony' : 'daily')
+            i === 0 ? 'daily' : (noise.random() < 0.5 ? 'ceremony' : 'daily'),
+            `${context.region ?? ''} ${context.location ?? ''}`
         ).filter(m => !usedTypes.has(m.type)); // Don't repeat marking types
         
         // console.log(`[CharGen Spec] Found ${availableMarkings.length} available markings for slot ${i+1}`);
@@ -1463,10 +1544,38 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     const attributes = AttributeBadgeService.generateAttributes(
         partialCharacter as PlayerCharacter,
         dateInfo.year,
-        context.location
+        context.location,
+        { localeType: historicalContext.localeType, region: context.region }
     );
 
     // Add attributes to character before generating backstory
+    // A byname is a claim about the person. Now that the attributes and the
+    // appearance exist, replace any the persona has not earned.
+    {
+      const reconciled = reconcileEpithet(
+        partialCharacter.name as string,
+        {
+          attributeIds: attributes.map(a => a.id),
+          age: partialCharacter.age as number,
+          heightCm: (partialCharacter.appearance as any)?.height,
+          birthSex: (partialCharacter as any).birthSex
+            ?? (partialCharacter.gender === 'Female' ? 'Female'
+              : partialCharacter.gender === 'Male' ? 'Male' : undefined),
+          hairColor: (partialCharacter.appearance as any)?.hairColor,
+        },
+        () => noise.random(),
+      );
+      (partialCharacter as any).name = reconciled;
+    }
+
+    // The renderer reads appearance, not attributes. Push the visible ones over
+    // so the portrait agrees with the card.
+    (partialCharacter as any).appearance = applyAttributeAppearance(
+      (partialCharacter as any).appearance,
+      attributes,
+      partialCharacter.name as string,
+    );
+
     const characterWithAttributes = { ...partialCharacter, attributes };
 
     // Use custom backstory if provided, otherwise generate procedural one with attributes
@@ -1528,7 +1637,9 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         attributes,
         noise,
         birthYear,  // Pass the actual birthYear to avoid recalculation
-        contextualNameKey || detectNameListKey(name)
+        contextualNameKey || detectNameListKey(name),
+        fathersGivenName,
+        inheritedFamilyName
     );
 
     // Initialize disease health with potential disease based on stats and setting
@@ -1809,7 +1920,7 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
         baseProfile.religion,
         noise
     );
-    const name = generateNpcName(
+    const generatedName = generateNpcNameDetailed(
         baseProfile.gender,
         culturalZone,
         finalContext.region,
@@ -1817,6 +1928,7 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
         noise,
         contextualNameKey || nameKey
     );
+    const name = generatedName.full;
 
     // Detect ethnicity from name for historically accurate appearance
     const detectedEthnicity = detectEthnicityFromName(name);
@@ -1843,7 +1955,8 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
     const { inventory, equippedItems } = assembleStartingPackage(role, tempCharacter as PlayerCharacter, {
         culture: culturalZone,
         era: generationContext.era,
-        privilege
+        privilege,
+        year: dateInfo.year
     });
 
     // Generate a color palette based on context
@@ -1921,7 +2034,8 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
             baseProfile.gender?.toLowerCase() as 'male' | 'female' || 'male',
             baseProfile.wealthLevel || 'modest',
             baseProfile.age,
-            i === 0 ? 'daily' : (noise.random() < 0.5 ? 'ceremony' : 'daily')
+            i === 0 ? 'daily' : (noise.random() < 0.5 ? 'ceremony' : 'daily'),
+            `${context.region ?? ''} ${context.location ?? ''}`
         ).filter(m => !usedTypes.has(m.type)); // Don't repeat marking types
         
         // console.log(`[CharGen] Found ${availableMarkings.length} available markings for slot ${i+1}`);
@@ -2040,7 +2154,8 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
     const attributes = AttributeBadgeService.generateAttributes(
         partialCharacter as PlayerCharacter,
         dateInfo.year,
-        context.location
+        finalContext.location,
+        { localeType: historicalContext.localeType, region: finalContext.region }
     );
 
     // Add attributes to character before generating backstory
@@ -2050,6 +2165,33 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
         // Store as ethnicCulturalZone to distinguish from geographic culturalZone
         (partialCharacter as any).ethnicCulturalZone = detectedEthnicity;
     }
+
+    // A byname is a claim about the person. Now that the attributes and the
+    // appearance exist, replace any the persona has not earned.
+    {
+      const reconciled = reconcileEpithet(
+        partialCharacter.name as string,
+        {
+          attributeIds: attributes.map(a => a.id),
+          age: partialCharacter.age as number,
+          heightCm: (partialCharacter.appearance as any)?.height,
+          birthSex: (partialCharacter as any).birthSex
+            ?? (partialCharacter.gender === 'Female' ? 'Female'
+              : partialCharacter.gender === 'Male' ? 'Male' : undefined),
+          hairColor: (partialCharacter.appearance as any)?.hairColor,
+        },
+        () => noise.random(),
+      );
+      (partialCharacter as any).name = reconciled;
+    }
+
+    // The renderer reads appearance, not attributes. Push the visible ones over
+    // so the portrait agrees with the card.
+    (partialCharacter as any).appearance = applyAttributeAppearance(
+      (partialCharacter as any).appearance,
+      attributes,
+      partialCharacter.name as string,
+    );
 
     const characterWithAttributes = { ...partialCharacter, attributes };
 
@@ -2085,7 +2227,9 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
         attributes,
         noise,
         birthYear,  // Pass the actual birthYear to avoid recalculation
-        contextualNameKey || detectNameListKey(name) || nameKey
+        // The set the persona's own name came from, rather than one re-detected
+        // from the finished string.
+        generatedName.nameKey || contextualNameKey || detectNameListKey(name) || nameKey
     );
 
     // Initialize disease health with potential disease based on stats and setting

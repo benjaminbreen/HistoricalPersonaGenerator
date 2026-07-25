@@ -10,7 +10,7 @@ const stableId = (value: string): string => value
 
 function inferLocaleType(region: string, location: string): LocaleType {
   const place = `${region} ${location}`;
-  if (/\b(?:london|paris|rome|vienna|constantinople|istanbul|venice|prague|berlin|madrid|lisbon|amsterdam|cairo|alexandria|baghdad|damascus|jerusalem|mecca|medina|isfahan|tehran|beijing|nanjing|hangzhou|kyoto|edo|tokyo|seoul|delhi|agra|lahore|dhaka|timbuktu|kilwa|cuzco|lima|potosi|boston|philadelphia|montreal)\b/i.test(place)) return 'city';
+  if (/\b(?:london|paris|rome|vienna|constantinople|istanbul|venice|prague|berlin|madrid|lisbon|amsterdam|cairo|alexandria|baghdad|damascus|jerusalem|mecca|medina|isfahan|tehran|beijing|nanjing|hangzhou|kyoto|edo|tokyo|seoul|delhi|agra|lahore|dhaka|timbuktu|kilwa|cuzco|lima|potosi|boston|philadelphia|montreal|moscow|new york|manhattan|hudson|kiev|kyiv|novgorod|warsaw|budapest|athens|naples|florence|milan|antwerp|bruges|hamburg|copenhagen|stockholm|dublin|edinburgh|bristol|liverpool|manchester|marseille|lyon|seville|barcelona|granada|fez|tunis|aleppo|smyrna|izmir|samarkand|bukhara|kabul|multan|calcutta|kolkata|bombay|mumbai|madras|chennai|canton|guangzhou|shanghai|nagasaki|osaka|kaifeng|xian|chang'an|tenochtitlan|mexico city|potosí|salvador|havana|charleston|quebec)\b/i.test(place)) return 'city';
   if (/\b(?:city|capital|metropolis|urban|port|harbor|harbour)\b/i.test(place)) return 'city';
   if (/\b(?:town|borough|market|settlement)\b/i.test(place)) return 'town';
   if (/\b(?:steppe|nomad|pastoral|caravan|migratory)\b/i.test(place)) return 'mobile';

@@ -11,6 +11,8 @@ import { CITIES_DATA } from '../../constants/gameData/cities';
 
 // Import clothing data synchronously
 import * as clothingModule from '../../constants/characterData/clothing';
+import { hasCapability, SocietyCapability } from '../../constants/societyCapabilities';
+import { cleanShavenChance, pickFacialHairStyle, type FacialHairContext } from '../../constants/characterData/facialHair';
 import { ValueNoise } from '../../utils/noise';
 import { generatePersonalGoal } from '../../services/goalService';
 import { getProfessionContext, getFallbackContext, ProfessionContext } from '../../services/professionContextService';
@@ -19,6 +21,9 @@ import { isClergyRoleCompatible } from '../../constants/characterData/religionCl
 import { createHistoricalContext } from '../../services/historicalContextService';
 import { getProfessionSelectionWeight, isProfessionHistoricallyAvailable } from '../../services/professionAvailabilityService';
 import { isMaterialAvailable } from '../../services/demographyService';
+import { filterNameKeys, resolveNameKey } from '../../constants/characterData/nameSetEras';
+import { FormattedName, formatPersonalName } from '../../constants/characterData/nameConventions';
+import { COLD_WEATHER_FALLBACK, ThermalNeed, thermalScore } from '../../services/climateService';
 import { getZoneReligionFallback, isReligionHistoricallyAvailable } from '../../services/religionFallbackService';
 import type { HistoricalContext } from '../../types/historicalContext';
 
@@ -173,13 +178,38 @@ export function determineReligion(
 
 // Enhanced name generation with fallbacks and region/year specificity
 export function generateNpcName(
-    gender: Gender, 
-    culturalZone: CulturalZone, 
+    gender: Gender,
+    culturalZone: CulturalZone,
     region: string | undefined,
     year: number,
     noise: ValueNoise,
     professionNameKey?: string
 ): string {
+    return generateNpcNameDetailed(gender, culturalZone, region, year, noise, professionNameKey).full;
+}
+
+/**
+ * As `generateNpcName`, but returning how the name was built.
+ *
+ * Callers that generate a family need this: a persona called "Wulf son of Ket"
+ * whose father panel says "Hrothgar" is worse than no patronymic at all.
+ */
+export function generateNpcNameDetailed(
+    gender: Gender,
+    culturalZone: CulturalZone,
+    region: string | undefined,
+    year: number,
+    noise: ValueNoise,
+    professionNameKey?: string
+): FormattedName {
+    // Fallback paths hand back a bare name; wrap them so every exit has the
+    // same shape.
+    const plain = (name: string): FormattedName => ({
+        full: name.trim(),
+        given: name.trim().split(/\s+/)[0] || name.trim(),
+        convention: 'personal',
+    });
+
     try {
         let nameKeyToUse: string | undefined = professionNameKey;
 
@@ -202,7 +232,10 @@ export function generateNpcName(
                         const beforeMatch = rule.before ? year < rule.before : true;
                         const afterMatch = rule.after ? year >= rule.after : true;
                         if (beforeMatch && afterMatch) {
-                            nameKeyToUse = rule.keys[Math.floor(noise.random() * rule.keys.length)];
+                            // Only traditions that could exist in this year.
+                            const usable = filterNameKeys(rule.keys, year);
+                            if (usable.length === 0) break;
+                            nameKeyToUse = usable[Math.floor(noise.random() * usable.length)];
                             console.log(`[NameGen] Selected from colonial mapping: ${nameKeyToUse}`);
                             break;
                         }
@@ -223,7 +256,12 @@ export function generateNpcName(
                         const afterMatch = rule.after ? year >= rule.after : true;
                         console.log(`[NameGen] Rule check: before=${rule.before}, after=${rule.after}, year=${year}, matches=${beforeMatch && afterMatch}`);
                         if (beforeMatch && afterMatch) {
-                            nameKeyToUse = rule.keys[Math.floor(noise.random() * rule.keys.length)];
+                            // Region rules are written with an open-ended `before`,
+                            // so a Bronze Age entry also matches the Palaeolithic.
+                            // Filter to what could actually exist in this year.
+                            const usable = filterNameKeys(rule.keys, year);
+                            if (usable.length === 0) break;
+                            nameKeyToUse = usable[Math.floor(noise.random() * usable.length)];
                             console.log(`[NameGen] Selected from regional mapping: ${nameKeyToUse}`);
                             break;
                         }
@@ -266,6 +304,16 @@ export function generateNpcName(
             }
         }
 
+        // One gate covering every path above — region rules, colonial rules,
+        // profession keys and the broad-zone fallback alike. A tradition that
+        // could not exist yet is replaced by the zone's reconstructed-form set,
+        // which also carries no surname.
+        const requestedNameKey = nameKeyToUse;
+        nameKeyToUse = resolveNameKey(nameKeyToUse, culturalZone, year, region || '');
+        if (requestedNameKey !== nameKeyToUse) {
+            console.log(`[NameGen] "${requestedNameKey}" is not plausible in ${year}; using ${nameKeyToUse}`);
+        }
+
         console.log(`[NameGen] Final name key to use: ${nameKeyToUse}`);
 
         const normalizedGender = gender === 'Male' ? 'Male' : 'Female';
@@ -282,7 +330,7 @@ export function generateNpcName(
                 const genderLower = normalizedGender === 'Male' ? 'male' : 'female';
                 const generatedName = fallback.generator(genderLower as 'male' | 'female');
                 console.log(`[NameGen] Used era-specific generator for ${culturalZone}/${year}: ${generatedName}`);
-                return generatedName;
+                return plain(generatedName);
             }
 
             // Otherwise use the fallback groups
@@ -340,23 +388,36 @@ export function generateNpcName(
             // Try era-specific generator as fallback
             const emergencyFallback = getEraSpecificFallback(culturalZone, year);
             if (emergencyFallback.generator) {
-                return emergencyFallback.generator(normalizedGender === 'Male' ? 'male' : 'female');
+                return plain(emergencyFallback.generator(normalizedGender === 'Male' ? 'male' : 'female'));
             }
             // Use era-appropriate names from fallback groups
             const emergencyNames = emergencyFallback.groups?.[0] ? CHARACTER_NAMES[emergencyFallback.groups[0]] : null;
             const fallbackFirst = normalizedGender === 'Male'
                 ? (emergencyNames?.male?.[0] || 'John')
                 : (emergencyNames?.female?.[0] || 'Mary');
-            const fallbackLast = (surnames && surnames.length > 0) ? surnames[Math.floor(noise.random() * surnames.length)] : '';
-            return `${fallbackFirst} ${fallbackLast}`.trim();
+            return plain(fallbackFirst);
         }
 
         const first = firstNames[Math.floor(noise.random() * firstNames.length)];
-        let last = (surnames && surnames.length > 0) ? surnames[Math.floor(noise.random() * surnames.length)] : '';
 
-        if(last === '(No Surname)') last = '';
-
-        return `${first} ${last}`.trim();
+        // How the name is *built* is a separate question from which names exist.
+        // Hereditary surnames are recent and unusual; most people in most of the
+        // past were known by one name, by their father, by their trade or by a
+        // byname their neighbours gave them.
+        const formatted = formatPersonalName({
+            given: first,
+            gender: normalizedGender,
+            culturalZone,
+            region: region || '',
+            year,
+            surnames: surnames || [],
+            malePool: maleNames,
+            femalePool: femaleNames,
+            occupation: professionNameKey,
+            nameKey: nameKeyToUse,
+            random: noise.random,
+        });
+        return { ...formatted, nameKey: nameKeyToUse };
 
     } catch (error) {
         console.warn('[NPC Utils] Name generation failed, using era-specific fallback:', error);
@@ -364,12 +425,12 @@ export function generateNpcName(
         try {
             const emergencyFallback = getEraSpecificFallback(culturalZone, year);
             if (emergencyFallback.generator) {
-                return emergencyFallback.generator(gender === 'Male' ? 'male' : 'female');
+                return plain(emergencyFallback.generator(gender === 'Male' ? 'male' : 'female'));
             }
             const emergencyNames = emergencyFallback.groups?.[0] ? CHARACTER_NAMES[emergencyFallback.groups[0]] : null;
             if (emergencyNames) {
                 const first = gender === 'Male' ? emergencyNames.male[0] : emergencyNames.female[0];
-                return first;
+                return plain(first);
             }
         } catch {
             // Silent fail, use ultimate fallback
@@ -379,11 +440,17 @@ export function generateNpcName(
         const fallbackFirst = gender === 'Male'
             ? (zoneFallback?.male?.[0] || 'John')
             : (zoneFallback?.female?.[0] || 'Mary');
-        return fallbackFirst;
+        return plain(fallbackFirst);
     }
 }
 
-export function generateBodyMetrics(gender: Gender, stats: CharacterStats, noise: ValueNoise) {
+export function generateBodyMetrics(
+    gender: Gender,
+    stats: CharacterStats,
+    noise: ValueNoise,
+    /** Year and place, so shaving follows the fashion of the period. */
+    styleContext?: { year?: number; region?: string; location?: string; culturalZone?: CulturalZone },
+) {
     // Use average of two random numbers to create a distribution biased towards the center.
     const rand = () => (noise.random() + noise.random()) / 2;
     // More realistic pre-modern height range: 0.92 to 1.08 multiplier
@@ -425,7 +492,14 @@ export function generateBodyMetrics(gender: Gender, stats: CharacterStats, noise
 
     const weight = Math.round(bmi * Math.pow(height / 100, 2));
 
-    const facialHair = gender === 'Male' && noise.random() > 0.4;
+    // Whether a man shaved was a matter of period and place, not a coin flip:
+    // imperial Rome and the eighteenth century shaved, the Victorians did not.
+    const shaveChance = cleanShavenChance({
+        year: styleContext?.year ?? 1500,
+        culturalZone: styleContext?.culturalZone,
+        placeLower: `${styleContext?.region ?? ''} ${styleContext?.location ?? ''}`.toLowerCase(),
+    });
+    const facialHair = gender === 'Male' && noise.random() > shaveChance;
     return { height, build, weight, facialHair };
 }
 
@@ -463,7 +537,14 @@ function generateRealisticHairLength(gender: Gender, age: number, rand: () => nu
     }
 }
 
-export function generateFacialFeatures(noise: ValueNoise, gender: Gender, culturalZone: CulturalZone, age: number) {
+export function generateFacialFeatures(
+    noise: ValueNoise,
+    gender: Gender,
+    culturalZone: CulturalZone,
+    age: number,
+    /** Year and place, so facial hair can follow the fashion of the period. */
+    styleContext?: { year?: number; region?: string; location?: string },
+) {
     const rand = noise.random;
 
     const select = <T,>(arr: readonly T[]): T => arr[Math.floor(rand() * arr.length)];
@@ -473,7 +554,11 @@ export function generateFacialFeatures(noise: ValueNoise, gender: Gender, cultur
     const eyeShapes: ('almond' | 'round' | 'narrow' | 'wide' | 'hooded')[] = culturalZone === 'EAST_ASIAN' ? ['narrow', 'almond'] : ['almond', 'round', 'wide', 'hooded'];
     const noseShapes: ('straight' | 'aquiline' | 'broad' | 'button' | 'roman')[] = culturalZone === 'MENA' ? ['aquiline', 'roman', 'straight'] : ['straight', 'broad', 'button', 'roman'];
     const hairTextures: ('straight' | 'wavy' | 'curly' | 'coily' | 'kinky')[] = culturalZone === 'SUB_SAHARAN_AFRICAN' ? ['coily', 'kinky'] : ['straight', 'wavy', 'curly'];
-    const facialHairStyles: Appearance['facialHairStyle'][] = ['full_beard', 'goatee', 'mustache', 'stubble', 'van_dyke', 'soul_patch', 'mutton_chops'];
+    const facialHairCtx: FacialHairContext = {
+        year: styleContext?.year ?? 1500,
+        culturalZone,
+        placeLower: `${styleContext?.region ?? ''} ${styleContext?.location ?? ''}`.toLowerCase(),
+    };
 
     return {
         faceShape: select(faceShapes),
@@ -489,7 +574,7 @@ export function generateFacialFeatures(noise: ValueNoise, gender: Gender, cultur
         eyebrowThickness: select(['thin', 'medium', 'thick', 'bushy'] as const),
         eyelashes: select(['short', 'medium', 'long'] as const),
         lipShape: select(['thin', 'medium', 'full', 'bow', 'wide'] as const),
-        facialHairStyle: select(facialHairStyles),
+        facialHairStyle: pickFacialHairStyle(facialHairCtx, rand),
         facialHairThickness: select(['sparse', 'medium', 'thick'] as const),
     };
 }
@@ -641,7 +726,8 @@ export function generateCompleteOutfit(
     gender: Gender,
     occupation?: string,
     region?: string,
-    year?: number
+    year?: number,
+    thermal?: ThermalNeed
 ): {
     garment: ClothingPiece;
     headgear: ClothingPiece;
@@ -679,6 +765,58 @@ export function generateCompleteOutfit(
             ],
         };
         return preTextile[category] || [{ name: 'None', material: 'None' }];
+    };
+
+    /**
+     * Keep European colonial dress out of societies that had not yet met any
+     * Europeans. The clothing tables are keyed by cultural zone alone, so
+     * "South American, early modern" hands a Spanish jacket and felt hat to a
+     * Tehuelche band three centuries before the Argentine state reached them.
+     */
+    const COLONIAL_ITEM = /spanish|colonial|european|frock|waistcoat|breeches|felt hat|tricorn|buckle|petticoat|bonnet|musket|battle helmet|steel|iron helm/i;
+
+    const filterByContact = (items: ClothingPiece[], category: string): ClothingPiece[] => {
+        if (year === undefined || items.length === 0) return items;
+        const ctx = {
+            year,
+            culturalZone,
+            placeLower: `${region ?? ''}`.toLowerCase(),
+        };
+        if (hasCapability('european_contact', ctx)) return items;
+
+        const local = items.filter(item => {
+            const text = `${item.name} ${item.material} ${(item.adjectives ?? []).join(' ')}`;
+            return !COLONIAL_ITEM.test(text);
+        });
+        if (local.length > 0) return local;
+        return filterByMaterialEra([], category);
+    };
+
+    /**
+     * Bias the wardrobe toward what the weather demands.
+     *
+     * A preference, not a prohibition — people wore the wrong thing, and the
+     * poor wore whatever they had. But a hunter in a cold desert in January
+     * should not come out bare-chested, which is what happened when climate and
+     * clothing never spoke to each other.
+     */
+    const filterByThermal = (items: ClothingPiece[], category: string): ClothingPiece[] => {
+        if (!thermal || thermal === 'temperate' || items.length === 0) return items;
+
+        const scored = items.map(item => ({
+            item,
+            score: thermalScore(`${item.name} ${item.material}`, thermal),
+        }));
+        const best = Math.max(...scored.map(s => s.score));
+        const suitable = scored.filter(s => s.score === best).map(s => s.item);
+
+        // Nothing in the tables is warm enough for a hard winter: fall back on
+        // what people actually wore in one.
+        if (thermal === 'freezing' && best <= 0) {
+            const fallback = COLD_WEATHER_FALLBACK[category];
+            if (fallback && fallback.length > 0) return fallback;
+        }
+        return suitable.length > 0 ? suitable : items;
     };
 
     // Region-based filtering for items that are inappropriate for specific regions within a cultural zone
@@ -865,11 +1003,11 @@ export function generateCompleteOutfit(
     };
     
     // Apply filters to each category - first by region, then by occupation
-    const filteredGarments = filterByMaterialEra(filterByOccupation(filterByRegion(clothingSet.garments, 'garment'), 'garment'), 'garment');
-    const filteredHeadgear = filterByMaterialEra(filterByOccupation(filterByRegion(clothingSet.headgear, 'headgear'), 'headgear'), 'headgear');
-    const filteredFootwear = filterByMaterialEra(filterByOccupation(filterByRegion(clothingSet.footwear, 'footwear'), 'footwear'), 'footwear');
-    const filteredBelts = filterByMaterialEra(filterByOccupation(filterByRegion(clothingSet.belts, 'belt'), 'belt'), 'belt');
-    const filteredAccessories = filterByMaterialEra(filterByOccupation(filterByRegion(clothingSet.accessories, 'accessory'), 'accessory'), 'accessory');
+    const filteredGarments = filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.garments, 'garment'), 'garment'), 'garment'), 'garment'), 'garment');
+    const filteredHeadgear = filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.headgear, 'headgear'), 'headgear'), 'headgear'), 'headgear'), 'headgear');
+    const filteredFootwear = filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.footwear, 'footwear'), 'footwear'), 'footwear'), 'footwear'), 'footwear');
+    const filteredBelts = filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.belts, 'belt'), 'belt'), 'belt'), 'belt'), 'belt');
+    const filteredAccessories = filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.accessories, 'accessory'), 'accessory'), 'accessory'), 'accessory'), 'accessory');
     
     // Convert wealth level for clothing variations
     const simplifiedWealth =
@@ -981,8 +1119,17 @@ export function generateBaseProfile(
         const currency = 5 + Math.floor(noise.random() * (wealthLevel === 'poor' ? 10 : wealthLevel === 'modest' ? 30 : 100));
 
         const culturalAppearance = generateCulturalAppearance(context.culturalZone, noise, context.region);
-        const facialFeatures = generateFacialFeatures(noise, gender, context.culturalZone, age);
-        const bodyMetrics = generateBodyMetrics(gender, stats, noise);
+        const facialFeatures = generateFacialFeatures(noise, gender, context.culturalZone, age, {
+            year: (context as any).year,
+            region: (context as any).region,
+            location: (context as any).localArea,
+        });
+        const bodyMetrics = generateBodyMetrics(gender, stats, noise, {
+            year: (context as any).year,
+            region: (context as any).region,
+            location: (context as any).localArea,
+            culturalZone: context.culturalZone,
+        });
         
         const clothingPalette = generateClothingPalette(wealthLevel, context.era, context.culturalZone, gender, noise);
         const clothingPieces = generateCompleteOutfit(
@@ -1105,7 +1252,11 @@ export function generateBaseProfile(
         };
 
         // Now, assign beliefs to this partial profile.
-        const beliefData = assignBeliefs(profileInProgress as NpcEntity, noise);
+        const beliefData = assignBeliefs(profileInProgress as NpcEntity, noise, {
+            year: (context as any).year,
+            region: (context as any).region,
+            location: (context as any).localArea,
+        });
         profileInProgress.ideology = beliefData.ideology;
         profileInProgress.beliefs = beliefData.beliefs;
 
@@ -1382,15 +1533,27 @@ function getFallbackRole(
             { role: 'Fisher', emoji: '🎣', gender: 'any' },
         ];
 
-    const otherRoles = [
-        { role: 'Laborer', emoji: '🧑‍🔧', gender: 'any' },
-        { role: 'Servant', emoji: '🧹', gender: 'any' },
-        { role: 'Weaver', emoji: '🧶', gender: 'any' },
-        { role: 'Potter', emoji: '🏺', gender: 'any' },
-        { role: 'Water Carrier', emoji: '🏺', gender: 'any' },
-        { role: 'Caretaker', emoji: '🧑‍⚕️', gender: 'any' },
-        { role: 'Child Watcher', emoji: '👶', gender: 'Female' },
-    ];
+    // Work that is not food-getting looks completely different before there are
+    // villages to labour in or pots to throw. "Laborer" and "Servant" presuppose
+    // someone to labour for.
+    const otherRoles = foraging
+        ? [
+            { role: 'Toolmaker', emoji: '🪨', gender: 'any' },
+            { role: 'Hide Worker', emoji: '🦬', gender: 'any' },
+            { role: 'Firekeeper', emoji: '🔥', gender: 'any' },
+            { role: 'Healer', emoji: '🌿', gender: 'any' },
+            { role: 'Storyteller', emoji: '🗣️', gender: 'any' },
+            { role: 'Child Watcher', emoji: '👶', gender: 'any' },
+        ]
+        : [
+            { role: 'Laborer', emoji: '🧑‍🔧', gender: 'any' },
+            { role: 'Servant', emoji: '🧹', gender: 'any' },
+            { role: 'Weaver', emoji: '🧶', gender: 'any' },
+            { role: 'Potter', emoji: '🏺', gender: 'any' },
+            { role: 'Water Carrier', emoji: '🏺', gender: 'any' },
+            { role: 'Caretaker', emoji: '🧑‍⚕️', gender: 'any' },
+            { role: 'Child Watcher', emoji: '👶', gender: 'Female' },
+        ];
 
     const usable = (r: { role: string }) =>
         !historicalContext || isProfessionHistoricallyAvailable(r.role, historicalContext);
@@ -2073,18 +2236,72 @@ export function validateCharacterCoherence(
     return { personality: adjusted, warnings };
 }
 
+/**
+ * Ideologies that presuppose a material precondition. An agrarian-pastoralist
+ * outlook needs farming to exist; a mercantile one needs money; a scholarly one
+ * needs something to read.
+ */
+/** Used only when a caller cannot supply an absolute year. */
+const ERA_MIDPOINT: Partial<Record<HistoricalEra, number>> = {
+    [HistoricalEra.PREHISTORY]: -6500,
+    [HistoricalEra.ANTIQUITY]: -1250,
+    [HistoricalEra.MEDIEVAL]: 975,
+    [HistoricalEra.RENAISSANCE_EARLY_MODERN]: 1600,
+    [HistoricalEra.INDUSTRIAL_ERA]: 1825,
+    [HistoricalEra.MODERN_ERA]: 1950,
+    [HistoricalEra.FUTURE_ERA]: 2050,
+};
+
+const IDEOLOGY_REQUIREMENTS: Record<string, SocietyCapability> = {
+    AGRARIAN_PASTORALIST: 'settled_agriculture',
+    MERCANTILE_PRAGMATIST: 'coinage',
+    SCHOLARLY_THEOLOGIAN: 'writing',
+    LEGALIST_AUTHORITARIAN: 'writing',
+    CIVIC_REPUBLICAN: 'urban_settlement',
+    HERMETIC_OCCULTIST: 'writing',
+    STOIC_PHILOSOPHER: 'writing',
+    DIALECTICAL_THINKER: 'writing',
+    MONASTIC_ASCETIC: 'urban_settlement',
+    ARTISAN_CRAFTSMAN: 'settled_agriculture',
+};
+
+function ideologyIsPossible(
+    ideologyId: string,
+    ctx: { year: number; culturalZone: CulturalZone; placeLower: string },
+): boolean {
+    const requirement = IDEOLOGY_REQUIREMENTS[ideologyId];
+    if (!requirement) return true;
+    return hasCapability(requirement, ctx);
+}
+
 export function assignBeliefs(
     character: NpcEntity | PlayerCharacter,
-    noise: ValueNoise
+    noise: ValueNoise,
+    /** Absolute year and place, for the capability gate below. */
+    context?: { year?: number; region?: string; location?: string },
 ): { ideology: string, beliefs: { beliefId: string; conviction: number }[] } {
     const { culturalZone, era, religion, personality, socialContext } = character;
     const profession = (character as any).profession || (character as any).class;
 
     // 1. Find suitable ideologies by sanitizing IDEOLOGIES array first
+    //
+    // Era alone is too coarse at the deep end: PREHISTORY now spans 10,000 to
+    // 3,000 BCE, which covers both foragers and Neolithic farmers. Ideologies
+    // that presuppose a way of life are additionally gated on whether that way
+    // of life existed here yet. See constants/societyCapabilities.ts.
+    const capabilityCtx = {
+        year: context?.year ?? (character as any).year ?? ERA_MIDPOINT[era] ?? 0,
+        culturalZone,
+        placeLower: [
+            context?.location, context?.region,
+            (character as any).location, (character as any).region, (character as any).birthplace,
+        ].filter(Boolean).join(' ').toLowerCase(),
+    };
     const suitableIdeologies = IDEOLOGIES.filter(Boolean).filter(ideo =>
         ideo.culturalZones.includes(culturalZone) &&
         ideo.eras.includes(era) &&
-        ideo.religions.includes(religion)
+        ideo.religions.includes(religion) &&
+        ideologyIsPossible(ideo.id, capabilityCtx)
     );
 
     // 2. Score each ideology by personality/social context fit

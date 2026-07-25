@@ -161,6 +161,23 @@ body.dark-mode .top-bar {
   background: var(--color-surface-elevated);
 }
 
+.top-bar button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.top-bar .top-bar-donate {
+  border-color: color-mix(in srgb, var(--color-accent-primary) 72%, var(--color-border-strong));
+  color: color-mix(in srgb, var(--color-accent-primary) 84%, var(--color-text-primary));
+  background: color-mix(in srgb, var(--color-accent-primary) 8%, transparent);
+}
+
+.top-bar .top-bar-donate:hover {
+  border-color: var(--color-accent-primary);
+  color: var(--color-surface);
+  background: var(--color-accent-primary);
+}
+
 .source-ingestion-panel {
   border: 1.5px solid var(--color-border);
   background: var(--color-surface);
@@ -1274,6 +1291,185 @@ body.dark-mode .top-bar {
   text-decoration: underline;
 }
 
+.share-persona-modal {
+  max-width: 560px;
+}
+
+.share-persona-body {
+  display: grid;
+  gap: var(--sp-xl);
+}
+
+.share-persona-body > p {
+  margin: 0;
+}
+
+.share-persona-identity {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--sp-lg);
+  align-items: baseline;
+  padding-bottom: var(--sp-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.share-persona-identity > span {
+  grid-row: 1 / span 2;
+  color: var(--color-accent-primary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.share-persona-identity strong {
+  color: var(--color-text-primary);
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+
+.share-persona-identity p {
+  margin: var(--sp-xs) 0 0;
+  color: var(--color-text-tertiary);
+  font-size: 0.83rem;
+}
+
+.share-privacy-note {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-md);
+  padding: var(--sp-lg);
+  border: 1px solid color-mix(in srgb, var(--color-accent-blue) 34%, var(--color-border));
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--color-accent-blue) 7%, var(--color-surface));
+  color: var(--color-text-secondary);
+}
+
+.share-privacy-note > svg {
+  margin-top: 0.12rem;
+  color: var(--color-accent-blue);
+  font-size: 1.1rem;
+}
+
+.share-privacy-note strong {
+  color: var(--color-text-primary);
+  font-size: 0.84rem;
+}
+
+.share-privacy-note p {
+  margin: var(--sp-xs) 0 0;
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.share-url-field {
+  display: grid;
+  gap: var(--sp-sm);
+}
+
+.share-url-field > span {
+  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.share-url-field input {
+  width: 100%;
+  padding: 0.72rem 0.8rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+
+.share-url-field input:focus {
+  outline: 2px solid color-mix(in srgb, var(--color-accent-primary) 35%, transparent);
+  border-color: var(--color-accent-primary);
+}
+
+.share-persona-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-md);
+  padding-top: var(--sp-sm);
+}
+
+.share-persona-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-xs);
+}
+
+.persona-share-toast {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 1400;
+  max-width: min(420px, calc(100vw - 2rem));
+  padding: 0.72rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--color-accent-secondary) 52%, var(--color-border));
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--color-surface) 94%, var(--color-accent-secondary));
+  box-shadow: 0 12px 34px rgba(26, 22, 18, 0.2);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.shared-persona-loading,
+.shared-persona-error {
+  min-height: 26rem;
+}
+
+.shared-persona-error .btn {
+  margin-top: var(--sp-lg);
+}
+
+@media (max-width: 600px) {
+  .share-persona-modal {
+    width: calc(100vw - 1rem);
+    max-height: calc(100vh - 1rem);
+  }
+
+  .share-persona-body {
+    gap: var(--sp-lg);
+  }
+
+  .share-persona-identity {
+    grid-template-columns: 1fr;
+    gap: var(--sp-xs);
+  }
+
+  .share-persona-identity > span {
+    grid-row: auto;
+  }
+
+  .share-persona-actions {
+    flex-direction: column-reverse;
+  }
+
+  .share-persona-actions .btn {
+    width: 100%;
+  }
+
+  .persona-share-toast {
+    right: 0.75rem;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    max-width: none;
+  }
+}
+
 /* Disclaimer box in About modal */
 .disclaimer-box {
   background: linear-gradient(135deg, #fff8e7 0%, #fff3d4 100%);
@@ -1909,7 +2105,7 @@ body.dark-mode .disclaimer-box {
   text-align: left;
 }
 
-.narrative-biography p:first-letter {
+.narrative-biography p:first-of-type::first-letter {
   font-size: 2.2em;
 }
 
@@ -2086,6 +2282,26 @@ body.dark-mode .card-header {
 
 .controls-info a:hover {
   text-decoration: underline;
+}
+
+.shared-persona-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  padding: 0.28rem 0.62rem;
+  border: 1px solid color-mix(in srgb, var(--color-accent-secondary) 55%, var(--color-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-accent-secondary) 10%, var(--color-surface));
+  color: color-mix(in srgb, var(--color-accent-secondary) 76%, var(--color-text-primary));
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.shared-persona-badge svg {
+  font-size: 0.78rem;
 }
 
 .btn {
@@ -2714,7 +2930,7 @@ body.dark-mode .area-pill {
   line-height: 1.55;
 }
 
-.narrative-biography p:first-letter {
+.narrative-biography p:first-of-type::first-letter {
   font-size: 2.5em;
   font-weight: 700;
   float: left;
@@ -2722,6 +2938,11 @@ body.dark-mode .area-pill {
   margin-right: 0.08em;
   margin-top: 0.1em;
   color: var(--color-accent-primary);
+}
+
+/* The biography is two paragraphs; only the first takes the drop cap. */
+.narrative-biography p + p {
+  margin-top: 0.95em;
 }
 
 /* Character name styling in biography */
@@ -3012,9 +3233,11 @@ body.dark-mode .area-pill {
 .location-map-section h3,
 .disease-section h3,
 .attributes-section h3 {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   margin: 0;
-  padding: var(--sp-lg) var(--sp-xl);
+  /* Four banded headers now run down this column; at the old padding the bands
+     alone were taller than the lists between them. */
+  padding: var(--sp-md) var(--sp-lg);
   color: white;
   background: var(--color-accent-tertiary);
   text-transform: uppercase;
@@ -3227,70 +3450,96 @@ body.dark-mode .area-pill {
   font-family: var(--font-serif);
 }
 
+/* Equipment and inventory rows.
+   These used to be individual bordered cards stacked with a gap, which cost
+   roughly 90px of column height each — three garments filled the panel before
+   anything the persona was carrying could be shown. They are now a ruled list:
+   the slot label sits left, the name right, and only a long name takes a second
+   line. Same information, about a third of the height. */
 .equipment-grid {
-  padding: var(--sp-lg);
+  padding: var(--sp-sm) var(--sp-lg) var(--sp-md);
   display: flex;
   flex-direction: column;
-  gap: var(--sp-md);
 }
 
 .equipment-item {
   display: flex;
-  flex-direction: column;
-  gap: var(--sp-xs);
-  padding: var(--sp-md);
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--sp-md);
+  padding: var(--sp-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+  transition: background 0.2s ease;
+}
+
+.equipment-item:last-child {
+  border-bottom: none;
 }
 
 .equipment-item:hover {
-  border-color: var(--color-accent-tertiary);
-  box-shadow: 0 2px 6px rgba(197, 149, 99, 0.15);
+  background: rgba(197, 149, 99, 0.07);
 }
 
 .equipment-slot {
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--color-text-tertiary);
   font-weight: 700;
   font-family: var(--font-sans);
+  flex: 0 0 auto;
 }
 
 .equipment-name {
-  font-size: 0.9375rem;
+  font-size: 0.8125rem;
+  line-height: 1.3;
   color: var(--color-text-primary);
   font-weight: 600;
   font-family: var(--font-sans);
+  margin-left: auto;
+  text-align: right;
+}
+
+/* A name too long to share the line drops below the label and uses the full
+   width rather than wrapping into a narrow ragged column. */
+.equipment-name:only-child,
+.equipment-slot + .equipment-name {
+  min-width: 0;
 }
 
 .inventory-list {
-  padding: var(--sp-lg);
+  padding: var(--sp-sm) var(--sp-lg) var(--sp-md);
   display: flex;
   flex-direction: column;
-  gap: var(--sp-sm);
 }
 
 .inventory-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: var(--sp-md);
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  align-items: baseline;
+  gap: var(--sp-md);
+  padding: var(--sp-sm) 0;
+  border-bottom: 1px dotted var(--color-border);
+  transition: background 0.2s ease;
+}
+
+.inventory-item:last-child {
+  border-bottom: none;
 }
 
 .inventory-item:hover {
-  border-color: var(--color-accent-secondary);
-  box-shadow: 0 2px 6px rgba(107, 142, 127, 0.15);
+  background: rgba(107, 142, 127, 0.07);
+}
+
+.inventory-overflow .item-name {
+  font-style: italic;
+  color: var(--color-text-tertiary);
+  font-size: 0.75rem;
 }
 
 .item-name {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.3;
   color: var(--color-text-primary);
   font-weight: 500;
   font-family: var(--font-sans);
@@ -4484,7 +4733,9 @@ body.dark-mode .breadcrumb-item:not(.active):hover {
   color: var(--color-accent-secondary);
   cursor: pointer;
   position: relative;
-  display: inline-block;
+  /* inline-block creates a line-break opportunity after the name, which pushed
+     the closing period of "His parents are X and Y." onto its own line. */
+  display: inline;
   padding-bottom: 2px;
   transition: all 0.2s ease;
 }
@@ -5363,4 +5614,106 @@ body.dark-mode .death-stat {
 
 body.dark-mode .sampling-mode {
   border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* -------------------------------------------------------------------------
+   Language attribution and scholarly sources
+   The card shows one language; everything about how it was chosen lives here.
+   ------------------------------------------------------------------------- */
+
+.language-sources-marker {
+  margin-left: 0.3em;
+  font-size: 0.75em;
+  vertical-align: super;
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+  cursor: help;
+}
+
+.language-clickable:hover .language-sources-marker {
+  opacity: 0.9;
+}
+
+.reconstructed-marker {
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor;
+  cursor: help;
+  opacity: 0.75;
+}
+
+.language-attribution .language-confidence {
+  font-style: italic;
+  opacity: 0.85;
+  margin-bottom: 0.5rem;
+}
+
+.language-subhead {
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  margin: 1rem 0 0.4rem;
+}
+
+.language-hypotheses,
+.language-sources {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.language-hypotheses .hypothesis {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr;
+  gap: 0.15rem 0.6rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+  opacity: 0.7;
+}
+
+.language-hypotheses .hypothesis.chosen {
+  opacity: 1;
+  font-weight: 600;
+}
+
+.hypothesis-weight {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  opacity: 0.7;
+}
+
+.hypothesis-note {
+  grid-column: 2;
+  font-size: 0.85em;
+  font-weight: 400;
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+.language-source {
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.9em;
+  line-height: 1.45;
+}
+
+.source-supports {
+  opacity: 0.7;
+  font-size: 0.92em;
+}
+
+.source-contested {
+  opacity: 0.7;
+  font-size: 0.92em;
+  font-style: italic;
+}
+
+.language-method-note {
+  margin-top: 1rem;
+  font-size: 0.85em;
+  opacity: 0.6;
+  line-height: 1.5;
 }

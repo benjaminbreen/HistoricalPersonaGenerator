@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import personaShareHandler from './api/persona-share.js';
 
 const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite';
 const DEFAULT_OPENAI_MODEL = 'gpt-5-nano';
@@ -459,6 +460,11 @@ const serveStatic = (req, res) => {
 };
 
 const server = http.createServer((req, res) => {
+  if ((req.url || '').startsWith('/api/persona-share')) {
+    void personaShareHandler(req, res);
+    return;
+  }
+
   if ((req.url || '').startsWith('/api/old-bailey/random')) {
     void handleOldBaileyRoute(req, res);
     return;

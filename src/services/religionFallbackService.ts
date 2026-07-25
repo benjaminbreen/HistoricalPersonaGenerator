@@ -40,7 +40,12 @@ export function getZoneReligionFallback(
   switch (culturalZone) {
     case 'EUROPEAN':
       if (year < -800) return [entry('Local Beliefs', 80), entry('Ancestor Worship', 20)];
-      if (year < 300) return [entry('Local Beliefs', 65), entry('Roman Polytheism', 25), entry('Judaism', 10)];
+      // Iron Age Europe was Celtic, Germanic and Italic polytheism, all of which
+      // this app files under Local Beliefs. Rome had not expanded and Jewish
+      // communities in the western provinces are a later Roman phenomenon; the
+      // single -800..300 bucket was putting both into eighth-century BCE Gaul.
+      if (year < -100) return [entry('Local Beliefs', 84), entry('Ancestor Worship', 16)];
+      if (year < 300) return [entry('Local Beliefs', 58), entry('Roman Polytheism', 32), entry('Judaism', 6), entry('Early Christianity', 4)];
       if (year < 800) return [entry('Local Beliefs', 50), entry('Early Christianity', 35), entry('Judaism', 10), entry('Roman Catholicism', 5)];
       if (year < 1450) return [entry('Roman Catholicism', 55), entry('Eastern Orthodoxy', 20), entry('Local Beliefs', 15), entry('Judaism', 10)];
       if (year < 1750) return [entry('Roman Catholicism', 45), entry('Protestantism', 30), entry('Eastern Orthodoxy', 15), entry('Judaism', 10)];

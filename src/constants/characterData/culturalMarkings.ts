@@ -32,6 +32,12 @@ export interface CulturalMarking {
   socialClasses?: ('poor' | 'modest' | 'comfortable' | 'wealthy' | 'noble')[];
   occasions?: ('daily' | 'ceremony' | 'war' | 'mourning' | 'celebration' | 'religious')[];
   weight: number; // Selection probability (1-10)
+  /**
+   * Sub-zone scoping. "Oceania" covers Aotearoa, Samoa, Rapa Nui and the New
+   * Guinea highlands, which do not mark the body the same way at all; a
+   * practice belonging to one of them says so here.
+   */
+  places?: RegExp;
   culturalSignificance: string;
 }
 
@@ -41,6 +47,7 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'TA_MOKO',
     type: 'tattoo',
     culturalZones: ['OCEANIA'],
+    places: /aotearoa|new zealand|maori|māori|north island|south island/,
     patterns: [
       {
         id: 'ta_moko_warrior',
@@ -64,10 +71,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
       }
     ],
     isPermanent: true,
-    professions: ['Warrior', 'Chief', 'Noble', 'Hunter'],
     gender: 'any',
     ageGroups: ['adult', 'elder'],
-    socialClasses: ['comfortable', 'wealthy', 'noble'],
     occasions: ['daily'],
     weight: 8,
     culturalSignificance: 'Sacred genealogical record and status marker'
@@ -76,6 +81,9 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'POLYNESIAN_TATTOO',
     type: 'tattoo',
     culturalZones: ['OCEANIA'],
+    // Polynesia proper. Melanesia and the New Guinea highlands mark the body
+    // differently and should not inherit tatau by being in the same zone.
+    places: /samoa|tonga|marquesa|rapa nui|easter island|hawai|tahiti|cook island|society island|austral|tuamotu|polynesia|fiji|niue|tokelau/,
     patterns: [
       {
         id: 'pe_a',
@@ -89,11 +97,11 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
       }
     ],
     isPermanent: true,
-    gender: 'male',
+    gender: 'any',
     ageGroups: ['young', 'adult'],
-    socialClasses: ['modest', 'comfortable', 'wealthy'],
+
     occasions: ['daily'],
-    weight: 6,
+    weight: 15,
     culturalSignificance: 'Rite of passage into manhood'
   },
 
@@ -429,7 +437,7 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     gender: 'any',
     ageGroups: ['child', 'young', 'adult', 'elder'],
     occasions: ['daily'],
-    weight: 10, // Very common daily practice
+    weight: 6, // Common daily practice
     culturalSignificance: 'Protection from evil eye and sun glare'
   },
   {
@@ -451,7 +459,7 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     duration: 12,
     gender: 'any',
     occasions: ['daily'],
-    weight: 9, // Extremely common
+    weight: 6,
     culturalSignificance: 'Sun protection and insect repellent'
   },
   {
@@ -505,7 +513,7 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     gender: 'any',
     professions: ['Hunter', 'Warrior', 'Fisher', 'Navigator'],
     occasions: ['daily'],
-    weight: 9,
+    weight: 5,
     culturalSignificance: 'Reduces glare during hunting and warfare'
   },
   {
@@ -1128,7 +1136,8 @@ export function getMarkingsForCharacter(
   gender: 'male' | 'female' = 'male',
   socialClass: string = 'modest',
   age: number = 30,
-  occasion: string = 'daily'
+  occasion: string = 'daily',
+  place?: string
 ): CulturalMarking[] {
   
   // Determine age group
@@ -1136,9 +1145,14 @@ export function getMarkingsForCharacter(
                    age < 25 ? 'young' :
                    age < 50 ? 'adult' : 'elder';
   
+  const placeLower = (place ?? '').toLowerCase();
+
   return CULTURAL_MARKINGS.filter(marking => {
     // Check cultural zone
     if (!marking.culturalZones.includes(culturalZone)) return false;
+
+    // Check sub-zone place scoping
+    if (marking.places && !marking.places.test(placeLower)) return false;
     
     // Check era if specified
     if (marking.eras && era && !marking.eras.includes(era)) return false;
@@ -1246,7 +1260,10 @@ export function convertToAppearanceMarking(
     } else if (pattern.pattern === 'three_lines') {
       rendererPattern = location === 'forehead' ? 'three_lines' : 'stripes';
     } else if (pattern.pattern === 'eye_liner') {
-      rendererPattern = 'eye_band';
+      // Kohl is a fine line along the lash line, not the broad band of
+      // Oceanic charcoal or mourning paint. Keeping the pattern distinct lets
+      // the renderer draw the right one.
+      rendererPattern = 'eye_liner';
     } else {
       rendererPattern = pattern.pattern; // Keep dot, flower, solid, zigzag, handprint, etc.
     }
@@ -1303,9 +1320,10 @@ export function getMarkingProbability(
   // Base probabilities by culture - historically accurate
   // These reflect actual anthropological data on body modification prevalence
   const baseProbabilities: Record<CulturalZone, number> = {
-    // Oceania is too internally diverse for a zone-wide "near universal" assumption.
-    // Keep generic generation conservative until markings can be selected by community.
-    OCEANIA: 0.35,
+    // Now that markings can be scoped to a community (see `places`), Oceania
+    // can carry the rate the ethnography actually reports rather than a
+    // placeholder. Tattooing was close to universal across Polynesia.
+    OCEANIA: 0.85,
     
     // Pre-Columbian Americas: Face/body paint was daily wear, tattoos/piercings very common
     NORTH_AMERICAN_PRE_COLUMBIAN: 0.90,

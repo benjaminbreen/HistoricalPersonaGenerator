@@ -49,7 +49,18 @@ import {
   IoLogoGithub,
   IoDocumentText,
   IoDownload,
-  IoAlertCircle
+  IoAlertCircle,
+  IoEye,
+  IoEar,
+  IoBed,
+  IoPaw,
+  IoSnow,
+  IoUmbrella,
+  IoThermometer,
+  IoSparkles,
+  IoTelescope,
+  IoHandLeft,
+  IoMusicalNotes
 } from 'react-icons/io5';
 import {
   FaDumbbell,
@@ -71,10 +82,79 @@ import {
   GiCrown,
   GiShield,
   GiSwordWound,
-  GiBattleGear
+  GiBattleGear,
+  GiMute,
+  GiTalk,
+  GiWalkingBoot,
+  GiBrokenBone,
+  GiHandBandage,
+  GiSnail,
+  GiWeight,
+  GiTooth,
+  GiSpotedFlower,
+  GiHourglass,
+  GiLungs,
+  GiMountainRoad,
+  GiWineGlass,
+  GiVirus,
+  GiPrayer,
+  GiMilkCarton,
+  GiMineWagon,
+  GiChemicalDrop,
+  GiSewingString,
+  GiWheat,
+  GiQuillInk,
+  GiBrain,
+  GiTiedScroll,
+  GiScrollQuill,
+  GiAbacus,
+  GiSpellBook,
+  GiCandleFlame,
+  GiSunrise,
+  GiOwl,
+  GiBed,
+  GiNightSleep,
+  GiThirdEye,
+  GiCookingPot,
+  GiDrinking,
+  GiSmokingPipe,
+  GiSpiderWeb,
+  GiMoneyStack,
+  GiAnvil,
+  GiPeaceDove,
+  GiEyeOfHorus,
+  GiFamilyTree,
+  GiBabyFace,
+  GiCrossMark,
+  GiDeathSkull,
+  GiRing,
+  GiFootprint,
+  GiTrail,
+  GiShipWheel,
+  GiHandcuffs,
+  GiPadlock,
+  GiPrisoner,
+  GiHammerNails,
+  GiHerbsBundle,
+  GiWaterDrop,
+  GiHorseHead,
+  GiBowArrow,
+  GiBeehive,
+  GiMusicalNotes,
+  GiHeartPlus,
+  GiSandsOfTime,
+  GiBallerinaShoes,
+  GiSpiralShell,
+  GiScarWound,
+  GiThreeLeaves,
+  GiCurledLeaf,
+  GiOpenBook,
+  GiRelationshipBounds
 } from 'react-icons/gi';
 import { generateHistoricalPersona, GenerationParams, HistoricalPersona } from '../services/personaGenerator';
 import type { SamplingMode } from '../services/demographyService';
+import { getAreaClimate, hemisphereFor, seasonFor } from '../services/climateService';
+import { ClimateType } from '../types/enums';
 import { HistoricalEra, CulturalZone, Gender } from '../types';
 import { generateNpcName } from '../generation/common/npcUtils';
 import { ValueNoise } from '../utils/noise';
@@ -94,11 +174,13 @@ import {
 } from '../services/geminiPersonaMaterialService';
 import { createPastedTextSource, getRandomWikidataPerson, ingestRandomOldBaileySource, ingestUrlSource, OldBaileyRandomFilters } from '../services/sourceIngestionService';
 import PortraitSwitch from './portraitLab/PortraitSwitch';
+import { usePortraitEngine } from './portraitLab/usePortraitEngine';
 import { generateStatDescription } from '../utils/statToText';
 import MiniLocationMap from './MiniLocationMap';
 import { RARITY_COLORS } from '../types/attributeTypes';
 import { PERSONAL_BELIEFS, IDEOLOGIES, getProfessionEmoji } from '../constants';
 import { getLanguageForCharacter } from '../constants/gameData/languages';
+import { confidenceBlurb } from '../services/languageAttributionService';
 import { WikipediaPanel } from './WikipediaPanel';
 import {
   adaptPersonaMaterialRecord,
@@ -113,6 +195,22 @@ import {
   describePhysicalAppearance,
   getNarrativePronouns,
 } from '../services/narrativeTextService';
+import { generateNarrativeBiography } from '../services/narrativeBiographyService';
+import { historicalPlaceLabel } from '../constants/gameData/placeLabels';
+import {
+  copyTextToClipboard,
+  createSharedPersona,
+  currentShareId,
+  loadSharedPersona,
+  removeShareFromCurrentUrl,
+  replaceCurrentUrlWithShare,
+  sharedPersonaUrl,
+} from '../services/sharedPersonaService';
+import {
+  SHARED_PERSONA_SCHEMA_VERSION,
+  SharedPersonaSnapshot,
+  StoredSharedPersona,
+} from '../types/sharedPersona';
 import { getDisplayZone } from '../utils/zoneDisplayUtils';
 import './PersonaGenerator.css';
 
@@ -144,6 +242,24 @@ const GENDERS: { value: Gender; label: string }[] = [
   { value: 'Female', label: 'Female' },
   { value: 'Non-binary', label: 'Non-binary' },
 ];
+
+/**
+ * Names generated from reconstructed languages carry the linguistic convention
+ * of a leading asterisk (*Temür) for an unattested form. Shown bare it reads as
+ * a typo, so it gets an explanation on hover.
+ */
+const RECONSTRUCTED_NAME_TOOLTIP =
+  'The asterisk is the linguistic convention for a reconstructed form: this name is built from a language recovered by comparison rather than recorded, so no attested spelling of it exists.';
+
+const renderName = (name: string): React.ReactNode => {
+  if (!name || !name.startsWith('*')) return name;
+  return (
+    <>
+      <abbr className="reconstructed-marker" title={RECONSTRUCTED_NAME_TOOLTIP}>*</abbr>
+      {name.slice(1)}
+    </>
+  );
+};
 
 // Icon mapping for attribute badges
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
@@ -180,8 +296,93 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
   IoSchool,
   IoEyeOff,
   IoGlasses,
+  IoEye,
+  IoEar,
+  IoPaw,
+  IoSnow,
+  IoUmbrella,
+  IoThermometer,
+  IoSparkles,
+  IoTelescope,
+  IoHandLeft,
+  IoMusicalNotes,
+  IoBed,
+  IoHammer,
+  IoPeople,
+  IoWater,
+  IoAirplane,
+  IoMoonSharp,
+  // Game Icons used by the attribute pool
+  GiMute,
+  GiTalk,
+  GiWalkingBoot,
+  GiBrokenBone,
+  GiHandBandage,
+  GiSnail,
+  GiWeight,
+  GiTooth,
+  GiSpotedFlower,
+  GiHourglass,
+  GiLungs,
+  GiMountainRoad,
+  GiWineGlass,
+  GiVirus,
+  GiPrayer,
+  GiMilkCarton,
+  GiMineWagon,
+  GiChemicalDrop,
+  GiSewingString,
+  GiWheat,
+  GiQuillInk,
+  GiBrain,
+  GiTiedScroll,
+  GiScrollQuill,
+  GiAbacus,
+  GiSpellBook,
+  GiCandleFlame,
+  GiSunrise,
+  GiOwl,
+  GiBed,
+  GiNightSleep,
+  GiThirdEye,
+  GiCookingPot,
+  GiDrinking,
+  GiSmokingPipe,
+  GiSpiderWeb,
+  GiMoneyStack,
+  GiAnvil,
+  GiPeaceDove,
+  GiEyeOfHorus,
+  GiFamilyTree,
+  GiBabyFace,
+  GiCrossMark,
+  GiDeathSkull,
+  GiRing,
+  GiFootprint,
+  GiTrail,
+  GiShipWheel,
+  GiHandcuffs,
+  GiPadlock,
+  GiPrisoner,
+  GiHammerNails,
+  GiHerbsBundle,
+  GiWaterDrop,
+  GiHorseHead,
+  GiBowArrow,
+  GiBeehive,
+  GiMusicalNotes,
+  GiHeartPlus,
+  GiSandsOfTime,
+  GiBallerinaShoes,
+  GiSpiralShell,
+  GiScarWound,
+  GiThreeLeaves,
+  GiCurledLeaf,
+  GiOpenBook,
+  GiRelationshipBounds,
   // Aliases for compatibility
   FaGlasses: IoGlasses,
+  FaHeart: FaHeartbeat, // imported as FaHeartbeat; without this alias Honest and Generous fell back to a star
   // Generic fallbacks for missing icons
   GiFragile: FaFeather,
   GiLeg: IoWarning,
@@ -354,6 +555,10 @@ const getMarkingTypeLabel = (type: string): string => {
 // Helper function to format marking descriptions grammatically
 const formatMarkingDescription = (marking: any): string => {
   const { type, size, location, pattern, color } = marking;
+
+  // Named practices describe themselves better than any generated phrase:
+  // "Kohl", "Ta Moko", "Bindi" rather than "Small black face paint (eye band)".
+  if (marking.name && typeof marking.name === 'string') return marking.name;
 
   // Convert hex colors to natural language
   const colorName = hexToColorName(color);
@@ -791,8 +996,10 @@ const lockProceduralSeedRecord = (
 };
 
 export default function PersonaGenerator() {
+  const { engine: portraitEngine, setEngine: setPortraitEngine } = usePortraitEngine();
   const [persona, setPersona] = useState<HistoricalPersona | null>(null);
   const [params, setParams] = useState<Partial<GenerationParams>>({});
+  const [samplingMode, setSamplingMode] = useState<SamplingMode>('explore');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [darkMode, setDarkMode] = useState(false); // Light mode by default
   const [showAbout, setShowAbout] = useState(false);
@@ -829,6 +1036,15 @@ export default function PersonaGenerator() {
   const [categoryEditDrafts, setCategoryEditDrafts] = useState<Record<string, string>>({});
   const [sourcePanelCollapsed, setSourcePanelCollapsed] = useState(true);
   const [sourceStudioView, setSourceStudioView] = useState<SourceStudioView>('full');
+  const [sharedPersonaId, setSharedPersonaId] = useState<string | null>(() => currentShareId());
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [isCreatingShare, setIsCreatingShare] = useState(false);
+  const [isLoadingSharedPersona, setIsLoadingSharedPersona] = useState(
+    () => new URLSearchParams(window.location.search).has('p')
+  );
+  const [sharedPersonaError, setSharedPersonaError] = useState<string | null>(null);
+  const [shareStatus, setShareStatus] = useState<string | null>(null);
+  const initialPersonaLoadStarted = useRef(false);
 
   const materialAdapter = annotationRecord ? adaptPersonaMaterialRecord(annotationRecord, {
     useSourceTitleAsName: sourceTarget === 'named_subject',
@@ -852,6 +1068,39 @@ export default function PersonaGenerator() {
   const sourceAttributes = materialOverrides?.attributes || [];
   const sourceIdeology = materialOverrides?.worldviewDescription || '';
   const isSyntheticAnnotation = annotationRecord?.source.source_basis === 'synthetic_composite';
+
+  /**
+   * The equipment column runs down the whole page, so what it shows has to
+   * earn its place. Clothing already fills the top panel; below it we show the
+   * two most telling things the persona is carrying and no more than four
+   * inventory lines. A slinger's full kit is eleven items, and printing all of
+   * them says less about them than the first two do.
+   */
+  const ACCESSORY_PRIORITY = ['main_hand', 'belt', 'off_hand', 'necklace', 'accessory', 'ring1', 'back'];
+  const MAX_ACCESSORIES = 2;
+  const MAX_INVENTORY = 4;
+
+  const visibleAccessories = useMemo(() => {
+    const entries = Object.entries(persona?.character?.equippedItems || {})
+      .filter(([slot]) => !['head', 'torso', 'legs', 'feet', 'cloak'].includes(slot.toLowerCase()))
+      .filter((entry): entry is [string, { name: string }] => Boolean(entry[1] && (entry[1] as any).name))
+      .filter(([, item]) => item.name.toLowerCase() !== 'none');
+    const rank = (slot: string) => {
+      const index = ACCESSORY_PRIORITY.indexOf(slot.toLowerCase());
+      return index === -1 ? ACCESSORY_PRIORITY.length : index;
+    };
+    return entries.sort((a, b) => rank(a[0]) - rank(b[0])).slice(0, MAX_ACCESSORIES);
+  }, [persona]);
+
+  const visibleInventory = useMemo(
+    () => (persona?.character?.inventory || []).slice(0, MAX_INVENTORY),
+    [persona]
+  );
+  const hiddenInventoryCount = Math.max(
+    0,
+    (persona?.character?.inventory?.length || 0) - MAX_INVENTORY
+  );
+
   const updateOldBaileyFilters = (updater: (filters: OldBaileyRandomFilters) => OldBaileyRandomFilters) => {
     setOldBaileySelectionActive(true);
     setOldBaileyFilters(updater);
@@ -965,13 +1214,99 @@ export default function PersonaGenerator() {
     }
   }, [darkMode]);
 
-  // Auto-generate a fast procedural persona on mount. The top "Generate Random Persona"
-  // button runs the same seed through the schema pipeline.
+  const restoreSharedPersona = (stored: StoredSharedPersona) => {
+    const snapshot = stored.snapshot;
+    const restoredPersona = snapshot.persona;
+    const restoredRecord = snapshot.annotationRecord || null;
+
+    setPersona(restoredPersona);
+    setParams({});
+    setAnnotationRecord(restoredRecord);
+    setEditableJsonl(restoredRecord ? annotationRecordToJsonl(restoredRecord) : '');
+    setPersonaSketch(snapshot.personaSketch || null);
+    setSourcePortraitUrl(snapshot.sourcePortraitUrl || null);
+    setSourcePortraitAttribution(snapshot.sourcePortraitAttribution || null);
+    setSourceTarget(snapshot.sourceTarget || 'named_subject');
+    setSourceTitle(restoredRecord?.source.title || '');
+    setSourceUrl(restoredRecord?.source.url || '');
+    // Raw pasted or extracted source text is deliberately never part of a share.
+    setSourceText('');
+    setOldBaileySelectionActive(false);
+    setSourcePanelCollapsed(true);
+    setSourceStudioView('full');
+    setFieldEditStatus(restoredRecord ? 'Loaded from a public persona share.' : null);
+    setSourceIngestionStatus(
+      restoredRecord
+        ? `Loaded shared persona and evidence record for ${restoredPersona.character.name}.`
+        : `Loaded shared procedural persona ${restoredPersona.character.name}.`
+    );
+    setPersonaStack([restoredPersona]);
+    setCurrentPersonaIndex(0);
+    setBreadcrumbPath([{ name: restoredPersona.character.name, index: 0 }]);
+    setActiveTab('biography');
+    setWikipediaArticle(null);
+    setDeathRevealState('prompt');
+    setDeathInfo(null);
+    setSamplingMode(snapshot.samplingMode || 'explore');
+    setPortraitEngine(snapshot.portraitEngine);
+    setSharedPersonaId(stored.id);
+    setSharedPersonaError(null);
+  };
+
+  const resetSharedPersonaState = () => {
+    setSharedPersonaId(null);
+    setSharedPersonaError(null);
+    setShareStatus(null);
+    removeShareFromCurrentUrl();
+  };
+
+  // Restore exact shared state when ?p= is present; otherwise generate the
+  // usual fast procedural landing persona. The ref prevents React Strict Mode
+  // from issuing the load twice; the request intentionally survives Strict
+  // Mode's simulated effect cleanup so its result is not discarded.
   useEffect(() => {
-    generateProceduralOnly();
+    if (initialPersonaLoadStarted.current) return;
+    initialPersonaLoadStarted.current = true;
+    const requestedId = new URLSearchParams(window.location.search).get('p');
+
+    if (!requestedId) {
+      setIsLoadingSharedPersona(false);
+      generateProceduralOnly();
+      return;
+    }
+
+    const validId = currentShareId();
+    if (!validId) {
+      setIsLoadingSharedPersona(false);
+      setSharedPersonaError('This persona link is malformed.');
+      return;
+    }
+
+    setIsLoadingSharedPersona(true);
+    loadSharedPersona(validId)
+      .then(stored => {
+        restoreSharedPersona(stored);
+      })
+      .catch(error => {
+        setPersona(null);
+        setSharedPersonaId(null);
+        setSharedPersonaError(
+          error instanceof Error ? error.message : 'This shared persona could not be loaded.'
+        );
+      })
+      .finally(() => {
+        setIsLoadingSharedPersona(false);
+      });
   }, []);
 
+  useEffect(() => {
+    if (!shareStatus) return undefined;
+    const timer = window.setTimeout(() => setShareStatus(null), 4200);
+    return () => window.clearTimeout(timer);
+  }, [shareStatus]);
+
   const generateRandom = () => {
+    resetSharedPersonaState();
     const newPersona = generateHistoricalPersona(params);
     console.log('[PersonaGenerator] Generated character data:', {
       hasAttributes: !!newPersona.character.attributes,
@@ -1016,6 +1351,7 @@ export default function PersonaGenerator() {
       fieldEditStatus?: string | null;
     } = {}
   ) => {
+    resetSharedPersonaState();
     const adaptedMaterial = adaptPersonaMaterialRecord(record, options);
     const generationParams = adaptedMaterial.generationParams;
     const newPersona = generateHistoricalPersona(generationParams);
@@ -1052,6 +1388,10 @@ export default function PersonaGenerator() {
 
     if (adaptedMaterial.displayOverrides.languageData) {
       newPersona.languageData = adaptedMaterial.displayOverrides.languageData;
+      // The attribution describes the language the generator chose. Once source
+      // material replaces that language, the attribution no longer describes
+      // what is on screen, so it is dropped rather than left to contradict it.
+      newPersona.languageAttribution = undefined;
     }
 
     setParams(generationParams);
@@ -1704,6 +2044,7 @@ export default function PersonaGenerator() {
         familyMember,
         newGenerationDepth
       );
+      resetSharedPersonaState();
 
       // Add to stack (remove any personas after current if we navigated back)
       const newStack = personaStack.slice(0, currentPersonaIndex + 1);
@@ -1803,6 +2144,7 @@ export default function PersonaGenerator() {
   };
 
   const applyProceduralPersona = (newPersona: HistoricalPersona) => {
+    resetSharedPersonaState();
     setParams({});
     console.log('[PersonaGenerator] Generated character data:', {
       hasAttributes: !!newPersona.character.attributes,
@@ -1828,17 +2170,13 @@ export default function PersonaGenerator() {
     setDeathInfo(null);
   };
 
-  // Explore mode keeps the whole world reachable; true frequency samples eras
-  // and regions by how many people actually lived in them. The flattening is
-  // deliberate but never silent — see docs/DEMOGRAPHY.md.
-  const [samplingMode, setSamplingMode] = useState<SamplingMode>('explore');
-
   const generateProceduralOnly = () => {
     applyProceduralPersona(generateHistoricalPersona({ samplingMode }));
   };
 
   const generateCompletelyRandom = async () => {
     if (isSourceGenerating) return;
+    resetSharedPersonaState();
     setIsSourceGenerating(true);
     setSourcePanelCollapsed(true);
     setSourceTarget('named_subject');
@@ -1887,19 +2225,79 @@ export default function PersonaGenerator() {
     setSandAnimationKey(prev => prev + 1); // Restart sand animation
   };
 
-  const handleShare = async () => {
-    if (navigator.share && persona) {
-      try {
-        await navigator.share({
-          title: `Historical Persona: ${persona.character.name}`,
-          text: `${persona.character.name} - ${persona.character.profession} from ${persona.location} (${persona.year})`,
-          url: window.location.href,
-        });
-      } catch (err) {
-        console.log('Error sharing:', err);
-      }
-    } else {
-      alert('Sharing is not supported in this browser. Copy the URL to share!');
+  const handleShare = () => {
+    if (!persona || isCreatingShare) return;
+    setShowShareDialog(true);
+  };
+
+  const buildSharedPersonaSnapshot = (): SharedPersonaSnapshot => {
+    if (!persona) throw new Error('Generate a persona before creating a share link.');
+    const completedSketch = personaSketch && !personaSketch.startsWith('Writing ')
+      ? personaSketch
+      : undefined;
+    return {
+      schemaVersion: SHARED_PERSONA_SCHEMA_VERSION,
+      persona,
+      annotationRecord: annotationRecord || undefined,
+      personaSketch: completedSketch,
+      sourcePortraitUrl: sourcePortraitUrl || undefined,
+      sourcePortraitAttribution: sourcePortraitAttribution || undefined,
+      sourceTarget,
+      portraitEngine,
+      samplingMode,
+      generatorVersion: '1.0.0',
+    };
+  };
+
+  const createPersonaShareLink = async () => {
+    if (!persona || isCreatingShare) return;
+    setIsCreatingShare(true);
+    setShareStatus(null);
+    try {
+      const id = await createSharedPersona(buildSharedPersonaSnapshot());
+      const url = replaceCurrentUrlWithShare(id);
+      setSharedPersonaId(id);
+      setShareStatus('Public persona link created. It will keep this exact character.');
+      // Keep the ready-state dialog open so copying remains a fresh user gesture
+      // even in browsers that revoke clipboard permission after a network wait.
+      return url;
+    } catch (error) {
+      setShareStatus(error instanceof Error ? error.message : 'Could not create a share link.');
+      return null;
+    } finally {
+      setIsCreatingShare(false);
+    }
+  };
+
+  const copyPersonaShareLink = async () => {
+    if (!sharedPersonaId) return;
+    try {
+      await copyTextToClipboard(sharedPersonaUrl(sharedPersonaId));
+      setShareStatus('Persona link copied to the clipboard.');
+      setShowShareDialog(false);
+    } catch (error) {
+      setShareStatus(error instanceof Error ? error.message : 'Could not copy the persona link.');
+    }
+  };
+
+  const openNativePersonaShare = async () => {
+    if (!sharedPersonaId || !persona) return;
+    const url = sharedPersonaUrl(sharedPersonaId);
+    if (!navigator.share) {
+      await copyPersonaShareLink();
+      return;
+    }
+    try {
+      await navigator.share({
+        title: `Historical Persona: ${persona.character.name}`,
+        text: `${persona.character.name} — ${persona.character.profession} from ${persona.location} (${persona.year})`,
+        url,
+      });
+      setShareStatus('Persona link shared.');
+      setShowShareDialog(false);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      setShareStatus('The share sheet could not open. You can copy the link instead.');
     }
   };
 
@@ -2854,11 +3252,36 @@ export default function PersonaGenerator() {
       .join(' ');
   };
 
-  const getSeasonInfo = (month: number, day: number): { season: string; color: string; description: string } => {
-    // Northern hemisphere seasons - darker colors for better contrast
+  const getSeasonInfo = (
+    month: number,
+    day: number,
+    culturalZone?: string,
+    region?: string
+  ): { season: string; color: string; description: string } => {
     let season = '';
     let color = '';
     let description = '';
+
+    // The display zone has spaces where the data has underscores.
+    const zone = (culturalZone || '').replace(/ /g, '_');
+    const climate = zone && region ? getAreaClimate(zone, region) : undefined;
+    const hemisphere = zone ? hemisphereFor(zone, region || '') : 'north';
+
+    // Near the equator the year divides into wet and dry, not into four
+    // temperate seasons; "the depths of winter" in equatorial Africa is simply
+    // the wrong frame.
+    if (climate === ClimateType.TROPICAL) {
+      const wet = seasonFor(month, hemisphere, climate) === 'wet';
+      return wet
+        ? { season: 'wet', color: '#3f6b6b', description: 'the height of the rains' }
+        : { season: 'dry', color: '#a5703a', description: 'the dry season' };
+    }
+
+    // Shift the calendar six months for the southern hemisphere, so a persona
+    // in Patagonia or Aotearoa is not described as freezing in January.
+    if (hemisphere === 'south') {
+      month = ((month + 5) % 12) + 1;
+    }
 
     if (month === 12 || month === 1 || month === 2) {
       season = 'winter';
@@ -2940,410 +3363,8 @@ export default function PersonaGenerator() {
     return colorMap[importance] || '#7f8c8d';
   };
 
-  const generateNarrativeBiography = (persona: HistoricalPersona): string => {
-    const character = persona.character;
-    const events = persona.enhancedLifeEvents || [];
-    const pronoun = character.gender === 'Male' ? 'he' : character.gender === 'Female' ? 'she' : 'they';
-    const pronounObj = character.gender === 'Male' ? 'him' : character.gender === 'Female' ? 'her' : 'them';
-    const pronounPoss = character.gender === 'Male' ? 'his' : character.gender === 'Female' ? 'her' : 'their';
-    const pronounPossCap = character.gender === 'Male' ? 'His' : character.gender === 'Female' ? 'Her' : 'Their';
-    const pronounVerb = character.gender === 'Non-binary' ? 'have' : 'has';
-    const pronounBe = character.gender === 'Non-binary' ? 'are' : 'is';
-    let biographyChoiceIndex = 0;
-    const biographySeed = [
-      character.name,
-      persona.year,
-      persona.location,
-      persona.region,
-      character.profession,
-      character.age,
-      character.portraitSeed,
-    ].join('|');
-    const seededIndex = (length: number): number => {
-      let hash = 2166136261 + biographyChoiceIndex;
-      biographyChoiceIndex += 1;
-      for (let i = 0; i < biographySeed.length; i += 1) {
-        hash ^= biographySeed.charCodeAt(i);
-        hash = Math.imul(hash, 16777619);
-      }
-      return Math.abs(hash) % Math.max(1, length);
-    };
-    const pickBiography = <T,>(values: T[]): T => values[seededIndex(values.length)];
+  // generateNarrativeBiography now lives in services/narrativeBiographyService.ts
 
-    // Get proper wealth description
-    const wealthDescriptions: Record<string, string> = {
-      'poor': 'poor',
-      'modest': 'humble',
-      'comfortable': 'respectable',
-      'wealthy': 'prosperous',
-      'noble': 'noble'
-    };
-    const wealthDesc = typeof character.wealthLevel === 'string' && wealthDescriptions[character.wealthLevel]
-      ? wealthDescriptions[character.wealthLevel]
-      : 'modest';
-
-    // Opening - birth and background
-    const birthYear = persona.year - character.age;
-
-    // Styled character name for visual emphasis
-    const styledName = `<span class="character-name">${character.name}</span>`;
-
-    // Vary opening phrases
-    const openingTemplates = [
-      `Born in ${formatYear(birthYear)} in ${persona.location}, ${styledName} `,
-      `It was in ${persona.location}, in the year ${formatYear(birthYear)}, that ${styledName} came into the world, and ${pronounPoss} `,
-      `In ${formatYear(birthYear)}, ${styledName} began life in ${persona.location}. ${pronounPossCap} `,
-      `The year ${formatYear(birthYear)} saw the birth of ${styledName} in ${persona.location}. ${pronounPossCap} `,
-      `${styledName} first drew breath in ${formatYear(birthYear)}, in ${persona.location}, where ${pronoun} `,
-      `In ${formatYear(birthYear)}, ${styledName} entered the world in ${persona.location}. ${pronounPossCap} `
-    ];
-
-    const selectedOpening = seededIndex(openingTemplates.length);
-    let narrative = openingTemplates[selectedOpening];
-
-    // Family context
-    const siblings = character.family?.filter(f =>
-      f.relation === 'sibling' || f.relation === 'brother' || f.relation === 'sister'
-    ) || [];
-    const parents = character.family?.filter(f =>
-      f.relation === 'father' || f.relation === 'mother'
-    ) || [];
-
-    // Adjust verb based on which opening template was used
-    // These openings end with a possessive pronoun ("his/her/their"), so they need noun-led phrasing.
-    const needsPossessiveForm = [1, 2, 3, 5].includes(selectedOpening);
-
-    if (siblings.length > 0) {
-      if (needsPossessiveForm) {
-        narrative += `upbringing was as one of ${siblings.length + 1} children in a ${wealthDesc} household`;
-      } else {
-        narrative += `grew up as one of ${siblings.length + 1} children in a ${wealthDesc} household`;
-      }
-    } else if (parents.length > 0) {
-      if (needsPossessiveForm) {
-        narrative += `parents raised ${pronounObj} in a ${wealthDesc} family`;
-      } else {
-        narrative += `was raised by ${pronounPoss} parents in a ${wealthDesc} family`;
-      }
-    } else {
-      if (needsPossessiveForm) {
-        narrative += `upbringing was in a ${wealthDesc} household`;
-      } else {
-        narrative += `came of age in a ${wealthDesc} household`;
-      }
-    }
-
-    // Religion and cultural context with varied religiosity
-    if (character.religion && character.religion !== 'Local Beliefs' && character.religion !== 'Agnostic') {
-      // Use character's religiosity score if available, otherwise random
-      const religiosity = character.socialContext?.religiosity ?? (seededIndex(100) / 100);
-
-      let religionPhrase = '';
-      if (religiosity > 0.8) {
-        // Very religious upbringing
-        const veryReligiousTemplates = [
-          `was deeply immersed in the traditions of ${character.religion}`,
-          `was raised with deep devotion to ${character.religion}`,
-          `grew up surrounded by the fervent practice of ${character.religion}`,
-          `was immersed in the teachings of ${character.religion} from an early age`
-        ];
-        religionPhrase = pickBiography(veryReligiousTemplates);
-      } else if (religiosity > 0.5) {
-        // Moderately religious
-        const moderateTemplates = [
-          `was steeped in the practices of ${character.religion}`,
-          `grew up observing the practices of ${character.religion}`,
-          `was brought up within the ${character.religion} tradition`,
-          `learned the customs of ${character.religion} from ${pronounPoss} family`
-        ];
-        religionPhrase = pickBiography(moderateTemplates);
-      } else if (religiosity > 0.25) {
-        // Nominally religious
-        const nominalTemplates = [
-          `was exposed to the practices of ${character.religion}`,
-          `had a modest upbringing in ${character.religion}`,
-          `grew up with some knowledge of ${character.religion}`,
-          `was familiar with ${character.religion}, though not particularly devout`
-        ];
-        religionPhrase = pickBiography(nominalTemplates);
-      } else {
-        // Barely religious/cultural only
-        const culturalTemplates = [
-          `was nominally ${character.religion}, though faith played little role in ${pronounPoss} upbringing`,
-          `came from a ${character.religion} household, though ${pronoun} practiced little`,
-          `was culturally ${character.religion}, though not particularly observant`,
-          `knew of ${character.religion} mainly as a cultural background, not a daily practice`
-        ];
-        religionPhrase = pickBiography(culturalTemplates);
-      }
-
-      narrative += `, where ${pronoun} ${religionPhrase}`;
-    }
-    narrative += '. ';
-
-    const narrativePronouns = getNarrativePronouns(character.gender);
-    const physicalDescription = describePhysicalAppearance(character.appearance, narrativePronouns);
-    if (physicalDescription) narrative += `${physicalDescription} `;
-
-    // Add transitional phrase before foundational attributes (if needed)
-    const foundationalAttributes = character.attributes?.filter((attr: any) => attr.foundational === true) || [];
-
-    if (foundationalAttributes.length > 0) {
-      const attributeNarratives: Record<string, string> = {
-        'blind': `${pronounPossCap} world ${pronounBe} one of touch, sound, and memory—${pronoun} ${pronounBe === 'are' ? 'have' : 'has'} been blind since ${character.age > 10 ? 'childhood' : 'birth'}, navigating life through senses others take for granted. `,
-        'deaf': `${character.name} was born without hearing and ${pronounVerb} learned to read the world through gesture and expression, ${pronounPoss} silence a constant companion. `,
-        'mute': `Unable to speak, ${pronoun} communicate${pronounBe === 'are' ? '' : 's'} through gestures and, when possible, the written word. `,
-        'lame': `${pronounPossCap} gait ${pronounBe} marked by a pronounced limp, the legacy of an injury sustained in ${character.age > 20 ? 'youth' : 'childhood'}. `,
-        'one_armed': `${pronounPossCap} left arm was lost to ${character.age > 25 ? 'injury' : 'disease'} years ago, yet ${pronoun} ${pronounVerb} adapted with remarkable resilience. `,
-        'disfigured': `${pronounPossCap} face bears the marks of ${character.age > 15 ? 'a terrible accident' : 'childhood illness'}, scars that draw stares but do not define ${pronounObj}. `,
-        'educated': `Unusually for someone of ${pronounPoss} station, ${pronoun} ${pronounVerb} received an education, able to read and write with facility. `,
-
-        'cowardly': `${pronounPossCap} courage ${pronounVerb} often failed ${pronounObj} in moments of danger, a fact ${pronoun} ${pronounBe === 'are' ? 'are' : 'is'} not proud of. `,
-        'devout': `${pronounPossCap} faith ${pronounBe} the bedrock of ${pronounPoss} existence, guiding every decision and action. `,
-        'cursed': `Whispers follow ${pronounObj} wherever ${pronoun} ${character.gender === 'Non-binary' ? 'go' : 'goes'}—some say ${pronoun} ${pronounBe} cursed, marked by ill fortune. `,
-        'twin': `${pronounPossCap} twin sibling ${pronounBe} never far from ${pronounPoss} thoughts, their lives intertwined by birth and fate. `,
-        'orphan': `Having lost both parents in ${character.age > 15 ? 'youth' : 'childhood'}, ${pronoun} ${pronounVerb} learned self-reliance early. `,
-        'bastard_born': `Born outside of marriage, ${pronoun} ${pronounVerb} always felt the sting of social stigma, ${pronounPoss} parentage a constant shadow. `,
-        'exile': `Cast out from ${pronounPoss} homeland, ${pronoun} now live${pronounBe === 'are' ? '' : 's'} in exile, forever longing for what was lost. `,
-        'former_slave': `${pronounPossCap} freedom ${pronounBe} hard-won—${pronoun} spent years in bondage before escaping or earning ${pronounPoss} liberation. `,
-        'war_veteran': `${pronounPossCap} body and mind still carry the scars of war, memories of battle that refuse to fade. `
-      };
-
-      // Add narrative for each foundational attribute
-      for (const attr of foundationalAttributes) {
-        const attrNarrative = attributeNarratives[attr.id];
-        if (attrNarrative) {
-          narrative += attrNarrative;
-        }
-      }
-    }
-
-    // Find THE most important life event
-    const keyEvent = events
-      .filter(e => e.kind !== 'birth' && e.kind !== 'apprenticeship')
-      .filter(e =>
-        e.importance === EventImportance.MILESTONE ||
-        e.importance === EventImportance.TRAGEDY ||
-        e.importance === EventImportance.OPPORTUNITY
-      )
-      .sort((a, b) => {
-        const importanceOrder = {
-          [EventImportance.TRAGEDY]: 0,
-          [EventImportance.MILESTONE]: 1,
-          [EventImportance.OPPORTUNITY]: 2,
-          [EventImportance.INJURY]: 3,
-          [EventImportance.RELATIONSHIP]: 4,
-          [EventImportance.MUNDANE]: 5
-        };
-        return importanceOrder[a.importance] - importanceOrder[b.importance];
-      })[0];
-
-    // Integrate the defining moment with better context
-    if (keyEvent) {
-      const yearsAgo = persona.year - keyEvent.year;
-      const ageAtEvent = character.age - yearsAgo;
-
-      // Skip events with invalid ages (can happen with BCE dates when event year precedes birth)
-      if (ageAtEvent < 0 || ageAtEvent > character.age) {
-        console.warn(`Skipping event with invalid age ${ageAtEvent} (event year: ${keyEvent.year}, birth year: ${persona.year - character.age})`);
-      } else {
-        // Only add event narrative if the age is valid
-        narrative += `${describeLifeEvent(keyEvent, ageAtEvent, narrativePronouns)} `;
-      }
-    }
-
-    // Current life - profession and daily existence with varied phrasing
-    const professionArticle = character.profession?.match(/^[aeiou]/i) ? 'an' : 'a';
-
-    // Profession phrasings WITH temporal markers (for use without transition)
-    const professionPhrasingsWithTime = [
-      `Now ${character.age} years old, ${pronoun} make${pronounBe === 'are' ? '' : 's'} ${pronounPoss} living as ${professionArticle} ${character.profession || 'laborer'}`,
-      `At ${character.age}, ${pronoun} work${pronounBe === 'are' ? '' : 's'} as ${professionArticle} ${character.profession || 'laborer'}`,
-      `Now ${character.age}, ${pronoun} earn${pronounBe === 'are' ? '' : 's'} bread as ${professionArticle} ${character.profession || 'laborer'}`
-    ];
-
-    // Profession phrasings WITHOUT temporal markers (for use with transitions)
-    const professionPhrasingsNoTime = [
-      `${pronoun} make${pronounBe === 'are' ? '' : 's'} ${pronounPoss} living as ${professionArticle} ${character.profession || 'laborer'} at the age of ${character.age}`,
-      `${pronoun} work${pronounBe === 'are' ? '' : 's'} as ${professionArticle} ${character.profession || 'laborer'}`,
-      `${pronoun} earn${pronounBe === 'are' ? '' : 's'} bread as ${professionArticle} ${character.profession || 'laborer'}`,
-      `${pronoun} earn${pronounBe === 'are' ? '' : 's'} a living as ${professionArticle} ${character.profession || 'laborer'}`,
-      `${pronoun === 'they' ? 'they practice' : pronoun === 'she' ? 'she practices' : 'he practices'} the trade of ${character.profession || 'laborer'}`
-    ];
-
-    // Add transitional phrase to profession section
-    const professionTransitions = [
-      'Today, ',
-      'Now, ',
-      `At ${character.age}, `
-    ];
-
-    const useTransition = seededIndex(10) < 4; // 40% chance of using a transition
-    if (useTransition) {
-      narrative += pickBiography(professionTransitions);
-      narrative += pickBiography(professionPhrasingsNoTime);
-    } else {
-      narrative += pickBiography(professionPhrasingsWithTime);
-    }
-
-    // Add work context based on stats
-    if (character.stats) {
-      if (character.stats.strength > 7 && character.profession?.toLowerCase().includes('smith')) {
-        narrative += `, ${pronounPoss} powerful arms wielding hammer and tongs with practiced skill`;
-      } else if (character.stats.intelligence > 7 && (character.profession?.toLowerCase().includes('scholar') || character.profession?.toLowerCase().includes('scribe'))) {
-        narrative += `, ${pronounPoss} keen mind devoted to the pursuit of knowledge`;
-      } else if (character.stats.charisma > 7 && character.profession?.toLowerCase().includes('merchant')) {
-        narrative += `, ${pronounPoss} gift for persuasion serving ${pronounObj} well in the marketplace`;
-      }
-    }
-
-    // Health status
-    if (character.diseaseHealth?.currentDiseases && character.diseaseHealth.currentDiseases.length > 0) {
-      const diseaseName = character.diseaseHealth.currentDiseases[0].disease.name;
-      narrative += `. ${diseaseName} has made ordinary labor more uncertain, but ${pronoun} ${character.gender === 'Non-binary' ? 'continue' : 'continues'} as circumstances allow`;
-    }
-
-    narrative += '. ';
-
-    // Helper function to get ideology description
-    const getIdeologyDescription = (ideologyId: string): string => {
-      const ideology = IDEOLOGIES.find((i: any) => i.id === ideologyId);
-      if (!ideology?.description) return '';
-
-      // Strip common verb prefixes to make description grammatically integrate
-      let cleanDesc = ideology.description
-        .replace(/^Emphasizes /i, '')
-        .replace(/^Seeks to /i, '')
-        .replace(/^Focuses on /i, '')
-        .replace(/^Values /i, '')
-        .replace(/^Prioritizes /i, '')
-        .replace(/^Champions /i, '')
-        .replace(/^Devoted to /i, '')
-        .replace(/^Believes in /i, '')
-        .replace(/^Renounces /i, '')
-        .replace(/^Centered on /i, '');
-
-      // Lowercase first letter to integrate into sentence
-      return cleanDesc.charAt(0).toLowerCase() + cleanDesc.slice(1);
-    };
-
-    // Helper function to get belief description
-    const getBeliefDescription = (beliefs: any[]): string | null => {
-      if (!beliefs || beliefs.length === 0) return null;
-
-      // Sort by conviction to get the strongest belief
-      const sortedBeliefs = [...beliefs].sort((a, b) => b.conviction - a.conviction);
-      const primaryBelief = sortedBeliefs[0];
-
-      if (!primaryBelief || !primaryBelief.beliefId) return null;
-
-      // Look up the belief text from PERSONAL_BELIEFS constant
-      const beliefData = PERSONAL_BELIEFS.find((b: any) => b.id === primaryBelief.beliefId);
-
-      if (beliefData && beliefData.text) {
-        // Strip common prefixes and lowercase the first letter to integrate into sentence
-        let cleanText = beliefData.text
-          .replace(/^[Bb]elieves that /i, '')
-          .replace(/^[Bb]elieves in /i, '')
-          .replace(/^[Bb]elieves /i, '')
-          .replace(/^[Dd]eeply /i, '');
-        return cleanText.charAt(0).toLowerCase() + cleanText.slice(1);
-      }
-
-      return null;
-    };
-
-    // Social standing and beliefs - more sophisticated integration
-    const beliefText = getBeliefDescription(character.beliefs);
-
-    const professionText = (character.profession || '').toLowerCase();
-    const canCarryAbstractIdeology = /merchant|banker|lawyer|clerk|scribe|scholar|teacher|operator|official|administrator|printer|journalist|student|activist|politician|priest|monk|imam|rabbi|minister|reformer|writer|artist|entrepreneur|shopkeeper|trader/.test(professionText);
-    const ideologyLooksModern = /CAPITALIST|SOCIALIST|LIBERAL|NATIONALIST/i.test(character.ideology || '');
-
-    if (character.ideology && character.ideology !== 'Pragmatism' && (!ideologyLooksModern || canCarryAbstractIdeology)) {
-      const ideology = IDEOLOGIES.find((i: any) => i.id === character.ideology);
-      const ideologySentence = describeIdeology(ideology, narrativePronouns);
-      if (ideologySentence) narrative += `${ideologySentence} `;
-    } else if (beliefText) {
-      // If no ideology but has beliefs, mention them
-      narrative += `${pronounPossCap} worldview ${pronounBe} shaped by the conviction that ${beliefText}. `;
-    }
-
-    // Personality - sophisticated and varied
-    const personality = character.personality;
-    if (personality) {
-      const traits: string[] = [];
-
-      // Check for ideologies that conflict with certain personality traits
-      const isRevolutionary = character.ideology &&
-        (character.ideology.toLowerCase().includes('revolutionary') ||
-         character.ideology.toLowerCase().includes('radical') ||
-         character.ideology.toLowerCase().includes('anarchist'));
-
-      const isConservative = character.ideology &&
-        (character.ideology.toLowerCase().includes('traditional') ||
-         character.ideology.toLowerCase().includes('conservative'));
-
-      // More nuanced personality combinations
-      if (personality.openness > 0.7 && personality.extraversion > 0.6) {
-        traits.push('an adventurous spirit who seeks out new experiences and companions');
-      } else if (personality.openness > 0.7 && personality.conscientiousness > 0.6) {
-        traits.push('a curious mind tempered by methodical discipline');
-      } else if (personality.openness > 0.7) {
-        traits.push('a thoughtful soul drawn to novel ideas and perspectives');
-      } else if (personality.openness < 0.3 && personality.conscientiousness > 0.7 && !isRevolutionary) {
-        // Skip "tradition and routine" if revolutionary
-        traits.push('a steadfast character who finds strength in tradition and routine');
-      } else if (personality.openness < 0.3) {
-        traits.push('a practical nature that values the proven over the experimental');
-      }
-
-      if (personality.agreeableness > 0.7 && personality.extraversion > 0.6 && !isRevolutionary) {
-        // Skip "warm and generous" if revolutionary (conflicts with radical change)
-        traits.push('a warm and generous presence that draws people near');
-      } else if (personality.agreeableness > 0.7 && !isRevolutionary) {
-        // Skip "gentle disposition seeks harmony" if revolutionary (direct contradiction)
-        traits.push('a gentle disposition that seeks harmony above conflict');
-      } else if (personality.agreeableness > 0.7 && isRevolutionary) {
-        // Alternative trait for high agreeableness revolutionaries
-        traits.push('a compassionate heart that drives commitment to justice');
-      } else if (personality.agreeableness < 0.3 && personality.neuroticism < 0.4) {
-        traits.push('a bold, uncompromising manner that some find refreshing and others find abrasive');
-      } else if (personality.agreeableness < 0.3) {
-        traits.push('an independent streak that prizes personal freedom above social convention');
-      }
-
-      if (traits.length > 0) {
-        const personalityIntros = [
-          `Those who know ${pronounObj} speak of ${traits[0]}`,
-          `Acquaintances describe ${pronounObj} as possessing ${traits[0]}`,
-          `${pronounPossCap} reputation rests on ${traits[0]}`,
-          `${pronoun === 'they' ? 'They are' : pronoun === 'she' ? 'She is' : 'He is'} known for ${traits[0]}`
-        ];
-
-        narrative += pickBiography(personalityIntros);
-
-        if (traits.length > 1) {
-          narrative += `, as well as ${traits[1]}`;
-        }
-        narrative += '.';
-      }
-    }
-
-    // Add parent names at the end
-    if (character.family && character.family.length > 0) {
-      const father = character.family.find(m => m.relation === 'father');
-      const mother = character.family.find(m => m.relation === 'mother');
-
-      const parentSentence = describeParents(father?.name, mother?.name, narrativePronouns, true);
-      if (parentSentence) narrative += ` ${parentSentence}`;
-    }
-
-    // Clean up any double periods or extra spaces
-    narrative = narrative.replace(/\.{2,}/g, '.').replace(/\s{2,}/g, ' ').trim();
-
-    return narrative;
-  };
 
   // Mapping for religion/region names to Wikipedia article titles
   const getWikipediaArticle = (displayName: string): string => {
@@ -3867,16 +3888,20 @@ export default function PersonaGenerator() {
     if (!persona) return null;
     const rawBio = generateNarrativeBiography(persona);
     const diseaseName = persona.character.diseaseHealth?.currentDiseases?.[0]?.disease?.name;
-    const withWikiLinks = makeTermsClickable(
-      rawBio,
-      persona.character.religion,
-      persona.location,
-      diseaseName
-    );
-
-    // For Phase 1, use simple approach: render HTML then enhance with family links
-    // We'll parse the HTML and add family name spans
-    return makeNamesClickableInHTML(withWikiLinks, persona.character.family);
+    // The biography is now two paragraphs, separated by a blank line.
+    return rawBio.split(/\n{2,}/).filter(Boolean).map((paragraph, index) => {
+      const withWikiLinks = makeTermsClickable(
+        paragraph,
+        persona.character.religion,
+        persona.location,
+        diseaseName
+      );
+      return (
+        <p key={index}>
+          {makeNamesClickableInHTML(withWikiLinks, persona.character.family)}
+        </p>
+      );
+    });
   }, [persona]);
 
   // Helper: Process life event text to make family names clickable
@@ -4093,9 +4118,21 @@ export default function PersonaGenerator() {
             {darkMode ? <IoSunny aria-hidden="true" /> : <IoMoonSharp aria-hidden="true" />}
             {darkMode ? 'Light Mode' : 'Dark Mode'}
           </button>
-          <button onClick={handleShare} aria-label="Share this persona">
+          <button
+            className="top-bar-donate"
+            onClick={() => setShowDonate(true)}
+            aria-label="Support this project"
+          >
+            <IoHeart aria-hidden="true" />
+            Donate
+          </button>
+          <button
+            onClick={handleShare}
+            aria-label={sharedPersonaId ? 'Open this persona share link' : 'Create a share link for this persona'}
+            disabled={!persona || isLoadingSharedPersona || isCreatingShare}
+          >
             <IoShareSocial aria-hidden="true" />
-            Share
+            {isCreatingShare ? 'Saving…' : 'Share'}
           </button>
           <button onClick={handleSavePDF} aria-label="Save persona as PDF">
             <IoSave aria-hidden="true" />
@@ -4134,13 +4171,18 @@ export default function PersonaGenerator() {
               True frequency
             </button>
           </div>
+          {sharedPersonaId && (
+            <span className="shared-persona-badge">
+              <IoShareSocial aria-hidden="true" />
+              Shared persona
+            </span>
+          )}
           <span className="controls-disclaimer">
             Prototype – may contain errors
           </span>
           <span className="controls-divider" aria-hidden="true">|</span>
           <span className="controls-info">
             Created by <a href="https://benjaminpbreen.com" target="_blank" rel="noopener noreferrer">Benjamin Breen</a>, UCSC History.{' '}
-            <a href="#" onClick={(e) => { e.preventDefault(); setShowDonate(true); }}>Donate</a>{' · '}
             <a href="https://github.com/benjaminbreen/HistoricalPersonaGenerator" target="_blank" rel="noopener noreferrer">GitHub</a>
           </span>
         </div>
@@ -4630,7 +4672,7 @@ export default function PersonaGenerator() {
               <div className="card-header">
               <div className="header-left">
                 <div className="name-with-pills">
-                  <h2>{persona.character.name}</h2>
+                  <h2>{renderName(persona.character.name)}</h2>
                   <div className="location-pills">
                     <span
                       className="location-pill region-pill wiki-link"
@@ -4638,19 +4680,23 @@ export default function PersonaGenerator() {
                     >
                       {persona.region}
                     </span>
-                    {persona.location !== persona.region && (
-                      <span
-                        className="location-pill area-pill wiki-link"
-                        onClick={() => setWikipediaArticle(getWikipediaArticle(persona.location))}
-                      >
-                        {persona.location}
-                      </span>
-                    )}
+                    {persona.location !== persona.region && (() => {
+                      const placeLabel = historicalPlaceLabel(persona.location, persona.year);
+                      return (
+                        <span
+                          className={`location-pill area-pill wiki-link${placeLabel.note ? ' place-anachronism' : ''}`}
+                          title={placeLabel.note}
+                          onClick={() => setWikipediaArticle(getWikipediaArticle(persona.location))}
+                        >
+                          {placeLabel.label}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
                 <div className="season-narrative">
-                  It is <span className="season-text" style={{ color: getSeasonInfo(persona.month, persona.day).color }}>
-                    {getSeasonInfo(persona.month, persona.day).description}
+                  It is <span className="season-text" style={{ color: getSeasonInfo(persona.month, persona.day, persona.culturalZone, persona.region).color }}>
+                    {getSeasonInfo(persona.month, persona.day, persona.culturalZone, persona.region).description}
                   </span> in the {formatEraLabel(persona.era)} in {formatCulturalZone(persona.culturalZone, persona.region, persona.location)}
                 </div>
                 {persona.odds && (
@@ -4773,6 +4819,7 @@ export default function PersonaGenerator() {
                             </span>
                           )}
                           {annotationRecord && renderSourceFieldTag('/persona_seed/social_identity/languages')}
+                          <span className="language-sources-marker" title="How this language was arrived at, and the scholarship behind it">†</span>
                         </span>
                       </div>
                     )}
@@ -4857,7 +4904,7 @@ export default function PersonaGenerator() {
                             ))}
                           </div>
                         ) : (
-                          <p>{memoizedBiographyWithFamilyLinks}</p>
+                          memoizedBiographyWithFamilyLinks
                         )}
                       </div>
                     )}
@@ -5446,32 +5493,26 @@ export default function PersonaGenerator() {
                 </motion.div>
 
                 {/* Accessories section for non-standard equipment slots */}
-                {!annotationRecord && Object.entries(persona.character.equippedItems || {})
-                  .filter(([slot]) => !['head', 'torso', 'feet'].includes(slot.toLowerCase()))
-                  .filter(([_, item]) => item).length > 0 && (
+                {!annotationRecord && visibleAccessories.length > 0 && (
                   <motion.div
                     className="equipment-section accessories-section"
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.32 }}
                   >
-                    <h3>Accessories</h3>
+                    <h3>Carried</h3>
                     <div className="equipment-grid">
-                      {Object.entries(persona.character.equippedItems || {})
-                        .filter(([slot]) => !['head', 'torso', 'feet'].includes(slot.toLowerCase()))
-                        .map(([slot, item]) => (
-                          item && (
-                            <div key={slot} className="equipment-item">
-                              <span className="equipment-slot">{formatItemName(slot)}</span>
-                              <span className="equipment-name">{formatItemName(item.name)}</span>
-                            </div>
-                          )
-                        ))}
+                      {visibleAccessories.map(([slot, item]) => (
+                        <div key={slot} className="equipment-item">
+                          <span className="equipment-slot">{formatItemName(slot)}</span>
+                          <span className="equipment-name">{formatItemName(item.name)}</span>
+                        </div>
+                      ))}
                     </div>
                   </motion.div>
                 )}
 
-                {!annotationRecord && persona.character.inventory && persona.character.inventory.length > 0 && (
+                {!annotationRecord && visibleInventory.length > 0 && (
                   <motion.div
                     className="inventory-section"
                     initial={{ opacity: 0, x: 10 }}
@@ -5480,7 +5521,7 @@ export default function PersonaGenerator() {
                   >
                     <h3>Inventory</h3>
                     <div className="inventory-list">
-                      {persona.character.inventory.map((item, idx) => (
+                      {visibleInventory.map((item, idx) => (
                         <div key={idx} className="inventory-item">
                           <span className="item-name">{formatItemName(item.name)}</span>
                           {item.quantity > 1 && (
@@ -5488,6 +5529,11 @@ export default function PersonaGenerator() {
                           )}
                         </div>
                       ))}
+                      {hiddenInventoryCount > 0 && (
+                        <div className="inventory-item inventory-overflow">
+                          <span className="item-name">and {hiddenInventoryCount} more</span>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 )}
@@ -5783,7 +5829,24 @@ export default function PersonaGenerator() {
         )}
       </AnimatePresence>
 
-      {!persona && (
+      {isLoadingSharedPersona && (
+        <div className="empty-state shared-persona-loading" role="status" aria-live="polite">
+          <p>Opening shared persona…</p>
+          <p className="empty-subtitle">Restoring the exact saved character and evidence record.</p>
+        </div>
+      )}
+
+      {!isLoadingSharedPersona && sharedPersonaError && !persona && (
+        <div className="empty-state shared-persona-error" role="alert">
+          <p>Unable to open this persona</p>
+          <p className="empty-subtitle">{sharedPersonaError}</p>
+          <button className="btn btn-primary" onClick={generateProceduralOnly}>
+            Generate a new persona
+          </button>
+        </div>
+      )}
+
+      {!isLoadingSharedPersona && !sharedPersonaError && !persona && (
         <div className="empty-state">
           <p>No persona record is currently loaded.</p>
           <p className="empty-subtitle">Generate a procedural seed or load a historical source to begin.</p>
@@ -5798,6 +5861,130 @@ export default function PersonaGenerator() {
     </footer>
 
     <AnimatePresence>
+      {shareStatus && (
+        <motion.div
+          className="persona-share-toast"
+          role="status"
+          aria-live="polite"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 12 }}
+        >
+          {shareStatus}
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    <AnimatePresence>
+      {showShareDialog && persona && (
+        <motion.div
+          className="modal-overlay"
+          onClick={() => !isCreatingShare && setShowShareDialog(false)}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="share-persona-modal-title"
+        >
+          <motion.div
+            className="modal share-persona-modal"
+            onClick={(event) => event.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+          >
+            <div className="modal-header">
+              <h2 id="share-persona-modal-title">
+                {sharedPersonaId ? 'Share this persona' : 'Create a public persona link'}
+              </h2>
+              <button
+                className="modal-close"
+                onClick={() => setShowShareDialog(false)}
+                disabled={isCreatingShare}
+                aria-label="Close share dialog"
+              >
+                <IoClose aria-hidden="true" />
+                Close
+              </button>
+            </div>
+            <div className="modal-body share-persona-body">
+              <div className="share-persona-identity">
+                <span>{formatYear(persona.year)}</span>
+                <strong>{persona.character.name}</strong>
+                <p>{persona.character.profession} · {persona.location}, {persona.region}</p>
+              </div>
+
+              {!sharedPersonaId ? (
+                <>
+                  <p>
+                    This creates an immutable snapshot of the character as you see it now,
+                    including the selected portrait system.
+                  </p>
+                  <div className="share-privacy-note">
+                    <IoInformationCircle aria-hidden="true" />
+                    <div>
+                      <strong>Anyone with the link can view it.</strong>
+                      <p>
+                        {annotationRecord
+                          ? 'The displayed annotation, evidence labels, and short evidence snippets will be included. '
+                          : 'The generated character record will be included. '}
+                        Raw pasted text, uploaded document contents, input fields, and API credentials are never included.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="share-persona-actions">
+                    <button
+                      className="btn"
+                      onClick={() => setShowShareDialog(false)}
+                      disabled={isCreatingShare}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={createPersonaShareLink}
+                      disabled={isCreatingShare}
+                    >
+                      <IoShareSocial aria-hidden="true" />
+                      {isCreatingShare ? 'Creating link…' : 'Create public link'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p>
+                    This URL restores the exact saved persona rather than generating a new one.
+                  </p>
+                  <label className="share-url-field">
+                    <span>Public link</span>
+                    <input
+                      type="text"
+                      readOnly
+                      value={sharedPersonaUrl(sharedPersonaId)}
+                      onFocus={event => event.currentTarget.select()}
+                    />
+                  </label>
+                  <div className="share-persona-actions">
+                    <button className="btn btn-primary" onClick={copyPersonaShareLink}>
+                      Copy link
+                    </button>
+                    {typeof navigator !== 'undefined' && navigator.share && (
+                      <button className="btn" onClick={openNativePersonaShare}>
+                        <IoShareSocial aria-hidden="true" />
+                        Share…
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
       {showAbout && (
         <motion.div
           className="modal-overlay"
@@ -6488,7 +6675,7 @@ export default function PersonaGenerator() {
             </button>
 
             <div className="language-modal-header">
-              <h2>{persona.languageData.name}</h2>
+              <h2>{sourceLanguageData?.name || sourceLanguageLabel || persona.languageData.name}</h2>
               {persona.languageData.nativeName && (
                 <p className="language-native-name">{persona.languageData.nativeName}</p>
               )}
@@ -6545,6 +6732,63 @@ export default function PersonaGenerator() {
                       <span key={idx} className="language-tag">{region}</span>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {persona.languageAttribution
+                && !sourceLanguageData
+                && !sourceLanguageLabel
+                && persona.languageAttribution.label === persona.languageData.name && (
+                <div className="language-section language-attribution">
+                  <h3>How this was arrived at</h3>
+                  <p className="language-confidence">
+                    {confidenceBlurb(persona.languageAttribution.confidence)}
+                  </p>
+                  {persona.languageAttribution.note && (
+                    <p className="language-context">{persona.languageAttribution.note}</p>
+                  )}
+
+                  {persona.languageAttribution.hypotheses.length > 1 && (
+                    <>
+                      <h4 className="language-subhead">What was weighed</h4>
+                      <ul className="language-hypotheses">
+                        {persona.languageAttribution.hypotheses.map((hyp, idx) => (
+                          <li key={hyp.label} className={idx === 0 ? 'hypothesis chosen' : 'hypothesis'}>
+                            <span className="hypothesis-weight">{Math.round(hyp.probability * 100)}%</span>
+                            <span className="hypothesis-label">{hyp.label}</span>
+                            {hyp.note && <span className="hypothesis-note">{hyp.note}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+
+                  {persona.languageAttribution.sources.length > 0 && (
+                    <>
+                      <h4 className="language-subhead">Sources</h4>
+                      <ul className="language-sources">
+                        {persona.languageAttribution.sources.map(source => (
+                          <li key={source.id} className="language-source">
+                            <span className="source-citation">
+                              {source.authors} ({source.year}). <em>{source.title}</em>
+                              {source.venue ? `. ${source.venue}` : ''}.
+                            </span>
+                            <span className="source-supports">{source.supports}</span>
+                            {source.contested && (
+                              <span className="source-contested">Contested: {source.contested}</span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+
+                  <p className="language-method-note">
+                    Where no records survive, this app names a language rather than leaving a
+                    blank, and shows the reasoning here. The comparative method reaches roughly
+                    eight thousand years; beyond that nothing can be named honestly, which is why
+                    the generator stops at 10,000 BCE.
+                  </p>
                 </div>
               )}
 

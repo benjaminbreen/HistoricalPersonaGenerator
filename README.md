@@ -133,6 +133,31 @@ GEMINI_API_KEY=your_key_here npm start
 
 Current source-backed records use annotation schema `1.1.0`. The schema keeps `1.0.0` records valid, while new generation prefers compact cross-cultural fields for social position, constraint regimes, public world, religious practice, normative world, and interaction style.
 
+## Persona Share Links
+
+The Share action saves an immutable, versioned snapshot and produces a short URL
+such as `/?p=AbCdEf123...`. This preserves the exact procedural or LLM-generated
+persona instead of trying to reproduce it from a random seed.
+
+For Vercel production:
+
+1. Open the project’s **Storage** tab.
+2. Create a **Private Blob** store and connect it to the project.
+3. Confirm that Vercel added `BLOB_READ_WRITE_TOKEN`, or the OIDC-based
+   `BLOB_STORE_ID` configuration, to the project.
+4. Redeploy.
+
+No storage credential is exposed to the browser. `/api/persona-share` validates,
+sanitizes, size-limits, and stores each snapshot server-side. Locally, when Blob
+credentials are absent, the same endpoint writes ignored development records to
+`.persona-shares/`.
+
+Shared snapshots include the rendered character data, selected portrait engine,
+and—when present—the displayed annotation/evidence record and generated sketch.
+They deliberately exclude raw pasted source text, uploaded document contents,
+source-input form state, and API credentials. Share links should still be
+treated as public: anyone with the URL can view the saved persona.
+
 ## Developer Tools
 
 ### Portrait Gallery
@@ -170,6 +195,7 @@ The app treats sources as evidence, not decorative flavor. A probate inventory, 
 - **Vite** for development and builds
 - **AJV** for JSON Schema validation
 - **Gemini** for optional schema filling from source text
+- **Vercel Blob** for immutable persona share snapshots
 - **SVG** for procedural pixel portraits
 
 ## Credits

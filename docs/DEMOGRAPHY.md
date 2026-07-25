@@ -203,7 +203,129 @@ down to a third of a percent.
 
 ---
 
-## 7. What is still knowingly wrong
+## 7. Anachronism gating, and why `year` beat `era`
+
+Widening prehistory to 40,000 BCE broke things that had been fine for years, in
+a way worth recording because the failure is general.
+
+`PREHISTORY` used to span a single millennium, so "era = PREHISTORY" was a
+perfectly good proxy for "roughly 3500 BCE". After the change it spans **37,000
+years**, and every subsystem keyed on era silently lost that resolution. The
+starting-equipment assembler took an era and no year, so it could not tell a
+Palaeolithic forager from a Chalcolithic villager and issued both a bronze torc.
+
+**The rule now: `era` is for labels; `year` is for availability.** Anything
+deciding whether a thing could exist takes a year.
+
+Four gates enforce it, each documented where it lives:
+
+| Gate | Location | Catches |
+| --- | --- | --- |
+| Materials | `demographyService.isMaterialAvailable` | linen at 28,000 BCE, woven sandals in the Palaeolithic, bronze fittings before bronze |
+| Professions | `professionAvailabilityService` | weavers before looms, farmers before agriculture, scribes before writing |
+| Naming traditions | `nameSetEras.resolveNameKey` | an Achaemenid prince hunting in the Tarim Basin in 22,094 BCE |
+| Equipment | `assembleStartingPackage` | anything the wardrobe gate would have caught, arriving by the other path |
+
+Two traps found while building these, both worth remembering:
+
+- **Exemptions must beat short-circuits.** The material gate first tried a list
+  of always-available materials checked *before* the rules. A woven sandal made
+  of plant fibre passed, because "fibre" is ancient — the *construction* was the
+  anachronism, not the material. Barkcloth now exempts itself from the woven
+  rule rather than the whole check being skipped.
+- **A gate is only as good as its fallback.** Routing every deep-prehistory
+  persona to the `PREHISTORIC_*` name sets was pointless while those sets ended
+  in Arabic, Ptolemaic and New Kingdom names, and while `PREHISTORIC_AFRICAN`
+  consisted of modern Akan and Swahili names, a state founded in 1701, a textile
+  and a twentieth-century statesman. They have been trimmed to what is
+  defensible.
+
+**Honestly held caveat.** For genuinely deep prehistory *every* attested name is
+an anachronism — no personal name survives from the Palaeolithic anywhere. Using
+the earliest-attested regional names is the least-bad compromise available while
+the app insists on naming everyone. The alternative, and the better idea, is to
+let the card decline to name people it cannot name. Oceania is the one case
+handled properly: Remote Oceania was settled within the last three thousand
+years, so before 1500 BCE the fallback is Aboriginal Australian, the only
+Oceanic naming tradition with deep-time standing.
+
+`npm run portrait-audit` reports region rules that reach past their tradition —
+118 have no lower bound at all. `resolveNameKey` stops them reaching a persona,
+so this is a latent-trap warning rather than a live bug.
+
+---
+
+## 8. Climate
+
+Seasons were computed from the calendar month alone, so every persona south of
+the equator had them inverted — a Mapuche or Māori persona on 26 December was
+described as being in "the depths of winter" during high summer. That was about
+a sixth of all output.
+
+Nothing connected climate to clothing either, so a hunter in the Tarim Basin — a
+cold desert where January means −10°C — was generated bare-chested in December.
+`climateService` now derives hemisphere and season from the region, and biases
+the wardrobe by thermal need. It is a preference rather than a prohibition:
+people wore the wrong thing, and the poor wore whatever they had. Equatorial
+regions get wet and dry seasons rather than four temperate ones.
+
+---
+
+## 9. Naming conventions
+
+A name has a *shape* as well as a vocabulary, and the generator only modelled
+the vocabulary. Every name came out as a given name followed by something from a
+surname list, which quietly asserts that hereditary family names are the human
+default.
+
+They are not. They are recent and unusual. England had no general system of
+inherited surnames before roughly the twelfth century; Wales was still
+patronymic in the sixteenth, Sweden and Norway into the nineteenth, and Iceland
+has never adopted them. Across the Arabic-speaking world a person was placed by
+descent (*ibn*, *bint*) and by parenthood (*Abu*, *Umm*) rather than by a family
+name until the twentieth century. China is the great exception — hereditary
+surnames there are genuinely ancient.
+
+Eight conventions are now modelled and chosen by culture and period: a bare
+personal name, patronymic, teknonym, epithet, clan, toponymic, occupational and
+inherited. "X of Y" is one of the eight rather than the shape of all human
+naming.
+
+Two things follow that matter more than the variety:
+
+- **The family agrees with the name.** If the persona is "Yeshimebet daughter of
+  Kebede", the father is Kebede. If the persona carries a hereditary name, the
+  father and siblings carry it too. A patronymic whose father panel disagrees is
+  worse than no patronymic.
+- **Before agriculture, a name is a name.** No inheritance, no estates to be
+  "of", no trades to be named for — personal names and earned bynames only.
+
+---
+
+## 10. Foraging lives
+
+The general life-event pools assume markets, guilds, inheritance, and marriages
+that improve a family's standing. Applying them to the Palaeolithic produced a
+persona in 22,000 BCE who had "arranged a sibling's marriage carefully to
+strengthen the family's position in society" — a sentence containing at least
+three concepts that had not been invented.
+
+Lives beginning before 8000 BCE now draw on a separate pool describing what the
+archaeology and the ethnography of foraging societies actually record: the
+seasons, the herds, the weather, initiation, toolstone, the long walk, the dead.
+Work that is not food-getting changes too — a forager band has toolmakers, hide
+workers, firekeepers and healers, not labourers and servants, both of which
+presuppose someone to labour for.
+
+Equipment follows: a spear and a hide thong, flint, a scraper, sinew cordage and
+a fire drill. Bows are gated to 15,000 BCE — the unambiguous evidence is early
+Holocene, and while stone points from Sibudu are argued to imply archery some
+60,000 years ago, the date here errs toward the spear-and-atlatl kit that is not
+in doubt.
+
+---
+
+## 11. What is still knowingly wrong
 
 Kept honest rather than quietly fixed:
 
@@ -226,6 +348,51 @@ Kept honest rather than quietly fixed:
 - **Everyone still works.** The generator assigns an occupation to every adult.
   Real populations contain the disabled, the retired, the destitute and the
   institutionalised.
+- **Place names are not gated.** A persona in 22,000 BCE is still labelled as
+  being in "Xinjiang", a Qing administrative name from 1884. Toponyms need the
+  same treatment the naming traditions just received.
+- **Dates claim more precision than exists.** "Born in 22,139 BCE, 26 December"
+  is a category error at that range.
+- **Roughly two personas in five carry nothing.** The profession-to-package
+  table covers about 410 of 700 roles, and the gap is almost entirely modern —
+  a factory hand or a telephone operator gets no kit. It reads as an absence of
+  possessions rather than an absence of data.
+
+---
+
+## 12. What the persona is carrying
+
+The `STARTING_PACKAGES` table — five hundred professions, each with a tool, some
+clothing and a few carried goods — was dead. `src/constants/index.ts` re-declared
+`STARTING_PACKAGES` as `{}` *after* re-exporting the real table, and a local
+export always beats `export *`, so every persona assembled an empty package in
+silence. The item constructor behind it, `generateItem`, was a stub returning
+null besides. What appeared in the equipment panel was clothing and nothing else.
+
+Both are live now, with three constraints on what the table is allowed to say:
+
+- **The wardrobe keeps its slots.** Packages carry clothing too, but they are
+  keyed on profession alone, while the clothing tables are keyed on culture,
+  period, wealth and climate. Since the package is assembled first and the
+  clothing only fills what is left empty, letting a package claim `head` or
+  `torso` would have replaced the better system with the worse one. Packages
+  contribute tools, weapons and carried goods; the wardrobe dresses the persona.
+- **The year still decides.** Carried goods go through the same availability gate
+  as everything else, so a package written with a settled profession in mind does
+  not hand a coin to someone born before coinage.
+- **Repeats mean quantity.** Three `SLING_STONE` entries are one line reading
+  ×3, not three lines.
+
+About a third of the packages asked for `'*CONTEXTUAL*'` in the main hand — a
+call into a weapon generator that was removed with the rest of the game's item
+layer, so those hands came out empty. Most of the professions marked that way are
+not soldiers; they are farmers and carpenters whose "contextual weapon" was
+really a hoe or an adze, and the marker now resolves to the tool the profession
+implies.
+
+The display is capped at two carried items and four inventory lines, with the
+remainder counted rather than listed. A slinger's full kit is eleven items and
+the first two say more about him than all eleven do.
 
 ---
 

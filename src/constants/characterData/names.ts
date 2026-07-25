@@ -39,8 +39,11 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
     PREHISTORIC_MENA: {
-        male: ['Atum', 'Khenti', 'Menes', 'Narmer', 'Scorpion', 'Ka', 'Iry-Hor', 'Abydos', 'Hierakonpolis', 'Naqada', 'Badari', 'Merimde', 'Fayum', 'Omari', 'Maadi', 'Tasian', 'Hamza', 'Yusuf', 'Ibrahim', 'Musa'],
-        female: ['Neithhotep', 'Merneith', 'Herneith', 'Nakhtneith', 'Khenthap', 'Betresh', 'Ahhotep', 'Tetisheri', 'Amenirdis', 'Nitocris', 'Ankhesenamun', 'Nefertiti', 'Hatshepsut', 'Cleopatra', 'Berenice', 'Arsinoe', 'Layla', 'Zahra', 'Fatima', 'Amina'],
+        // Predynastic and Naqada-horizon only. Arabic names (post-600 CE),
+        // Ptolemaic Greek and New Kingdom names were removed: this set is the
+        // fallback for the whole Palaeolithic and must not reach forward.
+        male: ['Atum', 'Khenti', 'Menes', 'Narmer', 'Scorpion', 'Ka', 'Iry-Hor', 'Abydos', 'Hierakonpolis', 'Naqada', 'Badari', 'Merimde', 'Fayum', 'Omari', 'Maadi', 'Tasian'],
+        female: ['Neithhotep', 'Merneith', 'Herneith', 'Nakhtneith', 'Khenthap', 'Betresh', 'Ahhotep', 'Tetisheri'],
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
     // Ancient Chinese & Proto-Mongolic (3000 BCE - 200 CE)
@@ -50,8 +53,12 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
     PREHISTORIC_AFRICAN: {
-        male: ['Aman', 'Kofi', 'Kwame', 'Nkrumah', 'Osei', 'Mensah', 'Adjei', 'Asante', 'Kente', 'Zuberi', 'Jabari', 'Omari', 'Sekou', 'Chike', 'Dume', 'Kato', 'Jengo', 'Baraka', 'Hasani', 'Imara'],
-        female: ['Ama', 'Efua', 'Akosua', 'Adwoa', 'Yaa', 'Afia', 'Abena', 'Nana', 'Makena', 'Asha', 'Khadija', 'Zara', 'Amara', 'Nia', 'Imani', 'Sanaa', 'Dalila', 'Hasina', 'Jumoke', 'Kesia'],
+        // No personal names survive from Palaeolithic Africa. These are short,
+        // widely distributed forms chosen to avoid claiming a specific later
+        // people: the ethnonyms ('Asante'), surnames ('Mensah', 'Nkrumah'),
+        // Arabic-derived names and a textile ('Kente') have been removed.
+        male: ['Aman', 'Zuberi', 'Jabari', 'Chike', 'Dume', 'Kato', 'Jengo', 'Imara', 'Sekou', 'Baraka'],
+        female: ['Ama', 'Yaa', 'Nana', 'Makena', 'Asha', 'Amara', 'Nia', 'Imani', 'Kesia'],
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
     PREHISTORIC_AMERICAN: {
@@ -1229,7 +1236,7 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         { after: 882, before: 1240, keys: ['RUSSIAN', 'SLAVIC_MEDIEVAL'] }, // Kievan Rus'
         { after: 1240, before: 1480, keys: ['RUSSIAN', 'MONGOLIAN_TRADITIONAL', 'TURKIC_STEPPE'] }, // Mongol Yoke
         { after: 1480, before: 1721, keys: ['RUSSIAN', 'POLISH'] },
-        { after: 1721, keys: ['RUSSIAN', 'POLISH_MODERN', 'JEWISH_ASHKENAZI'] }
+        { after: 1721, keys: ['RUSSIAN', 'RUSSIAN', 'RUSSIAN', 'POLISH_MODERN', 'JEWISH_ASHKENAZI'] }
     ],
     // Low Countries
     "Low Countries": [

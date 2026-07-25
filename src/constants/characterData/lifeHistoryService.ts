@@ -77,6 +77,16 @@ interface EventTemplate {
 
 // Disease names by era and culture
 // Causes of death - diseases, accidents, violence, starvation, etc.
+/**
+ * Causes that can only befall someone who was pregnant. The tables below are
+ * shared across both parents, so without this filter fathers were dying of
+ * childbirth complications.
+ */
+const FEMALE_ONLY_CAUSES = /childbirth|puerperal|in labou?r\b|birthing/i;
+
+/** Causes overwhelmingly confined to men in most of the periods modelled here. */
+const MALE_DOMINATED_CAUSES = /killed in battle|killed in warfare|killed in combat|mining|shipwreck|duel|killed in conquest/i;
+
 const HISTORICAL_CAUSES_OF_DEATH: Record<HistoricalEra, Record<CulturalZone, string[]>> = {
   [HistoricalEra.PREHISTORY]: {
     EUROPEAN: ['pneumonia', 'infected wounds', 'childbirth complications', 'starvation', 'exposure to cold', 'animal attack', 'drowning', 'fall from cliffs', 'tribal warfare'],
@@ -980,6 +990,134 @@ const CULTURAL_EVENT_MODIFIERS: Record<CulturalZone, Partial<EventTemplate>[]> =
 };
 
 // ============================================================================
+// FORAGING LIVES
+// ============================================================================
+
+/**
+ * Events for lives lived before agriculture.
+ *
+ * The general pools assume a world of markets, guilds, inheritance, arranged
+ * marriages that improve a family's standing, and institutions to be recognised
+ * by. None of that exists for a forager, and applying it produced a persona in
+ * 22,000 BCE who had "arranged a sibling's marriage carefully to strengthen the
+ * family's position in society" — a sentence containing at least three concepts
+ * that had not been invented.
+ *
+ * What is here instead is what the archaeology and the ethnography of foraging
+ * societies actually describe: the seasons, the herds, the weather, the long
+ * walk, the toolstone, the dead. Deliberately concrete and deliberately small.
+ */
+const FORAGER_EVENTS: EventTemplate[] = [
+  {
+    kind: 'achievement',
+    importance: EventImportance.MILESTONE,
+    titles: ['A Good Kill', 'The Hunt Returns'],
+    templates: [
+      'Brought down a large animal alone for the first time, and carried the meat back to the camp',
+      'Was among the party that drove a herd into the narrows, and the band ate well for many days',
+      'Speared a beast that had eluded the band all season',
+    ],
+    minAge: 12,
+    weight: 1.4,
+  },
+  {
+    kind: 'tragedy',
+    importance: EventImportance.TRAGEDY,
+    titles: ['The Long Winter', 'Hunger'],
+    templates: [
+      'A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring',
+      'The herds did not come that year, and the camp moved three times looking for them',
+      'A summer of no rain drove the band far from the usual ground, into country nobody knew',
+    ],
+    minAge: 4,
+    weight: 1.2,
+  },
+  {
+    kind: 'discovery',
+    importance: EventImportance.OPPORTUNITY,
+    titles: ['Good Stone', 'A New Water'],
+    templates: [
+      'Found an outcrop of workable stone, and the band returned to it for years afterwards',
+      'Learned the way to a spring that held water through the dry months',
+      'Followed a river further than anyone in the band had gone, and came back able to describe it',
+    ],
+    minAge: 10,
+    weight: 1,
+  },
+  {
+    kind: 'religious',
+    importance: EventImportance.MILESTONE,
+    titles: ['Initiation', 'The Marks'],
+    templates: [
+      'Was taken from the camp by the elders, kept apart, and came back changed and marked',
+      'Received the marks that say who this person is and who they may speak to',
+      'Sat through the long night when the songs are given to those old enough to hold them',
+    ],
+    minAge: 11,
+    maxAge: 20,
+    weight: 1.3,
+  },
+  {
+    kind: 'injury',
+    importance: EventImportance.INJURY,
+    titles: ['Broken', 'The Fall'],
+    templates: [
+      'Was caught by an animal that did not die quickly, and carried the scars afterwards',
+      'Fell badly on the rocks, and the leg never set straight',
+      'Went through the ice, and lost feeling in the fingers of one hand for good',
+    ],
+    minAge: 8,
+    weight: 0.9,
+  },
+  {
+    kind: 'journey',
+    importance: EventImportance.MILESTONE,
+    titles: ['The Long Walk', 'Strangers'],
+    templates: [
+      'Walked with the band to the far camp, further than the children had ever been',
+      'Met a band nobody knew at the river, and there was trading and wariness and then singing',
+      'Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season',
+    ],
+    minAge: 8,
+    weight: 1,
+  },
+  {
+    kind: 'childbirth',
+    importance: EventImportance.TRAGEDY,
+    titles: ['A Birth That Went Wrong'],
+    templates: [
+      'A birth went wrong in the night, and by morning the camp was quieter by two',
+      'Lost a child before it could walk, and buried it under the floor of the shelter',
+    ],
+    minAge: 15,
+    weight: 0.9,
+  },
+  {
+    kind: 'family',
+    importance: EventImportance.MILESTONE,
+    titles: ['Joining', 'A New Hearth'],
+    templates: [
+      'Left the band of birth to live with another, as is the custom',
+      'Took a partner from a band met at the summer gathering',
+      'Came back to the band of birth after years away, and was taken in again',
+    ],
+    minAge: 14,
+    weight: 1.1,
+  },
+  {
+    kind: 'death',
+    importance: EventImportance.TRAGEDY,
+    titles: ['A Death in the Band'],
+    templates: [
+      'An elder died, and with them went the knowledge of country nobody else held',
+      'Buried a kinsman with ochre and with the things they had made',
+    ],
+    minAge: 6,
+    weight: 1,
+  },
+];
+
+// ============================================================================
 // FAMILY EVENT INTEGRATION
 // ============================================================================
 
@@ -1032,7 +1170,8 @@ const FAMILY_EVENTS: EventTemplate[] = [
 function generateEarlyLifeEvent(
   profession: string,
   gender: string,
-  socialClass: string
+  socialClass: string,
+  birthYear = 0
 ): { kind: EventKind; title: string; text: string } | null {
   const profLower = profession.toLowerCase();
 
@@ -1166,7 +1305,9 @@ function generateEarlyLifeEvent(
 
   if (laborerProfessions.some(p => profLower.includes(p))) {
     const variants = [
-      `Experienced hard labor for the first time, joining work crews at dawn`,
+      birthYear < -8000
+      ? `Took a share of the heavy work of the camp, carrying and hauling with the rest`
+      : `Experienced hard labor for the first time, joining work crews at dawn`,
       `Began hauling loads for merchants, building strength`,
       `Started working alongside father in backbreaking toil`
     ];
@@ -1228,7 +1369,11 @@ function generateEarlyLifeEvent(
   return {
     kind: 'apprenticeship',
     title: 'Early Training',
-    text: `Began learning the trade of ${profession} from an experienced practitioner`
+    // "Trade" and "practitioner" belong to a world with crafts and masters.
+    // A forager learns from kin, in the country, by going along.
+    text: birthYear < -8000
+      ? `Began going out with the older ones, learning the country and how to take from it`
+      : `Began learning the trade of ${profession} from an experienced practitioner`
   };
 }
 
@@ -1251,22 +1396,34 @@ export function generateLifeHistory(
     kind: 'birth',
     importance: EventImportance.MILESTONE,
     title: 'Birth',
-    text: `Born in ${character.hometown || 'a small settlement'} to a ${character.socialClass || 'common'} family`
+    text: (() => {
+      const home = (character as { hometown?: string }).hometown;
+      return birthYear < -8000
+        ? `Born to the band that ranged ${home || 'this country'}`
+        : `Born in ${home || 'a small settlement'} to a ${character.socialClass || 'common'} family`;
+    })()
   });
 
-  // Collect all applicable event templates
-  let eventPool: EventTemplate[] = [
-    ...MERCHANT_EVENTS,
-    ...SCHOLAR_EVENTS,
-    ...CRAFTSMAN_EVENTS,
-    ...SOLDIER_EVENTS,
-    ...FARMER_EVENTS,
-    ...RELIGIOUS_EVENTS,
-    ...FAMILY_EVENTS
-  ];
+  // Before agriculture the general pools describe a world that does not exist
+  // yet — markets, guilds, inheritance, social standing. Gate on the year, not
+  // the era: PREHISTORY now spans 37,000 years and its late end is Neolithic.
+  const FORAGING_THRESHOLD_YEAR = -8000;
+  const isForagingLife = birthYear < FORAGING_THRESHOLD_YEAR;
+
+  let eventPool: EventTemplate[] = isForagingLife
+    ? [...FORAGER_EVENTS]
+    : [
+        ...MERCHANT_EVENTS,
+        ...SCHOLAR_EVENTS,
+        ...CRAFTSMAN_EVENTS,
+        ...SOLDIER_EVENTS,
+        ...FARMER_EVENTS,
+        ...RELIGIOUS_EVENTS,
+        ...FAMILY_EVENTS
+      ];
 
   // Add cultural modifiers
-  if (CULTURAL_EVENT_MODIFIERS[culturalZone]) {
+  if (!isForagingLife && CULTURAL_EVENT_MODIFIERS[culturalZone]) {
     eventPool = [...eventPool, ...CULTURAL_EVENT_MODIFIERS[culturalZone]];
   }
 
@@ -1300,7 +1457,7 @@ export function generateLifeHistory(
 
     // Only add if within character's lifetime
     if (earlyYear >= birthYear && earlyYear <= currentYear) {
-      const earlyLifeEvent = generateEarlyLifeEvent(profession, character.gender, socialClass);
+      const earlyLifeEvent = generateEarlyLifeEvent(profession, character.gender, socialClass, birthYear);
 
       if (earlyLifeEvent) {
         events.push({
@@ -1388,9 +1545,14 @@ export function generateLifeHistory(
     const weightedEvents = validEvents.map(template => {
       let weight = template.weight;
 
-      // Apply era weight
-      if (template.eraWeights && template.eraWeights[era] !== undefined) {
-        weight *= template.eraWeights[era];
+      // Apply era weight. A template that lists eras at all is declaring where
+      // it belongs, so an era it omits excludes it rather than leaving it at
+      // full base weight — otherwise the feudal-obligation events kept firing
+      // for twentieth-century personas.
+      if (template.eraWeights) {
+        const eraWeight = template.eraWeights[era];
+        if (eraWeight === undefined) return { template, weight: 0 };
+        weight *= eraWeight;
       }
 
       // Apply cultural weight
@@ -1461,7 +1623,7 @@ export function generateLifeHistory(
     let text = selectedTemplate.templates[Math.floor(Math.random() * selectedTemplate.templates.length)];
 
     // Replace placeholders with context-appropriate values
-    text = replacePlaceholders(text, culturalZone, era, character);
+    text = replacePlaceholders(text, culturalZone, era, character, eventYear);
 
     // Add cultural context for certain events
     let culturalContext: string | undefined;
@@ -1489,18 +1651,15 @@ export function generateLifeHistory(
       const isMotherDeath = Math.random() < 0.5;
       const parentType = isMotherDeath ? 'mother' : 'father';
 
-      // Filter causes of death based on gender and historical plausibility
+      // Filter causes of death based on sex and historical plausibility
       let causesOfDeath = allCausesOfDeath;
+      if (!isMotherDeath) {
+        // Fathers cannot die of childbirth. This was previously unfiltered.
+        causesOfDeath = allCausesOfDeath.filter(cause => !FEMALE_ONLY_CAUSES.test(cause));
+        if (causesOfDeath.length === 0) causesOfDeath = ['illness'];
+      }
       if (isMotherDeath) {
-        // Mothers are less likely to die in warfare, battles, or accidents
-        // Filter out explicitly male-dominated death causes
-        causesOfDeath = allCausesOfDeath.filter(cause =>
-          !cause.includes('killed in battle') &&
-          !cause.includes('killed in warfare') &&
-          !cause.includes('mining') &&
-          !cause.includes('shipwreck') &&
-          !cause.includes('duel')
-        );
+        causesOfDeath = allCausesOfDeath.filter(cause => !MALE_DOMINATED_CAUSES.test(cause));
         // If all causes filtered out, use disease/illness causes
         if (causesOfDeath.length === 0) {
           causesOfDeath = allCausesOfDeath.filter(cause =>
@@ -1594,14 +1753,22 @@ function replacePlaceholders(
   text: string,
   culturalZone: CulturalZone,
   era: HistoricalEra,
-  character: PlayerCharacter | NpcEntity
+  character: PlayerCharacter | NpcEntity,
+  year?: number
 ): string {
   const commodities = TRADE_GOODS[culturalZone]?.[era] || ['goods'];
   const causesOfDeath = HISTORICAL_CAUSES_OF_DEATH[era][culturalZone] || ['illness'];
 
   // Replace placeholders
   text = text.replace('[COMMODITY]', commodities[Math.floor(Math.random() * commodities.length)]);
-  text = text.replace('[DISEASE]', causesOfDeath[Math.floor(Math.random() * causesOfDeath.length)]);
+  // [DISEASE] is used in templates about many different people. Only offer a
+  // female-only cause when the sentence is actually about a woman.
+  const femaleSubject = /\b(?:mother|wife|sister|daughter|widow|she|her)\b/i.test(text);
+  const eligibleCauses = femaleSubject
+    ? causesOfDeath
+    : causesOfDeath.filter(cause => !FEMALE_ONLY_CAUSES.test(cause));
+  const causePool = eligibleCauses.length > 0 ? eligibleCauses : ['illness'];
+  text = text.replace('[DISEASE]', causePool[Math.floor(Math.random() * causePool.length)]);
   text = text.replace('[OCCUPATION]', character.profession || 'work');
   text = text.replace('[SEASON]', ['spring', 'summer', 'harvest time', 'winter'][Math.floor(Math.random() * 4)]);
   text = text.replace('[SON/DAUGHTER]', Math.random() > 0.5 ? 'son' : 'daughter');
@@ -1623,7 +1790,7 @@ function replacePlaceholders(
   text = text.replace('[INSTITUTION]', getInstitution(culturalZone, era));
 
   // Social placeholders
-  text = text.replace('[SOCIAL_GROUP]', getSocialGroup(culturalZone, era));
+  text = text.replace('[SOCIAL_GROUP]', getSocialGroup(culturalZone, era, year));
   text = text.replace('[ENEMY]', getEnemyGroup(culturalZone, era));
 
   // Disasters
@@ -1641,7 +1808,7 @@ function replacePlaceholders(
   text = text.replace('[CRAFT]', character.profession || 'craft');
   text = text.replace('[SUBJECT]', getScholarlySubject(era));
   text = text.replace('[SCHOLARLY_PRACTICE]', getScholarlyPractice(era));
-  text = text.replace('[GROUP]', getSocialGroup(culturalZone, era));
+  text = text.replace('[GROUP]', getSocialGroup(culturalZone, era, year));
 
   return text;
 }
@@ -1699,7 +1866,30 @@ function getInstitution(zone: CulturalZone, era: HistoricalEra): string {
   return 'the university';
 }
 
-function getSocialGroup(zone: CulturalZone, era: HistoricalEra): string {
+/**
+ * Institutions a family could marry into. The era argument was accepted and
+ * never used, so an eighth-century BCE persona could marry into a cathedral
+ * chapter. Entries that belong to a period now say so.
+ */
+const ERA_BOUND_GROUPS: Record<string, [min: number, max: number]> = {
+  'cathedral chapter': [800, 1900],
+  'town council': [1100, 2100],
+  'merchant guild': [1000, 1850],
+  'craft guild': [1000, 1850],
+  'artisan guild': [400, 1900],
+  'navigator guild': [-1000, 1800],
+  'Sufi order': [900, 2100],
+  'Buddhist monastery': [-200, 2100],
+  'samurai clan': [1100, 1870],
+  'literati family': [-200, 1912],
+  'political party': [1790, 2100],
+  'religious congregation': [1600, 2100],
+  'military order': [1100, 1900],
+  'noble panaca': [1200, 1533],
+  'Brahmin family': [-1000, 2100],
+};
+
+function getSocialGroup(zone: CulturalZone, era: HistoricalEra, year?: number): string {
   const groups: Record<CulturalZone, string[]> = {
     EUROPEAN: ['merchant guild', 'noble house', 'cathedral chapter', 'town council'],
     MENA: ['merchant caravan', 'tribal confederation', 'Sufi order', 'military elite'],
@@ -1712,8 +1902,15 @@ function getSocialGroup(zone: CulturalZone, era: HistoricalEra): string {
     OCEANIA: ['chiefly family', 'navigator guild', 'warrior band', 'trading partnership']
   };
 
-  const list = groups[zone] || ['influential family'];
-  return list[Math.floor(Math.random() * list.length)];
+  const all = groups[zone] || ['influential family'];
+  const list = year === undefined
+    ? all
+    : all.filter(group => {
+      const bounds = ERA_BOUND_GROUPS[group];
+      return !bounds || (year >= bounds[0] && year <= bounds[1]);
+    });
+  const usable = list.length > 0 ? list : ['influential family'];
+  return usable[Math.floor(Math.random() * usable.length)];
 }
 
 function getEnemyGroup(zone: CulturalZone, era: HistoricalEra): string {

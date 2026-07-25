@@ -10,8 +10,9 @@ import { getEquipmentSlot, getMaterialFromName, getCategoryFromName, getEmojiFro
 import { calculateAmuletChance, getQualityFromPrivilege, getWealthFromPrivilege, getCulturalAccessoryChance } from '../constants/gameData/culturalClassifications';
 import { getPetChanceMultiplier, canHaveEccentricPets, getBaseCatChance, ECCENTRIC_PETS } from '../constants/gameData/professionClassifications';
 import { generateProceduralItemDescription } from '../services/itemDescriptionGenerator';
+import { isMaterialAvailable } from '../services/demographyService';
 import { createTamedAnimal, addToParty } from '../services/animalTamingService';
-import { generateItem, createColoredItemInstance, applyColorsToAllItems, generateContextualWeapon } from '../services/itemGenerationService';
+import { createColoredItemInstance, applyColorsToAllItems } from '../services/itemGenerationService';
 import { generateContextualHeadgear, generateContextualStartingPackage } from '../services/headgearGenerationService';
 import { generateContextualTorso, GENERIC_TORSO_ITEMS } from '../services/torsoGenerationService';
 import { generateContextualAccessory, GENERIC_ACCESSORIES } from '../services/accessoryGenerationService';
@@ -26,7 +27,9 @@ import { v4 as uuidv4 } from 'uuid';
  * Replaces complex regex and hardcoded arrays with clean data-driven approach
  */
 export function generateProceduralItemDefinition(baseId: string): ItemDefinition {
-    const name = baseId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    // Base IDs are SCREAMING_SNAKE, so title-casing without lowering first left
+    // the name shouting: 'FISHING_NET' → "FISHING NET" rather than "Fishing Net".
+    const name = baseId.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     const lowerId = baseId.toLowerCase();
 
     // Handle special log items
@@ -176,8 +179,10 @@ export function createItemInstance(
         item = applyRegionalMaterial(item, culture);
     }
 
-    // Add color to name only for appropriate items
-    if (colorPrefix) {
+    // Add color to name only for appropriate items. Items that stand for the
+    // *absence* of a thing never take one — "Orange Barefoot" is not a colour
+    // of footwear.
+    if (colorPrefix && !/^(?:barefoot|none|nothing|bare)\b/i.test(item.name)) {
         const material = (item.material || '').toLowerCase();
         if (!MATERIAL_COLORS.has(material)) {
             item.name = `${colorPrefix} ${item.name}`;
@@ -563,6 +568,46 @@ function addRandomPets(playerCharacter: PlayerCharacter): void {
     }
 }
 
+/**
+ * The tool a profession implies, for packages that ask for `'*CONTEXTUAL*'`.
+ *
+ * That marker used to route to a weapon generator that was stripped out with
+ * the rest of the game's item layer, so roughly a third of all packages left the
+ * main hand empty. Most of the professions marked this way are not soldiers —
+ * they are farmers and carpenters whose "contextual weapon" was really a hoe or
+ * an adze. First match wins, so order the specific before the general.
+ */
+const CONTEXTUAL_TOOLS: Array<[RegExp, string]> = [
+    [/hunter|fowler|trapper/i, 'HUNTING_BOW'],
+    [/fisher|whaler|dhow|sailor|mariner/i, 'FISHING_NET'],
+    [/soldier|warrior|guard|knight|samurai|ronin|legionary|hoplite|mercenary|archer|cavalry|ninja/i, 'SPEAR'],
+    [/smith|forge|metal|bronze|iron/i, 'SMITHING_HAMMER'],
+    [/carpenter|joiner|shipwright|cooper|wheelwright/i, 'ADZE'],
+    [/carver|sculptor|mason|stonecutter/i, 'CARVING_KNIFE'],
+    [/scribe|clerk|scholar|notary|astronomer|philosopher|physician|priest|monk/i, 'REED_PEN'],
+    [/weaver|reeler|spinner|tailor|dyer|embroider/i, 'SPINDLE'],
+    [/potter|tiler|brick/i, 'CLAY_LUMP'],
+    [/cutter|logger|woodsman|charcoal|bamboo/i, 'AXE'],
+    [/butcher|tanner|skinner|leather|cobbler|hide/i, 'SKINNING_KNIFE'],
+    [/baker|cook|brewer|miller|noodle|tofu|miso|confection/i, 'WOODEN_PADDLE'],
+    [/herder|shepherd|drover|cowherd|goatherd/i, 'HERDING_STAFF'],
+    [/miner|quarry|digger|salt/i, 'PICKAXE'],
+    [/farm|cultivat|planter|paddy|grower|gardener|vine|orchard|harvest|tapper|picker/i, 'HOE'],
+    [/merchant|trader|pedlar|peddler|shopkeeper|vendor|market/i, 'SCALE'],
+    [/porter|carrier|labor|laborer|servant|gatherer|water/i, 'CARRYING_POLE'],
+];
+
+function contextualToolFor(
+    profession: string,
+    era?: HistoricalEra,
+    culture?: CulturalZone
+): Item | null {
+    for (const [pattern, baseId] of CONTEXTUAL_TOOLS) {
+        if (pattern.test(profession)) return createItemInstance(baseId, era, culture);
+    }
+    return null;
+}
+
 export function assembleStartingPackage(
     profession: string, 
     playerCharacter?: PlayerCharacter,
@@ -570,6 +615,13 @@ export function assembleStartingPackage(
         culture?: CulturalZone;
         era?: HistoricalEra;
         privilege?: number;
+        /**
+         * The actual year. `era` is no longer fine-grained enough to gate
+         * anything: PREHISTORY now spans 40,000 BCE to 3,000 BCE, so an era-keyed
+         * package cannot tell a Palaeolithic forager from a Chalcolithic
+         * villager and happily issues both a bronze torc.
+         */
+        year?: number;
     }
 ): { inventory: Item[], equippedItems: PlayerCharacter['equippedItems'] } {
     // Try to get the defined package, or generate a contextual one
@@ -585,6 +637,16 @@ export function assembleStartingPackage(
     }
     
     if (!pkg) return { inventory: [], equippedItems: {} };
+
+    /**
+     * `generateItem` in itemGenerationService is a stub that returns null for
+     * everything — a leftover from stripping the game's item layer out of this
+     * app. `createItemInstance` does the same job from the same base IDs,
+     * synthesising a definition when none is on file, so use it directly rather
+     * than routing through a function that is guaranteed to fail.
+     */
+    const makeItem = (baseId: string): Item | null =>
+        createItemInstance(baseId, colorOptions?.era, colorOptions?.culture);
     
     // Clear any existing tamed animals when creating a new character
     if (playerCharacter) {
@@ -592,42 +654,97 @@ export function assembleStartingPackage(
         localStorage.removeItem('tamedAnimals');
     }
 
-    // Create inventory items with unified generation system
-    const inventory: Item[] = pkg.inventory
-        .map(baseId => generateItem(baseId, {
-            culture: colorOptions?.culture,
-            era: colorOptions?.era,
-            privilege: colorOptions?.privilege
-        }))
-        .filter(item => item !== null) as Item[];
-    
+    /**
+     * What a foraging life carries. Used when the year is early enough that the
+     * gates below strip a package down to nothing — the professions tables were
+     * written with settled toolkits in mind, so a Palaeolithic hunter otherwise
+     * ends up holding a bronze torc or nothing at all.
+     */
+    const FORAGER_KIT: Array<{ slot: EquipmentSlot; baseId: string; material: string }> = [
+        { slot: 'main_hand', baseId: 'HAFTED_SPEAR', material: 'Flint and Wood' },
+        { slot: 'belt', baseId: 'HIDE_THONG', material: 'Hide' },
+    ];
+    const FORAGER_CARRY: Array<{ baseId: string; material: string }> = [
+        { baseId: 'FLINT_CORE', material: 'Flint' },
+        { baseId: 'HIDE_SCRAPER', material: 'Flint and Hide' },
+        { baseId: 'SINEW_CORDAGE', material: 'Sinew' },
+        { baseId: 'FIRE_DRILL', material: 'Wood' },
+        { baseId: 'DRIED_MEAT', material: 'Meat' },
+    ];
+
+    // Anything the package hands out has to be possible in this year.
+    const year = colorOptions?.year;
+    const possible = (item: Item | null | undefined): boolean => {
+        if (!item) return false;
+        if (year === undefined) return true;
+        // Procedurally defined items default to a material of "cloth" whether or
+        // not they are made of any such thing, so including it would rule out a
+        // flint spear in the Palaeolithic on the grounds that it is textile.
+        // Judge on the name, and on the material only when it is specific.
+        const material = (item.material || '').toLowerCase() === 'cloth' ? '' : item.material || '';
+        return isMaterialAvailable(`${item.name} ${material}`, year);
+    };
+
+    /**
+     * Slots the wardrobe owns.
+     *
+     * The packages carry clothing too — 'STRAW_HAT', 'KOSODE', 'SANDALS' — but
+     * they are keyed on profession alone, while the clothing tables in
+     * characterGenerator are keyed on culture, period, wealth and now climate.
+     * Since the package is assembled first and the clothing only fills what is
+     * still empty, letting the package claim these slots would quietly replace
+     * the better system with the worse one. The package contributes tools,
+     * weapons and carried goods; the wardrobe dresses the persona.
+     */
+    const WARDROBE_SLOTS = new Set(['head', 'torso', 'legs', 'feet', 'cloak']);
+
     // Create equipped items
     const equippedItems: PlayerCharacter['equippedItems'] = {};
 
-    // Add all defined equipment from the package
     for (const slot in pkg.equipment) {
+        if (WARDROBE_SLOTS.has(slot.toLowerCase())) continue;
         const baseId = pkg.equipment[slot as keyof typeof pkg.equipment];
-        if (baseId) {
-            let item: Item | null;
+        if (!baseId) continue;
+        // '*CONTEXTUAL*' asks for a profession-appropriate weapon from a
+        // generator that no longer exists in this app. Fall back on the tool the
+        // profession's name implies, which is usually what it meant anyway.
+        const item = baseId === '*CONTEXTUAL*'
+            ? contextualToolFor(profession, colorOptions?.era, colorOptions?.culture)
+            : makeItem(baseId);
+        if (possible(item)) equippedItems[slot as keyof typeof equippedItems] = item!;
+    }
 
-            // Handle procedural weapon generation
-            if (baseId === '*CONTEXTUAL*' && colorOptions) {
-                item = generateContextualWeapon(profession, {
-                    culture: colorOptions.culture,
-                    era: colorOptions.era,
-                    socialClass: colorOptions.privilege && colorOptions.privilege > 0.7 ? 'noble' :
-                                colorOptions.privilege && colorOptions.privilege > 0.4 ? 'common' : 'common',
-                    privilege: colorOptions.privilege
-                });
+    // Carried goods, gated the same way. A package written for a settled
+    // profession will happily list a coin or a bronze pot; the year decides.
+    // Repeats in the table mean quantity, not separate lines — a slinger carries
+    // three sling stones, not "Sling Stone, Sling Stone, Sling Stone".
+    const inventory: Item[] = [];
+    for (const baseId of pkg.inventory) {
+        const item = makeItem(baseId);
+        if (!possible(item)) continue;
+        const existing = inventory.find(other => other.name === item!.name);
+        if (existing) existing.quantity += 1;
+        else inventory.push(item!);
+    }
+
+    // If the year stripped the package bare, fall back on the toolkit that is
+    // actually attested for the period rather than leaving the persona
+    // empty-handed.
+    if (year !== undefined && year < -8000 && !equippedItems.main_hand) {
+        for (const { slot, baseId, material } of FORAGER_KIT) {
+            if (equippedItems[slot]) continue;
+            const item = makeItem(baseId);
+            if (item) {
+                item.material = material;
+                equippedItems[slot] = item;
             }
-            else {
-                item = generateItem(baseId, {
-                    culture: colorOptions?.culture,
-                    era: colorOptions?.era,
-                    privilege: colorOptions?.privilege
-                });
+        }
+        for (const { baseId, material } of FORAGER_CARRY) {
+            const item = makeItem(baseId);
+            if (item) {
+                item.material = material;
+                inventory.push(item);
             }
-            if(item) equippedItems[slot as keyof typeof equippedItems] = item;
         }
     }
 
@@ -647,12 +764,8 @@ export function assembleStartingPackage(
             });
 
             if (necklaceId) {
-                const necklaceItem = generateItem(necklaceId, {
-                    culture: colorOptions.culture,
-                    era: colorOptions.era,
-                    privilege: colorOptions.privilege
-                });
-                if (necklaceItem) {
+                const necklaceItem = makeItem(necklaceId);
+                if (possible(necklaceItem) && necklaceItem) {
                     necklaceItem.quality = getQualityFromPrivilege(colorOptions.privilege || 0.5);
                     necklaceItem.name = addQualityAdjective(necklaceItem.name, colorOptions.privilege || 0.5);
                     equippedItems.necklace = necklaceItem;
@@ -674,12 +787,8 @@ export function assembleStartingPackage(
             });
 
             if (ringId) {
-                const ringItem = generateItem(ringId, {
-                    culture: colorOptions.culture,
-                    era: colorOptions.era,
-                    privilege: colorOptions.privilege
-                });
-                if (ringItem) {
+                const ringItem = makeItem(ringId);
+                if (possible(ringItem) && ringItem) {
                     ringItem.quality = getQualityFromPrivilege(colorOptions.privilege || 0.5);
                     ringItem.name = addQualityAdjective(ringItem.name, colorOptions.privilege || 0.5);
                     equippedItems.ring1 = ringItem;

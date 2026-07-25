@@ -22,6 +22,50 @@ export function getNarrativePronouns(gender: string): NarrativePronouns {
 const stripTerminalPunctuation = (text: string): string => text.trim().replace(/[.!?;:,]+$/g, '');
 const lowerFirst = (text: string): string => text.charAt(0).toLowerCase() + text.slice(1);
 
+/**
+ * Conjugate a bare verb for the narrative subject. Replaces the scattered
+ * `pronounBe === 'are' ? '' : 's'` ternaries, which had to be repeated at every
+ * verb and got the irregulars wrong.
+ */
+const IRREGULAR_VERBS: Record<string, [singular: string, plural: string]> = {
+  be: ['is', 'are'],
+  is: ['is', 'are'],
+  are: ['is', 'are'],
+  have: ['has', 'have'],
+  has: ['has', 'have'],
+  do: ['does', 'do'],
+  does: ['does', 'do'],
+  go: ['goes', 'go'],
+  goes: ['goes', 'go'],
+  was: ['was', 'were'],
+  were: ['was', 'were'],
+};
+
+export function conjugate(verb: string, pronouns: NarrativePronouns): string {
+  const plural = pronouns.subject === 'they';
+  const irregular = IRREGULAR_VERBS[verb.toLowerCase()];
+  if (irregular) return irregular[plural ? 1 : 0];
+  if (plural) return verb;
+  if (/(?:s|sh|ch|x|z|o)$/i.test(verb)) return `${verb}es`;
+  if (/[^aeiou]y$/i.test(verb)) return `${verb.slice(0, -1)}ies`;
+  return `${verb}s`;
+}
+
+/**
+ * Profession names are stored in Title Case for labels ("Field Hand"), which
+ * reads wrong mid-sentence. Lowercase them unless the word is a genuine proper
+ * noun or a title that keeps its capital.
+ */
+const PROPER_PROFESSION_WORDS = /^(?:Roman|Greek|Norse|Aztec|Inca|Maya|Mughal|Ottoman|Qing|Ming|Han|Tang|Song|Viking|Samurai|Shinto|Buddhist|Christian|Jewish|Muslim|Hindu|Sufi|Zen|Brahmin|Cossack|Bedouin|Tuareg|Maori|Sami|Ainu|Janissary|Templar|Jesuit|Franciscan|Dominican|Benedictine)$/;
+
+export function lowerProfession(profession: string | undefined): string {
+  if (!profession) return 'laborer';
+  return profession
+    .split(' ')
+    .map(word => (PROPER_PROFESSION_WORDS.test(word) ? word : word.toLowerCase()))
+    .join(' ');
+}
+
 export function withIndefiniteArticle(text: string): string {
   const trimmed = text.trim();
   const takesA = /^(?:uni(?:vers|form)|use|user|euro|one\b)/i.test(trimmed);
@@ -32,12 +76,17 @@ export function withIndefiniteArticle(text: string): string {
 export function describePhysicalAppearance(
   appearance: { height?: number; build?: string } | undefined,
   pronouns: NarrativePronouns,
+  birthSex?: 'Male' | 'Female',
 ): string {
   if (!appearance) return '';
 
-  const height = appearance.height && appearance.height > 180
+  // The old thresholds were sex-blind, so nearly every woman in the app was
+  // described as short. Only remark on height at genuine extremes for the
+  // persona's own sex.
+  const [shortBelow, tallAbove] = birthSex === 'Female' ? [150, 176] : [160, 186];
+  const height = appearance.height && appearance.height > tallAbove
     ? 'tall'
-    : appearance.height && appearance.height < 165
+    : appearance.height && appearance.height < shortBelow
       ? 'short'
       : '';
   const build = appearance.build && appearance.build !== 'average'
@@ -147,7 +196,14 @@ export function describeIdeology(
     return `${subjectCap} ${lowerFirst(description)}.`;
   }
 
-  return `${pronouns.possessiveCap} outlook reflects ${lowerFirst(description)}.`;
+  // Noun-initial descriptions ("Buddhist path emphasizing liberation…") used to
+  // fall through to `reflects ${lowerFirst(description)}`, which destroyed the
+  // proper noun and left the phrase without its article.
+  const firstWord = description.split(/\s+/)[0] ?? '';
+  const isProperNoun = /^[A-Z][a-z]/.test(firstWord) && !/^(?:A|An|The)$/.test(firstWord);
+  const body = isProperNoun ? description : lowerFirst(description);
+  const needsArticle = !/^(?:a|an|the)\b/i.test(body);
+  return `${pronouns.possessiveCap} outlook reflects ${needsArticle ? 'the ' : ''}${body}.`;
 }
 
 export function describeParents(
@@ -168,7 +224,7 @@ export function describeParents(
 export function findNarrativeFailureModes(text: string): string[] {
   const checks: Array<[RegExp, string]> = [
     [/\b(a) impoverished\b/i, 'incorrect indefinite article before “impoverished”'],
-    [/\ba (?:average|aristocrat|artist|exile|eldest|office|insomniac)\b/i, 'incorrect indefinite article'],
+    [/\ba (?:average|aristocrat|artist|exile|eldest|office|insomniac|ordinary)\b/i, 'incorrect indefinite article'],
     [/\ban university\b/i, 'incorrect indefinite article before “university”'],
     [/\ba 18-year-old\b/i, 'incorrect indefinite article before an age'],
     [/\b(short|tall)\b[^.!?]{0,45}\b\1\b/i, 'repeated height adjective'],
@@ -194,6 +250,14 @@ export function findNarrativeFailureModes(text: string): string[] {
     [/\b(?:hair is|eyes are a shade of) (?:peru|goldenrod|silver|royal blue|dark dark|dark nearly)\b/i, 'raw CSS color name leaked into appearance prose'],
     [/\bfrom father\b/i, 'life event omits an article or possessive before “father”'],
     [/\b(?:Success came, eventually|Recognition found you|Family can be both burden|Blood ties run deep|You(?:'ve| have) proven yourself|spiritual journey has been)\b/i, 'generic life-event aphorism'],
+    [/\breflects [a-z]+ (?:path|way|tradition|school|doctrine|creed)\b/, 'proper noun lowercased in an ideology description'],
+    [/\breflects (?!a\b|an\b|the\b)[a-z]+ing\b/, 'ideology description missing its article'],
+    [/\b(?:as|of) (?:a|an|the) [A-Z][a-z]+ (?:Hand|Worker|Maker|Seller|Keeper|Driver|Guard|Doctor|Wallah)\b/, 'profession left in Title Case mid-sentence'],
+    [/\bNow,?\s[^.]*\bat the age of \d+\b/i, 'doubled temporal marker around the profession clause'],
+    // Only an actual doubled age marker, not the adverb "now" appearing later
+    // in a perfectly good sentence.
+    [/\bAt \d+,[^.]*\bnow \d+\b/i, 'doubled temporal marker around the profession clause'],
+    [/\b[a-z]+s has made ordinary labor\b/i, 'plural disease name with a singular verb'],
     [/\.\s*\./, 'doubled punctuation'],
   ];
 

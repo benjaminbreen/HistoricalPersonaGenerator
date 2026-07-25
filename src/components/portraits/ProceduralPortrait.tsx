@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { naturalMaterialColor } from '../../constants/characterData/materialColors';
 import {
   bayer4, seededRng, mix, plotPixel,
   skinRamp, hairRamp, outlineColor,
@@ -248,7 +249,14 @@ const ProceduralPortrait: React.FC<ProceduralPortraitProps> = ({
 
   // Utility function to get item color from equipped items
   const getItemColor = (item: any): string => {
-    if (!item?.color) return appearanceWithDefaults.palette.primary;
+    // Undyed and natural materials are not a matter of taste: fox fur is
+    // fox-coloured and straw is straw-coloured. Without this they inherited the
+    // garment palette, which produced magenta fur hoods.
+    if (!item?.color) {
+      const natural = naturalMaterialColor(item?.material, item?.name, seed);
+      if (natural) return natural;
+      return appearanceWithDefaults.palette.primary;
+    }
 
     // Handle both hex colors and color names
     if (item.color.startsWith('#')) {
@@ -959,28 +967,28 @@ const parseHairstyle = (
         '#B99C96',
       ],
       MENA: [
-        '#C2AD87',
-        '#BE9A8C',
-        '#B7A482',
-        '#B78E82',
+        '#5F7E86',
+        '#7A6E92',
+        '#586F80',
+        '#6E6688',
       ],
       SOUTH_ASIAN: [
-        '#C5B27D',
+        '#6C8FA0',
         '#8FB8B6',
-        '#B7A675',
+        '#63849A',
         '#86AEB4',
       ],
       SUB_SAHARAN_AFRICAN: [
-        '#A99173',
-        '#B89B78',
-        '#9C876C',
-        '#AD9073',
+        '#3F6478',
+        '#5E7A5A',
+        '#3A5C6E',
+        '#557052',
       ],
       NORTH_AMERICAN_PRE_COLUMBIAN: [
         '#83B2B1',
-        '#B99A70',
+        '#7E8FA6',
         '#7AA5A6',
-        '#AA8A68',
+        '#75879E',
       ],
       NORTH_AMERICAN_COLONIAL: [
         '#9BA8BA',
@@ -990,22 +998,54 @@ const parseHairstyle = (
       ],
       SOUTH_AMERICAN: [
         '#8DB39A',
-        '#BA9485',
+        '#8A7F9B',
         '#82A88F',
-        '#AD897D',
+        '#7C7392',
       ],
       OCEANIA: [
         '#8BB7A9',
-        '#B99A92',
+        '#6F93A8',
         '#82AB9F',
-        '#AA8F88',
+        '#67899E',
       ]
     };
 
     // Select color based on era and gender
     const colors = culturalThemes[culturalZone] || culturalThemes.EUROPEAN;
     const colorIndex = (isModernEra ? 2 : 0) + (isFemale ? 1 : 0);
-    const baseColor = portraitOverrides?.background?.base || colors[colorIndex];
+
+    /**
+     * A dark sitter against a warm brown ground disappears into it. Pick the
+     * option in this zone's palette that stands furthest from the skin tone,
+     * and darken or lighten it if even the best is too close.
+     */
+    const relativeLuminance = (hex: string): number => {
+      const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+      if (!m) return 0.5;
+      const n = parseInt(m[1], 16);
+      const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => {
+        const c = v / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+
+    const skinLuminance = relativeLuminance(actualSkinTone);
+    const preferred = colors[colorIndex];
+    const bestByContrast = colors.reduce((best, candidate) =>
+      Math.abs(relativeLuminance(candidate) - skinLuminance) >
+      Math.abs(relativeLuminance(best) - skinLuminance) ? candidate : best, preferred);
+
+    const chosen = Math.abs(relativeLuminance(preferred) - skinLuminance) >= 0.14
+      ? preferred
+      : bestByContrast;
+
+    const stillFlat = Math.abs(relativeLuminance(chosen) - skinLuminance) < 0.14;
+    const separated = stillFlat
+      ? (skinLuminance > 0.35 ? createShadow(chosen, 0.62) : createHighlight(chosen, 1.45))
+      : chosen;
+
+    const baseColor = portraitOverrides?.background?.base || separated;
 
     // Create gradient colors
     const bg1 = baseColor;
@@ -1057,7 +1097,7 @@ const parseHairstyle = (
       </>
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bgGradientId, bgVignetteId, textureId, culturalZone, seed, era, isFemale, isWealthy, stats.charisma, portraitOverrides?.background]);
+  }, [bgGradientId, bgVignetteId, textureId, culturalZone, seed, era, isFemale, isWealthy, stats.charisma, portraitOverrides?.background, actualSkinTone]);
 
   const backgroundTextureOpacity =
     portraitOverrides?.background?.texture === 'none' ? 0 :
@@ -1206,10 +1246,18 @@ const renderHead = useMemo(() => {
       skipTopRows = 0; // These don't cover the top fully
     } else if (headgearName.includes('turban') || headgearName.includes('pagri')) {
       skipTopRows = 5; // These cover more of the head
-    } else if (headgearName.includes('coif') || headgearName.includes('hood') || headgearName.includes('helm')) {
-      skipTopRows = 3; // Full coverage items
+    } else if (headgearName.includes('coif') || headgearName.includes('hood')
+      || headgearName.includes('helm') || headgearName.includes('wimple')
+      || headgearName.includes('hijab') || headgearName.includes('veil')) {
+      skipTopRows = 5; // Full coverage items
+    } else if (headgearName.includes('hat') || headgearName.includes('straw')
+      || headgearName.includes('sombrero') || headgearName.includes('conical')
+      || headgearName.includes('douli') || headgearName.includes('tricorn')) {
+      // A hat sits on the crown, so the whole crown goes under it. At two rows
+      // the hair was showing above and around the hat like a wig beneath it.
+      skipTopRows = 4;
     } else {
-      skipTopRows = 2; // Default for most hats, caps, etc.
+      skipTopRows = 3; // Caps, coifs, kufis and the rest
     }
   }
 
@@ -5593,6 +5641,31 @@ if (defaultCapStyles.has(hairStyle)) {
       const markingColor = marking.color;
       switch (marking.type) {
         case 'scar': {
+          // A lost or ruined eye, drawn over the eye itself rather than beside
+          // it, so a persona called "the One-Eyed" reads as one-eyed.
+          if (marking.pattern === 'eye_loss') {
+            // Geometry mirrors the eye renderer. Its own locals are scoped to
+            // that function, so the values are recomputed here rather than
+            // referenced.
+            const lossSpacing = Math.floor(headDim.width * 0.24);
+            const lossEyeW = 3;
+            const lossEyeH = 2;
+            const lossLeft = rand(700 + index) > 0.5;
+            const lossEyeX = lossLeft ? centerX - lossSpacing - 2 : centerX + lossSpacing - 1;
+            const lossEyeY = headY + Math.floor(headDim.height * 0.36);
+            // Close the lid over it, then lay a scar across.
+            for (let i = 0; i < lossEyeW; i++) {
+              elements.push(
+                <rect key={`eyeloss-lid-${index}-${i}`} x={lossEyeX + i} y={lossEyeY} width="1" height={lossEyeH} fill={skinHighlight} opacity={0.85} className="pixel" />
+              );
+            }
+            for (let i = -1; i <= lossEyeW; i++) {
+              elements.push(
+                <rect key={`eyeloss-scar-${index}-${i}`} x={lossEyeX + i} y={lossEyeY - 1 + Math.floor((i + 1) / 2)} width="1" height="1" fill={marking.color || skinHighlight} className="pixel" />
+              );
+            }
+            break;
+          }
           if (marking.location === 'face') {
             const scarX = headX + (rand(500 + index) > 0.5 ? 5 : headDim.width - 7);
             const scarY = headY + Math.floor(headDim.height * 0.3);

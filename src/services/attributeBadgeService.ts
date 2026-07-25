@@ -1,114 +1,239 @@
 /**
  * services/attributeBadgeService.ts - Generates and manages character attribute badges
+ *
+ * Selection is weighted sampling without replacement over the whole pool. The
+ * previous implementation rolled a rarity tier and then picked uniformly inside
+ * it, which meant an attribute's real frequency was tierWeight / tierSize: with
+ * only six members in the "rare" tier, being blind was about as likely as any
+ * given "common" trait. Prevalence now lives on the attribute itself.
  */
 
-import { AttributeBadge, AttributeRarity, RARITY_WEIGHTS } from '../types/attributeTypes';
+import {
+  AttributeBadge,
+  AttributeContext,
+  AttributeRarity,
+  deriveRarity,
+} from '../types/attributeTypes';
 import { PlayerCharacter } from '../types';
 import { NpcEntity } from '../types/npcTypes';
-import { UNIVERSAL_ATTRIBUTES, CULTURAL_ATTRIBUTES, getApplicableAttributes } from '../constants/attributeDefinitions';
+import { CulturalZone, WealthLevel } from '../types/characterData';
+import {
+  UNIVERSAL_ATTRIBUTES,
+  CULTURAL_ATTRIBUTES,
+  getAllAttributes,
+  findAttributeById,
+  passesHardGates,
+  getApplicableAttributes,
+} from '../constants/attributeDefinitions';
+
+export interface AttributeGenerationOptions {
+  maxBadges?: number;
+  /** From HistoricalContext; drives the urban/rural weighting. */
+  localeType?: 'rural' | 'town' | 'city' | 'mobile' | 'unknown';
+  region?: string;
+  random?: () => number;
+}
+
+interface WeightedCandidate {
+  attr: AttributeBadge;
+  weight: number;
+}
+
+const DEFAULT_BASE_WEIGHT = 10;
 
 export class AttributeBadgeService {
   /**
-   * Generate random attributes for a character based on their stats, era, and culture
+   * Generate attributes for a character, weighted by how common each one
+   * actually was for someone of this age, sex, class, trade, place and year.
    */
   static generateAttributes(
     character: PlayerCharacter | NpcEntity,
     year: number,
     geography: string,
-    maxBadges: number = 3
+    optionsOrMax: AttributeGenerationOptions | number = {}
   ): AttributeBadge[] {
-    // Get all applicable attributes
-    const applicable = getApplicableAttributes(character, year, geography);
+    const options: AttributeGenerationOptions =
+      typeof optionsOrMax === 'number' ? { maxBadges: optionsOrMax } : optionsOrMax;
+    const random = options.random ?? Math.random;
+    const maxBadges = options.maxBadges ?? 3;
 
-    if (applicable.length === 0) return [];
+    const ctx = this.buildContext(character, year, geography, options);
+    const candidates = this.scorePool(character, ctx);
+    if (candidates.length === 0) return [];
 
-    // Separate attributes into categories for better selection
-    const universalAttributes = applicable.filter(attr =>
-      attr.category !== 'background' && !attr.id.includes('merchant') && !attr.id.includes('knight')
-    );
-    const backgroundAttributes = applicable.filter(attr =>
-      attr.category === 'background' || attr.id.includes('merchant') || attr.id.includes('knight')
-    );
-
-    // Determine how many badges (0-maxBadges)
-    const numBadges = this.rollBadgeCount(maxBadges);
+    const numBadges = this.rollBadgeCount(maxBadges, random);
     if (numBadges === 0) return [];
 
-    // Select badges with profession-aware logic
     const selected: AttributeBadge[] = [];
-    const used = new Set<string>();
+    const usedIds = new Set<string>();
+    const usedGroups = new Set<string>();
+    // Every id excluded by something already chosen, plus the reverse direction.
+    const forbidden = new Set<string>();
 
-    for (let i = 0; i < numBadges && applicable.length > 0; i++) {
-      const rarity = this.rollRarity();
+    let pool = candidates.slice();
 
-      // 80% chance to use universal attributes, 20% chance for background attributes
-      // This ensures most characters get appropriate generic attributes
-      const useUniversal = Math.random() < 0.8 || backgroundAttributes.length === 0;
-      const pool = useUniversal ? universalAttributes : backgroundAttributes;
+    while (selected.length < numBadges && pool.length > 0) {
+      const picked = this.weightedPick(pool, random);
+      if (!picked) break;
 
-      // Filter by rarity and not already used
-      const candidates = pool.filter(
-        attr => attr.rarity === rarity && !used.has(attr.id)
-      );
+      pool = pool.filter(c => c.attr.id !== picked.attr.id);
 
-      if (candidates.length > 0) {
-        const badge = candidates[Math.floor(Math.random() * candidates.length)];
+      if (forbidden.has(picked.attr.id)) continue;
+      if (picked.attr.exclusiveGroup && usedGroups.has(picked.attr.exclusiveGroup)) continue;
+      if (picked.attr.requires && !picked.attr.requires.every(id => usedIds.has(id))) continue;
 
-        // Check exclusions
-        if (badge.excludes) {
-          const hasExcluded = badge.excludes.some(id => used.has(id));
-          if (hasExcluded) continue;
-        }
+      selected.push({
+        ...picked.attr,
+        rarity: deriveRarity(picked.weight),
+        // Functions do not survive serialisation and have no business in
+        // saved persona data.
+        condition: undefined,
+        weight: undefined,
+      });
+      usedIds.add(picked.attr.id);
+      if (picked.attr.exclusiveGroup) usedGroups.add(picked.attr.exclusiveGroup);
 
-        // Check requirements
-        if (badge.requires) {
-          const hasRequired = badge.requires.every(id => used.has(id));
-          if (!hasRequired) continue;
-        }
-
-        selected.push(badge);
-        used.add(badge.id);
-      }
+      picked.attr.excludes?.forEach(id => forbidden.add(id));
+      // Exclusion is symmetric even when only one side declares it.
+      pool.forEach(c => {
+        if (c.attr.excludes?.includes(picked.attr.id)) forbidden.add(c.attr.id);
+      });
     }
 
     return selected;
   }
-  
+
   /**
-   * Roll for number of badges (weighted towards fewer)
+   * Assemble everything the weight functions are allowed to know.
    */
-  private static rollBadgeCount(max: number): number {
-    const roll = Math.random();
-    if (roll < 0.15) return 0; // 15% have no badges (reduced from 40%)
-    if (roll < 0.50) return 1; // 35% have 1 badge  
-    if (roll < 0.80) return Math.min(2, max); // 30% have 2 badges
-    return Math.min(3, max); // 20% have 3 badges
+  private static buildContext(
+    character: PlayerCharacter | NpcEntity,
+    year: number,
+    geography: string,
+    options: AttributeGenerationOptions
+  ): AttributeContext {
+    const char = character as any;
+    const birthSex: 'Male' | 'Female' | 'Other' =
+      char.birthSex === 'Male' || char.birthSex === 'Female'
+        ? char.birthSex
+        : char.gender === 'Male' || char.gender === 'Female'
+          ? char.gender
+          : 'Other';
+
+    const region = options.region ?? char.region;
+    const profession = char.profession ?? char.occupation ?? '';
+    const placeLower = `${geography ?? ''} ${region ?? ''} ${char.birthplace ?? ''}`.toLowerCase();
+
+    const locale = options.localeType;
+    const urban = locale === 'city' || locale === 'town'
+      ? true
+      : locale === 'rural'
+        ? false
+        : /\b(city|town|borough|ward|quarter)\b/.test(placeLower);
+
+    return {
+      year,
+      age: typeof char.age === 'number' ? char.age : 30,
+      sex: birthSex,
+      culturalZone: char.culturalZone as CulturalZone | undefined,
+      location: geography,
+      region,
+      wealth: char.wealthLevel as WealthLevel | undefined,
+      socialClass: char.socialClass ?? char.class,
+      profession,
+      professionLower: String(profession).toLowerCase(),
+      placeLower,
+      urban,
+    };
   }
-  
+
   /**
-   * Roll for attribute rarity
+   * Apply hard gates, legacy conditions and context weighting, and drop
+   * anything that comes out at zero.
    */
-  private static rollRarity(): AttributeRarity {
-    const total = Object.values(RARITY_WEIGHTS).reduce((a, b) => a + b, 0);
-    let roll = Math.random() * total;
-    
-    for (const [rarity, weight] of Object.entries(RARITY_WEIGHTS)) {
-      roll -= weight;
-      if (roll <= 0) {
-        return rarity as AttributeRarity;
+  private static scorePool(
+    character: PlayerCharacter | NpcEntity,
+    ctx: AttributeContext
+  ): WeightedCandidate[] {
+    const scored: WeightedCandidate[] = [];
+
+    for (const attr of getAllAttributes()) {
+      if (!passesHardGates(attr, ctx)) continue;
+
+      if (attr.condition) {
+        try {
+          if (!attr.condition(character)) continue;
+        } catch {
+          continue;
+        }
       }
+
+      let weight = attr.baseWeight ?? DEFAULT_BASE_WEIGHT;
+      if (attr.weight) {
+        try {
+          weight *= attr.weight(ctx, character);
+        } catch {
+          continue;
+        }
+      }
+
+      if (!Number.isFinite(weight) || weight <= 0) continue;
+      scored.push({ attr, weight });
     }
-    
-    return 'common';
+
+    return scored;
   }
-  
+
+  /**
+   * How many badges this persona gets. Weighted toward one or two, as before.
+   */
+  private static rollBadgeCount(max: number, random: () => number): number {
+    if (max <= 0) return 0;
+    const roll = random();
+    if (roll < 0.12) return 0;
+    if (roll < 0.45) return Math.min(1, max);
+    if (roll < 0.78) return Math.min(2, max);
+    return Math.min(3, max);
+  }
+
+  private static weightedPick(
+    pool: WeightedCandidate[],
+    random: () => number
+  ): WeightedCandidate | null {
+    const total = pool.reduce((sum, c) => sum + c.weight, 0);
+    if (total <= 0) return null;
+
+    let roll = random() * total;
+    for (const candidate of pool) {
+      roll -= candidate.weight;
+      if (roll <= 0) return candidate;
+    }
+    return pool[pool.length - 1];
+  }
+
+  /**
+   * The prevalence-derived rarity for an attribute in a given context. Useful
+   * for tooling and audits; generation stamps this onto each badge already.
+   */
+  static rarityInContext(
+    attributeId: string,
+    character: PlayerCharacter | NpcEntity,
+    year: number,
+    geography: string,
+    options: AttributeGenerationOptions = {}
+  ): AttributeRarity | null {
+    const ctx = this.buildContext(character, year, geography, options);
+    const match = this.scorePool(character, ctx).find(c => c.attr.id === attributeId);
+    return match ? deriveRarity(match.weight) : null;
+  }
+
   /**
    * Get specific attribute by ID
    */
   static getAttributeById(id: string): AttributeBadge | undefined {
-    return [...UNIVERSAL_ATTRIBUTES, ...CULTURAL_ATTRIBUTES].find(attr => attr.id === id);
+    return findAttributeById(id);
   }
-  
+
   /**
    * Apply attribute effects to character
    */
@@ -118,14 +243,12 @@ export class AttributeBadgeService {
   ): void {
     for (const attr of attributes) {
       if (!attr.effect) continue;
-      
+
       // Parse effect strings and apply
-      // This would be expanded based on specific effect implementations
       if (attr.effect.includes('+')) {
         const match = attr.effect.match(/\+(\d+) to (\w+)/);
         if (match) {
           const [, value, stat] = match;
-          // Apply stat modification
           if (stat === 'combat' && 'combat' in character) {
             (character as any).combatBonus = ((character as any).combatBonus || 0) + parseInt(value);
           }
@@ -133,36 +256,21 @@ export class AttributeBadgeService {
       }
     }
   }
-  
+
   /**
-   * Check if character should have a specific attribute
+   * Check if character could have a specific attribute in this context.
    */
   static shouldHaveAttribute(
     character: PlayerCharacter | NpcEntity,
     attributeId: string,
     year: number,
-    geography: string
+    geography: string,
+    options: AttributeGenerationOptions = {}
   ): boolean {
-    const attr = this.getAttributeById(attributeId);
-    if (!attr) return false;
-    
-    // Check year range
-    if (attr.yearRange) {
-      if (year < attr.yearRange[0] || year > attr.yearRange[1]) {
-        return false;
-      }
-    }
-    
-    // Check geography
-    if (attr.requiredGeography && !attr.requiredGeography.includes(geography)) {
-      return false;
-    }
-    
-    // Check condition
-    if (attr.condition && !attr.condition(character)) {
-      return false;
-    }
-    
-    return true;
+    const ctx = this.buildContext(character, year, geography, options);
+    return this.scorePool(character, ctx).some(c => c.attr.id === attributeId);
   }
 }
+
+// Re-exported so existing importers of these names keep working.
+export { UNIVERSAL_ATTRIBUTES, CULTURAL_ATTRIBUTES, getApplicableAttributes };

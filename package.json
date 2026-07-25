@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit",
     "persona-batch": "esbuild scripts/generatePersonaBatch.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/generatePersonaBatch.mjs && node node_modules/.cache/generatePersonaBatch.mjs",
     "persona-audit": "esbuild scripts/auditHistoricalGeneration.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditHistoricalGeneration.mjs && node node_modules/.cache/auditHistoricalGeneration.mjs",
+    "share-test": "node scripts/testPersonaShare.mjs",
     "start": "node server.js",
     "preview": "vite preview",
     "portrait-sheet": "esbuild src/components/portraitLab/devtools/renderSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/renderSheet.mjs && node node_modules/.cache/renderSheet.mjs portrait-sheet.png",
@@ -31,6 +32,7 @@
     "vite": "^7.2.4"
   },
   "dependencies": {
+    "@vercel/blob": "^2.6.1",
     "ajv": "^8.20.0",
     "framer-motion": "^12.23.24",
     "prop-types": "^15.8.1",

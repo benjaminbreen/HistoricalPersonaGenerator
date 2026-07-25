@@ -32,6 +32,10 @@ import './nodeShims';
 import { writeFileSync } from 'node:fs';
 import { generateHistoricalPersona } from '../../../services/personaGenerator';
 import { diseaseService } from '../../../services/diseaseService';
+import { auditNameRules } from '../../../constants/characterData/nameSetEras';
+import { REGION_NAME_MAPPING } from '../../../constants/characterData/names';
+import { ERA_BOUNDS } from '../../../services/demographyService';
+import { HistoricalEra } from '../../../types/enums';
 import { MAT, Raster } from '../core/raster';
 import {
   buildPortraitSpec, classifyGarmentName, classifyHeadwearName, restingExpression,
@@ -360,6 +364,26 @@ rule('UNHANDLED marking patterns (drew a generic stroke)');
 table(unknownPatterns, rendered);
 rule('Deliberately not drawn');
 table(skippedPatterns, rendered);
+
+// Data warnings: region rules that *can* hand out a naming tradition before it
+// existed. `resolveNameKey` stops these reaching a persona, so this is a "your
+// table says something it does not mean" report rather than a live bug — but an
+// unbounded rule is a trap for whoever edits it next.
+const nameWarnings = auditNameRules(
+  REGION_NAME_MAPPING as any,
+  ERA_BOUNDS[HistoricalEra.PREHISTORY].min
+);
+rule('Name rules reaching past their tradition (data warning)');
+const unboundedRules = nameWarnings.filter(w => w.kind === 'unbounded');
+const overlapRules = nameWarnings.filter(w => w.kind === 'overlap');
+lines.push(`  ${unboundedRules.length} rules with no lower bound, ${overlapRules.length} bounded rules starting early`);
+if (unboundedRules.length > 0) {
+  lines.push('  Unbounded — these reach to the era floor:');
+  for (const w of unboundedRules.slice(0, 10)) {
+    lines.push(`    ${w.zone}/${w.region} [${w.rule}] → ${w.implausibleKeys.join(', ')}`);
+  }
+  if (unboundedRules.length > 10) lines.push(`    … and ${unboundedRules.length - 10} more`);
+}
 
 rule('Structural findings');
 if (findings.length === 0) lines.push('  (none)');

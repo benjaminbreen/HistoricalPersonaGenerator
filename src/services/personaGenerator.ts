@@ -5,6 +5,7 @@ import { PlayerCharacter, HistoricalEra, CulturalZone, Gender, WealthLevel } fro
 import { generateCharacterWithSpec } from './characterGenerator';
 import { GEOGRAPHICAL_DATA } from '../constants/gameData/geography';
 import { generateLifeHistory, EnhancedLifeEvent, EventImportance } from '../constants/characterData/lifeHistoryService';
+import { attributeLanguage, attributionToLanguageData, type LanguageAttribution } from './languageAttributionService';
 import { getLanguageForCharacter, LanguageData } from '../constants/gameData/languages';
 import { applyPortraitAuthenticity } from './portraitAuthenticityService';
 import {
@@ -91,6 +92,11 @@ export interface GenerationParams {
 export interface HistoricalPersona {
   character: PlayerCharacter;
   era: string;
+  /**
+   * Human-readable label ("SOUTH ASIAN"), not the `CulturalZone` enum. Any
+   * table keyed by the enum — climate, geography, society capabilities — must
+   * use `character.culturalZone` or `historicalContext.culturalZone` instead.
+   */
   culturalZone: string;
   location: string;
   region: string; // The broader region (e.g., "British Isles", "Southwest")
@@ -99,6 +105,8 @@ export interface HistoricalPersona {
   day: number; // 1-31
   enhancedLifeEvents?: EnhancedLifeEvent[]; // New enhanced life events
   languageData?: LanguageData; // Native language data
+  /** How that language was arrived at, with its citations. */
+  languageAttribution?: LanguageAttribution;
   historicalContext: HistoricalContext;
   /** How representative this draw actually was. Never hidden from the reader. */
   odds?: DrawOdds;
@@ -333,15 +341,19 @@ export function generateHistoricalPersona(params: Partial<GenerationParams> = {}
     character.backstory = character.backstory + ' ' + lifeEventSentence;
   }
 
-  // Get native language data
-  const languageData = getLanguageForCharacter(
+  // Native language. Every persona gets one: the attested tables where they
+  // reach, a cited deep-time attribution where they do not.
+  // See docs/LANGUAGE_ATTRIBUTION.md.
+  const languageAttribution = attributeLanguage({
     culturalZone,
     year,
     region,
     location,
-    character.name,
-    character.profession
-  );
+    characterName: character.name,
+    profession: character.profession,
+    seed: params.seed ?? 0,
+  });
+  const languageData = attributionToLanguageData(languageAttribution, culturalZone, year);
 
   return {
     character,
@@ -354,6 +366,7 @@ export function generateHistoricalPersona(params: Partial<GenerationParams> = {}
     day,
     enhancedLifeEvents,
     languageData,
+    languageAttribution,
     historicalContext,
     odds: describeOdds(era, culturalZone, year),
     samplingMode,

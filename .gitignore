@@ -33,6 +33,7 @@ dist-ssr
 
 # Vercel
 .vercel
+.persona-shares
 
 # Backup files
 *.bak

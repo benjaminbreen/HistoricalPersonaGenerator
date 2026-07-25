@@ -122,13 +122,16 @@ function birthsAt(year: number): number {
  * roughly 12% of all humans ever born, and something over ninety percent of the
  * time our species has existed, entirely out of reach.
  *
- * The floor of 40,000 BCE is a content decision rather than a demographic one:
- * it reaches back through the Upper Palaeolithic, which is as far as this app's
- * material can say anything meaningful, while PRB's table itself runs to
- * 190,000 BCE.
+ * The floor of 10,000 BCE is a content decision rather than a demographic one.
+ * It is set by what can be said about language: the comparative method reaches
+ * roughly eight to ten thousand years before it stops returning signal, so even
+ * the most ambitious macro-family proposals (Nostratic, Dene-Caucasian) run out
+ * at about this horizon. Beyond it the app could name a place and a trade but
+ * could not honestly name a tongue. PRB's table itself runs to 190,000 BCE; we
+ * stop where the evidence does. See docs/LANGUAGE_ATTRIBUTION.md.
  */
 export const ERA_BOUNDS: Record<HistoricalEra, { min: number; max: number }> = {
-  [HistoricalEra.PREHISTORY]: { min: -40000, max: -3000 },
+  [HistoricalEra.PREHISTORY]: { min: -10000, max: -3000 },
   [HistoricalEra.ANTIQUITY]: { min: -3000, max: 500 },
   [HistoricalEra.MEDIEVAL]: { min: 500, max: 1450 },
   [HistoricalEra.RENAISSANCE_EARLY_MODERN]: { min: 1450, max: 1750 },
@@ -510,40 +513,76 @@ export function sampleWealthLevel(era: HistoricalEra, random: Random): WealthLev
  *
  * Dates are conservative earliest-evidence estimates and are approximate.
  */
-const MATERIAL_EARLIEST: Array<[RegExp, number]> = [
+interface MaterialRule {
+  pattern: RegExp;
+  earliest: number;
+  /** Descriptions matching this are not caught by the rule. */
+  exempt?: RegExp;
+}
+
+const MATERIAL_RULES: MaterialRule[] = [
   // Woven plant fibre. Earliest linen textiles are Neolithic Anatolia/Levant.
-  [/linen|flax/i, -7000],
-  [/hemp/i, -5000],
-  [/cotton|calico|muslin|chintz/i, -5000],
-  // Wool cloth needs sheep bred for a fleece, which is later than domestication.
-  [/wool|felt|broadcloth|worsted|serge|tweed/i, -4000],
-  [/silk|satin|brocade|damask/i, -3000],
-  // Named woven garments and generic cloth imply the loom even when no
-  // material is given.
-  [/sari|saree|toga|chiton|himation|robe|gown|tunic and mantle/i, -6000],
-  [/\bwoven\b|\bweave\b|\bcloth\b|\btextile\b|\bknit\b/i, -6000],
+  { pattern: /linen|flax/i, earliest: -7000 },
+  { pattern: /hemp/i, earliest: -5000 },
+  { pattern: /cotton|calico|muslin|chintz/i, earliest: -5000 },
+  // Wool cloth needs sheep bred for a fleece, later than domestication itself.
+  { pattern: /wool|felt|broadcloth|worsted|serge|tweed/i, earliest: -4000 },
+  { pattern: /silk|satin|brocade|damask/i, earliest: -3000 },
+  // Named woven garments imply the loom even when no material is given.
+  { pattern: /sari|saree|toga|chiton|himation|robe|gown|tunic and mantle/i, earliest: -6000 },
+  // Generic cloth and weaving. Barkcloth and tapa are *beaten* rather than
+  // woven and are far older, so they are exempted rather than swept up here —
+  // this is the rule that most needs an exception, and getting it wrong either
+  // bans barkcloth from the Palaeolithic or lets woven sandals into it.
+  {
+    pattern: /\bwoven\b|\bweave\b|\bcloth\b|\btextile\b|\bknit\b|\bplait\w*\b/i,
+    earliest: -6000,
+    exempt: /bark ?cloth|tapa/i,
+  },
+  // Plaited footwear. The oldest known sandals are early Holocene; hide and fur
+  // footwear is far older, so it is exempted.
+  {
+    pattern: /sandal|slipper|shoe|boot/i,
+    earliest: -9000,
+    exempt: /hide|leather|fur|skin|pelt|moccasin/i,
+  },
+  // Technologies, not materials — a bow is wood and sinew, both of which are as
+  // old as people, so nothing about its materials rules it out. The object is
+  // what is anachronistic.
+  //
+  // The bow is the contested one. Stone points from Sibudu are argued to imply
+  // archery some 60,000 years ago; unambiguous bows are early Holocene. The date
+  // here is conservative and errs toward the spear-and-atlatl kit that is not in
+  // doubt.
+  { pattern: /\bbow\b|arrow|quiver|crossbow|fletch/i, earliest: -15000 },
+  { pattern: /\bpot\b|pottery|ceramic|urn|amphora|jar|crock/i, earliest: -16000 },
+  { pattern: /plough|plow|sickle|hoe\b|quern|millstone|yoke/i, earliest: -10000 },
+  { pattern: /loom|spindle|distaff/i, earliest: -6000 },
+  { pattern: /wheel|cart|wagon|chariot/i, earliest: -3500 },
+  { pattern: /coin|currency|purse of/i, earliest: -700 },
   // Metals, for fittings and ornament.
-  [/copper/i, -5000],
-  [/bronze/i, -3300],
-  [/iron|steel/i, -1200],
-  [/glass/i, -1500],
-  // Everything else — hide, leather, fur, sinew, bark, grass, bone, shell,
-  // feather, plant fibre — is available for the whole span.
+  { pattern: /copper/i, earliest: -5000 },
+  { pattern: /bronze/i, earliest: -3300 },
+  { pattern: /iron|steel/i, earliest: -1200 },
+  { pattern: /glass/i, earliest: -1500 },
+  // Everything else — hide, fur, sinew, bark, grass, bone, shell, feather,
+  // plant fibre — matches no rule and is available for the whole span.
 ];
 
 /**
- * Materials available for the whole span, checked first so that genuinely
- * ancient technologies are never caught by a broader gate — barkcloth is beaten
- * rather than woven and is far older than the loom, so "bark cloth" must not be
- * filtered by the rule that removes woven cloth.
+ * Is this garment, covering or object possible in this year?
+ *
+ * Each rule is checked in turn and any match before its earliest date rules the
+ * item out. An earlier version short-circuited on a list of always-available
+ * materials *before* checking the rules, which meant a woven sandal made of
+ * plant fibre passed because "fibre" is ancient — the construction was the
+ * anachronism, not the material.
  */
-const ALWAYS_AVAILABLE =
-  /\b(?:bark ?cloth|tapa|hide|skin|pelt|fur|leather|rawhide|sinew|gut|bone|antler|shell|tooth|claw|feather|grass|reed|rush|straw|plant fibre|plant fiber|fibre|fiber|bast|raffia)\b/i;
-
 export function isMaterialAvailable(description: string, year: number): boolean {
-  if (ALWAYS_AVAILABLE.test(description)) return true;
-  for (const [pattern, earliest] of MATERIAL_EARLIEST) {
-    if (pattern.test(description) && year < earliest) return false;
+  for (const rule of MATERIAL_RULES) {
+    if (!rule.pattern.test(description)) continue;
+    if (rule.exempt && rule.exempt.test(description)) continue;
+    if (year < rule.earliest) return false;
   }
   return true;
 }

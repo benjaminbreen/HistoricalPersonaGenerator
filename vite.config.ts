@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import fs from 'node:fs'
 import path from 'node:path'
+import personaShareHandler from './api/persona-share.js'
 
 const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite'
 const DEFAULT_OPENAI_MODEL = 'gpt-5-nano'
@@ -441,6 +442,10 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
   return {
     name: 'gemini-persona-api',
     configureServer(server: any) {
+      server.middlewares.use('/api/persona-share', async (req: any, res: any) => {
+        await personaShareHandler(req, res)
+      })
+
       server.middlewares.use('/api/old-bailey/random', async (req: any, res: any) => {
         if (req.method !== 'GET') {
           res.statusCode = 405

@@ -1243,7 +1243,9 @@ export const LANGUAGES: Record<string, LanguageData> = {
     isReconstructed: true,
     period: [-3500, -1500],
     regions: ['Taiwan', 'Southeast Asia', 'Pacific Islands'],
-    culturalZones: ['OCEANIAN' as CulturalZone, 'SOUTH_ASIAN' as CulturalZone],
+    // 'OCEANIAN' is not a zone in the enum, and Proto-Austronesian was never
+    // spoken in South Asia; the mislisting sent it to the Indus Valley.
+    culturalZones: ['OCEANIA' as CulturalZone, 'EAST_ASIAN' as CulturalZone],
     successors: ['PROTO_POLYNESIAN', 'OLD_MALAY', 'OLD_TAGALOG', 'OLD_JAVANESE'],
     description: 'Reconstructed ancestor of all Austronesian languages from Madagascar to Hawaii.',
     llmPrompt: 'Reconstruct Proto-Austronesian with focus on maritime vocabulary. Use reduplication for plurals and intensification. Verb-initial word order. Include terms for outrigger canoes, navigation, fishing, and tropical agriculture.',
@@ -3578,7 +3580,9 @@ export const LANGUAGES: Record<string, LanguageData> = {
     script: 'Latin',
     period: [500, 2025],
     regions: ['Madagascar'],
-    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone, 'OCEANIA' as CulturalZone],
+    // Austronesian by descent but African by geography. Listing OCEANIA here
+    // sent Malagasy to Rapa Nui and the rest of Polynesia.
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     description: 'Austronesian language brought to Madagascar from Southeast Asia',
     greetings: {
       hello: 'Salama',
@@ -6650,6 +6654,14 @@ export function getLanguageForCharacter(
             if (lang && year >= lang.period[0] && year <= lang.period[1]) {
               if (lang.isReconstructed && year > -3000) {
                 continue; // Skip proto-languages in historical periods
+              }
+              // A name is weaker evidence than a place. Diaspora is real, but a
+              // Scottish-looking name in 1780 Rwanda should not make the persona
+              // a Scots speaker; require the language to belong in this zone.
+              if (Array.isArray(lang.culturalZones)
+                && lang.culturalZones.length > 0
+                && !lang.culturalZones.includes(culturalZone as CulturalZone)) {
+                continue;
               }
               return lang;
             }
