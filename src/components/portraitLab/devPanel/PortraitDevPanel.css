@@ -1,0 +1,151 @@
+/* portraitLab/devPanel/PortraitDevPanel.css — the ⌘⇧D contact sheet overlay.
+ *
+ * Deliberately dark and instrument-like rather than matching the app's paper
+ * palette: this sits *over* the running app, and it should never be mistaken
+ * for part of it. The neutral ground also keeps the portraits honest — a warm
+ * paper background quietly flatters every skin tone drawn on it.
+ */
+
+.pdp {
+  --pdp-ink: #e8e2d6;
+  --pdp-muted: #8d8578;
+  --pdp-line: #34302a;
+  --pdp-accent: #c9784b;
+
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  background: #171513;
+  color: var(--pdp-ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.pdp__bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'title controls' 'blurb controls';
+  gap: 4px 24px;
+  align-items: start;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--pdp-line);
+  background: #1d1a17;
+}
+
+.pdp__title { grid-area: title; display: flex; align-items: baseline; gap: 10px; }
+.pdp__title strong { font-size: 14px; letter-spacing: -0.01em; }
+.pdp__count { color: var(--pdp-muted); }
+
+.pdp__blurb {
+  grid-area: blurb;
+  margin: 0;
+  max-width: 78ch;
+  line-height: 1.5;
+  color: var(--pdp-muted);
+}
+
+.pdp__controls {
+  grid-area: controls;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.pdp button,
+.pdp select {
+  font: inherit;
+  color: var(--pdp-ink);
+  background: #262220;
+  border: 1px solid var(--pdp-line);
+  border-radius: 4px;
+  padding: 5px 9px;
+  cursor: pointer;
+}
+
+.pdp button:hover,
+.pdp select:hover { background: #302b27; }
+
+.pdp__toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--pdp-muted);
+  cursor: pointer;
+}
+
+.pdp__sizes { display: flex; gap: 2px; }
+.pdp__sizes button { padding: 5px 7px; }
+.pdp__sizes .is-active {
+  background: #c9784b;
+  border-color: #c9784b;
+  color: #1a1512;
+}
+
+.pdp__close { border-color: #5a463c; }
+
+.pdp kbd {
+  font: inherit;
+  font-size: 10px;
+  padding: 1px 4px;
+  margin-left: 3px;
+  border-radius: 3px;
+  background: #100e0d;
+  border: 1px solid var(--pdp-line);
+  color: var(--pdp-muted);
+}
+
+.pdp__scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 18px; }
+
+.pdp__grid {
+  display: grid;
+  gap: 14px 10px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.pdp__cell { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+
+/* A neutral mid-grey behind every portrait so the silhouette edges are
+ * honestly visible against something that flatters nothing. */
+.pdp__shot {
+  padding: 4px;
+  background: #2a2724;
+  border: 1px solid var(--pdp-line);
+  border-radius: 5px;
+  line-height: 0;
+  transition: border-color 120ms ease;
+}
+
+.pdp__shot:hover { border-color: #c9784b; background: #322e2a; }
+.pdp__shot img,
+.pdp__shot canvas,
+.pdp__shot svg { display: block; image-rendering: pixelated; max-width: 100%; }
+
+.pdp__cell figcaption {
+  color: var(--pdp-muted);
+  font-size: 10px;
+  text-align: center;
+  line-height: 1.3;
+  max-width: 15ch;
+  overflow-wrap: anywhere;
+}
+
+.pdp__hint {
+  padding: 9px 18px;
+  border-top: 1px solid var(--pdp-line);
+  background: #1d1a17;
+  color: var(--pdp-muted);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .pdp__bar { grid-template-columns: 1fr; grid-template-areas: 'title' 'blurb' 'controls'; }
+  .pdp__controls { justify-content: flex-start; }
+}

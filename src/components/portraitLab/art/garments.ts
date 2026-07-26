@@ -18,7 +18,7 @@ import {
   maskDilate, maskEllipse, maskFromProfile, maskIntersect, maskSubtract,
 } from '../core/raster';
 import { Ramp } from '../core/color';
-import { makeNoise1D, makeRng } from '../core/rng';
+import { makeNoise1D, makeNoise2D, makeRng } from '../core/rng';
 import { RenderContext } from '../render/context';
 import { GarmentKind } from '../spec/types';
 
@@ -168,6 +168,7 @@ export function drawGarment(context: RenderContext): BodyMasks {
     return 3 - nz * 1.5 + Math.abs(dx) * 2.1 + drop + shoulderTopLight + (dx > 0 ? 0.5 : 0);
   }, { dither: 0.5 });
 
+  applyClothSurface(context, body);
   drawFolds(context, body);
   drawCollar(context, body, opening);
   drawContextDetails(context, body);
@@ -178,6 +179,72 @@ export function drawGarment(context: RenderContext): BodyMasks {
   applyContactShadow(raster, maskSubtract(shoulders, body), book, { dx: 0, dy: 1, strength: 1, depth: 1 });
 
   return { body, neckline: opening };
+}
+
+/**
+ * How the cloth itself takes the light.
+ *
+ * The ramp already varies contrast by material, but contrast alone cannot tell
+ * silk from wool — both come out as the same smooth gradient in a different key.
+ * What actually separates them is surface: silk is specular and throws a narrow
+ * band of lustre across the curve; velvet is the opposite, drinking light at
+ * grazing angles so it goes darkest exactly where a shiny cloth goes brightest;
+ * wool is matte with visible fibre; linen is crisp and slubbed.
+ *
+ * This is a cheap pass — a few value shifts — but it is the difference between
+ * a persona wearing *cloth* and a persona wearing a coloured shape.
+ */
+function applyClothSurface(context: RenderContext, body: Mask): void {
+  const { raster, spec, anatomy, book } = context;
+  const { size, centerX } = anatomy;
+  const material = spec.garment.material.toLowerCase();
+  const grain = makeNoise2D(spec.seed ^ 0x5ab3);
+  const half = Math.max(1, anatomy.shoulderHalf * 1.02);
+
+  const silky = /silk|satin|brocade|damask|taffeta/.test(material);
+  const velvet = /velvet|plush|fustian/.test(material);
+  const woolly = /wool|felt|broadcloth|serge|tweed|kersey/.test(material);
+  const linenish = /linen|cotton|muslin|calico|hemp|ramie/.test(material);
+  const coarse = /barkcloth|bark cloth|fibre|fiber|plant|raffia|grass|straw|reed|tapa|hide|skin/.test(material);
+
+  if (!silky && !velvet && !woolly && !linenish && !coarse) return;
+
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (!body[y * size + x]) continue;
+      if (raster.matAt(x, y) !== MAT.CLOTH_A) continue;
+      const dx = (x + 0.5 - centerX) / half;
+
+      if (silky) {
+        // A narrow sheen band up the lit side, and a faster falloff at the
+        // edges — lustre is a highlight that moves, not an overall brightness.
+        const band = Math.exp(-Math.pow((dx + 0.38) / 0.26, 2));
+        if (band > 0.45 && grain(x * 0.3, y * 0.28) > -0.35) raster.shift(x, y, -1, book);
+        if (Math.abs(dx) > 0.74) raster.shift(x, y, 1, book);
+      } else if (velvet) {
+        // Pile scatters: darkest at the turn, with a crushed, uneven nap.
+        const n = grain(x * 0.42, y * 0.38);
+        if (n > 0.5) raster.shift(x, y, -1, book);
+        else if (n < -0.5) raster.shift(x, y, 1, book);
+        if (Math.abs(dx) > 0.62) raster.shift(x, y, 1, book);
+      } else if (woolly) {
+        const n = grain(x * 0.8, y * 0.72);
+        if (n > 0.55) raster.shift(x, y, 1, book);
+        else if (n < -0.62) raster.shift(x, y, -1, book);
+      } else if (linenish) {
+        // Slubs: the odd thicker thread catching the light, on a crisp ground.
+        if ((x * 3 + y * 5) % 13 === 0 && grain(x * 0.5, y * 0.45) > 0.15) {
+          raster.shift(x, y, -1, book);
+        } else if (grain(x * 0.95, y * 0.9) > 0.7) {
+          raster.shift(x, y, 1, book);
+        }
+      } else {
+        // Coarse plant fibre and hide: a visible, irregular weave.
+        if ((x + y * 2) % 5 === 0 && grain(x * 0.6, y * 0.55) > 0) raster.shift(x, y, 1, book);
+        else if (grain(x * 0.7, y * 0.65) > 0.66) raster.shift(x, y, -1, book);
+      }
+    }
+  }
 }
 
 /**

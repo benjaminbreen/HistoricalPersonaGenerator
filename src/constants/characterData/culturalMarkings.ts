@@ -6,6 +6,7 @@
 
 import { CulturalZone } from './culturalZones';
 import { HistoricalEra } from '../../types/ambiance';
+import { random as seededRandom } from '../../utils/seededRandom';
 
 export interface MarkingPattern {
   id: string;
@@ -617,6 +618,7 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'URUCUM',
     type: 'paint',
     culturalZones: ['SOUTH_AMERICAN'],
+    places: /amazon|orinoco|xingu|guiana|rio negro|ucayali|mato grosso|rainforest|llanos|tapajos/,
     patterns: [
       {
         id: 'urucum_red',
@@ -1004,6 +1006,9 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'HAIR_OCHRE',
     type: 'paint',
     culturalZones: ['SUB_SAHARAN_AFRICAN'],
+    // Otjize is Himba and Herero practice in the southwest, not a
+    // continent-wide one; it was turning up on the Sierra Leone coast.
+    places: /namib|herero|himba|kaokoveld|kunene|angola|kalahari|damaraland|southern africa|south west africa/,
     patterns: [
       {
         id: 'ochre_hair',
@@ -1185,7 +1190,7 @@ export function getMarkingsForCharacter(
 // Select a random marking based on weights
 export function selectRandomMarking(
   markings: CulturalMarking[],
-  seed: number = Math.random()
+  seed: number = seededRandom()
 ): CulturalMarking | null {
   if (markings.length === 0) return null;
   
@@ -1205,7 +1210,7 @@ export function selectRandomMarking(
 // Get a random pattern from a marking
 export function getRandomPattern(
   marking: CulturalMarking,
-  seed: number = Math.random()
+  seed: number = seededRandom()
 ): MarkingPattern | null {
   if (marking.patterns.length === 0) return null;
   const index = Math.floor(seed * marking.patterns.length);
@@ -1366,10 +1371,18 @@ export function getMarkingProbability(
     // Declined with colonialism and modernization
     probability *= 0.4;
   }
-  
+
   // Profession adjustments - certain roles had mandatory markings
   if (profession) {
     const profLower = profession.toLowerCase();
+
+    // Ceremonial and clan body paint belongs to people living in the community
+    // that practises it. A twentieth-century textile worker or shop clerk was
+    // turning up in annatto, which reads as costume rather than culture.
+    if ((era === 'INDUSTRIAL_ERA' || era === 'MODERN_ERA')
+      && /worker|clerk|driver|mechanic|factory|office|nurse|teacher|salesman|cashier|engineer|operator|warehouse|technician|secretar|waitress|janitor|accountant|police/.test(profLower)) {
+      probability *= 0.15;
+    }
     
     // These professions almost always had markings
     if (profLower.includes('warrior') || profLower.includes('shaman') || 

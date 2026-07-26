@@ -275,7 +275,7 @@ export interface ProfileOptions {
 }
 
 /** Catmull-Rom through the control points, clamped at the ends. */
-function sampleProfile(keys: Array<[number, number]>, t: number): number {
+export function sampleProfile(keys: Array<[number, number]>, t: number): number {
   if (t <= keys[0][0]) return keys[0][1];
   if (t >= keys[keys.length - 1][0]) return keys[keys.length - 1][1];
   let i = 0;

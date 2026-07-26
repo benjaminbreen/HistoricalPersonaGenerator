@@ -10,6 +10,19 @@ export interface Ideology {
   name: string;
   description: string; // General tenets
   eras: HistoricalEra[];
+  /**
+   * Absolute years, where the era bucket is too coarse to be honest.
+   * RENAISSANCE_EARLY_MODERN spans some three and a half centuries, so an
+   * ideology tagged with it alone could surface in 1400 as readily as in 1750.
+   */
+  yearRange?: [number, number];
+  /**
+   * Some stances presuppose a position and not merely an opinion — a capitalist
+   * entrepreneur holds capital. Compared against socialContext.privilege (0-1).
+   * Deliberately absent from stances the poor and enslaved genuinely held:
+   * Stoicism had Epictetus, and millenarian prophecy was a poor person's creed.
+   */
+  minPrivilege?: number;
   culturalZones: CulturalZone[];
   religions: string[]; // Associated religions
   associatedBeliefs: { // Weighted chances for specific beliefs

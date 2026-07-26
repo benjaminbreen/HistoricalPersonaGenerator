@@ -10,6 +10,7 @@ import { ValueNoise } from '../utils/noise';
 import { generateBaseProfile, determineSocialRole, generateNpcName, generateNpcNameDetailed, assignBeliefs, generateClothingPalette, generateCompleteOutfit, generateCulturalAppearance, adjustPersonalityForProfession, validateCharacterCoherence } from '../generation/common/npcUtils';
 import { mapLocationToCulture } from '../utils/mapUtils';
 import { hexToColorName } from '../utils/colorUtils';
+import { COLOR_WORDS, hasIntrinsicColor, nameForHex } from '../constants/gameData/colorNames';
 import { CharacterSpecification } from './worldWeaverService';
 import DiseaseService from './diseaseService';
 import { AttributeBadgeService } from './attributeBadgeService';
@@ -19,12 +20,14 @@ import { getMarkingsForCharacter, selectRandomMarking, getRandomPattern, convert
 import { formatSocialStatusForEra, sampleSocialStatus } from './socialStatusService';
 import { reconcileEpithet } from '../constants/characterData/nameConventions';
 import { applyAttributeAppearance } from './attributeAppearanceService';
+import { generateOrnament } from './ornamentService';
 import { isClergyRoleCompatible } from '../constants/characterData/religionClergyRoles';
 import { illnessRate, pickByPrevalence } from './diseasePrevalenceService';
 import { getAreaClimate, hemisphereFor, seasonFor, thermalNeed } from './climateService';
 import { describeBeliefSecondPerson, withIndefiniteArticle } from './narrativeTextService';
 import { createHistoricalContext } from './historicalContextService';
 import type { HistoricalContext } from '../types/historicalContext';
+import { random as seededRandom } from '../utils/seededRandom';
 
 let characterIdCounter = 0;
 
@@ -598,6 +601,20 @@ function generateProceduralFamily(
     inheritedFamilyName?: string
 ): void {
     const age = character.age;
+
+    // Bynames are given by neighbours to tell people apart, so a household of
+    // "Atum the Short and Khenthap the Short" defeats the purpose. Track what
+    // has been used and strip a repeat rather than re-rolling into another one.
+    const usedEpithets = new Set<string>();
+    const dedupeEpithet = (name: string): string => {
+        const match = / (the [A-Z][A-Za-z-]+)$/.exec(name);
+        if (!match) return name;
+        if (!usedEpithets.has(match[1])) {
+            usedEpithets.add(match[1]);
+            return name;
+        }
+        return name.slice(0, name.length - match[1].length - 1).trim();
+    };
     // CRITICAL FIX: Use the passed birthYear if provided, otherwise calculate
     // This is essential for family member navigation - when we click a parent,
     // their birthYear is explicitly set and should NOT be recalculated
@@ -616,7 +633,23 @@ function generateProceduralFamily(
     const fatherBirthYear = birthYear - parentAge;
     const motherBirthYear = birthYear - parentAge + Math.floor(noise.random() * 5); // Mother might be slightly younger
 
-    const fatherGenerated = generateNpcNameDetailed('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey);
+    // A father with the same name as his son is a real naming practice in some
+    // cultures, but an *identical* name inside one nuclear family reads as a
+    // generator fault rather than a patronymic — the card just says "His
+    // parents are Siu and Yoyo" under a persona called Siu. Redraw a few times
+    // before accepting a collision.
+    const givenOf = (full: string): string =>
+        (full || '').trim().split(/\s+/)[0]?.toLowerCase() ?? '';
+    const selfGiven = givenOf(character.name);
+    const collides = (candidate: string): boolean => {
+        const given = givenOf(candidate);
+        return given.length > 0 && given === selfGiven;
+    };
+
+    let fatherGenerated = generateNpcNameDetailed('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey);
+    for (let attempt = 0; attempt < 4 && collides(fatherGenerated.given); attempt += 1) {
+        fatherGenerated = generateNpcNameDetailed('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey);
+    }
     // If the character is "Wulf son of Ket", the father is Ket. His own name is
     // still built by his own culture's convention on top of that given name.
     const fatherName = inheritedFamilyName
@@ -624,7 +657,10 @@ function generateProceduralFamily(
         : fathersGivenName
             ? fatherGenerated.full.replace(fatherGenerated.given, fathersGivenName)
             : fatherGenerated.full;
-    const motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise, familyNameKey);
+    let motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise, familyNameKey);
+    for (let attempt = 0; attempt < 4 && collides(motherName); attempt += 1) {
+        motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise, familyNameKey);
+    }
 
     // Generate father's profession
     const fatherProfession = generateParentProfession('male', culturalZone, era, noise, currentYear, region);
@@ -633,13 +669,13 @@ function generateProceduralFamily(
     const motherProfession = generateMotherProfession(culturalZone, era, noise);
 
     character.family.push({
-        name: fatherName,
+        name: dedupeEpithet(fatherName),
         relation: 'father',
         profession: fatherProfession,
         birthYear: fatherBirthYear
     });
     character.family.push({
-        name: motherName,
+        name: dedupeEpithet(motherName),
         relation: 'mother',
         profession: motherProfession,
         birthYear: motherBirthYear
@@ -674,7 +710,7 @@ function generateProceduralFamily(
                 : siblingGenerated.full;
 
         character.family.push({
-            name: siblingName,
+            name: dedupeEpithet(siblingName),
             relation: siblingGender === 'male' ? 'brother' : 'sister',
             age: siblingAge,
             birthYear: siblingBirthYear
@@ -688,7 +724,7 @@ function generateProceduralFamily(
             : (normalizedGender === 'male' ? 'female' : 'male');
         const twinName = generateNpcName(twinGender === 'male' ? 'Male' : 'Female', culturalZone, region, birthYear, noise, familyNameKey);
         character.family.push({
-            name: twinName,
+            name: dedupeEpithet(twinName),
             relation: 'twin',
             age: age,
             birthYear: birthYear
@@ -710,7 +746,7 @@ function generateProceduralFamily(
             : generateMotherProfession(culturalZone, era, noise);
 
         character.family.push({
-            name: spouseName,
+            name: dedupeEpithet(spouseName),
             relation: 'spouse',
             age: spouseAge,
             profession: spouseProfession,
@@ -734,7 +770,7 @@ function generateProceduralFamily(
                 const childName = generateNpcName(childGender === 'male' ? 'Male' : 'Female', culturalZone, region, childBirthYear, noise, familyNameKey);
 
                 character.family.push({
-                    name: childName,
+                    name: dedupeEpithet(childName),
                     relation: childGender === 'male' ? 'son' : 'daughter',
                     age: childAge,
                     birthYear: childBirthYear
@@ -893,6 +929,26 @@ function getHistoricalChildCount(era: HistoricalEra, age: number, yearsMarried: 
 /**
  * Generate a character with custom specifications from World Weaver
  */
+/**
+ * Whether a name from one tradition plausibly belongs to a person who looks
+ * like that tradition, in a place belonging to another.
+ *
+ * A European-derived name does not make a persona European. In 1812 Freetown an
+ * English or Portuguese name most often belonged to a Krio or locally-born
+ * person, and letting the name override geography produced blonde, pale West
+ * Africans practising West African religion.
+ */
+function nameImpliesAppearance(detected: string, geographic: string): boolean {
+    if (detected === geographic) return true;
+    const pairs = [
+        ['EUROPEAN', 'NORTH_AMERICAN_COLONIAL'],
+        ['EUROPEAN', 'MENA'],
+        ['MENA', 'SOUTH_ASIAN'],
+        ['EAST_ASIAN', 'SOUTH_ASIAN'],
+    ];
+    return pairs.some(([a, b]) => (detected === a && geographic === b) || (detected === b && geographic === a));
+}
+
 export function generateCharacterWithSpec(context: GenerationContext, spec?: CharacterSpecification | null): PlayerCharacter {
     console.log('[Character Generator] Generating character with spec:', spec);
     
@@ -901,7 +957,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         return generateCharacter(context);
     }
     
-    const noise = new ValueNoise(context.seed ?? (Date.now() + Math.random() * 10000));
+    const noise = new ValueNoise(context.seed ?? (Date.now() + seededRandom() * 10000));
     const dateInfo = parseDateString(context.date);
     // Use ethnicity from spec if provided, then context, then fall back to geographic cultural zone
     const culturalZone = (spec as any).ethnicity || context.culturalZone || mapLocationToCulture(context.location, dateInfo.year);
@@ -1111,7 +1167,10 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     if (detectedEthnicity && detectedEthnicity !== culturalZone && !isSoutheastAsianContext(context)) {
         baseProfile.appearance = {
             ...baseProfile.appearance,
-            ...generateCulturalAppearance(detectedEthnicity, noise),
+            ...generateCulturalAppearance(
+                nameImpliesAppearance(detectedEthnicity, culturalZone) ? detectedEthnicity : culturalZone,
+                noise,
+            ),
         };
     }
     
@@ -1150,156 +1209,30 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         };
     }
     
-    // Helper function to get color name from hex
-    const getColorName = (colorHex: string | undefined): string => {
-        if (!colorHex) return '';
-        
-        const hexToColor: Record<string, string> = {
-            '#000080': 'Navy', '#001f3f': 'Navy', '#0000ff': 'Blue', '#4169e1': 'Royal',
-            '#ff0000': 'Red', '#dc143c': 'Crimson', '#00ff00': 'Green', '#228b22': 'Forest',
-            '#ffff00': 'Yellow', '#ffd700': 'Gold', '#800080': 'Purple', '#4b0082': 'Indigo',
-            '#ffa500': 'Orange', '#ff8c00': 'Orange', '#964b00': 'Brown', '#8b4513': 'Brown',
-            '#000000': 'Black', '#ffffff': 'White', '#c0c0c0': 'Silver', '#808080': 'Gray',
-            '#008080': 'Teal', '#40e0d0': 'Turquoise', '#ff7f50': 'Coral', '#deb887': 'Tan',
-            '#d2b48c': 'Tan', '#f5deb3': 'Wheat', '#faebd7': 'Ivory',
-            // Add fallback brown colors
-            '#654321': 'Dark_Brown', '#d2691e': 'Chocolate', '#a52a2a': 'Brown',
-            '#704214': 'Dark_Brown', '#8b7355': 'Tan'
-        };
-        
-        const colorHexLower = colorHex.toLowerCase();
-        
-        // First try exact match
-        if (hexToColor[colorHexLower]) {
-            return hexToColor[colorHexLower];
-        }
-        
-        // If no exact match, find closest color by comparing RGB values
-        const hexToRgb = (hex: string) => {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : null;
-        };
-        
-        const targetRgb = hexToRgb(colorHex);
-        if (targetRgb) {
-            let minDistance = Infinity;
-            let closestColor = 'Gray';
-            
-            for (const [hex, name] of Object.entries(hexToColor)) {
-                const rgb = hexToRgb(hex);
-                if (rgb) {
-                    const distance = Math.sqrt(
-                        Math.pow(targetRgb.r - rgb.r, 2) +
-                        Math.pow(targetRgb.g - rgb.g, 2) +
-                        Math.pow(targetRgb.b - rgb.b, 2)
-                    );
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        closestColor = name;
-                    }
-                }
-            }
-            return closestColor;
-        }
-        
-        return 'Gray'; // Final fallback
-    };
-    
-    // Helper function to check if material is its own color
-    const isMaterialColor = (material: string | undefined): boolean => {
-        if (!material) return false;
-        const materialColors = ['leather', 'hide', 'fur', 'straw', 'iron', 'steel', 'bronze', 
-                               'copper', 'brass', 'gold', 'silver', 'wood', 'oak', 'pine', 'bamboo'];
-        return materialColors.some(mat => material.toLowerCase().includes(mat));
-    };
+    // Helper function to get color name from hex.
+    // One shared vocabulary of dyestuffs (constants/gameData/colorNames), so
+    // the name the card prints and the hex the portrait draws cannot disagree.
+    const getColorName = (colorHex: string | undefined): string =>
+        nameForHex(colorHex);
+
+    // Helper function to check if material is its own color.
+    // The hand-written list this replaced was missing sedge, grass, reed and
+    // rattan, which is how a woven sedge sunhat was issued a dye colour and
+    // came out lilac. Shared with the portrait renderer now.
+    const isMaterialColor = (material: string | undefined): boolean =>
+        hasIntrinsicColor(material);
     
     // Apply colors to equipped items based on palette
     const applyColorToItem = (item: Item, colorHex: string | undefined): Item => {
         if (!colorHex) return item;
         
-        // Convert hex to color name
-        const hexToColor: Record<string, string> = {
-            '#000080': 'Navy',
-            '#001f3f': 'Navy',
-            '#0000ff': 'Blue',
-            '#4169e1': 'Royal Blue',
-            '#ff0000': 'Red',
-            '#dc143c': 'Crimson',
-            '#00ff00': 'Green',
-            '#228b22': 'Forest Green',
-            '#ffff00': 'Yellow',
-            '#ffd700': 'Gold',
-            '#800080': 'Purple',
-            '#4b0082': 'Indigo',
-            '#ffa500': 'Orange',
-            '#ff8c00': 'Dark Orange',
-            '#964b00': 'Brown',
-            '#8b4513': 'Saddle Brown',
-            '#000000': 'Black',
-            '#ffffff': 'White',
-            '#c0c0c0': 'Silver',
-            '#808080': 'Gray',
-            '#008080': 'Teal',
-            '#40e0d0': 'Turquoise',
-            '#ff7f50': 'Coral',
-            '#deb887': 'Burlywood',
-            '#d2b48c': 'Tan',
-            '#f5deb3': 'Wheat',
-            '#faebd7': 'Antique White',
-            '#8b7355': 'Burlywood'
-        };
-        
-        // Find the closest matching color
-        let colorName = '';
-        const colorHexLower = colorHex.toLowerCase();
-        
-        // First try exact match
-        if (hexToColor[colorHexLower]) {
-            colorName = hexToColor[colorHexLower];
-        } else {
-            // Find closest color by comparing RGB values
-            const hexToRgb = (hex: string) => {
-                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                return result ? {
-                    r: parseInt(result[1], 16),
-                    g: parseInt(result[2], 16),
-                    b: parseInt(result[3], 16)
-                } : null;
-            };
-            
-            const targetRgb = hexToRgb(colorHex);
-            if (targetRgb) {
-                let minDistance = Infinity;
-                let closestColor = 'Gray';
-                
-                for (const [hex, name] of Object.entries(hexToColor)) {
-                    const rgb = hexToRgb(hex);
-                    if (rgb) {
-                        const distance = Math.sqrt(
-                            Math.pow(targetRgb.r - rgb.r, 2) +
-                            Math.pow(targetRgb.g - rgb.g, 2) +
-                            Math.pow(targetRgb.b - rgb.b, 2)
-                        );
-                        if (distance < minDistance) {
-                            minDistance = distance;
-                            closestColor = name;
-                        }
-                    }
-                }
-                colorName = closestColor;
-            }
-        }
-        
+        // A material that is its own colour is never renamed. Straw is straw.
+        if (isMaterialColor(item.material)) return item;
+
+        const colorName = getColorName(colorHex);
+
         // Check if color is already in the name
-        const colorWords = ['navy', 'red', 'blue', 'green', 'yellow', 'purple', 'black', 'white', 'gold', 'silver', 
-                           'crimson', 'emerald', 'amber', 'bronze', 'copper', 'ivory', 'ebony', 'maroon', 
-                           'olive', 'teal', 'turquoise', 'coral', 'brown', 'gray', 'grey'];
-        
-        for (const color of colorWords) {
+        for (const color of COLOR_WORDS) {
             if (item.name.toLowerCase().includes(color)) {
                 // Color already in name, but still store it in the color field
                 return {
@@ -1340,6 +1273,10 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         
         const headItem = createItemInstance(headgearBaseId);
         if (headItem) {
+            // Keep the material the clothing table actually declared.
+            if (baseProfile.appearance.headgear.material) {
+                headItem.material = baseProfile.appearance.headgear.material;
+            }
             equippedItems.head = headItem;
             console.log('[CharGen] Created head item from appearance:', headgearBaseId, '→', headItem.name);
         }
@@ -1358,6 +1295,9 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         
         const garmentItem = createItemInstance(garmentBaseId);
         if (garmentItem) {
+            if (baseProfile.appearance.garment.material) {
+                garmentItem.material = baseProfile.appearance.garment.material;
+            }
             // Check if this is a leg item (pants, trousers, etc.) or torso item
             if (garmentItem.equipmentSlot === 'legs') {
                 equippedItems.legs = garmentItem;
@@ -1384,6 +1324,9 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         
         const feetItem = createItemInstance(footwearBaseId);
         if (feetItem) {
+            if (baseProfile.appearance.footwear.material) {
+                feetItem.material = baseProfile.appearance.footwear.material;
+            }
             equippedItems.feet = feetItem;
             console.log('[CharGen] Created feet item from appearance:', footwearBaseId, '→', feetItem.name);
         }
@@ -1502,18 +1445,18 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     // Calculate health based on potentially modified stats
     const maxHealth = 80 + baseProfile.stats.constitution * 2 + baseProfile.stats.strength;
     const startingHealth = spec.health === 'sickly' ? 
-        Math.floor(maxHealth * (0.5 + Math.random() * 0.2)) : // 50-70% for sickly
+        Math.floor(maxHealth * (0.5 + seededRandom() * 0.2)) : // 50-70% for sickly
         spec.health === 'unhealthy' ?
-        Math.floor(maxHealth * (0.6 + Math.random() * 0.2)) : // 60-80% for unhealthy
-        Math.floor(maxHealth * (0.8 + Math.random() * 0.2)); // 80-100% for average/healthy
+        Math.floor(maxHealth * (0.6 + seededRandom() * 0.2)) : // 60-80% for unhealthy
+        Math.floor(maxHealth * (0.8 + seededRandom() * 0.2)); // 80-100% for average/healthy
     
     // Characters always start relatively well-rested (max 20% fatigue)
-    const baseFatigue = Math.random() * 20; // 0-20% fatigue
+    const baseFatigue = seededRandom() * 20; // 0-20% fatigue
     const constitutionBonus = baseProfile.stats.constitution - 10;
     // Constitution can further reduce fatigue, but never below 0
     const startingFatigue = Math.max(0, Math.min(20, baseFatigue - constitutionBonus));
     
-    const staticPortraitSeed = Math.floor(Math.random() * 1000000);
+    const staticPortraitSeed = Math.floor(seededRandom() * 1000000);
     
     const partialCharacter: Omit<PlayerCharacter, 'backstory' | 'id' | 'inventory' | 'party' | 'eventLog' | 'profileImage' | 'isLlmEnhanced'> = {
         ...baseProfile,
@@ -1521,7 +1464,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         class: socialClass,
         socialClass,
         profession: role,
-        level: Math.floor(1 + Math.random() * 5), // Random level 1-5
+        level: Math.floor(1 + seededRandom() * 5), // Random level 1-5
         experience: 0,
         maxExperience: 100,
         health: startingHealth,
@@ -1535,7 +1478,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         portraitSeed: staticPortraitSeed,
         family: [],
         lifeEvents: [],
-        mapReputation: Math.floor(20 + Math.random() * 60 + (socialClass === 'Noble' ? 20 : socialClass === 'Merchant' ? 10 : 0)), // 20-80 base, with bonus for nobles/merchants
+        mapReputation: Math.floor(20 + seededRandom() * 60 + (socialClass === 'Noble' ? 20 : socialClass === 'Merchant' ? 10 : 0)), // 20-80 base, with bonus for nobles/merchants
         appearance: finalAppearance,
         equippedItems,
     };
@@ -1576,6 +1519,31 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
       partialCharacter.name as string,
     );
 
+    // Ornament. `appearance.jewelry` is read by the equipment list, the
+    // appearance panel and the portrait renderer, and until now nothing wrote
+    // to it, so every persona rendered bare.
+    {
+      const ornament = generateOrnament(
+        {
+          year: dateInfo.year,
+          culturalZone,
+          placeLower: `${context.location ?? ''} ${context.region ?? ''}`.toLowerCase(),
+          gender: partialCharacter.gender as string,
+          wealth: baseProfile.wealthLevel,
+          socialClass,
+          profession: partialCharacter.profession as string,
+          attributeIds: attributes.map(a => a.id),
+        },
+        () => noise.random(),
+      );
+      if (ornament.length > 0) {
+        (partialCharacter as any).appearance = {
+          ...(partialCharacter as any).appearance,
+          jewelry: ornament,
+        };
+      }
+    }
+
     const characterWithAttributes = { ...partialCharacter, attributes };
 
     // Use custom backstory if provided, otherwise generate procedural one with attributes
@@ -1586,7 +1554,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         console.log(`[Character Generator] Adding ${spec.customItems.length} custom items from WorldWeaver`);
         for (const customItem of spec.customItems) {
             const item: Item = {
-                id: `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                id: `custom-${Date.now()}-${seededRandom().toString(36).substr(2, 9)}`,
                 baseId: customItem.name.toUpperCase().replace(/\s+/g, '_'),
                 name: customItem.name,
                 description: customItem.description,
@@ -1637,7 +1605,10 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         attributes,
         noise,
         birthYear,  // Pass the actual birthYear to avoid recalculation
-        contextualNameKey || detectNameListKey(name),
+        // The set the persona's own name came from. Re-detecting it from the
+        // finished string picked the wrong list often enough to give an
+        // Aboriginal persona French or Scottish parents.
+        generatedName.nameKey || contextualNameKey || detectNameListKey(name),
         fathersGivenName,
         inheritedFamilyName
     );
@@ -1713,7 +1684,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             diseaseChance = 0.2; // 20% chance for healthy characters
         }
         
-        const shouldHaveDisease = Math.random() < diseaseChance;
+        const shouldHaveDisease = seededRandom() < diseaseChance;
         
         if (shouldHaveDisease) {
             // Directly create disease health for player character
@@ -1740,7 +1711,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
                     pickByPrevalence(availableDiseases, Math.random, { inEpidemic: Boolean(epidemicDisease) })
                     || availableDiseases[0];
 
-                if (epidemicDisease && Math.random() < 0.8) {
+                if (epidemicDisease && seededRandom() < 0.8) {
                     selectedDisease = epidemicDisease;
                     console.log(`[Character Generator] Custom character spawning during ${epidemicDisease.name} epidemic in ${dateInfo.year}`);
                 }
@@ -1885,7 +1856,7 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
         }
     }
     
-    const noise = new ValueNoise(finalContext.seed ?? (Date.now() + Math.random() * 10000));
+    const noise = new ValueNoise(finalContext.seed ?? (Date.now() + seededRandom() * 10000));
     const dateInfo = parseDateString(finalContext.date);
     const culturalZone = finalContext.culturalZone || mapLocationToCulture(finalContext.location, dateInfo.year);
     const historicalContext = finalContext.historicalContext || createHistoricalContext({
@@ -1932,7 +1903,10 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
 
     // Detect ethnicity from name for historically accurate appearance
     const detectedEthnicity = detectEthnicityFromName(name);
-    const appearanceEthnicity = detectedEthnicity || culturalZone; // Fallback to geographic zone
+    const appearanceEthnicity =
+        (detectedEthnicity && nameImpliesAppearance(detectedEthnicity, culturalZone))
+            ? detectedEthnicity
+            : culturalZone;
 
     // Regenerate appearance with correct ethnicity if ethnicity differs from geographic zone
     if (detectedEthnicity && detectedEthnicity !== culturalZone && !isSoutheastAsianContext(finalContext)) {
@@ -2113,25 +2087,25 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
     };
     
     const maxHealth = 80 + baseProfile.stats.constitution * 2 + baseProfile.stats.strength;
-    const startingHealth = Math.floor(maxHealth * (0.8 + Math.random() * 0.2)); // 80-100% of max health
+    const startingHealth = Math.floor(maxHealth * (0.8 + seededRandom() * 0.2)); // 80-100% of max health
     
     // Characters always start relatively well-rested (max 20% fatigue)
     // Regardless of time of day, newly spawned characters are fresh
-    const baseFatigue = Math.random() * 20; // 0-20% fatigue
+    const baseFatigue = seededRandom() * 20; // 0-20% fatigue
 
     // Constitution affects fatigue resistance
     const constitutionBonus = baseProfile.stats.constitution - 10;
     // Constitution can further reduce fatigue, but never below 0 or above 20
     const startingFatigue = Math.max(0, Math.min(20, baseFatigue - constitutionBonus));
     
-    const staticPortraitSeed = Math.floor(Math.random() * 1000000);
+    const staticPortraitSeed = Math.floor(seededRandom() * 1000000);
     
     const partialCharacter: Omit<PlayerCharacter, 'backstory' | 'id' | 'inventory' | 'party' | 'eventLog' | 'profileImage' | 'isLlmEnhanced'> = {
         ...baseProfile,
         name,
         class: socialClass,
         profession: role,
-        level: Math.floor(1 + Math.random() * 5), // Random level 1-5
+        level: Math.floor(1 + seededRandom() * 5), // Random level 1-5
         experience: 0,
         maxExperience: 100,
         health: startingHealth,
@@ -2145,7 +2119,7 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
         portraitSeed: staticPortraitSeed,
         family: [], // Initialize empty
         lifeEvents: [], // Initialize empty
-        mapReputation: Math.floor(20 + Math.random() * 60 + (socialClass === 'Noble' ? 20 : socialClass === 'Merchant' ? 10 : 0)), // Random 20-80, with bonus for nobles/merchants
+        mapReputation: Math.floor(20 + seededRandom() * 60 + (socialClass === 'Noble' ? 20 : socialClass === 'Merchant' ? 10 : 0)), // Random 20-80, with bonus for nobles/merchants
         appearance: finalAppearance, // Use the synced appearance object
         equippedItems,
     };
@@ -2193,19 +2167,43 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
       partialCharacter.name as string,
     );
 
+    // Ornament. `appearance.jewelry` is read by the equipment list, the
+    // appearance panel and the portrait renderer, and until now nothing wrote
+    // to it, so every persona rendered bare.
+    {
+      const ornament = generateOrnament(
+        {
+          year: dateInfo.year,
+          culturalZone,
+          placeLower: `${finalContext.location ?? ''} ${finalContext.region ?? ''}`.toLowerCase(),
+          gender: partialCharacter.gender as string,
+          wealth: baseProfile.wealthLevel,
+          socialClass,
+          profession: partialCharacter.profession as string,
+          attributeIds: attributes.map(a => a.id),
+        },
+        () => noise.random(),
+      );
+      if (ornament.length > 0) {
+        (partialCharacter as any).appearance = {
+          ...(partialCharacter as any).appearance,
+          jewelry: ornament,
+        };
+      }
+    }
+
     const characterWithAttributes = { ...partialCharacter, attributes };
 
     // The backstory is generated from the final, consistent character data including attributes
     const backstory = _generateProceduralBackstory(characterWithAttributes as PlayerCharacter);
 
     const currentYear = dateInfo.year;
-    // CRITICAL FIX: Use spec.birthYear if provided, otherwise calculate from currentYear - age
-    // This is essential for family member generation to maintain correct temporal relationships
-    const birthYear = (spec as any)?.birthYear !== undefined
-        ? (typeof (spec as any).birthYear === 'string'
-            ? parseInt((spec as any).birthYear, 10)
-            : (spec as any).birthYear)
-        : currentYear - partialCharacter.age;
+    // This path takes no specification — `generateCharacterWithSpec` delegates
+    // here precisely when there is none — so the birth year comes from the age.
+    // It previously read a `spec` that is not in scope, which is a ReferenceError
+    // the moment this branch runs; the build never saw it because the build does
+    // not typecheck.
+    const birthYear = currentYear - partialCharacter.age;
     (partialCharacter as any).birthYear = birthYear;
     partialCharacter.lifeEvents.push({ year: birthYear, event: `Born in the region of ${context.region}.`});
     if (partialCharacter.age > 16) {
@@ -2237,7 +2235,7 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
     
     // SIMPLIFIED: Base 33% chance (1 in 3) to match NPCs
     const diseaseChance = 0.33;
-    const shouldHaveDisease = Math.random() < diseaseChance;
+    const shouldHaveDisease = seededRandom() < diseaseChance;
     
     let diseaseHealth = undefined;
     if (shouldHaveDisease) {
@@ -2250,7 +2248,7 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
         
         if (availableDiseases.length > 0) {
             // Check for epidemic diseases first (like plague in 1348)
-            let selectedDisease = availableDiseases[Math.floor(Math.random() * availableDiseases.length)];
+            let selectedDisease = availableDiseases[Math.floor(seededRandom() * availableDiseases.length)];
             
             // During epidemics, increase chance of epidemic disease
             const epidemicDisease = diseaseService.getEpidemicDisease(
@@ -2260,7 +2258,7 @@ export function generateCharacter(context: GenerationContext): PlayerCharacter {
                 dateInfo.year
             );
             
-            if (epidemicDisease && Math.random() < 0.8) {
+            if (epidemicDisease && seededRandom() < 0.8) {
                 selectedDisease = epidemicDisease;
                 console.log(`[Character Generator] Player spawning during ${epidemicDisease.name} epidemic in ${dateInfo.year}`);
             }

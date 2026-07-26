@@ -27,6 +27,7 @@ import { sampleSocialStatus } from './socialStatusService';
 import { describeLifeEventSecondPerson } from './narrativeTextService';
 import { createHistoricalContext } from './historicalContextService';
 import type { HistoricalContext } from '../types/historicalContext';
+import { withSeed } from '../utils/seededRandom';
 
 // Generate a backstory sentence based on a significant life event
 function generateLifeEventBackstorySentence(
@@ -192,8 +193,21 @@ function getEraFromYear(year: number): HistoricalEra {
 }
 
 export function generateHistoricalPersona(params: Partial<GenerationParams> = {}): HistoricalPersona {
+  // One persona, one seed. Generation reaches for randomness in ~100 places
+  // across nine modules; `withSeed` makes all of them deterministic for the
+  // duration of this call, so the same seed always produces the same person.
+  // Without it a shared persona link showed the recipient a different life
+  // than the sender saw, and no regression test over generation could exist.
+  const resolvedSeed = (params.seed ?? (Date.now() ^ Math.floor(Math.random() * 0x7fffffff))) >>> 0;
+  return withSeed(resolvedSeed, () => generatePersonaWithSeed(params, resolvedSeed));
+}
+
+function generatePersonaWithSeed(
+  params: Partial<GenerationParams>,
+  resolvedSeed: number,
+): HistoricalPersona {
   const samplingMode: SamplingMode = params.samplingMode ?? DEFAULT_SAMPLING_MODE;
-  let seedState = (params.seed ?? (Date.now() ^ Math.floor(Math.random() * 0x7fffffff))) >>> 0;
+  let seedState = resolvedSeed;
   const random = (): number => {
     seedState += 0x6D2B79F5;
     let value = seedState;

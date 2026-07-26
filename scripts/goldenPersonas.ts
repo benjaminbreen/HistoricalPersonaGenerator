@@ -1,0 +1,208 @@
+/**
+ * scripts/goldenPersonas.ts
+ *
+ * A regression net for persona generation.
+ *
+ * The repo had audits but no regression tests: the audits assert properties
+ * ("no Islam in pre-Islamic Arabia") and so only catch faults someone already
+ * thought to name. Every defect found by hand this week — a Japanese sedge hat
+ * on a Formosan farmer, a Swedish Muslim in 1920, "a sprained ankle in his
+ * ankle", "Vigfussson" — passed every property assertion in the suite. They
+ * were caught by a person reading one card.
+ *
+ * So: pin a fixed matrix of personas and diff the whole rendered shape. Nobody
+ * has to predict the fault; they only have to notice a line changed.
+ *
+ *   npm run golden:verify    diff against the committed file (use in CI)
+ *   npm run golden:accept    rewrite it (after an intended change)
+ *
+ * Determinism comes from the generator itself: `generateHistoricalPersona`
+ * opens a seeded scope (`utils/seededRandom`) for the whole of its work, so a
+ * seed reproduces a persona exactly. This harness used to swap in a seeded
+ * `Math.random` to fake that; it no longer needs to, and deliberately does not,
+ * because a test that installs its own determinism cannot detect the loss of
+ * the real thing.
+ */
+
+if (!('localStorage' in globalThis)) {
+  const values = new Map<string, string>();
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => values.set(key, String(value)),
+      removeItem: (key: string) => values.delete(key),
+      clear: () => values.clear(),
+    },
+  });
+}
+
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
+
+const originalLog = console.log;
+console.log = () => undefined;
+console.warn = () => undefined;
+console.info = () => undefined;
+
+const { generateHistoricalPersona } = await import('../src/services/personaGenerator');
+const { buildPortraitSpec } = await import('../src/components/portraitLab/spec/buildSpec');
+
+const GOLDEN = 'tests/golden/personas.json';
+
+/**
+ * The matrix. Chosen to cover every cultural zone, the full era range, and —
+ * importantly — the specific places whose defects prompted this file, so a
+ * regression on any of them shows up as a diff rather than as a surprise.
+ */
+const CASES: Array<{ name: string; year: number; culturalZone: string; region: string; location: string }> = [
+  { name: 'formosan-highlands-1306', year: 1306, culturalZone: 'EAST_ASIAN', region: 'Taiwan and Ryukyu', location: 'Central Mountains' },
+  { name: 'japan-kyoto-1306', year: 1306, culturalZone: 'EAST_ASIAN', region: 'Japan', location: 'Kyoto' },
+  { name: 'stockholm-1920', year: 1920, culturalZone: 'EUROPEAN', region: 'Scandinavia', location: 'Stockholm Archipelago' },
+  { name: 'stockholm-1150', year: 1150, culturalZone: 'EUROPEAN', region: 'Scandinavia', location: 'Stockholm Archipelago' },
+  { name: 'anatolia-1952', year: 1952, culturalZone: 'MENA', region: 'Anatolia', location: 'Cappadocian Highlands' },
+  { name: 'anatolia-1650', year: 1650, culturalZone: 'MENA', region: 'Anatolia', location: 'Cappadocian Highlands' },
+  { name: 'sahel-1350', year: 1350, culturalZone: 'SUB_SAHARAN_AFRICAN', region: 'Sahel', location: 'Niger Bend' },
+  { name: 'london-1740', year: 1740, culturalZone: 'EUROPEAN', region: 'British Isles', location: 'London' },
+  { name: 'london-1870', year: 1870, culturalZone: 'EUROPEAN', region: 'British Isles', location: 'London' },
+  { name: 'arabia-500', year: 500, culturalZone: 'MENA', region: 'Arabian Peninsula', location: 'Najd Plateau' },
+  { name: 'indus-2000bce', year: -2000, culturalZone: 'SOUTH_ASIAN', region: 'Indus Valley', location: 'Punjab Plains' },
+  { name: 'arnhem-1200', year: 1200, culturalZone: 'OCEANIA', region: 'Australia', location: 'Arnhem Land' },
+  { name: 'tahiti-1200', year: 1200, culturalZone: 'OCEANIA', region: 'Polynesia', location: 'Tahiti' },
+  { name: 'andes-1500', year: 1500, culturalZone: 'SOUTH_AMERICAN', region: 'Andes', location: 'Cusco Highlands' },
+  { name: 'southwest-1200', year: 1200, culturalZone: 'NORTH_AMERICAN_PRE_COLUMBIAN', region: 'Southwest', location: 'Colorado Plateau' },
+  { name: 'newengland-1780', year: 1780, culturalZone: 'NORTH_AMERICAN_COLONIAL', region: 'Atlantic Coast', location: 'Boston' },
+  { name: 'ming-china-1500', year: 1500, culturalZone: 'EAST_ASIAN', region: 'North China', location: 'Yellow River Plain' },
+  { name: 'bengal-1900', year: 1900, culturalZone: 'SOUTH_ASIAN', region: 'Ganges', location: 'Bengal Lowlands' },
+  // Years that used to fall past the end of their region's year-bands and
+  // land on a coarse modern bucket. Pinned so the new bands stay honest.
+  { name: 'london-2020', year: 2020, culturalZone: 'EUROPEAN', region: 'British Isles', location: 'London' },
+  { name: 'paris-1850', year: 1850, culturalZone: 'EUROPEAN', region: 'France', location: 'Paris' },
+  { name: 'balkans-1900', year: 1900, culturalZone: 'EUROPEAN', region: 'Balkans', location: 'Sarajevo' },
+  { name: 'andes-1990', year: 1990, culturalZone: 'SOUTH_AMERICAN', region: 'Andes North', location: 'Quito' },
+  { name: 'newzealand-2010', year: 2010, culturalZone: 'OCEANIA', region: 'New Zealand', location: 'Wellington' },
+];
+
+/** Seeds per case — a few each, so one unlucky draw does not define the pin. */
+const SEEDS = [1, 2, 3];
+
+/**
+ * What gets pinned. Deliberately the *visible* surface — what a person would
+ * read off the card — rather than the whole object, so the file stays
+ * reviewable and an internal refactor does not churn it.
+ */
+function snapshot(persona: any): Record<string, unknown> {
+  const character = persona.character ?? {};
+  const spec = (() => {
+    try {
+      return buildPortraitSpec(character);
+    } catch (error) {
+      return { error: String((error as Error).message) };
+    }
+  })();
+
+  const equipped = character.equippedItems ?? {};
+  const item = (slot: string) => {
+    const piece = equipped[slot];
+    return piece ? `${piece.name ?? '?'} [${piece.material ?? '?'}]` : null;
+  };
+
+  return {
+    name: character.name ?? null,
+    gender: character.gender ?? null,
+    age: character.age ?? null,
+    profession: character.profession ?? null,
+    religion: character.religion ?? null,
+    language: persona.languageData?.name ?? null,
+    languageBasis: persona.languageAttribution?.basis ?? null,
+    languageConfidence: persona.languageAttribution?.confidence ?? null,
+    odds: persona.odds?.scope ?? null,
+    head: item('head'),
+    torso: item('torso'),
+    feet: item('feet'),
+    portrait: 'error' in (spec as any) ? spec : {
+      headwearKind: (spec as any).headwear?.kind ?? null,
+      headwearColor: (spec as any).headwear?.color ?? null,
+      garmentKind: (spec as any).garment?.kind ?? null,
+      garmentColor: (spec as any).garment?.colors?.primary ?? null,
+      backgroundBase: (spec as any).background?.base ?? null,
+    },
+    family: (character.family ?? [])
+      .slice(0, 4)
+      .map((member: any) => `${member.relation}: ${member.name}`),
+    // Life events carry most of the prose defects seen so far — the samurai
+    // in-law, World War I in 1897, the court-scribe apprenticeship.
+    events: (persona.enhancedLifeEvents ?? [])
+      .slice(0, 8)
+      .map((event: any) => `${event.year ?? '?'}: ${event.description ?? event.text ?? event.title ?? ''}`),
+  };
+}
+
+const generated: Record<string, unknown> = {};
+for (const testCase of CASES) {
+  for (const seed of SEEDS) {
+    try {
+      const persona = generateHistoricalPersona({
+        year: testCase.year,
+        culturalZone: testCase.culturalZone as any,
+        region: testCase.region,
+        location: testCase.location,
+        seed,
+      } as any);
+      generated[`${testCase.name}#${seed}`] = snapshot(persona);
+    } catch (error) {
+      generated[`${testCase.name}#${seed}`] = { CRASHED: String((error as Error).message) };
+    }
+  }
+}
+
+const serialized = `${JSON.stringify(generated, null, 2)}\n`;
+const accept = process.argv.includes('--accept');
+
+if (accept) {
+  mkdirSync(dirname(GOLDEN), { recursive: true });
+  writeFileSync(GOLDEN, serialized);
+  originalLog(`golden file written: ${Object.keys(generated).length} personas → ${GOLDEN}`);
+  process.exit(0);
+}
+
+if (!existsSync(GOLDEN)) {
+  originalLog(`No ${GOLDEN}. Run: npm run golden:accept`);
+  process.exit(2);
+}
+
+const expected = JSON.parse(readFileSync(GOLDEN, 'utf8'));
+const differences: string[] = [];
+const keys = new Set([...Object.keys(expected), ...Object.keys(generated)]);
+
+for (const key of [...keys].sort()) {
+  const before = JSON.stringify(expected[key], null, 2);
+  const after = JSON.stringify(generated[key], null, 2);
+  if (before === after) continue;
+  const beforeLines = (before ?? '').split('\n');
+  const afterLines = (after ?? '').split('\n');
+  const changed: string[] = [];
+  for (let i = 0; i < Math.max(beforeLines.length, afterLines.length); i += 1) {
+    if (beforeLines[i] === afterLines[i]) continue;
+    if (beforeLines[i] !== undefined) changed.push(`      - ${beforeLines[i].trim()}`);
+    if (afterLines[i] !== undefined) changed.push(`      + ${afterLines[i].trim()}`);
+  }
+  differences.push(`  ${key}\n${changed.slice(0, 14).join('\n')}`);
+}
+
+const crashes = Object.entries(generated).filter(([, value]) => (value as any)?.CRASHED);
+if (crashes.length > 0) {
+  originalLog(`${crashes.length} persona(s) crashed during generation:`);
+  for (const [key, value] of crashes.slice(0, 5)) {
+    originalLog(`  ${key}: ${(value as any).CRASHED}`);
+  }
+}
+
+if (differences.length > 0) {
+  originalLog(`${differences.length} of ${keys.size} golden personas changed:\n`);
+  originalLog(differences.slice(0, 12).join('\n\n'));
+  if (differences.length > 12) originalLog(`\n… and ${differences.length - 12} more`);
+  originalLog('\nIf these changes are intended, run: npm run golden:accept');
+  process.exit(1);
+}
+
+originalLog(`All ${keys.size} golden personas unchanged.`);

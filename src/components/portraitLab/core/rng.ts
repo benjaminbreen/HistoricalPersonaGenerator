@@ -74,3 +74,30 @@ export function makeNoise1D(seed: number): (x: number) => number {
     return a + (b - a) * t;
   };
 }
+
+/**
+ * Smooth 2-D value noise, in -1..1.
+ *
+ * Summing two 1-D fields is not a substitute: a 1-D noise of `x*a + y*b` is
+ * constant along a line, so adding two of them gives diagonal banding. That
+ * looks like striped cloth, which is exactly wrong for anything — fur, thatch,
+ * weathered stone — that needs to break up into blobs.
+ */
+export function makeNoise2D(seed: number): (x: number, y: number) => number {
+  const at = (ix: number, iy: number) => {
+    let h = (ix | 0) * 374761393 + (iy | 0) * 668265263 + seed * 69069;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 2147483647.5 - 1;
+  };
+  return (x: number, y: number) => {
+    const ix = Math.floor(x);
+    const iy = Math.floor(y);
+    const fx = x - ix;
+    const fy = y - iy;
+    const sx = fx * fx * (3 - 2 * fx);
+    const sy = fy * fy * (3 - 2 * fy);
+    const top = at(ix, iy) + (at(ix + 1, iy) - at(ix, iy)) * sx;
+    const bottom = at(ix, iy + 1) + (at(ix + 1, iy + 1) - at(ix, iy + 1)) * sx;
+    return top + (bottom - top) * sy;
+  };
+}

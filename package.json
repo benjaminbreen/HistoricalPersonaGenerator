@@ -6,13 +6,20 @@
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
+    "golden:verify": "esbuild scripts/goldenPersonas.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/goldenPersonas.mjs && node node_modules/.cache/goldenPersonas.mjs",
+    "golden:accept": "esbuild scripts/goldenPersonas.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/goldenPersonas.mjs && node node_modules/.cache/goldenPersonas.mjs --accept",
+    "typecheck:ratchet": "node scripts/typecheckRatchet.mjs",
     "persona-batch": "esbuild scripts/generatePersonaBatch.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/generatePersonaBatch.mjs && node node_modules/.cache/generatePersonaBatch.mjs",
     "persona-audit": "esbuild scripts/auditHistoricalGeneration.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditHistoricalGeneration.mjs && node node_modules/.cache/auditHistoricalGeneration.mjs",
+    "narrative-audit": "esbuild scripts/auditNarrative.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditNarrative.mjs && node node_modules/.cache/auditNarrative.mjs",
     "share-test": "node scripts/testPersonaShare.mjs",
     "start": "node server.js",
     "preview": "vite preview",
     "portrait-sheet": "esbuild src/components/portraitLab/devtools/renderSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/renderSheet.mjs && node node_modules/.cache/renderSheet.mjs portrait-sheet.png",
-    "portrait-audit": "esbuild src/components/portraitLab/devtools/audit.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/portraitAudit.mjs --log-level=error && node node_modules/.cache/portraitAudit.mjs"
+    "portrait-audit": "esbuild src/components/portraitLab/devtools/audit.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/portraitAudit.mjs --log-level=error && node node_modules/.cache/portraitAudit.mjs",
+    "anachronism-audit": "esbuild scripts/auditAnachronismRisk.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditAnachronismRisk.mjs && node node_modules/.cache/auditAnachronismRisk.mjs",
+    "hat-sheet": "esbuild src/components/portraitLab/devtools/hatSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/hatSheet.mjs --log-level=error && node node_modules/.cache/hatSheet.mjs",
+    "verify": "npm run typecheck:ratchet && npm run golden:verify && npm run narrative-audit && npm run persona-audit > /dev/null && npm run portrait-audit > /dev/null && echo \"all checks passed\""
   },
   "keywords": [
     "history",

@@ -2,6 +2,7 @@
  * constants/characterData/names.ts - Comprehensive data for procedural name generation.
  */
 import { CulturalZone } from '../../types/characterData';
+import { random as seededRandom } from '../../utils/seededRandom';
 
 export interface NameList {
     male: string[];
@@ -146,11 +147,6 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
     // === DIVERSE AMERICAN IMMIGRANT NAMES ===
 
     // Ancient/Biblical Hebrew (c. 1200 BCE - 70 CE) - For ancient Israel/Judea
-    HEBREW: {
-        male: ['David', 'Solomon', 'Moses', 'Aaron', 'Joshua', 'Caleb', 'Samuel', 'Saul', 'Jonathan', 'Elijah', 'Elisha', 'Isaiah', 'Jeremiah', 'Ezekiel', 'Daniel', 'Ezra', 'Nehemiah', 'Gideon', 'Samson', 'Eli', 'Abner', 'Joab', 'Asahel', 'Zadok', 'Abiathar', 'Nathan', 'Micah', 'Amos', 'Hosea', 'Joel', 'Jonah', 'Obadiah', 'Malachi', 'Zechariah', 'Haggai', 'Simeon', 'Judah', 'Levi', 'Reuben', 'Benjamin'],
-        female: ['Sarah', 'Rebecca', 'Rachel', 'Leah', 'Miriam', 'Deborah', 'Ruth', 'Naomi', 'Hannah', 'Abigail', 'Bathsheba', 'Esther', 'Judith', 'Dinah', 'Tamar', 'Delilah', 'Rahab', 'Jael', 'Huldah', 'Zipporah', 'Keturah', 'Hagar', 'Bilhah', 'Zilpah', 'Michal', 'Ahinoam', 'Abital', 'Eglah', 'Maacah', 'Haggith'],
-        surname: ['ben Aaron', 'ben David', 'ben Solomon', 'ben Samuel', 'ben Levi', 'ben Judah', 'ben Benjamin', 'bat Sarah', 'bat Rachel', 'of Jerusalem', 'of Bethlehem', 'of Nazareth', 'of Hebron', 'of Jericho', 'of Galilee', 'of Judea', 'of Samaria', 'the Levite', 'the Priest', 'the Scribe']
-    },
 
     JEWISH_ASHKENAZI: {
         male: ['David', 'Isaac', 'Jacob', 'Abraham', 'Samuel', 'Benjamin', 'Solomon', 'Moses', 'Aaron', 'Joseph', 'Nathan', 'Eli', 'Daniel', 'Michael', 'Gabriel', 'Raphael', 'Simon', 'Reuben', 'Levi', 'Judah'],
@@ -907,11 +903,6 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
     },
 
     // === EASTERN EUROPEAN SPECIFICS ===
-    POLISH_MODERN: {
-        male: ['Jan', 'Piotr', 'Krzysztof', 'Andrzej', 'Tomasz', 'Pawel', 'Michal', 'Stanislaw', 'Marek', 'Jacek', 'Jerzy', 'Tadeusz', 'Adam', 'Zbigniew', 'Ryszard', 'Kazimierz', 'Henryk', 'Mariusz', 'Dariusz', 'Jaroslaw', 'Wlodzimierz', 'Leszek', 'Bogdan', 'Grzegorz', 'Wojciech', 'Miroslaw', 'Zygmunt', 'Witold', 'Czeslaw', 'Boleslaw'],
-        female: ['Maria', 'Anna', 'Katarzyna', 'Malgorzata', 'Agnieszka', 'Barbara', 'Ewa', 'Elzbieta', 'Krystyna', 'Zofia', 'Teresa', 'Jadwiga', 'Danuta', 'Halina', 'Irena', 'Stanislawa', 'Grazyna', 'Janina', 'Czeslawa', 'Wiesawa', 'Stefania', 'Aleksandra', 'Joanna', 'Helena', 'Urszula', 'Dorota', 'Beata', 'Renata', 'Iwona', 'Bozena'],
-        surname: ['Nowak', 'Kowalski', 'Wisniewski', 'Wojcik', 'Kowalczyk', 'Kaminski', 'Lewandowski', 'Zielinski', 'Szymanski', 'Wozniak', 'Dabrowski', 'Kozlowski', 'Jankowski', 'Mazur', 'Kwiatkowski', 'Krawczyk', 'Kaczmarek', 'Piotrowski', 'Grabowski', 'Nowakowski', 'Pawlowski', 'Michalski', 'Nowicki', 'Adamski', 'Dudek', 'Zajac', 'Wieczorek', 'Jakubowski', 'Jasinski', 'Zawadzki']
-    },
     CZECH: {
         male: ['Jan', 'Petr', 'Josef', 'Pavel', 'Tomas', 'Jaroslav', 'Frantisek', 'Miroslav', 'Vaclav', 'Martin', 'Jiri', 'Michal', 'Vladislav', 'Lukas', 'David', 'Jakub', 'Stanislav', 'Ladislav', 'Ondrej', 'Radek', 'Marek', 'Filip', 'Ales', 'Milan', 'Viktor', 'Roman', 'Daniel', 'Adam', 'Matej', 'Vojtech'],
         female: ['Marie', 'Jana', 'Eva', 'Anna', 'Hana', 'Vera', 'Alena', 'Lenka', 'Kvetoslava', 'Jarmila', 'Ludmila', 'Helena', 'Jirina', 'Božena', 'Zuzana', 'Libuse', 'Milada', 'Vlasta', 'Jaromira', 'Marketa', 'Tereza', 'Katerina', 'Petra', 'Simona', 'Michaela', 'Veronika', 'Barbora', 'Klara', 'Adela', 'Nikola'],
@@ -1182,7 +1173,15 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         { before: 200, keys: ['PREHISTORIC_PROTO_GERMANIC'] }, // Nordic Bronze Age & Pre-Roman Iron Age
         { after: 200, before: 793, keys: ['SCANDINAVIAN'] }, // Proto-Norse / Migration Period
         { after: 793, before: 1100, keys: ['SCANDINAVIAN', 'ICELANDIC'] }, // Viking Age
-        { after: 1100, keys: ['SCANDINAVIAN', 'ICELANDIC'] }
+        { after: 1100, before: 1500, keys: ['SCANDINAVIAN', 'ICELANDIC'] }, // Norse names still current
+        // The ICELANDIC set is this file's Old Norse pool, and it was reaching
+        // to the era ceiling: an 1856 Stockholmer drew "Ljot Vigfusson" and a
+        // 1920 one "Olaf Thorvaldsson" with a mother surnamed -dóttir, in a
+        // country that froze patronymics into hereditary surnames through the
+        // nineteenth century. The SCANDINAVIAN pool is already modern Swedish —
+        // Erik, Lars, Andersson, Johansson — so from the early modern period on
+        // it is the only one that should be offered here.
+        { after: 1500, keys: ['SCANDINAVIAN'] }
     ],
     // Scandinavian sub-regions (inherit from main Scandinavia mapping)
     "Stockholm Archipelago": [
@@ -1856,21 +1855,28 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
     },
     "OCEANIA": {
         // Australia
+        // As with New Guinea below: the cultural zone denotes a local persona,
+        // and colonial settlement should not replace their naming tradition
+        // wholesale. Irish settlers in Australia used anglicised names, so the
+        // Gaelic set — which carries Irish-language patronymics — does not
+        // belong here at all.
         "Australia – Southeast": [
             { before: 1788, keys: ['ABORIGINAL_AUSTRALIAN'] },
-            { after: 1788, keys: ['ENGLISH', 'CELTIC_IRISH'] }
+            { after: 1788, keys: ['ENGLISH', 'ABORIGINAL_AUSTRALIAN'] }
         ],
         "Australia – Outback and Center": [
             { before: 1870, keys: ['ABORIGINAL_AUSTRALIAN'] },
-            { after: 1870, keys: ['ENGLISH', 'CELTIC_IRISH', 'ABORIGINAL_AUSTRALIAN'] }
+            // The interior remained overwhelmingly Aboriginal long after the
+            // pastoral frontier reached it.
+            { after: 1870, keys: ['ABORIGINAL_AUSTRALIAN', 'ABORIGINAL_AUSTRALIAN', 'ABORIGINAL_AUSTRALIAN', 'ENGLISH'] }
         ],
         "Australia – North and Queensland": [
             { before: 1824, keys: ['ABORIGINAL_AUSTRALIAN'] },
-            { after: 1824, keys: ['ENGLISH', 'CELTIC_IRISH', 'CHINESE_CANTONESE', 'MELANESIAN'] }
+            { after: 1824, keys: ['ABORIGINAL_AUSTRALIAN', 'ENGLISH', 'CHINESE_CANTONESE', 'MELANESIAN'] }
         ],
         "Australia – West and Desert": [
             { before: 1829, keys: ['ABORIGINAL_AUSTRALIAN'] },
-            { after: 1829, keys: ['ENGLISH', 'CELTIC_IRISH'] }
+            { after: 1829, keys: ['ABORIGINAL_AUSTRALIAN', 'ABORIGINAL_AUSTRALIAN', 'ENGLISH'] }
         ],
         // Pacific Islands
         "New Zealand": [
@@ -2096,14 +2102,14 @@ function generateCompoundNativeAmericanName(gender: 'male' | 'female'): string {
     const prefixCategories = Object.keys(NORTH_AMERICAN_COMPOUND_PARTS.prefixes) as (keyof typeof NORTH_AMERICAN_COMPOUND_PARTS.prefixes)[];
     const suffixCategories = Object.keys(NORTH_AMERICAN_COMPOUND_PARTS.suffixes) as (keyof typeof NORTH_AMERICAN_COMPOUND_PARTS.suffixes)[];
 
-    const prefixCat = prefixCategories[Math.floor(Math.random() * prefixCategories.length)];
-    const suffixCat = suffixCategories[Math.floor(Math.random() * suffixCategories.length)];
+    const prefixCat = prefixCategories[Math.floor(seededRandom() * prefixCategories.length)];
+    const suffixCat = suffixCategories[Math.floor(seededRandom() * suffixCategories.length)];
 
     const prefixes = NORTH_AMERICAN_COMPOUND_PARTS.prefixes[prefixCat];
     const suffixes = NORTH_AMERICAN_COMPOUND_PARTS.suffixes[suffixCat];
 
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    const prefix = prefixes[Math.floor(seededRandom() * prefixes.length)];
+    const suffix = suffixes[Math.floor(seededRandom() * suffixes.length)];
 
     return `${prefix} ${suffix}`;
 }
@@ -2112,13 +2118,13 @@ function generateCompoundNativeAmericanName(gender: 'male' | 'female'): string {
  * Generates a proto-Semitic style name for ancient MENA
  */
 function generateProtoSemiticName(gender: 'male' | 'female'): string {
-    const divine = PROTO_SEMITIC_PARTS.divine[Math.floor(Math.random() * PROTO_SEMITIC_PARTS.divine.length)];
-    const meaning = PROTO_SEMITIC_PARTS.meanings[Math.floor(Math.random() * PROTO_SEMITIC_PARTS.meanings.length)];
+    const divine = PROTO_SEMITIC_PARTS.divine[Math.floor(seededRandom() * PROTO_SEMITIC_PARTS.divine.length)];
+    const meaning = PROTO_SEMITIC_PARTS.meanings[Math.floor(seededRandom() * PROTO_SEMITIC_PARTS.meanings.length)];
     const endings = PROTO_SEMITIC_PARTS.endings[gender];
-    const ending = endings[Math.floor(Math.random() * endings.length)];
+    const ending = endings[Math.floor(seededRandom() * endings.length)];
 
     // 50% chance of divine element first vs meaning first
-    if (Math.random() > 0.5) {
+    if (seededRandom() > 0.5) {
         return `${divine}-${meaning}${ending}`;
     } else {
         return `${meaning.charAt(0).toUpperCase()}${meaning.slice(1)}-${divine.toLowerCase()}${ending}`;
@@ -2262,7 +2268,7 @@ export function generateRandomName(
         }
     }
     
-    const randomGroup = culturalGroups[Math.floor(Math.random() * culturalGroups.length)];
+    const randomGroup = culturalGroups[Math.floor(seededRandom() * culturalGroups.length)];
     const nameList = CHARACTER_NAMES[randomGroup];
     
     if (!nameList) {
@@ -2280,8 +2286,8 @@ export function generateRandomName(
         filteredFirstNames = firstNames.slice(0, nameCount);
     }
     
-    const firstName = filteredFirstNames[Math.floor(Math.random() * filteredFirstNames.length)];
-    let surname = surnames[Math.floor(Math.random() * surnames.length)];
+    const firstName = filteredFirstNames[Math.floor(seededRandom() * filteredFirstNames.length)];
+    let surname = surnames[Math.floor(seededRandom() * surnames.length)];
     
     // Handle cultures without traditional surnames
     if (surname === '(No Surname)' && !options.allowNoSurname) {

@@ -11,7 +11,7 @@
 
 import {
   applyContactShadow, bayer, ellipsoidShader, fillMask, makeMask, MAT, Mask,
-  maskEllipse, maskFromProfile, maskUnion,
+  maskEllipse, maskFromProfile, maskUnion, sampleProfile,
 } from '../core/raster';
 import { makeNoise1D, unit } from '../core/rng';
 import { RenderContext } from '../render/context';
@@ -180,16 +180,24 @@ function drawFacialModelling(context: RenderContext, head: Mask): Mask {
     }
   }
 
-  // Ears sit on the silhouette and protrude a couple of pixels past it.
+  // Ears are hung on the silhouette row by row rather than at one fixed
+  // half-width: the skull narrows through the jaw, and an ear pinned to the
+  // widest point floats clear of the cheek at the bottom.
+  const edgeAt = (y: number) => {
+    const t = (y + 0.5 - anatomy.headTop) / Math.max(1, anatomy.headHeight);
+    return sampleProfile(anatomy.headProfile, Math.max(0, Math.min(1, t)));
+  };
+
   let ears = makeMask(size, size);
   for (const side of [-1, 1] as const) {
     const earMask = drawEar({
       raster,
       book,
       ramps,
-      x: centerX + side * anatomy.earX,
-      y: (anatomy.earTopY + anatomy.earBottomY) / 2,
-      height: anatomy.earBottomY - anatomy.earTopY,
+      centerX,
+      edgeAt,
+      top: anatomy.earTopY,
+      bottom: anatomy.earBottomY,
       side,
       ageLines: spec.ageLines,
     });

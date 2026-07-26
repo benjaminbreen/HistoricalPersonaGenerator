@@ -14,9 +14,9 @@ import {
   applyContactShadow, ellipsoidShader, fillMask, MAT, Mask, makeMask,
   maskEllipse, maskFromProfile, maskSubtract, maskUnion,
 } from '../core/raster';
-import { makeNoise1D, makeRng } from '../core/rng';
+import { makeNoise1D, makeNoise2D, makeRng } from '../core/rng';
 import { RenderContext } from '../render/context';
-import { HeadwearKind } from '../spec/types';
+import { CONICAL_HAT_PATTERN, HeadwearKind } from '../spec/types';
 
 /**
  * The part of the face a covering must leave clear. A coif, a veil, or a
@@ -122,18 +122,107 @@ export function drawHeadwear(context: RenderContext): Mask | null {
   }
 }
 
+/**
+ * Turns a smooth cap into fur.
+ *
+ * Three things separate fur from felt, and a smooth filled dome has none of
+ * them: the silhouette is broken rather than clean, the value is clumped
+ * rather than evenly graded, and there are individual guard hairs catching the
+ * light at the edge. The silhouette matters most — a clean outline reads as
+ * felt no matter how the interior is shaded.
+ *
+ * Returns the grown mask so the caller's shadow work covers the tufts too.
+ */
+function applyFur(context: RenderContext, mask: Mask): Mask {
+  const { anatomy, raster, ramps, spec, book } = context;
+  const { size, centerX } = anatomy;
+  const rng = makeRng(spec.seed ^ 0x9c17);
+  const wander = makeNoise1D(spec.seed ^ 0x4d2b);
+  const locks = makeNoise2D(spec.seed ^ 0x77a1);
+  const pile = makeNoise2D(spec.seed ^ 0x2e55);
+
+  // Push the boundary outward along the surface normal by a wandering amount,
+  // so the edge gains clumps and partings rather than uniform fuzz.
+  const cx = centerX;
+  const cy = anatomy.headTop + anatomy.headHeight * 0.42;
+  const grown = mask.slice();
+  const tufts: Array<[number, number]> = [];
+  for (let y = 1; y < size - 1; y += 1) {
+    for (let x = 1; x < size - 1; x += 1) {
+      if (!mask[y * size + x]) continue;
+      const open =
+        !mask[y * size + x - 1] || !mask[y * size + x + 1] ||
+        !mask[(y - 1) * size + x];
+      if (!open) continue;
+      let dx = x + 0.5 - cx;
+      let dy = y + 0.5 - cy;
+      const len = Math.max(0.001, Math.hypot(dx, dy));
+      dx /= len; dy /= len;
+      const angle = Math.atan2(dy, dx);
+      const reach = 1.3 + wander(angle * 5.5) * 1.7;
+      const steps = Math.max(0, Math.round(reach));
+      for (let k = 1; k <= steps; k += 1) {
+        const nx = Math.round(x + dx * k);
+        const ny = Math.round(y + dy * k);
+        if (nx < 1 || ny < 1 || nx >= size - 1 || ny >= size - 1) continue;
+        // A couple of pixels of fringe over the forehead, but never down into
+        // the eyes.
+        if (ny > anatomy.browY - 1) continue;
+        grown[ny * size + nx] = 1;
+        if (k === steps) tufts.push([nx, ny]);
+      }
+    }
+  }
+
+  // Fur scatters light, so it sits flatter and lighter than a felt dome.
+  fillHeadwear(context, grown, { dither: 0.75, gain: 5.2 });
+
+  // Clumped value. Two offset 1D fields stand in for a 2D one, which is enough
+  // to break the even gradient into locks of hair.
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (!grown[y * size + x]) continue;
+      // Two octaves: broad locks, plus a finer pile on top of them. Squashing
+      // y makes each lock slightly taller than it is wide, which is the way
+      // fur lies on a curved surface.
+      const m = locks(x * 0.34, y * 0.26) * 1.0 + pile(x * 0.85, y * 0.7) * 0.45;
+      const shift = Math.round(m * 1.5);
+      if (shift !== 0) raster.shift(x, y, shift, book);
+    }
+  }
+
+  // Guard hairs: single lit pixels at the tips, single dark ones just inside.
+  for (const [x, y] of tufts) {
+    if (rng() > 0.45) raster.shift(x, y, -2, book);
+    const iy = y + 1;
+    if (iy < size && grown[iy * size + x] && rng() > 0.7) raster.shift(x, iy, 2, book);
+  }
+
+  return grown;
+}
+
 function drawCap(context: RenderContext): Mask {
   const { spec, anatomy, raster, ramps } = context;
   const name = spec.headwear!.name.toLowerCase();
+  const material = spec.headwear!.material.toLowerCase();
 
   // A coif covers the ears and frames the whole face; a scholar's cap or a
   // skullcap sits high on the crown. Same primitive, different bottom edge.
   const isCoif = /coif|bonnet|kerchief|tignon/.test(name);
   const isFlatTop = /scholar|biretta|futou|official/.test(name);
+  // Fur sits thick and high on the head; felt sits close to it.
+  const isFur = !isCoif && !isFlatTop &&
+    /fur|pelt|shearling|astrakhan|ushanka|papakha|sheepskin|sable|mink|beaver|ermine|wolf|fox|bear|otter|marten/.test(`${name} ${material}`);
 
   const bottom = isCoif ? anatomy.chinY - 4 : anatomy.browY - 3;
-  let mask = crownMask(context, isCoif ? 2.8 : 1.6, isFlatTop ? 4 : 2, bottom);
+  let mask = crownMask(context, isCoif ? 2.8 : isFur ? 3.1 : 1.6, isFlatTop ? 4 : isFur ? 4 : 2, bottom);
   if (isCoif) mask = maskSubtract(mask, faceOpening(context, anatomy.browY - 3));
+
+  if (isFur) {
+    mask = applyFur(context, mask);
+    castOntoFace(context, mask, 3, 2);
+    return mask;
+  }
 
   fillHeadwear(context, mask, { dither: isCoif ? 0.3 : 0.45 });
 
@@ -167,12 +256,146 @@ function drawCap(context: RenderContext): Mask {
   return mask;
 }
 
+/**
+ * A conical woven hat — douli, sugegasa, salakot, non la.
+ *
+ * The thing that makes these read as a real object rather than a triangle
+ * parked on a disc is that the cone and the brim are *one continuous surface*.
+ * There is no join to see. Drawing them as a separate cone plus an ellipse
+ * leaves a dark wedge where the two meet and the whole thing reads as a witch
+ * hat balanced on a plate.
+ *
+ * Seen from the front the rim is a circle in perspective, so it sags below the
+ * widest points rather than cutting straight across. That sag, plus the woven
+ * rings, is most of the realism here.
+ */
+function drawConicalHat(context: RenderContext, weathered: boolean): Mask {
+  const { anatomy, raster, ramps, spec, book } = context;
+  const { size, centerX } = anatomy;
+
+  const rimY = anatomy.browY - 4;
+  const apexY = anatomy.headTop - 7;
+  const maxHalf = anatomy.headHalfWidth * 1.66;
+  const sag = 4.5;
+  const span = Math.max(1, rimY - apexY);
+  const noise = makeNoise1D(spec.seed ^ 0x51c3);
+
+  // Slope profile. An exponent just above 1 gives the slightly concave flare a
+  // real woven hat has; a straight line reads as a party hat.
+  const halfAt = (y: number) => {
+    const t = Math.max(0, Math.min(1, (y - apexY) / span));
+    let half = maxHalf * Math.pow(t, 1.18);
+    // Round the point off. Clamping to a flat minimum instead leaves a
+    // straight-sided chimney sticking out of the top of the hat.
+    if (t < 0.14) half = Math.max(half, 0.7 + (t / 0.14) * 1.4);
+    return Math.max(0.7, half);
+  };
+
+  const mask = makeMask(size, size);
+  for (let y = apexY; y <= rimY; y += 1) {
+    const half = halfAt(y);
+    for (let x = Math.round(centerX - half); x <= Math.round(centerX + half); x += 1) {
+      if (x < 0 || y < 0 || x >= size || y >= size) continue;
+      mask[y * size + x] = 1;
+    }
+  }
+  // The cone is narrower than the skull near the crown, so on its own it lets
+  // hair show *above* the brim, which cannot happen on a real hat. Union it
+  // with the skull profile so the covering always contains the head.
+  const crown = crownMask(context, 0.5, 3, rimY);
+  for (let i = 0; i < mask.length; i += 1) if (crown[i]) mask[i] = 1;
+
+  // The near edge of the rim, sagging below the widest points.
+  const rimArc = maskEllipse(size, size, centerX, rimY, maxHalf, sag);
+  for (let y = rimY; y < Math.min(size, rimY + sag + 2); y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (rimArc[y * size + x]) mask[y * size + x] = 1;
+    }
+  }
+
+  // Shade as a cone: the surface turns away from the light as it wraps around,
+  // so value tracks horizontal position, and the underside of the near rim is
+  // always the darkest part of the hat.
+  fillMask(raster, mask, ramps.headwear, MAT.HEADWEAR, (x, y) => {
+    const u = (x + 0.5 - centerX) / maxHalf;
+    const t = Math.max(0, Math.min(1, (y - apexY) / span));
+    let index = 2.15 + u * 1.85 + t * 0.85;
+    if (y > rimY) index += 2.2;            // underside of the brim
+    return index;
+  }, { dither: 0.3 });
+
+  // The weave. Concentric rings are how a coiled bamboo hat actually reads at
+  // this size; the radial ribs underneath them are what stop the rings from
+  // looking like contour lines on a map.
+  const rings = 5.2;
+  for (let y = apexY; y < Math.min(size, rimY + sag + 2); y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (!mask[y * size + x]) continue;
+      const dx = x + 0.5 - centerX;
+      const dy = y - apexY;
+      const half = Math.max(1, halfAt(y));
+      // Distance from the apex along the cone's surface, normalised.
+      const radial = Math.min(1, Math.hypot(dx / maxHalf, dy / span * 0.85));
+      const wobble = noise(radial * 7) * 0.06;
+      const ring = (radial * rings + wobble) % 1;
+      if (ring < 0.24) {
+        raster.shift(x, y, 1, book);
+      } else if (ring > 0.86) {
+        raster.shift(x, y, -1, book);      // the lit top of each coil
+      }
+      // Radial ribs, only on the lower half where they would be visible.
+      if (radial > 0.45) {
+        const angle = Math.atan2(Math.max(1, dy), dx);
+        if ((angle * 9 / Math.PI) % 1 < 0.16) raster.shift(x, y, 1, book);
+      }
+      // A worn hat loses fibres at the rim.
+      if (weathered && Math.abs(Math.abs(dx) - half) < 1.2 && noise(x * 0.9 + y) > 0.5) {
+        raster.shift(x, y, 1, book);
+      }
+    }
+  }
+
+  // Crisp the silhouette: a bright catch along the top-left slope and a dark
+  // lip all the way round the rim.
+  for (let y = apexY; y < Math.min(size, rimY + sag + 2); y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (!mask[y * size + x]) continue;
+      const left = !mask[y * size + x - 1];
+      const right = !mask[y * size + x + 1];
+      const below = y + 1 < size && !mask[(y + 1) * size + x];
+      if (below && y >= rimY) raster.shift(x, y, 2, book);
+      else if (left && y < rimY) raster.shift(x, y, -1, book);
+      else if (right && y < rimY) raster.shift(x, y, 1, book);
+    }
+  }
+
+  // A wide brim shades the whole upper face, not just the row beneath it.
+  applyContactShadow(raster, mask, book, { dx: 0, dy: 1, strength: 2, depth: 4 });
+  for (let y = rimY + 2; y < anatomy.eyeY; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (raster.matAt(x, y) === MAT.SKIN) raster.shift(x, y, 1, book);
+    }
+  }
+
+  return mask;
+}
+
 function drawBrimmedHat(context: RenderContext): Mask {
   const { anatomy, raster, ramps, spec, book } = context;
   const { size, centerX } = anatomy;
   const name = spec.headwear!.name.toLowerCase();
+  const material = spec.headwear!.material.toLowerCase();
   const tall = /top hat|capotain|steeple/.test(name);
-  const conical = /conical|douli|straw|coolie/.test(name);
+  // Match on material too: "Bamboo Hat" reads as a hat by name alone and was
+  // coming out a felt bowler. Woven plant fibre is the thing that makes these
+  // conical, so the material is the more reliable signal.
+  // Shared with the adapter's classification table rather than restated here:
+  // this list was missing `sugegasa` while the table that routes hats *to* this
+  // renderer had it, so a sugegasa arrived asking to be conical and left as a
+  // felt bowler. Two lists that must agree are one list.
+  const conical = CONICAL_HAT_PATTERN.test(`${name} ${material}`);
+  // Some hats are frayed and some are new; seeded so a given persona keeps theirs.
+  if (conical) return drawConicalHat(context, makeRng(spec.seed ^ 0x7f31)() > 0.45);
 
   const brimY = anatomy.browY - 5;
   const crownBottom = brimY + 1;

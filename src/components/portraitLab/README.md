@@ -36,6 +36,24 @@ both can be worked on at the same time without conflicts.
   Being able to *look at* the art from a terminal is what makes iterating on
   five-pixel noses tractable.
 
+- **`npm run hat-sheet`** does the same for head coverings alone — one portrait
+  per hat, so you can work on a brim without hunting for a persona wearing one.
+  Pass a label substring to zoom in on a single case:
+
+  ```bash
+  npm run hat-sheet -- hats.png        # all ten
+  npm run hat-sheet -- fur.png fur     # just the fur ones, 10x
+  ```
+
+- **<kbd>F2</kbd>** (or <kbd>⌘⇧D</kbd>) opens the **dev panel** over the running
+  app: forty-two live-generated personas at a time, along one axis — a hat
+  parade, an age ramp, a complexion ladder, forty-two seeds of the same face.
+  Where the fixtures are a fixed cast chosen so diffs mean something, this draws
+  straight from the generators, so it shows you the one-in-forty case a
+  hand-picked cast never will. <kbd>R</kbd> rerolls, <kbd>[</kbd>/<kbd>]</kbd>
+  change axis, clicking a portrait copies its JSON. On in dev; in a production
+  build it stays dormant unless you load the page with `?devPanel`.
+
 ## How it is put together
 
 ```

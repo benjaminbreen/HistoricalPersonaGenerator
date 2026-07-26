@@ -181,6 +181,7 @@ import { RARITY_COLORS } from '../types/attributeTypes';
 import { PERSONAL_BELIEFS, IDEOLOGIES, getProfessionEmoji } from '../constants';
 import { getLanguageForCharacter } from '../constants/gameData/languages';
 import { confidenceBlurb } from '../services/languageAttributionService';
+import { describeOrnament } from '../services/ornamentService';
 import { WikipediaPanel } from './WikipediaPanel';
 import {
   adaptPersonaMaterialRecord,
@@ -3651,7 +3652,6 @@ export default function PersonaGenerator() {
       'Himalayas': 'Himalayas',
       'Atlas Mountains': 'Atlas_Mountains',
       'Rocky Mountains': 'Rocky_Mountains',
-      'Ural Mountains': 'Ural_Mountains',
       'Carpathian Mountains': 'Carpathian_Mountains',
       'Pyrenees': 'Pyrenees',
       'Alps': 'Alps',
@@ -4116,7 +4116,7 @@ export default function PersonaGenerator() {
         <div className="top-bar-buttons" role="toolbar" aria-label="Page actions">
           <button onClick={toggleDarkMode} aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
             {darkMode ? <IoSunny aria-hidden="true" /> : <IoMoonSharp aria-hidden="true" />}
-            {darkMode ? 'Light Mode' : 'Dark Mode'}
+            <span className="top-bar-label">{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
           <button
             className="top-bar-donate"
@@ -4124,7 +4124,7 @@ export default function PersonaGenerator() {
             aria-label="Support this project"
           >
             <IoHeart aria-hidden="true" />
-            Donate
+            <span className="top-bar-label">Donate</span>
           </button>
           <button
             onClick={handleShare}
@@ -4132,15 +4132,15 @@ export default function PersonaGenerator() {
             disabled={!persona || isLoadingSharedPersona || isCreatingShare}
           >
             <IoShareSocial aria-hidden="true" />
-            {isCreatingShare ? 'Saving…' : 'Share'}
+            <span className="top-bar-label">{isCreatingShare ? 'Saving…' : 'Share'}</span>
           </button>
           <button onClick={handleSavePDF} aria-label="Save persona as PDF">
             <IoSave aria-hidden="true" />
-            Save as PDF
+            <span className="top-bar-label">Save as PDF</span>
           </button>
           <button onClick={() => setShowAbout(true)} aria-label="About this application">
             <IoInformationCircle aria-hidden="true" />
-            About
+            <span className="top-bar-label">About</span>
           </button>
         </div>
       </div>
@@ -4198,15 +4198,19 @@ export default function PersonaGenerator() {
               }}
               aria-label="Open the full Source Studio"
             >
-              <span className="source-studio-eyebrow">Evidence-aware generation</span>
               <h2>Source Studio</h2>
-              <p>
-                {isSourceGenerating
-                  ? (sourceIngestionStatus || 'Generating source-backed persona...')
-                  : annotationRecord && sourcePanelCollapsed
-                    ? `${sourceBasisLabel(annotationRecord.source.source_basis)} loaded.`
-                    : 'Build a persona from a real historical source.'}
-              </p>
+              {/* Collapsed, the four source options below already say what this
+                  does, and the subtitle wrapped to four lines in a narrow
+                  column — the largest single block above the persona card. */}
+              {(!sourcePanelCollapsed || isSourceGenerating || annotationRecord) && (
+                <p>
+                  {isSourceGenerating
+                    ? (sourceIngestionStatus || 'Generating source-backed persona...')
+                    : annotationRecord && sourcePanelCollapsed
+                      ? `${sourceBasisLabel(annotationRecord.source.source_basis)} loaded.`
+                      : 'Build a persona from a real historical source.'}
+                </p>
+              )}
             </button>
             <div className="source-mode-showcase" aria-label="Available historical source modes">
               <button
@@ -4708,7 +4712,8 @@ export default function PersonaGenerator() {
                         : 'Explore mode deliberately flattens eras and regions so the whole world is reachable — this is how rare the draw would really have been.'
                     }
                   >
-                    Roughly <strong>{persona.odds.phrase}</strong> were lived in this era and region
+                    Roughly <strong>{persona.odds.phrase}</strong> were lived in{' '}
+                    {persona.odds.scope ?? 'this era and region'}
                     {persona.samplingMode === 'explore' && <span className="draw-odds-mode"> · explore mode</span>}
                   </div>
                 )}
@@ -4774,16 +4779,18 @@ export default function PersonaGenerator() {
                         </div>
                         <div className="gender-block">
                           <span className="gender-label">{persona.character.gender}</span>
+                          {/* Build sat on its own full-width line for one word;
+                              it belongs with the gender it describes. */}
+                          <span className="gender-build">{persona.character.appearance.build}</span>
                         </div>
                       </div>
-                      <div className="build-details">
-                        <p>
-                          <strong>Build:</strong> {persona.character.appearance.build}
-                          {persona.character.appearance.facialHair && persona.character.gender !== 'Female' && (
-                            <><br/><strong>Facial Hair:</strong> {persona.character.appearance.facialHairStyle && persona.character.appearance.facialHairStyle.replace(/_/g, ' ')}</>
-                          )}
-                        </p>
-                      </div>
+                      {persona.character.appearance.facialHair && persona.character.gender !== 'Female' && (
+                        <div className="build-details">
+                          <p>
+                            <strong>Facial Hair:</strong> {persona.character.appearance.facialHairStyle && persona.character.appearance.facialHairStyle.replace(/_/g, ' ')}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -5471,8 +5478,7 @@ export default function PersonaGenerator() {
                         <div key={`jewelry-${idx}`} className="equipment-item jewelry-equipment">
                           <span className="equipment-slot">{piece.type}</span>
                           <span className="equipment-name">
-                            {piece.style} {piece.material}
-                            {piece.gems && piece.gems.length > 0 && ` (${piece.gems.join(', ')})`}
+                            {describeOrnament(piece as any)}
                           </span>
                         </div>
                       ))
@@ -6444,8 +6450,7 @@ export default function PersonaGenerator() {
                         <div key={idx} className="appearance-item jewelry-item">
                           <span className="label">{piece.type}</span>
                           <span className="value">
-                            {piece.style} {piece.material}
-                            {piece.gems && piece.gems.length > 0 && ` with ${piece.gems.join(', ')}`}
+                            {describeOrnament(piece as any)}
                           </span>
                         </div>
                       ))}
@@ -6719,7 +6724,11 @@ export default function PersonaGenerator() {
                 {persona.languageData.isReconstructed && (
                   <div className="language-detail-item language-reconstructed">
                     <span className="language-detail-label">Status</span>
-                    <span className="language-detail-value">Reconstructed Language</span>
+                    <span className="language-detail-value">
+                      {persona.languageAttribution?.confidence === 'conjectural' ? 'Hypothetical Language'
+                        : persona.languageAttribution?.confidence === 'inferred' ? 'Inferred from Region'
+                        : 'Reconstructed Language'}
+                    </span>
                   </div>
                 )}
               </div>
@@ -6744,7 +6753,8 @@ export default function PersonaGenerator() {
                   <p className="language-confidence">
                     {confidenceBlurb(persona.languageAttribution.confidence)}
                   </p>
-                  {persona.languageAttribution.note && (
+                  {persona.languageAttribution.note
+                    && persona.languageAttribution.note !== persona.languageData.historicalContext && (
                     <p className="language-context">{persona.languageAttribution.note}</p>
                   )}
 

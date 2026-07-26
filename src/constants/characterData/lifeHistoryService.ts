@@ -14,6 +14,8 @@ import {
   NpcEntity,
   FamilyMember
 } from '../../types';
+import { filterByCulture, resolveCulture } from '../../services/cultureResolution';
+import { random as seededRandom } from '../../utils/seededRandom';
 
 // ============================================================================
 // CORE TYPE DEFINITIONS
@@ -1189,7 +1191,7 @@ function generateEarlyLifeEvent(
     return {
       kind: 'apprenticeship',
       title: 'Apprenticeship',
-      text: variants[Math.floor(Math.random() * variants.length)]
+      text: variants[Math.floor(seededRandom() * variants.length)]
     };
   }
 
@@ -1207,7 +1209,7 @@ function generateEarlyLifeEvent(
     return {
       kind: 'agricultural',
       title: 'Coming of Age',
-      text: variants[Math.floor(Math.random() * variants.length)]
+      text: variants[Math.floor(seededRandom() * variants.length)]
     };
   }
 
@@ -1223,7 +1225,7 @@ function generateEarlyLifeEvent(
     return {
       kind: 'trade',
       title: 'Trade Apprenticeship',
-      text: variants[Math.floor(Math.random() * variants.length)]
+      text: variants[Math.floor(seededRandom() * variants.length)]
     };
   }
 
@@ -1241,7 +1243,7 @@ function generateEarlyLifeEvent(
     return {
       kind: 'religious',
       title: 'Religious Calling',
-      text: variants[Math.floor(Math.random() * variants.length)]
+      text: variants[Math.floor(seededRandom() * variants.length)]
     };
   }
 
@@ -1250,15 +1252,25 @@ function generateEarlyLifeEvent(
     'librarian', 'clerk'];
 
   if (scholarProfessions.some(p => profLower.includes(p))) {
-    const variants = [
-      `Began formal education, learning letters and classical texts`,
-      `Apprenticed to court scribe, practicing calligraphy daily`,
-      `Sent to study under noted scholar, mastering rhetoric and logic`
-    ];
+    // A court scribe is not where a nineteenth-century bank clerk learned the
+    // trade. "clerk" matches this list, so without a date these medieval
+    // variants reached straight into 1920 Stockholm.
+    const schoolingYear = birthYear + 13;
+    const variants = schoolingYear >= 1850
+      ? [
+        `Began formal schooling, learning letters, arithmetic and a clear hand`,
+        `Left school for a junior clerk's desk, copying ledgers and learning the work`,
+        `Took evening classes in bookkeeping while working days`,
+      ]
+      : [
+        `Began formal education, learning letters and classical texts`,
+        `Apprenticed to court scribe, practicing calligraphy daily`,
+        `Sent to study under noted scholar, mastering rhetoric and logic`,
+      ];
     return {
       kind: 'education',
       title: 'Formal Education',
-      text: variants[Math.floor(Math.random() * variants.length)]
+      text: variants[Math.floor(seededRandom() * variants.length)]
     };
   }
 
@@ -1277,7 +1289,7 @@ function generateEarlyLifeEvent(
       return {
         kind: 'family',
         title: 'Domestic Training',
-        text: variants[Math.floor(Math.random() * variants.length)]
+        text: variants[Math.floor(seededRandom() * variants.length)]
       };
     }
   }
@@ -1295,7 +1307,7 @@ function generateEarlyLifeEvent(
     return {
       kind: 'battle',
       title: 'Military Training',
-      text: variants[Math.floor(Math.random() * variants.length)]
+      text: variants[Math.floor(seededRandom() * variants.length)]
     };
   }
 
@@ -1314,7 +1326,7 @@ function generateEarlyLifeEvent(
     return {
       kind: 'mundane',
       title: 'Hard Labor Begins',
-      text: variants[Math.floor(Math.random() * variants.length)]
+      text: variants[Math.floor(seededRandom() * variants.length)]
     };
   }
 
@@ -1331,7 +1343,7 @@ function generateEarlyLifeEvent(
     return {
       kind: 'artistic',
       title: 'Artistic Training',
-      text: variants[Math.floor(Math.random() * variants.length)]
+      text: variants[Math.floor(seededRandom() * variants.length)]
     };
   }
 
@@ -1347,7 +1359,7 @@ function generateEarlyLifeEvent(
     return {
       kind: 'journey',
       title: 'Life on the Road',
-      text: variants[Math.floor(Math.random() * variants.length)]
+      text: variants[Math.floor(seededRandom() * variants.length)]
     };
   }
 
@@ -1361,7 +1373,7 @@ function generateEarlyLifeEvent(
     return {
       kind: 'political',
       title: 'Noble Education',
-      text: variants[Math.floor(Math.random() * variants.length)]
+      text: variants[Math.floor(seededRandom() * variants.length)]
     };
   }
 
@@ -1452,7 +1464,7 @@ export function generateLifeHistory(
 
   // Add profession-specific early life event
   if (character.age >= 12 && profession) {
-    const earlyAge = 12 + Math.floor(Math.random() * 4);
+    const earlyAge = 12 + Math.floor(seededRandom() * 4);
     const earlyYear = birthYear + earlyAge;
 
     // Only add if within character's lifetime
@@ -1474,7 +1486,7 @@ export function generateLifeHistory(
   }
 
   // Generate 4-10 additional events based on age for quality over quantity
-  const baseEvents = 4 + Math.floor(Math.random() * 2); // 4-5 base events
+  const baseEvents = 4 + Math.floor(seededRandom() * 2); // 4-5 base events
   const ageBonus = Math.floor(character.age / 12); // More events for older characters (slower rate)
   const numEvents = Math.min(baseEvents + ageBonus, 10); // Cap at 10 total
 
@@ -1482,7 +1494,7 @@ export function generateLifeHistory(
     // Select event based on weighted probability
     const validEvents = relevantEvents.filter(template => {
       // Check age requirements
-      const eventAge = 16 + Math.floor(Math.random() * Math.max(2, character.age - 16));
+      const eventAge = 16 + Math.floor(seededRandom() * Math.max(2, character.age - 16));
       if (template.minAge && eventAge < template.minAge) return false;
       if (template.maxAge && eventAge > template.maxAge) return false;
 
@@ -1576,7 +1588,7 @@ export function generateLifeHistory(
 
     // Select event based on weights
     const totalWeight = weightedEvents.reduce((sum, e) => sum + e.weight, 0);
-    let random = Math.random() * totalWeight;
+    let random = seededRandom() * totalWeight;
     let selectedTemplate: EventTemplate | null = null;
 
     for (const { template, weight } of weightedEvents) {
@@ -1595,7 +1607,7 @@ export function generateLifeHistory(
     do {
       const minAge = selectedTemplate.minAge || 14;
       const maxAge = Math.min(selectedTemplate.maxAge || character.age, character.age);
-      const eventAge = minAge + Math.floor(Math.random() * Math.max(1, maxAge - minAge));
+      const eventAge = minAge + Math.floor(seededRandom() * Math.max(1, maxAge - minAge));
       eventYear = birthYear + eventAge;
       attempts++;
     } while (eventYears.has(eventYear) && attempts < 10);
@@ -1619,8 +1631,8 @@ export function generateLifeHistory(
     eventKindCounts.set(templateId, currentCount + 1);
 
     // Select random title and template
-    const title = selectedTemplate.titles[Math.floor(Math.random() * selectedTemplate.titles.length)];
-    let text = selectedTemplate.templates[Math.floor(Math.random() * selectedTemplate.templates.length)];
+    const title = selectedTemplate.titles[Math.floor(seededRandom() * selectedTemplate.titles.length)];
+    let text = selectedTemplate.templates[Math.floor(seededRandom() * selectedTemplate.templates.length)];
 
     // Replace placeholders with context-appropriate values
     text = replacePlaceholders(text, culturalZone, era, character, eventYear);
@@ -1642,13 +1654,13 @@ export function generateLifeHistory(
   }
 
   // Add family member deaths if character is old enough
-  if (character.age > 30 && Math.random() > 0.5) {
-    const parentDeathAge = 25 + Math.floor(Math.random() * 20);
+  if (character.age > 30 && seededRandom() > 0.5) {
+    const parentDeathAge = 25 + Math.floor(seededRandom() * 20);
     if (parentDeathAge < character.age) {
       const allCausesOfDeath = HISTORICAL_CAUSES_OF_DEATH[era][culturalZone] || ['illness'];
 
       // Determine which parent dies, prioritizing one that hasn't already died
-      const isMotherDeath = Math.random() < 0.5;
+      const isMotherDeath = seededRandom() < 0.5;
       const parentType = isMotherDeath ? 'mother' : 'father';
 
       // Filter causes of death based on sex and historical plausibility
@@ -1681,10 +1693,10 @@ export function generateLifeHistory(
 
       // Very rare chance (0.1%) of lightning strike
       let causeOfDeath;
-      if (Math.random() < 0.001) {
+      if (seededRandom() < 0.001) {
         causeOfDeath = 'struck by lightning';
       } else {
-        causeOfDeath = causesOfDeath[Math.floor(Math.random() * causesOfDeath.length)];
+        causeOfDeath = causesOfDeath[Math.floor(seededRandom() * causesOfDeath.length)];
       }
       const deathPhrase = /^died\b/i.test(causeOfDeath)
         ? causeOfDeath
@@ -1716,7 +1728,7 @@ export function generateLifeHistory(
         ];
 
         const templates = isMotherDeath ? motherTemplates : fatherTemplates;
-        const selectedTemplate = templates[Math.floor(Math.random() * templates.length)];
+        const selectedTemplate = templates[Math.floor(seededRandom() * templates.length)];
 
         const parentDeathYear = birthYear + parentDeathAge;
 
@@ -1749,6 +1761,29 @@ export function generateLifeHistory(
 // HELPER FUNCTIONS
 // ============================================================================
 
+/**
+ * Causes of death that name a datable event, and the years they can be true.
+ *
+ * `ERA_BOUND_GROUPS` already does this for social groups; the causes-of-death
+ * table never got the same treatment, so every named war and epidemic in it was
+ * available across the whole 200-year era bucket. Anything unlisted here is a
+ * disease or accident with no fixed date and needs no bound.
+ */
+const DATED_CAUSE_BOUNDS: Array<[RegExp, [number, number]]> = [
+  [/world war i\b|world war one/i, [1914, 1918]],
+  [/world war ii\b|world war two/i, [1939, 1945]],
+  [/spanish flu/i, [1918, 1920]],
+  [/civil war/i, [1861, 1865]],
+  [/partition violence/i, [1947, 1948]],
+  [/automobile accident/i, [1900, 2100]],
+  [/railway accident/i, [1830, 2100]],
+  [/factory accident/i, [1770, 2100]],
+  [/polio/i, [1900, 2100]],
+  [/colonial wars/i, [1500, 1975]],
+  [/relocation/i, [1830, 1900]],
+  [/murdered by settlers/i, [1500, 1920]],
+];
+
 function replacePlaceholders(
   text: string,
   culturalZone: CulturalZone,
@@ -1757,10 +1792,22 @@ function replacePlaceholders(
   year?: number
 ): string {
   const commodities = TRADE_GOODS[culturalZone]?.[era] || ['goods'];
-  const causesOfDeath = HISTORICAL_CAUSES_OF_DEATH[era][culturalZone] || ['illness'];
+  const allCauses = HISTORICAL_CAUSES_OF_DEATH[era][culturalZone] || ['illness'];
+  // Era buckets are 200 years wide here. A cause of death that names a specific
+  // war or epidemic has to be bounded by that event, not by the bucket, or a
+  // persona's mother is "killed in World War I" in 1897.
+  const causesOfDeath = year === undefined
+    ? allCauses
+    : (() => {
+      const inPeriod = allCauses.filter(cause => {
+        const bounds = DATED_CAUSE_BOUNDS.find(([pattern]) => pattern.test(cause));
+        return !bounds || (year >= bounds[1][0] && year <= bounds[1][1]);
+      });
+      return inPeriod.length > 0 ? inPeriod : ['illness'];
+    })();
 
   // Replace placeholders
-  text = text.replace('[COMMODITY]', commodities[Math.floor(Math.random() * commodities.length)]);
+  text = text.replace('[COMMODITY]', commodities[Math.floor(seededRandom() * commodities.length)]);
   // [DISEASE] is used in templates about many different people. Only offer a
   // female-only cause when the sentence is actually about a woman.
   const femaleSubject = /\b(?:mother|wife|sister|daughter|widow|she|her)\b/i.test(text);
@@ -1768,21 +1815,21 @@ function replacePlaceholders(
     ? causesOfDeath
     : causesOfDeath.filter(cause => !FEMALE_ONLY_CAUSES.test(cause));
   const causePool = eligibleCauses.length > 0 ? eligibleCauses : ['illness'];
-  text = text.replace('[DISEASE]', causePool[Math.floor(Math.random() * causePool.length)]);
+  text = text.replace('[DISEASE]', causePool[Math.floor(seededRandom() * causePool.length)]);
   text = text.replace('[OCCUPATION]', character.profession || 'work');
-  text = text.replace('[SEASON]', ['spring', 'summer', 'harvest time', 'winter'][Math.floor(Math.random() * 4)]);
-  text = text.replace('[SON/DAUGHTER]', Math.random() > 0.5 ? 'son' : 'daughter');
+  text = text.replace('[SEASON]', ['spring', 'summer', 'harvest time', 'winter'][Math.floor(seededRandom() * 4)]);
+  text = text.replace('[SON/DAUGHTER]', seededRandom() > 0.5 ? 'son' : 'daughter');
 
   // Modern tech placeholders
-  text = text.replace('[TECH_SKILL]', ['web development', 'machine learning', 'cybersecurity', 'cloud computing', 'blockchain', 'data science'][Math.floor(Math.random() * 6)]);
-  text = text.replace('[TECH_STACK]', ['full-stack JavaScript', 'Python/Django', 'React/Node', 'AWS/DevOps', 'Rust/WebAssembly', 'Go microservices'][Math.floor(Math.random() * 6)]);
-  text = text.replace('[E_COMMERCE_ITEM]', ['electronics', 'fashion accessories', 'supplements', 'gaming peripherals', 'cryptocurrency hardware'][Math.floor(Math.random() * 5)]);
-  text = text.replace('[DIGITAL_GOOD]', ['NFTs', 'digital art', 'software licenses', 'online courses', 'crypto assets'][Math.floor(Math.random() * 5)]);
-  text = text.replace('[AI_FIELD]', ['natural language processing', 'computer vision', 'robotics', 'generative AI', 'reinforcement learning'][Math.floor(Math.random() * 5)]);
-  text = text.replace('[FUTURE_TECH]', ['quantum computing', 'brain-computer interfaces', 'autonomous vehicles', 'AR/VR metaverse', 'gene editing'][Math.floor(Math.random() * 5)]);
-  text = text.replace('[DEV_PRACTICE]', ['CI/CD pipelines', 'containerization', 'test-driven development', 'microservices architecture', 'serverless computing'][Math.floor(Math.random() * 5)]);
-  text = text.replace('[CAUSE]', ['climate action', 'digital privacy', 'social justice', 'open source software', 'net neutrality'][Math.floor(Math.random() * 5)]);
-  text = text.replace('[TECH_HUB]', ['San Francisco', 'Austin', 'Berlin', 'Singapore', 'Dubai', 'Shenzhen'][Math.floor(Math.random() * 6)]);
+  text = text.replace('[TECH_SKILL]', ['web development', 'machine learning', 'cybersecurity', 'cloud computing', 'blockchain', 'data science'][Math.floor(seededRandom() * 6)]);
+  text = text.replace('[TECH_STACK]', ['full-stack JavaScript', 'Python/Django', 'React/Node', 'AWS/DevOps', 'Rust/WebAssembly', 'Go microservices'][Math.floor(seededRandom() * 6)]);
+  text = text.replace('[E_COMMERCE_ITEM]', ['electronics', 'fashion accessories', 'supplements', 'gaming peripherals', 'cryptocurrency hardware'][Math.floor(seededRandom() * 5)]);
+  text = text.replace('[DIGITAL_GOOD]', ['NFTs', 'digital art', 'software licenses', 'online courses', 'crypto assets'][Math.floor(seededRandom() * 5)]);
+  text = text.replace('[AI_FIELD]', ['natural language processing', 'computer vision', 'robotics', 'generative AI', 'reinforcement learning'][Math.floor(seededRandom() * 5)]);
+  text = text.replace('[FUTURE_TECH]', ['quantum computing', 'brain-computer interfaces', 'autonomous vehicles', 'AR/VR metaverse', 'gene editing'][Math.floor(seededRandom() * 5)]);
+  text = text.replace('[DEV_PRACTICE]', ['CI/CD pipelines', 'containerization', 'test-driven development', 'microservices architecture', 'serverless computing'][Math.floor(seededRandom() * 5)]);
+  text = text.replace('[CAUSE]', ['climate action', 'digital privacy', 'social justice', 'open source software', 'net neutrality'][Math.floor(seededRandom() * 5)]);
+  text = text.replace('[TECH_HUB]', ['San Francisco', 'Austin', 'Berlin', 'Singapore', 'Dubai', 'Shenzhen'][Math.floor(seededRandom() * 6)]);
 
   // Location placeholders
   text = text.replace('[LOCATION]', getLocationName(culturalZone, era));
@@ -1790,8 +1837,10 @@ function replacePlaceholders(
   text = text.replace('[INSTITUTION]', getInstitution(culturalZone, era));
 
   // Social placeholders
-  text = text.replace('[SOCIAL_GROUP]', getSocialGroup(culturalZone, era, year));
-  text = text.replace('[ENEMY]', getEnemyGroup(culturalZone, era));
+  const region = (character as { region?: string }).region;
+  const location = (character as { location?: string }).location;
+  text = text.replace('[SOCIAL_GROUP]', getSocialGroup(culturalZone, era, year, region, location));
+  text = text.replace('[ENEMY]', getEnemyGroup(culturalZone, era, year, region, location));
 
   // Disasters
   text = text.replace('[DISASTER]', getDisaster(era));
@@ -1808,7 +1857,7 @@ function replacePlaceholders(
   text = text.replace('[CRAFT]', character.profession || 'craft');
   text = text.replace('[SUBJECT]', getScholarlySubject(era));
   text = text.replace('[SCHOLARLY_PRACTICE]', getScholarlyPractice(era));
-  text = text.replace('[GROUP]', getSocialGroup(culturalZone, era, year));
+  text = text.replace('[GROUP]', getSocialGroup(culturalZone, era, year, region, location));
 
   return text;
 }
@@ -1827,7 +1876,7 @@ function getLocationName(zone: CulturalZone, era: HistoricalEra): string {
   };
 
   const list = locations[zone] || ['a distant city'];
-  return list[Math.floor(Math.random() * list.length)];
+  return list[Math.floor(seededRandom() * list.length)];
 }
 
 function getHolySite(zone: CulturalZone, era: HistoricalEra): string {
@@ -1844,7 +1893,7 @@ function getHolySite(zone: CulturalZone, era: HistoricalEra): string {
   };
 
   const list = sites[zone] || ['the sacred place'];
-  return list[Math.floor(Math.random() * list.length)];
+  return list[Math.floor(seededRandom() * list.length)];
 }
 
 function getInstitution(zone: CulturalZone, era: HistoricalEra): string {
@@ -1860,7 +1909,7 @@ function getInstitution(zone: CulturalZone, era: HistoricalEra): string {
       SOUTH_AMERICAN: ['the acllahuasi', 'the calmecac'],
       OCEANIA: ['the navigation school', 'the chiefs\' council']
     };
-    return institutions[zone]?.[Math.floor(Math.random() * institutions[zone].length)] || 'the academy';
+    return institutions[zone]?.[Math.floor(seededRandom() * institutions[zone].length)] || 'the academy';
   }
 
   return 'the university';
@@ -1889,7 +1938,19 @@ const ERA_BOUND_GROUPS: Record<string, [min: number, max: number]> = {
   'Brahmin family': [-1000, 2100],
 };
 
-function getSocialGroup(zone: CulturalZone, era: HistoricalEra, year?: number): string {
+/**
+ * A social group has to belong to the persona's *place*, not merely to their
+ * continent. `EAST_ASIAN` covers China, Japan, Korea, Taiwan and Vietnam, so
+ * the era gate below would happily marry a Formosan Austronesian highlander's
+ * sister into a samurai clan: period-correct, zone-correct, absurd.
+ */
+function getSocialGroup(
+  zone: CulturalZone,
+  era: HistoricalEra,
+  year?: number,
+  region?: string,
+  location?: string,
+): string {
   const groups: Record<CulturalZone, string[]> = {
     EUROPEAN: ['merchant guild', 'noble house', 'cathedral chapter', 'town council'],
     MENA: ['merchant caravan', 'tribal confederation', 'Sufi order', 'military elite'],
@@ -1903,17 +1964,25 @@ function getSocialGroup(zone: CulturalZone, era: HistoricalEra, year?: number): 
   };
 
   const all = groups[zone] || ['influential family'];
-  const list = year === undefined
+  const inPeriod = year === undefined
     ? all
     : all.filter(group => {
       const bounds = ERA_BOUND_GROUPS[group];
       return !bounds || (year >= bounds[0] && year <= bounds[1]);
     });
+  const culture = year === undefined ? null : resolveCulture(zone, year, region, location);
+  const list = filterByCulture(inPeriod, group => group, culture);
   const usable = list.length > 0 ? list : ['influential family'];
-  return usable[Math.floor(Math.random() * usable.length)];
+  return usable[Math.floor(seededRandom() * usable.length)];
 }
 
-function getEnemyGroup(zone: CulturalZone, era: HistoricalEra): string {
+function getEnemyGroup(
+  zone: CulturalZone,
+  era: HistoricalEra,
+  year?: number,
+  region?: string,
+  location?: string,
+): string {
   const enemies: Record<CulturalZone, string[]> = {
     EUROPEAN: ['Viking raiders', 'Magyar horsemen', 'Ottoman forces', 'brigands'],
     MENA: ['Crusaders', 'Mongols', 'Bedouin raiders', 'rival emirate'],
@@ -1926,8 +1995,9 @@ function getEnemyGroup(zone: CulturalZone, era: HistoricalEra): string {
     OCEANIA: ['rival islanders', 'European sailors', 'blackbirders', 'enemy tribe']
   };
 
-  const list = enemies[zone] || ['hostile forces'];
-  return list[Math.floor(Math.random() * list.length)];
+  const culture = year === undefined ? null : resolveCulture(zone, year, region, location);
+  const list = filterByCulture(enemies[zone] || ['hostile forces'], enemy => enemy, culture);
+  return list[Math.floor(seededRandom() * list.length)];
 }
 
 function getDisaster(era: HistoricalEra): string {
@@ -1940,7 +2010,7 @@ function getDisaster(era: HistoricalEra): string {
     disasters.push('train accident', 'factory explosion', 'mine collapse');
   }
 
-  return disasters[Math.floor(Math.random() * disasters.length)];
+  return disasters[Math.floor(seededRandom() * disasters.length)];
 }
 
 function getItem(profession: string, era: HistoricalEra): string {
@@ -1955,7 +2025,7 @@ function getItem(profession: string, era: HistoricalEra): string {
 
   for (const [key, values] of Object.entries(items)) {
     if (profession.includes(key)) {
-      return values[Math.floor(Math.random() * values.length)];
+      return values[Math.floor(seededRandom() * values.length)];
     }
   }
 
@@ -1978,7 +2048,7 @@ function getCraftProcess(profession: string): string {
 
   for (const [key, values] of Object.entries(processes)) {
     if (profession.includes(key)) {
-      return values[Math.floor(Math.random() * values.length)];
+      return values[Math.floor(seededRandom() * values.length)];
     }
   }
 
@@ -1999,7 +2069,7 @@ function getNewCrop(zone: CulturalZone, era: HistoricalEra): string {
   };
 
   const list = crops[zone] || ['new variety'];
-  return list[Math.floor(Math.random() * list.length)];
+  return list[Math.floor(seededRandom() * list.length)];
 }
 
 function getCrop(zone: CulturalZone, era: HistoricalEra): string {
@@ -2016,7 +2086,7 @@ function getCrop(zone: CulturalZone, era: HistoricalEra): string {
   };
 
   const list = crops[zone] || ['grain'];
-  return list[Math.floor(Math.random() * list.length)];
+  return list[Math.floor(seededRandom() * list.length)];
 }
 
 function getAsset(era: HistoricalEra): string {
@@ -2026,7 +2096,7 @@ function getAsset(era: HistoricalEra): string {
     assets.push('a tractor', 'a delivery truck', 'a shop', 'machinery');
   }
 
-  return assets[Math.floor(Math.random() * assets.length)];
+  return assets[Math.floor(seededRandom() * assets.length)];
 }
 
 function getBusiness(profession: string, era: HistoricalEra): string {
@@ -2053,7 +2123,7 @@ function getHonor(zone: CulturalZone, era: HistoricalEra): string {
   };
 
   const list = honors[zone] || ['special recognition'];
-  return list[Math.floor(Math.random() * list.length)];
+  return list[Math.floor(seededRandom() * list.length)];
 }
 
 function getScholarlySubject(era: HistoricalEra): string {
@@ -2066,7 +2136,7 @@ function getScholarlySubject(era: HistoricalEra): string {
     subjects.push('chemistry', 'physics', 'biology', 'engineering');
   }
 
-  return subjects[Math.floor(Math.random() * subjects.length)];
+  return subjects[Math.floor(seededRandom() * subjects.length)];
 }
 
 function getScholarlyPractice(era: HistoricalEra): string {
@@ -2079,7 +2149,7 @@ function getScholarlyPractice(era: HistoricalEra): string {
     practices.push('laboratory work', 'field research', 'statistical analysis');
   }
 
-  return practices[Math.floor(Math.random() * practices.length)];
+  return practices[Math.floor(seededRandom() * practices.length)];
 }
 
 function getCulturalContext(eventKind: EventKind, zone: CulturalZone, era: HistoricalEra): string {
@@ -2097,7 +2167,7 @@ function getCulturalContext(eventKind: EventKind, zone: CulturalZone, era: Histo
     };
 
     const list = contexts[zone] || ['during the ceremony'];
-    return list[Math.floor(Math.random() * list.length)];
+    return list[Math.floor(seededRandom() * list.length)];
   }
 
   if (eventKind === 'marriage') {
@@ -2114,7 +2184,7 @@ function getCulturalContext(eventKind: EventKind, zone: CulturalZone, era: Histo
     };
 
     const list = contexts[zone] || ['with traditional ceremony'];
-    return list[Math.floor(Math.random() * list.length)];
+    return list[Math.floor(seededRandom() * list.length)];
   }
 
   return '';

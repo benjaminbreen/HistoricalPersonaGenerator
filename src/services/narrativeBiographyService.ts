@@ -25,6 +25,7 @@ import {
   describeParents,
   describePhysicalAppearance,
   getNarrativePronouns,
+  isPluralDiseaseName,
   lowerProfession,
   withIndefiniteArticle,
 } from './narrativeTextService';
@@ -398,14 +399,21 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
     const grave = activeDisease.disease.severity === 'critical';
     // Disease names are sometimes plural ("intestinal worms"), so the verb has
     // to agree with the name rather than with the persona.
-    const plural = /(?<!s|u|i)s$/.test(diseaseName);
-    const hasVerb = plural ? 'have' : 'has';
+    const hasVerb = isPluralDiseaseName(diseaseName) ? 'have' : 'has';
     // An injury is a thing that happened to a part of a body, not a condition
     // with a proper name: "a torn muscle in his shoulder", not "Torn muscle".
     const injury = INJURY_SITES[diseaseName];
-    const subject = injury
-      ? `${withIndefiniteArticle(diseaseName)} in ${pronounPoss} ${pickBiography(injury)}`
-      : capitalize(diseaseName);
+    // Some injury names already carry their own site — "sprained ankle",
+    // "scraped knee", "bruised ribs" — and naming it again produces "a sprained
+    // ankle in his ankle". Only add the site when the name does not have one.
+    const site = injury
+      ? pickBiography(injury.filter(part => !diseaseName.toLowerCase().includes(part)))
+      : undefined;
+    const subject = site
+      ? `${withIndefiniteArticle(diseaseName)} in ${pronounPoss} ${site}`
+      : injury
+        ? withIndefiniteArticle(diseaseName)
+        : capitalize(diseaseName);
     present.push(grave
       ? `${capitalize(subject)} ${hasVerb} ${pronounObj} now, and the household is preparing for what that usually means.`
       : `${capitalize(subject)} ${hasVerb} made ordinary labor uncertain, but ${pronoun} ${conjugate('continue', narrativePronouns)} as circumstances allow.`);

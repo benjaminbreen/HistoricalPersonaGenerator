@@ -6,6 +6,7 @@
 import { EventContext } from '../types/eventTypes';
 import { HistoricalEra } from '../constants/historicalEras';
 import { CulturalZone } from '../constants/geography';
+import { random as seededRandom } from './seededRandom';
 
 /**
  * Fill a template string with context-appropriate variables
@@ -27,7 +28,7 @@ export function fillTemplate(
     if (!options || options.length === 0) return;
     
     const regex = new RegExp(`\\[${key}\\]`, 'g');
-    const randomOption = options[Math.floor(Math.random() * options.length)];
+    const randomOption = options[Math.floor(seededRandom() * options.length)];
     filled = filled.replace(regex, randomOption);
   });
   

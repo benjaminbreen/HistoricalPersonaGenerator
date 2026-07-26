@@ -31,6 +31,21 @@ export type HeadwearKind =
   | 'none' | 'cap' | 'brimmed_hat' | 'wrapped_cloth' | 'veil' | 'hood'
   | 'helmet' | 'coronet' | 'band';
 
+/**
+ * Conical woven sunhats — douli, sugegasa, salakot, non la, and every other
+ * name for a cone of plant fibre. They share `brimmed_hat` with felt hats
+ * because they are structurally a crown plus a brim, and the renderer branches
+ * on this pattern to draw the cone.
+ *
+ * It lives here because both the adapter that classifies a hat and the renderer
+ * that draws it need the same answer, and when the two lists were maintained
+ * separately they drifted: the classifier knew `sugegasa` and the renderer did
+ * not, so a sedge sunhat was routed correctly and then drawn as a bowler.
+ * Matched against "<name> <material>" — the fibre is often the better signal.
+ */
+export const CONICAL_HAT_PATTERN =
+  /conical|dou ?li|douli|straw|coolie|sedge|kasa|sugegasa|salakot|non la|nón lá|bamboo|rattan|palm leaf|pandanus|rice hat/;
+
 export type FacialHairStyle =
   | 'full_beard' | 'goatee' | 'mustache' | 'stubble' | 'van_dyke' | 'soul_patch'
   | 'mutton_chops' | 'imperial' | 'handlebar' | 'forked_beard' | 'chin_curtain' | 'verdi';

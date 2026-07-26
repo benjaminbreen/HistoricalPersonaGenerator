@@ -1,6 +1,7 @@
 import PersonaGenerator from './components/PersonaGeneratorSimple';
 import PortraitGallery from './components/portraits/PortraitGallery';
 import PortraitLab from './components/portraitLab/PortraitLab';
+import PortraitDevPanel from './components/portraitLab/devPanel/PortraitDevPanel';
 import { PortraitEngineProvider } from './components/portraitLab/usePortraitEngine';
 import './App.css';
 
@@ -24,6 +25,8 @@ function App() {
         ) : (
           <PersonaGenerator />
         )}
+        {/* Contact sheet overlay on ⌘⇧D. Inert in production unless ?devPanel. */}
+        <PortraitDevPanel />
       </div>
     </PortraitEngineProvider>
   );

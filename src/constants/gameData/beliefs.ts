@@ -486,6 +486,8 @@ function createIdeologyVariant(
     name: string;
     description?: string;
     eras?: HistoricalEra[];
+    yearRange?: [number, number];
+    minPrivilege?: number;
     culturalZones?: CulturalZone[];
     religions?: string[];
     beliefModifications?: Record<string, number>;
@@ -513,6 +515,8 @@ function createIdeologyVariant(
     name: modifications.name,
     description: modifications.description || base.description,
     eras: modifications.eras || base.eras,
+    ...(modifications.yearRange ? { yearRange: modifications.yearRange } : {}),
+    ...(modifications.minPrivilege !== undefined ? { minPrivilege: modifications.minPrivilege } : {}),
     culturalZones: modifications.culturalZones || base.culturalZones,
     religions: modifications.religions || base.religions,
     associatedBeliefs: beliefs
@@ -545,6 +549,7 @@ const MODERN_SECULARISM: Ideology = {
     name: 'Modern Secularism',
     description: 'Emphasizes a worldview skeptical of supernatural claims, focused on the material world.',
     eras: [HistoricalEra.MODERN_ERA, HistoricalEra.FUTURE_ERA],
+    yearRange: [1880, 2100],
     culturalZones: ALL_CULTURES,
     religions: ['Atheism', 'Agnosticism'],
     associatedBeliefs: {
@@ -632,6 +637,8 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Renaissance Humanism',
     description: 'European intellectual movement emphasizing human potential and classical learning',
     eras: [HistoricalEra.RENAISSANCE_EARLY_MODERN],
+    yearRange: [1400, 1700],
+    minPrivilege: 0.45,
     culturalZones: ['EUROPEAN'],
     religions: ['Roman Catholicism', 'Protestantism'],
     beliefModifications: {
@@ -649,6 +656,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Protestant Reformation',
     description: 'Reformed Christianity emphasizing individual relationship with divine',
     eras: [HistoricalEra.RENAISSANCE_EARLY_MODERN],
+    yearRange: [1517, 2100],
     culturalZones: ['EUROPEAN'],
     religions: ['Protestantism'],
     beliefModifications: {
@@ -663,6 +671,8 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Enlightenment Rationalism',
     description: 'European intellectual movement emphasizing reason and scientific method',
     eras: [HistoricalEra.INDUSTRIAL_ERA],
+    yearRange: [1680, 2100],
+    minPrivilege: 0.4,
     culturalZones: ['EUROPEAN'],
     religions: ['Protestantism', 'Atheism'],
     beliefModifications: {
@@ -711,6 +721,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Neo-Confucianism',
     description: 'Medieval synthesis of Confucian ethics with metaphysical speculation',
     eras: [HistoricalEra.MEDIEVAL, HistoricalEra.RENAISSANCE_EARLY_MODERN],
+    yearRange: [1000, 2100],
     culturalZones: ['EAST_ASIAN'],
     religions: ['Neo-Confucianism'],
     newBeliefs: {
@@ -741,6 +752,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Chan Buddhism',
     description: 'East Asian Buddhist tradition emphasizing direct experience and meditation',
     eras: [HistoricalEra.MEDIEVAL, HistoricalEra.RENAISSANCE_EARLY_MODERN],
+    yearRange: [600, 2100],
     culturalZones: ['EAST_ASIAN'],
     religions: ['Buddhism', 'Chinese Traditional Religion'],
     associatedBeliefs: {
@@ -1122,6 +1134,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Melanesian Exchange Culture',
     description: 'Melanesian tradition emphasizing reciprocity, big man leadership, and spiritual exchange',
     eras: [HistoricalEra.MEDIEVAL, HistoricalEra.RENAISSANCE_EARLY_MODERN],
+    yearRange: [1880, 2100],
     culturalZones: ['OCEANIA'],
     religions: ['Melanesian Traditional Religion', 'Ancestor Worship'],
     associatedBeliefs: {
@@ -1156,6 +1169,8 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Transhumanist Optimism',
     description: 'Future worldview emphasizing technological enhancement of human capabilities',
     eras: [HistoricalEra.FUTURE_ERA],
+    yearRange: [1980, 2100],
+    minPrivilege: 0.5,
     culturalZones: ['EUROPEAN', 'EAST_ASIAN', 'NORTH_AMERICAN_COLONIAL'],
     religions: ['Atheism', 'Transhumanism'],
     associatedBeliefs: {
@@ -1190,6 +1205,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Global Consciousness',
     description: 'Future planetary awareness integrating all cultural traditions with ecological thinking',
     eras: [HistoricalEra.FUTURE_ERA],
+    yearRange: [1960, 2100],
     culturalZones: ['EUROPEAN', 'EAST_ASIAN', 'SOUTH_ASIAN', 'MENA', 'SUB_SAHARAN_AFRICAN', 'SOUTH_AMERICAN', 'OCEANIA', 'NORTH_AMERICAN_COLONIAL'],
     religions: ['Universal Consciousness', 'Gaia Philosophy'],
     associatedBeliefs: {
@@ -1228,6 +1244,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Liberal Progressive',
     description: 'Emphasizes individual freedom, social progress, and rational reform',
     eras: [HistoricalEra.RENAISSANCE_EARLY_MODERN, HistoricalEra.INDUSTRIAL_ERA, HistoricalEra.MODERN_ERA],
+    yearRange: [1750, 2100],
     culturalZones: ALL_CULTURES,
     religions: ['Protestantism', 'Judaism', 'Buddhism', 'Atheism', 'Unitarianism', 'Quakerism'],
     associatedBeliefs: {
@@ -1244,6 +1261,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Socialist Collectivist',
     description: 'Prioritizes collective welfare, economic equality, and social solidarity',
     eras: [HistoricalEra.INDUSTRIAL_ERA, HistoricalEra.MODERN_ERA],
+    yearRange: [1830, 2100],
     culturalZones: ALL_CULTURES,
     religions: ['Atheism', 'Christianity', 'Judaism', 'Buddhism', 'Local Beliefs'],
     associatedBeliefs: {
@@ -1260,6 +1278,10 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Capitalist Entrepreneur',
     description: 'Champions free markets, individual enterprise, and wealth creation',
     eras: [HistoricalEra.RENAISSANCE_EARLY_MODERN, HistoricalEra.INDUSTRIAL_ERA, HistoricalEra.MODERN_ERA],
+    // Joint-stock companies and a capitalist self-understanding, not merely
+    // trade. The era bucket starts at 1400, which is two centuries early.
+    yearRange: [1600, 2100],
+    minPrivilege: 0.45,
     culturalZones: ALL_CULTURES,
     religions: ['Protestantism', 'Judaism', 'Hinduism', 'Confucianism', 'Atheism', 'Roman Catholicism'],
     associatedBeliefs: {
@@ -1276,6 +1298,9 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Nationalist Patriot',
     description: 'Devoted to national identity, sovereignty, and cultural preservation',
     eras: [HistoricalEra.RENAISSANCE_EARLY_MODERN, HistoricalEra.INDUSTRIAL_ERA, HistoricalEra.MODERN_ERA],
+    // Nationalism as an ideology dates from the revolutionary decade, not from
+    // the existence of kingdoms.
+    yearRange: [1789, 2100],
     culturalZones: ALL_CULTURES,
     religions: ['Christianity', 'Shinto', 'Hinduism', 'Buddhism', 'Islam', 'Judaism', 'Atheism'],
     associatedBeliefs: {
@@ -1310,6 +1335,8 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Rationalist Empiricist',
     description: 'Values reason, logic, and scientific evidence over faith and tradition',
     eras: [HistoricalEra.RENAISSANCE_EARLY_MODERN, HistoricalEra.INDUSTRIAL_ERA, HistoricalEra.MODERN_ERA],
+    yearRange: [1600, 2100],
+    minPrivilege: 0.4,
     culturalZones: ALL_CULTURES,
     religions: ['Atheism', 'Protestantism', 'Judaism', 'Buddhism', 'Confucianism'],
     associatedBeliefs: {
@@ -1342,6 +1369,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Revolutionary Radical',
     description: 'Seeks to overthrow existing systems and create fundamental social change',
     eras: [HistoricalEra.RENAISSANCE_EARLY_MODERN, HistoricalEra.INDUSTRIAL_ERA, HistoricalEra.MODERN_ERA],
+    yearRange: [1770, 2100],
     culturalZones: ALL_CULTURES,
     religions: ['Protestantism', 'Atheism', 'Buddhism', 'Islam', 'Christianity', 'Judaism'],
     associatedBeliefs: {
@@ -1358,6 +1386,9 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Mercantile Pragmatist',
     description: 'Focuses on trade, practical solutions, and material prosperity',
     eras: [HistoricalEra.ANTIQUITY, HistoricalEra.MEDIEVAL, HistoricalEra.RENAISSANCE_EARLY_MODERN, HistoricalEra.INDUSTRIAL_ERA, HistoricalEra.MODERN_ERA],
+    // A stance of people who hold stock in trade. A tenant rice farmer may be
+    // shrewd, but this is not the name for it.
+    minPrivilege: 0.4,
     culturalZones: ALL_CULTURES,
     religions: ['Judaism', 'Islam', 'Hinduism', 'Christianity', 'Buddhism', 'Confucianism'],
     associatedBeliefs: {
@@ -1374,6 +1405,8 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Utopian Idealist',
     description: 'Believes in the possibility of creating a perfect society through human effort',
     eras: [HistoricalEra.RENAISSANCE_EARLY_MODERN, HistoricalEra.INDUSTRIAL_ERA, HistoricalEra.MODERN_ERA],
+    // More's Utopia gives the word and, roughly, the stance.
+    yearRange: [1516, 2100],
     culturalZones: ALL_CULTURES,
     religions: ['Christianity', 'Atheism', 'Buddhism', 'Judaism', 'Unitarianism'],
     associatedBeliefs: {
@@ -1438,6 +1471,8 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Technocratic Futurist',
     description: 'Believes technology and expertise will solve humanity’s problems',
     eras: [HistoricalEra.INDUSTRIAL_ERA, HistoricalEra.MODERN_ERA, HistoricalEra.FUTURE_ERA],
+    yearRange: [1900, 2100],
+    minPrivilege: 0.45,
     culturalZones: ALL_CULTURES,
     religions: ['Atheism', 'Buddhism', 'Protestantism', 'Judaism', 'Hinduism'],
     associatedBeliefs: {
@@ -1454,6 +1489,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Anarchist Libertarian',
     description: 'Rejects all forms of coercive authority in favor of voluntary association',
     eras: [HistoricalEra.INDUSTRIAL_ERA, HistoricalEra.MODERN_ERA],
+    yearRange: [1840, 2100],
     culturalZones: ALL_CULTURES,
     religions: ['Atheism', 'Buddhism', 'Protestantism', 'Judaism'],
     associatedBeliefs: {
@@ -1488,6 +1524,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Hedonistic Epicurean',
     description: 'Pursues pleasure and happiness as the highest good in life',
     eras: [HistoricalEra.ANTIQUITY, HistoricalEra.MEDIEVAL, HistoricalEra.RENAISSANCE_EARLY_MODERN],
+    minPrivilege: 0.35,
     culturalZones: ALL_CULTURES,
     religions: ['Greek Polytheism', 'Roman Polytheism', 'Buddhism', 'Taoism', 'Local Beliefs'],
     associatedBeliefs: {
@@ -1536,6 +1573,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Legalist Authoritarian',
     description: 'Believes strict laws and harsh punishments create social order',
     eras: [HistoricalEra.ANTIQUITY, HistoricalEra.MEDIEVAL, HistoricalEra.RENAISSANCE_EARLY_MODERN],
+    minPrivilege: 0.4,
     culturalZones: ALL_CULTURES,
     religions: ['Confucianism', 'Islam', 'Christianity', 'Judaism', 'Zoroastrianism'],
     associatedBeliefs: {
@@ -1584,6 +1622,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Scholarly Theologian',
     description: 'Seeks divine truth through study of sacred texts and debate',
     eras: [HistoricalEra.ANTIQUITY, HistoricalEra.MEDIEVAL, HistoricalEra.RENAISSANCE_EARLY_MODERN],
+    minPrivilege: 0.45,
     culturalZones: ALL_CULTURES,
     religions: ['Islam', 'Judaism', 'Christianity', 'Hinduism', 'Buddhism'],
     associatedBeliefs: {
@@ -1600,6 +1639,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Civic Republican',
     description: 'Values civic virtue and participation in public life',
     eras: [HistoricalEra.ANTIQUITY, HistoricalEra.RENAISSANCE_EARLY_MODERN, HistoricalEra.INDUSTRIAL_ERA],
+    minPrivilege: 0.45,
     culturalZones: ALL_CULTURES,
     religions: ['Roman Polytheism', 'Greek Polytheism', 'Christianity', 'Confucianism', 'Islam'],
     associatedBeliefs: {
@@ -1616,6 +1656,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Hermetic Occultist',
     description: 'Pursues hidden knowledge through esoteric practices and symbolism',
     eras: [HistoricalEra.ANTIQUITY, HistoricalEra.MEDIEVAL, HistoricalEra.RENAISSANCE_EARLY_MODERN],
+    minPrivilege: 0.4,
     culturalZones: ALL_CULTURES,
     religions: ['Hermeticism', 'Gnosticism', 'Judaism', 'Christianity', 'Islam', 'Egyptian Polytheism'],
     associatedBeliefs: {
@@ -1664,6 +1705,7 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Courtly Romantic',
     description: 'Idealizes refined love, chivalry, and aristocratic culture',
     eras: [HistoricalEra.MEDIEVAL, HistoricalEra.RENAISSANCE_EARLY_MODERN],
+    minPrivilege: 0.55,
     culturalZones: ALL_CULTURES,
     religions: ['Christianity', 'Islam', 'Hinduism', 'Buddhism', 'Shinto'],
     associatedBeliefs: {
@@ -1696,6 +1738,8 @@ export const IDEOLOGIES: Ideology[] = [
     name: 'Dialectical Thinker',
     description: 'Sees truth emerging from conflict between opposing forces',
     eras: [HistoricalEra.ANTIQUITY, HistoricalEra.MEDIEVAL, HistoricalEra.RENAISSANCE_EARLY_MODERN, HistoricalEra.INDUSTRIAL_ERA],
+    yearRange: [1800, 2100],
+    minPrivilege: 0.45,
     culturalZones: ALL_CULTURES,
     religions: ['Greek Polytheism', 'Christianity', 'Islam', 'Judaism', 'Buddhism', 'Zoroastrianism'],
     associatedBeliefs: {

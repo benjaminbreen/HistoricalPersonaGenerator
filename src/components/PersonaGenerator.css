@@ -5717,3 +5717,356 @@ body.dark-mode .sampling-mode {
   opacity: 0.6;
   line-height: 1.5;
 }
+
+/* -------------------------------------------------------------------------
+   Above-the-fold compression
+   The chrome above the persona card was taking more than half the viewport,
+   so the card opened below the fold on a laptop screen. These reduce vertical
+   padding only — nothing changes horizontally, and no type gets smaller.
+   ------------------------------------------------------------------------- */
+
+.control-buttons {
+  margin-bottom: var(--sp-md);
+  row-gap: var(--sp-sm);
+}
+
+/* The primary action does not need to be the tallest thing on the page. */
+.generation-random-button.btn {
+  padding-top: var(--sp-md);
+  padding-bottom: var(--sp-md);
+  line-height: 1.15;
+}
+
+.source-ingestion-panel {
+  margin-top: var(--sp-md);
+}
+
+.source-ingestion-panel-collapsed {
+  padding: var(--sp-xs) var(--sp-lg);
+  gap: 0;
+}
+
+/* The collapsed header carried `min-height: 5.25rem`, so removing the eyebrow
+   and the subtitle changed the content but not the height of the bar. The
+   showcase stretches to the header, so this one value was setting the height
+   of everything in it. */
+.source-ingestion-panel-collapsed .source-ingestion-header {
+  min-height: 0;
+  padding: 0.3rem 0.85rem 0.3rem 1rem;
+  gap: 1rem;
+}
+
+/* Likewise the primary button: its padding was never the constraint. */
+.generation-random-button {
+  min-height: 2.25rem;
+}
+
+/* Collapsed, the four source options are a menu bar rather than a set of
+   cards, so they do not need card padding. */
+.source-ingestion-panel-collapsed .source-mode-button {
+  padding: var(--sp-xs) 0.85rem;
+  line-height: 1.2;
+}
+
+.source-ingestion-panel-collapsed .source-mode-button span {
+  line-height: 1.2;
+}
+
+.source-ingestion-panel-collapsed .source-mode-button small {
+  margin-top: 0.05rem;
+  line-height: 1.2;
+  /* Collapsed, these descriptions wrapped to two or three lines on narrower
+     windows and set the height of the whole bar. One line, always. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.source-ingestion-panel-collapsed .source-studio-title h2 {
+  line-height: 1.2;
+}
+
+.source-ingestion-panel-collapsed .source-panel-toggle {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* The card header carries the name, place, season and date; it can afford to
+   give a little back. */
+.card-header {
+  padding-top: var(--sp-md);
+  padding-bottom: var(--sp-md);
+}
+
+.season-narrative {
+  margin-top: var(--sp-xs);
+  line-height: 1.35;
+}
+
+/* Collapsed, the title block was three stacked lines in a narrow column, and
+   the subtitle wrapped to four of them — the single largest thing above the
+   card. The four source options already say what the panel does. */
+.source-ingestion-panel-collapsed .source-studio-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 var(--sp-sm);
+}
+
+.source-ingestion-panel-collapsed .source-studio-title h2 {
+  display: inline;
+  margin: 0;
+}
+
+@media (min-height: 900px) {
+  /* Tall screens have the room; leave the original breathing space. */
+  .control-buttons { margin-bottom: var(--sp-lg); }
+  .source-ingestion-panel { margin-top: var(--sp-xl); }
+}
+
+/* Build reads as a qualifier of gender rather than its own row. */
+.gender-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.gender-build {
+  font-size: 0.8rem;
+  color: var(--color-text-tertiary);
+  text-transform: lowercase;
+  letter-spacing: 0.01em;
+}
+
+/* ===========================================================================
+   MOBILE REFINEMENT  (≤600px)
+   ===========================================================================
+
+   This block runs last on purpose. The file already carries responsive rules
+   at eleven different breakpoints, added a few at a time; the result worked in
+   the sense that nothing overlapped, but it was never tuned as a single
+   experience. The failures it left were all density failures:
+
+     · the sticky top bar stood 170px tall — a fifth of the viewport, gone
+       before any content, on every screen and at every scroll position
+     · body text was justified in a 315px column at 21px, which produces
+       rivers of whitespace rather than a tidy edge
+     · the location pills overflowed the viewport by 21px and clipped
+
+   The governing idea here is that phone space is vertical space. Chrome gets
+   compressed hard so content does not; type gets smaller but never below
+   readable; and nothing is hidden that the reader actually needs.
+   ========================================================================= */
+
+@media (max-width: 600px) {
+
+  /* --- Top bar: one row, not four ------------------------------------- */
+
+  .top-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-sm);
+    padding: var(--sp-sm) var(--sp-md);
+    /* Sticky is worth keeping — the actions are genuinely useful mid-read —
+       but only once it is the height of a single row. */
+    border-bottom-width: 1px;
+  }
+
+  .top-bar-brand {
+    gap: var(--sp-sm);
+    min-width: 0;              /* lets the title truncate instead of pushing */
+    flex: 1 1 auto;
+  }
+
+  .top-bar-brand .brand-icon {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+  }
+
+  /* Two tight lines rather than an ellipsis. Five 34px actions leave about
+     140px for the wordmark, which is not enough to set it on one line at a
+     readable size — and "Historical Person…" is a worse outcome than a
+     wrapped brand. Both lines still fit inside the single-row bar height. */
+  .top-bar-title {
+    font-size: 0.8125rem;
+    line-height: 1.12;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    letter-spacing: -0.005em;
+  }
+
+  /* Icon-only actions. Every one of these buttons already carries an
+     aria-label, so dropping the visible text costs nothing to a screen
+     reader — and five 34px targets fit a 375px row where five labelled
+     pills needed three stacked grid rows. */
+  .top-bar-buttons {
+    display: flex;
+    width: auto;
+    flex: 0 0 auto;
+    gap: 4px;
+  }
+
+  .top-bar-label {
+    /* Visually hidden rather than display:none — keeps the accessible name
+       intact if the aria-label is ever removed. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .top-bar button {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0;              /* collapses the whitespace between icon+label */
+  }
+
+  .top-bar button svg {
+    font-size: 15px;
+    flex: 0 0 auto;
+  }
+
+  /* --- Generation controls -------------------------------------------- */
+
+  .controls {
+    padding: var(--sp-md) var(--sp-md);
+  }
+
+  .control-buttons {
+    gap: var(--sp-sm);
+  }
+
+  .generation-random-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Provenance matters, but it is not what a reader came for. It stays
+     legible and stays on the page — it just stops taking three lines above
+     the fold. */
+  .controls-disclaimer,
+  .controls-info {
+    font-size: 0.6875rem;
+    line-height: 1.35;
+    opacity: 0.75;
+  }
+
+  .controls-divider {
+    display: none;
+  }
+
+  /* --- Location pills: wrap instead of clipping ------------------------ */
+
+  .location-pills {
+    flex-wrap: wrap;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .location-pill {
+    font-size: 0.8125rem;
+    padding: 2px var(--sp-md);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* --- Biography ------------------------------------------------------- */
+
+  /* Justified text needs either a wide measure or hyphenation to look like
+     anything but a ransom note. At 315px with `hyphens: manual` it had
+     neither, so it is ragged-right here — and hyphenation is switched on in
+     case a long place name still forces a bad line. */
+  .narrative-biography,
+  .narrative-biography p {
+    font-size: 1.0625rem !important;
+    line-height: 1.6;
+    text-align: left;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+
+  .narrative-biography p:first-of-type::first-letter {
+    font-size: 2.1em;
+  }
+
+  /* --- General density -------------------------------------------------- */
+
+  .persona-generator {
+    padding-left: var(--sp-sm);
+    padding-right: var(--sp-sm);
+  }
+
+  .source-ingestion-header {
+    padding: var(--sp-md);
+  }
+}
+
+@media (max-width: 600px) {
+
+  /* --- Fact rows: label beside value, not above it --------------------- */
+
+  /* Four one-line facts were taking 510px — a whole screen — because each
+     stacked a tiny caption above a large value across the full width. Set as
+     a label/value pair they read faster and cost a third of the height. The
+     label column is fixed so the values align into a scannable edge. */
+  .info-list-compact .info-item {
+    display: grid;
+    /* Wide enough for "NATIVE LANGUAGE" on one line, so every row is the same
+       height and the values scan as a single column. */
+    grid-template-columns: 6.25rem 1fr;
+    align-items: baseline;
+    gap: var(--sp-sm);
+    padding: 7px var(--sp-md);
+  }
+
+  .info-list-compact .info-item .label {
+    font-size: 0.5938rem;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+  }
+
+  .info-list-compact .info-item .value {
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    min-width: 0;              /* long values wrap instead of forcing overflow */
+  }
+
+  /* --- Tabs: one row ---------------------------------------------------- */
+
+  /* "LIFE EVENTS" and "INNER LIFE" were wrapping to two lines each, which
+     made the strip 62px tall and gave the four tabs four different heights.
+     At this size all four fit across 355px on one line. */
+  .biography-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .biography-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .biography-tabs > button,
+  .biography-tabs > * {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    padding: var(--sp-sm) var(--sp-md);
+    letter-spacing: 0.03em;
+  }
+}

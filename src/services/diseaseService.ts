@@ -19,6 +19,7 @@ import { AnimalEntity } from '../types/animalTypes';
 import { GameDate, PlayerCharacter } from '../types/index';
 import { HistoricalEra } from '../types/ambiance';
 import { CulturalZone } from '../types/characterData';
+import { random as seededRandom } from '../utils/seededRandom';
 // Lazy load disease data to improve startup performance
 let diseaseModule: any = null;
 let diseaseModulePromise: Promise<any> | null = null;
@@ -118,7 +119,7 @@ class DiseaseService {
     
     // Animals have higher disease chance (50%), humans have 33%
     const diseaseChance = isAnimal ? 0.5 : 0.33;
-    const hasDisease = Math.random() < diseaseChance;
+    const hasDisease = seededRandom() < diseaseChance;
     
     if (hasDisease && availableDiseases.length > 0) {
       let disease: Disease;
@@ -135,11 +136,11 @@ class DiseaseService {
           d.id === 'TULAREMIA'
         );
         
-        if (animalDiseases.length > 0 && Math.random() < 0.8) {
-          disease = animalDiseases[Math.floor(Math.random() * animalDiseases.length)];
+        if (animalDiseases.length > 0 && seededRandom() < 0.8) {
+          disease = animalDiseases[Math.floor(seededRandom() * animalDiseases.length)];
         } else {
           // 20% chance of regular disease
-          disease = availableDiseases[Math.floor(Math.random() * availableDiseases.length)];
+          disease = availableDiseases[Math.floor(seededRandom() * availableDiseases.length)];
         }
       } else {
         // For humans: Check for epidemic diseases first
@@ -147,13 +148,13 @@ class DiseaseService {
         
         if (epidemicDisease) {
           // During epidemics, 80% chance of epidemic disease
-          disease = Math.random() < 0.8 ? epidemicDisease : 
-                    availableDiseases[Math.floor(Math.random() * availableDiseases.length)];
+          disease = seededRandom() < 0.8 ? epidemicDisease : 
+                    availableDiseases[Math.floor(seededRandom() * availableDiseases.length)];
         } else {
           // Normal times: common cold is most likely (50%), other diseases share remaining 50%
           const commonCold = availableDiseases.find(d => d.id === 'COMMON_COLD');
-          disease = commonCold && Math.random() < 0.5 ? commonCold : 
-                    availableDiseases[Math.floor(Math.random() * availableDiseases.length)];
+          disease = commonCold && seededRandom() < 0.5 ? commonCold : 
+                    availableDiseases[Math.floor(seededRandom() * availableDiseases.length)];
         }
       }
       
@@ -166,7 +167,7 @@ class DiseaseService {
 
     // Chance for immunity from previous exposure
     for (const disease of availableDiseases) {
-      if (disease.grantsImmunity && Math.random() < 0.1) {
+      if (disease.grantsImmunity && seededRandom() < 0.1) {
         immunities.push(this.createImmunity(disease.id, currentYear));
       }
     }
@@ -441,11 +442,11 @@ class DiseaseService {
     else if (terrain === 'city' || terrain === 'urban' || terrain === 'city_center') {
       transmissionChance = 0.1;
       // 50/50 chance of smallpox or plague
-      diseaseId = Math.random() < 0.5 ? 'smallpox' : 'plague';
+      diseaseId = seededRandom() < 0.5 ? 'smallpox' : 'plague';
       message = `The crowded, unsanitary city conditions have given you ${diseaseId}!`;
     }
 
-    if (transmissionChance > 0 && Math.random() < transmissionChance) {
+    if (transmissionChance > 0 && seededRandom() < transmissionChance) {
       // Check if already has this disease
       if (playerCharacter.health?.currentDiseases?.some(d => d.disease.id === diseaseId)) {
         return { transmitted: false };
@@ -581,7 +582,7 @@ class DiseaseService {
       if (activeDisease.daysRemaining <= 0) {
         const recoveryChance = this.calculateRecoveryChance(entity, activeDisease);
         
-        if (Math.random() < recoveryChance) {
+        if (seededRandom() < recoveryChance) {
           // Recovered
           this.removeDiseaseEffects(entity, disease);
           recoveryEvents.push(this.generateRecoveryEvent(entity, disease));
@@ -603,7 +604,7 @@ class DiseaseService {
       // Mortality check for severe diseases
       if (activeDisease.severity > 0.8 && disease.mortalityRate > 0) {
         const mortalityChance = this.calculateMortalityChance(entity, activeDisease);
-        if (Math.random() < mortalityChance) {
+        if (seededRandom() < mortalityChance) {
           mortalityRisk = true;
           isDead = true;
         }
@@ -958,7 +959,7 @@ class DiseaseService {
     const constitutionModifier = 1 - ((constitution - 10) / 20); // Higher constitution reduces transmission
     transmissionChance *= constitutionModifier;
 
-    if (Math.random() < transmissionChance) {
+    if (seededRandom() < transmissionChance) {
       const newDisease = this.createActiveDisease(disease, currentYear);
       return { transmitted: true, newDisease };
     }
@@ -1022,7 +1023,7 @@ class DiseaseService {
     
     if (symptoms.length === 0) return '';
 
-    const symptom = symptoms[Math.floor(Math.random() * symptoms.length)];
+    const symptom = symptoms[Math.floor(seededRandom() * symptoms.length)];
     const entityName = isNpc ? 
       (entity as NpcEntity).name || 'a stranger' : 
       (entity as AnimalEntity).speciesName;
@@ -1038,11 +1039,11 @@ class DiseaseService {
     const symptoms = isNpc ? disease.narrativeHints.npcSymptoms : disease.narrativeHints.animalSymptoms;
     
     // Return 1-2 visible symptoms
-    const numSymptoms = Math.min(symptoms.length, Math.random() > 0.5 ? 2 : 1);
+    const numSymptoms = Math.min(symptoms.length, seededRandom() > 0.5 ? 2 : 1);
     const selectedSymptoms: string[] = [];
     
     for (let i = 0; i < numSymptoms; i++) {
-      const symptom = symptoms[Math.floor(Math.random() * symptoms.length)];
+      const symptom = symptoms[Math.floor(seededRandom() * symptoms.length)];
       if (!selectedSymptoms.includes(symptom)) {
         selectedSymptoms.push(`They ${symptom}.`);
       }
@@ -1130,7 +1131,7 @@ class DiseaseService {
     if (stage === 'symptomatic') {
       if (isPlayer) {
         const playerSymptoms = disease.narrativeHints.playerSymptoms;
-        return playerSymptoms[Math.floor(Math.random() * playerSymptoms.length)];
+        return playerSymptoms[Math.floor(seededRandom() * playerSymptoms.length)];
       } else {
         return `${entity.id} is showing symptoms of ${disease.name}`;
       }

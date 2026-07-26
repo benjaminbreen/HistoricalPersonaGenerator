@@ -61,7 +61,7 @@ function materialOptions(material: string): RampOptions {
   return { contrast: 1, shift: 0.34 };
 }
 
-const METAL_BASE: Record<string, string> = {
+export const METAL_BASE: Record<string, string> = {
   gold: '#cfa044',
   silver: '#b9bcc2',
   bronze: '#a8763f',

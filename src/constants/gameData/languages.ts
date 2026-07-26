@@ -1154,7 +1154,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Proto-Iroquoian',
     family: LANGUAGE_FAMILIES.IROQUOIAN,
     isReconstructed: true,
-    period: [-4000, 500],
+    period: [-2000, 500],
     regions: ['Eastern Great Lakes', 'St. Lawrence Valley', 'Northeastern Woodlands'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     successors: ['MOHAWK', 'SENECA', 'CHEROKEE', 'HURON'],
@@ -6466,6 +6466,11 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'ARAMAIC', period: [-500, 500], weight: 40 },
       { id: 'BYZANTINE_GREEK', period: [330, 1453], weight: 70 },
       { id: 'OTTOMAN_TURKISH', period: [1299, 1922], weight: 85 },
+      // The mapping used to stop at the Ottoman collapse, leaving republican
+      // Turkey with no language at all and sending modern Anatolians off to
+      // whichever lower-scoring mapping answered first.
+      { id: 'MODERN_TURKISH', period: [1923, 2025], weight: 90 },
+      { id: 'ARMENIAN', period: [405, 1915], weight: 25 },
       { id: 'CLASSICAL_ARABIC', period: [700, 1500], weight: 20 },
     ],
     namePatterns: [
@@ -6579,6 +6584,20 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
 const normalizeRegionLabel = (value: string): string =>
   value.toLowerCase().replace(/[–—·,/]+/g, ' ').replace(/\s+/g, ' ').trim();
 
+/**
+ * Landform nouns that name no place on their own. A mapping may legitimately
+ * list one — Scotland claims "highlands" — but as a *substring* test it will
+ * swallow every highland on earth, which is how a woman in the Cappadocian
+ * Highlands came to speak Scots. These match only as a whole label.
+ */
+const GENERIC_PLACE_WORDS = new Set([
+  'highland', 'highlands', 'lowland', 'lowlands', 'coast', 'coastal', 'basin',
+  'plateau', 'valley', 'delta', 'desert', 'plain', 'plains', 'hill', 'hills',
+  'foothills', 'mountain', 'mountains', 'range', 'river', 'island', 'islands',
+  'sea', 'bay', 'peninsula', 'steppe', 'forest', 'upland', 'uplands', 'marsh',
+  'gulf', 'interior', 'frontier', 'sierra', 'cordillera',
+]);
+
 const getRegionalMappingScore = (
   mapping: RegionLanguageMapping,
   searchTerms: string[]
@@ -6601,6 +6620,9 @@ const getRegionalMappingScore = (
       // Southeast Asian "Shan" keyword.
       if (term === pattern) {
         bestScore = Math.max(bestScore, specificityBonus + 10_000 + pattern.length);
+      } else if (GENERIC_PLACE_WORDS.has(pattern)) {
+        // A bare landform noun is not a place. Whole-label match only.
+        continue;
       } else if (term.includes(pattern)) {
         bestScore = Math.max(bestScore, specificityBonus + pattern.length);
       }
@@ -6719,6 +6741,13 @@ export function getLanguageForCharacter(
           const language = LANGUAGES[lang.id];
           // Skip reconstructed proto-languages for historical periods (after -3000 BCE)
           if (language && language.isReconstructed && year > -3000) return false;
+          // Same guard STEP 1 applies to name evidence: a place mapping that
+          // scored on a loose substring must not hand back a language from
+          // another part of the world.
+          if (language
+            && Array.isArray(language.culturalZones)
+            && language.culturalZones.length > 0
+            && !language.culturalZones.includes(culturalZone as CulturalZone)) return false;
           return true;
         })
         .sort((a, b) => b.weight - a.weight);
@@ -6729,6 +6758,8 @@ export function getLanguageForCharacter(
         const selected = validLanguages[0];
         return LANGUAGES[selected.id];
       }
+      // Nothing in this mapping fits; keep looking rather than stopping at the
+      // best-scoring place.
   }
 
   // STEP 4: Check exact language region matches (original logic)

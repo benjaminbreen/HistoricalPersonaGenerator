@@ -11,7 +11,7 @@ export interface CityDefinition {
   allegianceHistory: {
     [startYear: number]: string; // Maps a start year to a faction name. e.g., { 1545: 'Spanish Empire', 1825: 'Bolivia' }
   };
-  urbanDensity: 'small' | 'moderate' | 'large' | 'massive';
+  urbanDensity?: 'small' | 'moderate' | 'large' | 'massive';
   eraSpecificDensity?: {
     [era: string]: 'small' | 'moderate' | 'large' | 'massive';
   };
@@ -359,7 +359,9 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
         1776: "United States"
       },
       urbanDensity: 'moderate',
-      eraSpecificDensity: { 'early_modern': 'large' },
+      eraSpecificDensity: {
+        'early_modern': 'large'
+      },
       economicFocus: ['government', 'trade', 'philosophy', 'medicine']
     }
   ],
@@ -390,6 +392,17 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       urbanDensity: 'small',
       eraSpecificDensity: { 'modern': 'massive' },
       economicFocus: ['railways', 'meatpacking', 'industry', 'finance']
+    },
+    {
+      name: "Detroit",
+      isHistorical: true,
+      foundingYear: 1701,
+      description: "A French fur trading post that became the motor city of America.",
+      allegianceHistory: {
+        1701: "New France",
+        1760: "British Empire",
+        1796: "United States"
+      }
     }
   ],
   "Cajamarca Highlands": [
@@ -420,6 +433,24 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
         urbanDensity: 'small',
         eraSpecificDensity: { 'modern': 'moderate' },
         economicFocus: ['fur_trade', 'military', 'government']
+    },
+    {
+      name: "Montreal",
+      isHistorical: true,
+      foundingYear: 1642,
+      description: "French colonial trading post and gateway to the North American interior.",
+      allegianceHistory: {
+        1642: "New France",
+        1760: "British North America",
+        1867: "Dominion of Canada"
+      },
+      urbanDensity: 'moderate',
+      eraSpecificDensity: {
+        'renaissance_early_modern': 'small',
+        'modern': 'large'
+      },
+      populationPeak: 100000,
+      economicFocus: ['fur trade', 'shipping', 'administration', 'crafts', 'agriculture']
     }
   ],
   "Brandenburg Plain": [
@@ -437,6 +468,19 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       urbanDensity: 'moderate',
       eraSpecificDensity: { 'modern': 'massive' },
       economicFocus: ['government', 'military', 'industry', 'science']
+    },
+    {
+      name: "Lübeck",
+      isHistorical: true,
+      foundingYear: 1143,
+      description: "The queen of the Hanseatic League, a free imperial city that dominated Baltic trade for centuries.",
+      allegianceHistory: {
+        1143: "County of Holstein",
+        1226: "Free Imperial City (Hanseatic League)",
+        1871: "German Empire"
+      },
+      urbanDensity: 'moderate',
+      economicFocus: ['trade', 'salt', 'shipping', 'law']
     }
   ],
   "Hamburg Coast": [
@@ -451,7 +495,9 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
             1510: "Hanseatic League"
         },
         urbanDensity: 'moderate',
-        eraSpecificDensity: { 'modern': 'large' },
+        eraSpecificDensity: {
+            'modern': 'large'
+        },
         economicFocus: ['trade', 'shipping', 'brewing']
     }
   ],
@@ -547,11 +593,29 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Lisbon",
       isHistorical: true,
-      foundingYear: 1147,
-      description: "The capital of Portugal and the heart of a vast global empire during the Age of Discovery.",
+      // Olisipo above covers the Roman city through 711. The settlement continued
+      // under Muslim rule as al-Ushbuna and became Lisboa after 1147, so Lisbon
+      // picks up where Olisipo leaves off rather than overlapping it. The old
+      // -1200 date was the legendary Phoenician founding; the archaeological
+      // evidence for a Phoenician presence here is 8th century BCE at the earliest.
+      foundingYear: 711,
+      description: "Atlantic gateway and capital of the Portuguese maritime empire.",
       allegianceHistory: {
-        1147: "Kingdom of Portugal"
-      }
+        "-1200": "Phoenician Colonies",
+        "-205": "Roman Republic",
+        711: "Umayyad Caliphate",
+        1147: "Kingdom of Portugal",
+        1580: "Iberian Union",
+        1640: "Kingdom of Portugal"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'antiquity': 'moderate',
+        'medieval': 'moderate',
+        'renaissance_early_modern': 'large'
+      },
+      populationPeak: 200000,
+      economicFocus: ['trade', 'navigation', 'spices', 'gold', 'shipbuilding']
     }
   ],
   "Andalusian Plain": [
@@ -566,6 +630,48 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
         929: "Caliphate of Córdoba",
         1236: "Kingdom of Castile"
       }
+    },
+    {
+      name: "Seville",
+      isHistorical: true,
+      foundingYear: -800,
+      description: "Gateway to the Americas during the Spanish colonial era and major Andalusian city.",
+      allegianceHistory: {
+        "-800": "Phoenician Colonies",
+        "-206": "Roman Republic",
+        412: "Visigothic Kingdom",
+        712: "Umayyad Caliphate",
+        1248: "Kingdom of Castile",
+        1516: "Spanish Empire"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'antiquity': 'moderate',
+        'medieval': 'large',
+        'renaissance_early_modern': 'large'
+      },
+      populationPeak: 150000,
+      economicFocus: ['trade', 'shipbuilding', 'colonial administration', 'textiles', 'agriculture']
+    },
+    {
+      name: "Cordoba",
+      isHistorical: true,
+      foundingYear: -169,
+      description: "Capital of the Umayyad Caliphate of Córdoba and jewel of medieval Europe.",
+      allegianceHistory: {
+        "-169": "Roman Republic",
+        711: "Umayyad Caliphate",
+        1031: "Taifa of Córdoba",
+        1236: "Kingdom of Castile"
+      },
+      urbanDensity: 'massive',
+      eraSpecificDensity: {
+        'antiquity': 'moderate',
+        'medieval': 'massive',
+        'renaissance_early_modern': 'moderate'
+      },
+      populationPeak: 450000,
+      economicFocus: ['education', 'philosophy', 'crafts', 'agriculture', 'trade']
     }
   ],
   "Toledo Plateau": [
@@ -612,21 +718,22 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Venice",
       isHistorical: true,
       foundingYear: 421,
-      declineYear: 1797,
-      description: "A serene and powerful maritime republic built on islands, dominating trade in the Mediterranean.",
+      description: "Maritime republic and trading empire connecting Europe with the Orient.",
       allegianceHistory: {
-        421: "Republic of Venice"
-      }
-    },
-     {
-      name: "Venice",
-      isHistorical: true,
-      foundingYear: 1798,
-      description: "A city of breathtaking beauty, grappling with its lost imperial power and new place in a unified Italy.",
-      allegianceHistory: {
-        1798: "Habsburg Monarchy",
+        421: "Byzantine Empire",
+        697: "Republic of Venice",
+        1797: "Austrian Empire",
+        1805: "Kingdom of Italy (Napoleonic)",
+        1815: "Austrian Empire",
         1866: "Kingdom of Italy"
-      }
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'medieval': 'large',
+        'renaissance_early_modern': 'large'
+      },
+      populationPeak: 180000,
+      economicFocus: ['trade', 'navigation', 'glass', 'silk', 'spices']
     }
   ],
   "Florence Hills": [
@@ -648,13 +755,49 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Naples",
       isHistorical: true,
       foundingYear: -600,
-      description: "A magnificent southern port, heir to Greek Neapolis and gateway to the Mediterranean.",
+      description: "Major Italian kingdom capital and Mediterranean trading power.",
       allegianceHistory: {
-        [-600]: "Greek Colony",
-        [-326]: "Roman Republic",
+        "-600": "Greek Colonies",
+        326: "Roman Republic",
         1139: "Kingdom of Sicily",
-        1442: "Kingdom of Naples"
-      }
+        1282: "Kingdom of Naples",
+        1503: "Spanish Empire",
+        1734: "Kingdom of the Two Sicilies",
+        1861: "Kingdom of Italy"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'medieval': 'large',
+        'early_modern': 'massive',
+        'modern': 'massive'
+      },
+      populationPeak: 450000,
+      economicFocus: ['trade', 'silk', 'government', 'arts', 'maritime']
+    },
+    {
+      name: "Palermo",
+      isHistorical: true,
+      foundingYear: -734,
+      description: "Crossroads of Norman, Arab, and Byzantine cultures in the Mediterranean.",
+      allegianceHistory: {
+        "-734": "Phoenician Colonies",
+        "-254": "Roman Republic",
+        535: "Byzantine Empire",
+        831: "Emirate of Sicily",
+        1072: "County of Sicily",
+        1130: "Kingdom of Sicily",
+        1282: "Kingdom of Sicily (Aragonese)",
+        1816: "Kingdom of Two Sicilies",
+        1861: "Kingdom of Italy"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'antiquity': 'moderate',
+        'medieval': 'large',
+        'renaissance_early_modern': 'moderate'
+      },
+      populationPeak: 250000,
+      economicFocus: ['trade', 'administration', 'textiles', 'agriculture', 'crafts']
     }
   ],
   "Rhine Valley": [
@@ -684,28 +827,53 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Budapest",
       isHistorical: true,
-      foundingYear: 896,
-      description: "The pearl of the Danube, uniting Buda and Pest as the magnificent capital of Hungary.",
+      foundingYear: 1873,
+      description: "Twin cities of Buda and Pest, capital of Hungary and Danube trade center.",
       allegianceHistory: {
-        896: "Magyar Tribes",
+        106: "Roman Empire",
+        896: "Hungarian Principality",
         1000: "Kingdom of Hungary",
         1541: "Ottoman Empire",
-        1686: "Habsburg Monarchy"
-      }
+        1686: "Habsburg Monarchy",
+        1867: "Austro-Hungarian Empire",
+        1918: "Hungary"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'early_modern': 'large',
+        'modern': 'massive'
+      },
+      populationPeak: 300000,
+      economicFocus: ['trade', 'government', 'milling', 'textiles', 'river_transport']
     }
   ],
   "Vienna Basin": [
     {
       name: "Vienna",
       isHistorical: true,
+      // Roman Vindobona: a garrison from the early 1st century CE and a legionary
+      // fortress from c. 97. The old 500 date began the city at the post-Roman
+      // Germanic settlement and silently erased the Roman centuries.
       foundingYear: 15,
-      description: "The imperial city on the Danube, bastion of Christendom and heart of the Habsburg domains.",
+      description: "Habsburg capital and imperial seat, gateway between East and West.",
       allegianceHistory: {
         15: "Roman Empire",
+        500: "Germanic Tribes",
         976: "Margraviate of Austria",
         1156: "Duchy of Austria",
-        1438: "Habsburg Monarchy"
-      }
+        1278: "Habsburg Dynasty",
+        1804: "Austrian Empire",
+        1867: "Austro-Hungarian Empire",
+        1918: "Austria"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'medieval': 'moderate',
+        'early_modern': 'large',
+        'modern': 'massive'
+      },
+      populationPeak: 400000,
+      economicFocus: ['government', 'banking', 'arts', 'music', 'imperial_administration']
     }
   ],
   "Bohemian Plateau": [
@@ -713,12 +881,24 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Prague",
       isHistorical: true,
       foundingYear: 885,
-      description: "The golden city of a hundred spires, seat of Holy Roman Emperors and heart of Bohemia.",
+      description: "Capital of Bohemia and Holy Roman Empire, city of a hundred spires.",
       allegianceHistory: {
-        885: "Duchy of Bohemia",
-        1198: "Kingdom of Bohemia",
-        1526: "Habsburg Monarchy"
-      }
+        885: "Great Moravian Empire",
+        1212: "Kingdom of Bohemia",
+        1526: "Habsburg Monarchy",
+        1804: "Austrian Empire",
+        1867: "Austro-Hungarian Empire",
+        1918: "Czechoslovakia",
+        1993: "Czech Republic"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'medieval': 'large',
+        'early_modern': 'large',
+        'modern': 'large'
+      },
+      populationPeak: 200000,
+      economicFocus: ['government', 'brewing', 'crafts', 'silver_mining', 'glass']
     }
   ],
    "Bosporus": [
@@ -772,14 +952,40 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Athens",
       isHistorical: true,
       foundingYear: -3000,
-      description: "The cradle of democracy and philosophy, where Western civilization found its voice.",
+      description: "Birthplace of democracy and center of ancient Greek civilization.",
       allegianceHistory: {
-        [-800]: "Greek City-State",
+        "-3000": "Mycenaean Civilization",
+        "-1200": "Dark Age Greece",
+        "-800": "Archaic Athens",
+        "-508": "Athenian Democracy",
+        "-146": "Roman Province of Achaea",
+        395: "Byzantine Empire",
+        1458: "Ottoman Empire",
+        1833: "Kingdom of Greece"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'antiquity': 'large',
+        'medieval': 'moderate',
+        'renaissance_early_modern': 'moderate'
+      },
+      populationPeak: 250000,
+      economicFocus: ['philosophy', 'trade', 'education', 'crafts', 'democracy']
+    },
+    {
+      name: "Thessalonica",
+      isHistorical: true,
+      foundingYear: -315,
+      description: "Byzantine Empire's second city and gateway to the Balkans.",
+      allegianceHistory: {
+        [-315]: "Macedonian Kingdom",
         [-146]: "Roman Republic",
-        1204: "Latin Empire",
-        1261: "Byzantine Empire",
-        1458: "Ottoman Empire"
-      }
+        395: "Byzantine Empire",
+        1430: "Ottoman Empire",
+        1912: "Kingdom of Greece"
+      },
+      urbanDensity: 'moderate',
+      economicFocus: ['trade', 'silk', 'jewish_commerce', 'byzantine_culture']
     }
   ],
   "Crete": [
@@ -792,6 +998,46 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       allegianceHistory: {
         [-2000]: "Minoan Civilization"
       }
+    },
+    {
+      name: "Heraklion",
+      isHistorical: true,
+      foundingYear: -2000,
+      description: "Capital near ancient Knossos, center of Minoan civilization.",
+      allegianceHistory: {
+        [-2000]: "Minoan Civilization",
+        [-1100]: "Mycenaean Greeks",
+        [-67]: "Roman Empire",
+        395: "Byzantine Empire",
+        824: "Emirate of Crete",
+        961: "Byzantine Empire",
+        1204: "Republic of Venice",
+        1669: "Ottoman Empire",
+        1898: "Cretan State",
+        1913: "Kingdom of Greece"
+      },
+      urbanDensity: 'moderate',
+      populationPeak: 180000,
+      economicFocus: ['tourism', 'archaeology', 'shipping', 'agriculture']
+    },
+    {
+      name: "Chania",
+      isHistorical: true,
+      foundingYear: -1500,
+      description: "Venetian harbor city, one of the Mediterranean's most beautiful ports.",
+      allegianceHistory: {
+        [-1500]: "Minoan Settlement",
+        [-500]: "Greek City-State",
+        [-67]: "Roman Empire",
+        395: "Byzantine Empire",
+        1252: "Republic of Venice",
+        1645: "Ottoman Empire",
+        1898: "Cretan State",
+        1913: "Kingdom of Greece"
+      },
+      urbanDensity: 'small',
+      populationPeak: 110000,
+      economicFocus: ['tourism', 'olive oil', 'shipping', 'crafts']
     }
   ],
   "Moscow Basin": [
@@ -813,13 +1059,26 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Kiev",
       isHistorical: true,
       foundingYear: 482,
-      description: "The mother of Russian cities, first capital of the Rus and gateway between Scandinavia and Byzantium.",
+      description: "Mother of Russian cities and ancient capital of Kievan Rus.",
       allegianceHistory: {
         482: "Slavic Tribes",
         882: "Kievan Rus",
-        1240: "Mongol Empire",
-        1362: "Grand Duchy of Lithuania"
-      }
+        1240: "Golden Horde",
+        1362: "Grand Duchy of Lithuania",
+        1569: "Polish-Lithuanian Commonwealth",
+        1654: "Tsardom of Russia",
+        1917: "Ukrainian People's Republic",
+        1922: "Soviet Union",
+        1991: "Ukraine"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'medieval': 'large',
+        'renaissance_early_modern': 'moderate',
+        'modern': 'large'
+      },
+      populationPeak: 200000,
+      economicFocus: ['trade', 'religion', 'crafts', 'agriculture', 'education']
     }
   ],
   "Volga Bend": [
@@ -840,13 +1099,22 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Amsterdam",
       isHistorical: true,
       foundingYear: 1275,
-      description: "The merchant capital of the Dutch Golden Age, built on trade, tolerance, and the conquest of the sea.",
+      description: "Capital of the Dutch Golden Age and center of global commerce.",
       allegianceHistory: {
         1275: "County of Holland",
+        1506: "Habsburg Netherlands",
         1581: "Dutch Republic",
-        1806: "Kingdom of Holland",
+        1795: "Batavian Republic",
         1815: "Kingdom of the Netherlands"
-      }
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'medieval': 'small',
+        'renaissance_early_modern': 'large',
+        'modern': 'large'
+      },
+      populationPeak: 220000,
+      economicFocus: ['trade', 'banking', 'shipbuilding', 'diamonds', 'brewing']
     }
   ],
 
@@ -1058,13 +1326,17 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Fez",
       isHistorical: true,
       foundingYear: 789,
-      description: "The ancient capital of Morocco, center of Islamic learning and the world's oldest university.",
+      description: "A spiritual and cultural capital of Morocco, home to one of the world’s oldest universities.",
       allegianceHistory: {
         789: "Idrisid Dynasty",
         1040: "Almoravid Dynasty",
-        1121: "Almohad Dynasty",
-        1244: "Marinid Dynasty"
-      }
+        1147: "Almohad Caliphate",
+        1271: "Marinid Dynasty",
+        1666: "Alaouite Dynasty"
+      },
+      urbanDensity: 'large',
+      populationPeak: 400000,
+      economicFocus: ['BOOK_MANUSCRIPTS', 'LEATHERWORK', 'CERAMICS', 'CARPETS']
     }
   ],
   "Timbuktu Basin": [
@@ -1072,13 +1344,22 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Timbuktu",
       isHistorical: true,
       foundingYear: 1100,
-      description: "The mysterious city at the edge of the world, where salt meets gold and learning flourishes in the desert.",
+      description: "Legendary center of trans-Saharan trade and Islamic learning.",
       allegianceHistory: {
-        1100: "Ghana Empire",
-        1325: "Mali Empire",
+        1100: "Tuareg Tribes",
+        1324: "Mali Empire",
         1468: "Songhai Empire",
-        1591: "Moroccan Sultanate"
-      }
+        1591: "Moroccan Pashalik",
+        1893: "French Sudan",
+        1960: "Mali"
+      },
+      urbanDensity: 'moderate',
+      eraSpecificDensity: {
+        'medieval': 'large',
+        'renaissance_early_modern': 'moderate'
+      },
+      populationPeak: 100000,
+      economicFocus: ['trade', 'salt', 'gold', 'education', 'manuscripts']
     }
   ],
   "Niger Bend": [
@@ -1160,11 +1441,22 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Cape Town",
       isHistorical: true,
       foundingYear: 1652,
-      description: "The tavern of the seas, Dutch settlement at the southern tip of Africa.",
+      description: "Dutch refreshment station and gateway to the Indian Ocean trade.",
       allegianceHistory: {
-        1652: "Dutch Empire",
-        1795: "British Empire"
-      }
+        1652: "Dutch East India Company",
+        1795: "British Empire",
+        1803: "Batavian Republic",
+        1806: "British Empire",
+        1910: "Union of South Africa",
+        1994: "South Africa"
+      },
+      urbanDensity: 'moderate',
+      eraSpecificDensity: {
+        'renaissance_early_modern': 'small',
+        'modern': 'large'
+      },
+      populationPeak: 100000,
+      economicFocus: ['trade', 'shipping', 'wine', 'agriculture', 'provisions']
     }
   ],
 
@@ -1228,13 +1520,21 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Kyoto",
       isHistorical: true,
       foundingYear: 794,
-      description: "The imperial capital of a thousand years, heart of Japanese culture and the way of the court.",
+      description: "Ancient capital of Japan and center of imperial culture.",
       allegianceHistory: {
-        794: "Imperial Court",
+        794: "Heian Imperial Court",
         1185: "Kamakura Shogunate",
         1333: "Ashikaga Shogunate",
-        1603: "Tokugawa Shogunate"
-      }
+        1600: "Tokugawa Shogunate",
+        1868: "Empire of Japan"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'medieval': 'large',
+        'renaissance_early_modern': 'large'
+      },
+      populationPeak: 350000,
+      economicFocus: ['crafts', 'silk', 'religion', 'education', 'administration']
     }
   ],
   "Edo Plain": [
@@ -1257,12 +1557,19 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Seoul",
       isHistorical: true,
       foundingYear: 1394,
-      description: "The capital of the Hermit Kingdom, seat of Confucian learning and royal authority.",
+      description: "Capital of the Joseon Dynasty and Korea.",
       allegianceHistory: {
         1394: "Joseon Dynasty",
-        1897: "Korean Empire",
-        1910: "Japanese Empire"
-      }
+        1910: "Japanese Korea",
+        1945: "Republic of Korea"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'renaissance_early_modern': 'large',
+        'modern': 'massive'
+      },
+      populationPeak: 200000,
+      economicFocus: ['administration', 'education', 'crafts', 'ceramics', 'trade']
     }
   ],
   "Sydney Basin": [
@@ -1270,11 +1577,17 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Sydney",
       isHistorical: true,
       foundingYear: 1788,
-      description: "The first European settlement in Australia, built around one of the world's most beautiful harbors.",
+      description: "First British colonial settlement in Australia and major Pacific port.",
       allegianceHistory: {
-        1788: "British Empire",
+        1788: "British Colony of New South Wales",
         1901: "Commonwealth of Australia"
-      }
+      },
+      urbanDensity: 'moderate',
+      eraSpecificDensity: {
+        'modern': 'large'
+      },
+      populationPeak: 200000,
+      economicFocus: ['shipping', 'wool', 'gold', 'administration', 'trade']
     }
   ],
   "Canterbury Plains": [
@@ -1327,19 +1640,6 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
   ],
 
   // === MISSING NORTH AMERICAN CITIES ===
-  "Great Lakes Shoreline": [
-    {
-      name: "Detroit",
-      isHistorical: true,
-      foundingYear: 1701,
-      description: "A French fur trading post that became the motor city of America.",
-      allegianceHistory: {
-        1701: "New France",
-        1760: "British Empire",
-        1796: "United States"
-      }
-    }
-  ],
   "Puget Sound": [
     {
       name: "Seattle",
@@ -1484,12 +1784,27 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
   "Orinoco Delta": [
     {
       name: "Ciudad Guayana",
-      isHistorical: true,
+      isHistorical: false,
       foundingYear: 1961,
-      description: "A planned industrial city at the confluence of great rivers.",
+      description: "Modern planned industrial city at the Orinoco-Caroni confluence.",
       allegianceHistory: {
         1961: "Venezuela"
-      }
+      },
+      urbanDensity: 'moderate',
+      populationPeak: 900000,
+      economicFocus: ['steel', 'aluminum', 'hydropower', 'mining']
+    },
+    {
+      name: "Tucupita",
+      isHistorical: true,
+      foundingYear: 1848,
+      description: "Capital of Delta Amacuro state, gateway to the Orinoco Delta.",
+      allegianceHistory: {
+        1848: "Venezuela"
+      },
+      urbanDensity: 'small',
+      populationPeak: 100000,
+      economicFocus: ['fishing', 'agriculture', 'oil', 'indigenous crafts']
     }
   ],
 
@@ -1536,21 +1851,45 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
 // === AFRICA ===
   "Tunisian Sahel": [
     {
-        name: "Carthage",
-        isHistorical: true,
-        foundingYear: -814,
-        declineYear: 698,
-        description: "The great Phoenician rival to Rome, a maritime empire that dominated the Western Mediterranean.",
-        allegianceHistory: {
-            [-814]: "Carthaginian Republic",
-            [-146]: "Roman Republic",
-            439: "Vandal Kingdom",
-            534: "Byzantine Empire",
-            698: "Umayyad Caliphate"
-        },
-        urbanDensity: 'massive',
-        populationPeak: 500000,
-        economicFocus: ['trade', 'navy', 'mercenaries', 'agriculture']
+      name: "Carthage",
+      isHistorical: true,
+      foundingYear: -814,
+      description: "Phoenician trading empire and Rome's greatest rival.",
+      allegianceHistory: {
+        "-814": "Phoenician Carthage",
+        "-146": "Roman Africa",
+        439: "Vandal Kingdom",
+        534: "Byzantine Empire"
+      },
+      urbanDensity: 'massive',
+      eraSpecificDensity: {
+        'antiquity': 'massive'
+      },
+      populationPeak: 400000,
+      economicFocus: ['trade', 'navigation', 'silver', 'purple dye', 'military'],
+      // Punic Carthage was razed in 146 BCE, but Rome refounded the city in 29 BCE
+      // and it became the capital of Africa Proconsularis and one of the largest
+      // cities in the empire — Augustine's Carthage. It ends with the Arab
+      // conquest of 698, which is also when Tunis below takes over.
+      declineYear: 698
+    },
+    {
+      name: "Tunis",
+      isHistorical: true,
+      foundingYear: 698,
+      description: "Major North African port and center of Islamic scholarship.",
+      allegianceHistory: {
+        698: "Umayyad Caliphate",
+        800: "Aghlabid Emirate",
+        909: "Fatimid Caliphate",
+        1159: "Almohad Caliphate",
+        1574: "Ottoman Empire",
+        1881: "French Protectorate",
+        1956: "Tunisia"
+      },
+      urbanDensity: 'moderate',
+      populationPeak: 100000,
+      economicFocus: ['trade', 'textiles', 'olive_oil', 'scholarship', 'piracy']
     }
   ],
   "Bekaa Valley": [
@@ -1654,24 +1993,6 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
         economicFocus: ['fur_trade', 'military', 'government']
     }
   ],
-  "Hamburg Coast": [
-    {
-        name: "Hamburg",
-        isHistorical: true,
-        foundingYear: 808,
-        description: "A powerful free city and a leading member of the Hanseatic League, dominating North Sea trade.",
-        allegianceHistory: {
-            808: "Carolingian Empire",
-            1189: "Holy Roman Empire (Free City)",
-            1510: "Hanseatic League"
-        },
-        urbanDensity: 'moderate',
-        eraSpecificDensity: {
-            'modern': 'large'
-        },
-        economicFocus: ['trade', 'shipping', 'brewing']
-    }
-  ],
   "Loire Valley": [
     {
         name: "Lyon",
@@ -1708,6 +2029,53 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
         'early_modern': 'moderate'
       },
       economicFocus: ['textiles', 'trade', 'banking', 'art']
+    },
+    {
+      name: "Brussels",
+      isHistorical: true,
+      foundingYear: 979,
+      description: "Capital of the Spanish Netherlands and later Belgium.",
+      allegianceHistory: {
+        979: "Duchy of Lower Lorraine",
+        1430: "Duchy of Burgundy",
+        1482: "Habsburg Netherlands",
+        1556: "Spanish Netherlands",
+        1714: "Austrian Netherlands",
+        1795: "French Republic",
+        1815: "United Kingdom of the Netherlands",
+        1830: "Belgium"
+      },
+      urbanDensity: 'moderate',
+      eraSpecificDensity: {
+        'medieval': 'small',
+        'renaissance_early_modern': 'moderate',
+        'modern': 'large'
+      },
+      populationPeak: 200000,
+      economicFocus: ['trade', 'textiles', 'administration', 'brewing', 'crafts']
+    },
+    {
+      name: "Antwerp",
+      isHistorical: true,
+      foundingYear: 1200,
+      description: "Northern Europe's greatest trading port during the 16th century.",
+      allegianceHistory: {
+        1200: "Duchy of Brabant",
+        1430: "Duchy of Burgundy",
+        1482: "Habsburg Netherlands",
+        1556: "Spanish Netherlands",
+        1714: "Austrian Netherlands",
+        1795: "French Republic",
+        1815: "United Kingdom of the Netherlands",
+        1830: "Belgium"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'medieval': 'moderate',
+        'renaissance_early_modern': 'large'
+      },
+      populationPeak: 125000,
+      economicFocus: ['trade', 'banking', 'textiles', 'spices', 'diamonds']
     }
   ],
   "Scheldt Basin": [
@@ -1733,16 +2101,28 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Milan",
       isHistorical: true,
-      foundingYear: -400,
-      description: "The capital of the Western Roman Empire and later a powerful ducal seat and center of the Renaissance.",
+      foundingYear: -600,
+      description: "Major commercial and financial center of northern Italy.",
       allegianceHistory: {
-        [-222]: "Roman Republic",
+        "-600": "Celtic Tribes",
+        "-222": "Roman Republic",
         286: "Western Roman Empire",
+        774: "Frankish Kingdom",
+        1162: "Holy Roman Empire",
         1395: "Duchy of Milan",
-        1535: "Spanish Empire"
+        1796: "Cisalpine Republic",
+        1815: "Austrian Empire",
+        1861: "Kingdom of Italy"
       },
       urbanDensity: 'large',
-      economicFocus: ['finance', 'armor', 'fashion', 'trade']
+      eraSpecificDensity: {
+        'antiquity': 'moderate',
+        'medieval': 'large',
+        'renaissance_early_modern': 'large',
+        'modern': 'massive'
+      },
+      populationPeak: 200000,
+      economicFocus: ['banking', 'textiles', 'metalworking', 'trade', 'silk']
     },
     {
       name: "Genoa",
@@ -1763,14 +2143,47 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Bergen",
       isHistorical: true,
       foundingYear: 1070,
-      description: "Norway's ancient capital and a key foreign office of the Hanseatic League, built on the stockfish trade.",
+      description: "Historic Hanseatic trading city, gateway to the fjords.",
       allegianceHistory: {
         1070: "Kingdom of Norway",
-        1360: "Hanseatic League (Kontor)",
-        1754: "Denmark-Norway"
+        1380: "Kalmar Union",
+        1814: "Sweden-Norway Union",
+        1905: "Kingdom of Norway",
+        1940: "German Occupation",
+        1945: "Kingdom of Norway"
       },
       urbanDensity: 'moderate',
-      economicFocus: ['trade', 'fishing', 'shipping']
+      populationPeak: 300000,
+      economicFocus: ['fish trade', 'shipping', 'oil', 'tourism']
+    },
+    {
+      name: "Trondheim",
+      isHistorical: true,
+      foundingYear: 997,
+      description: "Medieval capital and pilgrimage center with Nidaros Cathedral.",
+      allegianceHistory: {
+        997: "Kingdom of Norway",
+        1380: "Kalmar Union",
+        1814: "Sweden-Norway Union",
+        1905: "Kingdom of Norway"
+      },
+      urbanDensity: 'moderate',
+      populationPeak: 200000,
+      economicFocus: ['pilgrimage', 'trade', 'education', 'technology']
+    },
+    {
+      name: "Tromsø",
+      isHistorical: true,
+      foundingYear: 1794,
+      description: "Arctic city, the 'Paris of the North' and gateway to polar exploration.",
+      allegianceHistory: {
+        1794: "Denmark-Norway",
+        1814: "Sweden-Norway Union",
+        1905: "Kingdom of Norway"
+      },
+      urbanDensity: 'small',
+      populationPeak: 80000,
+      economicFocus: ['arctic trade', 'whaling', 'fishing', 'research']
     }
   ],
   "Carpathian Foothills": [
@@ -1790,19 +2203,23 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
   ],
   "Stockholm Archipelago": [
     {
-        name: "Stockholm",
-        isHistorical: true,
-        foundingYear: 1252,
-        description: "The city built on islands, capital of the Swedish Empire during its age of greatness.",
-        allegianceHistory: {
-            1252: "Kingdom of Sweden"
-        },
-        urbanDensity: 'moderate',
-        eraSpecificDensity: {
-            'early_modern': 'moderate',
-            'modern': 'large'
-        },
-        economicFocus: ['government', 'trade', 'iron', 'military']
+      name: "Stockholm",
+      isHistorical: true,
+      foundingYear: 1252,
+      description: "Capital of Sweden and major Baltic trading center.",
+      allegianceHistory: {
+        1252: "Kingdom of Sweden",
+        1397: "Kalmar Union",
+        1523: "Kingdom of Sweden"
+      },
+      urbanDensity: 'moderate',
+      eraSpecificDensity: {
+        'medieval': 'small',
+        'renaissance_early_modern': 'moderate',
+        'modern': 'large'
+      },
+      populationPeak: 150000,
+      economicFocus: ['trade', 'iron', 'administration', 'shipping', 'timber']
     }
   ],
   
@@ -1849,6 +2266,23 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
         },
         urbanDensity: 'large',
         economicFocus: ['spices', 'trade', 'shipping']
+    },
+    {
+      name: "Singapore",
+      isHistorical: true,
+      foundingYear: 1819,
+      description: "Strategic trading port controlling the Strait of Malacca.",
+      allegianceHistory: {
+        1819: "British Empire",
+        1963: "Malaysia",
+        1965: "Singapore"
+      },
+      urbanDensity: 'moderate',
+      eraSpecificDensity: {
+        'modern': 'massive'
+      },
+      populationPeak: 50000,
+      economicFocus: ['trade', 'shipping', 'finance', 'entrepot', 'rubber']
     }
   ],
   "Yangtze Delta": [
@@ -1871,7 +2305,7 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
         name: "Suzhou",
         isHistorical: true,
-        foundingYear: [-514],
+        foundingYear: -514,
         populationPeak: 100000,
         description: "The Venice of the East, famous for its canals, gardens, and silk production.",
         allegianceHistory: {
@@ -1888,7 +2322,7 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
         name: "Hangzhou",
         isHistorical: true,
-        foundingYear: [-222],
+        foundingYear: -222,
         populationPeak: 98000,
         description: "Heaven on Earth, former capital of Southern Song and terminus of the Grand Canal.",
         allegianceHistory: {
@@ -1903,18 +2337,30 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
         economicFocus: ['silk', 'tea', 'porcelain', 'printing']
     },
     {
-        name: "Nanjing",
-        isHistorical: true,
-        foundingYear: [-495],
-        populationPeak: 85000,
-        description: "The great southern capital of several Chinese dynasties, rivaling Beijing for preeminence.",
-        allegianceHistory: {
-            229: "Kingdom of Wu",
-            1368: "Ming Dynasty",
-            1912: "Republic of China"
-        },
-        urbanDensity: 'large',
-        economicFocus: ['government', 'trade', 'textiles', 'shipbuilding']
+      name: "Nanjing",
+      isHistorical: true,
+      foundingYear: -472,
+      description: "Ancient Chinese capital and southern center of imperial power.",
+      allegianceHistory: {
+        "-472": "Wu Kingdom",
+        "-333": "Chu Kingdom",
+        "-221": "Qin Dynasty",
+        1368: "Ming Dynasty",
+        1644: "Qing Dynasty",
+        1853: "Taiping Heavenly Kingdom",
+        1864: "Qing Dynasty",
+        1912: "Republic of China",
+        1949: "People's Republic of China"
+      },
+      urbanDensity: 'massive',
+      eraSpecificDensity: {
+        'antiquity': 'moderate',
+        'medieval': 'large',
+        'renaissance_early_modern': 'massive',
+        'modern': 'massive'
+      },
+      populationPeak: 1000000,
+      economicFocus: ['administration', 'textiles', 'education', 'crafts', 'porcelain']
     }
   ],
   "Yangtze Gorges": [
@@ -1981,18 +2427,32 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
   ],
   "Samarkand Region": [
     {
-        name: "Samarkand",
-        isHistorical: true,
-        foundingYear: -700,
-        description: "The jewel of the Silk Road, made the glittering capital of a vast empire by Timur (Tamerlane).",
-        allegianceHistory: {
-            [-329]: "Macedonian Empire",
-            712: "Umayyad Caliphate",
-            1370: "Timurid Empire",
-            1500: "Khanate of Bukhara"
-        },
-        urbanDensity: 'large',
-        economicFocus: ['trade', 'silk', 'paper', 'astronomy', 'architecture']
+      name: "Samarkand",
+      isHistorical: true,
+      foundingYear: -700,
+      description: "Pearl of the Silk Road and Timurid cultural capital.",
+      allegianceHistory: {
+        "-700": "Sogdian City-States",
+        "-329": "Macedonian Empire",
+        "-250": "Greco-Bactrian Kingdom",
+        710: "Umayyad Caliphate",
+        819: "Samanid Empire",
+        1220: "Mongol Empire",
+        1370: "Timurid Empire",
+        1500: "Shaybanid Dynasty",
+        1785: "Emirate of Bukhara",
+        1868: "Russian Empire",
+        1924: "Soviet Union",
+        1991: "Uzbekistan"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'antiquity': 'moderate',
+        'medieval': 'large',
+        'renaissance_early_modern': 'large'
+      },
+      populationPeak: 150000,
+      economicFocus: ['trade', 'crafts', 'education', 'silk', 'astronomy']
     }
   ],
   "Nara Uplands": [
@@ -2021,6 +2481,24 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
         },
         urbanDensity: 'large',
         economicFocus: ['religion', 'architecture', 'agriculture']
+    },
+    {
+      name: "Yangon",
+      isHistorical: true,
+      foundingYear: 1755,
+      description: "Colonial capital of Burma and major Southeast Asian trading port.",
+      allegianceHistory: {
+        1755: "Konbaung Dynasty",
+        1824: "British Empire",
+        1948: "Burma",
+        1989: "Myanmar"
+      },
+      urbanDensity: 'moderate',
+      eraSpecificDensity: {
+        'modern': 'large'
+      },
+      populationPeak: 150000,
+      economicFocus: ['trade', 'rice', 'teak', 'gems', 'shipping']
     }
   ],
  "Khuzestan Plain": [
@@ -2042,49 +2520,43 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
   }
 ],
 
-"Shiraz Valley": [
-  {
-    name: "Persepolis",
-    isHistorical: true,
-    foundingYear: -518,
-    declineYear: -330,
-    description: "The ceremonial capital of the Achaemenid Empire, built by Darius the Great.",
-    allegianceHistory: {
-      [-518]: "Achaemenid Empire",
-      [-330]: "Macedonian Empire"
-    },
-    urbanDensity: "large",
-    populationPeak: 40000,
-    economicFocus: ["administration", "monumental_architecture", "stone_carving"]
-  },
-  {
-    name: "Shiraz",
-    isHistorical: true,
-    foundingYear: 693,
-    description: "A cultural capital of Persia, celebrated for its poets, gardens, and wine.",
-    allegianceHistory: {
-      693: "Umayyad Caliphate",
-      819: "Saffarid Dynasty",
-      1055: "Seljuk Empire",
-      1501: "Safavid Empire"
-    },
-    urbanDensity: "large",
-    populationPeak: 200000,
-    economicFocus: ["wine", "poetry", "gardens", "ceramics"]
-  }
-],
-  "Novgorod Woods": [
+  "Shiraz Valley": [
     {
-        name: "Novgorod",
-        isHistorical: true,
-        foundingYear: 859,
-        description: "A powerful merchant republic of the Rus, and a key eastern outpost of the Hanseatic League.",
-        allegianceHistory: {
-            859: "Novgorod Republic",
-            1478: "Grand Duchy of Moscow"
-        },
-        urbanDensity: 'moderate',
-        economicFocus: ['trade', 'furs', 'wax', 'republicanism']
+      name: "Persepolis",
+      isHistorical: true,
+      foundingYear: -518,
+      declineYear: -330,
+      description: "The ceremonial capital of the Achaemenid Empire, built by Darius the Great.",
+      allegianceHistory: {
+        [-518]: "Achaemenid Empire",
+        [-330]: "Macedonian Empire"
+      },
+      urbanDensity: "large",
+      populationPeak: 40000,
+      economicFocus: ["administration", "monumental_architecture", "stone_carving"]
+    },
+    {
+      name: "Shiraz",
+      isHistorical: true,
+      foundingYear: 693,
+      description: "City of poets, gardens, and wine, cultural heart of Persian civilization.",
+      allegianceHistory: {
+        693: "Umayyad Caliphate",
+        819: "Saffarid Dynasty",
+        1051: "Seljuk Empire",
+        1501: "Safavid Empire",
+        1747: "Zand Dynasty",
+        1794: "Qajar Dynasty",
+        1925: "Pahlavi Dynasty",
+        1979: "Islamic Republic of Iran"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'medieval': 'large',
+        'renaissance_early_modern': 'large'
+      },
+      populationPeak: 200000,
+      economicFocus: ['wine', 'poetry', 'gardens', 'textiles', 'crafts']
     }
   ],
   
@@ -2122,38 +2594,6 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       economicFocus: ['shipping', 'trade', 'education', 'rebellion']
     }
   ],
-  "Delaware River Valley": [
-    {
-      name: "Philadelphia",
-      isHistorical: true,
-      foundingYear: 1682,
-      description: "The city of brotherly love, the first capital of the United States and a center of enlightenment thought.",
-      allegianceHistory: {
-        1682: "Colony of Pennsylvania (English)",
-        1776: "United States"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'early_modern': 'large'
-      },
-      economicFocus: ['government', 'trade', 'philosophy', 'medicine']
-    }
-  ],
-  "Lower Mississippi Delta": [
-    {
-      name: "New Orleans",
-      isHistorical: true,
-      foundingYear: 1718,
-      description: "A vibrant crescent city controlling the mouth of the Mississippi, a melting pot of cultures.",
-      allegianceHistory: {
-        1718: "New France",
-        1763: "Spanish Empire",
-        1803: "United States"
-      },
-      urbanDensity: 'moderate',
-      economicFocus: ['shipping', 'trade', 'sugar', 'cotton']
-    }
-  ],
 // === EUROPE ===
   "Iberian Peninsula": [
     {
@@ -2183,21 +2623,6 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       },
       urbanDensity: 'moderate',
       economicFocus: ['shipping', 'trade', 'architecture', 'navy']
-    }
-  ],
-  "Brandenburg Plain": [
-    {
-      name: "Lübeck",
-      isHistorical: true,
-      foundingYear: 1143,
-      description: "The queen of the Hanseatic League, a free imperial city that dominated Baltic trade for centuries.",
-      allegianceHistory: {
-        1143: "County of Holstein",
-        1226: "Free Imperial City (Hanseatic League)",
-        1871: "German Empire"
-      },
-      urbanDensity: 'moderate',
-      economicFocus: ['trade', 'salt', 'shipping', 'law']
     }
   ],
   "Dalmatian Coast": [
@@ -2286,6 +2711,24 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       },
       urbanDensity: 'moderate',
       economicFocus: ['spices', 'pepper', 'trade', 'shipping']
+    },
+    {
+      name: "Mumbai",
+      isHistorical: true,
+      foundingYear: 1507,
+      description: "Major port city and commercial center, gateway to western India.",
+      allegianceHistory: {
+        1507: "Portuguese Empire",
+        1661: "British Empire",
+        1947: "India"
+      },
+      urbanDensity: 'moderate',
+      eraSpecificDensity: {
+        'early_modern': 'large',
+        'modern': 'massive'
+      },
+      populationPeak: 300000,
+      economicFocus: ['trade', 'textiles', 'shipping', 'cotton', 'finance']
     }
   ],
   "Western Ghats": [
@@ -2322,28 +2765,66 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Varanasi",
       isHistorical: true,
       foundingYear: -1200,
-      description: "The eternal city on the Ganges, holiest of Hindu cities where pilgrims seek liberation.",
+      description: "One of the world's oldest cities and holiest site in Hinduism.",
       allegianceHistory: {
-        [-1200]: "Vedic Kingdoms",
-        321: "Maurya Empire",
+        "-1200": "Vedic Kingdoms",
+        "-600": "Mahajanapadas",
+        321: "Mauryan Empire",
         320: "Gupta Empire",
         1194: "Delhi Sultanate",
-        1526: "Mughal Empire"
-      }
+        1526: "Mughal Empire",
+        1775: "British East India Company",
+        1947: "India"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'antiquity': 'moderate',
+        'medieval': 'large',
+        'renaissance_early_modern': 'large',
+        'modern': 'massive'
+      },
+      populationPeak: 200000,
+      economicFocus: ['religion', 'education', 'textiles', 'crafts', 'pilgrimage']
     }
   ],
   "Delhi Region": [
     {
       name: "Delhi",
       isHistorical: true,
-      foundingYear: -1000,
-      description: "The seat of empires, where the fate of India has been decided for a thousand years.",
+      foundingYear: 1052,
+      description: "Capital of multiple Indian empires, seat of Mughal power.",
       allegianceHistory: {
-        [-1000]: "Indraprastha",
+        1052: "Tomara Dynasty",
+        1180: "Chauhan Dynasty",
         1206: "Delhi Sultanate",
         1526: "Mughal Empire",
-        1803: "British Empire"
-      }
+        1803: "British East India Company",
+        1858: "British Raj",
+        1947: "India"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'medieval': 'large',
+        'early_modern': 'massive',
+        'modern': 'massive'
+      },
+      populationPeak: 400000,
+      economicFocus: ['government', 'textiles', 'metalwork', 'ivory', 'administration']
+    },
+    {
+      name: "Agra",
+      isHistorical: true,
+      foundingYear: 1504,
+      description: "Mughal capital and home of the Taj Mahal, center of Indo-Islamic architecture.",
+      allegianceHistory: {
+        1504: "Mughal Empire",
+        1803: "British East India Company",
+        1858: "British Raj",
+        1947: "India"
+      },
+      urbanDensity: 'large',
+      populationPeak: 200000,
+      economicFocus: ['architecture', 'marble', 'textiles', 'crafts', 'government']
     }
   ],
   "Kandy Plateau": [
@@ -2370,6 +2851,29 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
             641: "Rashidun Caliphate",
             1517: "Ottoman Empire"
         }
+    },
+    {
+      name: "Cairo",
+      isHistorical: true,
+      foundingYear: 969,
+      description: "The largest city in the Islamic world and Egypt's capital, center of Islamic learning.",
+      allegianceHistory: {
+        969: "Fatimid Caliphate",
+        1171: "Ayyubid Sultanate",
+        1250: "Mamluk Sultanate",
+        1517: "Ottoman Empire",
+        1805: "Ottoman Egypt",
+        1914: "British Protectorate",
+        1922: "Kingdom of Egypt"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'medieval': 'massive',
+        'early_modern': 'massive',
+        'modern': 'massive'
+      },
+      populationPeak: 500000,
+      economicFocus: ['trade', 'textiles', 'islamic_scholarship', 'spices', 'administration']
     }
   ],
   "Thebes Valley": [
@@ -2390,16 +2894,70 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Jerusalem",
       isHistorical: true,
       foundingYear: -1000,
-      description: "The holy city of three faiths, eternal focus of pilgrimage and prayer.",
+      description: "Holy city sacred to Judaism, Christianity, and Islam.",
       allegianceHistory: {
-        [-1000]: "Kingdom of Israel",
-        [-586]: "Babylonian Empire",
-        [-332]: "Macedonian Empire",
-        [-63]: "Roman Republic",
+        "-1000": "Kingdom of Israel",
+        "-586": "Babylonian Empire",
+        "-539": "Achaemenid Empire",
+        "-332": "Macedonian Empire",
+        "-63": "Roman Republic",
         638: "Rashidun Caliphate",
-        1099: "Crusader States",
-        1187: "Ayyubid Dynasty"
-      }
+        1099: "Crusader Kingdom of Jerusalem",
+        1187: "Ayyubid Dynasty",
+        1517: "Ottoman Empire",
+        1917: "British Mandate",
+        1948: "Jordan/Israel"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'antiquity': 'moderate',
+        'medieval': 'large',
+        'renaissance_early_modern': 'moderate',
+        'modern': 'large'
+      },
+      populationPeak: 200000,
+      economicFocus: ['religion', 'pilgrimage', 'trade', 'crafts', 'administration']
+    },
+    {
+      name: "Bethlehem",
+      isHistorical: true,
+      foundingYear: -1350,
+      description: "Birthplace of Jesus Christ, major Christian pilgrimage site.",
+      allegianceHistory: {
+        [-1350]: "Canaanite Settlement",
+        [-1000]: "Kingdom of Judah",
+        638: "Rashidun Caliphate",
+        1099: "Kingdom of Jerusalem",
+        1187: "Ayyubid Dynasty",
+        1517: "Ottoman Empire",
+        1917: "British Mandate",
+        1948: "Jordanian Control",
+        1967: "Israeli Occupation",
+        1995: "Palestinian Authority"
+      },
+      urbanDensity: 'small',
+      populationPeak: 30000,
+      economicFocus: ['pilgrimage', 'tourism', 'olive wood', 'mother-of-pearl']
+    },
+    {
+      name: "Hebron",
+      isHistorical: true,
+      foundingYear: -3500,
+      description: "Ancient city with the Tomb of the Patriarchs, sacred to Jews and Muslims.",
+      allegianceHistory: {
+        [-3500]: "Canaanite City",
+        [-1000]: "Kingdom of Judah",
+        638: "Rashidun Caliphate",
+        1099: "Kingdom of Jerusalem",
+        1187: "Ayyubid Dynasty",
+        1517: "Ottoman Empire",
+        1917: "British Mandate",
+        1948: "Jordanian Control",
+        1967: "Israeli Occupation"
+      },
+      urbanDensity: 'moderate',
+      populationPeak: 250000,
+      economicFocus: ['glass', 'pottery', 'leather', 'grapes']
     }
   ],
   "Tigris–Euphrates Confluence": [
@@ -2420,29 +2978,74 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Isfahan",
       isHistorical: true,
-      foundingYear: 1598,
-      description: "Half the world, as the Persians say - the magnificent Safavid capital of gardens and mosques.",
+      foundingYear: -500,
+      description: "Jewel of the Safavid Empire and architectural marvel of Persia.",
       allegianceHistory: {
-        1598: "Safavid Empire",
-        1722: "Afghan Invasion",
-        1729: "Afsharid Dynasty"
-      }
+        "-500": "Achaemenid Empire",
+        642: "Rashidun Caliphate",
+        1051: "Seljuk Empire",
+        1501: "Safavid Empire",
+        1722: "Afghan Hotaki Dynasty",
+        1729: "Safavid Restoration",
+        1785: "Zand Dynasty",
+        1794: "Qajar Dynasty"
+      },
+      urbanDensity: 'massive',
+      eraSpecificDensity: {
+        'antiquity': 'moderate',
+        'medieval': 'large',
+        'renaissance_early_modern': 'massive'
+      },
+      populationPeak: 600000,
+      economicFocus: ['crafts', 'carpets', 'textiles', 'trade', 'architecture']
+    },
+    {
+      name: "Tehran",
+      isHistorical: true,
+      foundingYear: 1200,
+      description: "Persian capital and major center of Iranian civilization.",
+      allegianceHistory: {
+        1200: "Khwarezmid Empire",
+        1220: "Mongol Empire",
+        1501: "Safavid Empire",
+        1736: "Afsharid Dynasty",
+        1785: "Zand Dynasty",
+        1794: "Qajar Dynasty",
+        1925: "Pahlavi Dynasty",
+        1979: "Islamic Republic of Iran"
+      },
+      urbanDensity: 'large',
+      eraSpecificDensity: {
+        'early_modern': 'large',
+        'modern': 'massive'
+      },
+      populationPeak: 250000,
+      economicFocus: ['government', 'carpets', 'silk', 'trade', 'crafts']
     }
   ],
   "Punjab Plains": [
     {
       name: "Lahore",
       isHistorical: true,
-      foundingYear: 100,
-      description: "A magnificent garden city and a capital of the Mughal Empire, guarding the gateway to the Indian subcontinent.",
+      foundingYear: 1000,
+      description: "Jewel of the Mughal Empire and major center of Indo-Islamic culture.",
       allegianceHistory: {
-        1021: "Ghaznavid Empire",
+        1000: "Ghaznavid Empire",
+        1186: "Ghurid Dynasty",
+        1206: "Delhi Sultanate",
         1524: "Mughal Empire",
+        1747: "Durrani Empire",
         1799: "Sikh Empire",
-        1849: "British Empire"
+        1849: "British Punjab",
+        1947: "Pakistan"
       },
       urbanDensity: 'large',
-      economicFocus: ['government', 'trade', 'architecture', 'military']
+      eraSpecificDensity: {
+        'medieval': 'moderate',
+        'renaissance_early_modern': 'large'
+      },
+      populationPeak: 300000,
+      economicFocus: ['trade', 'textiles', 'administration', 'crafts', 'gardens']
     }
   ],
   "Java Sea": [
@@ -2485,17 +3088,20 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Osaka",
       isHistorical: true,
       foundingYear: 1496,
-      description: "The commercial heart of Japan, a city of merchants, canals, and a formidable castle.",
+      description: "Major commercial center of Japan and gateway to the Inland Sea.",
       allegianceHistory: {
-        1496: "Jodo Shinshu (Temple-City)",
-        1583: "Toyotomi Hideyoshi",
-        1615: "Tokugawa Shogunate"
+        1496: "Sengoku Period",
+        1583: "Toyotomi Clan",
+        1600: "Tokugawa Shogunate",
+        1868: "Empire of Japan"
       },
       urbanDensity: 'large',
       eraSpecificDensity: {
+        'renaissance_early_modern': 'large',
         'modern': 'massive'
       },
-      economicFocus: ['trade', 'rice', 'finance', 'crafts']
+      populationPeak: 400000,
+      economicFocus: ['trade', 'crafts', 'textiles', 'sake', 'rice']
     }
   ],
 
@@ -2523,37 +3129,6 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
   }
 ],
 
-"Tunisian Sahel": [
-  {
-    name: "Carthage",
-    isHistorical: true,
-    foundingYear: -814,
-    declineYear: -146,
-    description: "The great Punic capital, rival of Rome, destroyed in the Third Punic War.",
-    allegianceHistory: {
-      [-814]: "Carthaginian Empire",
-      [-146]: "Roman Republic"
-    },
-    urbanDensity: "large",
-    populationPeak: 400000,
-    economicFocus: ["grain", "purple_dye", "shipping", "mercenaries"]
-  },
-  {
-    name: "Tunis",
-    isHistorical: true,
-    foundingYear: 698,
-    description: "A medieval and modern capital of Tunisia, rising after Carthage’s fall.",
-    allegianceHistory: {
-      698: "Umayyad Caliphate",
-      1229: "Hafsid Dynasty",
-      1574: "Ottoman Empire",
-      1881: "French Protectorate"
-    },
-    urbanDensity: "large",
-    populationPeak: 300000,
-    economicFocus: ["olive_oil", "grain", "ceramics", "trade"]
-  }
-],
 
   "Diyala Valley": [
   {
@@ -2574,23 +3149,32 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
 ],
 
 
-"Babylon Region": [
-  {
-    name: "Babylon",
-    isHistorical: true,
-    foundingYear: -2300,
-    description: "One of the most iconic cities of Mesopotamia, famed for its walls, ziggurats, and the legendary Hanging Gardens.",
-    allegianceHistory: {
-      [-1792]: "Babylonian Empire",
-      [-539]: "Achaemenid Empire",
-      [-331]: "Macedonian Empire",
-      650: "Sassanian Empire"
-    },
-    urbanDensity: 'large',
-    populationPeak: 200000,
-    economicFocus: ['WHEAT', 'DATES', 'TEXTILES', 'BRICK_CONSTRUCTION']
-  }
-],
+  "Babylon Region": [
+    {
+      name: "Babylon",
+      isHistorical: true,
+      foundingYear: -2300,
+      description: "Ancient capital of Mesopotamia and center of the Babylonian Empire.",
+      allegianceHistory: {
+        "-2300": "Akkadian Empire",
+        "-1894": "First Babylonian Dynasty",
+        "-1595": "Kassite Dynasty",
+        "-626": "Neo-Babylonian Empire",
+        "-539": "Achaemenid Empire",
+        "-331": "Macedonian Empire",
+        "-141": "Parthian Empire",
+        224: "Sassanid Empire",
+        637: "Rashidun Caliphate"
+      },
+      urbanDensity: 'massive',
+      eraSpecificDensity: {
+        'antiquity': 'massive'
+      },
+      populationPeak: 200000,
+      economicFocus: ['administration', 'religion', 'trade', 'agriculture', 'astronomy'],
+      declineYear: 650  // City largely abandoned by 7th century CE
+    }
+  ],
 "Nineveh Plain": [
   {
     name: "Nineveh",
@@ -2608,26 +3192,6 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     economicFocus: ['IRON_TOOLS', 'LINEN_TEXTILES', 'STONE_BLOCK', 'HORSES']
   }
 ],
-"Jerusalem Hills": [
-  {
-    name: "Jerusalem",
-    isHistorical: true,
-    foundingYear: -2000,
-    description: "A sacred and contested city, central to Judaism, Christianity, and Islam.",
-    allegianceHistory: {
-      [-1000]: "Kingdom of Judah",
-      [-586]: "Neo-Babylonian Empire",
-      [-63]: "Roman Republic",
-      638: "Rashidun Caliphate",
-      1099: "Crusader Kingdom of Jerusalem",
-      1187: "Ayyubid Sultanate",
-      1517: "Ottoman Empire"
-    },
-    urbanDensity: 'large',
-    populationPeak: 1000000,
-    economicFocus: ['WINE', 'OLIVE_OIL', 'STONEWORK', 'PILGRIMAGE_GOODS']
-  }
-],
 "Mount Lebanon Range": [
   {
     name: "Tyre",
@@ -2643,41 +3207,6 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     urbanDensity: 'moderate',
     populationPeak: 50000,
     economicFocus: ['PURPLE_DYE', 'CEDAR_TIMBER', 'GLASSWARE', 'OLIVE_OIL']
-  }
-],
-"Tunisian Sahel": [
-  {
-    name: "Carthage",
-    isHistorical: true,
-    foundingYear: -814,
-    declineYear: -146,
-    description: "The Phoenician-founded metropolis, a dominant naval and commercial power of the western Mediterranean until its destruction by Rome.",
-    allegianceHistory: {
-      [-814]: "Phoenician (Tyre)",
-      [-575]: "Carthaginian Republic",
-      [-146]: "Roman Republic"
-    },
-    urbanDensity: 'large',
-    populationPeak: 400000,
-    economicFocus: ['WHEAT', 'OLIVE_OIL', 'POTTERY', 'NAVAL_SHIPS']
-  }
-],
-"Fez Plateau": [
-  {
-    name: "Fez",
-    isHistorical: true,
-    foundingYear: 789,
-    description: "A spiritual and cultural capital of Morocco, home to one of the world’s oldest universities.",
-    allegianceHistory: {
-      789: "Idrisid Dynasty",
-      1040: "Almoravid Dynasty",
-      1147: "Almohad Caliphate",
-      1271: "Marinid Dynasty",
-      1666: "Alaouite Dynasty"
-    },
-    urbanDensity: 'large',
-    populationPeak: 400000,
-    economicFocus: ['BOOK_MANUSCRIPTS', 'LEATHERWORK', 'CERAMICS', 'CARPETS']
   }
 ],
 "Tripolitania": [
@@ -2820,31 +3349,22 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Havana",
       isHistorical: true,
       foundingYear: 1519,
-      description: "The key to the New World, the heavily fortified treasure port for the Spanish fleet.",
+      description: "Key to the New World and treasure fleet terminus of the Spanish Empire.",
       allegianceHistory: {
         1519: "Spanish Empire",
-        1898: "United States (Protectorate)",
-        1902: "Republic of Cuba"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'modern': 'large'
-      },
-      economicFocus: ['shipping', 'sugar', 'tobacco', 'military']
-    }
-  ],
-  "Cajamarca Highlands": [
-    {
-      name: "Lima",
-      isHistorical: true,
-      foundingYear: 1535,
-      description: "The City of Kings, the proud and wealthy capital of the vast Viceroyalty of Peru.",
-      allegianceHistory: {
-        1535: "Spanish Empire",
-        1821: "Republic of Peru"
+        1762: "British Empire",
+        1763: "Spanish Empire",
+        1898: "United States",
+        1902: "Republic of Cuba",
+        1959: "Revolutionary Cuba"
       },
       urbanDensity: 'large',
-      economicFocus: ['government', 'silver', 'trade', 'education']
+      eraSpecificDensity: {
+        'renaissance_early_modern': 'large',
+        'modern': 'large'
+      },
+      populationPeak: 200000,
+      economicFocus: ['trade', 'sugar', 'tobacco', 'shipping', 'fortification']
     }
   ],
   "Mosquito Coast": [
@@ -2977,44 +3497,6 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
   
-  "Athens Basin": [
-    {
-      name: "Athens",
-      isHistorical: true,
-      foundingYear: -3000,
-      description: "The cradle of democracy and Western philosophy.",
-      allegianceHistory: {
-        [-3000]: "Mycenaean Greeks",
-        [-508]: "Athenian Democracy",
-        [-338]: "Macedonian Empire",
-        [-146]: "Roman Republic",
-        395: "Byzantine Empire",
-        1458: "Ottoman Empire",
-        1833: "Kingdom of Greece"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'antiquity': 'large',
-        'modern': 'large'
-      },
-      economicFocus: ['philosophy', 'trade', 'naval_power', 'tourism']
-    },
-    {
-      name: "Thessalonica",
-      isHistorical: true,
-      foundingYear: -315,
-      description: "Byzantine Empire's second city and gateway to the Balkans.",
-      allegianceHistory: {
-        [-315]: "Macedonian Kingdom",
-        [-146]: "Roman Republic",
-        395: "Byzantine Empire",
-        1430: "Ottoman Empire",
-        1912: "Kingdom of Greece"
-      },
-      urbanDensity: 'moderate',
-      economicFocus: ['trade', 'silk', 'jewish_commerce', 'byzantine_culture']
-    }
-  ],
   
   // North America additions
   "Pacific Coast Ranges": [
@@ -3305,7 +3787,7 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Dhaka",
       isHistorical: true,
       foundingYear: 1608,
-      description: "Historic Mughal capital and center of muslin textile production.",
+      description: "Capital of Bengal and major center of muslin textile production.",
       allegianceHistory: {
         1608: "Mughal Empire",
         1765: "British East India Company",
@@ -3313,12 +3795,9 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
         1947: "Pakistan",
         1971: "Bangladesh"
       },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'modern': 'massive'
-      },
-      populationPeak: 21000000,
-      economicFocus: ['textiles', 'muslin', 'jute', 'commerce']
+      urbanDensity: 'large',
+      populationPeak: 200000,
+      economicFocus: ['textiles', 'muslin', 'trade', 'river_transport', 'administration']
     },
     {
       name: "Khulna",
@@ -3344,16 +3823,17 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Bangkok",
       isHistorical: true,
       foundingYear: 1782,
-      description: "Capital of Siam founded after the fall of Ayutthaya.",
+      description: "Capital of Thailand and major Southeast Asian metropolis.",
       allegianceHistory: {
-        1782: "Kingdom of Siam"
+        1782: "Kingdom of Siam",
+        1932: "Kingdom of Thailand"
       },
       urbanDensity: 'moderate',
       eraSpecificDensity: {
         'modern': 'massive'
       },
-      populationPeak: 10700000,
-      economicFocus: ['trade', 'rice', 'manufacturing', 'services']
+      populationPeak: 300000,
+      economicFocus: ['trade', 'administration', 'rice', 'shipping', 'temples']
     },
     {
       name: "Ayutthaya",
@@ -3444,22 +3924,22 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Jakarta",
       isHistorical: true,
-      foundingYear: 397,
-      description: "Major port city, known as Sunda Kelapa, then Jayakarta, then Batavia.",
+      foundingYear: 1619,
+      description: "Dutch colonial capital of the East Indies and major Southeast Asian port.",
       allegianceHistory: {
-        397: "Kingdom of Tarumanagara",
-        669: "Sunda Kingdom",
-        1527: "Sultanate of Banten",
-        1619: "Dutch East Indies",
-        1942: "Japanese Occupation",
-        1945: "Republic of Indonesia"
+        1527: "Sultanate of Demak",
+        1619: "Dutch East India Company",
+        1800: "Dutch East Indies",
+        1942: "Japanese Empire",
+        1945: "Indonesia"
       },
-      urbanDensity: 'moderate',
+      urbanDensity: 'large',
       eraSpecificDensity: {
+        'early_modern': 'large',
         'modern': 'massive'
       },
-      populationPeak: 10600000,
-      economicFocus: ['trade', 'spices', 'administration', 'manufacturing']
+      populationPeak: 200000,
+      economicFocus: ['trade', 'spices', 'administration', 'shipping', 'sugar']
     },
     {
       name: "Bandung",
@@ -3755,7 +4235,7 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Srinagar",
       isHistorical: true,
-      foundingYear: [-250],
+      foundingYear: -250,
       description: "Ancient city on Dal Lake, summer capital of Kashmir.",
       allegianceHistory: {
         [-250]: "Mauryan Empire",
@@ -3775,7 +4255,7 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Anantnag",
       isHistorical: true,
-      foundingYear: [-250],
+      foundingYear: -250,
       description: "Ancient pilgrimage center with sacred springs.",
       allegianceHistory: {
         [-250]: "Local Kingdom",
@@ -3793,7 +4273,7 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Shenyang",
       isHistorical: true,
-      foundingYear: [-300],
+      foundingYear: -300,
       description: "Ancient city that became the Manchu capital before conquering China.",
       allegianceHistory: {
         [-300]: "Yan State",
@@ -3851,103 +4331,7 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "Jerusalem Hills": [
-    {
-      name: "Jerusalem",
-      isHistorical: true,
-      foundingYear: [-3000],
-      description: "Holy city sacred to Judaism, Christianity, and Islam.",
-      allegianceHistory: {
-        [-3000]: "Canaanite City",
-        [-1000]: "Kingdom of Israel",
-        [-586]: "Babylonian Empire",
-        [-538]: "Persian Empire",
-        [-332]: "Macedonian Empire",
-        [-63]: "Roman Empire",
-        638: "Rashidun Caliphate",
-        1099: "Kingdom of Jerusalem",
-        1187: "Ayyubid Dynasty",
-        1517: "Ottoman Empire",
-        1917: "British Mandate",
-        1948: "Divided City",
-        1967: "Israeli Control"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'modern': 'large'
-      },
-      populationPeak: 1000000,
-      economicFocus: ['pilgrimage', 'tourism', 'government', 'technology']
-    },
-    {
-      name: "Bethlehem",
-      isHistorical: true,
-      foundingYear: [-1350],
-      description: "Birthplace of Jesus Christ, major Christian pilgrimage site.",
-      allegianceHistory: {
-        [-1350]: "Canaanite Settlement",
-        [-1000]: "Kingdom of Judah",
-        638: "Rashidun Caliphate",
-        1099: "Kingdom of Jerusalem",
-        1187: "Ayyubid Dynasty",
-        1517: "Ottoman Empire",
-        1917: "British Mandate",
-        1948: "Jordanian Control",
-        1967: "Israeli Occupation",
-        1995: "Palestinian Authority"
-      },
-      urbanDensity: 'small',
-      populationPeak: 30000,
-      economicFocus: ['pilgrimage', 'tourism', 'olive wood', 'mother-of-pearl']
-    },
-    {
-      name: "Hebron",
-      isHistorical: true,
-      foundingYear: [-3500],
-      description: "Ancient city with the Tomb of the Patriarchs, sacred to Jews and Muslims.",
-      allegianceHistory: {
-        [-3500]: "Canaanite City",
-        [-1000]: "Kingdom of Judah",
-        638: "Rashidun Caliphate",
-        1099: "Kingdom of Jerusalem",
-        1187: "Ayyubid Dynasty",
-        1517: "Ottoman Empire",
-        1917: "British Mandate",
-        1948: "Jordanian Control",
-        1967: "Israeli Occupation"
-      },
-      urbanDensity: 'moderate',
-      populationPeak: 250000,
-      economicFocus: ['glass', 'pottery', 'leather', 'grapes']
-    }
-  ],
 
-  "Orinoco Delta": [
-    {
-      name: "Ciudad Guayana",
-      isHistorical: false,
-      foundingYear: 1961,
-      description: "Modern planned industrial city at the Orinoco-Caroni confluence.",
-      allegianceHistory: {
-        1961: "Venezuela"
-      },
-      urbanDensity: 'moderate',
-      populationPeak: 900000,
-      economicFocus: ['steel', 'aluminum', 'hydropower', 'mining']
-    },
-    {
-      name: "Tucupita",
-      isHistorical: true,
-      foundingYear: 1848,
-      description: "Capital of Delta Amacuro state, gateway to the Orinoco Delta.",
-      allegianceHistory: {
-        1848: "Venezuela"
-      },
-      urbanDensity: 'small',
-      populationPeak: 100000,
-      economicFocus: ['fishing', 'agriculture', 'oil', 'indigenous crafts']
-    }
-  ],
 
   "Guyana Highlands": [
     {
@@ -4007,54 +4391,6 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "Norwegian Fjords": [
-    {
-      name: "Bergen",
-      isHistorical: true,
-      foundingYear: 1070,
-      description: "Historic Hanseatic trading city, gateway to the fjords.",
-      allegianceHistory: {
-        1070: "Kingdom of Norway",
-        1380: "Kalmar Union",
-        1814: "Sweden-Norway Union",
-        1905: "Kingdom of Norway",
-        1940: "German Occupation",
-        1945: "Kingdom of Norway"
-      },
-      urbanDensity: 'moderate',
-      populationPeak: 300000,
-      economicFocus: ['fish trade', 'shipping', 'oil', 'tourism']
-    },
-    {
-      name: "Trondheim",
-      isHistorical: true,
-      foundingYear: 997,
-      description: "Medieval capital and pilgrimage center with Nidaros Cathedral.",
-      allegianceHistory: {
-        997: "Kingdom of Norway",
-        1380: "Kalmar Union",
-        1814: "Sweden-Norway Union",
-        1905: "Kingdom of Norway"
-      },
-      urbanDensity: 'moderate',
-      populationPeak: 200000,
-      economicFocus: ['pilgrimage', 'trade', 'education', 'technology']
-    },
-    {
-      name: "Tromsø",
-      isHistorical: true,
-      foundingYear: 1794,
-      description: "Arctic city, the 'Paris of the North' and gateway to polar exploration.",
-      allegianceHistory: {
-        1794: "Denmark-Norway",
-        1814: "Sweden-Norway Union",
-        1905: "Kingdom of Norway"
-      },
-      urbanDensity: 'small',
-      populationPeak: 80000,
-      economicFocus: ['arctic trade', 'whaling', 'fishing', 'research']
-    }
-  ],
 
   "Azores": [
     {
@@ -4093,7 +4429,7 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Seoul",
       isHistorical: true,
-      foundingYear: [-18],
+      foundingYear: -18,
       description: "Capital of Korea for over 600 years, from Joseon to modern megacity.",
       allegianceHistory: {
         [-18]: "Baekje Kingdom",
@@ -4115,7 +4451,7 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Pyongyang",
       isHistorical: true,
-      foundingYear: [-2333],
+      foundingYear: -2333,
       description: "Ancient capital of Goguryeo, now capital of North Korea.",
       allegianceHistory: {
         [-2333]: "Gojoseon",
@@ -4138,7 +4474,7 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Busan",
       isHistorical: true,
-      foundingYear: [-100],
+      foundingYear: -100,
       description: "Major port city, Korea's gateway to the sea.",
       allegianceHistory: {
         [-100]: "Geumgwan Gaya",
@@ -4161,7 +4497,7 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Fukuoka",
       isHistorical: true,
-      foundingYear: [-100],
+      foundingYear: -100,
       description: "Ancient gateway between Japan and Asia, major commercial center.",
       allegianceHistory: {
         [-100]: "Na Kingdom",
@@ -4217,46 +4553,47 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Nicosia",
       isHistorical: true,
-      foundingYear: [-280],
-      description: "Last divided capital in Europe, contested between Greeks and Turks.",
+      foundingYear: 965,
+      description: "The last divided capital in Europe, seat of Lusignan crusader kings and Venetian governors.",
       allegianceHistory: {
-        [-280]: "Ptolemaic Kingdom",
-        58: "Roman Empire",
-        395: "Byzantine Empire",
-        1191: "Kingdom of Cyprus",
+        965: "Byzantine Empire",
+        1191: "Kingdom of Cyprus (Lusignan)",
         1489: "Republic of Venice",
         1571: "Ottoman Empire",
-        1878: "British Administration",
-        1960: "Republic of Cyprus",
-        1974: "Divided City"
+        1878: "British Empire",
+        1960: "Republic of Cyprus"
       },
       urbanDensity: 'moderate',
-      populationPeak: 350000,
-      economicFocus: ['government', 'finance', 'trade', 'services']
+      eraSpecificDensity: {
+        'medieval': 'moderate',
+        'renaissance_early_modern': 'moderate',
+        'modern': 'moderate'
+      },
+      populationPeak: 116000,
+      economicFocus: ['copper', 'trade', 'wine', 'lace', 'government']
     },
     {
       name: "Famagusta",
       isHistorical: true,
-      foundingYear: [-300],
-      description: "Medieval port city with Venetian walls, ghost town since 1974.",
+      foundingYear: -285,
+      description: "The richest city in Christendom during the Lusignan era, protected by massive Venetian walls.",
       allegianceHistory: {
-        [-300]: "Ptolemaic Kingdom",
-        1191: "Kingdom of Cyprus",
+        [-285]: "Ptolemaic Egypt",
+        1291: "Kingdom of Cyprus (Lusignan)",
         1489: "Republic of Venice",
-        1571: "Ottoman Empire",
-        1878: "British Administration",
-        1960: "Republic of Cyprus",
-        1974: "Turkish Occupation"
+        1571: "Ottoman Empire"
       },
-      urbanDensity: 'small',
-      declineYear: 1974,
-      populationPeak: 40000,
-      economicFocus: ['trade', 'tourism', 'port']
+      urbanDensity: 'moderate',
+      eraSpecificDensity: {
+        'medieval': 'large',
+        'renaissance_early_modern': 'moderate'
+      },
+      economicFocus: ['trade', 'shipping', 'crusades', 'luxury goods']
     },
     {
       name: "Paphos",
       isHistorical: true,
-      foundingYear: [-1400],
+      foundingYear: -1400,
       description: "Mythical birthplace of Aphrodite, ancient capital with Roman mosaics.",
       allegianceHistory: {
         [-1400]: "Mycenaean Settlement",
@@ -4275,54 +4612,12 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "Crete": [
-    {
-      name: "Heraklion",
-      isHistorical: true,
-      foundingYear: [-2000],
-      description: "Capital near ancient Knossos, center of Minoan civilization.",
-      allegianceHistory: {
-        [-2000]: "Minoan Civilization",
-        [-1100]: "Mycenaean Greeks",
-        [-67]: "Roman Empire",
-        395: "Byzantine Empire",
-        824: "Emirate of Crete",
-        961: "Byzantine Empire",
-        1204: "Republic of Venice",
-        1669: "Ottoman Empire",
-        1898: "Cretan State",
-        1913: "Kingdom of Greece"
-      },
-      urbanDensity: 'moderate',
-      populationPeak: 180000,
-      economicFocus: ['tourism', 'archaeology', 'shipping', 'agriculture']
-    },
-    {
-      name: "Chania",
-      isHistorical: true,
-      foundingYear: [-1500],
-      description: "Venetian harbor city, one of the Mediterranean's most beautiful ports.",
-      allegianceHistory: {
-        [-1500]: "Minoan Settlement",
-        [-500]: "Greek City-State",
-        [-67]: "Roman Empire",
-        395: "Byzantine Empire",
-        1252: "Republic of Venice",
-        1645: "Ottoman Empire",
-        1898: "Cretan State",
-        1913: "Kingdom of Greece"
-      },
-      urbanDensity: 'small',
-      populationPeak: 110000,
-      economicFocus: ['tourism', 'olive oil', 'shipping', 'crafts']
-    }
-  ],
 
   "Rhodes": [
     {
       name: "Rhodes City",
       isHistorical: true,
-      foundingYear: [-408],
+      foundingYear: -408,
       description: "Medieval city of the Knights Hospitaller, site of the Colossus.",
       allegianceHistory: {
         [-408]: "Rhodes City-State",
@@ -4340,7 +4635,7 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     {
       name: "Lindos",
       isHistorical: true,
-      foundingYear: [-1000],
+      foundingYear: -1000,
       description: "Ancient acropolis town with Temple of Athena.",
       allegianceHistory: {
         [-1000]: "Dorian Settlement",
@@ -4408,33 +4703,39 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Havana",
       isHistorical: true,
       foundingYear: 1519,
-      description: "Pearl of the Caribbean, frozen in time by revolution and embargo.",
+      description: "The key to the New World, Spain's heavily fortified treasure fleet port and Caribbean capital.",
       allegianceHistory: {
         1519: "Spanish Empire",
-        1762: "British Occupation",
-        1763: "Spanish Empire",
-        1898: "US Occupation",
+        1898: "United States (Military Occupation)",
         1902: "Republic of Cuba",
         1959: "Revolutionary Cuba"
       },
-      urbanDensity: 'large',
-      populationPeak: 2200000,
-      economicFocus: ['tourism', 'cigars', 'rum', 'culture']
+      urbanDensity: 'moderate',
+      eraSpecificDensity: {
+        'renaissance_early_modern': 'moderate',
+        'industrial': 'large',
+        'modern': 'massive'
+      },
+      populationPeak: 2100000,
+      economicFocus: ['shipping', 'sugar', 'tobacco', 'military', 'rum']
     },
     {
       name: "Santiago de Cuba",
       isHistorical: true,
       foundingYear: 1515,
-      description: "Cradle of the Revolution and Afro-Cuban culture.",
+      description: "Cuba's second city and first capital, gateway to the Caribbean and coffee heartland.",
       allegianceHistory: {
         1515: "Spanish Empire",
-        1898: "US Occupation",
-        1902: "Republic of Cuba",
-        1959: "Revolutionary Cuba"
+        1898: "United States (Military Occupation)",
+        1902: "Republic of Cuba"
       },
-      urbanDensity: 'moderate',
-      populationPeak: 500000,
-      economicFocus: ['port', 'mining', 'music', 'revolution']
+      urbanDensity: 'small',
+      eraSpecificDensity: {
+        'renaissance_early_modern': 'small',
+        'industrial': 'moderate',
+        'modern': 'large'
+      },
+      economicFocus: ['copper', 'coffee', 'sugar', 'military']
     },
     {
       name: "Trinidad",
@@ -4458,46 +4759,55 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Santo Domingo",
       isHistorical: true,
       foundingYear: 1496,
-      description: "First European city in the Americas, Columbus's base.",
+      description: "The first European city in the Americas, seat of Spain's earliest colonial government.",
       allegianceHistory: {
         1496: "Spanish Empire",
-        1795: "French Colony",
+        1795: "French Republic",
         1809: "Spanish Empire",
         1821: "Republic of Spanish Haiti",
-        1822: "Unified Hispaniola",
+        1822: "Republic of Haiti",
         1844: "Dominican Republic"
       },
-      urbanDensity: 'large',
-      populationPeak: 3000000,
-      economicFocus: ['government', 'tourism', 'manufacturing', 'services']
+      urbanDensity: 'moderate',
+      eraSpecificDensity: {
+        'renaissance_early_modern': 'small',
+        'modern': 'large'
+      },
+      populationPeak: 965000,
+      economicFocus: ['government', 'sugar', 'trade', 'military']
     },
     {
       name: "Port-au-Prince",
       isHistorical: true,
       foundingYear: 1749,
-      description: "Capital of the first Black republic after successful slave revolution.",
+      description: "Capital of Haiti, birthplace of the world's first successful slave revolution.",
       allegianceHistory: {
-        1749: "French Saint-Domingue",
-        1804: "Empire of Haiti",
-        1806: "Republic of Haiti"
+        1749: "French Empire (Saint-Domingue)",
+        1804: "Republic of Haiti"
       },
-      urbanDensity: 'large',
-      populationPeak: 2800000,
-      economicFocus: ['government', 'commerce', 'manufacturing', 'NGOs']
+      urbanDensity: 'small',
+      eraSpecificDensity: {
+        'industrial': 'moderate',
+        'modern': 'large'
+      },
+      populationPeak: 987000,
+      economicFocus: ['sugar', 'coffee', 'government', 'trade']
     },
     {
       name: "Cap-Haïtien",
       isHistorical: true,
       foundingYear: 1670,
-      description: "The 'Paris of the Antilles' before the revolution.",
+      description: "The Paris of the Antilles, wealthy capital of French Saint-Domingue before the revolution.",
       allegianceHistory: {
-        1670: "French Saint-Domingue",
-        1804: "Kingdom of Haiti",
-        1820: "Republic of Haiti"
+        1670: "French Empire (Saint-Domingue)",
+        1804: "Republic of Haiti"
       },
-      urbanDensity: 'moderate',
-      populationPeak: 280000,
-      economicFocus: ['tourism', 'port', 'history', 'voodoo']
+      urbanDensity: 'small',
+      eraSpecificDensity: {
+        'renaissance_early_modern': 'moderate',
+        'industrial': 'moderate'
+      },
+      economicFocus: ['sugar', 'coffee', 'indigo', 'trade']
     }
   ],
 
@@ -4506,29 +4816,34 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       name: "Kingston",
       isHistorical: true,
       foundingYear: 1693,
-      description: "Capital built after Port Royal's earthquake, birthplace of reggae.",
+      description: "Jamaica's capital, built after Port Royal's destruction to become the Caribbean's largest English city.",
       allegianceHistory: {
-        1693: "British Colony",
+        1693: "Kingdom of England",
+        1707: "Kingdom of Great Britain",
+        1801: "United Kingdom",
         1962: "Jamaica"
       },
-      urbanDensity: 'moderate',
-      populationPeak: 700000,
-      economicFocus: ['shipping', 'tourism', 'music', 'bauxite']
+      urbanDensity: 'small',
+      eraSpecificDensity: {
+        'industrial': 'moderate',
+        'modern': 'large'
+      },
+      populationPeak: 670000,
+      economicFocus: ['sugar', 'rum', 'shipping', 'coffee', 'music']
     },
     {
       name: "Port Royal",
       isHistorical: true,
       foundingYear: 1518,
       declineYear: 1692,
-      description: "The 'wickedest city on Earth', pirate haven destroyed by earthquake.",
+      description: "The wickedest city on Earth, notorious pirate haven destroyed by earthquake and tsunami.",
       allegianceHistory: {
         1518: "Spanish Empire",
-        1655: "British Colony",
-        1692: "Destroyed"
+        1655: "English Commonwealth",
+        1660: "Kingdom of England"
       },
-      urbanDensity: 'large',
-      populationPeak: 8000,
-      economicFocus: ['piracy', 'privateering', 'trade', 'vice']
+      urbanDensity: 'moderate',
+      economicFocus: ['piracy', 'privateering', 'trade', 'sugar', 'slavery']
     },
     {
       name: "Montego Bay",
@@ -4635,93 +4950,8 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
 
   // === MAJOR MISSING CITIES ADDED ===
 
-  "Nile Delta": [
-    {
-      name: "Cairo",
-      isHistorical: true,
-      foundingYear: 969,
-      description: "The largest city in the Islamic world and Egypt's capital, center of Islamic learning.",
-      allegianceHistory: {
-        969: "Fatimid Caliphate",
-        1171: "Ayyubid Sultanate",
-        1250: "Mamluk Sultanate",
-        1517: "Ottoman Empire",
-        1805: "Ottoman Egypt",
-        1914: "British Protectorate",
-        1922: "Kingdom of Egypt"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'medieval': 'massive',
-        'early_modern': 'massive',
-        'modern': 'massive'
-      },
-      populationPeak: 500000,
-      economicFocus: ['trade', 'textiles', 'islamic_scholarship', 'spices', 'administration']
-    }
-  ],
 
-  "Delhi Region": [
-    {
-      name: "Delhi",
-      isHistorical: true,
-      foundingYear: 1052,
-      description: "Capital of multiple Indian empires, seat of Mughal power.",
-      allegianceHistory: {
-        1052: "Tomara Dynasty",
-        1180: "Chauhan Dynasty",
-        1206: "Delhi Sultanate",
-        1526: "Mughal Empire",
-        1803: "British East India Company",
-        1858: "British Raj",
-        1947: "India"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'medieval': 'large',
-        'early_modern': 'massive',
-        'modern': 'massive'
-      },
-      populationPeak: 400000,
-      economicFocus: ['government', 'textiles', 'metalwork', 'ivory', 'administration']
-    },
-    {
-      name: "Agra",
-      isHistorical: true,
-      foundingYear: 1504,
-      description: "Mughal capital and home of the Taj Mahal, center of Indo-Islamic architecture.",
-      allegianceHistory: {
-        1504: "Mughal Empire",
-        1803: "British East India Company",
-        1858: "British Raj",
-        1947: "India"
-      },
-      urbanDensity: 'large',
-      populationPeak: 200000,
-      economicFocus: ['architecture', 'marble', 'textiles', 'crafts', 'government']
-    }
-  ],
 
-  "Malabar Coast": [
-    {
-      name: "Mumbai",
-      isHistorical: true,
-      foundingYear: 1507,
-      description: "Major port city and commercial center, gateway to western India.",
-      allegianceHistory: {
-        1507: "Portuguese Empire",
-        1661: "British Empire",
-        1947: "India"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'early_modern': 'large',
-        'modern': 'massive'
-      },
-      populationPeak: 300000,
-      economicFocus: ['trade', 'textiles', 'shipping', 'cotton', 'finance']
-    }
-  ],
 
   "Gangetic Plain": [
     {
@@ -4744,45 +4974,7 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "Punjab Plains": [
-    {
-      name: "Lahore",
-      isHistorical: true,
-      foundingYear: 1000,
-      description: "Cultural capital of Punjab and major Mughal city.",
-      allegianceHistory: {
-        1000: "Ghaznavid Empire",
-        1186: "Ghurid Dynasty",
-        1206: "Delhi Sultanate",
-        1524: "Mughal Empire",
-        1799: "Sikh Empire",
-        1849: "British Raj",
-        1947: "Pakistan"
-      },
-      urbanDensity: 'large',
-      populationPeak: 150000,
-      economicFocus: ['textiles', 'trade', 'crafts', 'education', 'agriculture']
-    }
-  ],
 
-  "Sundarbans Delta": [
-    {
-      name: "Dhaka",
-      isHistorical: true,
-      foundingYear: 1608,
-      description: "Capital of Bengal and major center of muslin textile production.",
-      allegianceHistory: {
-        1608: "Mughal Empire",
-        1765: "British East India Company",
-        1858: "British Raj",
-        1947: "Pakistan",
-        1971: "Bangladesh"
-      },
-      urbanDensity: 'large',
-      populationPeak: 200000,
-      economicFocus: ['textiles', 'muslin', 'trade', 'river_transport', 'administration']
-    }
-  ],
 
   "Luzon Highlands": [
     {
@@ -4825,151 +5017,13 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "Strait of Malacca": [
-    {
-      name: "Singapore",
-      isHistorical: true,
-      foundingYear: 1819,
-      description: "Strategic trading port controlling the Strait of Malacca.",
-      allegianceHistory: {
-        1819: "British Empire",
-        1963: "Malaysia",
-        1965: "Singapore"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'modern': 'massive'
-      },
-      populationPeak: 50000,
-      economicFocus: ['trade', 'shipping', 'finance', 'entrepot', 'rubber']
-    }
-  ],
 
-  "Tunisian Sahel": [
-    {
-      name: "Tunis",
-      isHistorical: true,
-      foundingYear: 698,
-      description: "Major North African port and center of Islamic scholarship.",
-      allegianceHistory: {
-        698: "Umayyad Caliphate",
-        800: "Aghlabid Emirate",
-        909: "Fatimid Caliphate",
-        1159: "Almohad Caliphate",
-        1574: "Ottoman Empire",
-        1881: "French Protectorate",
-        1956: "Tunisia"
-      },
-      urbanDensity: 'moderate',
-      populationPeak: 100000,
-      economicFocus: ['trade', 'textiles', 'olive_oil', 'scholarship', 'piracy']
-    }
-  ],
 
   // === SECOND BATCH OF MAJOR MISSING CITIES ===
 
-  "Vienna Basin": [
-    {
-      name: "Vienna",
-      isHistorical: true,
-      foundingYear: 500,
-      description: "Habsburg capital and imperial seat, gateway between East and West.",
-      allegianceHistory: {
-        500: "Germanic Tribes",
-        976: "Margraviate of Austria",
-        1156: "Duchy of Austria",
-        1278: "Habsburg Dynasty",
-        1804: "Austrian Empire",
-        1867: "Austro-Hungarian Empire",
-        1918: "Austria"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'medieval': 'moderate',
-        'early_modern': 'large',
-        'modern': 'massive'
-      },
-      populationPeak: 400000,
-      economicFocus: ['government', 'banking', 'arts', 'music', 'imperial_administration']
-    }
-  ],
 
-  "Bohemian Plateau": [
-    {
-      name: "Prague",
-      isHistorical: true,
-      foundingYear: 885,
-      description: "Capital of Bohemia and Holy Roman Empire, city of a hundred spires.",
-      allegianceHistory: {
-        885: "Great Moravian Empire",
-        1212: "Kingdom of Bohemia",
-        1526: "Habsburg Monarchy",
-        1804: "Austrian Empire",
-        1867: "Austro-Hungarian Empire",
-        1918: "Czechoslovakia",
-        1993: "Czech Republic"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'medieval': 'large',
-        'early_modern': 'large',
-        'modern': 'large'
-      },
-      populationPeak: 200000,
-      economicFocus: ['government', 'brewing', 'crafts', 'silver_mining', 'glass']
-    }
-  ],
 
-  "Danube Bend": [
-    {
-      name: "Budapest",
-      isHistorical: true,
-      foundingYear: 1873,
-      description: "Twin cities of Buda and Pest, capital of Hungary and Danube trade center.",
-      allegianceHistory: {
-        106: "Roman Empire",
-        896: "Hungarian Principality",
-        1000: "Kingdom of Hungary",
-        1541: "Ottoman Empire",
-        1686: "Habsburg Monarchy",
-        1867: "Austro-Hungarian Empire",
-        1918: "Hungary"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'early_modern': 'large',
-        'modern': 'massive'
-      },
-      populationPeak: 300000,
-      economicFocus: ['trade', 'government', 'milling', 'textiles', 'river_transport']
-    }
-  ],
 
-  "Bay of Naples": [
-    {
-      name: "Naples",
-      isHistorical: true,
-      foundingYear: -600,
-      description: "Major Italian kingdom capital and Mediterranean trading power.",
-      allegianceHistory: {
-        "-600": "Greek Colonies",
-        326: "Roman Republic",
-        1139: "Kingdom of Sicily",
-        1282: "Kingdom of Naples",
-        1503: "Spanish Empire",
-        1734: "Kingdom of the Two Sicilies",
-        1861: "Kingdom of Italy"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'medieval': 'large',
-        'early_modern': 'massive',
-        'modern': 'massive'
-      },
-      populationPeak: 450000,
-      economicFocus: ['trade', 'silk', 'government', 'arts', 'maritime']
-    }
-  ],
 
   "Ligurian Coast": [
     {
@@ -4992,31 +5046,6 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "Isfahan Basin": [
-    {
-      name: "Tehran",
-      isHistorical: true,
-      foundingYear: 1200,
-      description: "Persian capital and major center of Iranian civilization.",
-      allegianceHistory: {
-        1200: "Khwarezmid Empire",
-        1220: "Mongol Empire",
-        1501: "Safavid Empire",
-        1736: "Afsharid Dynasty",
-        1785: "Zand Dynasty",
-        1794: "Qajar Dynasty",
-        1925: "Pahlavi Dynasty",
-        1979: "Islamic Republic of Iran"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'early_modern': 'large',
-        'modern': 'massive'
-      },
-      populationPeak: 250000,
-      economicFocus: ['government', 'carpets', 'silk', 'trade', 'crafts']
-    }
-  ],
 
   "Sindh River Delta": [
     {
@@ -5059,103 +5088,9 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "West Java Coast": [
-    {
-      name: "Jakarta",
-      isHistorical: true,
-      foundingYear: 1619,
-      description: "Dutch colonial capital of the East Indies and major Southeast Asian port.",
-      allegianceHistory: {
-        1527: "Sultanate of Demak",
-        1619: "Dutch East India Company",
-        1800: "Dutch East Indies",
-        1942: "Japanese Empire",
-        1945: "Indonesia"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'early_modern': 'large',
-        'modern': 'massive'
-      },
-      populationPeak: 200000,
-      economicFocus: ['trade', 'spices', 'administration', 'shipping', 'sugar']
-    }
-  ],
 
-  "Irrawaddy Valley": [
-    {
-      name: "Yangon",
-      isHistorical: true,
-      foundingYear: 1755,
-      description: "Colonial capital of Burma and major Southeast Asian trading port.",
-      allegianceHistory: {
-        1755: "Konbaung Dynasty",
-        1824: "British Empire",
-        1948: "Burma",
-        1989: "Myanmar"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'modern': 'large'
-      },
-      populationPeak: 150000,
-      economicFocus: ['trade', 'rice', 'teak', 'gems', 'shipping']
-    }
-  ],
 
-  "Andalusian Plain": [
-    {
-      name: "Seville",
-      isHistorical: true,
-      foundingYear: -800,
-      description: "Gateway to the Americas during the Spanish colonial era and major Andalusian city.",
-      allegianceHistory: {
-        "-800": "Phoenician Colonies",
-        "-206": "Roman Republic",
-        412: "Visigothic Kingdom",
-        712: "Umayyad Caliphate",
-        1248: "Kingdom of Castile",
-        1516: "Spanish Empire"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'antiquity': 'moderate',
-        'medieval': 'large',
-        'renaissance_early_modern': 'large'
-      },
-      populationPeak: 150000,
-      economicFocus: ['trade', 'shipbuilding', 'colonial administration', 'textiles', 'agriculture']
-    }
-  ],
 
-  "Po Valley": [
-    {
-      name: "Milan",
-      isHistorical: true,
-      foundingYear: -600,
-      description: "Major commercial and financial center of northern Italy.",
-      allegianceHistory: {
-        "-600": "Celtic Tribes",
-        "-222": "Roman Republic",
-        286: "Western Roman Empire",
-        774: "Frankish Kingdom",
-        1162: "Holy Roman Empire",
-        1395: "Duchy of Milan",
-        1796: "Cisalpine Republic",
-        1815: "Austrian Empire",
-        1861: "Kingdom of Italy"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'antiquity': 'moderate',
-        'medieval': 'large',
-        'renaissance_early_modern': 'large',
-        'modern': 'massive'
-      },
-      populationPeak: 200000,
-      economicFocus: ['banking', 'textiles', 'metalworking', 'trade', 'silk']
-    }
-  ],
 
   "Øresund Strait": [
     {
@@ -5203,36 +5138,32 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
       },
       populationPeak: 250000,
       economicFocus: ['trade', 'administration', 'textiles', 'education', 'crafts']
-    }
-  ],
-
-  "Dnieper River Valley": [
+    },
     {
-      name: "Kiev",
+      name: "Krakow",
       isHistorical: true,
-      foundingYear: 482,
-      description: "Mother of Russian cities and ancient capital of Kievan Rus.",
+      foundingYear: 965,
+      description: "Ancient capital of Poland and center of Polish culture and learning.",
       allegianceHistory: {
-        482: "Slavic Tribes",
-        882: "Kievan Rus",
-        1240: "Golden Horde",
-        1362: "Grand Duchy of Lithuania",
+        965: "Duchy of Poland",
+        1025: "Kingdom of Poland",
         1569: "Polish-Lithuanian Commonwealth",
-        1654: "Tsardom of Russia",
-        1917: "Ukrainian People's Republic",
-        1922: "Soviet Union",
-        1991: "Ukraine"
+        1795: "Austrian Empire",
+        1807: "Duchy of Warsaw",
+        1815: "Free City of Kraków",
+        1846: "Austrian Empire",
+        1918: "Poland"
       },
       urbanDensity: 'large',
       eraSpecificDensity: {
         'medieval': 'large',
-        'renaissance_early_modern': 'moderate',
-        'modern': 'large'
+        'renaissance_early_modern': 'large'
       },
-      populationPeak: 200000,
-      economicFocus: ['trade', 'religion', 'crafts', 'agriculture', 'education']
+      populationPeak: 100000,
+      economicFocus: ['education', 'religion', 'crafts', 'trade', 'salt']
     }
   ],
+
 
   "Alexandria Coast": [
     {
@@ -5263,32 +5194,6 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "Babylon Region": [
-    {
-      name: "Babylon",
-      isHistorical: true,
-      foundingYear: -2300,
-      description: "Ancient capital of Mesopotamia and center of the Babylonian Empire.",
-      allegianceHistory: {
-        "-2300": "Akkadian Empire",
-        "-1894": "First Babylonian Dynasty",
-        "-1595": "Kassite Dynasty",
-        "-626": "Neo-Babylonian Empire",
-        "-539": "Achaemenid Empire",
-        "-331": "Macedonian Empire",
-        "-141": "Parthian Empire",
-        224: "Sassanid Empire",
-        637: "Rashidun Caliphate"
-      },
-      urbanDensity: 'massive',
-      eraSpecificDensity: {
-        'antiquity': 'massive'
-      },
-      populationPeak: 200000,
-      economicFocus: ['administration', 'religion', 'trade', 'agriculture', 'astronomy'],
-      declineYear: 650  // City largely abandoned by 7th century CE
-    }
-  ],
 
   "Fars Province": [
     {
@@ -5309,152 +5214,10 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "Samarkand Region": [
-    {
-      name: "Samarkand",
-      isHistorical: true,
-      foundingYear: -700,
-      description: "Pearl of the Silk Road and Timurid cultural capital.",
-      allegianceHistory: {
-        "-700": "Sogdian City-States",
-        "-329": "Macedonian Empire",
-        "-250": "Greco-Bactrian Kingdom",
-        710: "Umayyad Caliphate",
-        819: "Samanid Empire",
-        1220: "Mongol Empire",
-        1370: "Timurid Empire",
-        1500: "Shaybanid Dynasty",
-        1785: "Emirate of Bukhara",
-        1868: "Russian Empire",
-        1924: "Soviet Union",
-        1991: "Uzbekistan"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'antiquity': 'moderate',
-        'medieval': 'large',
-        'renaissance_early_modern': 'large'
-      },
-      populationPeak: 150000,
-      economicFocus: ['trade', 'crafts', 'education', 'silk', 'astronomy']
-    }
-  ],
 
-  "Chao Phraya Basin": [
-    {
-      name: "Bangkok",
-      isHistorical: true,
-      foundingYear: 1782,
-      description: "Capital of Thailand and major Southeast Asian metropolis.",
-      allegianceHistory: {
-        1782: "Kingdom of Siam",
-        1932: "Kingdom of Thailand"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'modern': 'massive'
-      },
-      populationPeak: 300000,
-      economicFocus: ['trade', 'administration', 'rice', 'shipping', 'temples']
-    }
-  ],
 
-  "Flanders Fields": [
-    {
-      name: "Brussels",
-      isHistorical: true,
-      foundingYear: 979,
-      description: "Capital of the Spanish Netherlands and later Belgium.",
-      allegianceHistory: {
-        979: "Duchy of Lower Lorraine",
-        1430: "Duchy of Burgundy",
-        1482: "Habsburg Netherlands",
-        1556: "Spanish Netherlands",
-        1714: "Austrian Netherlands",
-        1795: "French Republic",
-        1815: "United Kingdom of the Netherlands",
-        1830: "Belgium"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'medieval': 'small',
-        'renaissance_early_modern': 'moderate',
-        'modern': 'large'
-      },
-      populationPeak: 200000,
-      economicFocus: ['trade', 'textiles', 'administration', 'brewing', 'crafts']
-    },
-    {
-      name: "Antwerp",
-      isHistorical: true,
-      foundingYear: 1200,
-      description: "Northern Europe's greatest trading port during the 16th century.",
-      allegianceHistory: {
-        1200: "Duchy of Brabant",
-        1430: "Duchy of Burgundy",
-        1482: "Habsburg Netherlands",
-        1556: "Spanish Netherlands",
-        1714: "Austrian Netherlands",
-        1795: "French Republic",
-        1815: "United Kingdom of the Netherlands",
-        1830: "Belgium"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'medieval': 'moderate',
-        'renaissance_early_modern': 'large'
-      },
-      populationPeak: 125000,
-      economicFocus: ['trade', 'banking', 'textiles', 'spices', 'diamonds']
-    }
-  ],
 
-  "Lisbon Coast": [
-    {
-      name: "Lisbon",
-      isHistorical: true,
-      foundingYear: -1200,
-      description: "Atlantic gateway and capital of the Portuguese maritime empire.",
-      allegianceHistory: {
-        "-1200": "Phoenician Colonies",
-        "-205": "Roman Republic",
-        711: "Umayyad Caliphate",
-        1147: "Kingdom of Portugal",
-        1580: "Iberian Union",
-        1640: "Kingdom of Portugal"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'antiquity': 'moderate',
-        'medieval': 'moderate',
-        'renaissance_early_modern': 'large'
-      },
-      populationPeak: 200000,
-      economicFocus: ['trade', 'navigation', 'spices', 'gold', 'shipbuilding']
-    }
-  ],
 
-  "Stockholm Archipelago": [
-    {
-      name: "Stockholm",
-      isHistorical: true,
-      foundingYear: 1252,
-      description: "Capital of Sweden and major Baltic trading center.",
-      allegianceHistory: {
-        1252: "Kingdom of Sweden",
-        1397: "Kalmar Union",
-        1523: "Kingdom of Sweden"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'medieval': 'small',
-        'renaissance_early_modern': 'moderate',
-        'modern': 'large'
-      },
-      populationPeak: 150000,
-      economicFocus: ['trade', 'iron', 'administration', 'shipping', 'timber']
-    }
-  ],
 
   "Irish Sea": [
     {
@@ -5480,75 +5243,8 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "Kyoto Basin": [
-    {
-      name: "Kyoto",
-      isHistorical: true,
-      foundingYear: 794,
-      description: "Ancient capital of Japan and center of imperial culture.",
-      allegianceHistory: {
-        794: "Heian Imperial Court",
-        1185: "Kamakura Shogunate",
-        1333: "Ashikaga Shogunate",
-        1600: "Tokugawa Shogunate",
-        1868: "Empire of Japan"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'medieval': 'large',
-        'renaissance_early_modern': 'large'
-      },
-      populationPeak: 350000,
-      economicFocus: ['crafts', 'silk', 'religion', 'education', 'administration']
-    }
-  ],
 
-  "Han River Valley": [
-    {
-      name: "Seoul",
-      isHistorical: true,
-      foundingYear: 1394,
-      description: "Capital of the Joseon Dynasty and Korea.",
-      allegianceHistory: {
-        1394: "Joseon Dynasty",
-        1910: "Japanese Korea",
-        1945: "Republic of Korea"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'renaissance_early_modern': 'large',
-        'modern': 'massive'
-      },
-      populationPeak: 200000,
-      economicFocus: ['administration', 'education', 'crafts', 'ceramics', 'trade']
-    }
-  ],
 
-  "Punjab Plains": [
-    {
-      name: "Lahore",
-      isHistorical: true,
-      foundingYear: 1000,
-      description: "Jewel of the Mughal Empire and major center of Indo-Islamic culture.",
-      allegianceHistory: {
-        1000: "Ghaznavid Empire",
-        1186: "Ghurid Dynasty",
-        1206: "Delhi Sultanate",
-        1524: "Mughal Empire",
-        1747: "Durrani Empire",
-        1799: "Sikh Empire",
-        1849: "British Punjab",
-        1947: "Pakistan"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'medieval': 'moderate',
-        'renaissance_early_modern': 'large'
-      },
-      populationPeak: 300000,
-      economicFocus: ['trade', 'textiles', 'administration', 'crafts', 'gardens']
-    }
-  ],
 
   "Transoxiana": [
     {
@@ -5578,83 +5274,8 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "Bay of Naples": [
-    {
-      name: "Palermo",
-      isHistorical: true,
-      foundingYear: -734,
-      description: "Crossroads of Norman, Arab, and Byzantine cultures in the Mediterranean.",
-      allegianceHistory: {
-        "-734": "Phoenician Colonies",
-        "-254": "Roman Republic",
-        535: "Byzantine Empire",
-        831: "Emirate of Sicily",
-        1072: "County of Sicily",
-        1130: "Kingdom of Sicily",
-        1282: "Kingdom of Sicily (Aragonese)",
-        1816: "Kingdom of Two Sicilies",
-        1861: "Kingdom of Italy"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'antiquity': 'moderate',
-        'medieval': 'large',
-        'renaissance_early_modern': 'moderate'
-      },
-      populationPeak: 250000,
-      economicFocus: ['trade', 'administration', 'textiles', 'agriculture', 'crafts']
-    }
-  ],
 
-  "Andalusian Plain": [
-    {
-      name: "Cordoba",
-      isHistorical: true,
-      foundingYear: -169,
-      description: "Capital of the Umayyad Caliphate of Córdoba and jewel of medieval Europe.",
-      allegianceHistory: {
-        "-169": "Roman Republic",
-        711: "Umayyad Caliphate",
-        1031: "Taifa of Córdoba",
-        1236: "Kingdom of Castile"
-      },
-      urbanDensity: 'massive',
-      eraSpecificDensity: {
-        'antiquity': 'moderate',
-        'medieval': 'massive',
-        'renaissance_early_modern': 'moderate'
-      },
-      populationPeak: 450000,
-      economicFocus: ['education', 'philosophy', 'crafts', 'agriculture', 'trade']
-    }
-  ],
 
-  "Athens Basin": [
-    {
-      name: "Athens",
-      isHistorical: true,
-      foundingYear: -3000,
-      description: "Birthplace of democracy and center of ancient Greek civilization.",
-      allegianceHistory: {
-        "-3000": "Mycenaean Civilization",
-        "-1200": "Dark Age Greece",
-        "-800": "Archaic Athens",
-        "-508": "Athenian Democracy",
-        "-146": "Roman Province of Achaea",
-        395: "Byzantine Empire",
-        1458: "Ottoman Empire",
-        1833: "Kingdom of Greece"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'antiquity': 'large',
-        'medieval': 'moderate',
-        'renaissance_early_modern': 'moderate'
-      },
-      populationPeak: 250000,
-      economicFocus: ['philosophy', 'trade', 'education', 'crafts', 'democracy']
-    }
-  ],
 
   "Peloponnesian Hills": [
     {
@@ -5701,25 +5322,6 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "Tunisian Sahel": [
-    {
-      name: "Carthage",
-      isHistorical: true,
-      foundingYear: -814,
-      description: "Phoenician trading empire and Rome's greatest rival.",
-      allegianceHistory: {
-        "-814": "Phoenician Carthage",
-        "-146": "Roman Africa"
-      },
-      urbanDensity: 'massive',
-      eraSpecificDensity: {
-        'antiquity': 'massive'
-      },
-      populationPeak: 400000,
-      economicFocus: ['trade', 'navigation', 'silver', 'purple dye', 'military'],
-      declineYear: -146  // Destroyed by Rome in Third Punic War
-    }
-  ],
 
   "Hejaz Interior": [
     {
@@ -5748,490 +5350,24 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "Jerusalem Hills": [
-    {
-      name: "Jerusalem",
-      isHistorical: true,
-      foundingYear: -1000,
-      description: "Holy city sacred to Judaism, Christianity, and Islam.",
-      allegianceHistory: {
-        "-1000": "Kingdom of Israel",
-        "-586": "Babylonian Empire",
-        "-539": "Achaemenid Empire",
-        "-332": "Macedonian Empire",
-        "-63": "Roman Republic",
-        638: "Rashidun Caliphate",
-        1099: "Crusader Kingdom of Jerusalem",
-        1187: "Ayyubid Dynasty",
-        1517: "Ottoman Empire",
-        1917: "British Mandate",
-        1948: "Jordan/Israel"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'antiquity': 'moderate',
-        'medieval': 'large',
-        'renaissance_early_modern': 'moderate',
-        'modern': 'large'
-      },
-      populationPeak: 200000,
-      economicFocus: ['religion', 'pilgrimage', 'trade', 'crafts', 'administration']
-    }
-  ],
 
-  "Varanasi Basin": [
-    {
-      name: "Varanasi",
-      isHistorical: true,
-      foundingYear: -1200,
-      description: "One of the world's oldest cities and holiest site in Hinduism.",
-      allegianceHistory: {
-        "-1200": "Vedic Kingdoms",
-        "-600": "Mahajanapadas",
-        321: "Mauryan Empire",
-        320: "Gupta Empire",
-        1194: "Delhi Sultanate",
-        1526: "Mughal Empire",
-        1775: "British East India Company",
-        1947: "India"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'antiquity': 'moderate',
-        'medieval': 'large',
-        'renaissance_early_modern': 'large',
-        'modern': 'massive'
-      },
-      populationPeak: 200000,
-      economicFocus: ['religion', 'education', 'textiles', 'crafts', 'pilgrimage']
-    }
-  ],
 
-  "St. Lawrence River": [
-    {
-      name: "Montreal",
-      isHistorical: true,
-      foundingYear: 1642,
-      description: "French colonial trading post and gateway to the North American interior.",
-      allegianceHistory: {
-        1642: "New France",
-        1760: "British North America",
-        1867: "Dominion of Canada"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'renaissance_early_modern': 'small',
-        'modern': 'large'
-      },
-      populationPeak: 100000,
-      economicFocus: ['fur trade', 'shipping', 'administration', 'crafts', 'agriculture']
-    }
-  ],
 
-  "Sydney Basin": [
-    {
-      name: "Sydney",
-      isHistorical: true,
-      foundingYear: 1788,
-      description: "First British colonial settlement in Australia and major Pacific port.",
-      allegianceHistory: {
-        1788: "British Colony of New South Wales",
-        1901: "Commonwealth of Australia"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'modern': 'large'
-      },
-      populationPeak: 200000,
-      economicFocus: ['shipping', 'wool', 'gold', 'administration', 'trade']
-    }
-  ],
 
-  "Timbuktu Basin": [
-    {
-      name: "Timbuktu",
-      isHistorical: true,
-      foundingYear: 1100,
-      description: "Legendary center of trans-Saharan trade and Islamic learning.",
-      allegianceHistory: {
-        1100: "Tuareg Tribes",
-        1324: "Mali Empire",
-        1468: "Songhai Empire",
-        1591: "Moroccan Pashalik",
-        1893: "French Sudan",
-        1960: "Mali"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'medieval': 'large',
-        'renaissance_early_modern': 'moderate'
-      },
-      populationPeak: 100000,
-      economicFocus: ['trade', 'salt', 'gold', 'education', 'manuscripts']
-    }
-  ],
 
-  "Venetian Lagoon": [
-    {
-      name: "Venice",
-      isHistorical: true,
-      foundingYear: 421,
-      description: "Maritime republic and trading empire connecting Europe with the Orient.",
-      allegianceHistory: {
-        421: "Byzantine Empire",
-        697: "Republic of Venice",
-        1797: "Austrian Empire",
-        1805: "Kingdom of Italy (Napoleonic)",
-        1815: "Austrian Empire",
-        1866: "Kingdom of Italy"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'medieval': 'large',
-        'renaissance_early_modern': 'large'
-      },
-      populationPeak: 180000,
-      economicFocus: ['trade', 'navigation', 'glass', 'silk', 'spices']
-    }
-  ],
 
-  "Rhine–Meuse Delta": [
-    {
-      name: "Amsterdam",
-      isHistorical: true,
-      foundingYear: 1275,
-      description: "Capital of the Dutch Golden Age and center of global commerce.",
-      allegianceHistory: {
-        1275: "County of Holland",
-        1506: "Habsburg Netherlands",
-        1581: "Dutch Republic",
-        1795: "Batavian Republic",
-        1815: "Kingdom of the Netherlands"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'medieval': 'small',
-        'renaissance_early_modern': 'large',
-        'modern': 'large'
-      },
-      populationPeak: 220000,
-      economicFocus: ['trade', 'banking', 'shipbuilding', 'diamonds', 'brewing']
-    }
-  ],
 
-  "Vistula River": [
-    {
-      name: "Krakow",
-      isHistorical: true,
-      foundingYear: 965,
-      description: "Ancient capital of Poland and center of Polish culture and learning.",
-      allegianceHistory: {
-        965: "Duchy of Poland",
-        1025: "Kingdom of Poland",
-        1569: "Polish-Lithuanian Commonwealth",
-        1795: "Austrian Empire",
-        1807: "Duchy of Warsaw",
-        1815: "Free City of Kraków",
-        1846: "Austrian Empire",
-        1918: "Poland"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'medieval': 'large',
-        'renaissance_early_modern': 'large'
-      },
-      populationPeak: 100000,
-      economicFocus: ['education', 'religion', 'crafts', 'trade', 'salt']
-    }
-  ],
 
-  "Yangtze Delta": [
-    {
-      name: "Nanjing",
-      isHistorical: true,
-      foundingYear: -472,
-      description: "Ancient Chinese capital and southern center of imperial power.",
-      allegianceHistory: {
-        "-472": "Wu Kingdom",
-        "-333": "Chu Kingdom",
-        "-221": "Qin Dynasty",
-        1368: "Ming Dynasty",
-        1644: "Qing Dynasty",
-        1853: "Taiping Heavenly Kingdom",
-        1864: "Qing Dynasty",
-        1912: "Republic of China",
-        1949: "People's Republic of China"
-      },
-      urbanDensity: 'massive',
-      eraSpecificDensity: {
-        'antiquity': 'moderate',
-        'medieval': 'large',
-        'renaissance_early_modern': 'massive',
-        'modern': 'massive'
-      },
-      populationPeak: 1000000,
-      economicFocus: ['administration', 'textiles', 'education', 'crafts', 'porcelain']
-    }
-  ],
 
-  "Inland Sea Coast": [
-    {
-      name: "Osaka",
-      isHistorical: true,
-      foundingYear: 1496,
-      description: "Major commercial center of Japan and gateway to the Inland Sea.",
-      allegianceHistory: {
-        1496: "Sengoku Period",
-        1583: "Toyotomi Clan",
-        1600: "Tokugawa Shogunate",
-        1868: "Empire of Japan"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'renaissance_early_modern': 'large',
-        'modern': 'massive'
-      },
-      populationPeak: 400000,
-      economicFocus: ['trade', 'crafts', 'textiles', 'sake', 'rice']
-    }
-  ],
 
-  "Isfahan Basin": [
-    {
-      name: "Isfahan",
-      isHistorical: true,
-      foundingYear: -500,
-      description: "Jewel of the Safavid Empire and architectural marvel of Persia.",
-      allegianceHistory: {
-        "-500": "Achaemenid Empire",
-        642: "Rashidun Caliphate",
-        1051: "Seljuk Empire",
-        1501: "Safavid Empire",
-        1722: "Afghan Hotaki Dynasty",
-        1729: "Safavid Restoration",
-        1785: "Zand Dynasty",
-        1794: "Qajar Dynasty"
-      },
-      urbanDensity: 'massive',
-      eraSpecificDensity: {
-        'antiquity': 'moderate',
-        'medieval': 'large',
-        'renaissance_early_modern': 'massive'
-      },
-      populationPeak: 600000,
-      economicFocus: ['crafts', 'carpets', 'textiles', 'trade', 'architecture']
-    }
-  ],
 
-  "Greater Antilles": [
-    {
-      name: "Havana",
-      isHistorical: true,
-      foundingYear: 1519,
-      description: "Key to the New World and treasure fleet terminus of the Spanish Empire.",
-      allegianceHistory: {
-        1519: "Spanish Empire",
-        1762: "British Empire",
-        1763: "Spanish Empire",
-        1898: "United States",
-        1902: "Republic of Cuba",
-        1959: "Revolutionary Cuba"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'renaissance_early_modern': 'large',
-        'modern': 'large'
-      },
-      populationPeak: 200000,
-      economicFocus: ['trade', 'sugar', 'tobacco', 'shipping', 'fortification']
-    }
-  ],
 
-  "Cape Coast": [
-    {
-      name: "Cape Town",
-      isHistorical: true,
-      foundingYear: 1652,
-      description: "Dutch refreshment station and gateway to the Indian Ocean trade.",
-      allegianceHistory: {
-        1652: "Dutch East India Company",
-        1795: "British Empire",
-        1803: "Batavian Republic",
-        1806: "British Empire",
-        1910: "Union of South Africa",
-        1994: "South Africa"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'renaissance_early_modern': 'small',
-        'modern': 'large'
-      },
-      populationPeak: 100000,
-      economicFocus: ['trade', 'shipping', 'wine', 'agriculture', 'provisions']
-    }
-  ],
 
-  "Shiraz Valley": [
-    {
-      name: "Shiraz",
-      isHistorical: true,
-      foundingYear: 693,
-      description: "City of poets, gardens, and wine, cultural heart of Persian civilization.",
-      allegianceHistory: {
-        693: "Umayyad Caliphate",
-        819: "Saffarid Dynasty",
-        1051: "Seljuk Empire",
-        1501: "Safavid Empire",
-        1747: "Zand Dynasty",
-        1794: "Qajar Dynasty",
-        1925: "Pahlavi Dynasty",
-        1979: "Islamic Republic of Iran"
-      },
-      urbanDensity: 'large',
-      eraSpecificDensity: {
-        'medieval': 'large',
-        'renaissance_early_modern': 'large'
-      },
-      populationPeak: 200000,
-      economicFocus: ['wine', 'poetry', 'gardens', 'textiles', 'crafts']
-    }
-  ],
 
   // === NEWLY ADDED REGIONS (December 2024) ===
 
-  "Cuba": [
-    {
-      name: "Havana",
-      isHistorical: true,
-      foundingYear: 1519,
-      description: "The key to the New World, Spain's heavily fortified treasure fleet port and Caribbean capital.",
-      allegianceHistory: {
-        1519: "Spanish Empire",
-        1898: "United States (Military Occupation)",
-        1902: "Republic of Cuba",
-        1959: "Revolutionary Cuba"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'renaissance_early_modern': 'moderate',
-        'industrial': 'large',
-        'modern': 'massive'
-      },
-      populationPeak: 2100000,
-      economicFocus: ['shipping', 'sugar', 'tobacco', 'military', 'rum']
-    },
-    {
-      name: "Santiago de Cuba",
-      isHistorical: true,
-      foundingYear: 1515,
-      description: "Cuba's second city and first capital, gateway to the Caribbean and coffee heartland.",
-      allegianceHistory: {
-        1515: "Spanish Empire",
-        1898: "United States (Military Occupation)",
-        1902: "Republic of Cuba"
-      },
-      urbanDensity: 'small',
-      eraSpecificDensity: {
-        'renaissance_early_modern': 'small',
-        'industrial': 'moderate',
-        'modern': 'large'
-      },
-      economicFocus: ['copper', 'coffee', 'sugar', 'military']
-    }
-  ],
 
-  "Hispaniola": [
-    {
-      name: "Santo Domingo",
-      isHistorical: true,
-      foundingYear: 1496,
-      description: "The first European city in the Americas, seat of Spain's earliest colonial government.",
-      allegianceHistory: {
-        1496: "Spanish Empire",
-        1795: "French Republic",
-        1809: "Spanish Empire",
-        1821: "Republic of Spanish Haiti",
-        1822: "Republic of Haiti",
-        1844: "Dominican Republic"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'renaissance_early_modern': 'small',
-        'modern': 'large'
-      },
-      populationPeak: 965000,
-      economicFocus: ['government', 'sugar', 'trade', 'military']
-    },
-    {
-      name: "Port-au-Prince",
-      isHistorical: true,
-      foundingYear: 1749,
-      description: "Capital of Haiti, birthplace of the world's first successful slave revolution.",
-      allegianceHistory: {
-        1749: "French Empire (Saint-Domingue)",
-        1804: "Republic of Haiti"
-      },
-      urbanDensity: 'small',
-      eraSpecificDensity: {
-        'industrial': 'moderate',
-        'modern': 'large'
-      },
-      populationPeak: 987000,
-      economicFocus: ['sugar', 'coffee', 'government', 'trade']
-    },
-    {
-      name: "Cap-Haïtien",
-      isHistorical: true,
-      foundingYear: 1670,
-      description: "The Paris of the Antilles, wealthy capital of French Saint-Domingue before the revolution.",
-      allegianceHistory: {
-        1670: "French Empire (Saint-Domingue)",
-        1804: "Republic of Haiti"
-      },
-      urbanDensity: 'small',
-      eraSpecificDensity: {
-        'renaissance_early_modern': 'moderate',
-        'industrial': 'moderate'
-      },
-      economicFocus: ['sugar', 'coffee', 'indigo', 'trade']
-    }
-  ],
 
-  "Jamaica": [
-    {
-      name: "Port Royal",
-      isHistorical: true,
-      foundingYear: 1518,
-      declineYear: 1692,
-      description: "The wickedest city on Earth, notorious pirate haven destroyed by earthquake and tsunami.",
-      allegianceHistory: {
-        1518: "Spanish Empire",
-        1655: "English Commonwealth",
-        1660: "Kingdom of England"
-      },
-      urbanDensity: 'moderate',
-      economicFocus: ['piracy', 'privateering', 'trade', 'sugar', 'slavery']
-    },
-    {
-      name: "Kingston",
-      isHistorical: true,
-      foundingYear: 1693,
-      description: "Jamaica's capital, built after Port Royal's destruction to become the Caribbean's largest English city.",
-      allegianceHistory: {
-        1693: "Kingdom of England",
-        1707: "Kingdom of Great Britain",
-        1801: "United Kingdom",
-        1962: "Jamaica"
-      },
-      urbanDensity: 'small',
-      eraSpecificDensity: {
-        'industrial': 'moderate',
-        'modern': 'large'
-      },
-      populationPeak: 670000,
-      economicFocus: ['sugar', 'rum', 'shipping', 'coffee', 'music']
-    }
-  ],
 
   "Sicily": [
     {
@@ -6285,48 +5421,6 @@ export const CITIES_DATA: { [mapAreaName: string]: CityDefinition[] } = {
     }
   ],
 
-  "Cyprus": [
-    {
-      name: "Nicosia",
-      isHistorical: true,
-      foundingYear: 965,
-      description: "The last divided capital in Europe, seat of Lusignan crusader kings and Venetian governors.",
-      allegianceHistory: {
-        965: "Byzantine Empire",
-        1191: "Kingdom of Cyprus (Lusignan)",
-        1489: "Republic of Venice",
-        1571: "Ottoman Empire",
-        1878: "British Empire",
-        1960: "Republic of Cyprus"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'medieval': 'moderate',
-        'renaissance_early_modern': 'moderate',
-        'modern': 'moderate'
-      },
-      populationPeak: 116000,
-      economicFocus: ['copper', 'trade', 'wine', 'lace', 'government']
-    },
-    {
-      name: "Famagusta",
-      isHistorical: true,
-      foundingYear: -285,
-      description: "The richest city in Christendom during the Lusignan era, protected by massive Venetian walls.",
-      allegianceHistory: {
-        [-285]: "Ptolemaic Egypt",
-        1291: "Kingdom of Cyprus (Lusignan)",
-        1489: "Republic of Venice",
-        1571: "Ottoman Empire"
-      },
-      urbanDensity: 'moderate',
-      eraSpecificDensity: {
-        'medieval': 'large',
-        'renaissance_early_modern': 'moderate'
-      },
-      economicFocus: ['trade', 'shipping', 'crusades', 'luxury goods']
-    }
-  ],
 
   "Bali": [
     {

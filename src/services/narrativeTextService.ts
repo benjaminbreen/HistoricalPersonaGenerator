@@ -73,6 +73,23 @@ export function withIndefiniteArticle(text: string): string {
   return `${takesAn || (!takesA && /^[aeiou]/i.test(trimmed)) ? 'an' : 'a'} ${trimmed}`;
 }
 
+/**
+ * Whether a disease name takes a plural verb.
+ *
+ * Guessing from a trailing "s" gets both directions wrong: tetanus, typhus and
+ * measles are singular, while worms and chilblains are plural. The exceptions
+ * are the whole problem, so they are listed rather than inferred.
+ */
+const SINGULAR_DESPITE_S = /^(tetanus|typhus|measles|mumps|shingles|scabies|rabies|syphilis|tuberculosis|rickets|smallpox|pox|chickenpox|herpes|scrofulous|the stone)$/i;
+const KNOWN_PLURAL = /^(intestinal worms|worms|chilblains|boils|sores|fits|lice|nits|hives|piles|cramps|convulsions|night sweats)$/i;
+
+export function isPluralDiseaseName(name: string): boolean {
+  const trimmed = (name || '').trim().toLowerCase();
+  if (KNOWN_PLURAL.test(trimmed)) return true;
+  if (SINGULAR_DESPITE_S.test(trimmed)) return false;
+  return /(?<!s|u|i)s$/.test(trimmed);
+}
+
 export function describePhysicalAppearance(
   appearance: { height?: number; build?: string } | undefined,
   pronouns: NarrativePronouns,
@@ -257,7 +274,9 @@ export function findNarrativeFailureModes(text: string): string[] {
     // Only an actual doubled age marker, not the adverb "now" appearing later
     // in a perfectly good sentence.
     [/\bAt \d+,[^.]*\bnow \d+\b/i, 'doubled temporal marker around the profession clause'],
-    [/\b[a-z]+s has made ordinary labor\b/i, 'plural disease name with a singular verb'],
+    // Only genuinely plural subjects. Matching any word ending in "s" flagged
+    // "Tetanus has made…" and "A torn muscle in his ribs has made…", both fine.
+    [/(?:^|\.\s)(?:Intestinal worms|Worms|Chilblains|Boils|Sores|Fits|Lice|Hives|Cramps|Convulsions) has\b/, 'plural disease name with a singular verb'],
     [/\.\s*\./, 'doubled punctuation'],
   ];
 

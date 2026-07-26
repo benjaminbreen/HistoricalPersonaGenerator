@@ -5,6 +5,7 @@
 
 import { CulturalZone } from './culturalZones';
 import { HistoricalEra } from '../../types/ambiance';
+import { random as seededRandom } from '../../utils/seededRandom';
 
 export interface AccessoryDefinition {
   baseId: string;
@@ -240,7 +241,7 @@ export function getAccessoriesForCharacter(
 // Select a random accessory based on weights
 export function selectRandomAccessory(
   accessories: AccessoryDefinition[],
-  seed: number = Math.random()
+  seed: number = seededRandom()
 ): string | null {
   if (accessories.length === 0) return null;
   

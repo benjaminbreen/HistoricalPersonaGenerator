@@ -21,6 +21,7 @@ import { generateCulturalAccessory, generateAccessorySet } from '../services/cul
 
 // Use UUID for better performance and uniqueness instead of counter
 import { v4 as uuidv4 } from 'uuid';
+import { random as seededRandom } from './seededRandom';
 
 /**
  * Simplified procedural ItemDefinition generator using classification system
@@ -350,7 +351,7 @@ function createStartingCompanion(animalBaseId: string, playerCharacter: PlayerCh
     
     // Create a basic animal entity
     const animal: AnimalEntity = {
-        id: `companion-${Date.now()}-${Math.random()}`,
+        id: `companion-${Date.now()}-${seededRandom()}`,
         baseId: animalBaseId,
         speciesName: animalData.name,
         emoji: animalData.emoji,
@@ -429,7 +430,7 @@ function addQualityAdjective(itemName: string, privilege: number): string {
         adjectives = qualityAdjectives.legendary;
     }
 
-    const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const randomAdjective = adjectives[Math.floor(seededRandom() * adjectives.length)];
     return `${randomAdjective} ${itemName}`;
 }
 
@@ -543,20 +544,20 @@ function addRandomPets(playerCharacter: PlayerCharacter): void {
 
     // Random pet dog (base 10% chance, modified by profession)
     const dogChance = 0.10 * petChanceMultiplier;
-    if (Math.random() < dogChance) {
+    if (seededRandom() < dogChance) {
         createStartingCompanion('DOG', playerCharacter);
     }
 
     // Random pet cat (era-appropriate base chance, modified by profession)
     const baseCatChance = getBaseCatChance(currentYear);
     const catChance = baseCatChance * petChanceMultiplier;
-    if (Math.random() < catChance) {
+    if (seededRandom() < catChance) {
         createStartingCompanion('CAT', playerCharacter);
     }
 
     // Eccentric pets for unusual professions
-    if (canHaveEccentricPets(profession) && Math.random() < 0.05) {
-        const randomPet = ECCENTRIC_PETS[Math.floor(Math.random() * ECCENTRIC_PETS.length)];
+    if (canHaveEccentricPets(profession) && seededRandom() < 0.05) {
+        const randomPet = ECCENTRIC_PETS[Math.floor(seededRandom() * ECCENTRIC_PETS.length)];
 
         // Skip Old World animals for Pre-Columbian characters
         if (isPreColumbian && OLD_WORLD_ANIMALS.includes(randomPet)) {
@@ -755,7 +756,7 @@ export function assembleStartingPackage(
     if (!equippedItems.necklace && colorOptions) {
         const necklaceChance = calculateAmuletChance(colorOptions.era, colorOptions.culture, profession);
 
-        if (Math.random() < necklaceChance) {
+        if (seededRandom() < necklaceChance) {
             const necklaceId = generateContextualAccessory(profession, {
                 era: colorOptions.era,
                 culture: colorOptions.culture,
@@ -778,7 +779,7 @@ export function assembleStartingPackage(
     if (!equippedItems.ring1 && colorOptions) {
         const ringChance = 0.3 + (colorOptions.privilege || 0.5) * 0.4;
 
-        if (Math.random() < ringChance) {
+        if (seededRandom() < ringChance) {
             const ringId = generateContextualAccessory(profession, {
                 era: colorOptions.era,
                 culture: colorOptions.culture,
@@ -802,7 +803,7 @@ export function assembleStartingPackage(
         const culturalChance = getCulturalAccessoryChance(colorOptions.culture);
         const accessoryChance = Math.min(1.0, culturalChance + (colorOptions.privilege || 0.5) * 0.1);
 
-        if (Math.random() < accessoryChance) {
+        if (seededRandom() < accessoryChance) {
             const wealthLevel = getWealthFromPrivilege(colorOptions.privilege || 0.5);
 
             const accessoryItem = generateCulturalAccessory({
@@ -817,7 +818,7 @@ export function assembleStartingPackage(
                 equippedItems.accessory = accessoryItem;
 
                 // Wealthy characters may get extra accessories
-                if ((wealthLevel === 'wealthy' || wealthLevel === 'comfortable') && Math.random() < 0.4) {
+                if ((wealthLevel === 'wealthy' || wealthLevel === 'comfortable') && seededRandom() < 0.4) {
                     const extraAccessories = generateAccessorySet({
                         culture: colorOptions.culture || 'EUROPEAN',
                         era: colorOptions.era,

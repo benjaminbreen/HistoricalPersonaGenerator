@@ -49,6 +49,8 @@ export interface LanguageAttribution {
   basis: string;
   sources: ScholarlySource[];
   note?: string;
+  /** The window's span, so the card shows a period rather than a single year. */
+  yearRange?: [number, number];
 }
 
 const CONFIDENCE_BLURB: Record<LanguageConfidence, string> = {
@@ -192,6 +194,7 @@ function fromWindow(
     basis: window.id,
     sources: getSources(sourceIds),
     note: chosen.note,
+    yearRange: window.yearRange,
   };
 }
 
@@ -261,6 +264,15 @@ export function attributeLanguage(input: LanguageAttributionInput): LanguageAttr
     return asAttestedAttribution(better);
   }
 
+  // 2b. The selector came back with nothing, or with an entry that does not
+  //     belong in this zone or period. That is not evidence the table has no
+  //     answer — it is evidence the selector missed. Ask the table directly
+  //     before falling through to deep time, or a 1952 Anatolian ends up with
+  //     a label built for the Neolithic.
+  const byRegion = findAttestedByRegion(
+    input.culturalZone, input.year, input.region, input.location);
+  if (byRegion) return asAttestedAttribution(byRegion);
+
   // 3. and 4. Zone window, then the backstop. Every zone has a backstop across
   //    the whole range, so this cannot return nothing.
   const zoneWindow = matchWindow(input, 'zone');
@@ -292,7 +304,7 @@ export function attributionToLanguageData(
     id: `attributed-${attribution.basis}`,
     name: attribution.label,
     family: attribution.family,
-    period: [year, year],
+    period: attribution.yearRange ?? [year, year],
     regions: [],
     culturalZones: [zone],
     isReconstructed: attribution.confidence !== 'attested',

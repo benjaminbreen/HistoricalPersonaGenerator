@@ -4,6 +4,7 @@
  */
 
 import { PlayerCharacter } from '../types';
+import { random as seededRandom } from './seededRandom';
 
 const getStatLevel = (value: number): 'very_low' | 'low' | 'average' | 'high' | 'very_high' => {
   if (value <= 3) return 'very_low';
@@ -13,7 +14,7 @@ const getStatLevel = (value: number): 'very_low' | 'low' | 'average' | 'high' | 
   return 'very_high';
 };
 
-const pickRandom = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+const pickRandom = <T,>(arr: T[]): T => arr[Math.floor(seededRandom() * arr.length)];
 
 // Enhanced descriptors with more variety
 const strengthDescriptors = {
@@ -274,7 +275,7 @@ const getPhysicalObservations = (character: PlayerCharacter): string[] => {
     sentences.push('The burden of years weighs heavily upon you.');
   }
 
-  if (isMiddleAged && stats.strength > 8 && conLevel > 7) {
+  if (isMiddleAged && stats.strength > 8 && stats.constitution > 7) {
     sentences.push('You are at the peak of your physical powers.');
   }
 
@@ -293,6 +294,7 @@ const getMentalSocialObservations = (character: PlayerCharacter): string[] => {
   const chaLevel = getStatLevel(stats.charisma);
   const intLevel = getStatLevel(stats.intelligence);
   const wisLevel = getStatLevel(stats.wisdom);
+  const dexLevel = getStatLevel(stats.dexterity);
 
   // Intelligence vs Wisdom contrasts
   if (intLevel === 'very_high' && wisLevel === 'very_low') {
@@ -436,7 +438,7 @@ export const generateStatDescription = (character: PlayerCharacter): string => {
 
   // Select 2-4 most interesting observations
   const selectedCount = Math.min(Math.max(2, Math.floor(allObservations.length * 0.4)), 4);
-  const shuffled = allObservations.sort(() => Math.random() - 0.5);
+  const shuffled = allObservations.sort(() => seededRandom() - 0.5);
   sentences.push(...shuffled.slice(0, selectedCount));
 
   // Fallback for very average characters

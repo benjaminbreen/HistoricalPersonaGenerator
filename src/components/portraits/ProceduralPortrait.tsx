@@ -1040,12 +1040,35 @@ const parseHairstyle = (
       ? preferred
       : bestByContrast;
 
-    const stillFlat = Math.abs(relativeLuminance(chosen) - skinLuminance) < 0.14;
-    const separated = stillFlat
-      ? (skinLuminance > 0.35 ? createShadow(chosen, 0.62) : createHighlight(chosen, 1.45))
-      : chosen;
+    // Hue, not just lightness. A tan ground behind brown skin passes a
+    // luminance test and still reads as brown on brown, which is the actual
+    // complaint. Warm grounds within ~45 degrees of the sitter's own hue are
+    // rejected in favour of this zone's cooler option.
+    const hueOf = (hex: string): number => {
+      const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+      if (!m) return 0;
+      const n = parseInt(m[1], 16);
+      const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+      if (d === 0) return 0;
+      const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+      return (h * 60 + 360) % 360;
+    };
+    const hueGap = (a: string, b: string): number => {
+      const diff = Math.abs(hueOf(a) - hueOf(b)) % 360;
+      return diff > 180 ? 360 - diff : diff;
+    };
 
-    const baseColor = portraitOverrides?.background?.base || separated;
+    // A context pack supplies its own ground, and several of them are warm
+    // earth tones — exactly the brown-on-brown case.
+    const packBase = portraitOverrides?.background?.base;
+    const requested = packBase && hueGap(packBase, actualSkinTone) >= 45 ? packBase : chosen;
+
+    const tooClose = Math.abs(relativeLuminance(requested) - skinLuminance) < 0.14
+      || hueGap(requested, actualSkinTone) < 30;
+    const baseColor = tooClose
+      ? (skinLuminance > 0.35 ? createShadow(requested, 0.6) : createHighlight(requested, 1.5))
+      : requested;
 
     // Create gradient colors
     const bg1 = baseColor;
@@ -6116,28 +6139,25 @@ if (defaultCapStyles.has(hairStyle)) {
               const leftEyeX = centerX - eyeSpacing - 2;
               const rightEyeX = centerX + eyeSpacing - 1;
 
-              // Left eye kohl/shadow - surrounding the eye
+              // Kohl is a line along the lash line with a short wing past the
+              // outer corner — not a band across the face. Everything here is
+              // bounded to the eye's own width and only ever extends *away*
+              // from the nose, so the two sides cannot meet over the bridge.
+              const kohlW = 4;
+
               elements.push(
-                // Upper lid shadow
-                <rect key={`kohl-l-top1-${index}`} x={leftEyeX - 2} y={eyeY - 2} width="6" height="1" fill={markingColor} opacity={0.5} className="pixel" />,
-                <rect key={`kohl-l-top2-${index}`} x={leftEyeX - 1} y={eyeY - 1} width="4" height="1" fill={markingColor} opacity={0.7} className="pixel" />,
-                // Lower lid shadow
-                <rect key={`kohl-l-bot1-${index}`} x={leftEyeX - 1} y={eyeY + 2} width="4" height="1" fill={markingColor} opacity={0.6} className="pixel" />,
-                <rect key={`kohl-l-bot2-${index}`} x={leftEyeX} y={eyeY + 3} width="2" height="1" fill={markingColor} opacity={0.4} className="pixel" />,
-                // Outer corner accent
-                <rect key={`kohl-l-corner-${index}`} x={leftEyeX - 3} y={eyeY} width="1" height="2" fill={markingColor} opacity={0.5} className="pixel" />
+                // Upper lash line
+                <rect key={`kohl-l-lash-${index}`} x={leftEyeX} y={eyeY - 1} width={kohlW} height="1" fill={markingColor} opacity={0.85} className="pixel" />,
+                // Wing, outward only
+                <rect key={`kohl-l-wing-${index}`} x={leftEyeX - 1} y={eyeY - 1} width="1" height="1" fill={markingColor} opacity={0.6} className="pixel" />,
+                // Lower lash, thinner and lighter
+                <rect key={`kohl-l-lower-${index}`} x={leftEyeX + 1} y={eyeY + 2} width="2" height="1" fill={markingColor} opacity={0.45} className="pixel" />
               );
 
-              // Right eye kohl/shadow - surrounding the eye
               elements.push(
-                // Upper lid shadow
-                <rect key={`kohl-r-top1-${index}`} x={rightEyeX - 2} y={eyeY - 2} width="6" height="1" fill={markingColor} opacity={0.5} className="pixel" />,
-                <rect key={`kohl-r-top2-${index}`} x={rightEyeX - 1} y={eyeY - 1} width="4" height="1" fill={markingColor} opacity={0.7} className="pixel" />,
-                // Lower lid shadow
-                <rect key={`kohl-r-bot1-${index}`} x={rightEyeX - 1} y={eyeY + 2} width="4" height="1" fill={markingColor} opacity={0.6} className="pixel" />,
-                <rect key={`kohl-r-bot2-${index}`} x={rightEyeX} y={eyeY + 3} width="2" height="1" fill={markingColor} opacity={0.4} className="pixel" />,
-                // Outer corner accent
-                <rect key={`kohl-r-corner-${index}`} x={rightEyeX + 4} y={eyeY} width="1" height="2" fill={markingColor} opacity={0.5} className="pixel" />
+                <rect key={`kohl-r-lash-${index}`} x={rightEyeX} y={eyeY - 1} width={kohlW} height="1" fill={markingColor} opacity={0.85} className="pixel" />,
+                <rect key={`kohl-r-wing-${index}`} x={rightEyeX + kohlW} y={eyeY - 1} width="1" height="1" fill={markingColor} opacity={0.6} className="pixel" />,
+                <rect key={`kohl-r-lower-${index}`} x={rightEyeX + 1} y={eyeY + 2} width="2" height="1" fill={markingColor} opacity={0.45} className="pixel" />
               );
             } else {
               // Full eye band (mourning paint or warrior paint)

@@ -1150,17 +1150,6 @@ export const LIMINAL_SEQUENCES: Record<string, LiminalSequence> = {
   },
   
   // Trans-Siberian - forest and steppe
-  "LIMINAL_TRANS_SIBERIAN": {
-    destination: "Eastern Siberia",
-    sequence: [
-      MapArchetype.ALL_LAND,  // Forest biome generated on ALL_LAND
-      MapArchetype.ALL_LAND,
-      MapArchetype.ALL_LAND,  // Forest biome generated on ALL_LAND
-      MapArchetype.RIVER_PORT,  // River valley with settlements
-      MapArchetype.ALL_LAND,
-      MapArchetype.ALL_LAND  // Forest biome generated on ALL_LAND
-    ]
-  },
   
   // Cape Route around Africa - dangerous waters
   "LIMINAL_CAPE_OF_GOOD_HOPE": {
@@ -1189,28 +1178,7 @@ export const LIMINAL_SEQUENCES: Record<string, LiminalSequence> = {
     ]
   },
 
-  "LIMINAL_NORTH_ATLANTIC_CROSSING": {
-  // Shorter North Atlantic hop (e.g., Britain ↔ Iceland via Faroes)
-  destination: "Iceland",
-  sequence: [
-    MapArchetype.SHOALS,
-    MapArchetype.OPEN_OCEAN,
-    MapArchetype.ISLAND,     // Faroes / Shetland stand-in
-    MapArchetype.OPEN_OCEAN,
-    MapArchetype.SHOALS
-  ]
-},
 
-"LIMINAL_DAVIS_STRAIT": {
-  // Greenland ↔ Labrador/Baffin route
-  destination: "Labrador Coast",
-  sequence: [
-    MapArchetype.SHOALS,
-    MapArchetype.OPEN_OCEAN,
-    MapArchetype.OPEN_OCEAN,
-    MapArchetype.SHOALS
-  ]
-},
 
 "LIMINAL_NORTHWEST_TO_MOUNTAINS": {
   // Great Plains break to the Northern Rockies
@@ -1221,15 +1189,6 @@ export const LIMINAL_SEQUENCES: Record<string, LiminalSequence> = {
   ]
 },
 
-"LIMINAL_MEDITERRANEAN_ISLANDS": {
-  // Levant/North Africa ↔ Aegean stepping through islands
-  destination: "Crete",
-  sequence: [
-    MapArchetype.SHOALS,
-    MapArchetype.ISLAND,     // Cyprus/Rhodes/Crete stand-in
-    MapArchetype.SHOALS
-  ]
-},
 
 "LIMINAL_PACIFIC_TO_ANTARCTICA": {
   // South Pacific/Drake Passage toward Antarctic Peninsula

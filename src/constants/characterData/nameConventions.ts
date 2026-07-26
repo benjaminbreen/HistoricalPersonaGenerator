@@ -88,8 +88,20 @@ const ARABIC_PATRONYMIC = (parent: string, gender: 'Male' | 'Female') =>
 const HEBREW_PATRONYMIC = (parent: string, gender: 'Male' | 'Female') =>
   `${gender === 'Male' ? 'ben' : 'bat'} ${parent}`;
 
-const NORSE_PATRONYMIC = (parent: string, gender: 'Male' | 'Female') =>
-  `${parent}${gender === 'Male' ? 'sson' : 'sdóttir'}`;
+// The genitive -s is already there when the father's name ends in one, so
+// Vigfus takes `son`, not `sson` — the naive concatenation produced the
+// three-s "Vigfussson". Names ending in -r or -n behave the same way in the
+// modern spelling this app uses (Ragnar → Ragnarsson keeps its own r).
+const norsePatronymic = (daughterSuffix: string) =>
+  (parent: string, gender: 'Male' | 'Female') => {
+    const stem = /s$/i.test(parent) ? parent : `${parent}s`;
+    return `${stem}${gender === 'Male' ? 'son' : daughterSuffix}`;
+  };
+
+/** Iceland, which still forms patronymics this way. */
+const ICELANDIC_PATRONYMIC = norsePatronymic('dóttir');
+/** Mainland Scandinavia, where the female form is -dotter and has no accent. */
+const NORSE_PATRONYMIC = norsePatronymic('dotter');
 
 const WELSH_PATRONYMIC = (parent: string, gender: 'Male' | 'Female') =>
   `${gender === 'Male' ? 'ap' : 'ferch'} ${parent}`;
@@ -208,7 +220,43 @@ const has = (place: string, pattern: RegExp) => pattern.test(place);
  * father, or by nothing but a given name, and the same man by different ones in
  * different records.
  */
+/**
+ * "X son of Y" and "X child of Y" are how records *describe* a person before
+ * civil registration — they are not names anyone was entered under afterwards.
+ * Once a state is writing surnames into a register, that descriptive form is
+ * gone, so its weight belongs with the inherited surname it turned into. Left
+ * unguarded it produced "Rachel daughter of Edmund" in New Zealand in 2010.
+ *
+ * Traditions that genuinely kept a live patronymic past 1900 — Icelandic, and
+ * the Arabic ibn/bint — use their own formatter and are untouched by this.
+ */
+const CIVIL_REGISTRATION = 1900;
+
+function settleDescriptiveForms(profile: ConventionProfile, year: number): ConventionProfile {
+  if (year < CIVIL_REGISTRATION) return profile;
+  const descriptive = profile.patronymic === PLAIN_PATRONYMIC;
+  const teknonymic = profile.teknonym === PLAIN_TEKNONYM;
+  if (!descriptive && !teknonymic) return profile;
+
+  const weights = { ...profile.weights };
+  let folded = 0;
+  if (descriptive && weights.patronymic) { folded += weights.patronymic; delete weights.patronymic; }
+  if (teknonymic && weights.teknonym) { folded += weights.teknonym; delete weights.teknonym; }
+  if (folded === 0) return profile;
+  weights.inherited = (weights.inherited ?? 0) + folded;
+  return { ...profile, weights };
+}
+
 export function conventionProfileFor(
+  culturalZone: string,
+  region: string,
+  year: number,
+  nameKey?: string
+): ConventionProfile {
+  return settleDescriptiveForms(resolveConventionProfile(culturalZone, region, year, nameKey), year);
+}
+
+function resolveConventionProfile(
   culturalZone: string,
   region: string,
   year: number,
@@ -221,7 +269,7 @@ export function conventionProfileFor(
   // not name people the same way at all.
   if (nameKey === 'ICELANDIC') {
     // Iceland never adopted hereditary surnames and still has not.
-    return { weights: { patronymic: 1 }, patronymic: NORSE_PATRONYMIC };
+    return { weights: { patronymic: 1 }, patronymic: ICELANDIC_PATRONYMIC };
   }
   if (nameKey === 'SCANDINAVIAN' && year < 1900) {
     return { weights: { patronymic: 0.78, epithet: 0.14, personal: 0.08 }, patronymic: NORSE_PATRONYMIC };
@@ -256,7 +304,7 @@ export function conventionProfileFor(
     case 'EUROPEAN': {
       if (has(place, /iceland/) && year >= 874) {
         // Iceland never adopted hereditary surnames and still has not.
-        return { weights: { patronymic: 1 }, patronymic: NORSE_PATRONYMIC };
+        return { weights: { patronymic: 1 }, patronymic: ICELANDIC_PATRONYMIC };
       }
       if (has(place, /italy|roman|latium|campania/) && year >= -500 && year < 500) {
         return { weights: { inherited: 0.8, personal: 0.2 } };
@@ -345,6 +393,28 @@ export function conventionProfileFor(
     }
 
     case 'OCEANIA': {
+      // Mission registration and colonial administration brought hereditary
+      // surnames to most of Polynesia through the nineteenth century, often by
+      // fixing a father's given name as a family name. Before that a single
+      // name was the norm and should stay so.
+      // Once a state is registering births, almost everyone has a surname on
+      // paper whatever they are called at home. A quarter of modern New
+      // Zealanders going by a single name was well wide of the mark.
+      if (year >= 1900) {
+        return { weights: { inherited: 0.87, personal: 0.08, epithet: 0.05 } };
+      }
+      if (year >= 1850) {
+        return {
+          weights: { inherited: 0.55, personal: 0.25, patronymic: 0.12, epithet: 0.08 },
+          patronymic: PLAIN_PATRONYMIC,
+        };
+      }
+      if (year >= 1780) {
+        return {
+          weights: { personal: 0.45, inherited: 0.25, teknonym: 0.14, epithet: 0.1, clan: 0.06 },
+          teknonym: PLAIN_TEKNONYM,
+        };
+      }
       return {
         weights: { personal: 0.58, teknonym: 0.18, epithet: 0.16, clan: 0.08 },
         teknonym: PLAIN_TEKNONYM,

@@ -709,9 +709,42 @@ export interface DrawOdds {
   probability: number;
   /** "about 1 in 250 human lives" */
   phrase: string;
+  /**
+   * What the probability was actually computed over — an era and a whole
+   * cultural zone, never the specific locality on the card.
+   *
+   * This exists because the card used to print the figure beside a place name
+   * like "Central Mountains, Taiwan" and say "in this era and region", which
+   * reads as a claim about that valley. It is a claim about medieval East Asia,
+   * and it is out by orders of magnitude if you take it for the other thing.
+   */
+  scope: string;
   eraShare: number;
   zoneShare: number;
 }
+
+const ZONE_PHRASE: Record<string, string> = {
+  EUROPEAN: 'Europe',
+  MENA: 'the Middle East and North Africa',
+  SOUTH_ASIAN: 'South Asia',
+  EAST_ASIAN: 'East Asia',
+  SUB_SAHARAN_AFRICAN: 'sub-Saharan Africa',
+  OCEANIA: 'Oceania',
+  NORTH_AMERICAN_PRE_COLUMBIAN: 'pre-Columbian North America',
+  NORTH_AMERICAN_COLONIAL: 'colonial North America',
+  SOUTH_AMERICAN: 'South America',
+};
+
+const ERA_PHRASE: Record<string, string> = {
+  STONE_AGE: 'the Stone Age',
+  BRONZE_AGE: 'the Bronze Age',
+  CLASSICAL_ANTIQUITY: 'classical antiquity',
+  MEDIEVAL: 'the medieval period',
+  RENAISSANCE_EARLY_MODERN: 'the early modern period',
+  INDUSTRIAL_ERA: 'the industrial era',
+  MODERN_ERA: 'the modern era',
+  FUTURE_ERA: 'the future era',
+};
 
 /**
  * What the drawn combination was actually worth, as a share of all human lives.
@@ -739,10 +772,14 @@ export function describeOdds(era: HistoricalEra, zone: CulturalZone, year: numbe
     return Math.round(n / 500) * 500;
   };
 
+  const eraPhrase = ERA_PHRASE[era as unknown as string] || 'this era';
+  const zonePhrase = ZONE_PHRASE[zone as unknown as string] || 'this region';
+
   return {
     probability,
     eraShare,
     zoneShare,
+    scope: `${eraPhrase} in ${zonePhrase}`,
     phrase: Number.isFinite(oneIn)
       ? `1 in ${round(oneIn).toLocaleString()} human lives`
       : 'a vanishingly small share of human lives',

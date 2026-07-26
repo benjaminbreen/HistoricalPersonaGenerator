@@ -13,7 +13,8 @@
  */
 
 import { hashString, unit } from '../core/rng';
-import { hexToRgb, mixRgb, rgbToHex } from '../core/color';
+import { hexToRgb, hslToRgb, luminance, mixRgb, rgbToHex, rgbToHsl } from '../core/color';
+import { hasIntrinsicColor } from '../../../constants/gameData/colorNames';
 import {
   BackgroundSpec,
   Build,
@@ -97,8 +98,13 @@ const HEADWEAR_KEYWORDS: Array<[RegExp, HeadwearKind]> = [
   [/(crown|diadem|coronet|tiara|headdress|headpiece|sacred feather)/i, 'coronet'],
   [/(circlet|band|fillet|wreath|garland|ornament|passa|jadai|chaplet|hairpin|hair pin|comb|hair flower|laurel|tikka|patti|rakhdi|fascinator|hairpiece|bindi)/i, 'band'],
   [/(turban|headcloth|head cloth|headwrap|head wrap|head tie|gele|keffiyeh|shemagh|pagri|scarf|kerchief|tignon|wrap|duku|gele)/i, 'wrapped_cloth'],
+  // Fur headgear is soft and brimless. This has to precede the generic `hat`
+  // rule below, or a "Fur Hat" picks up a stiff felt brim.
+  [/(fur|pelt|shearling|astrakhan|ushanka|papakha|sheepskin|fox tail)/i, 'cap'],
   [/(cap|coif|bonnet|kufi|taqiyah|biretta|skullcap|futou|beret|toque|fez|tarboosh|hennin|topi|snapback|beanie|biggins|kofia|mitre|songkok)/i, 'cap'],
-  [/(brim|tricorn|bicorne|sombrero|straw|petasos|boater|bowler|fedora|homburg|visor|top hat|wide[- ]?hat|conical|douli|sugegasa|cheese-cutter|hat)/i, 'brimmed_hat'],
+  // `dou li` is written with a space in the item data, so the old `douli`
+  // spelling never matched and those hats fell through to the `cap` fallback.
+  [/(brim|tricorn|bicorne|sombrero|straw|petasos|boater|bowler|fedora|homburg|visor|top hat|wide[- ]?hat|conical|dou ?li|bamboo|sedge|sugegasa|kasa|salakot|non la|cheese-cutter|hat)/i, 'brimmed_hat'],
 ];
 
 function classify<T>(name: string, table: Array<[RegExp, T]>, fallback: T): T {
@@ -161,6 +167,10 @@ const MATERIAL_COLORS: Array<[RegExp, string]> = [
   [/leather|hide/i, '#6b482f'],
   [/fur|sheepskin/i, '#8b7358'],
   [/straw|reed|grass|raffia/i, '#c2a463'],
+  // Bamboo and its relatives were falling through to the generic garment
+  // palette, which is why a woven bamboo hat came out the same grey as a felt
+  // one. Split bamboo weathers to a warmer, slightly greener straw than reed.
+  [/bamboo|rattan|cane|sedge|palm leaf|pandanus/i, '#c0a566'],
   [/barkcloth|bark cloth|fibre|fiber|plant/i, '#a98a63'],
 ];
 
@@ -172,32 +182,137 @@ function colorForMaterial(material: string | undefined): string | null {
   return null;
 }
 
+/**
+ * The colour of a material that is never dyed, or null for anything that is.
+ *
+ * Linen, hemp, wool and cotton all take dye, so a generated colour on those is
+ * meaningful and must win. Sedge, straw, bark, hide, wood and metal do not, and
+ * for those the material *is* the colour — which is the whole reason a sedge
+ * sunhat was arriving at the renderer as a lilac bowler.
+ */
+function intrinsicColorFor(material: string | undefined): string | null {
+  if (!hasIntrinsicColor(material)) return null;
+  return colorForMaterial(material);
+}
+
 // ---------------------------------------------------------------------------
 // Backgrounds
 // ---------------------------------------------------------------------------
 
+/**
+ * One backdrop pair per cultural zone: a base for the field and a lighter
+ * accent for the rake of key light across the upper left.
+ *
+ * These are all cool or neutral on purpose. Human complexions occupy a narrow
+ * warm band — every one of them sits between about 20° and 40° of hue — so a
+ * warm ground is a ground the face cannot separate from, no matter how the
+ * lighting is handled. Zone character has to come from *which* cool it is
+ * (northern steel, Sahelian petrol, indigo, ink-green) and from the accent,
+ * not from putting brown behind brown.
+ */
 const ZONE_BACKGROUNDS: Record<string, [string, string]> = {
-  EUROPEAN: ['#5a6b70', '#8c9689'],
-  MENA: ['#7d6a4f', '#b39b6e'],
-  SOUTH_ASIAN: ['#6b5a70', '#a08462'],
-  EAST_ASIAN: ['#57685f', '#8a9280'],
-  SUB_SAHARAN_AFRICAN: ['#7a5a44', '#b0885c'],
-  NORTH_AMERICAN_PRE_COLUMBIAN: ['#6c6350', '#9d8f6c'],
-  NORTH_AMERICAN_COLONIAL: ['#5d6357', '#8d8b70'],
-  SOUTH_AMERICAN: ['#5f6a52', '#96936a'],
-  OCEANIA: ['#4d6b6b', '#83a08c'],
+  EUROPEAN: ['#4a5a6a', '#8d9a9c'],
+  MENA: ['#5c6272', '#a09a8c'],
+  SOUTH_ASIAN: ['#4d4870', '#9b8fa8'],
+  EAST_ASIAN: ['#3f5a55', '#8b9a8e'],
+  SUB_SAHARAN_AFRICAN: ['#2f5560', '#9aa896'],
+  NORTH_AMERICAN_PRE_COLUMBIAN: ['#4b5a4e', '#979c84'],
+  NORTH_AMERICAN_COLONIAL: ['#445a5c', '#8e9a8e'],
+  SOUTH_AMERICAN: ['#3d5a48', '#8ea183'],
+  OCEANIA: ['#35606e', '#8fa9ac'],
 };
+
+/** Shortest distance between two hues, in degrees. */
+const hueGap = (a: number, b: number): number =>
+  Math.abs(((a - b) % 360 + 540) % 360 - 180);
+
+/**
+ * The guarantee behind the table above, and the one thing that has to hold for
+ * a backdrop supplied from outside — the authenticity service picks colours for
+ * place, not for legibility, and a warm earth from a context pack will happily
+ * bury a warm complexion.
+ *
+ * The constraint is the whole *figure*, not the face. An earlier version of
+ * this checked skin only, which let a green hemp robe sit on a green ground:
+ * at this framing the garment occupies more of the silhouette than the head
+ * does, so cloth has at least as much claim on the separation as skin.
+ *
+ * The zone colour sets the intent; the figure sets the constraint. A ground
+ * that lands within 45° of either the skin's hue or the garment's is rotated
+ * onto the complementary side of whichever it collides with (taking the branch
+ * nearer the zone's own hue, so packs stay distinguishable), chroma is capped
+ * so the ground never competes with the figure, and value is pushed away from
+ * the skin's.
+ */
+function separateFromFigure(
+  hex: string,
+  skinHex: string,
+  garmentHex: string | undefined,
+  range: [number, number]
+): string {
+  const bg = rgbToHsl(hexToRgb(hex));
+  const skin = rgbToHsl(hexToRgb(skinHex));
+  const skinLum = luminance(hexToRgb(skinHex));
+  const [lo, hi] = range;
+
+  // Only a garment with real chroma can swallow a background. A grey-brown
+  // homespun cannot, and treating it as a constraint would rotate every
+  // backdrop in the app for no gain.
+  const garment = garmentHex ? rgbToHsl(hexToRgb(garmentHex)) : null;
+  const garmentBites = garment !== null && garment.s > 0.18;
+
+  // The garment wants a wider berth than the skin does. Skin is never vivid, so
+  // 45° of hue plus the value push below is enough to hold it apart; a
+  // saturated dyed cloth against a desaturated ground of the same family reads
+  // as one mass at 48° and only separates around 50.
+  const collides = (h: number) =>
+    hueGap(h, skin.h) < 45 || (garmentBites && hueGap(h, garment!.h) < 50);
+
+  let hue = bg.h;
+  if (collides(bg.h)) {
+    // Complementary branches off whichever part of the figure we clashed with;
+    // keep the one closer to where the zone wanted to be, and prefer a branch
+    // that does not simply collide with the other half of the figure instead.
+    const anchor = hueGap(bg.h, skin.h) < 45 ? skin.h : garment!.h;
+    const candidates = [anchor + 120, anchor + 205, anchor + 160]
+      .filter(h => !collides(h));
+    const usable = candidates.length > 0 ? candidates : [anchor + 160];
+    hue = usable.reduce((best, h) =>
+      hueGap(bg.h, h) < hueGap(bg.h, best) ? h : best);
+  }
+
+  // A backdrop is scenery. Chroma here reads as "painted flat", and it steals
+  // saturation contrast from the one saturated thing that matters, the figure.
+  const sat = Math.min(bg.s, 0.2);
+
+  // Dark complexions want a backdrop lighter than they are, pale ones a darker
+  // backdrop; either way the gap has to be real.
+  const wantLighter = skinLum <= 0.42;
+  let l = wantLighter ? Math.max(bg.l, skin.l + 0.14) : Math.min(bg.l, skin.l - 0.16);
+  l = Math.max(lo, Math.min(hi, l));
+  if (Math.abs(luminance(hslToRgb({ h: hue, s: sat, l })) - skinLum) < 0.12) {
+    l = wantLighter ? Math.min(hi + 0.08, l + 0.1) : Math.max(lo - 0.08, l - 0.1);
+  }
+
+  return rgbToHex(hslToRgb({ h: hue, s: sat, l }));
+}
 
 function backgroundFor(
   source: PortraitSource,
-  overrides: Record<string, any> | undefined
+  overrides: Record<string, any> | undefined,
+  skinHex: string,
+  garmentHex: string | undefined
 ): BackgroundSpec {
   const provided = overrides?.background;
   const zone = source.culturalZone || 'EUROPEAN';
   const [base, accent] = ZONE_BACKGROUNDS[zone] || ZONE_BACKGROUNDS.EUROPEAN;
   return {
-    base: provided?.base || base,
-    accent: provided?.accent || accent,
+    // An explicitly supplied backdrop is still held to the contrast rule — the
+    // authenticity service picks for place, not for legibility.
+    base: separateFromFigure(provided?.base || base, skinHex, garmentHex, [0.17, 0.44]),
+    // The accent only ever appears as a rake of light across the upper corner,
+    // so it lives a band above the base rather than competing with it.
+    accent: separateFromFigure(provided?.accent || accent, skinHex, garmentHex, [0.42, 0.62]),
     vignette: provided?.vignette ?? true,
     texture: provided?.texture || 'subtle',
   };
@@ -338,7 +453,12 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     name: garmentPiece.name || 'Simple Garment',
     material: (garmentPiece.material || 'wool').toLowerCase(),
     colors: {
-      primary: garmentPiece.color || palette.primary || '#7c6a54',
+      // An intrinsic material outranks whatever colour the generator picked.
+      // Straw is the colour of straw; leather is the colour of leather. The
+      // old precedence let a generated palette entry paint a sedge sunhat
+      // lilac and a bark-cloth wrap sky blue.
+      primary: intrinsicColorFor(garmentPiece.material)
+        || garmentPiece.color || palette.primary || '#7c6a54',
       secondary: palette.secondary || '#9a8768',
       accent: palette.accent || '#a8834f',
     },
@@ -363,7 +483,8 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
       kind,
       name,
       material: (headPiece?.material || 'cloth').toLowerCase(),
-      color: headPiece?.color || colorForMaterial(headPiece?.material) || palette.secondary || '#5c5347',
+      color: intrinsicColorFor(headPiece?.material)
+        || headPiece?.color || colorForMaterial(headPiece?.material) || palette.secondary || '#5c5347',
       accent: palette.accent || '#a8834f',
       ornament: ornamentBase,
     };
@@ -421,7 +542,10 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
 
     condition,
     mood,
-    background: backgroundFor(source, overrides),
+    // The garment's primary is what actually fills the lower two-thirds of the
+    // frame, so it constrains the backdrop alongside the complexion.
+    background: backgroundFor(
+      source, overrides, appearance.skinColor || '#c58f68', garment.colors.primary),
 
     contextPackId: overrides?.contextPackId,
     culturalZone: source.culturalZone,

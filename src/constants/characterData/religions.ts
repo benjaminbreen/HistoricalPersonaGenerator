@@ -56,6 +56,42 @@ export const RELIGION_YEAR_TRANSITIONS: Partial<
                 { religion: 'Puritanism', weight: 5 },
                 { religion: 'Judaism', weight: 3 },
             ] },
+            { startYear: 1801, endYear: 1850, religions: [
+                { religion: 'Protestantism', weight: 78 },
+                { religion: 'Roman Catholicism', weight: 18 },
+                { religion: 'Atheism', weight: 3 },
+                { religion: 'Judaism', weight: 1 },
+            ] },
+            { startYear: 1851, endYear: 1919, religions: [
+                { religion: 'Protestantism', weight: 72 },
+                { religion: 'Roman Catholicism', weight: 20 },
+                { religion: 'Atheism', weight: 6 },
+                { religion: 'Judaism', weight: 2 },
+            ] },
+            { startYear: 1920, endYear: 1959, religions: [
+                { religion: 'Protestantism', weight: 65 },
+                { religion: 'Roman Catholicism', weight: 20 },
+                { religion: 'Atheism', weight: 13 },
+                { religion: 'Judaism', weight: 2 },
+            ] },
+            { startYear: 1960, endYear: 1999, religions: [
+                { religion: 'Atheism', weight: 40 },
+                { religion: 'Protestantism', weight: 38 },
+                { religion: 'Roman Catholicism', weight: 15 },
+                { religion: 'Islam', weight: 3 },
+                { religion: 'Sikhism', weight: 2 },
+                { religion: 'Judaism', weight: 1 },
+                { religion: 'Hinduism', weight: 1 },
+            ] },
+            { startYear: 2000, endYear: 2100, religions: [
+                { religion: 'Atheism', weight: 50 },
+                { religion: 'Protestantism', weight: 27 },
+                { religion: 'Roman Catholicism', weight: 12 },
+                { religion: 'Islam', weight: 6 },
+                { religion: 'Hinduism', weight: 2 },
+                { religion: 'Sikhism', weight: 2 },
+                { religion: 'Judaism', weight: 1 },
+            ] },
         ],
         France: [
             { startYear: 500, endYear: 1149, religions: [
@@ -81,6 +117,32 @@ export const RELIGION_YEAR_TRANSITIONS: Partial<
                 { religion: 'Roman Catholicism', weight: 87 },
                 { religion: 'Protestantism', weight: 11 },
                 { religion: 'Judaism', weight: 2 },
+            ] },
+            { startYear: 1801, endYear: 1904, religions: [
+                { religion: 'Roman Catholicism', weight: 92 },
+                { religion: 'Atheism', weight: 4 },
+                { religion: 'Protestantism', weight: 3 },
+                { religion: 'Judaism', weight: 1 },
+            ] },
+            { startYear: 1905, endYear: 1959, religions: [
+                { religion: 'Roman Catholicism', weight: 80 },
+                { religion: 'Atheism', weight: 15 },
+                { religion: 'Protestantism', weight: 3 },
+                { religion: 'Judaism', weight: 2 },
+            ] },
+            { startYear: 1960, endYear: 1999, religions: [
+                { religion: 'Roman Catholicism', weight: 60 },
+                { religion: 'Atheism', weight: 30 },
+                { religion: 'Islam', weight: 5 },
+                { religion: 'Protestantism', weight: 3 },
+                { religion: 'Judaism', weight: 2 },
+            ] },
+            { startYear: 2000, endYear: 2100, religions: [
+                { religion: 'Atheism', weight: 45 },
+                { religion: 'Roman Catholicism', weight: 40 },
+                { religion: 'Islam', weight: 10 },
+                { religion: 'Protestantism', weight: 4 },
+                { religion: 'Judaism', weight: 1 },
             ] },
         ],
         'Iberian Peninsula': [
@@ -111,6 +173,28 @@ export const RELIGION_YEAR_TRANSITIONS: Partial<
                 { religion: 'Roman Catholicism', weight: 98 },
                 { religion: 'Conversos', weight: 2 },
             ] },
+            { startYear: 1801, endYear: 1930, religions: [
+                { religion: 'Roman Catholicism', weight: 97 },
+                { religion: 'Atheism', weight: 2 },
+                { religion: 'Protestantism', weight: 1 },
+            ] },
+            { startYear: 1931, endYear: 1974, religions: [
+                { religion: 'Roman Catholicism', weight: 92 },
+                { religion: 'Atheism', weight: 7 },
+                { religion: 'Protestantism', weight: 1 },
+            ] },
+            { startYear: 1975, endYear: 1999, religions: [
+                { religion: 'Roman Catholicism', weight: 78 },
+                { religion: 'Atheism', weight: 18 },
+                { religion: 'Protestantism', weight: 2 },
+                { religion: 'Islam', weight: 2 },
+            ] },
+            { startYear: 2000, endYear: 2100, religions: [
+                { religion: 'Roman Catholicism', weight: 55 },
+                { religion: 'Atheism', weight: 35 },
+                { religion: 'Islam', weight: 6 },
+                { religion: 'Protestantism', weight: 4 },
+            ] },
         ],
         'Germanic Lands': [
             { startYear: 500, endYear: 749, religions: [
@@ -136,6 +220,31 @@ export const RELIGION_YEAR_TRANSITIONS: Partial<
                 { religion: 'Roman Catholicism', weight: 40 },
                 { religion: 'Judaism', weight: 4 },
             ] },
+            { startYear: 1851, endYear: 1918, religions: [
+                { religion: 'Protestantism', weight: 62 },
+                { religion: 'Roman Catholicism', weight: 35 },
+                { religion: 'Judaism', weight: 2 },
+                { religion: 'Atheism', weight: 1 },
+            ] },
+            { startYear: 1919, endYear: 1945, religions: [
+                { religion: 'Protestantism', weight: 58 },
+                { religion: 'Roman Catholicism', weight: 33 },
+                { religion: 'Atheism', weight: 8 },
+                { religion: 'Judaism', weight: 1 },
+            ] },
+            { startYear: 1946, endYear: 1989, religions: [
+                { religion: 'Protestantism', weight: 48 },
+                { religion: 'Roman Catholicism', weight: 42 },
+                { religion: 'Atheism', weight: 9 },
+                { religion: 'Islam', weight: 1 },
+            ] },
+            { startYear: 1990, endYear: 2100, religions: [
+                { religion: 'Atheism', weight: 40 },
+                { religion: 'Roman Catholicism', weight: 27 },
+                { religion: 'Protestantism', weight: 25 },
+                { religion: 'Islam', weight: 7 },
+                { religion: 'Judaism', weight: 1 },
+            ] },
         ],
         Balkans: [
             { startYear: 500, endYear: 1203, religions: [
@@ -160,6 +269,30 @@ export const RELIGION_YEAR_TRANSITIONS: Partial<
                 { religion: 'Roman Catholicism', weight: 12 },
                 { religion: 'Judaism', weight: 3 },
             ] },
+            { startYear: 1801, endYear: 1912, religions: [
+                { religion: 'Eastern Orthodoxy', weight: 55 },
+                { religion: 'Sunni Islam', weight: 32 },
+                { religion: 'Roman Catholicism', weight: 10 },
+                { religion: 'Judaism', weight: 3 },
+            ] },
+            { startYear: 1913, endYear: 1945, religions: [
+                { religion: 'Eastern Orthodoxy', weight: 60 },
+                { religion: 'Sunni Islam', weight: 25 },
+                { religion: 'Roman Catholicism', weight: 12 },
+                { religion: 'Judaism', weight: 3 },
+            ] },
+            { startYear: 1946, endYear: 1989, religions: [
+                { religion: 'Eastern Orthodoxy', weight: 42 },
+                { religion: 'Atheism', weight: 32 },
+                { religion: 'Sunni Islam', weight: 20 },
+                { religion: 'Roman Catholicism', weight: 6 },
+            ] },
+            { startYear: 1990, endYear: 2100, religions: [
+                { religion: 'Eastern Orthodoxy', weight: 55 },
+                { religion: 'Sunni Islam', weight: 25 },
+                { religion: 'Roman Catholicism', weight: 10 },
+                { religion: 'Atheism', weight: 10 },
+            ] },
         ],
         Scandinavia: [
             { startYear: 500, endYear: 899, religions: [
@@ -182,6 +315,44 @@ export const RELIGION_YEAR_TRANSITIONS: Partial<
                 { religion: 'Protestantism', weight: 98 },
                 { religion: 'Roman Catholicism', weight: 2 },
             ] },
+            // The bands used to stop at 1800 and hand the next three centuries
+            // to the MODERN_ERA bucket, whose distribution is a present-day
+            // snapshot — Atheism 65 / Protestantism 30 / Islam 5. Applied to
+            // 1920 Stockholm that produced a Swedish Muslim bank clerk who had
+            // made the hajj, in a country whose first mosque opened in 1949.
+            // Leaving the state church only became legal in 1860, and mass
+            // secularisation is a post-1960 phenomenon.
+            { startYear: 1801, endYear: 1859, religions: [
+                { religion: 'Protestantism', weight: 98 },
+                { religion: 'Judaism', weight: 1 },
+                { religion: 'Roman Catholicism', weight: 1 },
+            ] },
+            { startYear: 1860, endYear: 1919, religions: [
+                { religion: 'Protestantism', weight: 96 },
+                { religion: 'Atheism', weight: 2 },
+                { religion: 'Judaism', weight: 1 },
+                { religion: 'Roman Catholicism', weight: 1 },
+            ] },
+            { startYear: 1920, endYear: 1959, religions: [
+                { religion: 'Protestantism', weight: 92 },
+                { religion: 'Atheism', weight: 6 },
+                { religion: 'Judaism', weight: 1 },
+                { religion: 'Roman Catholicism', weight: 1 },
+            ] },
+            { startYear: 1960, endYear: 1999, religions: [
+                { religion: 'Protestantism', weight: 70 },
+                { religion: 'Atheism', weight: 25 },
+                { religion: 'Roman Catholicism', weight: 2 },
+                { religion: 'Islam', weight: 2 },
+                { religion: 'Judaism', weight: 1 },
+            ] },
+            { startYear: 2000, endYear: 2100, religions: [
+                { religion: 'Atheism', weight: 55 },
+                { religion: 'Protestantism', weight: 33 },
+                { religion: 'Islam', weight: 8 },
+                { religion: 'Roman Catholicism', weight: 3 },
+                { religion: 'Judaism', weight: 1 },
+            ] },
         ],
     },
     SOUTH_AMERICAN: {
@@ -201,6 +372,22 @@ export const RELIGION_YEAR_TRANSITIONS: Partial<
                 { religion: 'Syncretic Christianity', weight: 24 },
                 { religion: 'Inca Sun Worship', weight: 8 },
             ] },
+            { startYear: 1801, endYear: 1900, religions: [
+                { religion: 'Roman Catholicism', weight: 88 },
+                { religion: 'Syncretic Christianity', weight: 10 },
+                { religion: 'Andean Shamanism', weight: 2 },
+            ] },
+            { startYear: 1901, endYear: 1969, religions: [
+                { religion: 'Roman Catholicism', weight: 90 },
+                { religion: 'Syncretic Christianity', weight: 8 },
+                { religion: 'Andean Shamanism', weight: 2 },
+            ] },
+            { startYear: 1970, endYear: 2100, religions: [
+                { religion: 'Roman Catholicism', weight: 70 },
+                { religion: 'Protestantism', weight: 20 },
+                { religion: 'Syncretic Christianity', weight: 7 },
+                { religion: 'Atheism', weight: 3 },
+            ] },
         ],
         'Andes South': [
             { startYear: 1400, endYear: 1531, religions: [
@@ -217,6 +404,22 @@ export const RELIGION_YEAR_TRANSITIONS: Partial<
                 { religion: 'Roman Catholicism', weight: 72 },
                 { religion: 'Syncretic Christianity', weight: 22 },
                 { religion: 'Inca Sun Worship', weight: 6 },
+            ] },
+            { startYear: 1801, endYear: 1900, religions: [
+                { religion: 'Roman Catholicism', weight: 86 },
+                { religion: 'Syncretic Christianity', weight: 11 },
+                { religion: 'Aymara Religion', weight: 3 },
+            ] },
+            { startYear: 1901, endYear: 1969, religions: [
+                { religion: 'Roman Catholicism', weight: 89 },
+                { religion: 'Syncretic Christianity', weight: 8 },
+                { religion: 'Aymara Religion', weight: 3 },
+            ] },
+            { startYear: 1970, endYear: 2100, religions: [
+                { religion: 'Roman Catholicism', weight: 68 },
+                { religion: 'Protestantism', weight: 21 },
+                { religion: 'Syncretic Christianity', weight: 8 },
+                { religion: 'Atheism', weight: 3 },
             ] },
         ],
     },
@@ -255,6 +458,26 @@ export const RELIGION_YEAR_TRANSITIONS: Partial<
                 { religion: 'Christianity', weight: 68 },
                 { religion: 'Maori Traditional Religion', weight: 32 },
             ] },
+            { startYear: 1901, endYear: 1959, religions: [
+                { religion: 'Protestantism', weight: 70 },
+                { religion: 'Roman Catholicism', weight: 14 },
+                { religion: 'Maori Traditional Religion', weight: 8 },
+                { religion: 'Atheism', weight: 8 },
+            ] },
+            { startYear: 1960, endYear: 1999, religions: [
+                { religion: 'Protestantism', weight: 48 },
+                { religion: 'Atheism', weight: 30 },
+                { religion: 'Roman Catholicism', weight: 15 },
+                { religion: 'Maori Traditional Religion', weight: 7 },
+            ] },
+            { startYear: 2000, endYear: 2100, religions: [
+                { religion: 'Atheism', weight: 48 },
+                { religion: 'Protestantism', weight: 28 },
+                { religion: 'Roman Catholicism', weight: 12 },
+                { religion: 'Maori Traditional Religion', weight: 6 },
+                { religion: 'Hinduism', weight: 3 },
+                { religion: 'Islam', weight: 3 },
+            ] },
         ],
         'New Guinea and Melanesia': [
             { startYear: 1400, endYear: 1849, religions: [
@@ -265,12 +488,34 @@ export const RELIGION_YEAR_TRANSITIONS: Partial<
                 { religion: 'Melanesian Traditional Religion', weight: 72 },
                 { religion: 'Christianity', weight: 28 },
             ] },
+            { startYear: 1901, endYear: 1959, religions: [
+                { religion: 'Melanesian Traditional Religion', weight: 55 },
+                { religion: 'Protestantism', weight: 28 },
+                { religion: 'Roman Catholicism', weight: 17 },
+            ] },
+            { startYear: 1960, endYear: 2100, religions: [
+                { religion: 'Protestantism', weight: 45 },
+                { religion: 'Roman Catholicism', weight: 28 },
+                { religion: 'Melanesian Traditional Religion', weight: 22 },
+                { religion: 'Cargo Cults', weight: 5 },
+            ] },
         ],
         Polynesia: [
             { startYear: 1400, endYear: 1796, religions: [{ religion: 'Polynesian Traditional Religion', weight: 100 }] },
             { startYear: 1797, endYear: 1850, religions: [
                 { religion: 'Polynesian Traditional Religion', weight: 62 },
                 { religion: 'Christianity', weight: 38 },
+            ] },
+            { startYear: 1851, endYear: 1950, religions: [
+                { religion: 'Protestantism', weight: 72 },
+                { religion: 'Roman Catholicism', weight: 20 },
+                { religion: 'Polynesian Traditional Religion', weight: 8 },
+            ] },
+            { startYear: 1951, endYear: 2100, religions: [
+                { religion: 'Protestantism', weight: 60 },
+                { religion: 'Roman Catholicism', weight: 25 },
+                { religion: 'Mormonism', weight: 10 },
+                { religion: 'Polynesian Traditional Religion', weight: 5 },
             ] },
         ],
         Micronesia: [
@@ -279,12 +524,35 @@ export const RELIGION_YEAR_TRANSITIONS: Partial<
                 { religion: 'Micronesian Traditional Religion', weight: 65 },
                 { religion: 'Christianity', weight: 35 },
             ] },
+            { startYear: 1901, endYear: 1959, religions: [
+                { religion: 'Roman Catholicism', weight: 50 },
+                { religion: 'Protestantism', weight: 35 },
+                { religion: 'Micronesian Traditional Religion', weight: 15 },
+            ] },
+            { startYear: 1960, endYear: 2100, religions: [
+                { religion: 'Roman Catholicism', weight: 52 },
+                { religion: 'Protestantism', weight: 40 },
+                { religion: 'Micronesian Traditional Religion', weight: 8 },
+            ] },
         ],
         'Hawaii and Central Pacific': [
             { startYear: 1400, endYear: 1819, religions: [{ religion: 'Hawaiian Traditional Religion', weight: 100 }] },
             { startYear: 1820, endYear: 1850, religions: [
                 { religion: 'Hawaiian Traditional Religion', weight: 62 },
                 { religion: 'Christianity', weight: 38 },
+            ] },
+            { startYear: 1851, endYear: 1950, religions: [
+                { religion: 'Protestantism', weight: 60 },
+                { religion: 'Roman Catholicism', weight: 25 },
+                { religion: 'Hawaiian Traditional Religion', weight: 10 },
+                { religion: 'Mormonism', weight: 5 },
+            ] },
+            { startYear: 1951, endYear: 2100, religions: [
+                { religion: 'Protestantism', weight: 40 },
+                { religion: 'Roman Catholicism', weight: 25 },
+                { religion: 'Atheism', weight: 20 },
+                { religion: 'Buddhism', weight: 8 },
+                { religion: 'Hawaiian Traditional Religion', weight: 7 },
             ] },
         ],
     },
@@ -305,6 +573,22 @@ export const RELIGION_YEAR_TRANSITIONS: Partial<
                 { religion: 'Syncretic Christianity', weight: 18 },
                 { religion: 'Mesoamerican Traditional Religion', weight: 3 },
             ] },
+            { startYear: 1801, endYear: 1910, religions: [
+                { religion: 'Roman Catholicism', weight: 95 },
+                { religion: 'Syncretic Christianity', weight: 4 },
+                { religion: 'Mesoamerican Traditional Religion', weight: 1 },
+            ] },
+            { startYear: 1911, endYear: 1979, religions: [
+                { religion: 'Roman Catholicism', weight: 93 },
+                { religion: 'Syncretic Christianity', weight: 5 },
+                { religion: 'Protestantism', weight: 2 },
+            ] },
+            { startYear: 1980, endYear: 2100, religions: [
+                { religion: 'Roman Catholicism', weight: 78 },
+                { religion: 'Protestantism', weight: 13 },
+                { religion: 'Atheism', weight: 6 },
+                { religion: 'Syncretic Christianity', weight: 3 },
+            ] },
         ],
         'Central America': [
             { startYear: 1492, endYear: 1523, religions: [
@@ -320,6 +604,22 @@ export const RELIGION_YEAR_TRANSITIONS: Partial<
                 { religion: 'Roman Catholicism', weight: 80 },
                 { religion: 'Syncretic Christianity', weight: 15 },
                 { religion: 'Mayan Traditional Religion', weight: 5 },
+            ] },
+            { startYear: 1801, endYear: 1910, religions: [
+                { religion: 'Roman Catholicism', weight: 94 },
+                { religion: 'Syncretic Christianity', weight: 5 },
+                { religion: 'Mayan Traditional Religion', weight: 1 },
+            ] },
+            { startYear: 1911, endYear: 1979, religions: [
+                { religion: 'Roman Catholicism', weight: 90 },
+                { religion: 'Syncretic Christianity', weight: 6 },
+                { religion: 'Protestantism', weight: 4 },
+            ] },
+            { startYear: 1980, endYear: 2100, religions: [
+                { religion: 'Roman Catholicism', weight: 60 },
+                { religion: 'Protestantism', weight: 30 },
+                { religion: 'Syncretic Christianity', weight: 6 },
+                { religion: 'Atheism', weight: 4 },
             ] },
         ],
     },

@@ -4,6 +4,7 @@
 import { CharacterHealth, ActiveDisease, Disease } from '../types/diseaseTypes';
 import { PlayerCharacter } from '../types';
 import { generateDiseaseProgressionEvent, DiseaseProgressionEvent } from './diseaseNotificationService';
+import { random as seededRandom } from '../utils/seededRandom';
 
 // Store previous stages for change detection
 const previousStages = new Map<string, string>();
@@ -308,7 +309,7 @@ export function shouldPlayerDieFromDisease(diseaseHealth: CharacterHealth | unde
     if (restrictions.isTerminal) {
       // Random death check for terminal diseases
       const deathChance = Math.min(activeDisease.severity * 0.1, 0.05); // Up to 5% chance per check
-      if (Math.random() < deathChance) {
+      if (seededRandom() < deathChance) {
         return { shouldDie: true, cause: activeDisease };
       }
     }

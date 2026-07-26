@@ -3,6 +3,7 @@
  * Comprehensive historical eras and cultural zones with intelligent fallback systems.
  */
 import { HistoricalEra, CulturalZone, WealthLevel, Gender } from '../../types';
+import { random as seededRandom } from '../../utils/seededRandom';
 
 interface ClothingPiece {
     name: string;
@@ -62,77 +63,112 @@ const CULTURAL_SIMILARITY: Partial<Record<CulturalZone, CulturalZone[]>> = {
 
 
 // ERA-SPECIFIC COLOR PALETTES
+//
+// Grounded in what dyers could actually achieve. Before the first aniline dye
+// (mauveine, 1856) every colour on a garment came from madder, weld, woad and
+// indigo, lichens, tannins and insect reds — all of which give softer, slightly
+// greyed hues than a modern screen colour. Fully saturated cloth was not just
+// unusual, it was a statement of wealth: good indigo, kermes scarlet and Tyrian
+// purple were among the most expensive substances in the pre-modern world.
+//
+// So the rule here is that ordinary people wear undyed wool, linen and cheap
+// plant dyes — creams, greys, browns, russets, weld yellows, pale woad — and
+// deep saturated colour is reserved for the wealthy tiers. Pure #FFFFFF and
+// pure #000000 are avoided throughout: bleached linen is warm off-white, and a
+// true fast black was difficult and costly until the early modern period.
+
 const PREHISTORIC_COLORS: ClothingPalette = {
-    primary: ['#8B4513', '#654321', '#A0522D', '#DEB887', '#6B4226', '#8B7355'], // Earth tones, hide colors
-    secondary: ['#F5DEB3', '#D2B48C', '#BC8F8F', '#DDBF94', '#C8B99C'], // Natural fiber colors
-    accent: ['#228B22', '#8B0000', '#DAA520', '#CD853F', '#9ACD32'] // Plant dyes
+    // Hide, fur and bast fibre, with ochre and plant dyes over the top.
+    primary: ['#8a5a3c', '#6b4a33', '#9a6b45', '#c8a882', '#6b4226', '#877258'],
+    secondary: ['#e6d5b8', '#cbb493', '#b9a58c', '#ddbf94', '#c8b99c'],
+    accent: ['#6b7a3a', '#8a3324', '#c19a3f', '#a8763f', '#7d8a4a']
 };
 
 const ANCIENT_COLORS: ClothingPalette = {
-    primary: ['#FFFFFF', '#F5F5DC', '#8B0000', '#4B0082', '#000080', '#2F4F4F'], 
-    secondary: ['#F5DEB3', '#D2691E', '#8B4513', '#CD853F', '#A0522D'], 
-    accent: ['#FFD700', '#C0C0C0', '#228B22', '#DC143C', '#4169E1']
+    // Undyed wool and linen for most; madder, indigo and — for the very few —
+    // Tyrian purple, which cost more by weight than silver.
+    primary: ['#e8e0cc', '#ddd2b8', '#8c3a2e', '#5b3a6b', '#33456b', '#4a5450'],
+    secondary: ['#e0d3b0', '#b5703c', '#7d5533', '#b98a52', '#96603a'],
+    accent: ['#c9a227', '#b0b3ba', '#9c3a34', '#48618f', '#e8e0cc']
 };
 
 const MEDIEVAL_COLORS: ClothingPalette = {
-    primary: ['#251df5', '#4b5563', '#3c362a', '#6d2828', '#2d3748', '#744210'], 
-    secondary: ['#fde68a', '#e5e7eb', '#6b7280', '#d1d5db', '#f3f4f6'], 
-    accent: ['#1e40af', '#15803d', '#b45309', '#7c2d12', '#581c87']
+    // Woad blue, madder russet, weld yellow and a great deal of undyed cloth.
+    // The old palette led with #251df5 — a pure electric blue no medieval dyer
+    // could reach, and the reason so many peasants were turning up in neon.
+    primary: ['#3f5378', '#5a5f63', '#4a4232', '#7a3a34', '#3a4250', '#6d5326'],
+    secondary: ['#e3d5a8', '#ddd8cf', '#8d8a80', '#c9c4b8', '#efe9dc'],
+    accent: ['#2f4a7a', '#4a6b3a', '#a9702c', '#6e3524', '#c9a227']
 };
 
 const RENAISSANCE_COLORS: ClothingPalette = {
-    primary: ['#8B0000', '#000080', '#800080', '#000000', '#2F4F4F', '#8B008B'],
-    secondary: ['#FFFFFF', '#FFD700', '#C0C0C0', '#F5DEB3', '#DDA0DD'],
-    accent: ['#228B22', '#FF6347', '#4169E1', '#DA70D6', '#20B2AA']
+    // The era black became fashionable and achievable at the top of society,
+    // alongside kermes crimson and murrey.
+    primary: ['#7d2b2e', '#2b3a5e', '#5a3355', '#1c1a19', '#3f4a48', '#6b2f52'],
+    secondary: ['#f0e9d8', '#c9a227', '#b0b3ba', '#e0d3b0', '#d8cbb8'],
+    accent: ['#c9a227', '#b0b3ba', '#7d2b2e', '#2b3a5e', '#f0e9d8']
 };
 
 const INDUSTRIAL_COLORS: ClothingPalette = {
-    primary: ['#000000', '#2F4F4F', '#696969', '#8B4513', '#36454F', '#1C1C1C'],
-    secondary: ['#FFFFFF', '#F5F5DC', '#D3D3D3', '#DCDCDC', '#E5E5E5'],
-    accent: ['#B22222', '#000080', '#228B22', '#8B0000', '#4682B4']
+    // Dark wools and the new cheap blacks; bright aniline colours exist from
+    // 1856 but read as novelty rather than as everyday dress.
+    primary: ['#1c1a19', '#33413f', '#5c5c5c', '#6b4a33', '#2f3a40', '#232323'],
+    secondary: ['#f0ece0', '#e6ddc8', '#cfcfcf', '#d8d8d8', '#e5e2da'],
+    accent: ['#8f2f2c', '#2b3a5e', '#3d6b3f', '#6e2723', '#4a6b8a']
 };
 
 const MODERN_COLORS: ClothingPalette = {
-    primary: ['#000000', '#FFFFFF', '#696969', '#000080', '#2F4F4F', '#708090'],
-    secondary: ['#8B4513', '#4682B4', '#CD853F', '#A0522D', '#D2B48C'],
-    accent: ['#DC143C', '#DAA520', '#32CD32', '#FF4500', '#1E90FF']
+    // Synthetic dyes: anything goes, so this is the one palette allowed real
+    // saturation — though still short of screen primaries.
+    primary: ['#1c1a19', '#f2efe8', '#6b6b6b', '#2b3a5e', '#33413f', '#6f7a85'],
+    secondary: ['#7a5433', '#4a6b8a', '#b5824f', '#96603a', '#c8ab86'],
+    accent: ['#b02f3f', '#c9a227', '#4f9a4f', '#d4602f', '#3d7fbf']
 };
 
 // CULTURAL ZONE SPECIFIC PALETTES
 const EAST_ASIAN_COLORS: ClothingPalette = {
-    primary: ['#8B0000', '#FFD700', '#000000', '#FFFFFF', '#4169E1', '#228B22'],
-    secondary: ['#C0C0C0', '#DA70D6', '#20B2AA', '#FF6347', '#DDA0DD'],
-    accent: ['#FF1493', '#00CED1', '#98FB98', '#F0E68C', '#DEB887']
+    // Indigo above all — the working colour of East Asia — with madder and
+    // safflower reds, and gold and black silk at the top.
+    primary: ['#7d2b26', '#c9a227', '#1f1d1c', '#ece5d6', '#33456b', '#4a6b45'],
+    secondary: ['#b0b3ba', '#ece5d6', '#4a6b45', '#b5563f', '#d8cbb8'],
+    accent: ['#c9a227', '#7d2b26', '#1f1d1c', '#ece5d6', '#33456b']
 };
 
 const MENA_COLORS: ClothingPalette = {
-    primary: ['#251df5', '#F5DEB3', '#DEB887', '#8B4513', '#2F4F4F', '#D2691E'],
-    secondary: ['#000080', '#8B0000', '#228B22', '#DAA520', '#CD853F'],
-    accent: ['#FFD700', '#C0C0C0', '#4169E1', '#DC143C', '#20B2AA']
+    // Undyed cotton and wool against strong sun, indigo, saffron and madder.
+    primary: ['#33456b', '#e6dcc2', '#cbb493', '#7a5433', '#3a4a48', '#b5703c'],
+    secondary: ['#2b3a5e', '#7d2b26', '#4a6b3a', '#c9a227', '#b98a52'],
+    accent: ['#c9a227', '#b0b3ba', '#43598f', '#9c3a34', '#e6dcc2']
 };
 
 const TROPICAL_COLORS: ClothingPalette = {
-    primary: ['#F5DEB3', '#8B4513', '#FFFFFF', '#228B22', '#D2691E', '#DEB887'],
-    secondary: ['#FFD700', '#8B0000', '#000080', '#FF6347', '#DA70D6'],
-    accent: ['#20B2AA', '#98FB98', '#F0E68C', '#FFB6C1', '#87CEEB']
+    // Barkcloth and plant fibre, turmeric, and the reds and browns of local
+    // earths and woods.
+    primary: ['#e0d3b0', '#7a5433', '#ece5d6', '#4a6b45', '#b5703c', '#cbb493'],
+    secondary: ['#c9a227', '#8c3a2e', '#33456b', '#b5563f', '#b98a52'],
+    accent: ['#c9a227', '#8c3a2e', '#4a6b45', '#e0d3b0', '#7a5433']
 };
 
 const NORTHERN_COLORS: ClothingPalette = {
-    primary: ['#2F4F4F', '#696969', '#8B4513', '#000000', '#36454F', '#4682B4'],
-    secondary: ['#F5F5DC', '#D3D3D3', '#DEB887', '#CD853F', '#A0522D'],
-    accent: ['#B22222', '#228B22', '#000080', '#8B0000', '#4169E1']
+    // Heavy undyed wool in the natural fleece greys and browns, with woad and
+    // madder where they could be got.
+    primary: ['#3a4a48', '#5c5c5c', '#6b4a33', '#232323', '#2f3a40', '#4a6180'],
+    secondary: ['#efe9dc', '#cfcfcf', '#c8a882', '#b5824f', '#96603a'],
+    accent: ['#8f3330', '#4a6b3a', '#2b3a5e', '#6e2723', '#43598f']
 };
 
 const MEDIEVAL_MENA_COLORS: ClothingPalette = {
-    primary: ['#251df5', '#000080', '#800080', '#000000', '#2F4F4F', '#8B008B'],
-    secondary: ['#FFFFFF', '#FFD700', '#C0C0C0', '#F5DEB3', '#DDA0DD'],
-    accent: ['#228B22', '#FF6347', '#4169E1', '#DA70D6', '#20B2AA']
+    // The same electric #251df5 appeared here; replaced with the indigo and
+    // deep blues the region actually dyed with.
+    primary: ['#33456b', '#2b3a5e', '#5a3355', '#1f1d1c', '#3a4a48', '#6b2f52'],
+    secondary: ['#f0e9d8', '#c9a227', '#b0b3ba', '#e0d3b0', '#d8cbb8'],
+    accent: ['#c9a227', '#b0b3ba', '#43598f', '#7d2b26', '#f0e9d8']
 };
 
 const INDUSTRIAL_MENA_COLORS: ClothingPalette = {
-    primary: ['#000000', '#2F4F4F', '#696969', '#8B4513', '#36454F', '#1C1C1C'],
-    secondary: ['#FFFFFF', '#F5F5DC', '#D3D3D3', '#DCDCDC', '#E5E5E5'],
-    accent: ['#B22222', '#000080', '#228B22', '#8B0000', '#4682B4']
+    primary: ['#1c1a19', '#33413f', '#5c5c5c', '#6b4a33', '#2f3a40', '#232323'],
+    secondary: ['#f0ece0', '#e6ddc8', '#cfcfcf', '#d8d8d8', '#e5e2da'],
+    accent: ['#8f2f2c', '#2b3a5e', '#3d6b3f', '#6e2723', '#4a6b8a']
 };
 
 // COMPREHENSIVE CLOTHING DATABASE
@@ -341,37 +377,38 @@ export const CLOTHING_DATA: ClothingData = {
             wealthy: {
                 Male: {
                     garments: [
-                        { name: 'Senatorial Toga', material: 'Purple-striped Wool', adjectives: ['Imperial'] },
-                        { name: 'Silk Tunic', material: 'Chinese Silk', adjectives: ['Luxurious'] },
-                        { name: 'Emperor Robe', material: 'Tyrian Purple', adjectives: ['Divine'] }
+                        { name: 'Toga with Broad Purple Stripe', material: 'Fine Wool' },
+                        { name: 'Silk-Trimmed Tunic', material: 'Wool and Imported Silk' },
+                        { name: 'Formal Toga', material: 'Bleached Wool' }
                     ],
                     headgear: [
-                        { name: 'Golden Laurel', material: 'Solid Gold', adjectives: ['Imperial'] },
-                        { name: 'Jeweled Diadem', material: 'Gold and Gems' }
+                        { name: 'None', material: 'None' },
+                        { name: 'Wool Travelling Hood', material: 'Fine Wool' }
                     ],
                     footwear: [
-                        { name: 'Patrician Boots', material: 'Purple Leather', adjectives: ['Gilded'] },
-                        { name: 'Jeweled Sandals', material: 'Gold and Leather' }
+                        { name: 'Senatorial Calcei', material: 'Red Leather' },
+                        { name: 'Fine Leather Sandals', material: 'Tooled Leather' }
                     ],
                     belts: [
-                        { name: 'Golden Belt', material: 'Solid Gold', adjectives: ['Jeweled'] }
+                        { name: 'Tooled Leather Belt', material: 'Leather and Bronze' }
                     ],
                     accessories: [
-                        { name: 'Signet Ring', material: 'Gold and Ruby', adjectives: ['Imperial'] },
-                        { name: 'Ceremonial Sword', material: 'Gold and Steel', adjectives: ['Jeweled'] }
+                        { name: 'Signet Ring', material: 'Gold and Carnelian' },
+                        { name: 'Bronze Stylus and Tablet', material: 'Bronze and Wax' }
                     ],
                     palette: ANCIENT_COLORS
                 },
                 Female: {
                     garments: [
-                        { name: 'Imperial Stola', material: 'Gold-thread Silk', adjectives: ['Divine'] },
-                        { name: 'Empress Robe', material: 'Purple Silk', adjectives: ['Jeweled'] }
+                        { name: 'Stola over Linen Tunic', material: 'Fine Wool and Linen' },
+                        { name: 'Draped Palla', material: 'Imported Silk' }
                     ],
                     headgear: [
-                        { name: 'Imperial Crown', material: 'Gold and Pearls', adjectives: ['Divine'] }
+                        { name: 'Dressed Hair with Gold Pins', material: 'Gold' },
+                        { name: 'Fine Wool Veil', material: 'Fine Wool' }
                     ],
                     footwear: [
-                        { name: 'Golden Slippers', material: 'Gold and Silk', adjectives: ['Jeweled'] }
+                        { name: 'Soft Leather Slippers', material: 'Fine Leather' }
                     ],
                     belts: [
                         { name: 'Pearl Girdle', material: 'Pearls and Gold' }
@@ -1124,7 +1161,7 @@ export const CLOTHING_DATA: ClothingData = {
                         { name: 'Court Dress', material: 'Silk Brocade' }
                     ],
                     headgear: [
-                        { name: 'Phoenix Crown', material: 'Gold and Jade', adjectives: ['Delicate'] },
+                        { name: 'Gilt Hairpin Set', material: 'Gilt Bronze', adjectives: ['Delicate'] },
                         { name: 'Silk Hairpiece', material: 'Embroidered Silk' }
                     ],
                     footwear: [
@@ -1141,44 +1178,58 @@ export const CLOTHING_DATA: ClothingData = {
                     palette: EAST_ASIAN_COLORS
                 }
             },
+            // "Wealthy" here means a landowning or official household, not the
+            // imperial family. This tier used to be nothing but emperor and
+            // empress regalia — Imperial Robe, Dragon Crown, Imperial Seal,
+            // five-clawed dragon silk — which the Han and later codes reserved
+            // to the throne on pain of death, and which the generator was then
+            // handing to any prosperous persona in the zone.
             wealthy: {
                 Male: {
                     garments: [
-                        { name: 'Imperial Robe', material: 'Dragon Silk', adjectives: ['Golden'] },
-                        { name: 'Court Dress', material: 'Five-claw Dragon', adjectives: ['Imperial'] }
+                        { name: 'Shenyi Robe', material: 'Figured Silk', adjectives: ['Curved-Hem'] },
+                        { name: 'Cross-Collar Silk Robe', material: 'Damask Silk' },
+                        { name: 'Brocade Overcoat', material: 'Brocade' }
                     ],
                     headgear: [
-                        { name: 'Dragon Crown', material: 'Gold and Jade', adjectives: ['Imperial'] }
+                        { name: 'Guan Cap', material: 'Lacquered Silk' },
+                        { name: 'Silk Headwrap', material: 'Black Silk' }
                     ],
                     footwear: [
-                        { name: 'Dragon Boots', material: 'Silk and Gold', adjectives: ['Jeweled'] }
+                        { name: 'Silk Slippers', material: 'Silk' },
+                        { name: 'Lacquered Boots', material: 'Leather and Lacquer' }
                     ],
                     belts: [
-                        { name: 'Imperial Belt', material: 'Gold and Jade', adjectives: ['Dragon'] }
+                        { name: 'Belt with Jade Hook', material: 'Bronze and Jade' },
+                        { name: 'Woven Silk Belt', material: 'Silk' }
                     ],
                     accessories: [
-                        { name: 'Imperial Seal', material: 'White Jade', adjectives: ['Sacred'] },
-                        { name: 'Dragon Ring', material: 'Gold and Ruby' }
+                        { name: 'Jade Pendant', material: 'Nephrite', adjectives: ['Carved'] },
+                        { name: 'Bronze Mirror', material: 'Bronze' },
+                        { name: 'Official\'s Seal', material: 'Bronze' }
                     ],
                     palette: EAST_ASIAN_COLORS
                 },
                 Female: {
                     garments: [
-                        { name: 'Phoenix Robe', material: 'Phoenix Silk', adjectives: ['Imperial'] },
-                        { name: 'Empress Dress', material: 'Silk and Pearls' }
+                        { name: 'Curved-Hem Silk Robe', material: 'Figured Silk' },
+                        { name: 'Ruqun Jacket and Skirt', material: 'Damask Silk' },
+                        { name: 'Brocade Overrobe', material: 'Brocade' }
                     ],
                     headgear: [
-                        { name: 'Phoenix Crown', material: 'Gold and Pearls', adjectives: ['Imperial'] }
+                        { name: 'Gilt Hairpin Set', material: 'Gilt Bronze' },
+                        { name: 'Silk Headband', material: 'Silk' }
                     ],
                     footwear: [
-                        { name: 'Golden Slippers', material: 'Gold and Silk' }
+                        { name: 'Embroidered Silk Shoes', material: 'Silk' }
                     ],
                     belts: [
-                        { name: 'Pearl Sash', material: 'Pearls and Gold' }
+                        { name: 'Silk Sash', material: 'Silk' }
                     ],
                     accessories: [
-                        { name: 'Imperial Hairpin', material: 'Gold and Jade' },
-                        { name: 'Empress Ring', material: 'Gold and Emerald' }
+                        { name: 'Jade Bracelet', material: 'Nephrite' },
+                        { name: 'Bronze Hairpin', material: 'Bronze' },
+                        { name: 'Pearl Earrings', material: 'Pearl' }
                     ],
                     palette: EAST_ASIAN_COLORS
                 }
@@ -1282,50 +1333,57 @@ export const CLOTHING_DATA: ClothingData = {
                     palette: EAST_ASIAN_COLORS
                 }
             },
+            // Scholar-official and merchant households, not the court. Sumptuary
+            // law did most of this work in period: dragon insignia, and the
+            // five-clawed dragon in particular, were restricted to the imperial
+            // family, and rank was legible from cap, belt plaque and badge
+            // rather than from generic gold.
             wealthy: {
                 Male: {
                     garments: [
-                        { name: 'Imperial Robe', material: 'Dragon Silk', adjectives: ['Five-claw'] },
-                        { name: 'Noble Changshan', material: 'Gold Brocade' },
-                        { name: 'Court Dress', material: 'Silk and Gold Thread' }
+                        { name: 'Round-Collar Official Robe', material: 'Figured Silk' },
+                        { name: 'Scholar\'s Changshan', material: 'Plain Silk' },
+                        { name: 'Brocade Overcoat', material: 'Brocade' }
                     ],
                     headgear: [
-                        { name: 'Dragon Crown', material: 'Gold and Jade' },
-                        { name: 'Noble Hat', material: 'Silk and Gems' }
+                        { name: 'Futou Headwrap', material: 'Black Silk' },
+                        { name: 'Scholar Cap', material: 'Lacquered Silk' }
                     ],
                     footwear: [
-                        { name: 'Dragon Boots', material: 'Silk' },
+                        { name: 'Black Silk Boots', material: 'Silk and Leather' },
                         { name: 'Embroidered Shoes', material: 'Silk' }
                     ],
                     belts: [
-                        { name: 'Dragon Belt', material: 'Jade', adjectives: ['Imperial'] }
+                        { name: 'Jade-Plaque Rank Belt', material: 'Jade and Leather' },
+                        { name: 'Horn-Plaque Belt', material: 'Horn and Leather' }
                     ],
                     accessories: [
-                        { name: 'Imperial Seal', material: 'White Jade', adjectives: ['Carved'] },
-                        { name: 'Dragon Ring', material: 'Gold and Ruby' }
+                        { name: 'Rank Badge', material: 'Embroidered Silk' },
+                        { name: 'Jade Pendant', material: 'Nephrite' },
+                        { name: 'Writing Brush and Case', material: 'Bamboo and Lacquer' }
                     ],
                     palette: EAST_ASIAN_COLORS
                 },
                 Female: {
                     garments: [
-                        { name: 'Phoenix Robe', material: 'Phoenix Silk', adjectives: ['Imperial'] },
-                        { name: 'Hanfu', material: 'Brocade' },
-                        { name: 'Gown', material: 'Silk' }
+                        { name: 'Ruqun Jacket and Skirt', material: 'Figured Silk' },
+                        { name: 'Brocade Overrobe', material: 'Brocade' },
+                        { name: 'Silk Gown', material: 'Damask Silk' }
                     ],
                     headgear: [
-                        { name: 'Phoenix Crown', material: 'Gold and Pearls', adjectives: ['Elaborate'] },
-                        { name: 'Imperial Headdress', material: 'Gold and Jade' }
+                        { name: 'Gilt Hairpin Set', material: 'Gilt Silver' },
+                        { name: 'Silk Headband', material: 'Silk' }
                     ],
                     footwear: [
-                        { name: 'Phoenix Slippers', material: 'ilk' },
-                        { name: 'Embroidered Shoes', material: 'Silk' }
+                        { name: 'Embroidered Silk Shoes', material: 'Silk' }
                     ],
                     belts: [
-                        { name: 'Sash', material: 'Silk' }
+                        { name: 'Silk Sash', material: 'Silk' }
                     ],
                     accessories: [
-                        { name: 'Imperial Hairpin', material: 'Gold' },
-                        { name: 'Phoenix Earrings', material: 'Pearl' }
+                        { name: 'Silver Hairpin', material: 'Silver' },
+                        { name: 'Jade Bracelet', material: 'Nephrite' },
+                        { name: 'Pearl Earrings', material: 'Pearl' }
                     ],
                     palette: EAST_ASIAN_COLORS
                 }
@@ -1432,43 +1490,43 @@ export const CLOTHING_DATA: ClothingData = {
             wealthy: {
                 Male: {
                     garments: [
-                        { name: 'Imperial Robe', material: 'Dragon Silk', adjectives: ['Golden'] },
-                        { name: 'Noble Jacket', material: 'Gold Brocade' },
-                        { name: 'Court Dress', material: 'Silk and Gold' }
+                        { name: 'Round-Collar Official Robe', material: 'Figured Silk' },
+                        { name: 'Magua Riding Jacket', material: 'Brocade' },
+                        { name: 'Scholar\'s Changshan', material: 'Plain Silk' }
                     ],
                     headgear: [
-                        { name: 'Golden Crown', material: 'Gold and Jade' },
-                        { name: 'Noble Cap', material: 'Silk and Gems' }
+                        { name: 'Winter Court Hat', material: 'Silk and Sable' },
+                        { name: 'Summer Court Hat', material: 'Woven Straw and Silk' }
                     ],
                     footwear: [
-                        { name: 'Golden Boots', material: 'Silk and Gold' },
-                        { name: 'Jeweled Shoes', material: 'Silk and Pearls' }
+                        { name: 'Black Silk Boots', material: 'Silk and Leather' },
+                        { name: 'Embroidered Shoes', material: 'Silk' }
                     ],
                     belts: [
-                        { name: 'Golden Belt', material: 'Gold and Jade' }
+                        { name: 'Jade-Plaque Rank Belt', material: 'Jade and Leather' }
                     ],
                     accessories: [
-                        { name: 'Imperial Ring', material: 'Gold and Ruby' },
-                        { name: 'Jade Seal', material: 'White Jade' }
+                        { name: 'Rank Badge', material: 'Embroidered Silk' },
+                        { name: 'Court Bead Necklace', material: 'Amber and Coral' }
                     ],
                     palette: EAST_ASIAN_COLORS
                 },
                 Female: {
                     garments: [
-                        { name: 'Phoenix Gown', material: 'Phoenix Silk' },
-                        { name: 'Imperial Robe', material: 'Gold Brocade' },
-                        { name: 'Court Dress', material: 'Silk and Pearls' }
+                        { name: 'Embroidered Silk Overrobe', material: 'Figured Silk' },
+                        { name: 'Ruqun Jacket and Skirt', material: 'Brocade' },
+                        { name: 'Silk Gown', material: 'Damask Silk' }
                     ],
                     headgear: [
-                        { name: 'Phoenix Crown', material: 'Gold and Pearls' },
-                        { name: 'Imperial Headdress', material: 'Gold and Jade' }
+                        { name: 'Gilt Hairpin Set', material: 'Gilt Silver' },
+                        { name: 'Kingfisher-Feather Hair Ornament', material: 'Gilt Silver and Feather' }
                     ],
                     footwear: [
-                        { name: 'Golden Slippers', material: 'Gold and Silk' },
-                        { name: 'Phoenix Shoes', material: 'Silk and Gems' }
+                        { name: 'Embroidered Silk Shoes', material: 'Silk' },
+                        { name: 'Platform Shoes', material: 'Silk and Wood' }
                     ],
                     belts: [
-                        { name: 'Pearl Girdle', material: 'Pearls and Gold' }
+                        { name: 'Silk Sash', material: 'Silk' }
                     ],
                     accessories: [
                         { name: 'Imperial Hairpin', material: 'Gold and Jade' },
@@ -1610,15 +1668,15 @@ export const CLOTHING_DATA: ClothingData = {
                         { name: 'Silk Headdress', material: 'Embroidered Silk' }
                     ],
                     footwear: [
-                        { name: 'Golden Slippers', material: 'Gold and Silk' },
-                        { name: 'Phoenix Shoes', material: 'Silk and Gems' }
+                        { name: 'Embroidered Silk Shoes', material: 'Silk' },
+                        { name: 'Leather Court Shoes', material: 'Fine Leather' }
                     ],
                     belts: [
-                        { name: 'Pearl Girdle', material: 'Pearls and Gold' }
+                        { name: 'Silk Sash', material: 'Silk' }
                     ],
                     accessories: [
-                        { name: 'Imperial Hairpin', material: 'Gold and Jade' },
-                        { name: 'Diamond Earrings', material: 'Diamonds and Gold' }
+                        { name: 'Jade Hairpin', material: 'Jade and Silver' },
+                        { name: 'Pearl Earrings', material: 'Pearl and Gold' }
                     ],
                     palette: EAST_ASIAN_COLORS
                 }
@@ -5609,7 +5667,7 @@ function adjustMaterialQuality(material: string, targetQuality: 'poor' | 'standa
 
     if (targetMaterials && targetMaterials.length > 0) {
         // Pick a random material from the target quality tier
-        return targetMaterials[Math.floor(Math.random() * targetMaterials.length)];
+        return targetMaterials[Math.floor(seededRandom() * targetMaterials.length)];
     }
 
     return material; // Fallback to original material
@@ -5913,15 +5971,15 @@ const CLOTHING_VARIATIONS: Record<string, { variants: string[], materials: Recor
 export const getRandomClothingPiece = (pieces: ClothingPiece[], wealthLevel?: SimplifiedWealthLevel): ClothingPiece => {
     if (pieces.length === 0) return { name: 'None', material: 'None' };
 
-    const selected = pieces[Math.floor(Math.random() * pieces.length)];
+    const selected = pieces[Math.floor(seededRandom() * pieces.length)];
     const wealth = wealthLevel || 'common';
 
     // Check if this piece has variations (70% chance to vary)
     const variation = CLOTHING_VARIATIONS[selected.name];
-    if (variation && Math.random() < 0.7) {
-        const variantName = variation.variants[Math.floor(Math.random() * variation.variants.length)];
+    if (variation && seededRandom() < 0.7) {
+        const variantName = variation.variants[Math.floor(seededRandom() * variation.variants.length)];
         const variantMaterial = variation.materials[wealth][
-            Math.floor(Math.random() * variation.materials[wealth].length)
+            Math.floor(seededRandom() * variation.materials[wealth].length)
         ];
 
         return {
@@ -5939,7 +5997,7 @@ export const getRandomClothingPiece = (pieces: ClothingPiece[], wealthLevel?: Si
  */
 export const getRandomColor = (palette: ClothingPalette, category: 'primary' | 'secondary' | 'accent' = 'primary'): string => {
     const colors = palette[category];
-    return colors[Math.floor(Math.random() * colors.length)];
+    return colors[Math.floor(seededRandom() * colors.length)];
 };
 
 /**

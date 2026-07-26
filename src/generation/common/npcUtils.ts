@@ -25,7 +25,9 @@ import { filterNameKeys, resolveNameKey } from '../../constants/characterData/na
 import { FormattedName, formatPersonalName } from '../../constants/characterData/nameConventions';
 import { COLD_WEATHER_FALLBACK, ThermalNeed, thermalScore } from '../../services/climateService';
 import { getZoneReligionFallback, isReligionHistoricallyAvailable } from '../../services/religionFallbackService';
+import { filterByCulture, resolveCulture } from '../../services/cultureResolution';
 import type { HistoricalContext } from '../../types/historicalContext';
+import { random as seededRandom } from '../../utils/seededRandom';
 
 /**
  * Create safe NPC memory to avoid proxy revocation issues
@@ -220,12 +222,37 @@ export function generateNpcNameDetailed(
             professionNameKey
         });
 
+        // A profession-derived name key normally wins, but after contact in the
+        // Americas it is the thing producing the anachronism: a role definition
+        // still carrying 'MUISCA' forced a pre-Columbian name on a persona in
+        // 1980 Colombia. Where a colonial mapping applies, the region and year
+        // decide instead.
+        const postContactZones: Record<string, number> = {
+            NORTH_AMERICAN_PRE_COLUMBIAN: 1600,
+            SOUTH_AMERICAN: 1533,
+        };
+        const contactYear = postContactZones[culturalZone as string];
+        if (contactYear !== undefined && year > contactYear) {
+            nameKeyToUse = undefined;
+        }
+
         // 1. Check for a region/year specific override first
         if (!nameKeyToUse && region) {
-            // For North American regions after colonization, check NORTH_AMERICAN_COLONIAL mappings
-            if (culturalZone === 'NORTH_AMERICAN_PRE_COLUMBIAN' && year > 1600) {
-                console.log(`[NameGen] Checking NORTH_AMERICAN_COLONIAL for post-1600`);
-                const colonialRules = REGION_NAME_MAPPING['NORTH_AMERICAN_COLONIAL']?.[region];
+            // Post-contact name sets live under their own mapping keys. The
+            // lookup here previously named 'NORTH_AMERICAN_COLONIAL', which is
+            // not a key in the table (it is 'NORTH_AMERICAN'), and South
+            // America had no lookup at all — so its fully authored
+            // SOUTH_AMERICAN_COLONIAL block was dead data and personas in
+            // 1980 Colombia were still being named like pre-Columbian Muisca.
+            const colonialMapping: Record<string, { key: string; from: number }> = {
+                NORTH_AMERICAN_PRE_COLUMBIAN: { key: 'NORTH_AMERICAN', from: 1600 },
+                SOUTH_AMERICAN: { key: 'SOUTH_AMERICAN_COLONIAL', from: 1533 },
+            };
+            const colonial = colonialMapping[culturalZone as string];
+
+            if (colonial && year > colonial.from) {
+                console.log(`[NameGen] Checking ${colonial.key} for post-${colonial.from}`);
+                const colonialRules = REGION_NAME_MAPPING[colonial.key as keyof typeof REGION_NAME_MAPPING]?.[region];
                 if (colonialRules) {
                     console.log(`[NameGen] Found colonial rules for region "${region}":`, colonialRules);
                     for (const rule of colonialRules) {
@@ -537,6 +564,26 @@ function generateRealisticHairLength(gender: Gender, age: number, rand: () => nu
     }
 }
 
+/**
+ * The label the renderer reads, kept consistent with the zone. It used to be
+ * drawn uniformly from every option, so nearly four in ten Sub-Saharan personas
+ * came out pale while the hex `skinColor` beside it was correctly dark.
+ */
+type SkinTone = Appearance['skinTone'];
+
+const SKIN_TONE_LABELS: Record<string, readonly SkinTone[]> = {
+    SUB_SAHARAN_AFRICAN: ['dark', 'very_dark', 'dark', 'tan'],
+    OCEANIA: ['tan', 'dark', 'medium', 'very_dark'],
+    SOUTH_ASIAN: ['tan', 'medium', 'dark', 'olive'],
+    MENA: ['olive', 'tan', 'medium', 'light'],
+    SOUTH_AMERICAN: ['tan', 'medium', 'olive', 'dark'],
+    NORTH_AMERICAN_PRE_COLUMBIAN: ['tan', 'medium', 'olive', 'dark'],
+    EAST_ASIAN: ['light', 'medium', 'olive', 'fair'],
+    EUROPEAN: ['fair', 'light', 'pale', 'medium', 'very_pale'],
+    NORTH_AMERICAN_COLONIAL: ['fair', 'light', 'medium', 'tan', 'dark'],
+    DEFAULT: ['light', 'medium', 'tan', 'olive'],
+};
+
 export function generateFacialFeatures(
     noise: ValueNoise,
     gender: Gender,
@@ -568,7 +615,7 @@ export function generateFacialFeatures(
         jawline: select(gender === 'Male' ? ['sharp', 'square', 'round'] as const : ['soft', 'round', 'oval'] as const),
         hairTexture: select(hairTextures),
         hairLength: generateRealisticHairLength(gender, age, rand),
-        skinTone: select(['fair', 'light', 'medium', 'olive', 'tan', 'very_pale', 'pale', 'dark', 'very_dark'] as const),
+        skinTone: select(SKIN_TONE_LABELS[culturalZone] ?? SKIN_TONE_LABELS.DEFAULT),
         skinTexture: select(['smooth', 'freckled', 'weathered', 'rough', 'scarred'] as const),
         eyebrowShape: select(['straight', 'arched', 'rounded', 'angular'] as const),
         eyebrowThickness: select(['thin', 'medium', 'thick', 'bushy'] as const),
@@ -696,9 +743,14 @@ function generateBirthplace(
         const neighbors = getNeighboringMapAreas(context.region, context.culturalZone);
         if (neighbors.length > 0) {
             const neighbor = neighbors[Math.floor(noise.random() * neighbors.length)];
-            // Try to get actual cities from CITIES_DATA
-            const citiesInRegion = CITIES_DATA[neighbor.name];
-            if (citiesInRegion && citiesInRegion.length > 0) {
+            // Try to get actual cities from CITIES_DATA, restricted to those that
+            // actually existed in the persona's lifetime — otherwise a medieval
+            // character can be born in Shanghai or Quebec City.
+            const year = context.historicalContext?.year ?? 1500;
+            const citiesInRegion = (CITIES_DATA[neighbor.name] || []).filter(
+                city => year >= city.foundingYear && (!city.declineYear || year <= city.declineYear)
+            );
+            if (citiesInRegion.length > 0) {
                 const city = citiesInRegion[Math.floor(noise.random() * citiesInRegion.length)];
                 return `the city of ${city.name}`;
             }
@@ -736,6 +788,42 @@ export function generateCompleteOutfit(
     accessory: ClothingPiece;
 } {
     const clothingSet = clothingModule.getClothingData(culturalZone, era, wealthLevel, gender);
+
+    // Cultural gate. The zone tables are continent-wide, so `EAST_ASIAN` offers
+    // a Japanese sugegasa to a Formosan highlander and `OCEANIA` would offer a
+    // Polynesian lavalava to an Arnhem Land forager. Resolve the actual culture
+    // once and drop anything carrying a sibling culture's exclusive marker.
+    // (The bespoke Central Asian branch further down in `filterByRegion` is the
+    // hand-written version of this, found the hard way for one region.)
+    const culture = year === undefined
+        ? null
+        : resolveCulture(culturalZone, year, region);
+    //
+    // When a whole category turns out to belong to a sibling culture — the
+    // medieval East Asian poor headgear table is a sugegasa and a zukin, both
+    // Japanese — there is nothing left to keep, and handing back the rejected
+    // list would defeat the point. These are the genuinely pan-regional
+    // alternatives: woven plant fibre and undyed cloth, worn by working people
+    // more or less everywhere the app reaches.
+    const CULTURE_NEUTRAL: Record<string, ClothingPiece[]> = {
+        garment: [{ name: 'Simple Tunic', material: 'Hemp Cloth' }],
+        headgear: [
+            { name: 'Woven Sun Hat', material: 'Straw' },
+            { name: 'Cloth Headband', material: 'Hemp Cloth' },
+            { name: 'None', material: 'None' },
+        ],
+        footwear: [
+            { name: 'Straw Sandals', material: 'Woven Straw' },
+            { name: 'None', material: 'None' },
+        ],
+        belt: [{ name: 'Cord Belt', material: 'Braided Hemp' }],
+        accessory: [{ name: 'None', material: 'None' }],
+    };
+    const filterByCultureMarkers = (items: ClothingPiece[], category: string): ClothingPiece[] => {
+        const kept = filterByCulture(
+            items, item => `${item.name} ${item.material}`, culture, { allowEmpty: true });
+        return kept.length > 0 ? kept : (CULTURE_NEUTRAL[category] ?? items);
+    };
 
     // Material culture gate. The clothing tables were written for periods with
     // looms; now that deep prehistory is reachable, anything woven has to be
@@ -1003,11 +1091,11 @@ export function generateCompleteOutfit(
     };
     
     // Apply filters to each category - first by region, then by occupation
-    const filteredGarments = filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.garments, 'garment'), 'garment'), 'garment'), 'garment'), 'garment');
-    const filteredHeadgear = filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.headgear, 'headgear'), 'headgear'), 'headgear'), 'headgear'), 'headgear');
-    const filteredFootwear = filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.footwear, 'footwear'), 'footwear'), 'footwear'), 'footwear'), 'footwear');
-    const filteredBelts = filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.belts, 'belt'), 'belt'), 'belt'), 'belt'), 'belt');
-    const filteredAccessories = filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.accessories, 'accessory'), 'accessory'), 'accessory'), 'accessory'), 'accessory');
+    const filteredGarments = filterByCultureMarkers(filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.garments, 'garment'), 'garment'), 'garment'), 'garment'), 'garment'), 'garment');
+    const filteredHeadgear = filterByCultureMarkers(filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.headgear, 'headgear'), 'headgear'), 'headgear'), 'headgear'), 'headgear'), 'headgear');
+    const filteredFootwear = filterByCultureMarkers(filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.footwear, 'footwear'), 'footwear'), 'footwear'), 'footwear'), 'footwear'), 'footwear');
+    const filteredBelts = filterByCultureMarkers(filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.belts, 'belt'), 'belt'), 'belt'), 'belt'), 'belt'), 'belt');
+    const filteredAccessories = filterByCultureMarkers(filterByThermal(filterByMaterialEra(filterByOccupation(filterByContact(filterByRegion(clothingSet.accessories, 'accessory'), 'accessory'), 'accessory'), 'accessory'), 'accessory'), 'accessory');
     
     // Convert wealth level for clothing variations
     const simplifiedWealth =
@@ -1061,7 +1149,7 @@ export function generateBaseProfile(
 ): Omit<NpcEntity, 'id' | 'name' | 'class' | 'role' | 'descriptions' | 'movement' | 'x' | 'y' | 'emoji' | 'activity' | 'workplaceId' | 'workplaceName'> {
     try {
         if (!noise || typeof noise.random !== 'function') {
-            noise = { random: () => Math.random() } as ValueNoise;
+            noise = { random: () => seededRandom() } as ValueNoise;
         }
         
         const generateStat = (base: number = 5, variance: number = 5) => Math.max(1, Math.min(10, base + Math.floor((noise.random() - 0.5) * variance)));
@@ -1562,12 +1650,12 @@ function getFallbackRole(
     const food = foodRoles.filter(r => usable(r) && suits(r));
     const other = otherRoles.filter(r => usable(r) && suits(r));
 
-    const pool = Math.random() < subsistence && food.length > 0 ? food
+    const pool = seededRandom() < subsistence && food.length > 0 ? food
         : other.length > 0 ? other
         : food;
 
     if (pool.length > 0) {
-        const chosen = pool[Math.floor(Math.random() * pool.length)];
+        const chosen = pool[Math.floor(seededRandom() * pool.length)];
         return { socialClass: 'COMMONER', role: chosen.role, emoji: chosen.emoji };
     }
 
@@ -1591,7 +1679,7 @@ export function determineSocialRole(
                 item.selectionWeight ?? getProfessionSelectionWeight(item.role, roleHistoricalContext)
             );
             const total = weights.reduce((sum, weight) => sum + weight, 0);
-            let roll = Math.random() * total;
+            let roll = seededRandom() * total;
             for (let index = 0; index < roles.length; index += 1) {
                 roll -= weights[index];
                 if (roll <= 0) return roles[index];
@@ -1808,7 +1896,7 @@ export function determineSocialRole(
 
             // 99% chance to pick from regular roles if available, 1% for outlaws
             let chosen;
-            if (regularRoles.length > 0 && (outlawRoles.length === 0 || Math.random() > 0.01)) {
+            if (regularRoles.length > 0 && (outlawRoles.length === 0 || seededRandom() > 0.01)) {
                 chosen = pickWeightedRole(regularRoles);
             } else if (outlawRoles.length > 0) {
                 chosen = pickWeightedRole(outlawRoles);
@@ -2297,10 +2385,19 @@ export function assignBeliefs(
             (character as any).location, (character as any).region, (character as any).birthplace,
         ].filter(Boolean).join(' ').toLowerCase(),
     };
+    // The era buckets are wide, so an ideology may also declare an absolute
+    // year range, and one that presupposes a station may declare a privilege
+    // floor. Both were previously declared nowhere and enforced nowhere, which
+    // is how a poor herder came to be a Capitalist Entrepreneur in 1468.
+    const privilege = (socialContext as any)?.privilege;
     const suitableIdeologies = IDEOLOGIES.filter(Boolean).filter(ideo =>
         ideo.culturalZones.includes(culturalZone) &&
         ideo.eras.includes(era) &&
         ideo.religions.includes(religion) &&
+        (!ideo.yearRange
+            || (capabilityCtx.year >= ideo.yearRange[0] && capabilityCtx.year <= ideo.yearRange[1])) &&
+        (ideo.minPrivilege === undefined || privilege === undefined
+            || privilege >= ideo.minPrivilege) &&
         ideologyIsPossible(ideo.id, capabilityCtx)
     );
 

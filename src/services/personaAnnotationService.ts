@@ -2,10 +2,11 @@ import { CulturalZone, Gender, HistoricalEra, WealthLevel } from '../types';
 import { GenerationParams } from './personaGenerator';
 import { HistoricalPersonaAnnotationRecord, IngestedPersonaSource } from '../types/personaAnnotation';
 import { adaptPersonaMaterialRecord } from './personaMaterialAdapter';
+import { random as seededRandom } from '../utils/seededRandom';
 
-const pick = <T,>(values: T[]): T => values[Math.floor(Math.random() * values.length)];
+const pick = <T,>(values: T[]): T => values[Math.floor(seededRandom() * values.length)];
 
-const randomInt = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1)) + min;
+const randomInt = (min: number, max: number): number => Math.floor(seededRandom() * (max - min + 1)) + min;
 
 const slug = (value: string): string =>
   value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48) || 'source';
