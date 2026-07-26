@@ -28,6 +28,7 @@ import { describeBeliefSecondPerson, withIndefiniteArticle } from './narrativeTe
 import { createHistoricalContext } from './historicalContextService';
 import type { HistoricalContext } from '../types/historicalContext';
 import { random as seededRandom } from '../utils/seededRandom';
+import { devLog } from '../utils/devLog';
 
 let characterIdCounter = 0;
 
@@ -621,7 +622,7 @@ function generateProceduralFamily(
     const birthYear = characterBirthYear !== undefined ? characterBirthYear : (currentYear - age);
 
     // Debug logging to verify birthYear handling
-    console.log(`[generateProceduralFamily] ${character.name}: age=${age}, currentYear=${currentYear}, birthYear=${birthYear}` +
+    devLog(`[generateProceduralFamily] ${character.name}: age=${age}, currentYear=${currentYear}, birthYear=${birthYear}` +
         (characterBirthYear !== undefined ? ` (USED passed birthYear=${characterBirthYear})` : ' (calculated)'));
 
     const gender = character.gender;
@@ -950,7 +951,7 @@ function nameImpliesAppearance(detected: string, geographic: string): boolean {
 }
 
 export function generateCharacterWithSpec(context: GenerationContext, spec?: CharacterSpecification | null): PlayerCharacter {
-    console.log('[Character Generator] Generating character with spec:', spec);
+    devLog('[Character Generator] Generating character with spec:', spec);
     
     // There used to be a second, near-identical generator for the no-spec case:
     // 550 lines, 114 of them verbatim copies of the ones below. Every fix had to
@@ -961,7 +962,12 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         spec = {} as CharacterSpecification;
     }
     
-    const noise = new ValueNoise(context.seed ?? (Date.now() + seededRandom() * 10000));
+    // Falling back to the wall clock here made name generation irreproducible:
+    // the same persona seed produced different parents on different runs,
+    // because this noise source drives `generateNpcNameDetailed`. The ambient
+    // seeded source is deterministic inside `withSeed` and still varied
+    // outside it, which is what the clock was reaching for.
+    const noise = new ValueNoise(context.seed ?? Math.floor(seededRandom() * 0x7fffffff));
     const dateInfo = parseDateString(context.date);
     // Use ethnicity from spec if provided, then context, then fall back to geographic cultural zone
     const culturalZone = (spec as any).ethnicity || context.culturalZone || mapLocationToCulture(context.location, dateInfo.year);
@@ -985,7 +991,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
 
     // Log ethnicity usage for debugging
     if ((spec as any).ethnicity) {
-        console.log(`[Character Generator] Using ethnicity '${(spec as any).ethnicity}' for character generation (geographic zone would be: ${mapLocationToCulture(context.location, dateInfo.year)})`);
+        devLog(`[Character Generator] Using ethnicity '${(spec as any).ethnicity}' for character generation (geographic zone would be: ${mapLocationToCulture(context.location, dateInfo.year)})`);
     }
     
     // Anything that was not exactly 'male' used to fall through to 'Female',
@@ -1282,7 +1288,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
                 headItem.material = baseProfile.appearance.headgear.material;
             }
             equippedItems.head = headItem;
-            console.log('[CharGen] Created head item from appearance:', headgearBaseId, '→', headItem.name);
+            devLog('[CharGen] Created head item from appearance:', headgearBaseId, '→', headItem.name);
         }
     }
     
@@ -1305,10 +1311,10 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             // Check if this is a leg item (pants, trousers, etc.) or torso item
             if (garmentItem.equipmentSlot === 'legs') {
                 equippedItems.legs = garmentItem;
-                console.log('[CharGen] Created legs item from appearance:', garmentBaseId, '→', garmentItem.name);
+                devLog('[CharGen] Created legs item from appearance:', garmentBaseId, '→', garmentItem.name);
             } else {
                 equippedItems.torso = garmentItem;
-                console.log('[CharGen] Created torso item from appearance:', garmentBaseId, '→', garmentItem.name);
+                devLog('[CharGen] Created torso item from appearance:', garmentBaseId, '→', garmentItem.name);
             }
         }
     }
@@ -1332,7 +1338,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
                 feetItem.material = baseProfile.appearance.footwear.material;
             }
             equippedItems.feet = feetItem;
-            console.log('[CharGen] Created feet item from appearance:', footwearBaseId, '→', feetItem.name);
+            devLog('[CharGen] Created feet item from appearance:', footwearBaseId, '→', feetItem.name);
         }
     }
     
@@ -1369,7 +1375,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     const markingProbability = getMarkingProbability(culturalZone, generationContext.era, spec?.profession || role);
     const markings: any[] = [];
     
-    // console.log(`[CharGen Spec] Marking probability for ${culturalZone}/${generationContext.era}/${spec?.profession || role}: ${markingProbability}`);
+    // devLog(`[CharGen Spec] Marking probability for ${culturalZone}/${generationContext.era}/${spec?.profession || role}: ${markingProbability}`);
     
     // Determine how many markings to add based on culture - MORE historically accurate
     let numMarkings = 0;
@@ -1411,7 +1417,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             `${context.region ?? ''} ${context.location ?? ''}`
         ).filter(m => !usedTypes.has(m.type)); // Don't repeat marking types
         
-        // console.log(`[CharGen Spec] Found ${availableMarkings.length} available markings for slot ${i+1}`);
+        // devLog(`[CharGen Spec] Found ${availableMarkings.length} available markings for slot ${i+1}`);
         
         const selectedMarking = selectRandomMarking(availableMarkings, noise.random());
         if (selectedMarking) {
@@ -1420,7 +1426,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             if (pattern) {
                 const appearanceMarking = convertToAppearanceMarking(selectedMarking, pattern);
                 markings.push(appearanceMarking);
-                // console.log(`[CharGen Spec] Added cultural marking: ${pattern.localName || pattern.name} (${selectedMarking.type}`);
+                // devLog(`[CharGen Spec] Added cultural marking: ${pattern.localName || pattern.name} (${selectedMarking.type}`);
             }
         }
     }
@@ -1555,7 +1561,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
 
     // Add custom items to inventory if provided
     if (spec.customItems && spec.customItems.length > 0) {
-        console.log(`[Character Generator] Adding ${spec.customItems.length} custom items from WorldWeaver`);
+        devLog(`[Character Generator] Adding ${spec.customItems.length} custom items from WorldWeaver`);
         for (const customItem of spec.customItems) {
             const item: Item = {
                 id: `custom-${Date.now()}-${seededRandom().toString(36).substr(2, 9)}`,
@@ -1624,7 +1630,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     
     // Check if a specific disease was requested via WorldWeaver
     if (spec.disease) {
-        console.log(`[Character Generator] Specific disease requested: ${spec.disease}`);
+        devLog(`[Character Generator] Specific disease requested: ${spec.disease}`);
 
         // Try exact match first
         diseaseHealth = diseaseService.assignSpecificDisease(
@@ -1637,7 +1643,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
 
         // If exact match failed, try fuzzy matching
         if (!diseaseHealth || diseaseHealth.currentDiseases.length === 0) {
-            console.log(`[Character Generator] Exact match failed for '${spec.disease}', trying fuzzy match...`);
+            devLog(`[Character Generator] Exact match failed for '${spec.disease}', trying fuzzy match...`);
 
             // Normalize: uppercase, replace spaces with underscores, remove punctuation
             const normalizedId = spec.disease
@@ -1645,7 +1651,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
                 .replace(/\s+/g, '_')
                 .replace(/[^A-Z0-9_]/g, '');
 
-            console.log(`[Character Generator] Normalized disease ID: ${normalizedId}`);
+            devLog(`[Character Generator] Normalized disease ID: ${normalizedId}`);
 
             diseaseHealth = diseaseService.assignSpecificDisease(
                 { health: undefined } as any,
@@ -1658,11 +1664,11 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
 
         // Check if we successfully assigned the disease
         if (diseaseHealth && diseaseHealth.currentDiseases.length > 0) {
-            console.log(`[Character Generator] ✓ Custom character given requested disease: ${diseaseHealth.currentDiseases[0].disease.name}`);
+            devLog(`[Character Generator] ✓ Custom character given requested disease: ${diseaseHealth.currentDiseases[0].disease.name}`);
         } else {
             // Disease not available for this era/region - force a contextually appropriate disease
             console.warn(`[Character Generator] ⚠ Disease '${spec.disease}' not available for ${generationContext.era}/${culturalZone}/${dateInfo.year}`);
-            console.log(`[Character Generator] Forcing contextually appropriate disease instead...`);
+            devLog(`[Character Generator] Forcing contextually appropriate disease instead...`);
 
             // Override health spec to force disease selection below
             if (!spec.health || spec.health === 'average' || spec.health === 'healthy') {
@@ -1679,7 +1685,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
 
         if (spec.health === 'sick') {
             diseaseChance = 1.0; // 100% chance for sick characters
-            console.log(`[Character Generator] Health spec is 'sick', guaranteeing disease`);
+            devLog(`[Character Generator] Health spec is 'sick', guaranteeing disease`);
         } else if (spec.health === 'sickly') {
             diseaseChance = 0.6; // 60% chance for sickly characters
         } else if (spec.health === 'unhealthy') {
@@ -1712,12 +1718,12 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
                 // anthrax the second most common human ailment and buried
                 // intestinal worms beneath it.
                 let selectedDisease =
-                    pickByPrevalence(availableDiseases, Math.random, { inEpidemic: Boolean(epidemicDisease) })
+                    pickByPrevalence(availableDiseases, seededRandom, { inEpidemic: Boolean(epidemicDisease) })
                     || availableDiseases[0];
 
                 if (epidemicDisease && seededRandom() < 0.8) {
                     selectedDisease = epidemicDisease;
-                    console.log(`[Character Generator] Custom character spawning during ${epidemicDisease.name} epidemic in ${dateInfo.year}`);
+                    devLog(`[Character Generator] Custom character spawning during ${epidemicDisease.name} epidemic in ${dateInfo.year}`);
                 }
                 
                 diseaseHealth = {
@@ -1734,19 +1740,19 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
                     lastHealthUpdate: { year: dateInfo.year, month: 1, day: 1 }
                 };
                 
-                console.log(`[Character Generator] Custom character starts with disease: ${selectedDisease.name} (chance was ${(diseaseChance * 100).toFixed(1)}%)`);
+                devLog(`[Character Generator] Custom character starts with disease: ${selectedDisease.name} (chance was ${(diseaseChance * 100).toFixed(1)}%)`);
             } else {
-                console.log(`[Character Generator] No diseases available for custom character in era ${generationContext.era}`);
+                devLog(`[Character Generator] No diseases available for custom character in era ${generationContext.era}`);
             }
         } else {
-            // console.log(`[Character Generator] Custom character spawned healthy (disease chance was ${(diseaseChance * 100).toFixed(1)}%`);
+            // devLog(`[Character Generator] Custom character spawned healthy (disease chance was ${(diseaseChance * 100).toFixed(1)}%`);
         }
     }
     
     // Attributes already generated above before backstory
     
     if (attributes.length > 0) {
-        console.log(`[Character Generator] Generated ${attributes.length} attribute badge(s) for custom character:`, 
+        devLog(`[Character Generator] Generated ${attributes.length} attribute badge(s) for custom character:`, 
             attributes.map(a => `${a.name} (${a.rarity})`).join(', '));
     }
     
@@ -1768,7 +1774,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     const geographicZone = mapLocationToCulture(context.location, dateInfo.year);
     if (specEthnicity && specEthnicity !== geographicZone) {
         (character as any).ethnicCulturalZone = specEthnicity;
-        console.log(`[Character Generator] Set ethnicCulturalZone '${specEthnicity}' for ${name} (geographic zone: ${geographicZone})`);
+        devLog(`[Character Generator] Set ethnicCulturalZone '${specEthnicity}' for ${name} (geographic zone: ${geographicZone})`);
     }
 
     // Final coherence validation - catch any remaining contradictions
@@ -1781,10 +1787,10 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     });
     character.personality = validatedPersonality;
     if (warnings.length > 0) {
-        console.log(`[Character Generator] Coherence adjustments for ${name}:`, warnings);
+        devLog(`[Character Generator] Coherence adjustments for ${name}:`, warnings);
     }
 
-    console.log(`[Character Generator] Generated custom character ${name}, a ${role} with specifications`);
+    devLog(`[Character Generator] Generated custom character ${name}, a ${role} with specifications`);
 
     return character;
 }

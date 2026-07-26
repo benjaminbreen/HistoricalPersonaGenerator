@@ -55,11 +55,20 @@ const capabilityContext = (ctx: BiographyContext): CapabilityContext => ({
 const SETTLED_TRADES = /farm|field hand|miller|plough|plow|harvest|vintner|planter|shopkeep|clerk|scribe|weaver|potter|smith|mason|carpenter|baker|innkeep|merchant/i;
 
 export function registerFor(ctx: BiographyContext): SettlementRegister {
-  const base = settlementRegister(capabilityContext(ctx));
+  let base = settlementRegister(capabilityContext(ctx));
   // A persona who works fields or keeps a shop does not live in a band,
   // whatever the zone-level table says; describing them as both is worse than
   // describing them as settled.
-  if (base === 'band' && SETTLED_TRADES.test(ctx.profession || '')) return 'village';
+  if (base === 'band' && SETTLED_TRADES.test(ctx.profession || '')) base = 'village';
+
+  // `settlementRegister` answers "does this society have cities", which is not
+  // the same question as "does this person live in one". Without the locale
+  // refinement — the same one `birthplaceService` already applies — a persona
+  // born in a hamlet was told, one sentence later, about the street they grew
+  // up on.
+  const locale = ctx.historical?.localeType;
+  if ((locale === 'city' || locale === 'town') && base !== 'band') return 'district';
+  if (locale === 'rural' && base === 'district') return 'village';
   return base;
 }
 

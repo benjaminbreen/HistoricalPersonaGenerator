@@ -22,6 +22,7 @@ import { generateCulturalAccessory, generateAccessorySet } from '../services/cul
 // Use UUID for better performance and uniqueness instead of counter
 import { v4 as uuidv4 } from 'uuid';
 import { random as seededRandom } from './seededRandom';
+import { devLog } from './devLog';
 
 /**
  * Simplified procedural ItemDefinition generator using classification system
@@ -342,7 +343,7 @@ export function removeItemFromInventory(
  * Creates a tamed animal for starting companions
  */
 function createStartingCompanion(animalBaseId: string, playerCharacter: PlayerCharacter): void {
-    console.log(`[StartingCompanion] Adding ${animalBaseId} to ${playerCharacter.name} (${playerCharacter.profession})`);
+    devLog(`[StartingCompanion] Adding ${animalBaseId} to ${playerCharacter.name} (${playerCharacter.profession})`);
     const animalData = ANIMAL_DATA[animalBaseId];
     if (!animalData) {
         console.warn(`Starting companion animal not found: ${animalBaseId}`);
@@ -561,7 +562,7 @@ function addRandomPets(playerCharacter: PlayerCharacter): void {
 
         // Skip Old World animals for Pre-Columbian characters
         if (isPreColumbian && OLD_WORLD_ANIMALS.includes(randomPet)) {
-            console.log(`[RandomPets] Skipping ${randomPet} for ${culturalZone} character (Old World animal)`);
+            devLog(`[RandomPets] Skipping ${randomPet} for ${culturalZone} character (Old World animal)`);
             return; // Don't add this pet
         }
 
@@ -651,7 +652,7 @@ export function assembleStartingPackage(
     
     // Clear any existing tamed animals when creating a new character
     if (playerCharacter) {
-        console.log(`[StartingPackage] Clearing existing tamed animals for new character: ${playerCharacter.name}`);
+        devLog(`[StartingPackage] Clearing existing tamed animals for new character: ${playerCharacter.name}`);
         localStorage.removeItem('tamedAnimals');
     }
 
@@ -851,7 +852,7 @@ export function assembleStartingPackage(
             if (culturalZone &&
                 PRE_COLUMBIAN_ZONES.includes(culturalZone) &&
                 OLD_WORLD_ANIMALS.includes(animalBaseId)) {
-                console.log(`[StartingPackage] Skipping ${animalBaseId} for ${culturalZone} character (Old World animal)`);
+                devLog(`[StartingPackage] Skipping ${animalBaseId} for ${culturalZone} character (Old World animal)`);
                 return; // Skip this companion
             }
 

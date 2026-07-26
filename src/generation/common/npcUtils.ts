@@ -28,6 +28,7 @@ import { getZoneReligionFallback, isReligionHistoricallyAvailable } from '../../
 import { filterByCulture, resolveCulture } from '../../services/cultureResolution';
 import type { HistoricalContext } from '../../types/historicalContext';
 import { random as seededRandom } from '../../utils/seededRandom';
+import { devLog } from '../../utils/devLog';
 
 /**
  * Create safe NPC memory to avoid proxy revocation issues
@@ -118,7 +119,7 @@ export function determineReligion(
     year?: number,
     localArea?: string
 ): string {
-    console.log('[Religion] Looking up religion:', { culturalZone, region, era });
+    devLog('[Religion] Looking up religion:', { culturalZone, region, era });
 
     // Era buckets are too coarse for a conversion frontier. In 685 the lower
     // Elbe was still overwhelmingly outside Latin Christianity; treating the
@@ -145,20 +146,20 @@ export function determineReligion(
         regionalEraData?.some(item => !isReligionHistoricallyAvailable(item.religion, year));
     let eraData: ReligionDistributionEntry[] | undefined = transitionBand?.religions ||
         (regionalContainsAnachronism ? undefined : regionalEraData);
-    console.log('[Religion] First lookup result:', eraData ? `Found ${eraData.length} options` : 'Not found');
+    devLog('[Religion] First lookup result:', eraData ? `Found ${eraData.length} options` : 'Not found');
 
     if (!eraData || eraData.length === 0) {
         // Missing local data must never borrow an arbitrary region. Use an
         // explicit broad-zone distribution for the exact year instead.
         eraData = getZoneReligionFallback(culturalZone, year ?? 0, place);
-        console.log('[Religion] Using explicit zone/year fallback:', eraData);
+        devLog('[Religion] Using explicit zone/year fallback:', eraData);
     }
     if (year !== undefined) {
         eraData = eraData.filter(item => isReligionHistoricallyAvailable(item.religion, year));
     }
 
     if (!eraData || eraData.length === 0) {
-        console.log('[Religion] All lookups failed, returning "Local Beliefs"');
+        devLog('[Religion] All lookups failed, returning "Local Beliefs"');
         return 'Local Beliefs';
     }
     
@@ -215,7 +216,7 @@ export function generateNpcNameDetailed(
     try {
         let nameKeyToUse: string | undefined = professionNameKey;
 
-        console.log(`[NameGen] Starting name generation:`, {
+        devLog(`[NameGen] Starting name generation:`, {
             culturalZone,
             region,
             year,
@@ -251,60 +252,72 @@ export function generateNpcNameDetailed(
             const colonial = colonialMapping[culturalZone as string];
 
             if (colonial && year > colonial.from) {
-                console.log(`[NameGen] Checking ${colonial.key} for post-${colonial.from}`);
+                devLog(`[NameGen] Checking ${colonial.key} for post-${colonial.from}`);
                 const colonialRules = REGION_NAME_MAPPING[colonial.key as keyof typeof REGION_NAME_MAPPING]?.[region];
                 if (colonialRules) {
-                    console.log(`[NameGen] Found colonial rules for region "${region}":`, colonialRules);
+                    devLog(`[NameGen] Found colonial rules for region "${region}":`, colonialRules);
                     for (const rule of colonialRules) {
                         const beforeMatch = rule.before ? year < rule.before : true;
                         const afterMatch = rule.after ? year >= rule.after : true;
                         if (beforeMatch && afterMatch) {
                             // Only traditions that could exist in this year.
                             const usable = filterNameKeys(rule.keys, year);
-                            if (usable.length === 0) break;
+                            if (usable.length === 0) {
+                                nameKeyToUse = resolveNameKey(rule.keys[0], culturalZone, year, region || '');
+                                break;
+                            }
                             nameKeyToUse = usable[Math.floor(noise.random() * usable.length)];
-                            console.log(`[NameGen] Selected from colonial mapping: ${nameKeyToUse}`);
                             break;
                         }
                     }
                 } else {
-                    console.log(`[NameGen] No colonial rules found for region "${region}"`);
+                    devLog(`[NameGen] No colonial rules found for region "${region}"`);
                 }
             }
 
             // If not found in colonial mappings or not applicable, check the original cultural zone
             if (!nameKeyToUse && REGION_NAME_MAPPING[culturalZone as keyof typeof REGION_NAME_MAPPING]) {
-                console.log(`[NameGen] Checking REGION_NAME_MAPPING["${culturalZone}"]["${region}"]`);
+                devLog(`[NameGen] Checking REGION_NAME_MAPPING["${culturalZone}"]["${region}"]`);
                 const regionRules = REGION_NAME_MAPPING[culturalZone as keyof typeof REGION_NAME_MAPPING][region];
                 if (regionRules) {
-                    console.log(`[NameGen] Found regional rules:`, regionRules);
+                    devLog(`[NameGen] Found regional rules:`, regionRules);
                     for (const rule of regionRules) {
                         const beforeMatch = rule.before ? year < rule.before : true;
                         const afterMatch = rule.after ? year >= rule.after : true;
-                        console.log(`[NameGen] Rule check: before=${rule.before}, after=${rule.after}, year=${year}, matches=${beforeMatch && afterMatch}`);
+                        devLog(`[NameGen] Rule check: before=${rule.before}, after=${rule.after}, year=${year}, matches=${beforeMatch && afterMatch}`);
                         if (beforeMatch && afterMatch) {
                             // Region rules are written with an open-ended `before`,
                             // so a Bronze Age entry also matches the Palaeolithic.
                             // Filter to what could actually exist in this year.
                             const usable = filterNameKeys(rule.keys, year);
-                            if (usable.length === 0) break;
+                            if (usable.length === 0) {
+                                // The rule is right about the place and wrong about
+                                // the date: every tradition it names is too late to
+                                // exist yet. Breaking here left the key unset and
+                                // the broad-zone fallback below then supplied the
+                                // modern pool — which is how a herder on the
+                                // Dzungarian steppe in 636 BCE came to be called
+                                // Seo-jun. Take the zone's reconstructed set
+                                // instead, which is what the era gate exists for.
+                                nameKeyToUse = resolveNameKey(rule.keys[0], culturalZone, year, region || '');
+                                break;
+                            }
                             nameKeyToUse = usable[Math.floor(noise.random() * usable.length)];
-                            console.log(`[NameGen] Selected from regional mapping: ${nameKeyToUse}`);
                             break;
                         }
                     }
                 } else {
-                    console.log(`[NameGen] No regional rules found for "${culturalZone}"/"${region}"`);
-                    console.log(`[NameGen] Available regions in ${culturalZone}:`, Object.keys(REGION_NAME_MAPPING[culturalZone as keyof typeof REGION_NAME_MAPPING] || {}));
+                    devLog(`[NameGen] No regional rules found for "${culturalZone}"/"${region}"`);
+                    devLog(`[NameGen] Available regions in ${culturalZone}:`, Object.keys(REGION_NAME_MAPPING[culturalZone as keyof typeof REGION_NAME_MAPPING] || {}));
                 }
             } else if (!nameKeyToUse) {
-                console.log(`[NameGen] REGION_NAME_MAPPING["${culturalZone}"] does not exist`);
+                devLog(`[NameGen] REGION_NAME_MAPPING["${culturalZone}"] does not exist`);
             }
         }
         
         // 2. Fallback - check for specific region matching before using broad cultural zone
         if (!nameKeyToUse) {
-            console.log(`[NameGen] No name key found yet, entering fallback logic`);
+            devLog(`[NameGen] No name key found yet, entering fallback logic`);
             // For East Asian, check specific regions
             if (culturalZone === 'EAST_ASIAN' && region) {
                 // Map region to specific name set based on region name
@@ -326,7 +339,7 @@ export function generateNpcNameDetailed(
                     nameKeyToUse = culturalZone;
                 }
             } else {
-                console.log(`[NameGen] Using cultural zone as fallback: ${culturalZone}`);
+                devLog(`[NameGen] Using cultural zone as fallback: ${culturalZone}`);
                 nameKeyToUse = culturalZone;
             }
         }
@@ -338,10 +351,10 @@ export function generateNpcNameDetailed(
         const requestedNameKey = nameKeyToUse;
         nameKeyToUse = resolveNameKey(nameKeyToUse, culturalZone, year, region || '');
         if (requestedNameKey !== nameKeyToUse) {
-            console.log(`[NameGen] "${requestedNameKey}" is not plausible in ${year}; using ${nameKeyToUse}`);
+            devLog(`[NameGen] "${requestedNameKey}" is not plausible in ${year}; using ${nameKeyToUse}`);
         }
 
-        console.log(`[NameGen] Final name key to use: ${nameKeyToUse}`);
+        devLog(`[NameGen] Final name key to use: ${nameKeyToUse}`);
 
         const normalizedGender = gender === 'Male' ? 'Male' : 'Female';
 
@@ -356,7 +369,7 @@ export function generateNpcNameDetailed(
             if (fallback.generator) {
                 const genderLower = normalizedGender === 'Male' ? 'male' : 'female';
                 const generatedName = fallback.generator(genderLower as 'male' | 'female');
-                console.log(`[NameGen] Used era-specific generator for ${culturalZone}/${year}: ${generatedName}`);
+                devLog(`[NameGen] Used era-specific generator for ${culturalZone}/${year}: ${generatedName}`);
                 return plain(generatedName);
             }
 
@@ -364,13 +377,13 @@ export function generateNpcNameDetailed(
             if (fallback.groups && fallback.groups.length > 0) {
                 const fallbackKey = fallback.groups[Math.floor(noise.random() * fallback.groups.length)];
                 names = CHARACTER_NAMES[fallbackKey];
-                console.log(`[NameGen] Used era-specific fallback group: ${fallbackKey}`);
+                devLog(`[NameGen] Used era-specific fallback group: ${fallbackKey}`);
             }
 
             // Last resort: use the zone's default names if still nothing
             if (!names) {
                 names = CHARACTER_NAMES[culturalZone] || CHARACTER_NAMES.EUROPEAN;
-                console.log(`[NameGen] Last resort fallback to: ${culturalZone}`);
+                devLog(`[NameGen] Last resort fallback to: ${culturalZone}`);
             }
         }
 
@@ -402,7 +415,7 @@ export function generateNpcNameDetailed(
 
         // Override with English first names for modern indigenous peoples
         if (useModernIndigenousNaming) {
-            console.log(`[NameGen] Using modern indigenous naming: English first names with traditional surnames`);
+            devLog(`[NameGen] Using modern indigenous naming: English first names with traditional surnames`);
             maleNames = ['Robert', 'James', 'John', 'William', 'Charles', 'Joseph', 'Thomas', 'Daniel', 'Michael', 'David', 'Richard', 'Paul', 'Mark', 'Steven', 'Timothy', 'Kevin', 'Brian', 'Jeffrey', 'Gary', 'Ronald'];
             femaleNames = ['Mary', 'Patricia', 'Jennifer', 'Linda', 'Barbara', 'Elizabeth', 'Susan', 'Jessica', 'Sarah', 'Karen', 'Nancy', 'Lisa', 'Betty', 'Margaret', 'Sandra', 'Ashley', 'Dorothy', 'Kimberly', 'Emily', 'Donna'];
         }

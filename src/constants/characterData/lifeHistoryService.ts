@@ -15,6 +15,7 @@ import {
   FamilyMember
 } from '../../types';
 import { filterByCulture, resolveCulture } from '../../services/cultureResolution';
+import { withIndefiniteArticle } from '../../services/narrativeTextService';
 import { random as seededRandom } from '../../utils/seededRandom';
 
 // ============================================================================
@@ -60,6 +61,14 @@ interface EventTemplate {
   templates: string[];
   minAge?: number;
   maxAge?: number;
+  /**
+   * Years in which this event could actually happen. `eraWeights` only tilts
+   * the odds, so an event naming a specific institution stayed reachable in
+   * every era — a persona in 4236 BCE was learning sacred texts under a guru's
+   * guidance, roughly three thousand years before the Vedic tradition.
+   */
+  minYear?: number;
+  maxYear?: number;
   requiredGender?: 'male' | 'female';
   requiresLiteracy?: boolean; // Event requires character to be educated/literate
   excludedClasses?: string[]; // Social classes that cannot have this event
@@ -587,12 +596,15 @@ const CULTURAL_EVENT_MODIFIERS: Record<CulturalZone, Partial<EventTemplate>[]> =
       importance: EventImportance.MILESTONE,
       titles: ['Sacred River', 'Temple Duty'],
       templates: [
-        'Bathed in Ganges during Kumbh Mela',
+        'Bathed in the Ganges during Kumbh Mela',
         'Completed temple service during festival season',
-        'Learned sacred texts under guru\'s guidance'
+        'Learned sacred texts under a guru\'s guidance'
       ],
       weight: 1.0,
-      minAge: 16
+      minAge: 16,
+      // Temples, gurus and the Kumbh Mela all postdate the Vedic period; the
+      // festival in anything like its recorded form is medieval.
+      minYear: -800
     },
     {
       kind: 'trade',
@@ -1412,7 +1424,9 @@ export function generateLifeHistory(
       const home = (character as { hometown?: string }).hometown;
       return birthYear < -8000
         ? `Born to the band that ranged ${home || 'this country'}`
-        : `Born in ${home || 'a small settlement'} to a ${character.socialClass || 'common'} family`;
+        // "to a Upper Class family" — the article has to agree with whatever
+        // the social class happens to start with.
+        : `Born in ${home || 'a small settlement'} to ${withIndefiniteArticle(`${character.socialClass || 'common'} family`)}`;
     })()
   });
 
@@ -1497,6 +1511,14 @@ export function generateLifeHistory(
       const eventAge = 16 + Math.floor(seededRandom() * Math.max(2, character.age - 16));
       if (template.minAge && eventAge < template.minAge) return false;
       if (template.maxAge && eventAge > template.maxAge) return false;
+
+      // Institutions and named festivals have dates.
+      const templateYear = (character as { birthYear?: number }).birthYear;
+      if (typeof templateYear === 'number') {
+        const yearOfEvent = templateYear + eventAge;
+        if (template.minYear !== undefined && yearOfEvent < template.minYear) return false;
+        if (template.maxYear !== undefined && yearOfEvent > template.maxYear) return false;
+      }
 
       // Check max occurrences limit
       if (template.maxOccurrences) {

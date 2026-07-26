@@ -197,6 +197,7 @@ import {
 } from '../services/narrativeTextService';
 import { generateNarrativeBiography } from '../services/narrativeBiographyService';
 import { historicalPlaceLabel } from '../constants/gameData/placeLabels';
+import { devLog } from '../utils/devLog';
 import {
   copyTextToClipboard,
   createSharedPersona,
@@ -1306,7 +1307,7 @@ export default function PersonaGenerator() {
   const generateRandom = () => {
     resetSharedPersonaState();
     const newPersona = generateHistoricalPersona(params);
-    console.log('[PersonaGenerator] Generated character data:', {
+    devLog('[PersonaGenerator] Generated character data:', {
       hasAttributes: !!newPersona.character.attributes,
       attributeCount: newPersona.character.attributes?.length || 0,
       attributes: newPersona.character.attributes,
@@ -1976,7 +1977,7 @@ export default function PersonaGenerator() {
     }
 
     // DEBUG: Log all calculated values
-    console.log('[FamilyMember] Generating persona for:', familyMember.name, {
+    devLog('[FamilyMember] Generating persona for:', familyMember.name, {
       relation: familyMember.relation,
       familyMemberBirthYear: familyMember.birthYear,
       calculatedBirthYear: birthYear,
@@ -2144,7 +2145,7 @@ export default function PersonaGenerator() {
   const applyProceduralPersona = (newPersona: HistoricalPersona) => {
     resetSharedPersonaState();
     setParams({});
-    console.log('[PersonaGenerator] Generated character data:', {
+    devLog('[PersonaGenerator] Generated character data:', {
       hasAttributes: !!newPersona.character.attributes,
       attributeCount: newPersona.character.attributes?.length || 0,
       attributes: newPersona.character.attributes,
@@ -3194,6 +3195,28 @@ export default function PersonaGenerator() {
       'MODERN_ERA': 'Modern era',
     };
     return eraMap[era.toUpperCase()] || era.replace(/_/g, ' ').toLowerCase();
+  };
+
+  /**
+   * The era as it reads inside a sentence, article included.
+   *
+   * The label above is a standalone heading ("Antiquity"), and the season line
+   * used to paste it after a hardcoded "the" — giving "in the Antiquity" and
+   * "in the Prehistory". Which article a period takes is part of its name, so
+   * it belongs here rather than in the sentence.
+   */
+  const formatEraInPhrase = (era: string): string => {
+    const phrases: Record<string, string> = {
+      'PREHISTORY': 'prehistory',
+      'ANTIQUITY': 'antiquity',
+      'MEDIEVAL': 'the medieval period',
+      'RENAISSANCE_EARLY_MODERN': 'the early modern period',
+      'INDUSTRIAL_ERA': 'the industrial era',
+      'MODERN_ERA': 'the modern era',
+      'FUTURE_ERA': 'the near future',
+    };
+    return phrases[era.toUpperCase().replace(/ /g, '_')]
+      || `the ${formatEraLabel(era).toLowerCase()}`;
   };
 
   const formatCulturalZone = (zone: string, region?: string, location?: string): string => {
@@ -4698,7 +4721,7 @@ export default function PersonaGenerator() {
                 <div className="season-narrative">
                   It is <span className="season-text" style={{ color: getSeasonInfo(persona.month, persona.day, persona.culturalZone, persona.region).color }}>
                     {getSeasonInfo(persona.month, persona.day, persona.culturalZone, persona.region).description}
-                  </span> in the {formatEraLabel(persona.era)} in {formatCulturalZone(persona.culturalZone, persona.region, persona.location)}
+                  </span> in {formatEraInPhrase(persona.era)} in {formatCulturalZone(persona.culturalZone, persona.region, persona.location)}
                 </div>
                 {persona.odds && (
                   <div
@@ -4709,8 +4732,13 @@ export default function PersonaGenerator() {
                         : 'Explore mode deliberately flattens eras and regions so the whole world is reachable — this is how rare the draw would really have been.'
                     }
                   >
+                    {/* Built from the same formatters as the line above, so the
+                        card cannot say "Southeast Asia" in one sentence and
+                        "South Asia" in the next. `odds.scope` carries the same
+                        claim for non-UI consumers. */}
                     Roughly <strong>{persona.odds.phrase}</strong> were lived in{' '}
-                    {persona.odds.scope ?? 'this era and region'}
+                    {formatEraInPhrase(persona.era)} in{' '}
+                    {formatCulturalZone(persona.culturalZone, persona.region, persona.location)}
                     {persona.samplingMode === 'explore' && <span className="draw-odds-mode"> · explore mode</span>}
                   </div>
                 )}

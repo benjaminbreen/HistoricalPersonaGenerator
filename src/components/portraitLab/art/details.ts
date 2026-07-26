@@ -232,6 +232,35 @@ function drawPattern(
       }
       break;
     }
+    case 'eye_liner': {
+      // Kohl. It follows the lash line of each eye and stops there — it is not
+      // a stripe drawn across the face. Without this case it fell to the
+      // default below, which paints one horizontal line straight over the
+      // bridge of the nose.
+      //
+      // `paint` refuses any pixel that is not skin, so the eye itself is never
+      // covered: the line is laid on the lid above the opening and along the
+      // rim below it, and the parts that cross the eye simply do not take.
+      for (const side of [-1, 1] as const) {
+        const cx = anatomy.centerX + side * anatomy.eyeDX;
+        const rx = Math.max(4, Math.round(5 * scale));
+        for (let dx = -rx; dx <= rx; dx += 1) {
+          const outward = side < 0 ? -dx : dx;
+          const taper = (outward + rx) / (2 * rx);
+          // Upper lid, heavier toward the outer corner as it is actually drawn.
+          paint(raster, pigment, cx + dx, anatomy.eyeY - 5, alpha * (0.5 + 0.5 * taper));
+          paint(raster, pigment, cx + dx, anatomy.eyeY - 4, alpha * (0.3 + 0.6 * taper));
+          // Lower rim, lighter.
+          paint(raster, pigment, cx + dx, anatomy.eyeY + 2, alpha * (0.25 + 0.35 * taper));
+        }
+        // The outer flick, which is what makes it read as kohl at 96 pixels.
+        const tipX = cx + side * (rx + 1);
+        paint(raster, pigment, tipX, anatomy.eyeY - 5, alpha);
+        paint(raster, pigment, tipX, anatomy.eyeY - 6, alpha * 0.75);
+        if (scale >= 1.1) paint(raster, pigment, tipX + side, anatomy.eyeY - 6, alpha * 0.6);
+      }
+      break;
+    }
     case 'eye_band': {
       // Kohl or ochre drawn across the eyes. It sits *on* the lids, so it has
       // to stay thin — a solid bar just deletes the face.
@@ -318,7 +347,12 @@ function drawPattern(
       break;
     }
     default: {
-      line(anchor.x - half * 0.6, anchor.y, anchor.x + half * 0.6, anchor.y);
+      // Twenty-one of the thirty-nine patterns the marking tables declare have
+      // no case above. They used to land here, and a bar drawn clean across the
+      // middle of the face is the most destructive possible way to render "we
+      // do not know what this is". A short mark on one cheek is wrong quietly.
+      const w = Math.max(2, Math.round(half * 0.28));
+      line(anchor.x + half * 0.32, anchor.y, anchor.x + half * 0.32 + w, anchor.y);
       break;
     }
   }

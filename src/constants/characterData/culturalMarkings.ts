@@ -420,7 +420,11 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
   {
     baseId: 'KOHL_EYES',
     type: 'paint',
-    culturalZones: ['MENA', 'SOUTH_ASIAN', 'SUB_SAHARAN_AFRICAN', 'EUROPEAN'],
+    // Europe is deliberately absent. Kohl is a Near Eastern, North African and
+    // South Asian practice; it reached Europe only through Mediterranean
+    // contact, which is the entry below. Listing the whole zone here put kohl
+    // on Neolithic foragers in the Moscow Basin.
+    culturalZones: ['MENA', 'SOUTH_ASIAN', 'SUB_SAHARAN_AFRICAN'],
     patterns: [
       {
         id: 'kohl_liner',
@@ -440,6 +444,34 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     occasions: ['daily'],
     weight: 6, // Common daily practice
     culturalSignificance: 'Protection from evil eye and sun glare'
+  },
+  {
+    baseId: 'KOHL_EYES_MEDITERRANEAN',
+    type: 'paint',
+    culturalZones: ['EUROPEAN'],
+    // Minoan, Greek and Roman use, learned from Egypt. Not the forest zone, and
+    // not before there was contact to learn it from.
+    places: /crete|minoan|aegean|cyprus|greece|greek|athens|attica|ionia|sicily|magna graecia|rome|roman|latium|campania|pompeii|iberia|baetica|massilia|marseille|mediterranean/,
+    eras: [HistoricalEra.ANTIQUITY],
+    patterns: [
+      {
+        id: 'kohl_liner_mediterranean',
+        name: 'Kohl Eye Liner',
+        localName: 'Kohl',
+        description: 'Black eye liner, a practice learned from Egypt',
+        pattern: 'eye_liner',
+        locations: ['face'],
+        colors: ['#000000'],
+        size: 'small'
+      }
+    ],
+    isPermanent: false,
+    duration: 24,
+    gender: 'any',
+    ageGroups: ['young', 'adult', 'elder'],
+    occasions: ['daily'],
+    weight: 3,
+    culturalSignificance: 'Adopted from Egyptian practice through Mediterranean trade'
   },
   {
     baseId: 'DAILY_OCHRE',

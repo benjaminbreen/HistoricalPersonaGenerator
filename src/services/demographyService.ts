@@ -735,10 +735,12 @@ const ZONE_PHRASE: Record<string, string> = {
   SOUTH_AMERICAN: 'South America',
 };
 
+// Keys must match the `HistoricalEra` enum exactly. An earlier version invented
+// STONE_AGE/BRONZE_AGE/CLASSICAL_ANTIQUITY, none of which exist, so prehistory
+// and antiquity both fell back to the useless "this era".
 const ERA_PHRASE: Record<string, string> = {
-  STONE_AGE: 'the Stone Age',
-  BRONZE_AGE: 'the Bronze Age',
-  CLASSICAL_ANTIQUITY: 'classical antiquity',
+  PREHISTORY: 'prehistory',
+  ANTIQUITY: 'antiquity',
   MEDIEVAL: 'the medieval period',
   RENAISSANCE_EARLY_MODERN: 'the early modern period',
   INDUSTRIAL_ERA: 'the industrial era',

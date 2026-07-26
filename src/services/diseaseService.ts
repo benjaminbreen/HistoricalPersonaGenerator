@@ -20,6 +20,7 @@ import { GameDate, PlayerCharacter } from '../types/index';
 import { HistoricalEra } from '../types/ambiance';
 import { CulturalZone } from '../types/characterData';
 import { random as seededRandom } from '../utils/seededRandom';
+import { devLog } from '../utils/devLog';
 // Lazy load disease data to improve startup performance
 let diseaseModule: any = null;
 let diseaseModulePromise: Promise<any> | null = null;
@@ -33,7 +34,7 @@ const ensureDiseaseModule = async (): Promise<any> => {
   if (!diseaseModulePromise) {
     diseaseModulePromise = import('../constants/diseases').then(module => {
       diseaseModule = module;
-      console.log('[DiseaseService] Disease module loaded successfully with', module?.DISEASE_DATABASE?.diseases?.length, 'diseases');
+      devLog('[DiseaseService] Disease module loaded successfully with', module?.DISEASE_DATABASE?.diseases?.length, 'diseases');
       diseaseModulePromise = null; // Clear promise after loading
       return module;
     }).catch(error => {
@@ -83,10 +84,10 @@ class DiseaseService {
    */
   public async preloadDiseaseModule(): Promise<void> {
     if (this.initialized) return;
-    console.log('[DiseaseService] Preloading disease module...');
+    devLog('[DiseaseService] Preloading disease module...');
     await ensureDiseaseModule();
     this.initialized = true;
-    console.log('[DiseaseService] Disease module preloaded');
+    devLog('[DiseaseService] Disease module preloaded');
   }
 
   private initializeDiseaseCache(): void {
@@ -162,7 +163,7 @@ class DiseaseService {
       currentDiseases.push(activeDisease);
       
       const entityType = isAnimal ? 'Animal' : 'NPC';
-      console.log(`[DiseaseService] ${entityType} spawned with ${disease.name} in year ${currentYear}`);
+      devLog(`[DiseaseService] ${entityType} spawned with ${disease.name} in year ${currentYear}`);
     }
 
     // Chance for immunity from previous exposure
@@ -269,7 +270,7 @@ class DiseaseService {
       lastHealthUpdate: this.createGameDate(currentYear)
     };
 
-    console.log(`[DiseaseService] Assigned ${disease.name} to entity via WorldWeaver request`);
+    devLog(`[DiseaseService] Assigned ${disease.name} to entity via WorldWeaver request`);
     return health;
   }
 
@@ -794,7 +795,7 @@ class DiseaseService {
       );
       
       if (prevalenceData?.epidemicYears?.includes(currentYear)) {
-        console.log(`[DiseaseService] Epidemic detected: ${disease.name} in ${currentYear}`);
+        devLog(`[DiseaseService] Epidemic detected: ${disease.name} in ${currentYear}`);
         return disease;
       }
     }
@@ -833,10 +834,10 @@ class DiseaseService {
     }
 
     const legacyEraName = this.mapEraToLegacyName(era);
-    console.log(`[DiseaseService] Getting diseases for era: ${era} (mapped to: ${legacyEraName}), region: ${region}, year: ${currentYear}`);
-    console.log(`[DiseaseService] diseaseModule exists:`, !!diseaseModule);
-    console.log(`[DiseaseService] DISEASE_DATABASE exists:`, !!diseaseModule?.DISEASE_DATABASE);
-    console.log(`[DiseaseService] Total diseases in database:`, diseaseModule?.DISEASE_DATABASE?.diseases?.length || 0);
+    devLog(`[DiseaseService] Getting diseases for era: ${era} (mapped to: ${legacyEraName}), region: ${region}, year: ${currentYear}`);
+    devLog(`[DiseaseService] diseaseModule exists:`, !!diseaseModule);
+    devLog(`[DiseaseService] DISEASE_DATABASE exists:`, !!diseaseModule?.DISEASE_DATABASE);
+    devLog(`[DiseaseService] Total diseases in database:`, diseaseModule?.DISEASE_DATABASE?.diseases?.length || 0);
 
     const filtered = (diseaseModule?.DISEASE_DATABASE?.diseases || []).filter(disease => {
       // Check era availability (using legacy era names from diseases.ts)
@@ -866,7 +867,7 @@ class DiseaseService {
       return true;
     });
 
-    console.log(`[DiseaseService] Found ${filtered.length} available diseases`);
+    devLog(`[DiseaseService] Found ${filtered.length} available diseases`);
     return filtered;
   }
 
@@ -1110,14 +1111,14 @@ class DiseaseService {
     if ('stats' in entity && entity.stats) {
       // Apply stat penalties (these should be temporary)
       // This would integrate with the character's temporary stat modifier system
-      console.log(`Applying disease effects for ${disease.name} to entity`);
+      devLog(`Applying disease effects for ${disease.name} to entity`);
     }
   }
 
   private removeDiseaseEffects(entity: PlayerCharacter | NpcEntity | AnimalEntity, disease: Disease): void {
     if ('stats' in entity && entity.stats) {
       // Remove stat penalties
-      console.log(`Removing disease effects for ${disease.name} from entity`);
+      devLog(`Removing disease effects for ${disease.name} from entity`);
     }
   }
 

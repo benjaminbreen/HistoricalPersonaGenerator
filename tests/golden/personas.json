@@ -27,11 +27,11 @@
     ],
     "events": [
       "1231: Born in a small settlement to a Merchant family",
-      "1243: Helped with the harvest for the first season and proved capable despite a young age",
-      "1262: Returned home to care for aging parents",
-      "1289: Became the first in the village to successfully grow maize, earning respect from neighbors",
-      "1302: Took over the family business after a parent retired from active work",
-      "1304: A sister married into a well-connected samurai clan, improving the family's social standing"
+      "1245: Learned to read weather signs and predict harvest yields from a parent",
+      "1260: Arranged favorable marriage for younger sister",
+      "1263: The family pooled their resources to purchase a market stall, a significant investment",
+      "1266: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "1292: A sister married into a well-connected merchant consortium, improving the family's social standing"
     ]
   },
   "formosan-highlands-1306#2": {
@@ -62,13 +62,13 @@
     ],
     "events": [
       "1266: Born in a small settlement to a Commoner family",
-      "1278: Began working family fields, learning crop rotation from elders",
-      "1284: A sister married into a well-connected merchant consortium, improving the family's social standing",
-      "1291: The family pooled their resources to purchase a new plow, a significant investment",
-      "1292: Divided the land among the children, keeping the best field for old age",
-      "1294: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
-      "1295: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
-      "1297: The family lost their mother when she died from starvation during famine"
+      "1278: Learned to read weather signs and predict harvest yields from a parent",
+      "1286: A brother's marriage brought valuable new trade connections and opportunities",
+      "1288: A terrible blight spread through the rice crop, ruining the harvest and making for a lean winter",
+      "1292: The family lost their father when he died from smallpox",
+      "1297: Arranged favorable marriage for younger sister",
+      "1304: The family pooled their resources to purchase a market stall, a significant investment",
+      "1305: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit"
     ]
   },
   "formosan-highlands-1306#3": {
@@ -99,11 +99,11 @@
     ],
     "events": [
       "1286: Born in a small settlement to a Peasant family",
-      "1300: Began working family fields, learning crop rotation from elders",
-      "1302: Became the first in the village to successfully grow maize, earning respect from neighbors",
-      "1303: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
-      "1304: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1305: Inherited valuable tools and a workshop from a childless uncle"
+      "1301: Helped with the harvest for the first season and proved capable despite a young age",
+      "1302: A sister married into a well-connected merchant consortium, improving the family's social standing",
+      "1303: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "1304: Took over the family business after a parent retired from active work",
+      "1305: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
     ]
   },
   "japan-kyoto-1306#1": {
@@ -132,10 +132,10 @@
     ],
     "events": [
       "1231: Born in a small settlement to a Merchant family",
-      "1244: Began learning the trade of fisher from an experienced practitioner",
-      "1255: Inherited valuable tools and a workshop from a childless uncle",
-      "1261: Performed ancestral rites as eldest son",
-      "1298: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1245: Began learning the trade of fisher from an experienced practitioner",
+      "1277: Took over the family business after a parent retired from active work",
+      "1279: Arranged favorable marriage for younger sister",
+      "1289: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "japan-kyoto-1306#2": {
@@ -167,9 +167,9 @@
     "events": [
       "1266: Born in a small settlement to a Commoner family",
       "1278: Began learning the trade of fisherman from an experienced practitioner",
-      "1292: Arranged favorable marriage for younger sister",
-      "1293: A sister married into a well-connected merchant consortium, improving the family's social standing",
-      "1298: Took over the family business after a parent retired from active work"
+      "1285: Took over the family business after a parent retired from active work",
+      "1292: Returned home to care for aging parents",
+      "1304: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "japan-kyoto-1306#3": {
@@ -200,9 +200,9 @@
     ],
     "events": [
       "1286: Born in a small settlement to a Peasant family",
-      "1300: Began learning the trade of fisherman from an experienced practitioner",
-      "1302: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1305: Inherited valuable tools and a workshop from a childless uncle"
+      "1301: Began learning the trade of fisherman from an experienced practitioner",
+      "1303: A brother's marriage brought valuable new trade connections and opportunities",
+      "1304: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "stockholm-1920#1": {
@@ -231,10 +231,10 @@
       "spouse: Carl Oliversson"
     ],
     "events": [
-      "1839: Born in a small settlement to a Upper Class family",
-      "1851: Began learning the trade of judge from an experienced practitioner",
-      "1862: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1891: Took over the family business after a parent retired from active work"
+      "1839: Born in a small settlement to an Upper Class family",
+      "1853: Began learning the trade of judge from an experienced practitioner",
+      "1869: Inherited valuable tools and a workshop from a childless uncle",
+      "1911: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "stockholm-1920#2": {
@@ -264,9 +264,9 @@
     "events": [
       "1874: Born in a small settlement to a Middle Class family",
       "1886: Began learning the trade of small business owner from an experienced practitioner",
-      "1898: Inherited valuable tools and a workshop from a childless uncle",
-      "1917: A brother's marriage brought valuable new trade connections and opportunities",
-      "1917: Mother was killed in World War I despite efforts to save her"
+      "1900: A brother's marriage brought valuable new trade connections and opportunities",
+      "1904: Took over the family business after a parent retired from active work",
+      "1907: A father's death changed everything for the household"
     ]
   },
   "stockholm-1920#3": {
@@ -297,10 +297,10 @@
     ],
     "events": [
       "1899: Born in a small settlement to a Middle Class family",
-      "1913: Began formal schooling, learning letters, arithmetic and a clear hand",
-      "1916: A sister married into a well-connected town council, improving the family's social standing",
-      "1917: Took over the family business after a parent retired from active work",
-      "1918: Invited to debate at prestigious the university"
+      "1914: Took evening classes in bookkeeping while working days",
+      "1915: A sister married into a well-connected town council, improving the family's social standing",
+      "1917: Inherited valuable tools and a workshop from a childless uncle",
+      "1918: Discovered error in classical text, earning recognition"
     ]
   },
   "stockholm-1150#1": {
@@ -331,13 +331,13 @@
     ],
     "events": [
       "1075: Born in a small settlement to a Merchant family",
-      "1087: Made a first journey with a merchant caravan, carrying valuable goods",
-      "1095: A caravan was robbed by brigands on the road, costing the season's entire investment",
-      "1100: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1118: The family pooled their resources to purchase a market stall, a significant investment",
-      "1126: Summoned to lord's court as witness in land dispute",
-      "1135: Discovered untapped demand for timber in Prague",
-      "1149: Cornered the market on wool during shortage"
+      "1089: Began managing family stall at market, handling coins and customers",
+      "1103: Discovered untapped demand for wax in Rome",
+      "1115: Lost an entire wax shipment to war near Venice, a devastating financial blow",
+      "1128: Negotiated a lucrative contract with noble house for herring",
+      "1142: Took over the family business after a parent retired from active work",
+      "1146: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1149: Paid annual tribute to local lord"
     ]
   },
   "stockholm-1150#2": {
@@ -369,9 +369,9 @@
     "events": [
       "1110: Born in a small settlement to a Commoner family",
       "1122: Began learning the trade of fisherman from an experienced practitioner",
-      "1126: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1130: Required to provide labor for castle repairs",
-      "1148: Inherited valuable tools and a workshop from a childless uncle"
+      "1133: Paid annual tribute to local lord",
+      "1135: Inherited valuable tools and a workshop from a childless uncle",
+      "1144: A sister married into a well-connected cathedral chapter, improving the family's social standing"
     ]
   },
   "stockholm-1150#3": {
@@ -402,11 +402,10 @@
     ],
     "events": [
       "1130: Born in a small settlement to a Peasant family",
-      "1144: Sent to apprentice with trading company, learning accounts and negotiation",
-      "1145: Summoned to lord's court as witness in land dispute",
-      "1147: Secured exclusive trading rights for wool from Vienna",
-      "1148: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1149: Inherited valuable tools and a workshop from a childless uncle"
+      "1144: Summoned to lord's court as witness in land dispute",
+      "1145: Made a first journey with a merchant caravan, carrying valuable goods",
+      "1148: First to bring wax to local markets, earning substantial profit",
+      "1149: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "anatolia-1952#1": {
@@ -436,10 +435,10 @@
       "son: Yusuf ibn Burak"
     ],
     "events": [
-      "1871: Born in a small settlement to a Upper Class family",
-      "1883: Began learning the trade of judge from an experienced practitioner",
-      "1894: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1923: Took over the family business after a parent retired from active work"
+      "1871: Born in a small settlement to an Upper Class family",
+      "1885: Began learning the trade of judge from an experienced practitioner",
+      "1901: Inherited valuable tools and a workshop from a childless uncle",
+      "1943: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "anatolia-1952#2": {
@@ -471,10 +470,10 @@
     "events": [
       "1906: Born in a small settlement to a Middle Class family",
       "1918: Began learning the trade of salesman from an experienced practitioner",
-      "1933: The family pooled their resources to purchase a mill share, a significant investment",
-      "1936: Secured exclusive trading rights for petrochemicals from Tunis",
-      "1937: The family lost their mother when she died from childbirth complications",
-      "1945: A sister married into a well-connected tribal confederation, improving the family's social standing"
+      "1922: A sister married into a well-connected tribal confederation, improving the family's social standing",
+      "1923: Secured exclusive trading rights for petroleum from Tunis",
+      "1933: Mother died from typhoid fever, leaving the household in grief",
+      "1942: Took over the family business after a parent retired from active work"
     ]
   },
   "anatolia-1952#3": {
@@ -503,10 +502,10 @@
     ],
     "events": [
       "1931: Born in a small settlement to a Middle Class family",
-      "1945: Began formal schooling, learning letters, arithmetic and a clear hand",
-      "1948: A sister married into a well-connected Sufi order, improving the family's social standing",
-      "1949: Took over the family business after a parent retired from active work",
-      "1950: Invited to debate at prestigious the university"
+      "1946: Took evening classes in bookkeeping while working days",
+      "1947: A sister married into a well-connected military elite, improving the family's social standing",
+      "1949: Inherited valuable tools and a workshop from a childless uncle",
+      "1950: Discovered error in classical text, earning recognition"
     ]
   },
   "anatolia-1650#1": {
@@ -536,11 +535,10 @@
     ],
     "events": [
       "1575: Born in a small settlement to a Merchant family",
-      "1587: Began learning the trade of coffeehouse keeper from an experienced practitioner",
-      "1593: A sister married into a well-connected Sufi order, improving the family's social standing",
-      "1601: Took over the family business after a parent retired from active work",
-      "1608: A father's death changed everything for the household",
-      "1627: Completed hajj to Mecca, earning title of Hajji"
+      "1589: Began learning the trade of coffeehouse keeper from an experienced practitioner",
+      "1609: Visited Jerusalem's holy sites during pilgrimage",
+      "1630: A sister married into a well-connected merchant caravan, improving the family's social standing",
+      "1643: The family pooled their resources to purchase a market stall, a significant investment"
     ]
   },
   "anatolia-1650#2": {
@@ -572,11 +570,11 @@
     "events": [
       "1610: Born in a small settlement to a Commoner family",
       "1622: Began learning the trade of weapon smith from an experienced practitioner",
-      "1628: Noble household commissioned full set of masterworks",
-      "1629: The family pooled their resources to purchase a storage barn, a significant investment",
-      "1634: A brother's marriage brought valuable new trade connections and opportunities",
-      "1639: Visited Jerusalem's holy sites during pilgrimage",
-      "1649: The guild selected a piece of work for a noble commission"
+      "1633: Noble household commissioned full set of masterworks",
+      "1634: The family pooled their resources to purchase a market stall, a significant investment",
+      "1640: Admitted to the Weapon Smith guild after presenting masterwork",
+      "1641: A sister married into a well-connected tribal confederation, improving the family's social standing",
+      "1645: Studied at Al-Azhar for three years"
     ]
   },
   "anatolia-1650#3": {
@@ -607,9 +605,9 @@
     ],
     "events": [
       "1630: Born in a small settlement to a Peasant family",
-      "1642: Learned to read weather signs and predict harvest yields from a parent",
-      "1647: A sister married into a well-connected Sufi order, improving the family's social standing",
-      "1648: The family pooled their resources to purchase a market stall, a significant investment"
+      "1645: Helped with the harvest for the first season and proved capable despite a young age",
+      "1647: A brother's marriage brought valuable new trade connections and opportunities",
+      "1649: The family pooled their resources to purchase a market stall, a significant investment"
     ]
   },
   "sahel-1350#1": {
@@ -638,9 +636,10 @@
     ],
     "events": [
       "1275: Born in a small settlement to a Merchant family",
-      "1287: Began learning the trade of griot from an experienced practitioner",
-      "1293: A sister married into a well-connected trading family, improving the family's social standing",
-      "1324: Took over the family business after a parent retired from active work"
+      "1289: Began learning the trade of griot from an experienced practitioner",
+      "1303: Inherited valuable tools and a workshop from a childless uncle",
+      "1305: Tragedy struck when a parent died from starvation",
+      "1308: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "sahel-1350#2": {
@@ -671,10 +670,9 @@
     ],
     "events": [
       "1310: Born in a small settlement to a Commoner family",
-      "1322: Began working family fields, learning crop rotation from elders",
-      "1334: A brother's marriage brought valuable new trade connections and opportunities",
-      "1335: The family pooled their resources to purchase a storage barn, a significant investment",
-      "1336: A father's death changed everything for the household"
+      "1323: Trusted to tend livestock alone for the first time",
+      "1328: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1334: The family pooled their resources to purchase a storage barn, a significant investment"
     ]
   },
   "sahel-1350#3": {
@@ -704,9 +702,9 @@
     ],
     "events": [
       "1330: Born in a small settlement to a Peasant family",
-      "1345: Learned to read weather signs and predict harvest yields from a parent",
-      "1346: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1349: The family pooled their resources to purchase draft animals, a significant investment"
+      "1343: Trusted to tend livestock alone for the first time",
+      "1348: Inherited valuable tools and a workshop from a childless uncle",
+      "1349: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "london-1740#1": {
@@ -730,16 +728,16 @@
       "backgroundBase": "#6b756f"
     },
     "family": [
-      "father: Niall Fraser",
-      "mother: Isla Morrison"
+      "father: Seumas Fraser",
+      "mother: Heather MacBride",
+      "spouse: Douglas Morrison"
     ],
     "events": [
       "1665: Born in a small settlement to a Merchant family",
-      "1678: Began learning the trade of fisher from an experienced practitioner",
-      "1683: A sister married into a well-connected cathedral chapter, improving the family's social standing",
-      "1687: Summoned to lord's court as witness in land dispute",
-      "1698: A father's death changed everything for the household",
-      "1726: The family pooled their resources to purchase a storage barn, a significant investment"
+      "1679: Began learning the trade of fisher from an experienced practitioner",
+      "1686: The family pooled their resources to purchase a mill share, a significant investment",
+      "1690: Required to provide labor for castle repairs",
+      "1732: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "london-1740#2": {
@@ -768,12 +766,11 @@
     ],
     "events": [
       "1700: Born in a small settlement to a Commoner family",
-      "1712: Began martial training, learning swordplay and formation fighting",
-      "1716: Served in garrison during border tensions with town council",
-      "1723: Took over the family business after a parent retired from active work",
-      "1724: A brother's marriage brought valuable new trade connections and opportunities",
-      "1728: The family lost their mother when she died from childbirth complications",
-      "1730: Summoned to lord's court as witness in land dispute"
+      "1712: Sent to serve as squire, learning ways of war from veteran knight",
+      "1721: Required to provide labor for castle repairs",
+      "1728: Fought in siege of Vienna, surviving three assaults",
+      "1736: The family pooled their resources to purchase draft animals, a significant investment",
+      "1738: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "london-1740#3": {
@@ -804,10 +801,10 @@
     ],
     "events": [
       "1720: Born in a small settlement to a Peasant family",
-      "1734: Began learning the trade of innkeeper from an experienced practitioner",
+      "1735: Began learning the trade of innkeeper from an experienced practitioner",
+      "1736: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1737: Required to provide labor for castle repairs",
-      "1738: A brother's marriage brought valuable new trade connections and opportunities",
-      "1739: Took over the family business after a parent retired from active work"
+      "1738: Took over the family business after a parent retired from active work"
     ]
   },
   "london-1870#1": {
@@ -836,9 +833,9 @@
     ],
     "events": [
       "1790: Born in a small settlement to a Merchant family",
-      "1803: Began learning the trade of fisher from an experienced practitioner",
-      "1808: A sister married into a well-connected cathedral chapter, improving the family's social standing",
-      "1855: The family pooled their resources to purchase a mill share, a significant investment"
+      "1804: Began learning the trade of fisher from an experienced practitioner",
+      "1819: Inherited valuable tools and a workshop from a childless uncle",
+      "1861: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "london-1870#2": {
@@ -869,9 +866,9 @@
     "events": [
       "1826: Born in a small settlement to a Commoner family",
       "1838: Began learning the trade of doctor from an experienced practitioner",
-      "1850: Inherited valuable tools and a workshop from a childless uncle",
-      "1867: A brother's marriage brought valuable new trade connections and opportunities",
-      "1869: Mother died in a factory accident despite efforts to save her"
+      "1851: A brother's marriage brought valuable new trade connections and opportunities",
+      "1855: Took over the family business after a parent retired from active work",
+      "1859: A father's death changed everything for the household"
     ]
   },
   "london-1870#3": {
@@ -901,9 +898,9 @@
     ],
     "events": [
       "1849: Born in a small settlement to a Peasant family",
-      "1862: Began learning the trade of railway worker from an experienced practitioner",
-      "1868: A sister married into a well-connected town council, improving the family's social standing",
-      "1869: Inherited valuable tools and a workshop from a childless uncle"
+      "1863: Began learning the trade of railway worker from an experienced practitioner",
+      "1867: Inherited valuable tools and a workshop from a childless uncle",
+      "1869: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "arabia-500#1": {
@@ -934,13 +931,13 @@
     ],
     "events": [
       "425: Born in a small settlement to a Commoner family",
-      "437: Helped with the harvest for the first season and proved capable despite a young age",
-      "443: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
-      "450: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "455: The mother's death changed the household",
-      "468: The family pooled their resources to purchase a market stall, a significant investment",
-      "480: Completed hajj to Mecca, earning title of Hajji",
-      "485: With the help of extended family, cleared new land for cultivation"
+      "439: Learned to read weather signs and predict harvest yields from a parent",
+      "451: With the help of extended family, cleared new land for cultivation",
+      "455: A terrible blight spread through the dates crop, ruining the harvest and making for a lean winter",
+      "458: Became the first in the village to successfully grow sugarcane, earning respect from neighbors",
+      "493: Completed hajj to Mecca, earning title of Hajji",
+      "496: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "499: The family pooled their resources to purchase a market stall, a significant investment"
     ]
   },
   "arabia-500#2": {
@@ -971,13 +968,13 @@
     ],
     "events": [
       "460: Born in a small settlement to a Commoner family",
-      "472: Began working family fields, learning crop rotation from elders",
-      "479: A terrible blight spread through the barley crop, ruining the harvest and making for a lean winter",
-      "488: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
-      "490: Studied at Al-Azhar for three years",
-      "493: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "496: Divided the land among the children, keeping the best field for old age",
-      "499: Took over the family business after a parent retired from active work"
+      "472: Learned to read weather signs and predict harvest yields from a parent",
+      "476: A sister married into a well-connected merchant caravan, improving the family's social standing",
+      "477: Became the first in the village to successfully grow cotton, earning respect from neighbors",
+      "489: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
+      "490: Purchased the neighbor's plot after they decided to seek fortune in the city",
+      "497: Inherited valuable tools and a workshop from a childless uncle",
+      "497: The mother's death changed the household"
     ]
   },
   "arabia-500#3": {
@@ -1008,14 +1005,15 @@
     ],
     "events": [
       "480: Born in a small settlement to a Peasant family",
-      "494: Began working family fields, learning crop rotation from elders",
-      "496: A brother's marriage brought valuable new trade connections and opportunities",
-      "497: After years of careful selection, successfully bred a hardier variety of dates",
-      "499: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
+      "495: Helped with the harvest for the first season and proved capable despite a young age",
+      "496: A sister married into a well-connected merchant caravan, improving the family's social standing",
+      "497: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "498: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "499: The family pooled their resources to purchase a storage barn, a significant investment"
     ]
   },
   "indus-2000bce#1": {
-    "name": "Anita the Grey",
+    "name": "*Kanni the Grey",
     "gender": "Female",
     "age": 75,
     "profession": "Shepherd",
@@ -1023,7 +1021,7 @@
     "language": "Proto-Indo-Iranian",
     "languageBasis": "attested-table",
     "languageConfidence": "reconstructed",
-    "odds": "this era in South Asia",
+    "odds": "antiquity in South Asia",
     "head": "Rakhdi [Diamonds and Gold]",
     "torso": "Black Kundan Choli [Silk with Gem Work]",
     "feet": "Gem Payal [Gold and Gems]",
@@ -1035,21 +1033,20 @@
       "backgroundBase": "#4e4a6e"
     },
     "family": [
-      "father: Siddhartha",
-      "mother: Jyoti"
+      "father: *Cen",
+      "mother: *Punal"
     ],
     "events": [
       "-2075: Born in a small settlement to a Commoner family",
-      "-2062: Trusted to tend livestock alone for the first time",
+      "-2061: Learned to read weather signs and predict harvest yields from a parent",
       "-2047: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "-2040: Mother died from malaria, leaving the household in grief",
-      "-2033: Learned sacred texts under guru's guidance",
+      "-2039: Tragedy struck when a parent died from plague",
       "-2017: The family pooled their resources to purchase a mill share, a significant investment",
-      "-2005: A sister married into a well-connected warrior clan, improving the family's social standing"
+      "-2014: A sister married into a well-connected warrior clan, improving the family's social standing"
     ]
   },
   "indus-2000bce#2": {
-    "name": "Suresh the Grey",
+    "name": "*Muni the Grey",
     "gender": "Male",
     "age": 61,
     "profession": "Herder",
@@ -1057,7 +1054,7 @@
     "language": "Proto-Indo-Iranian",
     "languageBasis": "attested-table",
     "languageConfidence": "reconstructed",
-    "odds": "this era in South Asia",
+    "odds": "antiquity in South Asia",
     "head": null,
     "torso": "White Cotton Lungi [Plain Cotton]",
     "feet": "Barefoot [None]",
@@ -1069,21 +1066,21 @@
       "backgroundBase": "#726c9d"
     },
     "family": [
-      "father: Manoj",
-      "mother: Meera the Restless",
-      "spouse: Priya the Silent",
-      "daughter: Nita"
+      "father: *Malai",
+      "mother: *Aki the Restless",
+      "spouse: *Ammai the Silent",
+      "daughter: *Kanni"
     ],
     "events": [
       "-2061: Born in a small settlement to a Commoner family",
-      "-2049: Began working family fields, learning crop rotation from elders",
-      "-2045: A sister married into a well-connected merchant caste, improving the family's social standing",
-      "-2041: Took over the family business after a parent retired from active work",
-      "-2016: Bathed in Ganges during Kumbh Mela"
+      "-2048: Trusted to tend livestock alone for the first time",
+      "-2043: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "-2032: Father died from dysentery despite seeking help",
+      "-2025: The family pooled their resources to purchase a storage barn, a significant investment"
     ]
   },
   "indus-2000bce#3": {
-    "name": "Vikram",
+    "name": "*Vil",
     "gender": "Male",
     "age": 52,
     "profession": "Herder",
@@ -1091,7 +1088,7 @@
     "language": "Proto-Indo-Iranian",
     "languageBasis": "attested-table",
     "languageConfidence": "reconstructed",
-    "odds": "this era in South Asia",
+    "odds": "antiquity in South Asia",
     "head": "Natural Cotton Cap [White Cotton]",
     "torso": "Black Cotton Lungi [Plain Cotton]",
     "feet": "Natural Barefoot [None]",
@@ -1103,17 +1100,16 @@
       "backgroundBase": "#484365"
     },
     "family": [
-      "father: Ravi the Red",
-      "mother: Rita the Bold",
-      "spouse: Lakshmi",
-      "son: Suresh the Quiet"
+      "father: *Pon the Red",
+      "mother: *Nila the Bold",
+      "spouse: *Cempu",
+      "son: *Muni the Quiet"
     ],
     "events": [
       "-2052: Born in a small settlement to a Peasant family",
-      "-2040: Learned to read weather signs and predict harvest yields from a parent",
-      "-2027: A sister married into a well-connected warrior clan, improving the family's social standing",
-      "-2010: Took over the family business after a parent retired from active work",
-      "-2005: Completed temple service during festival season"
+      "-2037: Helped with the harvest for the first season and proved capable despite a young age",
+      "-2019: Inherited valuable tools and a workshop from a childless uncle",
+      "-2005: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "arnhem-1200#1": {
@@ -1144,11 +1140,12 @@
     ],
     "events": [
       "1125: Born in a small settlement to a Merchant family",
-      "1137: Helped with the harvest for the first season and proved capable despite a young age",
-      "1149: Inherited valuable tools and a workshop from a childless uncle",
-      "1155: Exchanged gifts with neighboring tribe, preventing conflict",
-      "1159: A sister married into a well-connected navigator guild, improving the family's social standing",
-      "1192: Became the first in the village to successfully grow sugarcane, earning respect from neighbors"
+      "1139: Learned to read weather signs and predict harvest yields from a parent",
+      "1158: The family pooled their resources to purchase a mill share, a significant investment",
+      "1169: Inherited responsibility for family fishing grounds",
+      "1169: Mother died from dysentery, leaving the household in grief",
+      "1171: Became the first in the village to successfully grow sugarcane, earning respect from neighbors",
+      "1196: A sister married into a well-connected chiefly family, improving the family's social standing"
     ]
   },
   "arnhem-1200#2": {
@@ -1179,10 +1176,11 @@
     ],
     "events": [
       "1160: Born in a small settlement to a Commoner family",
-      "1172: Began working family fields, learning crop rotation from elders",
-      "1185: Inherited valuable tools and a workshop from a childless uncle",
-      "1186: Inherited responsibility for family fishing grounds",
-      "1194: A sister married into a well-connected warrior band, improving the family's social standing"
+      "1173: Trusted to tend livestock alone for the first time",
+      "1178: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1184: The family pooled their resources to purchase a storage barn, a significant investment",
+      "1186: Hosted important feast, strengthening clan ties",
+      "1195: The family lost their father when he was killed in tribal warfare"
     ]
   },
   "arnhem-1200#3": {
@@ -1213,9 +1211,9 @@
     ],
     "events": [
       "1180: Born in a small settlement to a Peasant family",
-      "1192: Learned to read weather signs and predict harvest yields from a parent",
-      "1197: A sister married into a well-connected trading partnership, improving the family's social standing",
-      "1199: Inherited valuable tools and a workshop from a childless uncle"
+      "1195: Helped with the harvest for the first season and proved capable despite a young age",
+      "1197: A brother's marriage brought valuable new trade connections and opportunities",
+      "1198: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "tahiti-1200#1": {
@@ -1246,11 +1244,12 @@
     ],
     "events": [
       "1125: Born in a small settlement to a Merchant family",
-      "1137: Helped with the harvest for the first season and proved capable despite a young age",
-      "1149: Inherited valuable tools and a workshop from a childless uncle",
-      "1155: Exchanged gifts with neighboring tribe, preventing conflict",
-      "1159: A sister married into a well-connected navigator guild, improving the family's social standing",
-      "1192: Became the first in the village to successfully grow sugarcane, earning respect from neighbors"
+      "1139: Learned to read weather signs and predict harvest yields from a parent",
+      "1158: The family pooled their resources to purchase a mill share, a significant investment",
+      "1169: Inherited responsibility for family fishing grounds",
+      "1169: Mother died from dysentery, leaving the household in grief",
+      "1171: Became the first in the village to successfully grow sugarcane, earning respect from neighbors",
+      "1196: A sister married into a well-connected chiefly family, improving the family's social standing"
     ]
   },
   "tahiti-1200#2": {
@@ -1281,10 +1280,11 @@
     ],
     "events": [
       "1139: Born in a small settlement to a Commoner family",
-      "1151: Began working family fields, learning crop rotation from elders",
-      "1171: Inherited valuable tools and a workshop from a childless uncle",
-      "1173: Inherited responsibility for family fishing grounds",
-      "1190: A sister married into a well-connected warrior band, improving the family's social standing"
+      "1152: Trusted to tend livestock alone for the first time",
+      "1159: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1169: Mother died from dysentery, leaving the household in grief",
+      "1170: The family pooled their resources to purchase a storage barn, a significant investment",
+      "1172: Hosted important feast, strengthening clan ties"
     ]
   },
   "tahiti-1200#3": {
@@ -1313,10 +1313,10 @@
     ],
     "events": [
       "1148: Born in a small settlement to a Peasant family",
-      "1160: Learned to read weather signs and predict harvest yields from a parent",
-      "1177: A sister married into a well-connected trading partnership, improving the family's social standing",
-      "1184: Inherited valuable tools and a workshop from a childless uncle",
-      "1188: Hosted important feast, strengthening clan ties"
+      "1163: Helped with the harvest for the first season and proved capable despite a young age",
+      "1167: Took over the family business after a parent retired from active work",
+      "1177: Exchanged gifts with neighboring tribe, preventing conflict",
+      "1181: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "andes-1500#1": {
@@ -1347,12 +1347,12 @@
     ],
     "events": [
       "1425: Born in a small settlement to a Merchant family",
-      "1437: Helped with the harvest for the first season and proved capable despite a young age",
-      "1450: Participated in Inti Raymi sun ceremony",
-      "1454: A sister married into a well-connected merchant family, improving the family's social standing",
-      "1457: Tragedy struck when a parent died from smallpox",
-      "1480: Inherited valuable tools and a workshop from a childless uncle",
-      "1492: Became the first in the village to successfully grow coffee, earning respect from neighbors"
+      "1439: Learned to read weather signs and predict harvest yields from a parent",
+      "1455: Mother died from childbirth complications, and the family faced new responsibilities",
+      "1460: Took over the family business after a parent retired from active work",
+      "1466: Learned healing songs from village shaman",
+      "1470: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "1496: A sister married into a well-connected noble panaca, improving the family's social standing"
     ]
   },
   "andes-1500#2": {
@@ -1383,11 +1383,10 @@
     ],
     "events": [
       "1460: Born in a small settlement to a Commoner family",
-      "1472: Began working family fields, learning crop rotation from elders",
-      "1483: Learned healing songs from village shaman",
-      "1485: Inherited valuable tools and a workshop from a childless uncle",
-      "1491: The family lost their mother when she died from childbirth complications",
-      "1494: A sister married into a well-connected noble panaca, improving the family's social standing"
+      "1473: Trusted to tend livestock alone for the first time",
+      "1480: The family pooled their resources to purchase a new plow, a significant investment",
+      "1490: Made offering to mountain apu for good harvest",
+      "1498: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "andes-1500#3": {
@@ -1416,10 +1415,10 @@
     ],
     "events": [
       "1480: Born in a small settlement to a Peasant family",
-      "1492: Learned to read weather signs and predict harvest yields from a parent",
-      "1494: Participated in Inti Raymi sun ceremony",
-      "1497: A sister married into a well-connected merchant family, improving the family's social standing",
-      "1498: The family pooled their resources to purchase a market stall, a significant investment"
+      "1495: Helped with the harvest for the first season and proved capable despite a young age",
+      "1496: Participated in Inti Raymi sun ceremony",
+      "1497: A brother's marriage brought valuable new trade connections and opportunities",
+      "1499: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "southwest-1200#1": {
@@ -1450,12 +1449,12 @@
     ],
     "events": [
       "1125: Born in a small settlement to a Commoner family",
-      "1137: Helped with the harvest for the first season and proved capable despite a young age",
-      "1150: Led successful buffalo hunt, feeding village through winter",
-      "1179: Inherited valuable tools and a workshop from a childless uncle",
-      "1183: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1187: Became the first in the village to successfully grow beans, earning respect from neighbors",
-      "1196: Received vision during coming-of-age ceremony"
+      "1139: Learned to read weather signs and predict harvest yields from a parent",
+      "1145: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1149: Selected as keeper of sacred bundle",
+      "1186: Took over the family business after a parent retired from active work",
+      "1189: Discovered new fishing grounds during drought",
+      "1199: Became the first in the village to successfully grow beans, earning respect from neighbors"
     ]
   },
   "southwest-1200#2": {
@@ -1486,11 +1485,11 @@
     ],
     "events": [
       "1139: Born in a small settlement to a Commoner family",
-      "1151: Began working family fields, learning crop rotation from elders",
-      "1159: Took over the family business after a parent retired from active work",
-      "1165: Led successful buffalo hunt, feeding village through winter",
-      "1168: Received vision during coming-of-age ceremony",
-      "1197: A brother's marriage brought valuable new trade connections and opportunities"
+      "1152: Trusted to tend livestock alone for the first time",
+      "1157: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1169: Discovered new fishing grounds during drought",
+      "1188: Inherited valuable tools and a workshop from a childless uncle",
+      "1190: Selected as keeper of sacred bundle"
     ]
   },
   "southwest-1200#3": {
@@ -1519,11 +1518,12 @@
     ],
     "events": [
       "1148: Born in a small settlement to a Peasant family",
-      "1160: Learned to read weather signs and predict harvest yields from a parent",
-      "1165: Led successful buffalo hunt, feeding village through winter",
-      "1174: A sister married into a well-connected clan elders, improving the family's social standing",
-      "1184: Inherited valuable tools and a workshop from a childless uncle",
-      "1189: Received vision during coming-of-age ceremony"
+      "1163: Helped with the harvest for the first season and proved capable despite a young age",
+      "1185: The family pooled their resources to purchase draft animals, a significant investment",
+      "1185: The family lost their mother when she died from childbirth complications",
+      "1192: A brother's marriage brought valuable new trade connections and opportunities",
+      "1194: Selected as keeper of sacred bundle",
+      "1196: Discovered new fishing grounds during drought"
     ]
   },
   "newengland-1780#1": {
@@ -1553,11 +1553,12 @@
     ],
     "events": [
       "1705: Born in a small settlement to a Merchant family",
-      "1718: Began learning the trade of fisher from an experienced practitioner",
-      "1729: Joined wagon train heading west for new land",
-      "1731: Organized petition for local improvements",
-      "1752: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1766: Took over the family business after a parent retired from active work"
+      "1719: Began learning the trade of fisher from an experienced practitioner",
+      "1734: Served as juror in important trial",
+      "1737: The family pooled their resources to purchase draft animals, a significant investment",
+      "1744: A brother's marriage brought valuable new trade connections and opportunities",
+      "1745: Mother was murdered, and the family faced new responsibilities",
+      "1766: Joined wagon train heading west for new land"
     ]
   },
   "newengland-1780#2": {
@@ -1588,12 +1589,11 @@
     ],
     "events": [
       "1740: Born in a small settlement to a Commoner family",
-      "1752: Began learning the trade of fisher from an experienced practitioner",
-      "1759: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1767: Took over the family business after a parent retired from active work",
-      "1769: Mother died from childbirth complications, leaving the household in grief",
-      "1773: Joined wagon train heading west for new land",
-      "1776: Organized petition for local improvements"
+      "1753: Began learning the trade of fisher from an experienced practitioner",
+      "1759: Staked claim during gold rush",
+      "1762: A brother's marriage brought valuable new trade connections and opportunities",
+      "1765: Organized petition for local improvements",
+      "1776: Took over the family business after a parent retired from active work"
     ]
   },
   "newengland-1780#3": {
@@ -1624,10 +1624,10 @@
     ],
     "events": [
       "1760: Born in a small settlement to a Peasant family",
-      "1775: Began learning the trade of fisher from an experienced practitioner",
-      "1776: A sister married into a well-connected merchant family, improving the family's social standing",
-      "1778: Joined wagon train heading west for new land",
-      "1779: Took over the family business after a parent retired from active work"
+      "1773: Began learning the trade of fisher from an experienced practitioner",
+      "1776: A brother's marriage brought valuable new trade connections and opportunities",
+      "1778: The family pooled their resources to purchase a new plow, a significant investment",
+      "1779: Staked claim during gold rush"
     ]
   },
   "ming-china-1500#1": {
@@ -1658,13 +1658,13 @@
     ],
     "events": [
       "1425: Born in a small settlement to a Commoner family",
-      "1437: Helped with the harvest for the first season and proved capable despite a young age",
-      "1442: A sister married into a well-connected literati family, improving the family's social standing",
-      "1458: Took over the family business after a parent retired from active work",
-      "1480: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
-      "1487: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
-      "1488: Inherited an additional field from a childless uncle, expanding the family holdings",
-      "1497: Returned home to care for aging parents"
+      "1439: Learned to read weather signs and predict harvest yields from a parent",
+      "1441: A sister married into a well-connected samurai clan, improving the family's social standing",
+      "1450: Took over the family business after a parent retired from active work",
+      "1455: A terrible blight spread through the millet crop, ruining the harvest and making for a lean winter",
+      "1458: Returned home to care for aging parents",
+      "1459: Mother died from plague despite efforts to save her",
+      "1470: With the help of extended family, cleared new land for cultivation"
     ]
   },
   "ming-china-1500#2": {
@@ -1695,13 +1695,13 @@
     ],
     "events": [
       "1460: Born in a small settlement to a Commoner family",
-      "1472: Began working family fields, learning crop rotation from elders",
-      "1481: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "1485: A terrible blight spread through the soybeans crop, ruining the harvest and making for a lean winter",
-      "1486: Divided the land among the children, keeping the best field for old age",
-      "1487: A father's death changed everything for the household",
-      "1490: A sister married into a well-connected literati family, improving the family's social standing",
-      "1491: Inherited valuable tools and a workshop from a childless uncle"
+      "1472: Learned to read weather signs and predict harvest yields from a parent",
+      "1476: A sister married into a well-connected Buddhist monastery, improving the family's social standing",
+      "1488: Performed ancestral rites as eldest son",
+      "1489: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
+      "1493: Purchased the neighbor's plot after they decided to seek fortune in the city",
+      "1497: Inherited valuable tools and a workshop from a childless uncle",
+      "1497: The mother's death changed the household"
     ]
   },
   "ming-china-1500#3": {
@@ -1730,11 +1730,10 @@
     ],
     "events": [
       "1480: Born in a small settlement to a Peasant family",
-      "1494: Began working family fields, learning crop rotation from elders",
-      "1496: Became the first in the village to successfully grow peanuts, earning respect from neighbors",
-      "1497: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
-      "1498: A brother's marriage brought valuable new trade connections and opportunities",
-      "1499: Inherited valuable tools and a workshop from a childless uncle"
+      "1495: Helped with the harvest for the first season and proved capable despite a young age",
+      "1496: A sister married into a well-connected samurai clan, improving the family's social standing",
+      "1498: Became the first in the village to successfully grow sweet potatoes, earning respect from neighbors",
+      "1499: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
     ]
   },
   "bengal-1900#1": {
@@ -1762,12 +1761,11 @@
       "mother: Shanti"
     ],
     "events": [
-      "1819: Born in a small settlement to a Upper Class family",
-      "1831: Began learning the trade of judge from an experienced practitioner",
-      "1854: Completed temple service during festival season",
-      "1856: The mother's death changed the household",
-      "1884: The family pooled their resources to purchase a mill share, a significant investment",
-      "1891: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1819: Born in a small settlement to an Upper Class family",
+      "1833: Began learning the trade of judge from an experienced practitioner",
+      "1877: Completed temple service during festival season",
+      "1881: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1892: The family pooled their resources to purchase machinery, a significant investment"
     ]
   },
   "bengal-1900#2": {
@@ -1797,11 +1795,10 @@
     "events": [
       "1833: Born in a small settlement to a Middle Class family",
       "1845: Began learning the trade of salesman from an experienced practitioner",
-      "1849: First to bring IT services to local markets, earning substantial profit",
-      "1858: Mother died from childbirth complications, and the family faced new responsibilities",
-      "1863: Completed temple service during festival season",
-      "1866: A brother's marriage brought valuable new trade connections and opportunities",
-      "1898: The family pooled their resources to purchase a storage barn, a significant investment"
+      "1856: The family pooled their resources to purchase a storage barn, a significant investment",
+      "1864: Learned sacred texts under a guru's guidance",
+      "1875: Secured exclusive trading rights for gems from Colombo",
+      "1890: A sister married into a well-connected Brahmin family, improving the family's social standing"
     ]
   },
   "bengal-1900#3": {
@@ -1832,11 +1829,10 @@
     ],
     "events": [
       "1841: Born in a small settlement to a Working Class family",
-      "1855: Began learning the trade of postal worker from an experienced practitioner",
-      "1863: Learned sacred texts under guru's guidance",
-      "1880: A brother's marriage brought valuable new trade connections and opportunities",
-      "1882: Mother died from typhoid fever, leaving the household in grief",
-      "1884: Took over the family business after a parent retired from active work"
+      "1856: Began learning the trade of postal worker from an experienced practitioner",
+      "1857: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1881: Inherited valuable tools and a workshop from a childless uncle",
+      "1894: Learned sacred texts under a guru's guidance"
     ]
   },
   "london-2020#1": {
@@ -1860,15 +1856,16 @@
       "backgroundBase": "#4a5a6a"
     },
     "family": [
-      "father: Llewelyn Parry",
-      "mother: Nerys Lewis",
-      "spouse: Emrys Watkins"
+      "father: Llyr Parry",
+      "mother: Carys Lloyd",
+      "spouse: Owen Roberts",
+      "daughter: Angharad Edwards"
     ],
     "events": [
-      "1938: Born in a small settlement to a Upper Class family",
-      "1950: Began learning the trade of surgeon from an experienced practitioner",
-      "1961: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1990: Took over the family business after a parent retired from active work"
+      "1938: Born in a small settlement to an Upper Class family",
+      "1952: Began learning the trade of surgeon from an experienced practitioner",
+      "1968: Inherited valuable tools and a workshop from a childless uncle",
+      "2011: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "london-2020#2": {
@@ -1898,9 +1895,9 @@
     "events": [
       "1973: Born in a small settlement to a Middle Class family",
       "1985: Began learning the trade of dental hygienist from an experienced practitioner",
-      "1997: Inherited valuable tools and a workshop from a childless uncle",
-      "2016: A brother's marriage brought valuable new trade connections and opportunities",
-      "2016: Mother died from augmentation rejection despite efforts to save her"
+      "1998: Tragedy struck when a parent died from data fever",
+      "2003: A sister married into a well-connected town council, improving the family's social standing",
+      "2017: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "london-2020#3": {
@@ -1930,9 +1927,9 @@
     ],
     "events": [
       "1999: Born in a small settlement to a Middle Class family",
-      "2013: Began learning the trade of real estate agent from an experienced practitioner",
-      "2018: A brother's marriage brought valuable new trade connections and opportunities",
-      "2019: Took over the family business after a parent retired from active work"
+      "2014: Began learning the trade of real estate agent from an experienced practitioner",
+      "2017: Inherited valuable tools and a workshop from a childless uncle",
+      "2019: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "paris-1850#1": {
@@ -1963,9 +1960,9 @@
     ],
     "events": [
       "1770: Born in a small settlement to a Merchant family",
-      "1783: Began learning the trade of fisher from an experienced practitioner",
-      "1788: A sister married into a well-connected cathedral chapter, improving the family's social standing",
-      "1835: The family pooled their resources to purchase a mill share, a significant investment"
+      "1784: Began learning the trade of fisher from an experienced practitioner",
+      "1799: Inherited valuable tools and a workshop from a childless uncle",
+      "1841: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "paris-1850#2": {
@@ -1997,9 +1994,9 @@
     "events": [
       "1806: Born in a small settlement to a Commoner family",
       "1818: Began learning the trade of doctor from an experienced practitioner",
-      "1830: Inherited valuable tools and a workshop from a childless uncle",
-      "1847: A brother's marriage brought valuable new trade connections and opportunities",
-      "1849: Mother died in a factory accident despite efforts to save her"
+      "1831: A brother's marriage brought valuable new trade connections and opportunities",
+      "1835: Took over the family business after a parent retired from active work",
+      "1839: A father's death changed everything for the household"
     ]
   },
   "paris-1850#3": {
@@ -2029,9 +2026,9 @@
     ],
     "events": [
       "1829: Born in a small settlement to a Peasant family",
-      "1842: Began learning the trade of railway worker from an experienced practitioner",
-      "1848: A sister married into a well-connected town council, improving the family's social standing",
-      "1849: Inherited valuable tools and a workshop from a childless uncle"
+      "1843: Began learning the trade of railway worker from an experienced practitioner",
+      "1847: Inherited valuable tools and a workshop from a childless uncle",
+      "1849: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "balkans-1900#1": {
@@ -2060,11 +2057,12 @@
     ],
     "events": [
       "1822: Born in a small settlement to a Working Class family",
-      "1834: Enlisted in local militia, issued first real weapon",
-      "1850: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1869: Took an arrow to the shoulder during a skirmish, which took months to heal properly",
-      "1870: The family pooled their resources to purchase a storage barn, a significant investment",
-      "1882: Defended Constantinople from raiders"
+      "1836: Sent to serve as squire, learning ways of war from veteran knight",
+      "1851: Served in garrison during border tensions with town council",
+      "1857: Mother died from tuberculosis, leaving the household in grief",
+      "1882: The family pooled their resources to purchase a tractor, a significant investment",
+      "1885: Took an arrow to the shoulder during a skirmish, which took months to heal properly",
+      "1895: A sister married into a well-connected cathedral chapter, improving the family's social standing"
     ]
   },
   "balkans-1900#2": {
@@ -2096,10 +2094,10 @@
     "events": [
       "1855: Born in a small settlement to a Middle Class family",
       "1867: Began learning the trade of salesman from an experienced practitioner",
-      "1884: Secured exclusive trading rights for pharmaceuticals from Hamburg",
-      "1885: Took over the family business after a parent retired from active work",
-      "1892: A brother's marriage brought valuable new trade connections and opportunities",
-      "1897: The mother's death changed the household"
+      "1871: A sister married into a well-connected noble house, improving the family's social standing",
+      "1872: Secured exclusive trading rights for automobiles from Hamburg",
+      "1882: Mother died from tuberculosis, leaving the household in grief",
+      "1890: Took over the family business after a parent retired from active work"
     ]
   },
   "balkans-1900#3": {
@@ -2128,9 +2126,9 @@
     ],
     "events": [
       "1879: Born in a small settlement to a Middle Class family",
-      "1893: Began learning the trade of journalist from an experienced practitioner",
-      "1898: A brother's marriage brought valuable new trade connections and opportunities",
-      "1899: Took over the family business after a parent retired from active work"
+      "1894: Began learning the trade of journalist from an experienced practitioner",
+      "1897: Inherited valuable tools and a workshop from a childless uncle",
+      "1899: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "andes-1990#1": {
@@ -2160,12 +2158,12 @@
       "son: Emiliano Rojas"
     ],
     "events": [
-      "1908: Born in a small settlement to a Upper Class family",
-      "1920: Began learning the trade of judge from an experienced practitioner",
-      "1926: A sister married into a well-connected merchant family, improving the family's social standing",
-      "1935: Took over the family business after a parent retired from active work",
-      "1941: A father's death changed everything for the household",
-      "1959: Made offering to mountain apu for good harvest"
+      "1908: Born in a small settlement to an Upper Class family",
+      "1922: Began learning the trade of judge from an experienced practitioner",
+      "1935: Participated in Inti Raymi sun ceremony",
+      "1939: Mother died by suicide despite efforts to save her",
+      "1943: A brother's marriage brought valuable new trade connections and opportunities",
+      "1944: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "andes-1990#2": {
@@ -2197,10 +2195,11 @@
     "events": [
       "1943: Born in a small settlement to a Middle Class family",
       "1955: Began learning the trade of salesman from an experienced practitioner",
-      "1963: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1971: Made offering to mountain apu for good harvest",
-      "1973: Secured exclusive trading rights for lithium from Buenos Aires",
-      "1983: Took over the family business after a parent retired from active work"
+      "1959: First to bring lithium to local markets, earning substantial profit",
+      "1960: A sister married into a well-connected merchant family, improving the family's social standing",
+      "1968: Father died by suicide, leaving the family to manage affairs alone",
+      "1978: Made offering to mountain apu for good harvest",
+      "1984: The family pooled their resources to purchase a storage barn, a significant investment"
     ]
   },
   "andes-1990#3": {
@@ -2229,11 +2228,11 @@
     ],
     "events": [
       "1969: Born in a small settlement to a Middle Class family",
-      "1983: Began formal schooling, learning letters, arithmetic and a clear hand",
-      "1984: Made offering to mountain apu for good harvest",
-      "1986: A sister married into a well-connected merchant family, improving the family's social standing",
-      "1987: Took over the family business after a parent retired from active work",
-      "1988: Invited to debate at prestigious the university"
+      "1983: Made offering to mountain apu for good harvest",
+      "1984: Took evening classes in bookkeeping while working days",
+      "1986: A sister married into a well-connected ayllu, improving the family's social standing",
+      "1987: Inherited valuable tools and a workshop from a childless uncle",
+      "1988: Discovered error in classical text, earning recognition"
     ]
   },
   "newzealand-2010#1": {
@@ -2261,12 +2260,11 @@
       "mother: Joan Cooper"
     ],
     "events": [
-      "1928: Born in a small settlement to a Upper Class family",
-      "1940: Began learning the trade of surgeon from an experienced practitioner",
-      "1951: A sister married into a well-connected trading partnership, improving the family's social standing",
-      "1953: The family pooled their resources to purchase a market stall, a significant investment",
-      "1963: Mother died from isolation psychosis, leaving the household in grief",
-      "1981: Hosted important feast, strengthening clan ties"
+      "1928: Born in a small settlement to an Upper Class family",
+      "1942: Began learning the trade of surgeon from an experienced practitioner",
+      "1950: The family pooled their resources to purchase a mill share, a significant investment",
+      "1959: Exchanged gifts with neighboring tribe, preventing conflict",
+      "2001: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "newzealand-2010#2": {
@@ -2298,10 +2296,9 @@
     "events": [
       "1963: Born in a small settlement to a Middle Class family",
       "1975: Began learning the trade of dental hygienist from an experienced practitioner",
-      "1983: Took over the family business after a parent retired from active work",
-      "1989: Exchanged gifts with neighboring tribe, preventing conflict",
-      "1994: Mother died from reef death fever, leaving the household in grief",
-      "2006: A brother's marriage brought valuable new trade connections and opportunities"
+      "1993: A sister married into a well-connected trading partnership, improving the family's social standing",
+      "2001: The family pooled their resources to purchase a new plow, a significant investment",
+      "2008: Exchanged gifts with neighboring tribe, preventing conflict"
     ]
   },
   "newzealand-2010#3": {
@@ -2330,9 +2327,9 @@
     ],
     "events": [
       "1989: Born in a small settlement to a Middle Class family",
-      "2003: Began learning the trade of real estate agent from an experienced practitioner",
-      "2008: A brother's marriage brought valuable new trade connections and opportunities",
-      "2009: Took over the family business after a parent retired from active work"
+      "2004: Began learning the trade of real estate agent from an experienced practitioner",
+      "2007: Inherited valuable tools and a workshop from a childless uncle",
+      "2009: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   }
 }

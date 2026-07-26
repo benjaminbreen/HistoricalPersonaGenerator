@@ -7,6 +7,26 @@ const ajv = new Ajv2020({
   strict: false,
 });
 
+// Ajv ships no format validators, so every `date-time` property in the schema
+// logged "unknown format ... ignored" on each validation — four warnings per
+// persona in the browser console. Registering a real check both silences that
+// and actually validates the field.
+ajv.addFormat('date-time', {
+  type: 'string',
+  validate: (value: string) => !Number.isNaN(Date.parse(value)),
+});
+ajv.addFormat('uri', {
+  type: 'string',
+  validate: (value: string) => {
+    try {
+      new URL(value);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+});
+
 const validateAnnotationSchema = ajv.compile(annotationSchema);
 
 const WORKPLACE_VALUES = new Set([

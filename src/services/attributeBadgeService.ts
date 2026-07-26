@@ -17,6 +17,7 @@ import {
 import { PlayerCharacter } from '../types';
 import { NpcEntity } from '../types/npcTypes';
 import { CulturalZone, WealthLevel } from '../types/characterData';
+import { random as seededRandom } from '../utils/seededRandom';
 import {
   UNIVERSAL_ATTRIBUTES,
   CULTURAL_ATTRIBUTES,
@@ -54,7 +55,11 @@ export class AttributeBadgeService {
   ): AttributeBadge[] {
     const options: AttributeGenerationOptions =
       typeof optionsOrMax === 'number' ? { maxBadges: optionsOrMax } : optionsOrMax;
-    const random = options.random ?? Math.random;
+    // Defaulting to Math.random left attribute selection outside the persona's
+    // seeded scope, so the same seed produced different attributes — and
+    // therefore different earned epithets — on each run. The ambient source is
+    // seeded inside `withSeed` and falls through to Math.random outside it.
+    const random = options.random ?? seededRandom;
     const maxBadges = options.maxBadges ?? 3;
 
     const ctx = this.buildContext(character, year, geography, options);

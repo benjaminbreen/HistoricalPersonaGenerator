@@ -48,6 +48,23 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
     // Ancient Chinese & Proto-Mongolic (3000 BCE - 200 CE)
+    /**
+     * South Asia before the Indo-Aryan traditions the later sets draw on.
+     *
+     * The Indus script is undeciphered, so no Harappan personal name is
+     * recoverable and none is claimed here: these are reconstructed
+     * Proto-Dravidian lexical forms used as name-shaped placeholders, marked
+     * with the asterisk this file uses for reconstructions everywhere else.
+     * Pointing South Asia at PREHISTORIC_ASIAN instead — which is Sinitic and
+     * Mongolic, down to Huangdi and Nüwa — put legendary Chinese figures in the
+     * Indus Valley.
+     */
+    PREHISTORIC_SOUTH_ASIAN: {
+        male: ['*Kal', '*Vil', '*Cen', '*Muni', '*Val', '*Nel', '*Ur', '*Kotu', '*Tan', '*Arul', '*Pon', '*Malai', '*Katu', '*Vel', '*Cur'],
+        female: ['*Ammai', '*Cempu', '*Nila', '*Kanni', '*Tay', '*Vala', '*Ilai', '*Punal', '*Muti', '*Aki', '*Ceyal', '*Naru'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
+    },
+
     PREHISTORIC_ASIAN: {
         male: ['*Tengri', '*Bayar', '*Temür', '*Batu', '*Börte', 'Yao', 'Shun', 'Yu', 'Tang', 'Wu', 'Zhou', 'Fuxi', 'Shennong', 'Huangdi', 'Zhuanxu', 'Ku', 'Gun', 'Qi', 'Gao', 'Jie', 'Li', 'Pan', 'Geng', 'Xin'],
         female: ['*Gua', '*Eke', '*Aba', 'Nüwa', 'Leizu', 'Luozu', 'Fufei', 'Ehuang', 'Nüying', 'Changxi', 'Xihe', 'Jiandi', 'Jiangyuan', 'Tushan', 'Nvjiao', 'Moxi', 'Baosi', 'Daji', 'Bao', 'Gui', 'Jiang', 'Ji'],

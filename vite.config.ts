@@ -513,7 +513,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), geminiPersonaApiPlugin(env)],
     server: {
-      port: 3001,
+      port: 5173,
     },
     esbuild: {
       // Allow duplicate object keys (last one wins) - these are present in data files

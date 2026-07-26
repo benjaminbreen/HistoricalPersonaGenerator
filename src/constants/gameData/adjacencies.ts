@@ -1,6 +1,7 @@
 
 import { MapArchetype } from '../../types';
 import type { AdjacencyData, LiminalSequence } from '../../types';
+import { devLog } from '../../utils/devLog';
 
 // Complete adjacency data connecting all actual map areas directly, with liminal spaces for all oceanic crossings
 export const ADJACENCIES: Record<string, AdjacencyData> = {
@@ -1342,4 +1343,4 @@ function generateReverseLiminalSequences(): Record<string, LiminalSequence> {
 const REVERSE_LIMINAL_SEQUENCES = generateReverseLiminalSequences();
 Object.assign(LIMINAL_SEQUENCES, REVERSE_LIMINAL_SEQUENCES);
 
-console.log(`[Liminal] Generated ${Object.keys(REVERSE_LIMINAL_SEQUENCES).length} reverse liminal sequences`);
+devLog(`[Liminal] Generated ${Object.keys(REVERSE_LIMINAL_SEQUENCES).length} reverse liminal sequences`);

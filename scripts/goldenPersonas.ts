@@ -137,6 +137,24 @@ function snapshot(persona: any): Record<string, unknown> {
   };
 }
 
+/**
+ * Generation must draw only from the persona's seeded scope. Anything reaching
+ * for `Math.random` directly is outside it and makes the persona
+ * irreproducible — which is how attribute selection, and therefore earned
+ * epithets, stayed random for several runs after seeding was supposedly done.
+ * Counting here turns that from an intermittent golden-file flap into a
+ * pointed failure.
+ */
+const nativeRandom = Math.random;
+let unseededDraws = 0;
+const unseededSites = new Map<string, number>();
+Math.random = () => {
+  unseededDraws += 1;
+  const frames = (new Error().stack || '').split('\n').slice(2, 5).map(l => l.trim()).join('\n        ');
+  unseededSites.set(frames, (unseededSites.get(frames) ?? 0) + 1);
+  return nativeRandom();
+};
+
 const generated: Record<string, unknown> = {};
 for (const testCase of CASES) {
   for (const seed of SEEDS) {
@@ -153,6 +171,17 @@ for (const testCase of CASES) {
       generated[`${testCase.name}#${seed}`] = { CRASHED: String((error as Error).message) };
     }
   }
+}
+
+Math.random = nativeRandom;
+
+if (unseededDraws > 0) {
+  originalLog(`${unseededDraws} un-seeded Math.random call(s) — generation is not reproducible.`);
+  originalLog('Route these through `random()` from src/utils/seededRandom:\n');
+  for (const [site, count] of [...unseededSites.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6)) {
+    originalLog(`  ${count}×\n        ${site}\n`);
+  }
+  process.exit(1);
 }
 
 const serialized = `${JSON.stringify(generated, null, 2)}\n`;
