@@ -1,7 +1,6 @@
 import type { HistoricalPersona } from '../services/personaGenerator';
 import type { SamplingMode } from '../services/demographyService';
 import type { HistoricalPersonaAnnotationRecord } from './personaAnnotation';
-import type { PortraitEngine } from '../components/portraitLab/usePortraitEngine';
 
 export const SHARED_PERSONA_SCHEMA_VERSION = 1 as const;
 
@@ -13,7 +12,14 @@ export interface SharedPersonaSnapshot {
   sourcePortraitUrl?: string;
   sourcePortraitAttribution?: string;
   sourceTarget?: 'named_subject' | 'ordinary_person_from_source_world';
-  portraitEngine: PortraitEngine;
+  /**
+   * Which renderer the sender was using. The classic SVG renderer has been
+   * removed and there is only one engine now, so this is read from existing
+   * share links and ignored rather than acted on. Kept optional so v1
+   * snapshots still parse — bumping the schema version would invalidate every
+   * link already in the wild for no gain.
+   */
+  portraitEngine?: 'classic' | 'lab';
   samplingMode?: SamplingMode;
   generatorVersion?: string;
   originalSeed?: number;

@@ -173,8 +173,7 @@ import {
   validatePersonaAnnotationRecord,
 } from '../services/geminiPersonaMaterialService';
 import { createPastedTextSource, getRandomWikidataPerson, ingestRandomOldBaileySource, ingestUrlSource, OldBaileyRandomFilters } from '../services/sourceIngestionService';
-import PortraitSwitch from './portraitLab/PortraitSwitch';
-import { usePortraitEngine } from './portraitLab/usePortraitEngine';
+import PixelPortrait from './portraitLab/PixelPortrait';
 import { generateStatDescription } from '../utils/statToText';
 import MiniLocationMap from './MiniLocationMap';
 import { RARITY_COLORS } from '../types/attributeTypes';
@@ -997,7 +996,6 @@ const lockProceduralSeedRecord = (
 };
 
 export default function PersonaGenerator() {
-  const { engine: portraitEngine, setEngine: setPortraitEngine } = usePortraitEngine();
   const [persona, setPersona] = useState<HistoricalPersona | null>(null);
   const [params, setParams] = useState<Partial<GenerationParams>>({});
   const [samplingMode, setSamplingMode] = useState<SamplingMode>('explore');
@@ -1249,7 +1247,6 @@ export default function PersonaGenerator() {
     setDeathRevealState('prompt');
     setDeathInfo(null);
     setSamplingMode(snapshot.samplingMode || 'explore');
-    setPortraitEngine(snapshot.portraitEngine);
     setSharedPersonaId(stored.id);
     setSharedPersonaError(null);
   };
@@ -2244,7 +2241,7 @@ export default function PersonaGenerator() {
       sourcePortraitUrl: sourcePortraitUrl || undefined,
       sourcePortraitAttribution: sourcePortraitAttribution || undefined,
       sourceTarget,
-      portraitEngine,
+      portraitEngine: 'lab',
       samplingMode,
       generatorVersion: '1.0.0',
     };
@@ -4761,7 +4758,7 @@ export default function PersonaGenerator() {
                           alt={`Portrait of ${persona.character.name}`}
                         />
                       ) : (
-                        <PortraitSwitch
+                        <PixelPortrait
                           character={persona.character}
                           size={192}
                           temporaryExpression={mainPortraitHoverExpression}
@@ -6309,7 +6306,7 @@ export default function PersonaGenerator() {
                   onKeyDown={(e) => e.key === 'Enter' && handlePortraitClick()}
                   title="Click to cycle through expressions"
                 >
-                  <PortraitSwitch
+                  <PixelPortrait
                     character={persona.character}
                     size={400}
                     temporaryExpression={expressionCycle[portraitExpressionIndex].expression}

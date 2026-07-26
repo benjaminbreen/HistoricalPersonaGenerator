@@ -104,6 +104,34 @@ export const CULTURE_WINDOWS: CultureWindow[] = [
     markers: /\b(literati|qipao|cheongsam|changshan|hanfu|magua|ruqun|jiaoling|futou|shenyi|tangzhuang|imperial exam|mandarin square)\b/i,
   },
 
+  // `geography.ts` folds Central Asia and Siberia into the East Asia
+  // macro-zone, so without these windows a persona from Samarkand or the Ob
+  // resolved to no culture at all — and `resolveCulture` returning null means
+  // "no constraint", so every Chinese, Japanese and Korean marker passed
+  // straight through to them.
+  //
+  // The marker lists here are deliberately thin. Most Central Asian material
+  // culture is shared with Mongolia, Persia or the steppe generally — a yurt
+  // is not exclusive to anyone — and a marker that is not genuinely exclusive
+  // within the zone produces false rejections for its neighbours. Only terms
+  // with nowhere else to go in EAST_ASIAN are listed.
+  {
+    id: 'culture-central-asia',
+    label: 'Central Asian oasis and steppe',
+    zones: ['EAST_ASIAN' as CulturalZone],
+    yearRange: [-10000, 2100],
+    places: /\b(samarkand|ferghana|kyzylkum|balkh|bactria|transoxiana|sogdia|khorasan|pamir|hindu kush|oases|oxus|amu darya|syr darya|merv|khwarezm|kazakh|aral|tian shan|dzungar)\b/,
+    markers: /\b(chapan|doppa|tubeteika|karakul|sogdian|bactrian|khwarezmian|caravanserai)\b/i,
+  },
+  {
+    id: 'culture-siberia',
+    label: 'Siberian',
+    zones: ['EAST_ASIAN' as CulturalZone],
+    yearRange: [-10000, 2100],
+    places: /\b(siberia|yenisei|irtysh|baikal|tunguska|kamchatka|sakhalin|altai|taiga|lena|okhotsk)\b/,
+    markers: /\b(reindeer herder|chum tent|yaranga|malitsa|nivkh|yakut|evenk)\b/i,
+  },
+
   // --- Oceania -------------------------------------------------------------
   {
     id: 'culture-aboriginal-australia',

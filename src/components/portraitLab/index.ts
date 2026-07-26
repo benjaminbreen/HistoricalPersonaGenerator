@@ -1,28 +1,16 @@
 /**
- * portraitLab — a second, independent pixel-portrait renderer.
+ * portraitLab/index.ts
  *
- * Nothing in here imports the original `components/portraits` system except
- * `PortraitSwitch`, whose whole job is to choose between the two. That means
- * the old renderer can keep evolving on its own and neither can break the
- * other.
+ * The pixel portrait engine. This was originally a second renderer living
+ * beside the app's SVG-based `components/portraits` system so the two could be
+ * compared; that system has since been removed and this is the only one.
  *
- * Entry points:
- *   PortraitSwitch          drop-in for <ProceduralPortrait>, honours the toggle
- *   PixelPortrait           the new renderer on its own
- *   PortraitEngineProvider  wraps the app; owns the Cmd+` shortcut
- *   PortraitLab             the side-by-side bench at #portrait-lab
+ *   PixelPortrait           the portrait component used throughout the app
+ *   PortraitLab             a contact sheet of fixtures, at #portrait-lab
+ *   buildPortraitSpec       the adapter from the app's character model
  */
 
 export { default as PixelPortrait } from './PixelPortrait';
-export type { PixelPortraitHandle, PixelPortraitProps } from './PixelPortrait';
-export { default as PortraitSwitch } from './PortraitSwitch';
 export { default as PortraitLab } from './PortraitLab';
-export { PortraitEngineProvider, usePortraitEngine } from './usePortraitEngine';
-export type { PortraitEngine } from './usePortraitEngine';
-
-export { buildPortraitSpec, restingExpression, normalizeExpression } from './spec/buildSpec';
+export { buildPortraitSpec } from './spec/buildSpec';
 export type { PortraitSource } from './spec/buildSpec';
-export { compilePortrait, renderFrame } from './render/pipeline';
-export { idleFrame } from './render/animation';
-export { allFixtures, sheets } from './fixtures';
-export type { Fixture } from './fixtures';

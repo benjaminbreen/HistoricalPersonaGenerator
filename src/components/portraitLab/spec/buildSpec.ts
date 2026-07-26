@@ -44,8 +44,21 @@ export interface PortraitSource {
   portraitSeed?: number;
   profession?: string;
   name?: string;
-  personality?: Record<string, number>;
-  stats?: Record<string, number>;
+  /**
+   * Only three traits are read, so they are named rather than taken as a
+   * `Record<string, number>`. The app's `CharacterPersonality` is an interface
+   * and so carries no index signature, which made it structurally incompatible
+   * with a record type even though every value in it is a number — the old
+   * `character: any` prop on the removed PortraitSwitch was quietly hiding
+   * that at every call site.
+   */
+  personality?: {
+    extraversion?: number;
+    agreeableness?: number;
+    neuroticism?: number;
+  };
+  /** Accepted from callers and ignored — nothing here is drawn from stats. */
+  stats?: object;
   diseaseHealth?: { currentDiseases?: Array<{ disease?: { name?: string } }> };
   equippedItems?: Record<string, { name?: string; material?: string; color?: string } | undefined>;
   appearance?: Record<string, any>;

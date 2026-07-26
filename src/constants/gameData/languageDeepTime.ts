@@ -327,6 +327,81 @@ export const ATTRIBUTION_WINDOWS: AttributionWindow[] = [
       h('Pre-Koreanic peninsular (hypothetical)', 'unclassified', 0.2, 'conjectural', ['vovin2010']),
     ],
   },
+  // -------------------------------------------------------------------------
+  // CENTRAL ASIA AND SIBERIA
+  //
+  // Filed under EAST_ASIAN because `geography.ts` folds Central Asia into the
+  // East Asia macro-zone. Without these windows the zone-wide catch-alls below
+  // answered for Transoxiana too, so a Bronze Age persona from Samarkand was
+  // issued Proto-Sino-Tibetan or Proto-Tibeto-Burman — languages of the
+  // Himalayan massif, two thousand miles east. The attested tables in
+  // `languages.ts` do cover this region, but only from Sogdian at 500 BCE
+  // onward; everything older fell through to East Asia.
+  // -------------------------------------------------------------------------
+  {
+    id: 'ca-oxus-bronze',
+    yearRange: [-2800, -1500],
+    zones: ['EAST_ASIAN'],
+    places: /\b(samarkand|ferghana|kyzylkum|balkh|bactria|transoxiana|sogdia|khorasan|pamir|hindu kush|oases|oxus|amu darya|syr darya|merv|khwarezm|kazakh|aral|tian shan|dzungar)\b/,
+    hypotheses: [
+      h('Oxus civilisation language (unrecorded)', 'unclassified', 0.45, 'conjectural', ['witzel1999', 'anthony2007'],
+        'The BMAC oasis towns were large and organised but left no decipherable writing. The language survives only as a substrate — a layer of farming, irrigation and ritual vocabulary with no Indo-European etymology that was borrowed into Indo-Iranian as it moved through.'),
+      h('Proto-Indo-Iranian (reconstructed)', 'Indo-European', 0.4, 'reconstructed', ['anthony2007', 'mallory2006'],
+        'Sintashta and Andronovo herders were pushing south into the region across this window. Nothing was written here, but the language is among the best reconstructed in the world.'),
+      h('Unrecorded steppe language', 'unclassified', 0.15, 'conjectural', ['nichols1992'],
+        'Central Asia before the Iron Age was almost certainly more crowded than the two named candidates alone suggest.'),
+    ],
+  },
+  {
+    id: 'ca-old-iranian',
+    yearRange: [-1500, -500],
+    zones: ['EAST_ASIAN'],
+    places: /\b(samarkand|ferghana|kyzylkum|balkh|bactria|transoxiana|sogdia|khorasan|pamir|hindu kush|oases|oxus|amu darya|syr darya|merv|khwarezm|kazakh|aral|tian shan|dzungar)\b/,
+    hypotheses: [
+      h('Old Iranian dialects (reconstructed)', 'Indo-European', 0.55, 'reconstructed', ['mallory2006', 'witzel1999'],
+        'The ancestors of Sogdian, Bactrian and Khwarezmian, spoken here for centuries before any of them were written down.'),
+      h('Avestan (attested)', 'Indo-European', 0.3, 'attested', ['witzel1999'],
+        'Old Avestan was composed somewhere in this region early in the window, though it was transmitted orally for a very long time before it was written.'),
+      h('Oxus substrate survival (hypothetical)', 'unclassified', 0.15, 'conjectural', ['witzel1999'],
+        'Pockets of the pre-Iranian oasis population are likely to have persisted alongside the incomers.'),
+    ],
+  },
+  {
+    id: 'ca-siberia-pacific',
+    yearRange: [-10000, -500],
+    zones: ['EAST_ASIAN'],
+    places: /\b(kamchatka|sakhalin|chukot|okhotsk|amur)\b/,
+    hypotheses: [
+      h('Chukotko-Kamchatkan ancestor (reconstructed)', 'Chukotko-Kamchatkan', 0.4, 'conjectural', ['fortescue1998'],
+        'The northeastern Pacific margin is Chukotko-Kamchatkan country; Fortescue reconstructs the family but its time depth here is not securely dated.'),
+      h('Nivkh ancestor (hypothetical)', 'isolate', 0.25, 'conjectural', ['janhunen2009'],
+        'Nivkh on the lower Amur and Sakhalin is an isolate with no demonstrated relatives, which usually indicates long residence.'),
+      h('Ainu ancestor (hypothetical)', 'Ainu', 0.2, 'conjectural', ['hudson1999', 'vovin2010'],
+        'Ainu occupied Sakhalin and the Kurils as well as Hokkaido.'),
+      h('Unrecorded Pacific-margin languages', 'unclassified', 0.15, 'conjectural', ['nichols1992'],
+        'The coast supported far more communities than the three named survivors.'),
+    ],
+  },
+
+  {
+    id: 'ca-siberia-early',
+    yearRange: [-10000, -500],
+    zones: ['EAST_ASIAN'],
+    // Deliberately excludes Kamchatka and Sakhalin: the Uralic and Yeniseian
+    // weights below belong to western and central Siberia, and the Pacific
+    // margin has its own window underneath.
+    places: /\b(siberia|yenisei|irtysh|baikal|tunguska|altai|taiga|lena)\b/,
+    hypotheses: [
+      h('Proto-Uralic (reconstructed)', 'Uralic', 0.3, 'reconstructed', ['janhunen2009'],
+        'The Uralic homeland is usually placed in the forest belt around the Urals and the Ob, spreading both west and east.'),
+      h('Yeniseian (reconstructed)', 'Yeniseian', 0.28, 'conjectural', ['vajda2010'],
+        'Yeniseian was once far more widespread across central Siberia than the single surviving Ket; Vajda argues for a link to Na-Dene across the Bering land bridge.'),
+      h('Proto-Tungusic (reconstructed)', 'Tungusic', 0.22, 'reconstructed', ['janhunen2009', 'robbeets2021'],
+        'Along the Amur and the eastern taiga.'),
+      h('Unrecorded Siberian languages', 'unclassified', 0.2, 'conjectural', ['nichols1992'],
+        'Siberia has lost more language families than it kept; most of what was spoken here has left no trace at all.'),
+    ],
+  },
   {
     id: 'ea-early',
     yearRange: [-10000, -5000],

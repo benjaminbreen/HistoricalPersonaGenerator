@@ -6,7 +6,7 @@
  * The command-line sheet (`npm run portrait-sheet`) renders the *fixtures* —
  * a fixed cast, deliberately stable so diffs mean something. This panel is the
  * opposite tool: it draws forty-two personas straight out of the live
- * generators, in the real browser, with whatever engine the app is currently
+ * generators, in the real browser, with the pixel engine the app now uses
  * set to. It answers "what does this actually look like in the wild", which a
  * fixed cast can never tell you.
  *
@@ -16,8 +16,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PixelPortrait from '../PixelPortrait';
-import ProceduralPortrait from '../../portraits/ProceduralPortrait';
-import { usePortraitEngine } from '../usePortraitEngine';
 import { CELL_COUNT, GRID_COLUMNS, GENERATORS } from './generators';
 import './PortraitDevPanel.css';
 
@@ -49,7 +47,6 @@ const PortraitDevPanel: React.FC = () => {
   const [size, setSize] = useState(88);
   const [animated, setAnimated] = useState(false);
   const [copied, setCopied] = useState<number | null>(null);
-  const { engine, toggle: toggleEngine } = usePortraitEngine();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const generator = GENERATORS[generatorIndex % GENERATORS.length];
@@ -88,7 +85,6 @@ const PortraitDevPanel: React.FC = () => {
       else if (event.code === 'KeyR') { event.preventDefault(); reroll(); }
       else if (event.code === 'BracketRight' || event.code === 'ArrowRight') { event.preventDefault(); cycle(1); }
       else if (event.code === 'BracketLeft' || event.code === 'ArrowLeft') { event.preventDefault(); cycle(-1); }
-      else if (event.code === 'KeyE') { event.preventDefault(); toggleEngine(); }
       else if (event.code === 'Equal') {
         event.preventDefault();
         setSize(s => SIZES[Math.min(SIZES.length - 1, SIZES.indexOf(s) + 1)] ?? s);
@@ -99,7 +95,7 @@ const PortraitDevPanel: React.FC = () => {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [enabled, open, reroll, cycle, toggleEngine]);
+  }, [enabled, open, reroll, cycle]);
 
   // A grid of forty-two animated canvases will happily eat a core. Pause the
   // app's own scrolling while the sheet is up.
@@ -120,7 +116,7 @@ const PortraitDevPanel: React.FC = () => {
 
   if (!enabled || !open) return null;
 
-  const Portrait = engine === 'lab' ? PixelPortrait : ProceduralPortrait;
+  const Portrait = PixelPortrait;
 
   return (
     <div className="pdp" role="dialog" aria-label="Portrait dev panel">
@@ -142,9 +138,6 @@ const PortraitDevPanel: React.FC = () => {
           </select>
 
           <button type="button" onClick={reroll}>Reroll <kbd>R</kbd></button>
-          <button type="button" onClick={toggleEngine}>
-            {engine === 'lab' ? 'Lab' : 'Classic'} <kbd>E</kbd>
-          </button>
           <label className="pdp__toggle">
             <input type="checkbox" checked={animated} onChange={e => setAnimated(e.target.checked)} />
             Animate
@@ -193,7 +186,7 @@ const PortraitDevPanel: React.FC = () => {
 
       <footer className="pdp__hint">
         <kbd>F2</kbd> or <kbd>⌘⇧D</kbd> toggle · <kbd>R</kbd> reroll · <kbd>[</kbd><kbd>]</kbd> sheet ·
-        <kbd>E</kbd> engine · <kbd>−</kbd><kbd>+</kbd> size · click a portrait to copy its JSON
+        <kbd>−</kbd><kbd>+</kbd> size · click a portrait to copy its JSON
       </footer>
     </div>
   );

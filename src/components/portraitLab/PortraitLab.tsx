@@ -10,20 +10,17 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import ProceduralPortrait from '../portraits/ProceduralPortrait';
 import PixelPortrait from './PixelPortrait';
 import { Fixture, sheets } from './fixtures';
 import { buildPortraitSpec, restingExpression } from './spec/buildSpec';
 import './PortraitLab.css';
 
-type Layout = 'pairs' | 'lab-only' | 'classic-only';
 
 const SIZES = [96, 144, 192, 288];
 
 const PortraitLab: React.FC = () => {
   const [sheetId, setSheetId] = useState(sheets[0].id);
   const [size, setSize] = useState(192);
-  const [layout, setLayout] = useState<Layout>('pairs');
   const [animated, setAnimated] = useState(true);
   const [reseed, setReseed] = useState(0);
 
@@ -50,12 +47,12 @@ const PortraitLab: React.FC = () => {
     <main className="portrait-lab">
       <header className="portrait-lab__header">
         <div>
-          <p className="portrait-lab__eyebrow">A/B bench</p>
-          <h1>Portrait engines</h1>
+          <p className="portrait-lab__eyebrow">Contact sheet</p>
+          <h1>Portraits</h1>
           <p className="portrait-lab__intro">
-            The same persona rendered by both engines. Press{' '}
-            <kbd>⌘</kbd>&nbsp;<kbd>`</kbd> anywhere in the app to switch which one
-            the real UI uses.
+            Fixture personas rendered by the pixel engine, with the spec the
+            adapter produced for each one — when a portrait looks wrong it is
+            usually the spec rather than the drawing.
           </p>
         </div>
         <a className="portrait-lab__back" href="/">Back to generator</a>
@@ -76,18 +73,6 @@ const PortraitLab: React.FC = () => {
           ))}
         </div>
 
-        <div className="portrait-lab__group" role="group" aria-label="Layout">
-          {(['pairs', 'lab-only', 'classic-only'] as Layout[]).map(option => (
-            <button
-              key={option}
-              type="button"
-              className={option === layout ? 'is-active' : ''}
-              onClick={() => setLayout(option)}
-            >
-              {option === 'pairs' ? 'Side by side' : option === 'lab-only' ? 'Lab only' : 'Classic only'}
-            </button>
-          ))}
-        </div>
 
         <div className="portrait-lab__group" role="group" aria-label="Size">
           {SIZES.map(option => (
@@ -122,7 +107,6 @@ const PortraitLab: React.FC = () => {
             key={`${fixture.name}-${fixture.character.portraitSeed}`}
             fixture={fixture}
             size={size}
-            layout={layout}
             animated={animated}
           />
         ))}
@@ -134,9 +118,8 @@ const PortraitLab: React.FC = () => {
 const LabCard: React.FC<{
   fixture: Fixture;
   size: number;
-  layout: Layout;
   animated: boolean;
-}> = ({ fixture, size, layout, animated }) => {
+}> = ({ fixture, size, animated }) => {
   // Surfacing what the spec adapter decided is most of the debugging value:
   // when a portrait looks wrong it is usually the spec, not the drawing.
   const spec = useMemo(() => buildPortraitSpec(fixture.character), [fixture]);
@@ -145,20 +128,9 @@ const LabCard: React.FC<{
   return (
     <article className="portrait-lab__card">
       <div className="portrait-lab__frames">
-        {layout !== 'lab-only' && (
-          <figure>
-            {/* The classic renderer declares a stricter character shape than
-                the fixtures carry; the app passes it loose objects everywhere. */}
-            <ProceduralPortrait character={fixture.character as any} size={size} animated={animated} />
-            <figcaption>Classic</figcaption>
-          </figure>
-        )}
-        {layout !== 'classic-only' && (
-          <figure>
-            <PixelPortrait character={fixture.character} size={size} animated={animated} />
-            <figcaption>Lab</figcaption>
-          </figure>
-        )}
+        <figure>
+          <PixelPortrait character={fixture.character} size={size} animated={animated} />
+        </figure>
       </div>
 
       <div className="portrait-lab__body">
