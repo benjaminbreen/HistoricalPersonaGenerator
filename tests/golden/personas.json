@@ -23,7 +23,7 @@
       "father: Tsz",
       "mother: Yee",
       "spouse: Shing",
-      "daughter: Wing"
+      "son: Jim"
     ],
     "events": [
       "1231: Born in a small settlement to a Merchant family",
@@ -58,7 +58,7 @@
       "father: Wu the Patient",
       "mother: Jiang",
       "spouse: Moxi",
-      "son: Zhou the Short"
+      "son: Huangdi"
     ],
     "events": [
       "1266: Born in a small settlement to a Commoner family",
@@ -162,7 +162,7 @@
       "father: Haru Shimizu",
       "mother: Chiyo Shimizu",
       "spouse: Yoko",
-      "daughter: Chiyo Saito"
+      "son: Satoshi Kato"
     ],
     "events": [
       "1266: Born in a small settlement to a Commoner family",
@@ -228,7 +228,8 @@
     "family": [
       "father: Daniel Jansson",
       "mother: Lena Gunnarsdotter",
-      "spouse: Carl Oliversson"
+      "spouse: Carl Oliversson",
+      "son: Marcus Eriksson"
     ],
     "events": [
       "1839: Born in a small settlement to an Upper Class family",
@@ -327,7 +328,7 @@
       "father: Leif Sigurdsson",
       "mother: Eir Ormsdóttir",
       "spouse: Ulf Halfdansson",
-      "daughter: Helga Skulisdóttir"
+      "son: Kjartan Grimsson"
     ],
     "events": [
       "1075: Born in a small settlement to a Merchant family",
@@ -364,7 +365,7 @@
       "father: Vigfus Njalsson",
       "mother: Ingrid Vigfusdóttir",
       "spouse: Thordis Arisdóttir",
-      "daughter: Eir Steinsdóttir"
+      "daughter: Aud Refsdóttir"
     ],
     "events": [
       "1110: Born in a small settlement to a Commoner family",
@@ -432,7 +433,7 @@
       "father: Murat Koç",
       "mother: Merve bint Ömer",
       "spouse: Abu Ahmet (İbrahim)",
-      "son: Yusuf ibn Burak"
+      "daughter: Fatma bint Özkan"
     ],
     "events": [
       "1871: Born in a small settlement to an Upper Class family",
@@ -465,7 +466,7 @@
       "father: Abu İsmail (Selim)",
       "mother: Umm Burcu (Filiz)",
       "spouse: Umm Asiye (Sevgi)",
-      "daughter: İrem Polat"
+      "daughter: Hülya Arslan"
     ],
     "events": [
       "1906: Born in a small settlement to a Middle Class family",
@@ -565,7 +566,7 @@
       "father: Nerses",
       "mother: Sona Nazarian",
       "spouse: Zara bint Davit",
-      "daughter: Srpuhi Hovhannessian"
+      "daughter: Armine bint Hovhannes"
     ],
     "events": [
       "1610: Born in a small settlement to a Commoner family",
@@ -666,7 +667,7 @@
       "father: Reda Brahimi",
       "mother: Soraya, mother of Imane",
       "spouse: Sabrina Benatia",
-      "daughter: Zohra daughter of Djamel"
+      "son: Yacine Belkacem"
     ],
     "events": [
       "1310: Born in a small settlement to a Commoner family",
@@ -927,7 +928,7 @@
       "father: Khalid son of Hussein",
       "mother: Hafsa",
       "spouse: Ahmad son of Ali",
-      "daughter: Khadija daughter of Hassan"
+      "son: Zubair son of Jafar"
     ],
     "events": [
       "425: Born in a small settlement to a Commoner family",
@@ -964,7 +965,7 @@
       "father: Khalid son of Ali",
       "mother: Asma",
       "spouse: Rayhana the Patient",
-      "daughter: Lubna daughter of Abdul Aziz"
+      "daughter: Asma daughter of Abdul Rahman"
     ],
     "events": [
       "460: Born in a small settlement to a Commoner family",
@@ -1069,7 +1070,7 @@
       "father: *Malai",
       "mother: *Aki the Restless",
       "spouse: *Ammai the Silent",
-      "daughter: *Kanni"
+      "son: *Nel"
     ],
     "events": [
       "-2061: Born in a small settlement to a Commoner family",
@@ -1103,7 +1104,7 @@
       "father: *Pon the Red",
       "mother: *Nila the Bold",
       "spouse: *Cempu",
-      "son: *Muni the Quiet"
+      "daughter: *Ammai"
     ],
     "events": [
       "-2052: Born in a small settlement to a Peasant family",
@@ -1136,7 +1137,7 @@
       "father: Anaru, father of Tane",
       "mother: Marama",
       "spouse: Anaru",
-      "son: Rawiri"
+      "son: Anaru"
     ],
     "events": [
       "1125: Born in a small settlement to a Merchant family",
@@ -1172,7 +1173,7 @@
       "father: Koru, father of Pita",
       "mother: Marama",
       "spouse: Nayeli",
-      "daughter: Lani"
+      "son: Manaia, father of Rangi"
     ],
     "events": [
       "1160: Born in a small settlement to a Commoner family",
@@ -1240,7 +1241,7 @@
       "father: Tehei",
       "mother: Tarita",
       "spouse: Pito",
-      "daughter: Poehina"
+      "son: Marama"
     ],
     "events": [
       "1125: Born in a small settlement to a Merchant family",
@@ -1276,7 +1277,7 @@
       "father: Keoni",
       "mother: Aroha",
       "spouse: Kalea the Short",
-      "son: Pita, father of Rawiri"
+      "daughter: Ngaire"
     ],
     "events": [
       "1139: Born in a small settlement to a Commoner family",
@@ -1343,7 +1344,7 @@
       "father: Huascar Cusipaucar",
       "mother: Chuya",
       "spouse: Inti",
-      "daughter: Inti"
+      "son: Huanca"
     ],
     "events": [
       "1425: Born in a small settlement to a Merchant family",
@@ -1379,7 +1380,7 @@
       "father: Wiraqocha",
       "mother: Quispe",
       "spouse: Mama Vargas",
-      "daughter: Munay Soncco"
+      "daughter: Coya Kondori"
     ],
     "events": [
       "1460: Born in a small settlement to a Commoner family",
@@ -1445,7 +1446,7 @@
       "father: Picuris",
       "mother: Mesa",
       "spouse: Tewa",
-      "daughter: Hopi"
+      "son: Popé"
     ],
     "events": [
       "1125: Born in a small settlement to a Commoner family",
@@ -1481,7 +1482,7 @@
       "father: Sotuknang",
       "mother: Tukwinong",
       "spouse: Qoqole",
-      "son: Tuwaletstiwa"
+      "daughter: Angwushahai"
     ],
     "events": [
       "1139: Born in a small settlement to a Commoner family",
@@ -1585,7 +1586,7 @@
       "father: Hezekiah Harris",
       "mother: Faith",
       "spouse: Mary",
-      "son: Thomas Jackson"
+      "son: Barnabas Thompson"
     ],
     "events": [
       "1740: Born in a small settlement to a Commoner family",
@@ -1654,7 +1655,7 @@
       "father: Bao Yang",
       "mother: Ting Chen",
       "spouse: Ming Li",
-      "son: Lei Guo"
+      "daughter: Lien Xu"
     ],
     "events": [
       "1425: Born in a small settlement to a Commoner family",
@@ -1691,7 +1692,7 @@
       "father: Ping Zheng",
       "mother: Yan Sun",
       "spouse: Xue Yang",
-      "daughter: Zhen Wang"
+      "daughter: Xiao Ma"
     ],
     "events": [
       "1460: Born in a small settlement to a Commoner family",
@@ -1825,7 +1826,7 @@
       "father: Naresh Yadav",
       "mother: Shanti Saxena",
       "spouse: Preeti Sinha",
-      "daughter: Leela daughter of Sunil"
+      "daughter: Veena Yadav"
     ],
     "events": [
       "1841: Born in a small settlement to a Working Class family",
@@ -1859,7 +1860,7 @@
       "father: Llyr Parry",
       "mother: Carys Lloyd",
       "spouse: Owen Roberts",
-      "daughter: Angharad Edwards"
+      "son: Emrys Phillips"
     ],
     "events": [
       "1938: Born in a small settlement to an Upper Class family",
@@ -1956,7 +1957,7 @@
       "father: Pierre Moreau",
       "mother: Nathalie Bertrand",
       "spouse: Louis Richard",
-      "daughter: Marie Simon"
+      "son: Patrick André"
     ],
     "events": [
       "1770: Born in a small settlement to a Merchant family",
@@ -1989,7 +1990,7 @@
       "father: Étienne Dubois",
       "mother: Céline Laurent",
       "spouse: Véronique daughter of Nicolas",
-      "son: Louis Mercier"
+      "daughter: Chantal Laurent"
     ],
     "events": [
       "1806: Born in a small settlement to a Commoner family",
@@ -2089,7 +2090,7 @@
       "father: Athanasios Makris",
       "mother: Aphrodite Vlachos",
       "spouse: Irini daughter of Demetrius",
-      "daughter: Kalliopi Kostopoulos"
+      "daughter: Katerina Vasiliou"
     ],
     "events": [
       "1855: Born in a small settlement to a Middle Class family",
@@ -2155,7 +2156,7 @@
       "father: Joaquín Castillo",
       "mother: Quilla",
       "spouse: Sinchi",
-      "son: Emiliano Rojas"
+      "son: Emiliano Morales"
     ],
     "events": [
       "1908: Born in a small settlement to an Upper Class family",
@@ -2190,7 +2191,7 @@
       "father: Rumi Morales",
       "mother: Ata",
       "spouse: Ata",
-      "son: Zipa"
+      "daughter: Illapa"
     ],
     "events": [
       "1943: Born in a small settlement to a Middle Class family",
@@ -2291,7 +2292,7 @@
       "father: Torquil MacMillan",
       "mother: Oighrig Cameron",
       "spouse: Vaila Gordon",
-      "daughter: Una Cameron"
+      "daughter: Gillian Grant"
     ],
     "events": [
       "1963: Born in a small settlement to a Middle Class family",
@@ -2356,7 +2357,7 @@
       "father: *Ulaan",
       "mother: *Eke",
       "spouse: *Bayar",
-      "son: *Ulaan"
+      "son: *Sartaq"
     ],
     "events": [
       "-711: Born in a small settlement to a Commoner family",
@@ -2392,7 +2393,7 @@
       "father: *Sartaq the Patient",
       "mother: *Altan",
       "spouse: *Naran the Swift",
-      "son: *Tengri"
+      "daughter: *Gua the Younger"
     ],
     "events": [
       "-676: Born in a small settlement to a Commoner family",
@@ -2492,7 +2493,7 @@
       "father: Wu the Patient",
       "mother: Jiang",
       "spouse: Gui",
-      "daughter: Tushan"
+      "daughter: Jiandi"
     ],
     "events": [
       "-7040: Born in a small settlement to a Peasant family",
@@ -2594,7 +2595,7 @@
       "father: Dong-hyun Nam",
       "mother: Mi-young Shim",
       "spouse: Bo-ram Min",
-      "daughter: Mi-young Go"
+      "daughter: Jin-ah Shim"
     ],
     "events": [
       "1360: Born in a small settlement to a Commoner family",
@@ -2698,7 +2699,7 @@
       "father: Enkhbayar",
       "mother: Urantuya",
       "spouse: Jargalmaa Zorigbat",
-      "daughter: Ankhbayar Gantulga"
+      "daughter: Zolzaya Tengis"
     ],
     "events": [
       "1210: Born in a small settlement to a Commoner family",
@@ -2803,7 +2804,7 @@
       "father: Ryuu Ishikawa",
       "mother: Yoko Nakajima",
       "spouse: Risa Matsumoto",
-      "son: Jiro the JAPANESE"
+      "son: Satoshi Kato"
     ],
     "events": [
       "1826: Born in a small settlement to a Commoner family",
@@ -2871,7 +2872,7 @@
       "father: Wulkwowiros",
       "mother: Awsosdota",
       "spouse: Hrewiklewos",
-      "daughter: Aryona"
+      "son: Hrewiklewos"
     ],
     "events": [
       "-8075: Born to the band that ranged this country",
@@ -2908,7 +2909,7 @@
       "father: Aryomon the Patient",
       "mother: Sowlya",
       "spouse: Tritogena",
-      "daughter: Gwenaregna"
+      "daughter: Aryona"
     ],
     "events": [
       "-8040: Born to the band that ranged this country",
@@ -3013,7 +3014,7 @@
       "father: Xenophanes son of Nikandros",
       "mother: Phaedra daughter of Zenodoros",
       "spouse: Lasthenia daughter of Kleomenes",
-      "son: Philippos the Short"
+      "son: Herakleitos son of Zenodoros"
     ],
     "events": [
       "-470: Born in a small settlement to a Commoner family",
@@ -3219,7 +3220,7 @@
       "father: Hugo Olofsson",
       "mother: Lovisa Theosdotter",
       "spouse: Alicia Noahsdotter",
-      "daughter: Lovisa Viktorsdotter"
+      "daughter: Tuva Theosdotter"
     ],
     "events": [
       "860: Born in a small settlement to a Commoner family",
@@ -3290,7 +3291,7 @@
       "father: Mustapha Zidane",
       "mother: Naima Zerhouni",
       "spouse: Mehdi Zidane",
-      "son: Mourad son of Amine"
+      "son: Abdel Boumediene"
     ],
     "events": [
       "1405: Born in a small settlement to a Commoner family",
@@ -3325,7 +3326,7 @@
       "father: Rui Teixeira",
       "mother: Alice the PORTUGUESE",
       "spouse: Susana daughter of Fernando",
-      "daughter: Esperança Moreira"
+      "daughter: Margarida Monteiro"
     ],
     "events": [
       "1440: Born in a small settlement to a Commoner family",
@@ -3525,7 +3526,7 @@
       "father: Frederik de Wit",
       "mother: Klasina de Wit",
       "spouse: Leonarda Vermeulen",
-      "daughter: Dirkje Dijkstra"
+      "daughter: Betje Jacobs"
     ],
     "events": [
       "1610: Born in a small settlement to a Commoner family",
@@ -3592,7 +3593,8 @@
     "family": [
       "father: Wilhelm Hoffmann",
       "mother: Gisela Schröder",
-      "spouse: Wolfgang Schneider"
+      "spouse: Wolfgang Schneider",
+      "son: Wolfgang Bauer"
     ],
     "events": [
       "1849: Born in a small settlement to a Middle Class family",
@@ -3688,7 +3690,7 @@
       "father: Hierakonpolis",
       "mother: Khenthap",
       "spouse: Khenti",
-      "daughter: Nakhtneith"
+      "son: Atum"
     ],
     "events": [
       "-1425: Born in a small settlement to a Commoner family",
@@ -3794,7 +3796,7 @@
       "father: Nabu",
       "mother: Ninisina",
       "spouse: Hammurabi",
-      "daughter: Bau"
+      "son: Sargon"
     ],
     "events": [
       "-1825: Born in a small settlement to a Commoner family",
@@ -4235,7 +4237,7 @@
       "father: Marwan Qasemi",
       "mother: Yara bint Emad",
       "spouse: Ghada",
-      "daughter: Noor bint Abdallah"
+      "son: Diyaa Zreik"
     ],
     "events": [
       "1878: Born in a small settlement to a Middle Class family",
@@ -4341,7 +4343,7 @@
       "father: Chike",
       "mother: Yaa",
       "spouse: Kesia",
-      "daughter: Makena"
+      "son: Aman"
     ],
     "events": [
       "-9040: Born to the band that ranged this country",
@@ -4447,7 +4449,7 @@
       "father: Chike",
       "mother: Yaa",
       "spouse: Kesia",
-      "daughter: Makena"
+      "son: Aman"
     ],
     "events": [
       "-4340: Born in a small settlement to a Peasant family",
@@ -4545,7 +4547,7 @@
       "father: Haile Tsegaye",
       "mother: Kidist, mother of Workitu",
       "spouse: Yeshi Tadesse",
-      "daughter: Bethlehem daughter of Tadesse"
+      "son: Tewodros Haile"
     ],
     "events": [
       "1060: Born in a small settlement to a Commoner family",
@@ -4610,7 +4612,7 @@
       "father: Folarin Akinyemi",
       "mother: Nike daughter of Chinedu",
       "spouse: Idris son of Chinedu",
-      "daughter: Ebun"
+      "son: Folarin Adewale"
     ],
     "events": [
       "1325: Born in a small settlement to a Commoner family",
@@ -4645,7 +4647,7 @@
       "father: Idris Akinwale",
       "mother: Yemi Akinwale",
       "spouse: Joke daughter of Kwame",
-      "son: Bolaji"
+      "son: Chinedu"
     ],
     "events": [
       "1339: Born in a small settlement to a Commoner family",
@@ -4679,7 +4681,7 @@
       "father: Adebayo",
       "mother: Chiamaka Adekunle",
       "spouse: Hadiza Ogundimu",
-      "son: Babatunde son of Adamu"
+      "daughter: Hadiza daughter of Segun"
     ],
     "events": [
       "1348: Born in a small settlement to a Peasant family",
@@ -4808,7 +4810,7 @@
       "father: Siddhartha Bajpai",
       "mother: Jyoti daughter of Vikram",
       "spouse: Yogesh son of Rakesh",
-      "son: Arjun"
+      "son: Dinesh Srivastava"
     ],
     "events": [
       "1575: Born in a small settlement to a Commoner family",
@@ -4845,7 +4847,7 @@
       "father: Naresh Awasthi",
       "mother: Leela Thakur",
       "spouse: Shakti daughter of Arjun",
-      "son: Vijay"
+      "son: Vikram"
     ],
     "events": [
       "1589: Born in a small settlement to a Commoner family",
@@ -4881,7 +4883,7 @@
       "father: Mukesh son of Pramod",
       "mother: Veena Mishra",
       "spouse: Bharti",
-      "daughter: Lakshmi daughter of Ravi"
+      "son: Rakesh"
     ],
     "events": [
       "1598: Born in a small settlement to a Peasant family",
@@ -4918,7 +4920,7 @@
       "father: Hitesh",
       "mother: Shanti",
       "spouse: Vikram son of Rajesh",
-      "daughter: Priya"
+      "son: Pramod son of Sunil"
     ],
     "events": [
       "1125: Born in a small settlement to a Commoner family",
@@ -4955,7 +4957,7 @@
       "father: Naresh Awasthi",
       "mother: Leela Thakur",
       "spouse: Shakti daughter of Arjun",
-      "son: Vijay"
+      "son: Vikram"
     ],
     "events": [
       "1139: Born in a small settlement to a Commoner family",
@@ -4992,7 +4994,7 @@
       "father: Mukesh son of Pramod",
       "mother: Veena Mishra",
       "spouse: Bharti",
-      "daughter: Lakshmi daughter of Ravi"
+      "son: Rakesh"
     ],
     "events": [
       "1148: Born in a small settlement to a Peasant family",
@@ -5066,7 +5068,7 @@
       "father: *Nel",
       "mother: *Cempu",
       "spouse: *Naru",
-      "daughter: *Vala"
+      "son: *Malai"
     ],
     "events": [
       "-8061: Born to the band that ranged this country",
@@ -5103,7 +5105,7 @@
       "father: *Muni",
       "mother: *Ilai",
       "spouse: *Punal",
-      "son: *Nel"
+      "son: *Malai"
     ],
     "events": [
       "-8052: Born to the band that ranged this country",
@@ -5174,7 +5176,7 @@
       "father: Wolf",
       "mother: Rain the Swift",
       "spouse: River",
-      "son: Warrior"
+      "daughter: Flower"
     ],
     "events": [
       "639: Born in a small settlement to a Commoner family",
@@ -5209,7 +5211,7 @@
       "father: Hunter",
       "mother: Winter",
       "spouse: Sky the Red",
-      "son: Stone the Restless"
+      "daughter: Sky the Scarred"
     ],
     "events": [
       "648: Born in a small settlement to a Peasant family",
@@ -5245,7 +5247,7 @@
       "father: Forest",
       "mother: Summer",
       "spouse: Thunder",
-      "daughter: Moon"
+      "son: Spear"
     ],
     "events": [
       "1425: Born in a small settlement to a Merchant family",
@@ -5281,7 +5283,7 @@
       "father: Fire the Dark",
       "mother: Lily the Watchful",
       "spouse: Winter the Wanderer",
-      "daughter: Lily"
+      "daughter: River"
     ],
     "events": [
       "1439: Born in a small settlement to a Commoner family",
@@ -5349,7 +5351,7 @@
       "father: Iluq",
       "mother: Yura",
       "spouse: Amarok",
-      "daughter: Aput"
+      "son: Nanook"
     ],
     "events": [
       "1325: Born in a small settlement to a Commoner family",
@@ -5385,15 +5387,16 @@
       "father: Standing Salmon",
       "mother: White Mink",
       "spouse: Autumn Wolf",
-      "daughter: South Fish"
+      "daughter: Sakari"
     ],
     "events": [
       "1339: Born in a small settlement to a Commoner family",
-      "1354: Learned to read weather signs and predict harvest yields from a parent",
-      "1368: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1376: Led successful buffalo hunt, feeding village through winter",
-      "1377: Selected as keeper of sacred bundle",
-      "1394: Took over the family business after a parent retired from active work"
+      "1354: Trusted to tend livestock alone for the first time",
+      "1363: Received vision during coming-of-age ceremony",
+      "1369: Discovered new fishing grounds during drought",
+      "1377: Mother died from starvation despite efforts to save her",
+      "1385: Took over the family business after a parent retired from active work",
+      "1393: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "arctic-1400#3": {
@@ -5454,7 +5457,7 @@
       "father: Yokuts",
       "mother: Tiva the Short",
       "spouse: Wintu",
-      "son: Ishi"
+      "son: Yokuts the Stout"
     ],
     "events": [
       "925: Born in a small settlement to a Commoner family",
@@ -5490,7 +5493,7 @@
       "father: Wintu the Wanderer",
       "mother: Zaltana the One-Eyed",
       "spouse: Poloma",
-      "son: Karuk"
+      "daughter: Luyu"
     ],
     "events": [
       "939: Born in a small settlement to a Commoner family",
@@ -5594,7 +5597,7 @@
       "father: Hezekiah Harris",
       "mother: Faith",
       "spouse: Mary",
-      "son: Thomas Jackson"
+      "son: Ebenezer Johnson"
     ],
     "events": [
       "1826: Born in a small settlement to a Commoner family",
@@ -5802,7 +5805,7 @@
       "father: Lloque Inca",
       "mother: Kusi the Swift",
       "spouse: Munay Soncco",
-      "daughter: Chuya Cusipaucar"
+      "son: Apu Kondori"
     ],
     "events": [
       "1160: Born in a small settlement to a Commoner family",
@@ -5870,7 +5873,7 @@
       "father: Huascar Cusipaucar",
       "mother: Chuya",
       "spouse: Inti",
-      "daughter: Inti Waman"
+      "son: Huanca"
     ],
     "events": [
       "1525: Born in a small settlement to a Merchant family",
@@ -5906,7 +5909,7 @@
       "father: Lloque Inca",
       "mother: Kusi the Swift",
       "spouse: Coya",
-      "son: Inti Ccopa"
+      "son: Vicuña Llanos"
     ],
     "events": [
       "1560: Born in a small settlement to a Commoner family",
@@ -5973,7 +5976,7 @@
       "father: Inti Zapana",
       "mother: Yana Choque",
       "spouse: Illapa Apaza",
-      "son: Apu Quespi"
+      "son: Sayri Ttito"
     ],
     "events": [
       "1799: Born in a small settlement to a Merchant family",
@@ -6076,7 +6079,7 @@
       "father: Tomasi",
       "mother: Nanise",
       "spouse: Kem",
-      "daughter: Makereta"
+      "son: Petero"
     ],
     "events": [
       "1425: Born in a small settlement to a Merchant family",
@@ -6176,7 +6179,7 @@
       "father: Keawe",
       "mother: Lilia",
       "spouse: Kawika",
-      "daughter: Kailani"
+      "son: Kamal"
     ],
     "events": [
       "1625: Born in a small settlement to a Commoner family",
@@ -6276,7 +6279,7 @@
       "father: Jannali",
       "mother: Yamba",
       "spouse: Jarrah",
-      "daughter: Ulladulla"
+      "son: Birrani"
     ],
     "events": [
       "-20075: Born to the band that ranged this country",
@@ -6313,7 +6316,7 @@
       "father: Warwick the Patient",
       "mother: Papunya",
       "spouse: Narrandera",
-      "daughter: Yamba"
+      "daughter: Tallara"
     ],
     "events": [
       "-20040: Born to the band that ranged this country",
