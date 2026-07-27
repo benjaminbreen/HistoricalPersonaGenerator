@@ -3010,6 +3010,27 @@ body.dark-mode .area-pill {
   gap: var(--sp-md);
 }
 
+/* Children sit under the parents and spouse, in the same grid, with a count
+   line above them. A child who did not survive is shown by a lifespan and a
+   quieter card — stated, not flagged. */
+.children-block {
+  margin-top: var(--sp-lg);
+}
+
+.children-heading {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--sp-sm);
+}
+
+.parent-card.family-card-deceased {
+  opacity: 0.62;
+  cursor: default;
+  border-style: dashed;
+}
+
 .parent-card {
   background: var(--color-background);
   border: 1px solid var(--color-border);

@@ -21,6 +21,7 @@ import { formatSocialStatusForEra, sampleSocialStatus } from './socialStatusServ
 import { reconcileEpithet } from '../constants/characterData/nameConventions';
 import { applyAttributeAppearance } from './attributeAppearanceService';
 import { generateOrnament } from './ornamentService';
+import { generateChildren } from './householdService';
 import { isClergyRoleCompatible } from '../constants/characterData/religionClergyRoles';
 import { illnessRate, pickByPrevalence } from './diseasePrevalenceService';
 import { getAreaClimate, hemisphereFor, seasonFor, thermalNeed } from './climateService';
@@ -755,28 +756,43 @@ function generateProceduralFamily(
         });
 
         // ===== CHILDREN =====
-        // Only if character is old enough and married
-        const minChildBearingAge = 18;
-        const yearsMarried = age - marriageAge;
+        // Births are walked rather than counted, so spacing, birth order and
+        // infant mortality all come out of one model. See householdService.
+        const births = generateChildren(
+            {
+                age,
+                sex: normalizedGender === 'male' ? 'male' : 'female',
+                currentYear,
+                marriageAge,
+                spouseAge,
+                culturalZone,
+                wealth: (character as any).wealthLevel,
+            },
+            () => noise.random(),
+        );
 
-        if (age >= minChildBearingAge && yearsMarried > 0) {
-            const numChildren = getHistoricalChildCount(era, age, yearsMarried, noise);
+        for (const birth of births) {
+            const childName = generateNpcName(
+                birth.sex === 'male' ? 'Male' : 'Female',
+                culturalZone, region, birth.birthYear, noise, familyNameKey);
 
-            for (let i = 0; i < numChildren; i++) {
-                // Children born during marriage, spread out over the years
-                const childAgeMax = Math.min(yearsMarried, age - minChildBearingAge);
-                const childAge = Math.floor(noise.random() * childAgeMax);
-                const childBirthYear = currentYear - childAge;
-                const childGender = noise.random() > 0.5 ? 'male' : 'female';
-                const childName = generateNpcName(childGender === 'male' ? 'Male' : 'Female', culturalZone, region, childBirthYear, noise, familyNameKey);
+            // Children worked. A twelve-year-old with no trade listed is modern
+            // childhood projected backwards onto societies that had no such thing.
+            const oldEnoughToWork = !birth.isDeceased && birth.age >= 12;
+            const childProfession = oldEnoughToWork
+                ? (birth.sex === 'male'
+                    ? generateParentProfession('male', culturalZone, era, noise, currentYear, region)
+                    : generateMotherProfession(culturalZone, era, noise))
+                : undefined;
 
-                character.family.push({
-                    name: dedupeEpithet(childName),
-                    relation: childGender === 'male' ? 'son' : 'daughter',
-                    age: childAge,
-                    birthYear: childBirthYear
-                });
-            }
+            character.family.push({
+                name: dedupeEpithet(childName),
+                relation: birth.sex === 'male' ? 'son' : 'daughter',
+                age: birth.age,
+                birthYear: birth.birthYear,
+                ...(childProfession ? { profession: childProfession } : {}),
+                ...(birth.isDeceased ? { isDeceased: true, deathYear: birth.deathYear } : {}),
+            });
         }
     }
 }
@@ -901,26 +917,6 @@ function getHistoricalMarriageAge(era: HistoricalEra, gender: string, noise: Val
 
     const baseAge = marriageAges[era]?.[gender as 'male' | 'female'] || 20;
     return baseAge + Math.floor(noise.random() * 5); // Add 0-5 years variation
-}
-
-/**
- * Get historical child count based on era, age, and years married
- */
-function getHistoricalChildCount(era: HistoricalEra, age: number, yearsMarried: number, noise: ValueNoise): number {
-    // Modern era has lower fertility
-    const isModern = era === HistoricalEra.MODERN_ERA || era === HistoricalEra.FUTURE_ERA;
-
-    // Base number of children on years married and age
-    const maxChildrenByYears = Math.min(Math.floor(yearsMarried / 2), 8); // Roughly 1 child per 2 years, max 8
-
-    if (isModern) {
-        // Modern era: 0-3 children typically
-        return Math.min(Math.floor(noise.random() * 4), maxChildrenByYears);
-    } else {
-        // Pre-modern: higher fertility
-        const historicalMax = Math.min(8, maxChildrenByYears);
-        return Math.floor(noise.random() * (historicalMax + 1));
-    }
 }
 
 

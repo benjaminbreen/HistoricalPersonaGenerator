@@ -5062,6 +5062,66 @@ export default function PersonaGenerator() {
                                   </div>
                                 );
                               })()}
+
+                              {/* Children. The panel above names only the three
+                                  relations it was written for, so a persona with
+                                  six children showed none of them here. Those who
+                                  did not survive are stated as a lifespan rather
+                                  than marked — it is a fact about the household,
+                                  not a decoration. */}
+                              {(() => {
+                                const children = persona.character.family.filter(
+                                  m => m.relation === 'son' || m.relation === 'daughter');
+                                if (children.length === 0) return null;
+                                const living = children.filter(c => !c.isDeceased);
+                                const ordered = [...children].sort(
+                                  (a, b) => (a.birthYear ?? 0) - (b.birthYear ?? 0));
+
+                                return (
+                                  <div className="children-block">
+                                    <div className="children-heading">
+                                      {children.length === living.length
+                                        ? `${children.length} ${children.length === 1 ? 'child' : 'children'}`
+                                        : `${children.length} born, ${living.length} living`}
+                                    </div>
+                                    <div className="parents-grid">
+                                      {ordered.map((child, idx) => (
+                                        <motion.div
+                                          key={`child-${idx}`}
+                                          className={`parent-card clickable-family-card${child.isDeceased ? ' family-card-deceased' : ''}`}
+                                          initial={{ opacity: 0, y: 10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          transition={{ delay: 0.25 + idx * 0.03 }}
+                                          onClick={() => !child.isDeceased && handleViewFamilyMember(child)}
+                                          whileHover={child.isDeceased ? undefined : { scale: 1.02, boxShadow: '0 4px 12px rgba(107, 142, 127, 0.2)' }}
+                                          whileTap={child.isDeceased ? undefined : { scale: 0.98 }}
+                                          title={child.isDeceased ? undefined : 'Click to generate their life history'}
+                                        >
+                                          <div className="parent-header">
+                                            {child.relation === 'son'
+                                              ? <IoMan className="parent-icon" />
+                                              : <IoWoman className="parent-icon" />}
+                                            <div className="parent-label">
+                                              {child.relation === 'son' ? 'Son' : 'Daughter'}
+                                            </div>
+                                          </div>
+                                          <div className="parent-name">{child.name}</div>
+                                          {child.profession && (
+                                            <div className="parent-profession">
+                                              {getProfessionEmoji(child.profession)} {child.profession}
+                                            </div>
+                                          )}
+                                          <div className="parent-dates">
+                                            {child.isDeceased && child.birthYear !== undefined
+                                              ? `${formatYear(child.birthYear)} - ${formatYear(child.deathYear ?? child.birthYear)}`
+                                              : `Age ${child.age}`}
+                                          </div>
+                                        </motion.div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              })()}
                             </div>
 
                             {/* Family Tree Visualization */}

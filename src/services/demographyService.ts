@@ -414,7 +414,12 @@ function modernity(year: number): number {
   return clamp01((year - 1780) / 200);
 }
 
-function survivorshipAt(age: number, year: number): number {
+/**
+ * The fraction of a birth cohort still alive at `age`, for a cohort born in
+ * `year`. Exported because household generation needs the same curve: a child
+ * born in 1200 and a child born in 1975 do not face the same first year.
+ */
+export function survivorshipAt(age: number, year: number): number {
   const t = modernity(year);
   let i = 0;
   while (i < AGE_KNOTS.length - 2 && AGE_KNOTS[i + 1] < age) i += 1;

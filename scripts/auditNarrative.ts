@@ -359,6 +359,48 @@ const biographies: string[] = quiet(() =>
   });
 }
 
+// --- 12. Households -------------------------------------------------------
+{
+  const kids = (p: any) => (p.character.family ?? []).filter(
+    (f: any) => f.relation === 'son' || f.relation === 'daughter');
+
+  // A parent who would have been a child themselves at the birth.
+  const impossible: string[] = [];
+  // Two children of the same parents born in the same year, absent twins.
+  const collisions: string[] = [];
+  personas.forEach(p => {
+    const seen = new Map<number, number>();
+    kids(p).forEach((c: any) => {
+      const ageAtBirth = p.character.age - (p.year - (c.birthYear ?? p.year));
+      if (ageAtBirth < 12) impossible.push(`${p.character.name} at ${ageAtBirth}`);
+      seen.set(c.birthYear, (seen.get(c.birthYear) ?? 0) + 1);
+    });
+    [...seen.values()].filter(n => n > 2).forEach(() =>
+      collisions.push(String(p.character.name)));
+  });
+
+  // Child mortality has to be visible in the pre-modern corpus. Its absence is
+  // the whole reason householdService exists, so it is worth asserting.
+  const early = personas.filter(p => p.year < 1700);
+  const earlyBirths = early.flatMap(kids);
+  const earlyDeaths = earlyBirths.filter((c: any) => c.isDeceased);
+  const deathShare = earlyBirths.length > 0 ? earlyDeaths.length / earlyBirths.length : 0;
+
+  const modern = personas.filter(p => p.year >= 1960).flatMap(kids);
+  const modernShare = modern.length > 0
+    ? modern.filter((c: any) => c.isDeceased).length / modern.length : 0;
+
+  add({
+    name: 'household',
+    invariant: 'Children are spaced, possible, and buried at a rate their century would recognise',
+    measured: `${impossible.length} impossible births, ${collisions.length} birth-year pileups, `
+      + `${(deathShare * 100).toFixed(0)}% of pre-1700 children died, ${(modernShare * 100).toFixed(0)}% after 1960`,
+    passed: impossible.length === 0 && collisions.length === 0
+      && deathShare > 0.25 && deathShare < 0.6 && modernShare < 0.25,
+    detail: [...impossible.slice(0, 5), ...collisions.slice(0, 3)],
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Report
 // ---------------------------------------------------------------------------
