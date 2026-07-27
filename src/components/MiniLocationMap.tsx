@@ -205,10 +205,34 @@ const normalizeRegionKey = (value?: string): string =>
     .trim()
     .toLowerCase();
 
+/**
+ * Region names are unique within a continent but not across them: "Atlantic
+ * Coast" is both the Chesapeake-to-Cape-Cod seaboard and the Rio–Bahia coast of
+ * Brazil. `regionCoordinates` can only hold one of the two, so a persona from
+ * the Pine Barrens was pinned on Brazil. Continent-qualified keys are checked
+ * before the bare name; anything unambiguous needs no entry here.
+ */
+const CONTINENT_QUALIFIED_COORDINATES: Array<{
+  zone: RegExp;
+  region: string;
+  coords: [number, number];
+}> = [
+  // Chesapeake to Cape Cod, not Rio to Bahia.
+  { zone: /north american/, region: 'atlantic coast', coords: [-75, 39] },
+  { zone: /south american/, region: 'atlantic coast', coords: [-45, -20] },
+];
+
 const MiniLocationMap: React.FC<MiniLocationMapProps> = ({ continent, region }) => {
   const playerCoords = useMemo(() => {
     const normalizedRegion = normalizeRegionKey(region);
     const normalizedContinent = normalizeRegionKey(continent);
+
+    const qualified = CONTINENT_QUALIFIED_COORDINATES.find(
+      entry => entry.region === normalizedRegion && entry.zone.test(normalizedContinent)
+    );
+    if (qualified) {
+      return qualified.coords;
+    }
 
     // First try exact match
     if (regionCoordinates[region]) {

@@ -4169,9 +4169,30 @@ export default function PersonaGenerator() {
 
       <div className="controls" role="region" aria-label="Persona generation controls">
         <div className="control-buttons">
-          <button className="btn btn-primary generation-random-button" onClick={generateCompletelyRandom} aria-label="Generate a random historical persona">
+          {/* The primary action is the fast, local, procedural persona — the same
+              one the landing page shows. Sending every click to the language
+              model made the default path slow, non-deterministic and dependent
+              on an API key, and gave a first-time visitor no way back to the
+              procedural text they had just been looking at. Enrichment is now
+              its own deliberate choice. */}
+          <button
+            className="btn btn-primary generation-random-button"
+            onClick={generateProceduralOnly}
+            disabled={isSourceGenerating}
+            aria-label="Generate a random historical persona"
+          >
             <IoShuffle aria-hidden="true" />
-            {isSourceGenerating ? 'Generating Schema...' : 'Generate Random Persona'}
+            Generate Random Persona
+          </button>
+          <button
+            className="btn btn-secondary generation-ai-button"
+            onClick={generateCompletelyRandom}
+            disabled={isSourceGenerating}
+            title="Generate a persona and have a language model expand it into a fuller narrative. Slower, and needs an API key."
+            aria-label="Generate a persona and develop it with AI"
+          >
+            <IoSparkles aria-hidden="true" />
+            {isSourceGenerating ? 'Developing…' : 'Use AI to Develop Persona'}
           </button>
           <div className="sampling-mode" role="group" aria-label="How personas are sampled">
             <button
@@ -4788,7 +4809,7 @@ export default function PersonaGenerator() {
                       ) : (
                         <PixelPortrait
                           character={persona.character}
-                          size={192}
+                          size={232}
                           temporaryExpression={mainPortraitHoverExpression}
                         />
                       )}

@@ -524,6 +524,24 @@ body.dark-mode .top-bar {
   box-shadow: 0 5px 16px color-mix(in srgb, var(--color-accent-primary) 18%, transparent);
 }
 
+/* The AI path sits beside the primary action rather than replacing it: same
+   height so the pair reads as one control group, quieter fill so the fast
+   local generation stays the obvious default. */
+.generation-ai-button {
+  min-height: 2.85rem;
+  padding-inline: 1.1rem;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.generation-ai-button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
 .source-ingestion-panel,
 .source-ingestion-panel-collapsed {
   padding: 0;
@@ -2057,11 +2075,14 @@ body.dark-mode .disclaimer-box {
   letter-spacing: 0.095em;
 }
 
+/* Unframed. The portrait already carries its own painted border and vignette,
+   so a card border around it read as a frame inside a frame and cost the image
+   width it could use instead. */
 .portrait-container {
-  border: 1px solid var(--color-border);
-  border-radius: 3px;
-  background: var(--color-surface);
-  padding: 0.65rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.15rem 0;
 }
 
 .appearance-content {
@@ -2725,15 +2746,21 @@ body.dark-mode .area-pill {
 .portrait-container {
   display: flex;
   justify-content: center;
-  background: var(--color-bg);
-  border: 2px solid var(--color-border);
-  padding: var(--sp-lg);
-  border-radius: 4px;
+  background: transparent;
+  border: 0;
+  padding: 0.15rem 0;
+  border-radius: 0;
 }
 
 .portrait-container canvas {
-  border: 3px solid var(--color-accent-primary);
+  border: 0;
   border-radius: 2px;
+  /* Fill the column rather than sitting at a fixed pixel size inside it, and
+     keep the pixel grid crisp when it scales. */
+  width: 100%;
+  height: auto;
+  max-width: 232px;
+  image-rendering: pixelated;
 }
 
 .appearance-text {
