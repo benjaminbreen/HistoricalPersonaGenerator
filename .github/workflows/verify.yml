@@ -1,0 +1,47 @@
+# Everything this runs already existed as an npm script; nothing ran it
+# automatically. A safety net nobody is obliged to use decays into a safety net
+# that does not work, and this repo has the evidence: persona generation lost
+# determinism twice between commits that each passed locally.
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+
+      # Fails on type errors that are not already in scripts/typecheck-baseline.json.
+      - name: Type ratchet
+        run: npm run typecheck:ratchet
+
+      # 69 pinned personas. Also fails if generation makes an un-seeded draw.
+      - name: Golden personas
+        run: npm run golden:verify
+
+      - name: Narrative invariants
+        run: npm run narrative-audit
+
+      - name: Historical generation audit
+        run: npm run persona-audit
+
+      - name: Portrait audit
+        run: npm run portrait-audit
+
+      # Reports the remaining coarse-bucket risks. Informational: these are
+      # judgement calls about history, not defects a machine can settle.
+      - name: Anachronism risk (report only)
+        run: npm run anachronism-audit
+        continue-on-error: true
+
+      - name: Build
+        run: npm run build

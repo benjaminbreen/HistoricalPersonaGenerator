@@ -15,6 +15,7 @@ import {
   FamilyMember
 } from '../../types';
 import { filterByCulture, resolveCulture } from '../../services/cultureResolution';
+import { hasCapability, type CapabilityContext, type SocietyCapability } from '../societyCapabilities';
 import { withIndefiniteArticle } from '../../services/narrativeTextService';
 import { random as seededRandom } from '../../utils/seededRandom';
 
@@ -1652,9 +1653,19 @@ export function generateLifeHistory(
     const currentCount = eventKindCounts.get(templateId) || 0;
     eventKindCounts.set(templateId, currentCount + 1);
 
-    // Select random title and template
+    // Select random title and template, keeping only the variants this society
+    // could actually live out.
     const title = selectedTemplate.titles[Math.floor(seededRandom() * selectedTemplate.titles.length)];
-    let text = selectedTemplate.templates[Math.floor(seededRandom() * selectedTemplate.templates.length)];
+    const capabilityCtx: CapabilityContext = {
+      year: eventYear,
+      culturalZone,
+      placeLower: `${(character as { location?: string }).location ?? ''} ${(character as { region?: string }).region ?? ''}`.toLowerCase(),
+    };
+    const possible = selectedTemplate.templates.filter(variant => textIsPossible(variant, capabilityCtx));
+    // Nothing in this template fits the material culture: say nothing rather
+    // than say something impossible.
+    if (possible.length === 0) continue;
+    let text = possible[Math.floor(seededRandom() * possible.length)];
 
     // Replace placeholders with context-appropriate values
     text = replacePlaceholders(text, culturalZone, era, character, eventYear);
@@ -1805,6 +1816,44 @@ const DATED_CAUSE_BOUNDS: Array<[RegExp, [number, number]]> = [
   [/relocation/i, [1830, 1900]],
   [/murdered by settlers/i, [1500, 1920]],
 ];
+
+// ---------------------------------------------------------------------------
+// Material-culture screen for event text
+// ---------------------------------------------------------------------------
+
+/**
+ * Words that presuppose a technology or institution, and the capability each
+ * one needs.
+ *
+ * `societyCapabilities` already knows that a persona on the Kongo coast in
+ * 4344 BCE has no metallurgy, no draft animals and no coinage — the generated
+ * record carries an empty `technologies` array. Nothing consulted it when
+ * choosing event prose, so that persona's family "pooled their resources to
+ * purchase a new plow": three separate impossibilities in one clause.
+ *
+ * Screening the *text* rather than tagging each template is deliberate. There
+ * are hundreds of templates and the offending phrase is usually one variant
+ * among several, so a per-template flag would throw away good text along with
+ * bad. This drops the variant and keeps the rest.
+ */
+const CAPABILITY_VOCABULARY: Array<[RegExp, SocietyCapability]> = [
+  [/\bplou?gh|\bharness|\bcart\b|\bwagon|\boxen|\byoke/i, 'draft_animals'],
+  [/\bpurchase|\bbought\b|\bbuy\b|\bcoin|\bwage|\bprice[ds]?\b|\brent\b|\bdebt|\bloan|\bsold\b|\bsell\b/i, 'coinage'],
+  [/\bguild\b|\bapprentice(?:ship)?\b|\bjourneyman|\bmaster craftsman/i, 'guilds'],
+  [/\bread\b|\bwrit(?:e|ing|ten)\b|\bletters\b|\bscribe|\bbook|\bmanuscript|\bledger|\bcontract\b|\bdeed\b/i, 'writing'],
+  [/\bforge|\bsmith|\biron\b|\bsteel\b|\bbronze\b|\bblade\b|\bnail[s]?\b|\banvil/i, 'metallurgy'],
+  [/\binherit|\bestate\b|\bland (?:title|deed)|\bproperty\b|\bholding[s]?\b/i, 'heritable_land'],
+  [/\bcity\b|\btown\b|\bmarket square|\bquarter\b|\bward\b|\bcitizen/i, 'urban_settlement'],
+  [/\bharvest\b|\bfield[s]?\b|\bcrop|\bsow(?:ing|n)?\b|\bgranary|\bgrain store/i, 'settled_agriculture'],
+];
+
+/** Could this sentence be true of a society here, now? */
+function textIsPossible(text: string, ctx: CapabilityContext): boolean {
+  for (const [pattern, capability] of CAPABILITY_VOCABULARY) {
+    if (pattern.test(text) && !hasCapability(capability, ctx)) return false;
+  }
+  return true;
+}
 
 function replacePlaceholders(
   text: string,

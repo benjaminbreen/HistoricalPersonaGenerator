@@ -65,10 +65,29 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
 
+    /**
+     * Deep prehistory in the farming zones of East Asia — the Yellow and
+     * Yangtze basins and the southern coast.
+     *
+     * The steppe forms that used to sit at the head of this list (*Tengri,
+     * *Bayar, *Temür) belong to a different world and are now in
+     * PREHISTORIC_INNER_ASIAN: with both pooled together, a farmer on the
+     * Fujian coast in 7162 BCE could be called *Tengri, after a sky-god of the
+     * Turkic steppe two thousand miles north. The Sinitic entries are legendary
+     * and dynastic figures used as name-shaped forms; no personal name from
+     * this period is recoverable.
+     */
     PREHISTORIC_ASIAN: {
-        male: ['*Tengri', '*Bayar', '*Temür', '*Batu', '*Börte', 'Yao', 'Shun', 'Yu', 'Tang', 'Wu', 'Zhou', 'Fuxi', 'Shennong', 'Huangdi', 'Zhuanxu', 'Ku', 'Gun', 'Qi', 'Gao', 'Jie', 'Li', 'Pan', 'Geng', 'Xin'],
-        female: ['*Gua', '*Eke', '*Aba', 'Nüwa', 'Leizu', 'Luozu', 'Fufei', 'Ehuang', 'Nüying', 'Changxi', 'Xihe', 'Jiandi', 'Jiangyuan', 'Tushan', 'Nvjiao', 'Moxi', 'Baosi', 'Daji', 'Bao', 'Gui', 'Jiang', 'Ji'],
-        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
+        male: ['Yao', 'Shun', 'Yu', 'Tang', 'Wu', 'Zhou', 'Fuxi', 'Shennong', 'Huangdi', 'Zhuanxu', 'Ku', 'Gun', 'Qi', 'Gao', 'Jie', 'Li', 'Pan', 'Geng', 'Xin'],
+        female: ['Nüwa', 'Leizu', 'Luozu', 'Fufei', 'Ehuang', 'Nüying', 'Changxi', 'Xihe', 'Jiandi', 'Jiangyuan', 'Tushan', 'Nvjiao', 'Moxi', 'Baosi', 'Bao', 'Gui', 'Jiang', 'Ji'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
+    },
+
+    /** The steppe and forest belt: Mongolia, the Altai, Dzungaria, Siberia. */
+    PREHISTORIC_INNER_ASIAN: {
+        male: ['*Tengri', '*Bayar', '*Temür', '*Batu', '*Börte', '*Ulaan', '*Sartaq', '*Kül', '*Alan', '*Oroq'],
+        female: ['*Gua', '*Eke', '*Aba', '*Sarnai', '*Naran', '*Altan', '*Oyun', '*Chechek'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
     PREHISTORIC_AFRICAN: {
         // No personal names survive from Palaeolithic Africa. These are short,

@@ -55,10 +55,10 @@
       "backgroundBase": "#3f5a55"
     },
     "family": [
-      "father: Shun the Patient",
+      "father: Wu the Patient",
       "mother: Jiang",
-      "spouse: Nvjiao",
-      "son: Yu the Short"
+      "spouse: Moxi",
+      "son: Zhou the Short"
     ],
     "events": [
       "1266: Born in a small settlement to a Commoner family",
@@ -1041,7 +1041,7 @@
       "-2061: Learned to read weather signs and predict harvest yields from a parent",
       "-2047: Experimenting with a new plowing method led to a marked increase in field productivity",
       "-2039: Tragedy struck when a parent died from plague",
-      "-2017: The family pooled their resources to purchase a mill share, a significant investment",
+      "-2017: Inherited valuable tools and a workshop from a childless uncle",
       "-2014: A sister married into a well-connected warrior clan, improving the family's social standing"
     ]
   },
@@ -1076,7 +1076,7 @@
       "-2048: Trusted to tend livestock alone for the first time",
       "-2043: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "-2032: Father died from dysentery despite seeking help",
-      "-2025: The family pooled their resources to purchase a storage barn, a significant investment"
+      "-2025: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "indus-2000bce#3": {
@@ -1141,7 +1141,7 @@
     "events": [
       "1125: Born in a small settlement to a Merchant family",
       "1139: Learned to read weather signs and predict harvest yields from a parent",
-      "1158: The family pooled their resources to purchase a mill share, a significant investment",
+      "1158: Inherited valuable tools and a workshop from a childless uncle",
       "1169: Inherited responsibility for family fishing grounds",
       "1169: Mother died from dysentery, leaving the household in grief",
       "1171: Became the first in the village to successfully grow sugarcane, earning respect from neighbors",
@@ -1178,7 +1178,7 @@
       "1160: Born in a small settlement to a Commoner family",
       "1173: Trusted to tend livestock alone for the first time",
       "1178: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1184: The family pooled their resources to purchase a storage barn, a significant investment",
+      "1184: Inherited valuable tools and a workshop from a childless uncle",
       "1186: Hosted important feast, strengthening clan ties",
       "1195: The family lost their father when he was killed in tribal warfare"
     ]
@@ -1245,7 +1245,7 @@
     "events": [
       "1125: Born in a small settlement to a Merchant family",
       "1139: Learned to read weather signs and predict harvest yields from a parent",
-      "1158: The family pooled their resources to purchase a mill share, a significant investment",
+      "1158: Inherited valuable tools and a workshop from a childless uncle",
       "1169: Inherited responsibility for family fishing grounds",
       "1169: Mother died from dysentery, leaving the household in grief",
       "1171: Became the first in the village to successfully grow sugarcane, earning respect from neighbors",
@@ -1283,7 +1283,7 @@
       "1152: Trusted to tend livestock alone for the first time",
       "1159: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1169: Mother died from dysentery, leaving the household in grief",
-      "1170: The family pooled their resources to purchase a storage barn, a significant investment",
+      "1170: Inherited valuable tools and a workshop from a childless uncle",
       "1172: Hosted important feast, strengthening clan ties"
     ]
   },
@@ -1351,7 +1351,7 @@
       "1455: Mother died from childbirth complications, and the family faced new responsibilities",
       "1460: Took over the family business after a parent retired from active work",
       "1466: Learned healing songs from village shaman",
-      "1470: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "1470: Experimenting with a new plowing method led to a marked increase in field productivity",
       "1496: A sister married into a well-connected noble panaca, improving the family's social standing"
     ]
   },
@@ -1384,7 +1384,7 @@
     "events": [
       "1460: Born in a small settlement to a Commoner family",
       "1473: Trusted to tend livestock alone for the first time",
-      "1480: The family pooled their resources to purchase a new plow, a significant investment",
+      "1480: Inherited valuable tools and a workshop from a childless uncle",
       "1490: Made offering to mountain apu for good harvest",
       "1498: A brother's marriage brought valuable new trade connections and opportunities"
     ]
@@ -1418,7 +1418,7 @@
       "1495: Helped with the harvest for the first season and proved capable despite a young age",
       "1496: Participated in Inti Raymi sun ceremony",
       "1497: A brother's marriage brought valuable new trade connections and opportunities",
-      "1499: Inherited valuable tools and a workshop from a childless uncle"
+      "1499: Took over the family business after a parent retired from active work"
     ]
   },
   "southwest-1200#1": {
@@ -1519,7 +1519,7 @@
     "events": [
       "1148: Born in a small settlement to a Peasant family",
       "1163: Helped with the harvest for the first season and proved capable despite a young age",
-      "1185: The family pooled their resources to purchase draft animals, a significant investment",
+      "1185: Inherited valuable tools and a workshop from a childless uncle",
       "1185: The family lost their mother when she died from childbirth complications",
       "1192: A brother's marriage brought valuable new trade connections and opportunities",
       "1194: Selected as keeper of sacred bundle",
@@ -2330,6 +2330,4035 @@
       "2004: Began learning the trade of real estate agent from an experienced practitioner",
       "2007: Inherited valuable tools and a workshop from a childless uncle",
       "2009: A brother's marriage brought valuable new trade connections and opportunities"
+    ]
+  },
+  "kazakh-steppe-636bce#1": {
+    "name": "*Oyun the Quiet",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Silk Weaver",
+    "religion": "Tengrism",
+    "language": "Avestan (attested)",
+    "languageBasis": "ca-old-iranian",
+    "languageConfidence": "attested",
+    "odds": "antiquity in East Asia",
+    "head": "Green Silk Headband [Silk]",
+    "torso": "Yellow Brocade Overrobe [Brocade]",
+    "feet": "Green Embroidered Silk Shoes [Silk]",
+    "portrait": {
+      "headwearKind": "band",
+      "headwearColor": "#8c6a7a",
+      "garmentKind": "robe",
+      "garmentColor": "#c9a227",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: *Ulaan",
+      "mother: *Eke",
+      "spouse: *Bayar",
+      "son: *Ulaan"
+    ],
+    "events": [
+      "-711: Born in a small settlement to a Commoner family",
+      "-697: Taken as apprentice by renowned silk weaver, bound for seven years",
+      "-681: Took over the family business after a parent retired from active work",
+      "-676: Mother died from plague, leaving the household in grief",
+      "-653: Arranged favorable marriage for younger sister",
+      "-650: A sister married into a well-connected merchant consortium, improving the family's social standing",
+      "-640: Achieved master status, allowed to take apprentices"
+    ]
+  },
+  "kazakh-steppe-636bce#2": {
+    "name": "*Temür",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Bamboo Worker",
+    "religion": "Tengrism",
+    "language": "Old Iranian dialects (reconstructed)",
+    "languageBasis": "ca-old-iranian",
+    "languageConfidence": "reconstructed",
+    "odds": "antiquity in East Asia",
+    "head": null,
+    "torso": "Woad Merchant Robe [Quality Cotton]",
+    "feet": "Leather Boots [Good Leather]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "robe",
+      "garmentColor": "#33456b",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: *Sartaq the Patient",
+      "mother: *Altan",
+      "spouse: *Naran the Swift",
+      "son: *Tengri"
+    ],
+    "events": [
+      "-676: Born in a small settlement to a Commoner family",
+      "-664: Began learning the trade of bamboo worker from an experienced practitioner",
+      "-660: A sister married into a well-connected merchant consortium, improving the family's social standing",
+      "-657: Took over the family business after a parent retired from active work",
+      "-649: Mother died from plague, leaving the household in grief",
+      "-644: Returned home to care for aging parents"
+    ]
+  },
+  "kazakh-steppe-636bce#3": {
+    "name": "*Temür",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Herder",
+    "religion": "Shamanism",
+    "language": "Avestan (attested)",
+    "languageBasis": "ca-old-iranian",
+    "languageConfidence": "attested",
+    "odds": "antiquity in East Asia",
+    "head": "Li [Rice Straw]",
+    "torso": "Crimson Hemp Robe [Rough Hemp]",
+    "feet": "White Hemp Sandals [Hemp Cloth]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c2a463",
+      "garmentKind": "robe",
+      "garmentColor": "#7d2b26",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: *Tengri",
+      "mother: *Oyun"
+    ],
+    "events": [
+      "-656: Born in a small settlement to a Peasant family",
+      "-641: Helped with the harvest for the first season and proved capable despite a young age",
+      "-638: Inherited valuable tools and a workshop from a childless uncle",
+      "-637: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "fujian-7000bce#1": {
+    "name": "Nüwa",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Ancestor Worship",
+    "language": "Amur forager (hypothetical)",
+    "languageBasis": "ea-early",
+    "languageConfidence": "conjectural",
+    "odds": "prehistory in East Asia",
+    "head": null,
+    "torso": "Hide Cloak [Animal Fur]",
+    "feet": "Walnut Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "jacket",
+      "garmentColor": "#8b7358",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: Ku",
+      "mother: Ji"
+    ],
+    "events": [
+      "-7075: Born in a small settlement to a Commoner family",
+      "-7061: Learned to read weather signs and predict harvest yields from a parent",
+      "-7047: Became the first in the village to successfully grow maize, earning respect from neighbors",
+      "-7040: Mother died from typhoid fever, leaving the household in grief",
+      "-7017: Arranged favorable marriage for younger sister",
+      "-7014: A sister married into a well-connected merchant consortium, improving the family's social standing",
+      "-7004: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "fujian-7000bce#2": {
+    "name": "Zhou",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Herder",
+    "religion": "Local Beliefs",
+    "language": "Pre-Hmong-Mien (hypothetical)",
+    "languageBasis": "ea-early",
+    "languageConfidence": "conjectural",
+    "odds": "prehistory in East Asia",
+    "head": null,
+    "torso": "Hide Wrap [Animal Hide]",
+    "feet": "Natural Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#6b482f",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: Wu the Patient",
+      "mother: Jiang",
+      "spouse: Gui",
+      "daughter: Tushan"
+    ],
+    "events": [
+      "-7040: Born in a small settlement to a Peasant family",
+      "-7027: Trusted to tend livestock alone for the first time",
+      "-7023: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "-7013: Took over the family business after a parent retired from active work",
+      "-7007: Returned home to care for aging parents"
+    ]
+  },
+  "fujian-7000bce#3": {
+    "name": "Yu",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Herder",
+    "religion": "Ancestor Worship",
+    "language": "Amur forager (hypothetical)",
+    "languageBasis": "ea-early",
+    "languageConfidence": "conjectural",
+    "odds": "prehistory in East Asia",
+    "head": "Douli [Bamboo Strips]",
+    "torso": "Hide Wrap [Animal Hide]",
+    "feet": "Natural Barefoot [None]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c0a566",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#6b482f",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: Xin",
+      "mother: Nüwa",
+      "sister: Nüwa",
+      "spouse: Baosi"
+    ],
+    "events": [
+      "-7020: Born in a small settlement to a Peasant family",
+      "-7005: Helped with the harvest for the first season and proved capable despite a young age",
+      "-7002: Took over the family business after a parent retired from active work",
+      "-7001: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "korea-1400#1": {
+    "name": "Hye-jin Ahn",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Rice Farmer",
+    "religion": "Buddhism",
+    "language": "Korean",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in East Asia",
+    "head": "White Silk Headband [Silk]",
+    "torso": "White Silk Gown [Damask Silk]",
+    "feet": "White Embroidered Silk Shoes [Silk]",
+    "portrait": {
+      "headwearKind": "band",
+      "headwearColor": "#8c6a7a",
+      "garmentKind": "gown",
+      "garmentColor": "#ece5d6",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: Chan-ho Ahn",
+      "mother: Yoo-jin Jang"
+    ],
+    "events": [
+      "1325: Born in a small settlement to a Commoner family",
+      "1339: Learned to read weather signs and predict harvest yields from a parent",
+      "1342: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1355: With the help of extended family, cleared new land for cultivation",
+      "1358: Returned home to care for aging parents",
+      "1360: Inherited valuable tools and a workshop from a childless uncle",
+      "1369: The family lost their mother when she died from childbirth complications",
+      "1379: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "korea-1400#2": {
+    "name": "Seo-jun Nam",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Rice Farmer",
+    "religion": "Buddhism",
+    "language": "Korean",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in East Asia",
+    "head": "Silver Scholar Hat [Black Silk]",
+    "torso": "Crimson Brocade Jacket [Silk Brocade]",
+    "feet": "Silver Silk Shoes [Embroidered Silk]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#8c6a7a",
+      "garmentKind": "jacket",
+      "garmentColor": "#7d2b26",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: Dong-hyun Nam",
+      "mother: Mi-young Shim",
+      "spouse: Bo-ram Min",
+      "daughter: Mi-young Go"
+    ],
+    "events": [
+      "1360: Born in a small settlement to a Commoner family",
+      "1372: Learned to read weather signs and predict harvest yields from a parent",
+      "1380: A brother's marriage brought valuable new trade connections and opportunities",
+      "1382: A terrible blight spread through the rice crop, ruining the harvest and making for a lean winter",
+      "1386: The family lost their father when he died from smallpox",
+      "1391: Arranged favorable marriage for younger sister",
+      "1398: The family pooled their resources to purchase a market stall, a significant investment",
+      "1399: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit"
+    ]
+  },
+  "korea-1400#3": {
+    "name": "Min-jun Ryu",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Rice Farmer",
+    "religion": "Confucianism",
+    "language": "Korean",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in East Asia",
+    "head": "Woven Sun Hat [Straw]",
+    "torso": "Yellow Cotton Jacket [Coarse Cotton]",
+    "feet": "Straw Sandals [Woven Straw]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c2a463",
+      "garmentKind": "jacket",
+      "garmentColor": "#c9a227",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: Do-yun Ryu",
+      "mother: Seo-hyun Park"
+    ],
+    "events": [
+      "1380: Born in a small settlement to a Peasant family",
+      "1395: Helped with the harvest for the first season and proved capable despite a young age",
+      "1396: A sister married into a well-connected merchant consortium, improving the family's social standing",
+      "1397: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "1398: Took over the family business after a parent retired from active work",
+      "1399: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
+    ]
+  },
+  "mongolia-1250#1": {
+    "name": "Uyanga of the Red Deer clan",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Tengrism",
+    "language": "Middle Mongolian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in East Asia",
+    "head": "Gilt Hairpin Set [Gilt Silver]",
+    "torso": "White Silk Gown [Damask Silk]",
+    "feet": "Green Embroidered Silk Shoes [Silk]",
+    "portrait": {
+      "headwearKind": "band",
+      "headwearColor": "#b9bcc2",
+      "garmentKind": "gown",
+      "garmentColor": "#ece5d6",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: Boroldai of the Red Deer clan",
+      "mother: Dokuz Khatun",
+      "spouse: Guyuk of the Silver Fox clan"
+    ],
+    "events": [
+      "1175: Born in a small settlement to a Merchant family",
+      "1189: Learned to read weather signs and predict harvest yields from a parent",
+      "1204: Arranged favorable marriage for younger sister",
+      "1207: The family pooled their resources to purchase a market stall, a significant investment",
+      "1210: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "1236: A sister married into a well-connected merchant consortium, improving the family's social standing"
+    ]
+  },
+  "mongolia-1250#2": {
+    "name": "Batmunkh",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Rice Farmer",
+    "religion": "Tengrism",
+    "language": "Middle Mongolian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in East Asia",
+    "head": "Silver Scholar Hat [Black Silk]",
+    "torso": "Green Brocade Jacket [Silk Brocade]",
+    "feet": "Silver Silk Shoes [Embroidered Silk]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#8c6a7a",
+      "garmentKind": "jacket",
+      "garmentColor": "#4a6b45",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: Enkhbayar",
+      "mother: Urantuya",
+      "spouse: Jargalmaa Zorigbat",
+      "daughter: Ankhbayar Gantulga"
+    ],
+    "events": [
+      "1210: Born in a small settlement to a Commoner family",
+      "1222: Learned to read weather signs and predict harvest yields from a parent",
+      "1230: A brother's marriage brought valuable new trade connections and opportunities",
+      "1232: A terrible blight spread through the rice crop, ruining the harvest and making for a lean winter",
+      "1236: The family lost their father when he died from smallpox",
+      "1241: Arranged favorable marriage for younger sister",
+      "1248: The family pooled their resources to purchase a market stall, a significant investment",
+      "1249: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit"
+    ]
+  },
+  "mongolia-1250#3": {
+    "name": "Chinbat Enkhbold",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Rice Farmer",
+    "religion": "Tibetan Buddhism",
+    "language": "Middle Mongolian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in East Asia",
+    "head": "Woven Sun Hat [Straw]",
+    "torso": "Crimson Cotton Jacket [Coarse Cotton]",
+    "feet": "Straw Sandals [Woven Straw]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c2a463",
+      "garmentKind": "jacket",
+      "garmentColor": "#7d2b26",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: Dolgorsuren Enkhbold",
+      "mother: Gereltuya Doljin",
+      "sister: Altantsetseg Enkhbold"
+    ],
+    "events": [
+      "1230: Born in a small settlement to a Peasant family",
+      "1245: Helped with the harvest for the first season and proved capable despite a young age",
+      "1246: A sister married into a well-connected merchant consortium, improving the family's social standing",
+      "1247: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "1248: Took over the family business after a parent retired from active work",
+      "1249: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
+    ]
+  },
+  "japan-1870#1": {
+    "name": "Sayuri Ito",
+    "gender": "Female",
+    "age": 80,
+    "profession": "Shepherd",
+    "religion": "Shinto",
+    "language": "Classical Chinese",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in East Asia",
+    "head": "Gilt Hairpin Set [Gilt Silver]",
+    "torso": "Slate Silk Gown [Damask Silk]",
+    "feet": "Platform Shoes [Silk and Wood]",
+    "portrait": {
+      "headwearKind": "band",
+      "headwearColor": "#b9bcc2",
+      "garmentKind": "gown",
+      "garmentColor": "#696969",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: Haru Ito",
+      "mother: Tomoko Watanabe"
+    ],
+    "events": [
+      "1790: Born in a small settlement to a Commoner family",
+      "1804: Learned to read weather signs and predict harvest yields from a parent",
+      "1819: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1825: Mother died from tuberculosis, leaving the household in grief",
+      "1852: Arranged favorable marriage for younger sister",
+      "1855: A sister married into a well-connected Buddhist monastery, improving the family's social standing",
+      "1865: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "japan-1870#2": {
+    "name": "Haru Ishikawa",
+    "gender": "Male",
+    "age": 44,
+    "profession": "Weaver",
+    "religion": "Shinto",
+    "language": "Classical Chinese",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in East Asia",
+    "head": "White Scholar Hat [Black Felt]",
+    "torso": "Navy Merchant Jacket [Cotton Brocade]",
+    "feet": "Leather Shoes [Quality Leather]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#6b6153",
+      "garmentKind": "jacket",
+      "garmentColor": "#000080",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: Ryuu Ishikawa",
+      "mother: Yoko Nakajima",
+      "spouse: Risa Matsumoto",
+      "son: Jiro the JAPANESE"
+    ],
+    "events": [
+      "1826: Born in a small settlement to a Commoner family",
+      "1839: Apprenticed to guild master, learning trade secrets",
+      "1852: The family pooled their resources to purchase draft animals, a significant investment",
+      "1861: A father's death changed everything for the household",
+      "1862: A brother's marriage brought valuable new trade connections and opportunities",
+      "1866: Performed ancestral rites as eldest son",
+      "1869: Admitted to the Weaver guild after presenting masterwork"
+    ]
+  },
+  "japan-1870#3": {
+    "name": "Osamu Fujita",
+    "gender": "Male",
+    "age": 21,
+    "profession": "Herder",
+    "religion": "Buddhism",
+    "language": "Classical Chinese",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in East Asia",
+    "head": "Bamboo Hat [Woven Bamboo]",
+    "torso": "Slate Cotton Robe [Plain Cotton]",
+    "feet": "White Cloth Shoes [Cotton Canvas]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c0a566",
+      "garmentKind": "robe",
+      "garmentColor": "#696969",
+      "backgroundBase": "#3f5a55"
+    },
+    "family": [
+      "father: Yuuki Fujita",
+      "mother: Reiko Matsumoto",
+      "brother: Osamu Fujita"
+    ],
+    "events": [
+      "1849: Born in a small settlement to a Peasant family",
+      "1864: Helped with the harvest for the first season and proved capable despite a young age",
+      "1868: Inherited valuable tools and a workshop from a childless uncle",
+      "1869: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "europe-8000bce#1": {
+    "name": "Tritogena the Quiet",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Animism",
+    "language": "Pre-Neolithic European (hypothetical)",
+    "languageBasis": "eu-forager",
+    "languageConfidence": "conjectural",
+    "odds": "prehistory in Europe",
+    "head": null,
+    "torso": "Skin Tunic [Hide and Sinew]",
+    "feet": "Decorated Boots [Dyed Leather]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#6b482f",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Wulkwowiros",
+      "mother: Awsosdota",
+      "spouse: Hrewiklewos",
+      "daughter: Aryona"
+    ],
+    "events": [
+      "-8075: Born to the band that ranged this country",
+      "-8061: Learned to read weather signs and predict harvest yields from a parent",
+      "-8058: An elder died, and with them went the knowledge of country nobody else held",
+      "-8056: Received the marks that say who this person is and who they may speak to",
+      "-8038: Walked with the band to the far camp, further than the children had ever been",
+      "-8023: Took a partner from a band met at the summer gathering",
+      "-8021: Learned the way to a spring that held water through the dry months",
+      "-8018: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring"
+    ]
+  },
+  "europe-8000bce#2": {
+    "name": "Hrewiklewos",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Herder",
+    "religion": "Animism",
+    "language": "Vasconic (hypothetical)",
+    "languageBasis": "eu-forager",
+    "languageConfidence": "conjectural",
+    "odds": "prehistory in Europe",
+    "head": null,
+    "torso": "Skin Cloak [Bear Fur]",
+    "feet": "Hide Boots [Mammoth Leather]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "jacket",
+      "garmentColor": "#8b7358",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Aryomon the Patient",
+      "mother: Sowlya",
+      "spouse: Tritogena",
+      "daughter: Gwenaregna"
+    ],
+    "events": [
+      "-8040: Born to the band that ranged this country",
+      "-8027: Trusted to tend livestock alone for the first time",
+      "-8020: An elder died, and with them went the knowledge of country nobody else held",
+      "-8014: Took a partner from a band met at the summer gathering",
+      "-8013: Learned the way to a spring that held water through the dry months",
+      "-8010: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-8008: A birth went wrong in the night, and by morning the camp was quieter by two",
+      "-8006: Fell badly on the rocks, and the leg never set straight"
+    ]
+  },
+  "europe-8000bce#3": {
+    "name": "Monyemos",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Herder",
+    "religion": "Shamanism",
+    "language": "Pre-Neolithic European (hypothetical)",
+    "languageBasis": "eu-forager",
+    "languageConfidence": "conjectural",
+    "odds": "prehistory in Europe",
+    "head": "Fur Cap [Rabbit Fur]",
+    "torso": "Hide Wrap [Deer Hide]",
+    "feet": "Foot Wraps [Reindeer Hide]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#8b7358",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#6b482f",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Aryomon",
+      "mother: Diwosdugater",
+      "sister: Awsosdota"
+    ],
+    "events": [
+      "-8020: Born to the band that ranged this country",
+      "-8014: The herds did not come that year, and the camp moved three times looking for them",
+      "-8012: Was caught by an animal that did not die quickly, and carried the scars afterwards",
+      "-8007: Was among the party that drove a herd into the narrows, and the band ate well for many days",
+      "-8005: Helped with the harvest for the first season and proved capable despite a young age",
+      "-8004: Walked with the band to the far camp, further than the children had ever been",
+      "-8003: Left the band of birth to live with another, as is the custom",
+      "-8002: An elder died, and with them went the knowledge of country nobody else held"
+    ]
+  },
+  "greece-430bce#1": {
+    "name": "Xanthippe daughter of Sokrates",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Local Beliefs",
+    "language": "Ancient Greek",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in Europe",
+    "head": "Dressed Hair With Gold Pins [Gold]",
+    "torso": "Cream Draped Palla [Imported Silk]",
+    "feet": "Soft Leather Slippers [Fine Leather]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "tunic",
+      "garmentColor": "#8d4d43",
+      "backgroundBase": "#5a876b"
+    },
+    "family": [
+      "father: Sokrates",
+      "mother: Myrrine"
+    ],
+    "events": [
+      "-505: Born in a small settlement to a Merchant family",
+      "-491: Learned to read weather signs and predict harvest yields from a parent",
+      "-483: After years of careful selection, successfully bred a hardier variety of wheat",
+      "-462: The family pooled their resources to purchase a market stall, a significant investment",
+      "-459: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "greece-430bce#2": {
+    "name": "Leon son of Xenophanes",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Farmer",
+    "religion": "Local Beliefs",
+    "language": "Ancient Greek",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in Europe",
+    "head": "Laurel Wreath [Bronze Leaves]",
+    "torso": "Ivory Garment [Plain Cloth]",
+    "feet": "Military Sandals [Studded Leather]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "tunic",
+      "garmentColor": "#9b805e",
+      "backgroundBase": "#5a8771"
+    },
+    "family": [
+      "father: Xenophanes son of Nikandros",
+      "mother: Phaedra daughter of Zenodoros",
+      "spouse: Lasthenia daughter of Kleomenes",
+      "son: Philippos the Short"
+    ],
+    "events": [
+      "-470: Born in a small settlement to a Commoner family",
+      "-457: Trusted to tend livestock alone for the first time",
+      "-452: A terrible blight spread through the rye crop, ruining the harvest and making for a lean winter",
+      "-445: Became the first in the village to successfully grow maize, earning respect from neighbors",
+      "-444: A brother's marriage brought valuable new trade connections and opportunities",
+      "-439: Mother died from childbirth complications, and the family faced new responsibilities",
+      "-435: The family pooled their resources to purchase a storage barn, a significant investment",
+      "-432: With the help of extended family, cleared new land for cultivation"
+    ]
+  },
+  "greece-430bce#3": {
+    "name": "Heron",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Farmer",
+    "religion": "Local Beliefs",
+    "language": "Ancient Greek",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in Europe",
+    "head": null,
+    "torso": "Ivory Loincloth [Hemp]",
+    "feet": "Leather Sandals [Cracked Leather]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "tunic",
+      "garmentColor": "#9b805e",
+      "backgroundBase": "#5a8770"
+    },
+    "family": [
+      "father: Leon the Swift",
+      "mother: Arete the Lean",
+      "sister: Phaedra daughter of Theophrastos",
+      "brother: Dionysios"
+    ],
+    "events": [
+      "-450: Born in a small settlement to a Peasant family",
+      "-435: Helped with the harvest for the first season and proved capable despite a young age",
+      "-434: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "-432: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "-431: Became the first in the village to successfully grow sugar beets, earning respect from neighbors"
+    ]
+  },
+  "rome-100#1": {
+    "name": "Aspasia of Thebes",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Roman Polytheism",
+    "language": "Latin",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in Europe",
+    "head": "Dressed Hair With Gold Pins [Gold]",
+    "torso": "Woad Draped Palla [Imported Silk]",
+    "feet": "Soft Leather Slippers [Fine Leather]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "tunic",
+      "garmentColor": "#8d4d43",
+      "backgroundBase": "#5a876b"
+    },
+    "family": [
+      "father: Lysander of Thebes",
+      "mother: Arete of Corinth"
+    ],
+    "events": [
+      "25: Born in a small settlement to a Merchant family",
+      "39: Learned to read weather signs and predict harvest yields from a parent",
+      "47: After years of careful selection, successfully bred a hardier variety of wheat",
+      "68: The family pooled their resources to purchase a market stall, a significant investment",
+      "71: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "rome-100#2": {
+    "name": "Gnaeus Julius",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Farmer",
+    "religion": "Roman Polytheism",
+    "language": "Latin",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in Europe",
+    "head": "Laurel Wreath [Bronze Leaves]",
+    "torso": "Madder Garment [Plain Cloth]",
+    "feet": "Military Sandals [Studded Leather]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "tunic",
+      "garmentColor": "#9b805e",
+      "backgroundBase": "#5a8771"
+    },
+    "family": [
+      "father: Publius Julius",
+      "mother: Horatia Vibius"
+    ],
+    "events": [
+      "60: Born in a small settlement to a Commoner family",
+      "73: Trusted to tend livestock alone for the first time",
+      "78: A terrible blight spread through the rye crop, ruining the harvest and making for a lean winter",
+      "85: Became the first in the village to successfully grow maize, earning respect from neighbors",
+      "86: A brother's marriage brought valuable new trade connections and opportunities",
+      "91: Mother died from childbirth complications, and the family faced new responsibilities",
+      "95: The family pooled their resources to purchase a storage barn, a significant investment",
+      "98: With the help of extended family, cleared new land for cultivation"
+    ]
+  },
+  "rome-100#3": {
+    "name": "Marcus Licinius",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Farmer",
+    "religion": "Early Christianity",
+    "language": "Latin",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in Europe",
+    "head": null,
+    "torso": "Ivory Loincloth [Hemp]",
+    "feet": "Leather Sandals [Cracked Leather]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "tunic",
+      "garmentColor": "#9b805e",
+      "backgroundBase": "#5a8770"
+    },
+    "family": [
+      "father: Volusus Licinius",
+      "mother: Cornelia Licinius",
+      "sister: Livia Licinius"
+    ],
+    "events": [
+      "80: Born in a small settlement to a Peasant family",
+      "95: Helped with the harvest for the first season and proved capable despite a young age",
+      "96: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "98: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "99: Became the first in the village to successfully grow sugar beets, earning respect from neighbors"
+    ]
+  },
+  "ireland-900#1": {
+    "name": "Sian Griffiths",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Wool Merchant",
+    "religion": "Roman Catholicism",
+    "language": "Old English",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in Europe",
+    "head": "White Hennin [Silk and Gems]",
+    "torso": "Noble Houppelande [Cloth of Gold]",
+    "feet": "White Silk Slippers [Embroidered Silk]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#8c6a7a",
+      "garmentKind": "robe",
+      "garmentColor": "#cfa044",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Ieuan son of Gwylim",
+      "mother: Ffion the Tall"
+    ],
+    "events": [
+      "825: Born in a small settlement to a Merchant family",
+      "839: Began managing family stall at market, handling coins and customers",
+      "853: Discovered untapped demand for wax in Rome",
+      "865: Lost an entire wax shipment to war near Venice, a devastating financial blow",
+      "878: Negotiated a lucrative contract with noble house for herring",
+      "892: Took over the family business after a parent retired from active work",
+      "896: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "899: Paid annual tribute to local lord"
+    ]
+  },
+  "ireland-900#2": {
+    "name": "Lars Hugosson",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Farmer",
+    "religion": "Roman Catholicism",
+    "language": "Old English",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in Europe",
+    "head": "Cream Felt Hat [Quality Felt]",
+    "torso": "Woad Craftsman Tunic [Fine Linen]",
+    "feet": "Pointed Shoes [Soft Leather]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#6b6153",
+      "garmentKind": "tunic",
+      "garmentColor": "#3f5378",
+      "backgroundBase": "#6a4a55"
+    },
+    "family": [
+      "father: Hugo Olofsson",
+      "mother: Lovisa Theosdotter",
+      "spouse: Alicia Noahsdotter",
+      "daughter: Lovisa Viktorsdotter"
+    ],
+    "events": [
+      "860: Born in a small settlement to a Commoner family",
+      "872: Learned to read weather signs and predict harvest yields from a parent",
+      "877: Became the first in the village to successfully grow potatoes, earning respect from neighbors",
+      "878: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "893: Mother died from ergot poisoning, leaving the household in grief",
+      "894: The family pooled their resources to purchase a storage barn, a significant investment",
+      "895: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "897: Summoned to lord's court as witness in land dispute"
+    ]
+  },
+  "ireland-900#3": {
+    "name": "Aethelstan the Watchful",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Farmer",
+    "religion": "Norse Paganism",
+    "language": "Old English",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in Europe",
+    "head": "Ivory Coif [Linen]",
+    "torso": "Woad Peasant Shirt [Hemp]",
+    "feet": "Wooden Clogs [Oak Wood]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#d9d0bb",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#3f5378",
+      "backgroundBase": "#6a4a55"
+    },
+    "family": [
+      "father: Godric son of Aethelred",
+      "mother: Eadgyth daughter of Wulfric",
+      "sister: Aelfgifu the Stout"
+    ],
+    "events": [
+      "880: Born in a small settlement to a Peasant family",
+      "895: Helped with the harvest for the first season and proved capable despite a young age",
+      "896: Became the first in the village to successfully grow tomatoes, earning respect from neighbors",
+      "897: A terrible blight spread through the barley crop, ruining the harvest and making for a lean winter",
+      "898: A brother's marriage brought valuable new trade connections and opportunities",
+      "899: Paid annual tribute to local lord"
+    ]
+  },
+  "iberia-1480#1": {
+    "name": "Zohra Zidane",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Tapestry Weaver",
+    "religion": "Roman Catholicism",
+    "language": "Old Spanish",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in Europe",
+    "head": "Yellow Jeweled Hood [Velvet and Gems]",
+    "torso": "Black Royal Robe [Ermine and Silk]",
+    "feet": "Golden Slippers [Gold and Silk]",
+    "portrait": {
+      "headwearKind": "hood",
+      "headwearColor": "#c9a227",
+      "garmentKind": "robe",
+      "garmentColor": "#1c1a19",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Mustapha Zidane",
+      "mother: Naima Zerhouni",
+      "spouse: Mehdi Zidane",
+      "son: Mourad son of Amine"
+    ],
+    "events": [
+      "1405: Born in a small settlement to a Commoner family",
+      "1419: Taken as apprentice by renowned tapestry weaver, bound for seven years",
+      "1427: A brother's marriage brought valuable new trade connections and opportunities",
+      "1446: Admitted to the Tapestry Weaver guild after presenting masterwork",
+      "1448: The family pooled their resources to purchase a market stall, a significant investment",
+      "1450: Paid annual tribute to local lord"
+    ]
+  },
+  "iberia-1480#2": {
+    "name": "António Teixeira",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Mercenary",
+    "religion": "Roman Catholicism",
+    "language": "Old Spanish",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in Europe",
+    "head": "White Merchant Cap [Velvet]",
+    "torso": "Purple Bourgeois Jerkin [Fine Linen]",
+    "feet": "Court Shoes [Fine Leather]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#f0e9d8",
+      "garmentKind": "doublet",
+      "garmentColor": "#6b2f52",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Rui Teixeira",
+      "mother: Alice the PORTUGUESE",
+      "spouse: Susana daughter of Fernando",
+      "daughter: Esperança Moreira"
+    ],
+    "events": [
+      "1440: Born in a small settlement to a Commoner family",
+      "1452: Sent to serve as squire, learning ways of war from veteran knight",
+      "1461: Required to provide labor for castle repairs",
+      "1468: Fought in siege of Vienna, surviving three assaults",
+      "1476: The family pooled their resources to purchase draft animals, a significant investment",
+      "1478: A brother's marriage brought valuable new trade connections and opportunities"
+    ]
+  },
+  "iberia-1480#3": {
+    "name": "Alejandro son of Joaquín",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Innkeeper",
+    "religion": "Sunni Islam",
+    "language": "Old Spanish",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in Europe",
+    "head": "Yellow Rush Hat [Woven Rushes]",
+    "torso": "Crimson Peasant Shirt [Coarse Linen]",
+    "feet": "Wooden Shoes [Oak]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c9a227",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#7d2b2e",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Joaquín Rodriguez",
+      "mother: Lucia Herrera",
+      "sister: Isabella daughter of Joaquín"
+    ],
+    "events": [
+      "1460: Born in a small settlement to a Peasant family",
+      "1475: Began learning the trade of innkeeper from an experienced practitioner",
+      "1476: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1477: Required to provide labor for castle repairs",
+      "1478: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "russia-1600#1": {
+    "name": "Lyubov Alekseev",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Eastern Orthodoxy",
+    "language": "Russian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in Europe",
+    "head": "Silver Jeweled Hood [Velvet and Gems]",
+    "torso": "Noble Farthingale [Gold Brocade]",
+    "feet": "Silver Court Shoes [Velvet and Pearls]",
+    "portrait": {
+      "headwearKind": "hood",
+      "headwearColor": "#b0b3ba",
+      "garmentKind": "gown",
+      "garmentColor": "#cfa044",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Artem Pavlov",
+      "mother: Nadezhda daughter of Andrei"
+    ],
+    "events": [
+      "1525: Born in a small settlement to a Merchant family",
+      "1539: Learned to read weather signs and predict harvest yields from a parent",
+      "1547: A brother's marriage brought valuable new trade connections and opportunities",
+      "1563: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "1568: The family pooled their resources to purchase a market stall, a significant investment",
+      "1570: Paid annual tribute to local lord"
+    ]
+  },
+  "russia-1600#2": {
+    "name": "Hendrik Janssen",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Mercenary",
+    "religion": "Eastern Orthodoxy",
+    "language": "Russian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in Europe",
+    "head": "Silver Felt Beret [Quality Felt]",
+    "torso": "Charcoal Bourgeois Jerkin [Fine Linen]",
+    "feet": "Court Shoes [Fine Leather]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#6b6153",
+      "garmentKind": "doublet",
+      "garmentColor": "#3f4a48",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Frederik Janssen",
+      "mother: Isabelle Lefevre"
+    ],
+    "events": [
+      "1560: Born in a small settlement to a Commoner family",
+      "1572: Sent to serve as squire, learning ways of war from veteran knight",
+      "1581: Required to provide labor for castle repairs",
+      "1588: Fought in siege of Vienna, surviving three assaults",
+      "1596: The family pooled their resources to purchase draft animals, a significant investment",
+      "1598: A brother's marriage brought valuable new trade connections and opportunities"
+    ]
+  },
+  "russia-1600#3": {
+    "name": "Alexei Orlov",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Innkeeper",
+    "religion": "Roman Catholicism",
+    "language": "Russian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in Europe",
+    "head": "Yellow Biggins [Rough Wool]",
+    "torso": "Crimson Peasant Shirt [Coarse Linen]",
+    "feet": "Wooden Shoes [Oak]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#6b6153",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#7d2b2e",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Boris Orlov",
+      "mother: Irina Volkov",
+      "sister: Olga Orlov"
+    ],
+    "events": [
+      "1580: Born in a small settlement to a Peasant family",
+      "1595: Began learning the trade of innkeeper from an experienced practitioner",
+      "1596: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1597: Required to provide labor for castle repairs",
+      "1598: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "lowcountries-1650#1": {
+    "name": "Mathilde Bonnet",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Protestantism",
+    "language": "Dutch",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in Europe",
+    "head": "Ducal Crown [Gold and Pearls]",
+    "torso": "Noble Farthingale [Gold Brocade]",
+    "feet": "Silver Court Shoes [Velvet and Pearls]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#cfa044",
+      "garmentKind": "gown",
+      "garmentColor": "#cfa044",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Paul Bonnet",
+      "mother: Céline Garcia"
+    ],
+    "events": [
+      "1575: Born in a small settlement to a Merchant family",
+      "1589: Learned to read weather signs and predict harvest yields from a parent",
+      "1597: A brother's marriage brought valuable new trade connections and opportunities",
+      "1613: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "1618: The family pooled their resources to purchase a market stall, a significant investment",
+      "1620: Paid annual tribute to local lord"
+    ]
+  },
+  "lowcountries-1650#2": {
+    "name": "Gerrit de Wit",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Mercenary",
+    "religion": "Protestantism",
+    "language": "Dutch",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in Europe",
+    "head": "White Felt Beret [Quality Felt]",
+    "torso": "Purple Bourgeois Jerkin [Fine Linen]",
+    "feet": "Court Shoes [Fine Leather]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#6b6153",
+      "garmentKind": "doublet",
+      "garmentColor": "#6b2f52",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Frederik de Wit",
+      "mother: Klasina de Wit",
+      "spouse: Leonarda Vermeulen",
+      "daughter: Dirkje Dijkstra"
+    ],
+    "events": [
+      "1610: Born in a small settlement to a Commoner family",
+      "1622: Sent to serve as squire, learning ways of war from veteran knight",
+      "1631: Required to provide labor for castle repairs",
+      "1638: Fought in siege of Vienna, surviving three assaults",
+      "1646: The family pooled their resources to purchase draft animals, a significant investment",
+      "1648: A brother's marriage brought valuable new trade connections and opportunities"
+    ]
+  },
+  "lowcountries-1650#3": {
+    "name": "Johannes de Wit",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Innkeeper",
+    "religion": "Roman Catholicism",
+    "language": "Dutch",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in Europe",
+    "head": "Yellow Biggins [Rough Wool]",
+    "torso": "Crimson Peasant Shirt [Coarse Linen]",
+    "feet": "Wooden Shoes [Oak]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#6b6153",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#7d2b2e",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Martinus de Wit",
+      "mother: Anna Janssen",
+      "sister: Maria de Wit"
+    ],
+    "events": [
+      "1630: Born in a small settlement to a Peasant family",
+      "1645: Began learning the trade of innkeeper from an experienced practitioner",
+      "1646: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1647: Required to provide labor for castle repairs",
+      "1648: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "germany-1930#1": {
+    "name": "Monika Hoffmann",
+    "gender": "Female",
+    "age": 81,
+    "profession": "Mechanic",
+    "religion": "Protestantism",
+    "language": "German",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the modern era in Europe",
+    "head": "Tan Feathered Headdress [Ostrich and Gems]",
+    "torso": "Charcoal Cocktail Dress [Beaded Silk]",
+    "feet": "Tan Satin Slippers [Silk Satin]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#c8ab86",
+      "garmentKind": "gown",
+      "garmentColor": "#33413f",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Wilhelm Hoffmann",
+      "mother: Gisela Schröder",
+      "spouse: Wolfgang Schneider"
+    ],
+    "events": [
+      "1849: Born in a small settlement to a Middle Class family",
+      "1863: Began learning the trade of mechanic from an experienced practitioner",
+      "1879: Inherited valuable tools and a workshop from a childless uncle",
+      "1921: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "germany-1930#2": {
+    "name": "Maximilian Schmitz",
+    "gender": "Male",
+    "age": 46,
+    "profession": "Dock Worker",
+    "religion": "Protestantism",
+    "language": "German",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the modern era in Europe",
+    "head": "Russet Fedora [Felt]",
+    "torso": "Indigo Cardigan [Wool]",
+    "feet": "Oxford Shoes [Quality Leather]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#6b6153",
+      "garmentKind": "jacket",
+      "garmentColor": "#2b3a5e",
+      "backgroundBase": "#6a4a53"
+    },
+    "family": [
+      "father: Peter Schmitz",
+      "mother: Ingrid Schröder"
+    ],
+    "events": [
+      "1884: Born in a small settlement to a Working Class family",
+      "1896: Began learning the trade of dock worker from an experienced practitioner",
+      "1910: A brother's marriage brought valuable new trade connections and opportunities",
+      "1914: Took over the family business after a parent retired from active work",
+      "1917: A father's death changed everything for the household"
+    ]
+  },
+  "germany-1930#3": {
+    "name": "Karl Braun",
+    "gender": "Male",
+    "age": 21,
+    "profession": "Postal Worker",
+    "religion": "Roman Catholicism",
+    "language": "German",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the modern era in Europe",
+    "head": "Blue Fedora [Felt]",
+    "torso": "Black Cardigan [Wool]",
+    "feet": "Dress Shoes [Polished Leather]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#6b6153",
+      "garmentKind": "jacket",
+      "garmentColor": "#1c1a19",
+      "backgroundBase": "#4a5a6a"
+    },
+    "family": [
+      "father: Florian Braun",
+      "mother: Gertrude Zimmermann"
+    ],
+    "events": [
+      "1909: Born in a small settlement to a Working Class family",
+      "1924: Began learning the trade of postal worker from an experienced practitioner",
+      "1927: Inherited valuable tools and a workshop from a childless uncle",
+      "1929: A brother's marriage brought valuable new trade connections and opportunities"
+    ]
+  },
+  "egypt-1350bce#1": {
+    "name": "Neithhotep",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Farmer",
+    "religion": "Local Beliefs",
+    "language": "Ancient Egyptian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Yellow Jeweled Veil [Silk and Gems]",
+    "torso": "Natural Persian Gown [Silk and Pearls]",
+    "feet": "Golden Slippers [Gold and Silk]",
+    "portrait": {
+      "headwearKind": "veil",
+      "headwearColor": "#8c6a7a",
+      "garmentKind": "gown",
+      "garmentColor": "#cbb493",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Hierakonpolis",
+      "mother: Khenthap",
+      "spouse: Khenti",
+      "daughter: Nakhtneith"
+    ],
+    "events": [
+      "-1425: Born in a small settlement to a Commoner family",
+      "-1411: Learned to read weather signs and predict harvest yields from a parent",
+      "-1399: With the help of extended family, cleared new land for cultivation",
+      "-1383: Mother died from plague, leaving the household in grief",
+      "-1370: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "-1367: Inherited valuable tools and a workshop from a childless uncle",
+      "-1353: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
+      "-1351: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "egypt-1350bce#2": {
+    "name": "Merimde",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Farmer",
+    "religion": "Local Beliefs",
+    "language": "Ancient Egyptian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Indigo Turban [Silk and Linen]",
+    "torso": "Brown Linen Robe [Fine Linen]",
+    "feet": "Leather Sandals [Quality Leather]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#d9d0bb",
+      "garmentKind": "robe",
+      "garmentColor": "#7a5433",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Menes",
+      "mother: Ahhotep",
+      "spouse: Neithhotep"
+    ],
+    "events": [
+      "-1390: Born in a small settlement to a Commoner family",
+      "-1378: Learned to read weather signs and predict harvest yields from a parent",
+      "-1373: Became the first in the village to successfully grow sugarcane, earning respect from neighbors",
+      "-1365: A terrible blight spread through the olives crop, ruining the harvest and making for a lean winter",
+      "-1353: Took over the family business after a parent retired from active work",
+      "-1352: With the help of extended family, cleared new land for cultivation",
+      "-1351: A sister married into a well-connected tribal confederation, improving the family's social standing"
+    ]
+  },
+  "egypt-1350bce#3": {
+    "name": "Atum",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Farmer",
+    "religion": "Ancestor Worship",
+    "language": "Ancient Egyptian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Indigo Head Cloth [Linen]",
+    "torso": "Charcoal Linen Tunic [Coarse Linen]",
+    "feet": "Reed Sandals [Woven Reed]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#d9d0bb",
+      "garmentKind": "tunic",
+      "garmentColor": "#3a4a48",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Fayum",
+      "mother: Betresh the Red",
+      "brother: Iry-Hor",
+      "brother: Naqada"
+    ],
+    "events": [
+      "-1370: Born in a small settlement to a Peasant family",
+      "-1355: Helped with the harvest for the first season and proved capable despite a young age",
+      "-1354: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "-1352: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "-1351: Became the first in the village to successfully grow citrus, earning respect from neighbors"
+    ]
+  },
+  "mesopotamia-1750bce#1": {
+    "name": "Inanna",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Farmer",
+    "religion": "Local Beliefs",
+    "language": "Sumerian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Yellow Jeweled Veil [Silk and Gems]",
+    "torso": "Natural Persian Gown [Silk and Pearls]",
+    "feet": "Golden Slippers [Gold and Silk]",
+    "portrait": {
+      "headwearKind": "veil",
+      "headwearColor": "#8c6a7a",
+      "garmentKind": "gown",
+      "garmentColor": "#cbb493",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Nabu",
+      "mother: Ninisina",
+      "spouse: Hammurabi",
+      "daughter: Bau"
+    ],
+    "events": [
+      "-1825: Born in a small settlement to a Commoner family",
+      "-1811: Learned to read weather signs and predict harvest yields from a parent",
+      "-1799: With the help of extended family, cleared new land for cultivation",
+      "-1783: Mother died from plague, leaving the household in grief",
+      "-1770: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "-1767: Inherited valuable tools and a workshop from a childless uncle",
+      "-1753: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
+      "-1751: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "mesopotamia-1750bce#2": {
+    "name": "Adad",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Farmer",
+    "religion": "Local Beliefs",
+    "language": "Sumerian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Indigo Turban [Silk and Linen]",
+    "torso": "Brown Linen Robe [Fine Linen]",
+    "feet": "Leather Sandals [Quality Leather]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#d9d0bb",
+      "garmentKind": "robe",
+      "garmentColor": "#7a5433",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Ashurbanipal",
+      "mother: Aya",
+      "spouse: Ishtar"
+    ],
+    "events": [
+      "-1790: Born in a small settlement to a Commoner family",
+      "-1778: Learned to read weather signs and predict harvest yields from a parent",
+      "-1773: Became the first in the village to successfully grow sugarcane, earning respect from neighbors",
+      "-1765: A terrible blight spread through the olives crop, ruining the harvest and making for a lean winter",
+      "-1753: Took over the family business after a parent retired from active work",
+      "-1752: With the help of extended family, cleared new land for cultivation",
+      "-1751: A sister married into a well-connected tribal confederation, improving the family's social standing"
+    ]
+  },
+  "mesopotamia-1750bce#3": {
+    "name": "Sargon",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Farmer",
+    "religion": "Ancestor Worship",
+    "language": "Akkadian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Indigo Head Cloth [Linen]",
+    "torso": "Charcoal Linen Tunic [Coarse Linen]",
+    "feet": "Reed Sandals [Woven Reed]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#d9d0bb",
+      "garmentKind": "tunic",
+      "garmentColor": "#3a4a48",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Enkidu",
+      "mother: Ninegal the Red",
+      "brother: Marduk",
+      "brother: Nabu"
+    ],
+    "events": [
+      "-1770: Born in a small settlement to a Peasant family",
+      "-1755: Helped with the harvest for the first season and proved capable despite a young age",
+      "-1754: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "-1752: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "-1751: Became the first in the village to successfully grow citrus, earning respect from neighbors"
+    ]
+  },
+  "persia-500bce#1": {
+    "name": "Olympias the Quiet",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Farmer",
+    "religion": "Zoroastrianism",
+    "language": "Old Persian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Green Jeweled Veil [Silk and Gems]",
+    "torso": "Ivory Persian Gown [Silk and Pearls]",
+    "feet": "Golden Slippers [Gold and Silk]",
+    "portrait": {
+      "headwearKind": "veil",
+      "headwearColor": "#8c6a7a",
+      "garmentKind": "gown",
+      "garmentColor": "#e6dcc2",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Xerxes son of Hystaspes",
+      "mother: Stateira"
+    ],
+    "events": [
+      "-575: Born in a small settlement to a Commoner family",
+      "-561: Learned to read weather signs and predict harvest yields from a parent",
+      "-549: Purchased the neighbor's plot after they decided to seek fortune in the city",
+      "-533: Mother died from plague, leaving the household in grief",
+      "-520: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "-517: Inherited valuable tools and a workshop from a childless uncle",
+      "-503: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
+      "-501: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "persia-500bce#2": {
+    "name": "Cyrus son of Cyrus",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Farmer",
+    "religion": "Zoroastrianism",
+    "language": "Old Persian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Indigo Turban [Silk and Linen]",
+    "torso": "Brown Linen Robe [Fine Linen]",
+    "feet": "Leather Sandals [Quality Leather]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#d9d0bb",
+      "garmentKind": "robe",
+      "garmentColor": "#7a5433",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Cyrus",
+      "mother: Thessalonica"
+    ],
+    "events": [
+      "-540: Born in a small settlement to a Commoner family",
+      "-528: Learned to read weather signs and predict harvest yields from a parent",
+      "-523: Became the first in the village to successfully grow sugarcane, earning respect from neighbors",
+      "-515: A terrible blight spread through the olives crop, ruining the harvest and making for a lean winter",
+      "-503: Inherited valuable tools and a workshop from a childless uncle",
+      "-502: Purchased the neighbor's plot after they decided to seek fortune in the city",
+      "-501: A sister married into a well-connected tribal confederation, improving the family's social standing"
+    ]
+  },
+  "persia-500bce#3": {
+    "name": "Cyrus son of Phraates",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Farmer",
+    "religion": "Mithraism",
+    "language": "Old Persian",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Yellow Head Cloth [Linen]",
+    "torso": "Woad Linen Tunic [Coarse Linen]",
+    "feet": "Reed Sandals [Woven Reed]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#d9d0bb",
+      "garmentKind": "tunic",
+      "garmentColor": "#33456b",
+      "backgroundBase": "#725c63"
+    },
+    "family": [
+      "father: Phraates son of Pacorus",
+      "mother: Laodice the Scarred",
+      "sister: Thessalonica",
+      "sister: Artemisia"
+    ],
+    "events": [
+      "-520: Born in a small settlement to a Peasant family",
+      "-505: Helped with the harvest for the first season and proved capable despite a young age",
+      "-504: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "-502: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "-501: Became the first in the village to successfully grow citrus, earning respect from neighbors"
+    ]
+  },
+  "levant-30#1": {
+    "name": "Nintud",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Canaanite Religion",
+    "language": "Aramaic",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Royal Crown [Gold and Diamonds]",
+    "torso": "Charcoal Persian Gown [Silk and Pearls]",
+    "feet": "Golden Slippers [Gold and Silk]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#cfa044",
+      "garmentKind": "gown",
+      "garmentColor": "#3a4a48",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Enlil son of Marduk",
+      "mother: Ninlil"
+    ],
+    "events": [
+      "-45: Born in a small settlement to a Merchant family",
+      "-31: Learned to read weather signs and predict harvest yields from a parent",
+      "-23: After years of careful selection, successfully bred a hardier variety of wheat",
+      "-2: The family pooled their resources to purchase a market stall, a significant investment",
+      "1: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "levant-30#2": {
+    "name": "Amram son of Yosef",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Farmer",
+    "religion": "Canaanite Religion",
+    "language": "Aramaic",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Yellow Turban [Silk and Linen]",
+    "torso": "Ivory Linen Robe [Fine Linen]",
+    "feet": "Leather Sandals [Quality Leather]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#d9d0bb",
+      "garmentKind": "robe",
+      "garmentColor": "#e6dcc2",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Yosef son of Yitzhak",
+      "mother: Esther"
+    ],
+    "events": [
+      "-10: Born in a small settlement to a Commoner family",
+      "2: Learned to read weather signs and predict harvest yields from a parent",
+      "7: Became the first in the village to successfully grow sugarcane, earning respect from neighbors",
+      "15: A terrible blight spread through the olives crop, ruining the harvest and making for a lean winter",
+      "27: Inherited valuable tools and a workshop from a childless uncle",
+      "28: Purchased the neighbor's plot after they decided to seek fortune in the city",
+      "29: A sister married into a well-connected tribal confederation, improving the family's social standing"
+    ]
+  },
+  "levant-30#3": {
+    "name": "Yitzhak son of Yosef",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Farmer",
+    "religion": "Judaism",
+    "language": "Aramaic",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Green Head Cloth [Linen]",
+    "torso": "Woad Linen Tunic [Coarse Linen]",
+    "feet": "Reed Sandals [Woven Reed]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#d9d0bb",
+      "garmentKind": "tunic",
+      "garmentColor": "#33456b",
+      "backgroundBase": "#725c63"
+    },
+    "family": [
+      "father: Yosef",
+      "mother: Keturah daughter of Shimon",
+      "brother: Shmuel son of Yosef",
+      "sister: Leah"
+    ],
+    "events": [
+      "10: Born in a small settlement to a Peasant family",
+      "25: Helped with the harvest for the first season and proved capable despite a young age",
+      "26: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "28: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "29: Became the first in the village to successfully grow citrus, earning respect from neighbors"
+    ]
+  },
+  "maghreb-620bce#1": {
+    "name": "Dihya",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Farmer",
+    "religion": "Local Beliefs",
+    "language": "Berber (Tamazight)",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Yellow Jeweled Veil [Silk and Gems]",
+    "torso": "Natural Persian Gown [Silk and Pearls]",
+    "feet": "Golden Slippers [Gold and Silk]",
+    "portrait": {
+      "headwearKind": "veil",
+      "headwearColor": "#8c6a7a",
+      "garmentKind": "gown",
+      "garmentColor": "#cbb493",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Mohand son of Mohand",
+      "mother: Tasa"
+    ],
+    "events": [
+      "-695: Born in a small settlement to a Commoner family",
+      "-681: Learned to read weather signs and predict harvest yields from a parent",
+      "-669: With the help of extended family, cleared new land for cultivation",
+      "-653: Mother died from plague, leaving the household in grief",
+      "-640: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "-637: Inherited valuable tools and a workshop from a childless uncle",
+      "-623: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
+      "-621: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "maghreb-620bce#2": {
+    "name": "Ameziane",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Farmer",
+    "religion": "Local Beliefs",
+    "language": "Berber (Tamazight)",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Indigo Turban [Silk and Linen]",
+    "torso": "Brown Linen Robe [Fine Linen]",
+    "feet": "Leather Sandals [Quality Leather]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#d9d0bb",
+      "garmentKind": "robe",
+      "garmentColor": "#7a5433",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Massinissa son of Aurassi",
+      "mother: Tafrawt"
+    ],
+    "events": [
+      "-660: Born in a small settlement to a Commoner family",
+      "-648: Learned to read weather signs and predict harvest yields from a parent",
+      "-643: Became the first in the village to successfully grow sugarcane, earning respect from neighbors",
+      "-635: A terrible blight spread through the olives crop, ruining the harvest and making for a lean winter",
+      "-623: Took over the family business after a parent retired from active work",
+      "-622: With the help of extended family, cleared new land for cultivation",
+      "-621: A sister married into a well-connected tribal confederation, improving the family's social standing"
+    ]
+  },
+  "maghreb-620bce#3": {
+    "name": "Azalay",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Farmer",
+    "religion": "Zoroastrianism",
+    "language": "Berber (Tamazight)",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "antiquity in the Middle East and North Africa",
+    "head": "Indigo Head Cloth [Linen]",
+    "torso": "Brown Linen Tunic [Coarse Linen]",
+    "feet": "Reed Sandals [Woven Reed]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#d9d0bb",
+      "garmentKind": "tunic",
+      "garmentColor": "#7a5433",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Amyas son of Azegzaw",
+      "mother: Tiska the Grey"
+    ],
+    "events": [
+      "-640: Born in a small settlement to a Peasant family",
+      "-625: Helped with the harvest for the first season and proved capable despite a young age",
+      "-624: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "-622: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "-621: Became the first in the village to successfully grow citrus, earning respect from neighbors"
+    ]
+  },
+  "baghdad-1924#1": {
+    "name": "Umm Dina (Iman)",
+    "gender": "Female",
+    "age": 81,
+    "profession": "Judge",
+    "religion": "Shia Islam",
+    "language": "Classical Arabic",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the modern era in the Middle East and North Africa",
+    "head": null,
+    "torso": "Navy Cocktail Sari [Georgette and Sequins]",
+    "feet": "Ivory Designer Heels [Jimmy Choo]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "gown",
+      "garmentColor": "#000080",
+      "backgroundBase": "#69725c"
+    },
+    "family": [
+      "father: Bashar ibn Bashar",
+      "mother: Mariam bint Abdallah"
+    ],
+    "events": [
+      "1843: Born in a small settlement to an Upper Class family",
+      "1857: Began learning the trade of judge from an experienced practitioner",
+      "1873: Inherited valuable tools and a workshop from a childless uncle",
+      "1915: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "baghdad-1924#2": {
+    "name": "Jihad Qasemi",
+    "gender": "Male",
+    "age": 46,
+    "profession": "Salesman",
+    "religion": "Shia Islam",
+    "language": "Classical Arabic",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the modern era in the Middle East and North Africa",
+    "head": "Rust Keffiyeh [Cotton]",
+    "torso": "Navy Thobe [Fine Cotton]",
+    "feet": "Boots [Leather]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#cfc7b4",
+      "garmentKind": "robe",
+      "garmentColor": "#000080",
+      "backgroundBase": "#69725c"
+    },
+    "family": [
+      "father: Marwan Qasemi",
+      "mother: Yara bint Emad",
+      "spouse: Ghada",
+      "daughter: Noor bint Abdallah"
+    ],
+    "events": [
+      "1878: Born in a small settlement to a Middle Class family",
+      "1890: Began learning the trade of salesman from an experienced practitioner",
+      "1894: A sister married into a well-connected tribal confederation, improving the family's social standing",
+      "1895: Secured exclusive trading rights for petroleum from Tunis",
+      "1905: Mother died from typhoid fever, leaving the household in grief",
+      "1914: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "baghdad-1924#3": {
+    "name": "Marwan ibn Yusuf",
+    "gender": "Male",
+    "age": 21,
+    "profession": "Librarian",
+    "religion": "Sunni Islam",
+    "language": "Classical Arabic",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the modern era in the Middle East and North Africa",
+    "head": "Ivory Keffiyeh [Cotton]",
+    "torso": "Black Thobe [Fine Cotton]",
+    "feet": "Boots [Leather]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#cfc7b4",
+      "garmentKind": "robe",
+      "garmentColor": "#000000",
+      "backgroundBase": "#5c6272"
+    },
+    "family": [
+      "father: Yusuf ibn Marwan",
+      "mother: Maha bint Omar",
+      "brother: Mohammed Masri",
+      "sister: Iman Khouri"
+    ],
+    "events": [
+      "1903: Born in a small settlement to a Middle Class family",
+      "1918: Took evening classes in bookkeeping while working days",
+      "1919: A sister married into a well-connected military elite, improving the family's social standing",
+      "1921: Inherited valuable tools and a workshop from a childless uncle",
+      "1922: Discovered error in classical text, earning recognition"
+    ]
+  },
+  "sahel-9000bce#1": {
+    "name": "Nana the Grey",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Hunter",
+    "religion": "Local Beliefs",
+    "language": "Proto-Afroasiatic",
+    "languageBasis": "attested-table",
+    "languageConfidence": "reconstructed",
+    "odds": "prehistory in sub-Saharan Africa",
+    "head": "Yellow Beaded Headdress [Intricate Beadwork]",
+    "torso": "Beaded Apron [Leather and Beads]",
+    "feet": "Barefoot [None]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#c9a227",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#6b482f",
+      "backgroundBase": "#6c929d"
+    },
+    "family": [
+      "father: Jabari",
+      "mother: Amara",
+      "spouse: Jengo",
+      "son: Jengo"
+    ],
+    "events": [
+      "-9075: Born to the band that ranged this country",
+      "-9069: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
+      "-9061: Began going out with the older ones, learning the country and how to take from it",
+      "-9058: Followed a river further than anyone in the band had gone, and came back able to describe it",
+      "-9053: An elder died, and with them went the knowledge of country nobody else held",
+      "-9051: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
+      "-9042: Lost a child before it could walk, and buried it under the floor of the shelter",
+      "-9036: Fell badly on the rocks, and the leg never set straight"
+    ]
+  },
+  "sahel-9000bce#2": {
+    "name": "Sekou",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Hunter",
+    "religion": "Local Beliefs",
+    "language": "Proto-Afroasiatic",
+    "languageBasis": "attested-table",
+    "languageConfidence": "reconstructed",
+    "odds": "prehistory in sub-Saharan Africa",
+    "head": null,
+    "torso": "Hide Loincloth [Antelope Hide]",
+    "feet": "Madder Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "bare",
+      "garmentColor": "#6b482f",
+      "backgroundBase": "#445e66"
+    },
+    "family": [
+      "father: Chike",
+      "mother: Yaa",
+      "spouse: Kesia",
+      "daughter: Makena"
+    ],
+    "events": [
+      "-9040: Born to the band that ranged this country",
+      "-9027: Began going out with the older ones, learning the country and how to take from it",
+      "-9026: Left the band of birth to live with another, as is the custom",
+      "-9016: Went through the ice, and lost feeling in the fingers of one hand for good",
+      "-9013: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
+      "-9012: The herds did not come that year, and the camp moved three times looking for them",
+      "-9011: Lost a child before it could walk, and buried it under the floor of the shelter",
+      "-9009: Found an outcrop of workable stone, and the band returned to it for years afterwards"
+    ]
+  },
+  "sahel-9000bce#3": {
+    "name": "Jabari",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Hunter",
+    "religion": "Local Beliefs",
+    "language": "Proto-Afroasiatic",
+    "languageBasis": "attested-table",
+    "languageConfidence": "reconstructed",
+    "odds": "prehistory in sub-Saharan Africa",
+    "head": null,
+    "torso": "Hide Loincloth [Antelope Hide]",
+    "feet": "Madder Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "bare",
+      "garmentColor": "#6b482f",
+      "backgroundBase": "#52727b"
+    },
+    "family": [
+      "father: Aman",
+      "mother: Imani"
+    ],
+    "events": [
+      "-9020: Born to the band that ranged this country",
+      "-9007: Was among the party that drove a herd into the narrows, and the band ate well for many days",
+      "-9006: Left the band of birth to live with another, as is the custom",
+      "-9005: Began going out with the older ones, learning the country and how to take from it",
+      "-9004: An elder died, and with them went the knowledge of country nobody else held",
+      "-9003: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-9002: Sat through the long night when the songs are given to those old enough to hold them"
+    ]
+  },
+  "kongo-4300bce#1": {
+    "name": "Nana the Grey",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Local Beliefs",
+    "language": "Proto-Niger-Congo",
+    "languageBasis": "attested-table",
+    "languageConfidence": "reconstructed",
+    "odds": "prehistory in sub-Saharan Africa",
+    "head": "Yellow Beaded Headdress [Intricate Beadwork]",
+    "torso": "Decorated Wrap [Dyed Bark Cloth]",
+    "feet": "Barefoot [None]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#c9a227",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#a98a63",
+      "backgroundBase": "#6c929d"
+    },
+    "family": [
+      "father: Jabari",
+      "mother: Amara",
+      "spouse: Jengo",
+      "son: Jengo"
+    ],
+    "events": [
+      "-4375: Born in a small settlement to a Commoner family",
+      "-4361: Learned to read weather signs and predict harvest yields from a parent",
+      "-4353: A brother's marriage brought valuable new trade connections and opportunities",
+      "-4337: Became the first in the village to successfully grow cassava, earning respect from neighbors",
+      "-4333: Led successful cattle raid, gaining wealth and status",
+      "-4328: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "kongo-4300bce#2": {
+    "name": "Sekou",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Herder",
+    "religion": "Local Beliefs",
+    "language": "Proto-Niger-Congo",
+    "languageBasis": "attested-table",
+    "languageConfidence": "reconstructed",
+    "odds": "prehistory in sub-Saharan Africa",
+    "head": null,
+    "torso": "Cream Bark Cloth [Beaten Bark]",
+    "feet": "Madder Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#e0d3b0",
+      "backgroundBase": "#445e66"
+    },
+    "family": [
+      "father: Chike",
+      "mother: Yaa",
+      "spouse: Kesia",
+      "daughter: Makena"
+    ],
+    "events": [
+      "-4340: Born in a small settlement to a Peasant family",
+      "-4327: Trusted to tend livestock alone for the first time",
+      "-4323: Led successful cattle raid, gaining wealth and status",
+      "-4308: Took over the family business after a parent retired from active work",
+      "-4302: A brother's marriage brought valuable new trade connections and opportunities"
+    ]
+  },
+  "kongo-4300bce#3": {
+    "name": "Jabari",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Herder",
+    "religion": "Local Beliefs",
+    "language": "Proto-Niger-Congo",
+    "languageBasis": "attested-table",
+    "languageConfidence": "reconstructed",
+    "odds": "prehistory in sub-Saharan Africa",
+    "head": null,
+    "torso": "Hide Loincloth [Antelope Hide]",
+    "feet": "Madder Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "bare",
+      "garmentColor": "#6b482f",
+      "backgroundBase": "#52727b"
+    },
+    "family": [
+      "father: Aman",
+      "mother: Imani"
+    ],
+    "events": [
+      "-4320: Born in a small settlement to a Peasant family",
+      "-4305: Helped with the harvest for the first season and proved capable despite a young age",
+      "-4304: Led successful cattle raid, gaining wealth and status",
+      "-4303: A brother's marriage brought valuable new trade connections and opportunities",
+      "-4302: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "ethiopia-1100#1": {
+    "name": "Rahel daughter of Hailu",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Griot",
+    "religion": "Ethiopian Orthodox Christianity",
+    "language": "Ethiopic (Ge'ez)",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in sub-Saharan Africa",
+    "head": "Gold Gele [Gold-threaded Fabric]",
+    "torso": "Slate Aso Oke [Hand-woven Silk]",
+    "feet": "White Beaded Shoes [Velvet and Beads]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#cfa044",
+      "garmentKind": "tunic",
+      "garmentColor": "#5a5f63",
+      "backgroundBase": "#6c929d"
+    },
+    "family": [
+      "father: Hailu",
+      "mother: Meseret"
+    ],
+    "events": [
+      "1025: Born in a small settlement to a Merchant family",
+      "1039: Began learning the trade of griot from an experienced practitioner",
+      "1053: Inherited valuable tools and a workshop from a childless uncle",
+      "1055: Tragedy struck when a parent died from starvation",
+      "1058: A brother's marriage brought valuable new trade connections and opportunities"
+    ]
+  },
+  "ethiopia-1100#2": {
+    "name": "Menelik",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Herder",
+    "religion": "Ethiopian Orthodox Christianity",
+    "language": "Ethiopic (Ge'ez)",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in sub-Saharan Africa",
+    "head": "Natural Fez [Felt]",
+    "torso": "Slate Embroidered Robe [Cotton with Designs]",
+    "feet": "Leather Slippers [Soft Leather]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#6b6153",
+      "garmentKind": "robe",
+      "garmentColor": "#5a5f63",
+      "backgroundBase": "#445e66"
+    },
+    "family": [
+      "father: Haile Tsegaye",
+      "mother: Kidist, mother of Workitu",
+      "spouse: Yeshi Tadesse",
+      "daughter: Bethlehem daughter of Tadesse"
+    ],
+    "events": [
+      "1060: Born in a small settlement to a Commoner family",
+      "1073: Trusted to tend livestock alone for the first time",
+      "1078: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1084: The family pooled their resources to purchase a storage barn, a significant investment"
+    ]
+  },
+  "ethiopia-1100#3": {
+    "name": "Menelik son of Kebede",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Herder",
+    "religion": "Sunni Islam",
+    "language": "Ethiopic (Ge'ez)",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in sub-Saharan Africa",
+    "head": "Ivory Cotton Cap [Plain Cotton]",
+    "torso": "Woad Village Garment [Rough Wool]",
+    "feet": "Barefoot [None]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#cfc7b4",
+      "garmentKind": "tunic",
+      "garmentColor": "#3f5378",
+      "backgroundBase": "#9a6779"
+    },
+    "family": [
+      "father: Kebede",
+      "mother: Bethlehem Wolde",
+      "brother: Abebe"
+    ],
+    "events": [
+      "1080: Born in a small settlement to a Peasant family",
+      "1093: Trusted to tend livestock alone for the first time",
+      "1098: Inherited valuable tools and a workshop from a childless uncle",
+      "1099: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "swahili-1400#1": {
+    "name": "Ebun Akinyemi",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Local Beliefs",
+    "language": "Classical Swahili",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in sub-Saharan Africa",
+    "head": "Gold Gele [Gold-threaded Fabric]",
+    "torso": "Umber Aso Oke [Hand-woven Silk]",
+    "feet": "Cream Beaded Shoes [Velvet and Beads]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#cfa044",
+      "garmentKind": "tunic",
+      "garmentColor": "#4a4232",
+      "backgroundBase": "#6c929d"
+    },
+    "family": [
+      "father: Folarin Akinyemi",
+      "mother: Nike daughter of Chinedu",
+      "spouse: Idris son of Chinedu",
+      "daughter: Ebun"
+    ],
+    "events": [
+      "1325: Born in a small settlement to a Commoner family",
+      "1339: Learned to read weather signs and predict harvest yields from a parent",
+      "1362: Mother was murdered, and the family faced new responsibilities",
+      "1368: The family pooled their resources to purchase a market stall, a significant investment",
+      "1371: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1396: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit"
+    ]
+  },
+  "swahili-1400#2": {
+    "name": "Chukwuemeka Akinwale",
+    "gender": "Male",
+    "age": 61,
+    "profession": "Herder",
+    "religion": "Local Beliefs",
+    "language": "Classical Swahili",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in sub-Saharan Africa",
+    "head": "Cream Cotton Cap [Plain Cotton]",
+    "torso": "Walnut Simple Tunic [Rough Cotton]",
+    "feet": "Cream Barefoot [None]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#cfc7b4",
+      "garmentKind": "tunic",
+      "garmentColor": "#7a3a34",
+      "backgroundBase": "#445e66"
+    },
+    "family": [
+      "father: Idris Akinwale",
+      "mother: Yemi Akinwale",
+      "spouse: Joke daughter of Kwame",
+      "son: Bolaji"
+    ],
+    "events": [
+      "1339: Born in a small settlement to a Commoner family",
+      "1352: Trusted to tend livestock alone for the first time",
+      "1359: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1370: The family pooled their resources to purchase a storage barn, a significant investment",
+      "1375: The family lost their father when he died from sleeping sickness"
+    ]
+  },
+  "swahili-1400#3": {
+    "name": "Chinedu",
+    "gender": "Male",
+    "age": 52,
+    "profession": "Herder",
+    "religion": "Ancestor Worship",
+    "language": "Classical Swahili",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in sub-Saharan Africa",
+    "head": "White Cotton Cap [Plain Cotton]",
+    "torso": "Umber Village Garment [Rough Wool]",
+    "feet": "Barefoot [None]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#cfc7b4",
+      "garmentKind": "tunic",
+      "garmentColor": "#4a4232",
+      "backgroundBase": "#52727b"
+    },
+    "family": [
+      "father: Adebayo",
+      "mother: Chiamaka Adekunle",
+      "spouse: Hadiza Ogundimu",
+      "son: Babatunde son of Adamu"
+    ],
+    "events": [
+      "1348: Born in a small settlement to a Peasant family",
+      "1361: Trusted to tend livestock alone for the first time",
+      "1381: Inherited valuable tools and a workshop from a childless uncle",
+      "1395: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "southafrica-1890#1": {
+    "name": "Anele daughter of Sbu",
+    "gender": "Female",
+    "age": 81,
+    "profession": "Missionary",
+    "religion": "Christianity",
+    "language": "Classical Swahili",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in sub-Saharan Africa",
+    "head": "Ivory Fascinator [Feathers and Jewels]",
+    "torso": "Charcoal Aso Ebi [Hand-beaded Lace]",
+    "feet": "Ivory Designer Heels [Snakeskin]",
+    "portrait": {
+      "headwearKind": "band",
+      "headwearColor": "#e6ddc8",
+      "garmentKind": "tunic",
+      "garmentColor": "#2f3a40",
+      "backgroundBase": "#6c929d"
+    },
+    "family": [
+      "father: Sbu",
+      "mother: Precious"
+    ],
+    "events": [
+      "1809: Born in a small settlement to a Merchant family",
+      "1823: Began learning the trade of missionary from an experienced practitioner",
+      "1839: Inherited valuable tools and a workshop from a childless uncle",
+      "1881: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "southafrica-1890#2": {
+    "name": "Jan Kok",
+    "gender": "Male",
+    "age": 45,
+    "profession": "Cash Crop Farmer",
+    "religion": "Christianity",
+    "language": "Classical Swahili",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in sub-Saharan Africa",
+    "head": "Ivory Pith Helmet [Cork and Canvas]",
+    "torso": "Charcoal Safari Suit [Cotton Drill]",
+    "feet": "Leather Boots [Brown Leather]",
+    "portrait": {
+      "headwearKind": "helmet",
+      "headwearColor": "#cfcfcf",
+      "garmentKind": "jacket",
+      "garmentColor": "#2f3a40",
+      "backgroundBase": "#6c929d"
+    },
+    "family": [
+      "father: Adriaan Kok",
+      "mother: Johanna Bos"
+    ],
+    "events": [
+      "1845: Born in a small settlement to a Commoner family",
+      "1857: Learned to read weather signs and predict harvest yields from a parent",
+      "1862: Became the first in the village to successfully grow groundnuts, earning respect from neighbors",
+      "1872: A terrible blight spread through the yams crop, ruining the harvest and making for a lean winter",
+      "1886: Inherited valuable tools and a workshop from a childless uncle",
+      "1888: Purchased the neighbor's plot after they decided to seek fortune in the city",
+      "1889: A sister married into a well-connected age-grade society, improving the family's social standing"
+    ]
+  },
+  "southafrica-1890#3": {
+    "name": "Andile son of Fanele",
+    "gender": "Male",
+    "age": 21,
+    "profession": "Herder",
+    "religion": "Southern African Traditional Religion",
+    "language": "Classical Swahili",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in sub-Saharan Africa",
+    "head": "Ivory Kofia [Cotton Twill]",
+    "torso": "Black Work Shirt [Rough Cotton]",
+    "feet": "Ivory Tire Sandals [Recycled Rubber]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#cfc7b4",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#1c1a19",
+      "backgroundBase": "#52727b"
+    },
+    "family": [
+      "father: Fanele Zwane",
+      "mother: Zandile Ndlovu"
+    ],
+    "events": [
+      "1869: Born in a small settlement to a Peasant family",
+      "1884: Helped with the harvest for the first season and proved capable despite a young age",
+      "1887: A brother's marriage brought valuable new trade connections and opportunities",
+      "1888: The family pooled their resources to purchase machinery, a significant investment"
+    ]
+  },
+  "deccan-1650#1": {
+    "name": "Anita Bajpai",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Textile Weaver",
+    "religion": "Hinduism",
+    "language": "Marathi",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in South Asia",
+    "head": "Rakhdi [Diamonds and Gold]",
+    "torso": "Zardozi Choli [Velvet with Gold Work]",
+    "feet": "Pearl Payal [Pearls and Gold]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#b49a78",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#76545f",
+      "backgroundBase": "#557f6e"
+    },
+    "family": [
+      "father: Siddhartha Bajpai",
+      "mother: Jyoti daughter of Vikram",
+      "spouse: Yogesh son of Rakesh",
+      "son: Arjun"
+    ],
+    "events": [
+      "1575: Born in a small settlement to a Commoner family",
+      "1589: Taken as apprentice by renowned textile weaver, bound for seven years",
+      "1603: Bathed in the Ganges during Kumbh Mela",
+      "1610: Father died from plague, leaving the family to manage affairs alone",
+      "1626: Admitted to the Textile Weaver guild after presenting masterwork",
+      "1631: Established textile workshop with English backing",
+      "1636: Took over the family business after a parent retired from active work",
+      "1648: A sister married into a well-connected artisan guild, improving the family's social standing"
+    ]
+  },
+  "deccan-1650#2": {
+    "name": "Umesh",
+    "gender": "Male",
+    "age": 61,
+    "profession": "Village Potter",
+    "religion": "Hinduism",
+    "language": "Marathi",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in South Asia",
+    "head": "Yellow Gandhi Cap [White Cotton]",
+    "torso": "Purple Simple Kurta [Cotton]",
+    "feet": "Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "robe",
+      "garmentColor": "#83705a",
+      "backgroundBase": "#6c9d83"
+    },
+    "family": [
+      "father: Naresh Awasthi",
+      "mother: Leela Thakur",
+      "spouse: Shakti daughter of Arjun",
+      "son: Vijay"
+    ],
+    "events": [
+      "1589: Born in a small settlement to a Commoner family",
+      "1601: Taken as apprentice by renowned village potter, bound for seven years",
+      "1609: Learned sacred texts under a guru's guidance",
+      "1616: The guild selected a piece of work for a noble commission",
+      "1618: Established textile workshop with English backing",
+      "1640: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1643: Inherited valuable tools and a workshop from a childless uncle"
+    ]
+  },
+  "deccan-1650#3": {
+    "name": "Yogesh",
+    "gender": "Male",
+    "age": 52,
+    "profession": "Village Potter",
+    "religion": "Buddhism",
+    "language": "Marathi",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in South Asia",
+    "head": "White Gandhi Cap [White Cotton]",
+    "torso": "Crimson Simple Kurta [Cotton]",
+    "feet": "Barefoot [None]",
+    "portrait": {
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#a68a68",
+      "garmentKind": "robe",
+      "garmentColor": "#83705a",
+      "backgroundBase": "#436557"
+    },
+    "family": [
+      "father: Mukesh son of Pramod",
+      "mother: Veena Mishra",
+      "spouse: Bharti",
+      "daughter: Lakshmi daughter of Ravi"
+    ],
+    "events": [
+      "1598: Born in a small settlement to a Peasant family",
+      "1613: Apprenticed to guild master, learning trade secrets",
+      "1630: Mother died from malaria despite efforts to save her",
+      "1634: Established textile workshop with English backing",
+      "1635: The family pooled their resources to purchase a market stall, a significant investment",
+      "1642: Elected as guild treasurer, managing communal funds",
+      "1646: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1649: Completed temple service during festival season"
+    ]
+  },
+  "tamil-1200#1": {
+    "name": "Priya daughter of Hitesh",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Rice Farmer",
+    "religion": "Hinduism",
+    "language": "Classical Sanskrit",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in South Asia",
+    "head": "Sheesh Patti [Gold and Diamonds]",
+    "torso": "Peshwaz [Finest Muslin and Gold]",
+    "feet": "Ivory Gem-Studded Mojaris [Silk and Jewels]",
+    "portrait": {
+      "headwearKind": "band",
+      "headwearColor": "#cfa044",
+      "garmentKind": "gown",
+      "garmentColor": "#cfa044",
+      "backgroundBase": "#4e4a6e"
+    },
+    "family": [
+      "father: Hitesh",
+      "mother: Shanti",
+      "spouse: Vikram son of Rajesh",
+      "daughter: Priya"
+    ],
+    "events": [
+      "1125: Born in a small settlement to a Commoner family",
+      "1139: Learned to read weather signs and predict harvest yields from a parent",
+      "1152: Took over the family business after a parent retired from active work",
+      "1153: A father's death changed everything for the household",
+      "1155: Bathed in the Ganges during Kumbh Mela",
+      "1158: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "1180: A sister married into a well-connected merchant caste, improving the family's social standing",
+      "1193: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed"
+    ]
+  },
+  "tamil-1200#2": {
+    "name": "Umesh",
+    "gender": "Male",
+    "age": 61,
+    "profession": "Cotton Farmer",
+    "religion": "Hinduism",
+    "language": "Classical Sanskrit",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in South Asia",
+    "head": "Ivory Topi [Cotton Khadi]",
+    "torso": "Umber Cotton Kurta [Coarse Cotton]",
+    "feet": "Barefoot [None]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#cfc7b4",
+      "garmentKind": "tunic",
+      "garmentColor": "#4a4232",
+      "backgroundBase": "#726c9d"
+    },
+    "family": [
+      "father: Naresh Awasthi",
+      "mother: Leela Thakur",
+      "spouse: Shakti daughter of Arjun",
+      "son: Vijay"
+    ],
+    "events": [
+      "1139: Born in a small settlement to a Commoner family",
+      "1151: Learned to read weather signs and predict harvest yields from a parent",
+      "1156: Completed temple service during festival season",
+      "1164: A brother's marriage brought valuable new trade connections and opportunities",
+      "1166: A terrible blight spread through the rice crop, ruining the harvest and making for a lean winter",
+      "1171: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "1177: The family lost their mother when she died from plague",
+      "1196: The family pooled their resources to purchase a market stall, a significant investment"
+    ]
+  },
+  "tamil-1200#3": {
+    "name": "Yogesh",
+    "gender": "Male",
+    "age": 52,
+    "profession": "Cotton Farmer",
+    "religion": "Buddhism",
+    "language": "Classical Sanskrit",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in South Asia",
+    "head": "Cream Topi [Cotton Khadi]",
+    "torso": "Woad Cotton Kurta [Coarse Cotton]",
+    "feet": "Cream Barefoot [None]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#cfc7b4",
+      "garmentKind": "tunic",
+      "garmentColor": "#3f5378",
+      "backgroundBase": "#65434f"
+    },
+    "family": [
+      "father: Mukesh son of Pramod",
+      "mother: Veena Mishra",
+      "spouse: Bharti",
+      "daughter: Lakshmi daughter of Ravi"
+    ],
+    "events": [
+      "1148: Born in a small settlement to a Peasant family",
+      "1163: Helped with the harvest for the first season and proved capable despite a young age",
+      "1169: After years of careful selection, successfully bred a hardier variety of lentils",
+      "1179: Inherited valuable tools and a workshop from a childless uncle",
+      "1184: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "1187: Learned sacred texts under a guru's guidance",
+      "1192: A brother's marriage brought valuable new trade connections and opportunities",
+      "1196: Inherited an additional field from a childless uncle, expanding the family holdings"
+    ]
+  },
+  "indus-8000bce#1": {
+    "name": "*Kanni the Grey",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Local Beliefs",
+    "language": "Proto-Dravidian (reconstructed)",
+    "languageBasis": "sa-early",
+    "languageConfidence": "reconstructed",
+    "odds": "prehistory in South Asia",
+    "head": "Yellow Flower Garland [Fresh Jasmine]",
+    "torso": "Skin Tunic [Hide and Sinew]",
+    "feet": "Toe Rings [Silver]",
+    "portrait": {
+      "headwearKind": "band",
+      "headwearColor": "#c9a227",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#6b482f",
+      "backgroundBase": "#4e4a6e"
+    },
+    "family": [
+      "father: *Muni",
+      "mother: *Punal",
+      "spouse: *Arul",
+      "son: *Arul"
+    ],
+    "events": [
+      "-8075: Born to the band that ranged this country",
+      "-8061: Learned to read weather signs and predict harvest yields from a parent",
+      "-8058: An elder died, and with them went the knowledge of country nobody else held",
+      "-8056: Received the marks that say who this person is and who they may speak to",
+      "-8038: Walked with the band to the far camp, further than the children had ever been",
+      "-8023: Took a partner from a band met at the summer gathering",
+      "-8021: Learned the way to a spring that held water through the dry months",
+      "-8018: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring"
+    ]
+  },
+  "indus-8000bce#2": {
+    "name": "*Vel",
+    "gender": "Male",
+    "age": 61,
+    "profession": "Herder",
+    "religion": "Local Beliefs",
+    "language": "Proto-Munda (reconstructed)",
+    "languageBasis": "sa-early",
+    "languageConfidence": "reconstructed",
+    "odds": "prehistory in South Asia",
+    "head": null,
+    "torso": "Cream Bark Cloth [Tree Bark]",
+    "feet": "Madder Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#e0d3b0",
+      "backgroundBase": "#726c9d"
+    },
+    "family": [
+      "father: *Nel",
+      "mother: *Cempu",
+      "spouse: *Naru",
+      "daughter: *Vala"
+    ],
+    "events": [
+      "-8061: Born to the band that ranged this country",
+      "-8048: Trusted to tend livestock alone for the first time",
+      "-8032: An elder died, and with them went the knowledge of country nobody else held",
+      "-8024: Took a partner from a band met at the summer gathering",
+      "-8022: Learned the way to a spring that held water through the dry months",
+      "-8015: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-8014: A birth went wrong in the night, and by morning the camp was quieter by two",
+      "-8009: Fell badly on the rocks, and the leg never set straight"
+    ]
+  },
+  "indus-8000bce#3": {
+    "name": "*Vil",
+    "gender": "Male",
+    "age": 52,
+    "profession": "Herder",
+    "religion": "Ancestor Worship",
+    "language": "Proto-Dravidian (reconstructed)",
+    "languageBasis": "sa-early",
+    "languageConfidence": "reconstructed",
+    "odds": "prehistory in South Asia",
+    "head": null,
+    "torso": "White Bark Cloth [Tree Bark]",
+    "feet": "Rust Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#ece5d6",
+      "backgroundBase": "#484365"
+    },
+    "family": [
+      "father: *Muni",
+      "mother: *Ilai",
+      "spouse: *Punal",
+      "son: *Nel"
+    ],
+    "events": [
+      "-8052: Born to the band that ranged this country",
+      "-8037: Helped with the harvest for the first season and proved capable despite a young age",
+      "-8034: Was among the party that drove a herd into the narrows, and the band ate well for many days",
+      "-8033: Was taken from the camp by the elders, kept apart, and came back changed and marked",
+      "-8030: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
+      "-8023: A birth went wrong in the night, and by morning the camp was quieter by two",
+      "-8019: Fell badly on the rocks, and the leg never set straight",
+      "-8016: Left the band of birth to live with another, as is the custom"
+    ]
+  },
+  "mesoamerica-700#1": {
+    "name": "Moon the Grey",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Aztec Polytheism",
+    "language": "Mayan (attested)",
+    "languageBasis": "na-mesoamerica-late",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in pre-Columbian North America",
+    "head": "Grey Feather Crown [Swan Feathers]",
+    "torso": "Ceremonial Robe [Painted Hide]",
+    "feet": "White Moccasins [Ermine Fur]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#8d8a80",
+      "garmentKind": "robe",
+      "garmentColor": "#6b482f",
+      "backgroundBase": "#79907e"
+    },
+    "family": [
+      "father: Stone",
+      "mother: Willow"
+    ],
+    "events": [
+      "625: Born in a small settlement to a Merchant family",
+      "639: Learned to read weather signs and predict harvest yields from a parent",
+      "645: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "649: Selected as keeper of sacred bundle",
+      "686: Took over the family business after a parent retired from active work",
+      "689: Discovered new fishing grounds during drought",
+      "699: Became the first in the village to successfully grow beans, earning respect from neighbors"
+    ]
+  },
+  "mesoamerica-700#2": {
+    "name": "Warrior",
+    "gender": "Male",
+    "age": 61,
+    "profession": "Herder",
+    "religion": "Aztec Polytheism",
+    "language": "Nahuatl (attested)",
+    "languageBasis": "na-mesoamerica-late",
+    "languageConfidence": "attested",
+    "odds": "the medieval period in pre-Columbian North America",
+    "head": null,
+    "torso": "Indigo Hide Shirt [Buckskin]",
+    "feet": "Simple Moccasins [Raw Hide]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#3a4250",
+      "backgroundBase": "#4b5a4e"
+    },
+    "family": [
+      "father: Wolf",
+      "mother: Rain the Swift",
+      "spouse: River",
+      "son: Warrior"
+    ],
+    "events": [
+      "639: Born in a small settlement to a Commoner family",
+      "652: Trusted to tend livestock alone for the first time",
+      "657: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "669: Discovered new fishing grounds during drought",
+      "688: Inherited valuable tools and a workshop from a childless uncle",
+      "690: Selected as keeper of sacred bundle"
+    ]
+  },
+  "mesoamerica-700#3": {
+    "name": "River",
+    "gender": "Male",
+    "age": 52,
+    "profession": "Herder",
+    "religion": "Mesoamerican Shamanism",
+    "language": "Oto-Manguean (reconstructed)",
+    "languageBasis": "na-mesoamerica-late",
+    "languageConfidence": "reconstructed",
+    "odds": "the medieval period in pre-Columbian North America",
+    "head": null,
+    "torso": "Walnut Hide Shirt [Buckskin]",
+    "feet": "Simple Moccasins [Raw Hide]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#7a3a34",
+      "backgroundBase": "#4b5a4e"
+    },
+    "family": [
+      "father: Hunter",
+      "mother: Winter",
+      "spouse: Sky the Red",
+      "son: Stone the Restless"
+    ],
+    "events": [
+      "648: Born in a small settlement to a Peasant family",
+      "663: Helped with the harvest for the first season and proved capable despite a young age",
+      "685: Inherited valuable tools and a workshop from a childless uncle",
+      "685: The family lost their mother when she died from childbirth complications",
+      "692: A brother's marriage brought valuable new trade connections and opportunities",
+      "694: Selected as keeper of sacred bundle",
+      "696: Discovered new fishing grounds during drought"
+    ]
+  },
+  "plains-1500#1": {
+    "name": "Weayaya the Fair",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Buffalo Shamanism",
+    "language": "Lakota",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in pre-Columbian North America",
+    "head": "Walnut Feather Crown [Swan Feathers]",
+    "torso": "Ceremonial Robe [Painted Hide]",
+    "feet": "White Moccasins [Ermine Fur]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#654321",
+      "garmentKind": "robe",
+      "garmentColor": "#6b482f",
+      "backgroundBase": "#4b5a4e"
+    },
+    "family": [
+      "father: Forest",
+      "mother: Summer",
+      "spouse: Thunder",
+      "daughter: Moon"
+    ],
+    "events": [
+      "1425: Born in a small settlement to a Merchant family",
+      "1439: Learned to read weather signs and predict harvest yields from a parent",
+      "1453: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1460: Mother died from smallpox epidemic, leaving the household in grief",
+      "1482: Discovered new fishing grounds during drought",
+      "1486: A sister married into a well-connected medicine society, improving the family's social standing",
+      "1496: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "plains-1500#2": {
+    "name": "Shappa",
+    "gender": "Male",
+    "age": 61,
+    "profession": "Herder",
+    "religion": "Great Spirit Worship",
+    "language": "Lakota",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in pre-Columbian North America",
+    "head": null,
+    "torso": "Red Hide Shirt [Buckskin]",
+    "feet": "Simple Moccasins [Raw Hide]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#8B4513",
+      "backgroundBase": "#4b5a4e"
+    },
+    "family": [
+      "father: Fire the Dark",
+      "mother: Lily the Watchful",
+      "spouse: Winter the Wanderer",
+      "daughter: Lily"
+    ],
+    "events": [
+      "1439: Born in a small settlement to a Commoner family",
+      "1452: Trusted to tend livestock alone for the first time",
+      "1457: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1475: Inherited valuable tools and a workshop from a childless uncle",
+      "1477: Tragedy struck when a parent died from typhus",
+      "1484: Led successful buffalo hunt, feeding village through winter"
+    ]
+  },
+  "plains-1500#3": {
+    "name": "Bidziil the Elder",
+    "gender": "Male",
+    "age": 52,
+    "profession": "Herder",
+    "religion": "Christianity",
+    "language": "Lakota",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the early modern period in pre-Columbian North America",
+    "head": null,
+    "torso": "Red Hide Shirt [Buckskin]",
+    "feet": "Simple Moccasins [Raw Hide]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#8B4513",
+      "backgroundBase": "#4b5a4e"
+    },
+    "family": [
+      "father: Kangee the Grey",
+      "mother: Orenda",
+      "spouse: Enola"
+    ],
+    "events": [
+      "1448: Born in a small settlement to a Peasant family",
+      "1463: Helped with the harvest for the first season and proved capable despite a young age",
+      "1480: A brother's marriage brought valuable new trade connections and opportunities",
+      "1494: Counted coup on enemy warrior, gaining honor",
+      "1495: Inherited valuable tools and a workshop from a childless uncle"
+    ]
+  },
+  "arctic-1400#1": {
+    "name": "Atiqtalik",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Inuit Shamanism",
+    "language": "Na-Dene (reconstructed)",
+    "languageBasis": "na-arctic",
+    "languageConfidence": "reconstructed",
+    "odds": "the medieval period in pre-Columbian North America",
+    "head": "Ivory Feather Crown [Swan Feathers]",
+    "torso": "Ceremonial Robe [Painted Hide]",
+    "feet": "White Moccasins [Ermine Fur]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#ddd8cf",
+      "garmentKind": "robe",
+      "garmentColor": "#6b482f",
+      "backgroundBase": "#4b5a4e"
+    },
+    "family": [
+      "father: Iluq",
+      "mother: Yura",
+      "spouse: Amarok",
+      "daughter: Aput"
+    ],
+    "events": [
+      "1325: Born in a small settlement to a Commoner family",
+      "1339: Learned to read weather signs and predict harvest yields from a parent",
+      "1345: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1349: Selected as keeper of sacred bundle",
+      "1386: Took over the family business after a parent retired from active work",
+      "1389: Discovered new fishing grounds during drought",
+      "1399: Became the first in the village to successfully grow beans, earning respect from neighbors"
+    ]
+  },
+  "arctic-1400#2": {
+    "name": "Still Lightning",
+    "gender": "Male",
+    "age": 61,
+    "profession": "Herder",
+    "religion": "Inuit Shamanism",
+    "language": "Eskimo-Aleut (reconstructed)",
+    "languageBasis": "na-arctic",
+    "languageConfidence": "reconstructed",
+    "odds": "the medieval period in pre-Columbian North America",
+    "head": null,
+    "torso": "Woad Hide Shirt [Buckskin]",
+    "feet": "Simple Moccasins [Raw Hide]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#3f5378",
+      "backgroundBase": "#4b5a4e"
+    },
+    "family": [
+      "father: Standing Salmon",
+      "mother: White Mink",
+      "spouse: Autumn Wolf",
+      "daughter: South Fish"
+    ],
+    "events": [
+      "1339: Born in a small settlement to a Commoner family",
+      "1354: Learned to read weather signs and predict harvest yields from a parent",
+      "1368: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1376: Led successful buffalo hunt, feeding village through winter",
+      "1377: Selected as keeper of sacred bundle",
+      "1394: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "arctic-1400#3": {
+    "name": "Old Pike",
+    "gender": "Male",
+    "age": 52,
+    "profession": "Herder",
+    "religion": "Inuit Shamanism",
+    "language": "Na-Dene (reconstructed)",
+    "languageBasis": "na-arctic",
+    "languageConfidence": "reconstructed",
+    "odds": "the medieval period in pre-Columbian North America",
+    "head": null,
+    "torso": "Woad Hide Shirt [Buckskin]",
+    "feet": "Simple Moccasins [Raw Hide]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#3f5378",
+      "backgroundBase": "#4b5a4e"
+    },
+    "family": [
+      "father: Amarok",
+      "mother: Ila the Red"
+    ],
+    "events": [
+      "1348: Born in a small settlement to a Peasant family",
+      "1362: Began working family fields, learning crop rotation from elders",
+      "1368: Took over the family business after a parent retired from active work",
+      "1384: Participated in sun dance, earning honor marks",
+      "1385: The family lost their mother when she died from childbirth complications",
+      "1387: Discovered new fishing grounds during drought",
+      "1399: A sister married into a well-connected clan elders, improving the family's social standing"
+    ]
+  },
+  "california-1000#1": {
+    "name": "Yoomee",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Local Beliefs",
+    "language": "Hokan language (reconstructed)",
+    "languageBasis": "na-california",
+    "languageConfidence": "conjectural",
+    "odds": "the medieval period in pre-Columbian North America",
+    "head": "Cream Feather Crown [Swan Feathers]",
+    "torso": "Ceremonial Robe [Painted Hide]",
+    "feet": "White Moccasins [Ermine Fur]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#e3d5a8",
+      "garmentKind": "robe",
+      "garmentColor": "#6b482f",
+      "backgroundBase": "#4b5a4e"
+    },
+    "family": [
+      "father: Yokuts",
+      "mother: Tiva the Short",
+      "spouse: Wintu",
+      "son: Ishi"
+    ],
+    "events": [
+      "925: Born in a small settlement to a Commoner family",
+      "939: Learned to read weather signs and predict harvest yields from a parent",
+      "945: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "949: Selected as keeper of sacred bundle",
+      "986: Took over the family business after a parent retired from active work",
+      "989: Discovered new fishing grounds during drought",
+      "999: Became the first in the village to successfully grow beans, earning respect from neighbors"
+    ]
+  },
+  "california-1000#2": {
+    "name": "Yurok the Grey",
+    "gender": "Male",
+    "age": 61,
+    "profession": "Herder",
+    "religion": "Local Beliefs",
+    "language": "Hokan language (reconstructed)",
+    "languageBasis": "na-california",
+    "languageConfidence": "conjectural",
+    "odds": "the medieval period in pre-Columbian North America",
+    "head": null,
+    "torso": "Woad Hide Shirt [Buckskin]",
+    "feet": "Simple Moccasins [Raw Hide]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#3f5378",
+      "backgroundBase": "#4b5a4e"
+    },
+    "family": [
+      "father: Wintu the Wanderer",
+      "mother: Zaltana the One-Eyed",
+      "spouse: Poloma",
+      "son: Karuk"
+    ],
+    "events": [
+      "939: Born in a small settlement to a Commoner family",
+      "952: Trusted to tend livestock alone for the first time",
+      "957: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "969: Discovered new fishing grounds during drought",
+      "988: Inherited valuable tools and a workshop from a childless uncle",
+      "990: Selected as keeper of sacred bundle"
+    ]
+  },
+  "california-1000#3": {
+    "name": "Ishi",
+    "gender": "Male",
+    "age": 52,
+    "profession": "Herder",
+    "religion": "Ancestor Worship",
+    "language": "Uto-Aztecan (reconstructed)",
+    "languageBasis": "na-california",
+    "languageConfidence": "reconstructed",
+    "odds": "the medieval period in pre-Columbian North America",
+    "head": null,
+    "torso": "Indigo Hide Shirt [Buckskin]",
+    "feet": "Simple Moccasins [Raw Hide]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#3a4250",
+      "backgroundBase": "#4b5a4e"
+    },
+    "family": [
+      "father: Wiyot",
+      "mother: Litonya"
+    ],
+    "events": [
+      "948: Born in a small settlement to a Peasant family",
+      "963: Helped with the harvest for the first season and proved capable despite a young age",
+      "985: Inherited valuable tools and a workshop from a childless uncle",
+      "985: The family lost their mother when she died from childbirth complications",
+      "992: A brother's marriage brought valuable new trade connections and opportunities",
+      "994: Selected as keeper of sacred bundle",
+      "996: Discovered new fishing grounds during drought"
+    ]
+  },
+  "newengland-1870#1": {
+    "name": "Susanna Taylor",
+    "gender": "Female",
+    "age": 80,
+    "profession": "Fisher",
+    "religion": "Protestantism",
+    "language": "Spanish (attested)",
+    "languageBasis": "nac-colonial",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in colonial North America",
+    "head": "Ivory Diamond Tiara [Diamonds and Platinum]",
+    "torso": "Charcoal Opera Gown [Velvet and Pearls]",
+    "feet": "Ivory Evening Boots [Kid and Silk]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#cfcfcf",
+      "garmentKind": "gown",
+      "garmentColor": "#33413f",
+      "backgroundBase": "#445a5c"
+    },
+    "family": [
+      "father: Jacob Taylor",
+      "mother: Martha Davis",
+      "spouse: Gideon Davis"
+    ],
+    "events": [
+      "1790: Born in a small settlement to a Merchant family",
+      "1804: Began learning the trade of fisher from an experienced practitioner",
+      "1820: Served as juror in important trial",
+      "1823: The family pooled their resources to purchase draft animals, a significant investment",
+      "1830: Mother was murdered, and the family faced new responsibilities",
+      "1831: A brother's marriage brought valuable new trade connections and opportunities",
+      "1855: Joined wagon train heading west for new land"
+    ]
+  },
+  "newengland-1870#2": {
+    "name": "Benjamin Harris",
+    "gender": "Male",
+    "age": 44,
+    "profession": "Weaver",
+    "religion": "Protestantism",
+    "language": "Algonquian (reconstructed)",
+    "languageBasis": "nac-colonial",
+    "languageConfidence": "reconstructed",
+    "odds": "the industrial era in colonial North America",
+    "head": "White Bowler Hat [Quality Felt]",
+    "torso": "Brown Waistcoat [Silk]",
+    "feet": "Oxford Shoes [Polished Leather]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#6b6153",
+      "garmentKind": "doublet",
+      "garmentColor": "#6b4a33",
+      "backgroundBase": "#445a5c"
+    },
+    "family": [
+      "father: Hezekiah Harris",
+      "mother: Faith",
+      "spouse: Mary",
+      "son: Thomas Jackson"
+    ],
+    "events": [
+      "1826: Born in a small settlement to a Commoner family",
+      "1839: Apprenticed to guild master, learning trade secrets",
+      "1844: The family pooled their resources to purchase a delivery truck, a significant investment",
+      "1847: Achieved master status, allowed to take apprentices",
+      "1854: A brother's marriage brought valuable new trade connections and opportunities",
+      "1857: Established homestead on prairie",
+      "1866: Served as juror in important trial"
+    ]
+  },
+  "newengland-1870#3": {
+    "name": "Nathaniel Smith",
+    "gender": "Male",
+    "age": 21,
+    "profession": "Fisher",
+    "religion": "Judaism",
+    "language": "English (attested)",
+    "languageBasis": "nac-colonial",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in colonial North America",
+    "head": "White Flat Cap [Tweed]",
+    "torso": "Charcoal Factory Smock [Rough Cotton]",
+    "feet": "Wooden Clogs [Oak Wood]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#f0ece0",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#2f3a40",
+      "backgroundBase": "#445a5c"
+    },
+    "family": [
+      "father: John Smith",
+      "mother: Deborah Jones",
+      "brother: James Smith",
+      "sister: Experience Smith"
+    ],
+    "events": [
+      "1849: Born in a small settlement to a Peasant family",
+      "1862: Began learning the trade of fisher from an experienced practitioner",
+      "1865: A brother's marriage brought valuable new trade connections and opportunities",
+      "1867: The family pooled their resources to purchase a new plow, a significant investment",
+      "1868: Staked claim during gold rush"
+    ]
+  },
+  "louisiana-1820#1": {
+    "name": "Hope Hernandez",
+    "gender": "Female",
+    "age": 79,
+    "profession": "Shepherd",
+    "religion": "Protestantism",
+    "language": "Louisiana Creole",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in colonial North America",
+    "head": "Ivory Diamond Tiara [Diamonds and Platinum]",
+    "torso": "Black Opera Gown [Velvet and Pearls]",
+    "feet": "Ivory Evening Boots [Kid and Silk]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#cfcfcf",
+      "garmentKind": "gown",
+      "garmentColor": "#1c1a19",
+      "backgroundBase": "#445a5c"
+    },
+    "family": [
+      "father: Samuel Hernandez",
+      "mother: Patience Thomas",
+      "spouse: Ezekiel Jackson"
+    ],
+    "events": [
+      "1741: Born in a small settlement to a Commoner family",
+      "1755: Learned to read weather signs and predict harvest yields from a parent",
+      "1774: Elected to town council",
+      "1774: Tragedy struck when a parent was murdered",
+      "1781: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "1783: A sister married into a well-connected religious congregation, improving the family's social standing",
+      "1790: Joined wagon train heading west for new land",
+      "1798: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "louisiana-1820#2": {
+    "name": "Cornelius Thompson",
+    "gender": "Male",
+    "age": 42,
+    "profession": "Herder",
+    "religion": "Protestantism",
+    "language": "Louisiana Creole",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in colonial North America",
+    "head": "Ivory Bowler Hat [Quality Felt]",
+    "torso": "Charcoal Waistcoat [Silk]",
+    "feet": "Oxford Shoes [Polished Leather]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#6b6153",
+      "garmentKind": "doublet",
+      "garmentColor": "#33413f",
+      "backgroundBase": "#445a5c"
+    },
+    "family": [
+      "father: Edward Thompson",
+      "mother: Silence Lewis"
+    ],
+    "events": [
+      "1778: Born in a small settlement to a Commoner family",
+      "1791: Trusted to tend livestock alone for the first time",
+      "1802: Took over the family business after a parent retired from active work",
+      "1804: Joined wagon train heading west for new land",
+      "1808: Served as juror in important trial",
+      "1818: Mother died by suicide, and the family faced new responsibilities",
+      "1819: A sister married into a well-connected religious congregation, improving the family's social standing"
+    ]
+  },
+  "louisiana-1820#3": {
+    "name": "Robert White",
+    "gender": "Male",
+    "age": 21,
+    "profession": "Herder",
+    "religion": "Roman Catholicism",
+    "language": "Louisiana Creole",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in colonial North America",
+    "head": "Ivory Flat Cap [Tweed]",
+    "torso": "Brown Factory Smock [Rough Cotton]",
+    "feet": "Wooden Clogs [Oak Wood]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#d8d8d8",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#6b4a33",
+      "backgroundBase": "#445a5c"
+    },
+    "family": [
+      "father: William White",
+      "mother: Prudence Miller",
+      "sister: Priscilla White",
+      "sister: Silence White"
+    ],
+    "events": [
+      "1799: Born in a small settlement to a Peasant family",
+      "1812: Trusted to tend livestock alone for the first time",
+      "1816: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1818: Staked claim during gold rush",
+      "1819: Inherited valuable tools and a workshop from a childless uncle"
+    ]
+  },
+  "amazon-1200#1": {
+    "name": "Wayna the Grey",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Coya",
+    "religion": "Local Beliefs",
+    "language": "Tupían (reconstructed)",
+    "languageBasis": "sam-amazon",
+    "languageConfidence": "reconstructed",
+    "odds": "the medieval period in South America",
+    "head": "Gold Crown [Gold and Pearls]",
+    "torso": "White Feather Cloak [Hummingbird Feathers]",
+    "feet": "Gold Slippers [Silk and Gold]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#cfa044",
+      "garmentKind": "jacket",
+      "garmentColor": "#ece5d6",
+      "backgroundBase": "#3d5a48"
+    },
+    "family": [
+      "father: Rumi Quespi",
+      "mother: Chaska",
+      "spouse: Rumi Ccopa"
+    ],
+    "events": [
+      "1125: Born in a small settlement to a Merchant family",
+      "1139: Began learning the trade of coya from an experienced practitioner",
+      "1150: Participated in Inti Raymi sun ceremony",
+      "1165: Father died from typhoid fever despite seeking help",
+      "1180: Inherited valuable tools and a workshop from a childless uncle",
+      "1192: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "amazon-1200#2": {
+    "name": "Qhapaq Inca",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Herder",
+    "religion": "Local Beliefs",
+    "language": "Tupían (reconstructed)",
+    "languageBasis": "sam-amazon",
+    "languageConfidence": "reconstructed",
+    "odds": "the medieval period in South America",
+    "head": "Yellow Chullo Hat [Knitted Wool]",
+    "torso": "Green Decorated Poncho [Colored Wool]",
+    "feet": "Leather Shoes [Llama Leather]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#6b6153",
+      "garmentKind": "jacket",
+      "garmentColor": "#4a6b45",
+      "backgroundBase": "#3d415a"
+    },
+    "family": [
+      "father: Lloque Inca",
+      "mother: Kusi the Swift",
+      "spouse: Munay Soncco",
+      "daughter: Chuya Cusipaucar"
+    ],
+    "events": [
+      "1160: Born in a small settlement to a Commoner family",
+      "1173: Trusted to tend livestock alone for the first time",
+      "1180: Inherited valuable tools and a workshop from a childless uncle",
+      "1182: Learned healing songs from village shaman",
+      "1191: A sister married into a well-connected ayllu, improving the family's social standing"
+    ]
+  },
+  "amazon-1200#3": {
+    "name": "Inti",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Herder",
+    "religion": "Ancestor Worship",
+    "language": "Tupían (reconstructed)",
+    "languageBasis": "sam-amazon",
+    "languageConfidence": "reconstructed",
+    "odds": "the medieval period in South America",
+    "head": "Tan Knit Cap [Llama Wool]",
+    "torso": "White Wool Poncho [Undyed Wool]",
+    "feet": "Barefoot [None]",
+    "portrait": {
+      "headwearKind": "cap",
+      "headwearColor": "#6b6153",
+      "garmentKind": "jacket",
+      "garmentColor": "#ece5d6",
+      "backgroundBase": "#3d5a48"
+    },
+    "family": [
+      "father: Wayna",
+      "mother: Phaway Waskar",
+      "sister: Tika the Left-Handed",
+      "sister: Illa Quiso"
+    ],
+    "events": [
+      "1180: Born in a small settlement to a Peasant family",
+      "1195: Helped with the harvest for the first season and proved capable despite a young age",
+      "1196: Participated in Inti Raymi sun ceremony",
+      "1197: A brother's marriage brought valuable new trade connections and opportunities",
+      "1199: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "patagonia-1600#1": {
+    "name": "Coya Cusipaucar",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Roman Catholicism",
+    "language": "Chonan (attested from 1600s)",
+    "languageBasis": "sam-patagonia",
+    "languageConfidence": "inferred",
+    "odds": "the early modern period in South America",
+    "head": "Jeweled Comb [Gold and Pearls]",
+    "torso": "Bronze Velvet Cape [Rich Velvet]",
+    "feet": "Madder Silk Slippers [Embroidered Silk]",
+    "portrait": {
+      "headwearKind": "band",
+      "headwearColor": "#cfa044",
+      "garmentKind": "jacket",
+      "garmentColor": "#b5703c",
+      "backgroundBase": "#3d5a48"
+    },
+    "family": [
+      "father: Huascar Cusipaucar",
+      "mother: Chuya",
+      "spouse: Inti",
+      "daughter: Inti Waman"
+    ],
+    "events": [
+      "1525: Born in a small settlement to a Merchant family",
+      "1539: Learned to read weather signs and predict harvest yields from a parent",
+      "1555: Mother died from childbirth complications, and the family faced new responsibilities",
+      "1560: Took over the family business after a parent retired from active work",
+      "1566: Learned healing songs from village shaman",
+      "1570: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "1596: A sister married into a well-connected ayllu, improving the family's social standing"
+    ]
+  },
+  "patagonia-1600#2": {
+    "name": "Qhapaq Inca",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Herder",
+    "religion": "Roman Catholicism",
+    "language": "Ancestral Mapudungun (hypothetical)",
+    "languageBasis": "sam-patagonia",
+    "languageConfidence": "conjectural",
+    "odds": "the early modern period in South America",
+    "head": "Yellow Wide Brim Hat [Felt]",
+    "torso": "Green Spanish Jacket [Wool]",
+    "feet": "Leather Boots [Spanish Leather]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#6b6153",
+      "garmentKind": "jacket",
+      "garmentColor": "#4a6b45",
+      "backgroundBase": "#3d415a"
+    },
+    "family": [
+      "father: Lloque Inca",
+      "mother: Kusi the Swift",
+      "spouse: Coya",
+      "son: Inti Ccopa"
+    ],
+    "events": [
+      "1560: Born in a small settlement to a Commoner family",
+      "1573: Trusted to tend livestock alone for the first time",
+      "1580: The family pooled their resources to purchase a new plow, a significant investment",
+      "1590: Made offering to mountain apu for good harvest",
+      "1598: A brother's marriage brought valuable new trade connections and opportunities"
+    ]
+  },
+  "patagonia-1600#3": {
+    "name": "Illapa Wankár",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Herder",
+    "religion": "Local Beliefs",
+    "language": "Chonan (attested from 1600s)",
+    "languageBasis": "sam-patagonia",
+    "languageConfidence": "inferred",
+    "odds": "the early modern period in South America",
+    "head": "Yellow Felt Hat [Local Felt]",
+    "torso": "Cream Wool Pants [Coarse Wool]",
+    "feet": "Barefoot [None]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#6b6153",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#e0d3b0",
+      "backgroundBase": "#3d5a48"
+    },
+    "family": [
+      "father: Waman Wankár",
+      "mother: Phaway Waskar",
+      "brother: Puma Wankár"
+    ],
+    "events": [
+      "1580: Born in a small settlement to a Peasant family",
+      "1595: Helped with the harvest for the first season and proved capable despite a young age",
+      "1596: Participated in Inti Raymi sun ceremony",
+      "1597: A brother's marriage brought valuable new trade connections and opportunities",
+      "1599: Inherited valuable tools and a workshop from a childless uncle"
+    ]
+  },
+  "brazil-1880#1": {
+    "name": "Phuyupatamanta Zapana",
+    "gender": "Female",
+    "age": 81,
+    "profession": "Landowner",
+    "religion": "Roman Catholicism",
+    "language": "Modern Portuguese",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in South America",
+    "head": "Jeweled Tiara [Diamonds and Gold]",
+    "torso": "Brown Fur Stole [Chinchilla]",
+    "feet": "Ivory Silk Pumps [Beaded Silk]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#cfa044",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#6b4a33",
+      "backgroundBase": "#3d5a48"
+    },
+    "family": [
+      "father: Inti Zapana",
+      "mother: Yana Choque",
+      "spouse: Illapa Apaza",
+      "son: Apu Quespi"
+    ],
+    "events": [
+      "1799: Born in a small settlement to a Merchant family",
+      "1813: Began learning the trade of landowner from an experienced practitioner",
+      "1841: Took over the family business after a parent retired from active work",
+      "1856: Participated in Inti Raymi sun ceremony",
+      "1864: Divided the land among the children, keeping the best field for old age",
+      "1872: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+    ]
+  },
+  "brazil-1880#2": {
+    "name": "Manco Quiso",
+    "gender": "Male",
+    "age": 45,
+    "profession": "Coffee Planter",
+    "religion": "Roman Catholicism",
+    "language": "Modern Portuguese",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in South America",
+    "head": "Panama Hat [Toquilla Straw]",
+    "torso": "Black Cotton Guayabera [White Cotton]",
+    "feet": "Leather Shoes [Brown Leather]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c2a463",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#232323",
+      "backgroundBase": "#3d5a48"
+    },
+    "family": [
+      "father: Sumaq Quiso",
+      "mother: Sumaq Amaru",
+      "spouse: Phaway Ramos"
+    ],
+    "events": [
+      "1835: Born in a small settlement to a Commoner family",
+      "1847: Began learning the trade of coffee planter from an experienced practitioner",
+      "1851: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1852: A sister married into a well-connected military order, improving the family's social standing",
+      "1860: Father died from starvation, leaving the family to manage affairs alone",
+      "1869: Made offering to mountain apu for good harvest",
+      "1875: The family pooled their resources to purchase a storage barn, a significant investment"
+    ]
+  },
+  "brazil-1880#3": {
+    "name": "Illapa Wankár",
+    "gender": "Male",
+    "age": 21,
+    "profession": "Herder",
+    "religion": "Local Beliefs",
+    "language": "Modern Portuguese",
+    "languageBasis": "attested-table",
+    "languageConfidence": "attested",
+    "odds": "the industrial era in South America",
+    "head": "White Panama Hat [Toquilla Palm]",
+    "torso": "Black Canvas Pants [Heavy Canvas]",
+    "feet": "Barefoot [None]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#f0ece0",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#1c1a19",
+      "backgroundBase": "#3d5a48"
+    },
+    "family": [
+      "father: Inti Wankár",
+      "mother: Wayna",
+      "sister: Phaway Wankár"
+    ],
+    "events": [
+      "1859: Born in a small settlement to a Peasant family",
+      "1874: Helped with the harvest for the first season and proved capable despite a young age",
+      "1876: Participated in Inti Raymi sun ceremony",
+      "1877: A brother's marriage brought valuable new trade connections and opportunities",
+      "1878: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "newguinea-1500#1": {
+    "name": "Veniana",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Melanesian Traditional Religion",
+    "language": "Papuan highland language (hypothetical)",
+    "languageBasis": "oc-new-guinea",
+    "languageConfidence": "inferred",
+    "odds": "the early modern period in Oceania",
+    "head": "Pearl Tiara [Local Pearls and Gold]",
+    "torso": "Royal Tapa [Finest Bark Cloth over Silk]",
+    "feet": "Madder Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#a98a63",
+      "backgroundBase": "#7b8e7b"
+    },
+    "family": [
+      "father: Tomasi",
+      "mother: Nanise",
+      "spouse: Kem",
+      "daughter: Makereta"
+    ],
+    "events": [
+      "1425: Born in a small settlement to a Merchant family",
+      "1439: Learned to read weather signs and predict harvest yields from a parent",
+      "1447: A brother's marriage brought valuable new trade connections and opportunities",
+      "1463: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1469: Inherited responsibility for family fishing grounds",
+      "1472: Inherited valuable tools and a workshop from a childless uncle"
+    ]
+  },
+  "newguinea-1500#2": {
+    "name": "Filipe",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Herder",
+    "religion": "Melanesian Traditional Religion",
+    "language": "Papuan highland language (hypothetical)",
+    "languageBasis": "oc-new-guinea",
+    "languageConfidence": "inferred",
+    "odds": "the early modern period in Oceania",
+    "head": "Madder Felt Hat [Trade Felt]",
+    "torso": "Cream Hybrid Shirt [Cotton and Tapa]",
+    "feet": "Madder Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#a98a63",
+      "backgroundBase": "#627262"
+    },
+    "family": [
+      "father: Petero, father of Waisea",
+      "mother: Talei"
+    ],
+    "events": [
+      "1460: Born in a small settlement to a Commoner family",
+      "1473: Trusted to tend livestock alone for the first time",
+      "1478: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1492: Hosted important feast, strengthening clan ties",
+      "1498: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "newguinea-1500#3": {
+    "name": "Bani",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Herder",
+    "religion": "Melanesian Traditional Religion",
+    "language": "Trans-New Guinea (reconstructed)",
+    "languageBasis": "oc-new-guinea",
+    "languageConfidence": "reconstructed",
+    "odds": "the early modern period in Oceania",
+    "head": "Lauhala Hat [Pandanus Leaves]",
+    "torso": "Tapa Wrap [Local Bark Cloth]",
+    "feet": "Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#a98a63",
+      "backgroundBase": "#4e5b4e"
+    },
+    "family": [
+      "father: Mosese",
+      "mother: Timoci the Red",
+      "brother: Epeli",
+      "brother: Tevita"
+    ],
+    "events": [
+      "1480: Born in a small settlement to a Peasant family",
+      "1495: Helped with the harvest for the first season and proved capable despite a young age",
+      "1497: A brother's marriage brought valuable new trade connections and opportunities",
+      "1499: Inherited valuable tools and a workshop from a childless uncle"
+    ]
+  },
+  "hawaii-1700#1": {
+    "name": "Mailani",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Shepherd",
+    "religion": "Hawaiian Traditional Religion",
+    "language": "Oceanic Austronesian (reconstructed)",
+    "languageBasis": "backstop-oceania",
+    "languageConfidence": "inferred",
+    "odds": "the early modern period in Oceania",
+    "head": "Pearl Tiara [Local Pearls and Gold]",
+    "torso": "Royal Tapa [Finest Bark Cloth over Silk]",
+    "feet": "Madder Barefoot [None]",
+    "portrait": {
+      "headwearKind": "coronet",
+      "headwearColor": "#cfa044",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#8c6a7a",
+      "backgroundBase": "#6c919d"
+    },
+    "family": [
+      "father: Keawe",
+      "mother: Lilia",
+      "spouse: Kawika",
+      "daughter: Kailani"
+    ],
+    "events": [
+      "1625: Born in a small settlement to a Commoner family",
+      "1639: Learned to read weather signs and predict harvest yields from a parent",
+      "1647: A brother's marriage brought valuable new trade connections and opportunities",
+      "1663: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1669: Inherited responsibility for family fishing grounds",
+      "1672: Inherited valuable tools and a workshop from a childless uncle"
+    ]
+  },
+  "hawaii-1700#2": {
+    "name": "Kaipo",
+    "gender": "Male",
+    "age": 61,
+    "profession": "Herder",
+    "religion": "Hawaiian Traditional Religion",
+    "language": "Oceanic Austronesian (reconstructed)",
+    "languageBasis": "backstop-oceania",
+    "languageConfidence": "inferred",
+    "odds": "the early modern period in Oceania",
+    "head": null,
+    "torso": "Tapa Wrap [Local Bark Cloth]",
+    "feet": "Madder Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#a98a63",
+      "backgroundBase": "#415a62"
+    },
+    "family": [
+      "father: Kamal, father of Ulani",
+      "mother: Pikake"
+    ],
+    "events": [
+      "1639: Born in a small settlement to a Commoner family",
+      "1652: Trusted to tend livestock alone for the first time",
+      "1659: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1685: Hosted important feast, strengthening clan ties",
+      "1697: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "hawaii-1700#3": {
+    "name": "Koa",
+    "gender": "Male",
+    "age": 52,
+    "profession": "Herder",
+    "religion": "Hawaiian Traditional Religion",
+    "language": "Papuan language of the islands (hypothetical)",
+    "languageBasis": "backstop-oceania",
+    "languageConfidence": "inferred",
+    "odds": "the early modern period in Oceania",
+    "head": "Lauhala Hat [Pandanus Leaves]",
+    "torso": "Tapa Wrap [Local Bark Cloth]",
+    "feet": "Barefoot [None]",
+    "portrait": {
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c0a566",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#a98a63",
+      "backgroundBase": "#415a62"
+    },
+    "family": [
+      "father: Kanoa, father of Waika",
+      "mother: Lehua"
+    ],
+    "events": [
+      "1648: Born in a small settlement to a Peasant family",
+      "1663: Helped with the harvest for the first season and proved capable despite a young age",
+      "1676: Hosted important feast, strengthening clan ties",
+      "1680: Mother died from typhoid fever, and the family faced new responsibilities",
+      "1681: A brother's marriage brought valuable new trade connections and opportunities",
+      "1684: Took over the family business after a parent retired from active work"
+    ]
+  },
+  "australia-20000bce#1": {
+    "name": "Marlee the Grey",
+    "gender": "Female",
+    "age": 75,
+    "profession": "Hunter",
+    "religion": "Local Beliefs",
+    "language": "Unrecorded language of the region",
+    "languageBasis": "none",
+    "languageConfidence": "conjectural",
+    "odds": "prehistory in Oceania",
+    "head": null,
+    "torso": "White Feather Cape [Soft Feathers]",
+    "feet": "Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "jacket",
+      "garmentColor": "#ece5d6",
+      "backgroundBase": "#6c919d"
+    },
+    "family": [
+      "father: Jannali",
+      "mother: Yamba",
+      "spouse: Jarrah",
+      "daughter: Ulladulla"
+    ],
+    "events": [
+      "-20075: Born to the band that ranged this country",
+      "-20069: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
+      "-20061: Began going out with the older ones, learning the country and how to take from it",
+      "-20058: Followed a river further than anyone in the band had gone, and came back able to describe it",
+      "-20053: An elder died, and with them went the knowledge of country nobody else held",
+      "-20051: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
+      "-20042: Lost a child before it could walk, and buried it under the floor of the shelter",
+      "-20036: Fell badly on the rocks, and the leg never set straight"
+    ]
+  },
+  "australia-20000bce#2": {
+    "name": "Wagga",
+    "gender": "Male",
+    "age": 40,
+    "profession": "Hunter",
+    "religion": "Local Beliefs",
+    "language": "Unrecorded language of the region",
+    "languageBasis": "none",
+    "languageConfidence": "conjectural",
+    "odds": "prehistory in Oceania",
+    "head": null,
+    "torso": "Cream Fiber Loincloth [Plant Fiber]",
+    "feet": "Madder Barefoot [None]",
+    "portrait": {
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "bare",
+      "garmentColor": "#e0d3b0",
+      "backgroundBase": "#415a62"
+    },
+    "family": [
+      "father: Warwick the Patient",
+      "mother: Papunya",
+      "spouse: Narrandera",
+      "daughter: Yamba"
+    ],
+    "events": [
+      "-20040: Born to the band that ranged this country",
+      "-20027: Began going out with the older ones, learning the country and how to take from it",
+      "-20026: Left the band of birth to live with another, as is the custom",
+      "-20016: Went through the ice, and lost feeling in the fingers of one hand for good",
+      "-20013: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
+      "-20012: The herds did not come that year, and the camp moved three times looking for them",
+      "-20011: Lost a child before it could walk, and buried it under the floor of the shelter",
+      "-20009: Found an outcrop of workable stone, and the band returned to it for years afterwards"
+    ]
+  },
+  "australia-20000bce#3": {
+    "name": "Koori",
+    "gender": "Male",
+    "age": 20,
+    "profession": "Hunter",
+    "religion": "Ancestor Worship",
+    "language": "Unrecorded language of the region",
+    "languageBasis": "none",
+    "languageConfidence": "conjectural",
+    "odds": "prehistory in Oceania",
+    "head": "Rust Feather Band [Bird Feathers]",
+    "torso": "White Fiber Loincloth [Plant Fiber]",
+    "feet": "Rust Barefoot [None]",
+    "portrait": {
+      "headwearKind": "band",
+      "headwearColor": "#b5563f",
+      "garmentKind": "bare",
+      "garmentColor": "#ece5d6",
+      "backgroundBase": "#415a62"
+    },
+    "family": [
+      "father: Birrani",
+      "mother: Tiwi",
+      "brother: Mandawuy"
+    ],
+    "events": [
+      "-20020: Born to the band that ranged this country",
+      "-20007: Was among the party that drove a herd into the narrows, and the band ate well for many days",
+      "-20006: Left the band of birth to live with another, as is the custom",
+      "-20005: Began going out with the older ones, learning the country and how to take from it",
+      "-20004: An elder died, and with them went the knowledge of country nobody else held",
+      "-20003: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-20002: Sat through the long night when the songs are given to those old enough to hold them"
     ]
   }
 }

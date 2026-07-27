@@ -117,8 +117,23 @@ export function describePhysicalAppearance(
   return '';
 }
 
+/**
+ * Event texts come in two shapes: bare predicates that need a subject supplied
+ * ("began learning the trade"), and complete clauses that already have one
+ * ("Swarms of locusts descended on the fields").
+ *
+ * This used to list the subjects, which is an open set — every noun any
+ * template might open with. "Swarms" was not on it, so a persona's biography
+ * read "At age 82, you swarms of locusts descended on the fields". Listing the
+ * *verbs* instead is a closed set, and it fails in the safe direction: an
+ * opening we do not recognise is left as-is, which reads correctly, rather
+ * than having a pronoun stapled to the front of it.
+ */
+const PREDICATE_OPENERS =
+  /^(?:[a-z]+ed|began|broke|brought|built|bought|came|caught|chose|did|drew|drove|fell|fought|found|gave|went|grew|had|heard|held|kept|knew|laid|led|left|lost|made|met|paid|put|ran|rose|said|sang|sat|saw|sold|sent|set|shot|showed|sought|spent|spoke|stood|struck|swore|took|taught|told|took|understood|wore|won|wrote|bore|bound|dug|fed|felt|fled|flew|forgot|froze|hid|hit|hung|hurt|lay|lent|lit|meant|rode|rang|shook|shrank|slept|slid|spun|spread|stole|stuck|stung|swam|swept|swung|tore|threw|woke|wove)\b/i;
+
 function eventAlreadyHasSubject(text: string): boolean {
-  return /^(?:a|an|the|his|her|their|one|two|three|father|mother|brother|sister|family|guild|heavy|illness|tragedy|war|fire|flood|famine|plague)\b/i.test(text);
+  return !PREDICATE_OPENERS.test(text);
 }
 
 export function describeLifeEvent(

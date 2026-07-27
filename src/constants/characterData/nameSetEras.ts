@@ -224,6 +224,13 @@ export function prehistoricNameKeyFor(
     const australian = /australia|aboriginal|arnhem|kimberley|tasmania|outback|queensland|murray|cape york/i.test(region);
     if (australian || year < -1500) return 'ABORIGINAL_AUSTRALIAN';
   }
+  // `EAST_ASIAN` reaches from the Fujian coast to the Altai. The farming basins
+  // and the steppe belt did not share a naming world, and pooling them put a
+  // Turkic sky-god's name on a South China farmer.
+  if (culturalZone === 'EAST_ASIAN'
+    && /steppe|mongol|altai|dzungar|siberia|manchuria|tian shan|tarim|kazakh|transoxiana|aral|kyzylkum|khorasan/i.test(region)) {
+    return 'PREHISTORIC_INNER_ASIAN';
+  }
   return PREHISTORIC_BY_ZONE[culturalZone] || 'PREHISTORIC_ASIAN';
 }
 

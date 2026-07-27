@@ -688,6 +688,16 @@ export function generateClothingPalette(wealthLevel: WealthLevel, era: Historica
 }
 
 
+/**
+ * Style names describe the *form* of the hair, not a culture or a decade.
+ *
+ * This table is keyed by era alone — there is no cultural-zone axis — so any
+ * culturally named entry is wrong everywhere but its own culture, and any
+ * decade-named entry is wrong across most of its era. A woman on the Rif coast
+ * in 620 BCE was wearing "roman waves"; a merchant in Iraq in 1985 was wearing
+ * "finger waves", a style of the 1920s. Describing the shape instead is true
+ * in more places and claims less.
+ */
 function getHairstyle(era: HistoricalEra, gender: Gender, noise: ValueNoise): string {
     const isFemale = gender === 'Female';
     const isYoung = noise.random() < 0.3;
@@ -695,20 +705,20 @@ function getHairstyle(era: HistoricalEra, gender: Gender, noise: ValueNoise): st
 
     const maleStyles: Record<string, string[]> = {
       'PREHISTORY': isYoung ? ['medium_messy', 'tied_back'] : isOld ? ['balding', 'thin_long', 'elder_wild'] : ['long_wild', 'medium_messy', 'tied_back', 'warrior_knot', 'shaman_braids'],
-      'ANTIQUITY': isYoung ? ['short_cropped', 'medium_curled', 'youth_locks'] : isOld ? ['balding', 'philosopher_beard', 'elder_crown'] : ['short_cropped', 'medium_curled', 'warrior_knot', 'philosopher_beard', 'senator_style'],
-      'MEDIEVAL': isYoung ? ['bowl_cut', 'page_cut', 'squire_style'] : isOld ? ['monk_style', 'thin_long', 'elder_tonsure'] : ['bowl_cut', 'shoulder_length', 'monk_style', 'knight_cut', 'noble_waves'],
-      'RENAISSANCE_EARLY_MODERN': ['shoulder_curled', 'short_styled', 'renaissance_bob', 'courtier_locks', 'artist_mane'],
-      'INDUSTRIAL_ERA': isOld ? ['balding', 'thin_sides', 'gentleman_receding'] : ['side_part', 'slicked_back', 'gentleman_cut', 'victorian_waves', 'industrialist_style'],
+      'ANTIQUITY': isYoung ? ['short_cropped', 'medium_curled', 'youth_locks'] : isOld ? ['balding', 'full_beard_long_hair', 'elder_crown'] : ['short_cropped', 'medium_curled', 'warrior_knot', 'full_beard_long_hair', 'short_combed_forward'],
+      'MEDIEVAL': isYoung ? ['bowl_cut', 'page_cut', 'short_bowl'] : isOld ? ['shaved_crown', 'thin_long', 'thin_shaved_crown'] : ['bowl_cut', 'shoulder_length', 'shaved_crown', 'cropped_at_the_jaw', 'noble_waves'],
+      'RENAISSANCE_EARLY_MODERN': ['shoulder_curled', 'short_styled', 'blunt_jaw_length', 'long_curled', 'loose_shoulder_length'],
+      'INDUSTRIAL_ERA': isOld ? ['balding', 'thin_sides', 'receding_short'] : ['side_part', 'slicked_back', 'short_back_and_sides', 'oiled_side_waves', 'trimmed_and_oiled'],
       'MODERN_ERA': ['pompadour', 'side_part', 'short_modern', 'slick_back', 'professional_cut', 'contemporary_fade']
     };
     
     const femaleStyles: Record<string, string[]> = {
       'PREHISTORY': isYoung ? ['braided_long', 'tied_back', 'maiden_wild'] : ['long_wild', 'braided_long', 'tied_back', 'tribal_braids', 'elder_knots'],
-      'ANTIQUITY': ['greek_bun', 'roman_waves', 'braided_crown', 'goddess_locks', 'priestess_style'],
-      'MEDIEVAL': isYoung ? ['long_plaits', 'maiden_braids', 'novice_style'] : ['braided_buns', 'covered_hair', 'long_plaits', 'courtly_braids', 'noble_wimple'],
-      'RENAISSANCE_EARLY_MODERN': ['elaborate_braids', 'side_curls', 'high_forehead', 'pearl_net', 'renaissance_rolls'],
-      'INDUSTRIAL_ERA': isYoung ? ['gibson_girl', 'loose_curls', 'young_lady_style'] : ['victorian_updo', 'gibson_girl', 'elaborate_bun', 'chignon', 'matron_waves'],
-      'MODERN_ERA': isYoung ? ['bob_cut', 'finger_waves', 'flapper_style'] : ['bob_cut', 'finger_waves', 'pin_curls', 'victory_rolls', 'marcel_waves', 'modern_sophisticated']
+      'ANTIQUITY': ['gathered_bun', 'waved_and_pinned', 'braided_crown', 'long_loose_locks', 'veiled_and_bound'],
+      'MEDIEVAL': isYoung ? ['long_plaits', 'maiden_braids', 'novice_style'] : ['braided_buns', 'covered_hair', 'long_plaits', 'courtly_braids', 'covered_and_wrapped'],
+      'RENAISSANCE_EARLY_MODERN': ['elaborate_braids', 'side_curls', 'high_forehead', 'pearl_net', 'rolled_at_the_temples'],
+      'INDUSTRIAL_ERA': isYoung ? ['piled_high_soft', 'loose_curls', 'young_lady_style'] : ['high_pinned_updo', 'piled_high_soft', 'elaborate_bun', 'chignon', 'matron_waves'],
+      'MODERN_ERA': isYoung ? ['bob_cut', 'flat_set_waves', 'short_shingled'] : ['bob_cut', 'flat_set_waves', 'pin_curls', 'rolled_and_set', 'set_waves', 'smooth_shoulder_length']
     };
     
     const styles = (isFemale ? femaleStyles[era] : maleStyles[era]) || maleStyles['MEDIEVAL'];
