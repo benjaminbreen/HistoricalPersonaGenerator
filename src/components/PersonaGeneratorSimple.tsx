@@ -198,7 +198,7 @@ import {
 } from '../services/narrativeTextService';
 import { generateNarrativeBiography } from '../services/narrativeBiographyService';
 import { polityFormFor, socialStatusFieldLabel } from '../services/socialStatusService';
-import { describeYear, getPolityAt } from '../services/polityService';
+import { describeYear, getPolityAt, withPolityArticle } from '../services/polityService';
 import { historicalPlaceLabel } from '../constants/gameData/placeLabels';
 import { zoneAccent } from '../constants/gameData/zonePalette';
 import { devLog } from '../utils/devLog';
@@ -1013,7 +1013,7 @@ const lockProceduralSeedRecord = (
     settlement_or_locality: proceduralPersona.location,
     place_notes: [
       `Locked to procedural seed location ${proceduralPersona.location}, ${proceduralPersona.region}.`,
-      polity && `Under ${polity.name} here since ${describeYear(polity.since)}.`,
+      polity && `Under ${withPolityArticle(polity.name)} here since ${describeYear(polity.since)}.`,
       locked.persona_seed.place.place_notes,
     ].filter(Boolean).join(' ').trim(),
   };

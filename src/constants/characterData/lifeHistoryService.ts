@@ -23,6 +23,7 @@ import {
   type SubsistenceMode,
 } from '../societyCapabilities';
 import { withIndefiniteArticle } from '../../services/narrativeTextService';
+import { getPolityAt, getPolityChanges, withPolityArticle } from '../../services/polityService';
 import { random as seededRandom } from '../../utils/seededRandom';
 
 // ============================================================================
@@ -2134,10 +2135,83 @@ export function generateLifeHistory(
     }
   }
 
+  events.push(...regimeChangeEvents(capabilityPlace, culturalZone, birthYear, currentYear));
+
   // Sort events chronologically
   events.sort((a, b) => a.year - b.year);
 
   return events;
+}
+
+/** "second", "third" — only as far as a single lifetime plausibly reaches. */
+const ORDINALS = ['', '', 'second', 'third', 'fourth', 'fifth', 'sixth'];
+
+/**
+ * The states that took the place over while the persona was living in it.
+ *
+ * This is the one kind of world event the generator can date exactly, because
+ * it is read from `polityService` rather than drawn from a template pool. That
+ * is also what keeps it off the wrong side of the era-agnostic measure in
+ * `auditNarrative`: a sentence that can only be written in a year a real
+ * regime actually changed cannot leak into every era the way "A brother's
+ * marriage brought valuable new trade connections" does.
+ *
+ * The four phrasings are chosen by the persona's age rather than at random, so
+ * the variety tracks something true — a takeover at six is hearsay, at forty it
+ * is an administration to deal with, and at seventy it may be the third one.
+ *
+ * Each text is a bare predicate opening with a verb `narrativeTextService`
+ * recognises, because that is the shape the biography layer expects: it supplies
+ * the subject and the age itself. Writing "At 19, Joseon gave way to…" here
+ * produced "At age 19, at 19, Joseon gave way to…" in the biography.
+ *
+ * Two bounds, both deliberate: changes before age five are dropped as outside
+ * memory, and at most three are kept, because Paris between 1780 and 1850 saw
+ * five and a timeline is not a chronicle.
+ */
+function regimeChangeEvents(
+  place: string,
+  culturalZone: CulturalZone,
+  birthYear: number,
+  currentYear: number,
+): EnhancedLifeEvent[] {
+  const changes = getPolityChanges({ region: place, culturalZone }, birthYear, currentYear)
+    .filter(change => change.since - birthYear >= 5)
+    .slice(0, 3);
+  if (changes.length === 0) return [];
+
+  const bornUnder = getPolityAt({ year: birthYear, region: place, culturalZone })?.name;
+
+  return changes.map((change, index) => {
+    const age = change.since - birthYear;
+    const previous = index === 0
+      ? bornUnder
+      : changes[index - 1].name;
+    const seen = index + 2; // the state at birth, plus every change so far
+    const took = withPolityArticle(change.name);
+    const lost = previous ? withPolityArticle(previous) : undefined;
+
+    let text: string;
+    if (age < 12 && lost) {
+      text = `grew up under ${took}, which had taken the place from ${lost} too early to be remembered`;
+    } else if (age < 25 && lost) {
+      text = `saw ${lost} give way to ${took}`;
+    } else if (seen >= 3) {
+      text = `lived through a ${ORDINALS[seen] ?? 'further'} change of rule, to ${took}`;
+    } else if (lost) {
+      text = `came under ${took}, having been born under ${lost}`;
+    } else {
+      text = `came under ${took}, where no state had claimed the place before`;
+    }
+
+    return {
+      year: change.since,
+      kind: 'political' as EventKind,
+      importance: EventImportance.MILESTONE,
+      title: 'Change of rule',
+      text,
+    };
+  });
 }
 
 // ============================================================================

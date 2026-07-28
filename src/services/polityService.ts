@@ -794,6 +794,22 @@ export function getPolityAt(ctx: PolityContext): ResolvedPolity | undefined {
 }
 
 /**
+ * A polity name as it appears mid-sentence: "the Mughal Empire", "Joseon".
+ *
+ * The names above are stored as a reference work would list them, which is the
+ * right form for a schema field and the wrong one for running prose — "gave way
+ * to Korean Empire". Whether English wants an article here follows the common
+ * noun inside the name, not the name itself: an Empire, a Kingdom or a dynasty
+ * takes one, and Joseon, Brazil and Nazi Germany do not.
+ */
+export function withPolityArticle(name: string): string {
+  if (/^the\b/i.test(name)) return name;
+  return /\b(empire|kingdom|republic|sultanate|caliphate|dynasty|confederation|federation|union|states|raj|commonwealth|shogunate|khanate|lordship|monarchy|colonies|colony|court|protectorate|khedivate|viceroyalty)\b/i.test(name)
+    ? `the ${name}`
+    : name;
+}
+
+/**
  * A year as it would be written in a note: "1526", "330 BCE".
  *
  * Lives here because the negative-year convention is this table's, and the
