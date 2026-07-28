@@ -182,6 +182,7 @@ const ageBands: Counted = {};
 const greyBands: Counted = {};
 const restingFaces: Counted = {};
 const ornamentKinds: Counted = {};
+const garmentSurfaces: Counted = {};
 const ornamentMaterials: Counted = {};
 const plainHeadwear: Counted = {};
 const severities: Counted = {};
@@ -253,6 +254,7 @@ for (let i = 0; i < count; i += 1) {
     // named head items still come out undecorated. The second list is the one
     // that matters: it is where the next batch of keywords comes from, and it
     // is what stops 263 named items quietly reverting to plain bands.
+    for (const s2 of spec.garment.surfaces) bump(garmentSurfaces, `${s2.kind}/${s2.material}`);
     if (spec.headwear) {
       if (spec.headwear.ornaments.length === 0) bump(plainHeadwear, spec.headwear.name);
       for (const o of spec.headwear.ornaments) {
@@ -395,6 +397,8 @@ rule('Age');
 table(ageBands, rendered);
 rule('Greying');
 table(greyBands, rendered);
+rule('Garment surfaces drawn');
+table(garmentSurfaces, rendered);
 rule('Ornament parts drawn');
 table(ornamentKinds, rendered);
 rule('Ornament materials drawn');

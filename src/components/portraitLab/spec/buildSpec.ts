@@ -22,6 +22,7 @@ import {
   Expression,
   GarmentKind,
   GarmentSpec,
+  GarmentSurfaceSpec,
   HairLength,
   HairSilhouette,
   HeadwearKind,
@@ -350,6 +351,66 @@ export function ornamentsFor(
   }
 
   return { ornaments, matched: ornaments.length > 0 };
+}
+
+/**
+ * How a garment is decorated, read out of its name and material.
+ *
+ * Ordered by how much of the cloth the treatment claims. A robe can be brocade
+ * *and* fur-trimmed, and those coexist happily — one is the field and one is
+ * the edge — but it cannot be brocade and printed, so the field treatments are
+ * mutually exclusive by group and the edge treatments by another.
+ */
+const GARMENT_SURFACE_KEYWORDS: Array<{
+  pattern: RegExp;
+  kind: GarmentSurfaceSpec['kind'];
+  group: 'field' | 'edge';
+}> = [
+  { pattern: /brocade|damask|figured|jacquard|tissue|cloth of gold|cloth of silver/i, kind: 'brocade', group: 'field' },
+  { pattern: /print|painted|block.?print|batik|resist|stamped/i, kind: 'print', group: 'field' },
+  { pattern: /striped?|check|plaid|tartan|banded|narrow.strip|kente|ikat/i, kind: 'stripe', group: 'field' },
+
+  { pattern: /embroider|needlework|couched|gold thread|silver thread|zari/i, kind: 'embroidery', group: 'edge' },
+  { pattern: /lace|openwork|filet/i, kind: 'lace', group: 'edge' },
+  { pattern: /\bfur\b|ermine|sable|miniver|shearling/i, kind: 'furTrim', group: 'edge' },
+  { pattern: /bead|spangle|sequin|cowrie|shells?\b/i, kind: 'beading', group: 'edge' },
+];
+
+export function garmentSurfacesFor(
+  name: string,
+  material: string,
+  wealth: number
+): { surfaces: GarmentSurfaceSpec[]; matched: boolean } {
+  const text = `${name} ${material}`;
+  const surfaces: GarmentSurfaceSpec[] = [];
+  const usedGroups = new Set<string>();
+
+  for (const rule of GARMENT_SURFACE_KEYWORDS) {
+    if (usedGroups.has(rule.group)) continue;
+    if (!rule.pattern.test(text)) continue;
+    usedGroups.add(rule.group);
+
+    // Metal thread is named often enough to be worth honouring; otherwise the
+    // treatment takes a plausible default for what it is. Fur is not painted
+    // in the ornament palette at all — it takes the garment's own accent.
+    const material_ = ornamentMaterialFor(
+      text,
+      rule.kind === 'furTrim' ? 'bone'
+        : rule.kind === 'beading' ? 'pearl'
+        : rule.kind === 'lace' ? 'pearl'
+        : 'gold'
+    );
+
+    surfaces.push({
+      kind: rule.kind,
+      material: material_,
+      // Cloth of gold on a noble is not the same object as a printed cotton on
+      // a farmer, and the difference at this size is mostly density.
+      intensity: clamp01(0.35 + wealth * 0.65),
+    });
+  }
+
+  return { surfaces, matched: surfaces.length > 0 };
 }
 
 function classify<T>(name: string, table: Array<[RegExp, T]>, fallback: T): T {
@@ -863,6 +924,8 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
       accent: palette.accent || '#a8834f',
     },
     ornament: ornamentBase,
+    surfaces: garmentSurfacesFor(
+      garmentPiece.name || '', garmentPiece.material || '', ornamentBase).surfaces,
   };
 
   // --- headwear -------------------------------------------------------------

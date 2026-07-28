@@ -21,6 +21,7 @@ import { Ramp } from '../core/color';
 import { choose, makeNoise1D, makeNoise2D, makeRng } from '../core/rng';
 import { RenderContext } from '../render/context';
 import { GarmentKind } from '../spec/types';
+import { drawGarmentSurface } from './garmentSurface';
 
 export interface BodyMasks {
   body: Mask;
@@ -226,6 +227,10 @@ export function drawGarment(context: RenderContext): BodyMasks {
   }, { dither: 0.5 });
 
   applyClothSurface(context, body);
+  // Named decoration goes on before the folds, so the folds shade *over* the
+  // pattern the way real cloth does — a brocade that ignores the fold it is
+  // lying in reads as wallpaper rather than as a garment.
+  drawGarmentSurface(context, body, opening);
   drawFolds(context, body);
   drawCollar(context, body, opening);
   drawContextDetails(context, body);

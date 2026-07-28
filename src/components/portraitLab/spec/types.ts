@@ -113,6 +113,38 @@ export interface SpecColorSet {
   accent: string;
 }
 
+/**
+ * How a cloth is decorated, as distinct from what it is cut into.
+ *
+ * The same collapse as the headgear: 490 garment names, eight silhouettes. But
+ * a garment decorates differently from a hat — nothing is *stuck on* it, the
+ * treatment is in the weave or along the edge — so it wants its own vocabulary
+ * rather than the ornament one. 23% of the entries in `clothing.ts` name a
+ * surface, and they group tightly: 37 brocade or figured, 26 printed or
+ * painted, 12 embroidered, 11 lace, 11 fur, 8 patterned, 8 beaded.
+ *
+ * Split by where they live. `brocade`, `print` and `stripe` cover the field;
+ * the rest are edge treatments, which matters because the frame leaves only
+ * about seventeen rows of chest below the collar — and the neckline is the part
+ * of a garment a bust portrait actually shows.
+ */
+export type GarmentSurfaceKind =
+  | 'brocade'    // a woven motif, tone on tone, catching light at the turns
+  | 'print'      // a bolder repeat in a contrasting dye
+  | 'stripe'     // woven bands
+  | 'embroidery' // a worked band following the neckline
+  | 'lace'       // openwork at the edge
+  | 'furTrim'    // a soft broken edge
+  | 'beading';   // beads or spangles along the neck
+
+export interface GarmentSurfaceSpec {
+  kind: GarmentSurfaceKind;
+  /** Reuses the ornament palette, so gold thread here is gold there. */
+  material: OrnamentMaterial;
+  /** 0..1 — how dense and how bright. Wealth and material both feed it. */
+  intensity: number;
+}
+
 export interface GarmentSpec {
   kind: GarmentKind;
   name: string;
@@ -120,6 +152,8 @@ export interface GarmentSpec {
   colors: SpecColorSet;
   /** Trim, embroidery, and metal fittings scale with this. */
   ornament: number;
+  /** Decoration read out of the item's own name. */
+  surfaces: GarmentSurfaceSpec[];
 }
 
 export interface HeadwearSpec {
