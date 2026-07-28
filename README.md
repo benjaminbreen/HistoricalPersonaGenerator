@@ -8,6 +8,12 @@ A generator that produces a plausible ordinary person from a given time and plac
 
 This project began as a procedural historical character generator for the (overly ambitious, now defunct) [Universal History Simulator](https://github.com/benjaminbreen/UHS). As I kept working on it, AI coding tools made things feasible that I wouldn't have attempted alone — the portrait engine, most obviously — and it turned into a longer experiment: how far can a purely procedural system be pushed while staying roughly accurate? It does produce errors. The aim is an educated guess from available evidence, with the reasoning inspectable.
 
+## Who it's for
+
+I built it for my own classroom, but most of the people using it are not historians: writers and game designers who need a character grounded in a period rather than in generic period flavor, tabletop players building someone to run, teachers assembling a lesson, students, and readers who want to see how differently a life could have gone.
+
+One caveat applies to all of them. A generated persona is a historically informed draft, not a reconstruction of a real person — unless a source clearly supports a detail, in which case the app says so.
+
 ## What gets generated
 
 Each persona is assembled from constraints rather than sampled from a list of archetypes:
@@ -24,7 +30,7 @@ Coverage runs 40,000 BCE through the present across nine cultural zones, tightes
 
 ### A note on where personas come from
 
-"Generate a random historical persona" contains a hidden claim: that the persona is drawn from some population. The naive answer — uniform over the options in a dropdown — is off by more than an order of magnitude. So the app models the actual distribution of human lives.
+Asking for "a random historical persona" raises a question the app has to answer somehow: random out of what? The easy answer is to give each of the nine cultural zones an equal chance. But that makes an Oceanian life as likely as an East Asian one, when Oceania was roughly 0.5% of everyone who ever lived and East Asia roughly 26% — equal odds over-represent Oceania about twentyfold. So the app weights each era and region by the number of people actually born there.
 
 Era weights come from the Population Reference Bureau's birth table (Haub 1995, updated Kaneda 2022), integrated rather than guessed: roughly **117 billion humans ever born**. Regional weights are person-year estimates triangulated from McEvedy & Jones. The results are counterintuitive. Antiquity (3000 BCE–500 CE) holds about 40% of all human lives — a long window, populations already in the hundreds of millions, birth rates at their historical maximum. The early modern period (1450–1750), which *feels* central because that is where the archives are, is under 8%. Oceania is about one human life in two hundred.
 
