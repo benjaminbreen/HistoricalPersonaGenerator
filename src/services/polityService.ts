@@ -728,8 +728,24 @@ const ALLEGIANCES: Array<{
       { from: 1924, name: "Mongolian People's Republic" },
     ],
   },
+  // The steppe was nomadic, not ungoverned, and from the fifteenth century it
+  // was a khanate with a name. This entry sits before the oasis one so that
+  // Transoxiana and Khorasan — both filed under the Kazakh Steppes region in
+  // `geography.ts`, though neither is steppe — fall through to it.
   {
-    match: /central asian oases|transoxiana|samarkand|bukhara|xinjiang/i,
+    match: /kazakh|altai|aral sea|tian shan|dzungarian/i,
+    eras: [
+      { from: 1465, until: 1847, name: 'the Kazakh Khanate' },
+      { from: 1847, until: 1917, name: 'Russian Empire' },
+      { from: 1922, until: 1991, name: 'Soviet Union' },
+      { from: 1991, name: 'Kazakhstan' },
+    ],
+  },
+  // Khorasan belongs here rather than with the Persian plateau: the Samanids
+  // and Timurids were centred on it together with Transoxiana, and it spent
+  // more of its history looking north-east than south-west.
+  {
+    match: /central asian oases|transoxiana|samarkand|bukhara|ferghana|kyzylkum|khorasan/i,
     eras: [
       { from: -329, until: -250, name: 'the Hellenistic successor kingdoms' },
       { from: 819, until: 999, name: 'the Samanid Empire' },
@@ -737,6 +753,54 @@ const ALLEGIANCES: Array<{
       { from: 1370, until: 1507, name: 'Timurid Empire' },
       { from: 1876, until: 1917, name: 'Russian Turkestan' },
       { from: 1922, until: 1991, name: 'Soviet Union' },
+      { from: 1991, name: 'the Central Asian republics' },
+    ],
+  },
+  // Xinjiang used to be caught by the oasis pattern above, which handed it
+  // Russian Turkestan in 1900 — a polity six hundred miles west of it. The
+  // Tarim Basin was Qing from 1759 and Chinese after.
+  {
+    match: /xinjiang|tarim|kunlun|qaidam/i,
+    eras: [
+      { from: 640, until: 790, name: 'the Tang protectorate of the Western Regions' },
+      { from: 1220, until: 1370, name: 'the Chagatai Khanate' },
+      { from: 1634, until: 1755, name: 'the Dzungar Khanate' },
+      { from: 1759, until: 1912, name: 'Qing dynasty' },
+      { from: 1912, until: 1949, name: 'Republic of China' },
+      { from: 1949, name: "People's Republic of China" },
+    ],
+  },
+  {
+    match: /siberia|kamchatka/i,
+    eras: [
+      { from: 1468, until: 1598, name: 'the Khanate of Sibir' },
+      { from: 1598, until: 1721, name: 'Tsardom of Russia' },
+      { from: 1721, until: 1917, name: 'Russian Empire' },
+      { from: 1922, until: 1991, name: 'Soviet Union' },
+      { from: 1991, name: 'Russian Federation' },
+    ],
+  },
+  // Sakhalin changed hands twice more than the mainland did, and a persona born
+  // on it in 1910 was a Japanese subject while one across the strait was not.
+  {
+    match: /sakhalin/i,
+    eras: [
+      { from: 1875, until: 1905, name: 'Russian Empire' },
+      { from: 1905, until: 1945, name: 'Japanese colonial rule' },
+      { from: 1945, until: 1991, name: 'Soviet Union' },
+      { from: 1991, name: 'Russian Federation' },
+    ],
+  },
+  // Matched on the local area alone. "Manchuria" appears in the region name
+  // "Mongolia and Manchuria", so a pattern containing it would claim the
+  // Mongolian steppe and the Gobi as well.
+  {
+    match: /manchurian plain|liao basin|harbin|mukden/i,
+    eras: [
+      { from: 1636, until: 1912, name: 'Qing dynasty' },
+      { from: 1912, until: 1932, name: 'Republic of China' },
+      { from: 1932, until: 1945, name: 'Manchukuo' },
+      { from: 1949, name: "People's Republic of China" },
     ],
   },
 
