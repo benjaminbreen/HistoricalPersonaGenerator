@@ -133,9 +133,43 @@ export function buildPortraitRamps(spec: PortraitSpec): PortraitRamps {
     rgbToHex(mixRgb(skinRgb, { r: 158, g: 74, b: 74 }, spec.gender === 'Female' ? 0.36 : 0.26));
   const lip = buildRamp(lipHex, { contrast: 0.98, shift: 0.32, saturation: 1.1 });
 
-  const clothA = buildRamp(spec.garment.colors.primary, materialOptions(spec.garment.material));
-  const clothB = buildRamp(spec.garment.colors.secondary, materialOptions(spec.garment.material));
-  const clothC = buildRamp(spec.garment.colors.accent, { contrast: 1.15, shift: 0.3, saturation: 1.1 });
+  /**
+   * Wealth in the cloth itself, not only in what is sewn onto it.
+   *
+   * This is the one place where the historically true thing and the legible
+   * thing are the same thing. Before synthetic dyes, saturation *was* the
+   * expense: kermes, Tyrian purple, good indigo and lac cost what they did
+   * because they held a deep colour through repeated dyeing, while the poor
+   * wore undyed wool, weld, madder cut with clay, or whatever a single bath
+   * would give. So a noble's red is not a peasant's red with braid on it — it
+   * is a different red, and pushing chroma with wealth is not a flourish but
+   * the actual difference.
+   *
+   * Contrast rises with it too, because the fibres that took dye best — silk,
+   * fine worsted — are also the ones that reflect most sharply.
+   */
+  const WEALTH_RICHNESS: Record<string, { saturation: number; contrast: number }> = {
+    poor: { saturation: 0.72, contrast: 0.92 },
+    modest: { saturation: 0.88, contrast: 0.97 },
+    comfortable: { saturation: 1.0, contrast: 1.0 },
+    wealthy: { saturation: 1.22, contrast: 1.12 },
+    noble: { saturation: 1.42, contrast: 1.2 },
+  };
+  const richness = WEALTH_RICHNESS[spec.wealth] || WEALTH_RICHNESS.comfortable;
+  const clothOptions = materialOptions(spec.garment.material);
+  const richCloth: RampOptions = {
+    ...clothOptions,
+    saturation: (clothOptions.saturation ?? 1) * richness.saturation,
+    contrast: (clothOptions.contrast ?? 1) * richness.contrast,
+  };
+
+  const clothA = buildRamp(spec.garment.colors.primary, richCloth);
+  const clothB = buildRamp(spec.garment.colors.secondary, richCloth);
+  const clothC = buildRamp(spec.garment.colors.accent, {
+    contrast: 1.15 * richness.contrast,
+    shift: 0.3,
+    saturation: 1.1 * richness.saturation,
+  });
 
   const headwear = spec.headwear
     ? buildRamp(spec.headwear.color, materialOptions(spec.headwear.material))

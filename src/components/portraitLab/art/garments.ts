@@ -359,19 +359,30 @@ function drawFolds(context: RenderContext, body: Mask): void {
 function drawCollar(context: RenderContext, body: Mask, opening: Mask): void {
   const { raster, spec, anatomy, ramps, book } = context;
   const { size } = anatomy;
-  const edge = maskIntersect(maskDilate(maskDilate(opening, size, size, true), size, size, true), body);
-
   // Only genuinely well-off dress gets a contrasting trim. Everyone else gets
   // the same cloth turned under, which is what an ordinary neckline is — a
   // bright accent line on every single garment made the whole population look
   // like it was wearing the same piped uniform.
   const useAccent = spec.garment.ornament > 0.55;
+
+  // And a noble's is wider. Breadth of trim is the cheapest rank signal there
+  // is at this size, because it is the one that survives being two pixels: the
+  // eye cannot tell a fine braid from a coarse one but it can tell a narrow
+  // band from a broad one at a glance across a page of forty portraits.
+  const broad = spec.garment.ornament > 0.85;
+  let grown = maskDilate(maskDilate(opening, size, size, true), size, size, true);
+  if (broad) grown = maskDilate(grown, size, size, true);
+  const edge = maskIntersect(grown, body);
+
   const ramp = useAccent ? ramps.clothC : ramps.clothA;
   const material = useAccent ? MAT.CLOTH_C : MAT.CLOTH_A;
   fillMask(raster, edge, ramp, material, (x, y) => {
     // A turned edge reads as a lit lip above a shadowed fold.
     const lit = y < anatomy.collarY;
-    return (useAccent ? (lit ? 2.4 : 3.6) : (lit ? 1.8 : 4.6));
+    if (!useAccent) return lit ? 1.8 : 4.6;
+    // Brighter as well as broader: a trim of real gold or fine silk sits above
+    // the cloth's own value range rather than inside it.
+    return broad ? (lit ? 1.3 : 3.2) : (lit ? 2.4 : 3.6);
   });
 
   // The garment's own edge always reads darker where it turns under.

@@ -169,9 +169,14 @@ function drawEmbroidery(context: RenderContext, band: Mask, surface: GarmentSurf
       if (raster.matAt(x, y) !== MAT.CLOTH_A && raster.matAt(x, y) !== MAT.CLOTH_C) continue;
       // A running stitch: two on, one off, staggered by row so the pattern
       // travels diagonally the way real couching does.
+      //
+      // On a rich garment it closes up into solid goldwork. Court embroidery
+      // is not a line of stitches with cloth showing between them — it is a
+      // surface, worked until the ground disappears, and at this size that is
+      // the whole difference between a trimmed collar and an expensive one.
       const phase = (x + y * 2) % 3;
       if (!dense && phase === 0) continue;
-      const index = phase === 1 ? 1 : 3;
+      const index = dense ? (phase === 1 ? 0 : 2) : (phase === 1 ? 1 : 3);
       raster.set(x, y, ramp.steps[index], MAT.CLOTH_C, index);
     }
   }
@@ -226,9 +231,12 @@ function drawFurTrim(context: RenderContext, band: Mask, surface: GarmentSurface
       if (mat !== MAT.CLOTH_A && mat !== MAT.CLOTH_C) continue;
       // Clumped rather than graded: neighbouring pixels agree, distant ones do
       // not, which is what a lock of hair looks like from across a room.
-      const n = locks(x * 0.55, y * 0.55);
-      const index = n > 0.35 ? 1 : n < -0.3 ? 4 : 2.5;
-      raster.set(x, y, ramps.clothB.steps[Math.round(index)], MAT.CLOTH_B, Math.round(index));
+      // Wider apart than a cloth grain, so the clumps read as locks rather than
+      // as noise, and pushed to the ends of the ramp — fur is the highest-
+      // contrast surface on a garment, which is exactly why it signalled rank.
+      const n = locks(x * 0.38, y * 0.38);
+      const index = n > 0.2 ? 0 : n < -0.25 ? 5 : 2;
+      raster.set(x, y, ramps.clothB.steps[index], MAT.CLOTH_B, index);
       // Guard hairs breaking the outer edge.
       if (rng() > 0.82 && !band[(y - 1) * size + x] && raster.matAt(x, y - 1) === MAT.SKIN) {
         raster.shift(x, y - 1, 2, book);
