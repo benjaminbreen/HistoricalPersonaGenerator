@@ -198,6 +198,7 @@ import {
 } from '../services/narrativeTextService';
 import { generateNarrativeBiography } from '../services/narrativeBiographyService';
 import { polityFormFor, socialStatusFieldLabel } from '../services/socialStatusService';
+import { describeYear, getPolityAt } from '../services/polityService';
 import { historicalPlaceLabel } from '../constants/gameData/placeLabels';
 import { zoneAccent } from '../constants/gameData/zonePalette';
 import { devLog } from '../utils/devLog';
@@ -996,12 +997,33 @@ const lockProceduralSeedRecord = (
     specific_year: proceduralPersona.year,
     date_basis: 'synthetic_within_period',
   };
+  // The polity has to be resolved here rather than inherited. The record this
+  // locks was built for a randomly chosen region, so without this a persona
+  // born in Kyoto could carry that region's state into the prompt.
+  const polity = getPolityAt({
+    year: proceduralPersona.year,
+    region: proceduralPersona.region,
+    location: proceduralPersona.location,
+    culturalZone,
+  });
   locked.persona_seed.place = {
     ...locked.persona_seed.place,
     region: proceduralPersona.region,
+    polity: polity?.name,
     settlement_or_locality: proceduralPersona.location,
-    place_notes: `Locked to procedural seed location ${proceduralPersona.location}, ${proceduralPersona.region}. ${locked.persona_seed.place.place_notes || ''}`.trim(),
+    place_notes: [
+      `Locked to procedural seed location ${proceduralPersona.location}, ${proceduralPersona.region}.`,
+      polity && `Under ${polity.name} here since ${describeYear(polity.since)}.`,
+      locked.persona_seed.place.place_notes,
+    ].filter(Boolean).join(' ').trim(),
   };
+  appendSyntheticEvidence(
+    locked,
+    '/persona_seed/place/polity',
+    polity
+      ? `Resolved from the seed region and year ${proceduralPersona.year}, not from a source document.`
+      : 'No state is recorded for this region and year; the field is left empty rather than guessed.'
+  );
   locked.persona_seed.social_identity = {
     ...locked.persona_seed.social_identity,
     age_band: ageBandForAge(character.age),

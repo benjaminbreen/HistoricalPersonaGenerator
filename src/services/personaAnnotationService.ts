@@ -2,6 +2,7 @@ import { CulturalZone, Gender, HistoricalEra, WealthLevel } from '../types';
 import { GenerationParams } from './personaGenerator';
 import { HistoricalPersonaAnnotationRecord, IngestedPersonaSource } from '../types/personaAnnotation';
 import { adaptPersonaMaterialRecord } from './personaMaterialAdapter';
+import { getPolityAt, getPolityNames } from './polityService';
 import { random as seededRandom } from '../utils/seededRandom';
 
 const pick = <T,>(values: T[]): T => values[Math.floor(seededRandom() * values.length)];
@@ -21,15 +22,21 @@ const periodRanges: Record<HistoricalPersonaAnnotationRecord['persona_seed']['te
   '1915_1930': [1915, 1930],
 };
 
+/**
+ * The regions a synthetic seed can be placed in. The polity used to be a column
+ * here, which meant "Ming or Qing China" had to cover both dynasties and
+ * "Mughal Empire" was asserted for Bengal in every year the schema allows.
+ * `polityService` resolves it from the region and the year instead.
+ */
 const regions = [
-  { region: 'British Isles', polity: 'Kingdom of England', zone: 'EUROPEAN' as CulturalZone },
-  { region: 'Low Countries', polity: 'Dutch Republic', zone: 'EUROPEAN' as CulturalZone },
-  { region: 'Bengal', polity: 'Mughal Empire', zone: 'SOUTH_ASIAN' as CulturalZone },
-  { region: 'Lower Yangzi', polity: 'Ming or Qing China', zone: 'EAST_ASIAN' as CulturalZone },
-  { region: 'Ottoman Syria', polity: 'Ottoman Empire', zone: 'MENA' as CulturalZone },
-  { region: 'Gold Coast', polity: 'Akan states and Atlantic trading forts', zone: 'SUB_SAHARAN_AFRICAN' as CulturalZone },
-  { region: 'New Spain', polity: 'Spanish Empire', zone: 'SOUTH_AMERICAN' as CulturalZone },
-  { region: 'Saint-Domingue', polity: 'French colonial empire', zone: 'NORTH_AMERICAN_COLONIAL' as CulturalZone },
+  { region: 'British Isles', zone: 'EUROPEAN' as CulturalZone },
+  { region: 'Low Countries', zone: 'EUROPEAN' as CulturalZone },
+  { region: 'Bengal', zone: 'SOUTH_ASIAN' as CulturalZone },
+  { region: 'Lower Yangzi', zone: 'EAST_ASIAN' as CulturalZone },
+  { region: 'Ottoman Syria', zone: 'MENA' as CulturalZone },
+  { region: 'Gold Coast', zone: 'SUB_SAHARAN_AFRICAN' as CulturalZone },
+  { region: 'New Spain', zone: 'SOUTH_AMERICAN' as CulturalZone },
+  { region: 'Saint-Domingue', zone: 'NORTH_AMERICAN_COLONIAL' as CulturalZone },
 ];
 
 const occupations = [
@@ -170,7 +177,7 @@ export function generateRandomPersonaAnnotationRecord(): HistoricalPersonaAnnota
       },
       place: {
         region: place.region,
-        polity: place.polity,
+        polity: getPolityAt({ year: specificYear, region: place.region, culturalZone: place.zone })?.name,
         residence_locale: pick(['village', 'market_town', 'urban_neighborhood', 'port_town', 'port_city', 'estate_or_manor']),
         activity_locale: pick(['household_compound', 'fields_or_pasture', 'workshop_or_small_shop', 'market_or_bazaar', 'dock_or_waterside', 'office_or_countinghouse']),
         historical_pressures: [pick(['market_integration', 'war_or_militarization', 'state_expansion', 'economic_crisis', 'religious_conflict'])],
@@ -290,7 +297,10 @@ export function createAnnotationRecordFromSource(source: IngestedPersonaSource):
   const period_bucket = (Object.entries(periodRanges).find(([, [min, max]]) => year >= min && year <= max)?.[0] || '1750_1849') as HistoricalPersonaAnnotationRecord['persona_seed']['temporal']['period_bucket'];
   const lower = text.toLowerCase();
   const occupation = occupations.find(job => lower.includes(job)) || pick(occupations);
-  const place = regions.find(candidate => lower.includes(candidate.region.toLowerCase()) || lower.includes(candidate.polity.toLowerCase())) || pick(regions);
+  const place = regions.find(candidate =>
+    lower.includes(candidate.region.toLowerCase())
+    || getPolityNames({ region: candidate.region, culturalZone: candidate.zone })
+      .some(name => lower.includes(name.toLowerCase()))) || pick(regions);
   const isFemale = /\b(woman|wife|widow|mother|daughter|female|girl|she|her)\b/i.test(text);
   const genderRole = isFemale ? pick(['adult woman', 'widow', 'married woman']) : pick(['adult man', 'household man', 'young unmarried man']);
   const recordId = `source-${slug(source.title)}-${Date.now()}`;
@@ -331,7 +341,7 @@ export function createAnnotationRecordFromSource(source: IngestedPersonaSource):
       },
       place: {
         region: place.region,
-        polity: place.polity,
+        polity: getPolityAt({ year, region: place.region, culturalZone: place.zone })?.name,
         residence_locale: lower.includes('city') ? 'urban_neighborhood' : lower.includes('port') ? 'port_city' : 'market_town',
         activity_locale: lower.includes('ship') ? 'ship_or_boat' : lower.includes('court') ? 'court_or_law_site' : lower.includes('market') ? 'market_or_bazaar' : 'mixed_or_itinerant',
         historical_pressures: [
