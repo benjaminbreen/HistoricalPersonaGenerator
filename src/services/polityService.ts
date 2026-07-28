@@ -193,6 +193,140 @@ const FLAG_FILES: Record<string, string> = {
   'the Timurid Empire': 'Timurid.svg',
 };
 
+/**
+ * Labels that stand for "whichever of these countries it is now".
+ *
+ * Only the ones that describe the present. "The Italian states", "the Balkan
+ * kingdoms" and "the partitioning empires" are period answers and must never be
+ * swapped for a modern country.
+ */
+const MODERN_PLURALS = new Set([
+  'the Sahelian republics', 'the West African republics', 'the Congo Basin republics',
+  'the East African republics', 'the Levantine states', 'the Maghreb states',
+  'the Caucasus republics', 'the Central Asian republics', 'the mainland Southeast Asian states',
+  'the two Korean states', 'the Central European republics', 'the Balkan states',
+  'the Central American republics', 'the Caribbean republics and colonies',
+  'the Pacific island territories', 'the Micronesian republics', 'Argentina and Chile',
+  'the Nordic kingdoms',
+]);
+
+/**
+ * The present-day state a local area lies in, where it lies in exactly one.
+ *
+ * This refines the plural labels above and nothing else: a persona in the Niger
+ * Delta in 1990 is in Nigeria, not "the West African republics". The era table
+ * stays the historical spine — this only ever replaces the label for years the
+ * plural already covered, so nothing before independence is touched.
+ *
+ * Areas absent from this map keep their plural label, and that is the intended
+ * answer for two kinds of place: those genuinely spanning several states (Lake
+ * Chad touches four, the Lesser Antilles are fifteen, Tierra del Fuego is split)
+ * and those under disputed sovereignty, which this file will not adjudicate —
+ * Jerusalem Hills, Golan Heights and the Dead Sea Shore are all deliberately
+ * absent rather than assigned.
+ *
+ * Local-area names are this map's own coinages and several collide with real
+ * places elsewhere: the Galilee Basin here is in Israel, but there is another in
+ * Queensland, and "Benin Lowlands" is the Kingdom of Benin's country, which is
+ * Nigeria, not the Republic of Benin next door.
+ */
+const MODERN_STATE_BY_AREA: Record<string, string> = {
+  // Europe
+  'Danube Bend': 'Hungary',
+  'Bohemian Plateau': 'Czechia',
+  'Vienna Basin': 'Austria',
+  'Moravian Gate': 'Czechia',
+  'Bosporus': 'Turkey',
+  'Thracian Plain': 'Bulgaria',
+  'Dalmatian Coast': 'Croatia',
+  'Vardar Valley': 'North Macedonia',
+  'Stockholm Archipelago': 'Sweden',
+  'Norwegian Fjords': 'Norway',
+  'Jutland Peninsula': 'Denmark',
+  'Gotland': 'Sweden',
+
+  // The Americas
+  'Panama Isthmus': 'Panama',
+  'Cuba': 'Cuba',
+  'Jamaica': 'Jamaica',
+  'Valdés Peninsula': 'Argentina',
+  'Strait of Magellan': 'Chile',
+
+  // MENA
+  'Bekaa Valley': 'Lebanon',
+  'Mount Lebanon Range': 'Lebanon',
+  'Galilee Basin': 'Israel',
+  'Fez Plateau': 'Morocco',
+  'Rif Coast': 'Morocco',
+  'Draa Valley': 'Morocco',
+  'Tunisian Sahel': 'Tunisia',
+  'Tripolitania': 'Libya',
+  'Cyrenaica Coast': 'Libya',
+  'Tbilisi Valley': 'Georgia',
+  'Mount Ararat': 'Turkey',
+  'Chechen Highlands': 'Russia',
+
+  // Sub-Saharan Africa
+  'Timbuktu Basin': 'Mali',
+  'Niger Bend': 'Mali',
+  'Gao Region': 'Mali',
+  'Dogon Plateau': 'Mali',
+  'Hoggar Mountains': 'Algeria',
+  'Tibesti Mountains': 'Chad',
+  'Fouta Djallon Highlands': 'Guinea',
+  'Sierra Leone Coast': 'Sierra Leone',
+  'Ashanti Forest': 'Ghana',
+  'Gold Coast Savanna': 'Ghana',
+  'Bissagos Islands': 'Guinea-Bissau',
+  'Lagos Coastal Belt': 'Nigeria',
+  'Ivory Coast': 'Ivory Coast',
+  'Cross River Delta': 'Nigeria',
+  'Kinshasa Hinterland': 'the Democratic Republic of the Congo',
+  'Ituri Rainforest': 'the Democratic Republic of the Congo',
+  'Congo River Bend': 'the Democratic Republic of the Congo',
+  'Lualaba Headwaters': 'the Democratic Republic of the Congo',
+  'Serengeti Plain': 'Tanzania',
+  'Mount Kilimanjaro Foothills': 'Tanzania',
+  'Olduvai Gorge': 'Tanzania',
+  'Bangui Highlands': 'the Central African Republic',
+  'Okavango Delta': 'Botswana',
+  'Ibo Plateau': 'Nigeria',
+  'Niger Delta': 'Nigeria',
+  'Benin Lowlands': 'Nigeria',
+  'Oyo Hinterland': 'Nigeria',
+  'Jos Plateau': 'Nigeria',
+  'Ogun River Basin': 'Nigeria',
+
+  // Asia
+  'Irrawaddy Valley': 'Myanmar',
+  'Tenasserim Coast': 'Myanmar',
+  'Shan Plateau': 'Myanmar',
+  'Mekong Delta': 'Vietnam',
+  'Red River Delta': 'Vietnam',
+  'Chao Phraya Basin': 'Thailand',
+  'Tonle Sap Basin': 'Cambodia',
+  'Samarkand Region': 'Uzbekistan',
+  'Balkh Plains': 'Afghanistan',
+  'Han River Valley': 'South Korea',
+  'Gyeongju Basin': 'South Korea',
+  'Jeolla Highlands': 'South Korea',
+  'Busan Coast': 'South Korea',
+  'Kaesong Foothills': 'North Korea',
+  'Baekdu Mountain Zone': 'North Korea',
+
+  // Oceania
+  'Society Islands': 'French Polynesia',
+  'Marquesas': 'French Polynesia',
+  'Tuamotu Atolls': 'French Polynesia',
+  'Tonga Ridge': 'Tonga',
+  'Rapa Nui': 'Chile',
+  'Marshall Islands': 'the Marshall Islands',
+  'Palau': 'Palau',
+  'Yap Plateau': 'the Federated States of Micronesia',
+  'Northern Mariana Chain': 'the Northern Mariana Islands',
+  'Guam and Surroundings': 'Guam',
+};
+
 /** Commons renders SVGs to PNG at whatever width is asked for. */
 const commonsUrl = (file: string): string =>
   `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file.replace(/ /g, '_'))}?width=80`;
@@ -1216,17 +1350,24 @@ export function getPolityAt(ctx: PolityContext): ResolvedPolity | undefined {
 
     // A device the state adopted later in its life is not available to someone
     // living before it did, which is most of what this test is for.
-    const attested = EMBLEMS[era.name];
-    const file = FLAG_FILES[era.name];
+    // A plural label yields to the actual country where the local area sits in
+    // exactly one. `since` stays the era's, because the question the badge
+    // answers is when this settlement began, not when the country was founded.
+    const name = MODERN_PLURALS.has(era.name)
+      ? MODERN_STATE_BY_AREA[ctx.location ?? ''] ?? era.name
+      : era.name;
+
+    const attested = EMBLEMS[name];
+    const file = FLAG_FILES[name];
     const span = file ? spanFromFilename(file) : {};
     const inSpan = (span.from === undefined || ctx.year >= span.from)
       && (span.until === undefined || ctx.year <= span.until);
 
     return {
-      name: era.name,
+      name,
       since: era.from,
       until: era.until,
-      wikipedia: wikipediaTitleFor(era.name),
+      wikipedia: wikipediaTitleFor(name),
       emblem: attested && ctx.year >= attested.from ? attested : undefined,
       flagUrl: file && inSpan ? commonsUrl(file) : undefined,
     };
@@ -1262,7 +1403,8 @@ export function withPolityArticle(name: string): string {
  * every English sentence written since about 1865.
  */
 export function isPluralPolity(name: string): boolean {
-  if (/United States/i.test(name)) return false;
+  // Both are plural in form and singular in every sentence anyone writes.
+  if (/United States|Federated States/i.test(name)) return false;
   return / and /.test(name)
     || /\b(kingdoms|colonies|republics|empires|caliphates|city-states|states|principalities|emirates|mandates)\b/i.test(name);
 }
