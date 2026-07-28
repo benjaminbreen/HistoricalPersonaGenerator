@@ -170,9 +170,18 @@ function snapshot(persona: any): Record<string, unknown> {
       garmentColor: (spec as any).garment?.colors?.primary ?? null,
       backgroundBase: (spec as any).background?.base ?? null,
     },
-    family: (character.family ?? [])
-      .slice(0, 4)
-      .map((member: any) => `${member.relation}: ${member.name}`),
+    // One member per relation kind rather than the first four. `family` is
+    // ordered parents, siblings, spouse, children, and sibships now average
+    // five, so a flat slice of four could never reach a spouse or a child
+    // again — retiring them from the snapshot without anyone noticing.
+    family: Object.values(
+      (character.family ?? []).reduce((first: Record<string, string>, member: any) => {
+        if (!(member.relation in first)) {
+          first[member.relation] = `${member.relation}: ${member.name}`;
+        }
+        return first;
+      }, {} as Record<string, string>)
+    ),
     // Life events carry most of the prose defects seen so far — the samurai
     // in-law, World War I in 1897, the court-scribe apprenticeship.
     events: (persona.enhancedLifeEvents ?? [])

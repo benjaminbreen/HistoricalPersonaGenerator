@@ -94,6 +94,15 @@ export function describePhysicalAppearance(
   appearance: { height?: number; build?: string } | undefined,
   pronouns: NarrativePronouns,
   birthSex?: 'Male' | 'Female',
+  /**
+   * Seeded chooser. Optional so callers that only want the plainest form —
+   * the persona card's appearance line — keep the first phrasing.
+   *
+   * Without this the sentence had exactly three shapes, and "His build is
+   * short." was measured as the single most repeated sentence in the whole
+   * corpus at 2.2% of all generated sentences.
+   */
+  pick?: <T>(values: T[]) => T,
 ): string {
   if (!appearance) return '';
 
@@ -110,10 +119,31 @@ export function describePhysicalAppearance(
     ? appearance.build.toLowerCase()
     : '';
   const subjectCap = pronouns.subject.charAt(0).toUpperCase() + pronouns.subject.slice(1);
+  const choose = pick ?? (<T,>(values: T[]): T => values[0]);
 
-  if (height && build && height !== build) return `${pronouns.possessiveCap} frame ${pronouns.be} ${height} and ${build}.`;
-  if (height) return `${subjectCap} ${pronouns.be} ${height}.`;
-  if (build) return `${pronouns.possessiveCap} build ${pronouns.be} ${build}.`;
+  if (height && build && height !== build) {
+    return choose([
+      `${pronouns.possessiveCap} frame ${pronouns.be} ${height} and ${build}.`,
+      `${subjectCap} ${pronouns.be} ${height}, and ${build} with it.`,
+      `People remember ${pronouns.object} as ${height} and ${build}.`,
+    ]);
+  }
+  if (height) {
+    return choose([
+      `${subjectCap} ${pronouns.be} ${height}.`,
+      height === 'tall'
+        ? `${subjectCap} ${conjugate('stand', pronouns)} a head above most of ${pronouns.possessive} neighbors.`
+        : `${subjectCap} ${pronouns.be} small, and always ${pronouns.subject === 'they' ? 'were' : 'was'}.`,
+      `${pronouns.possessiveCap} height ${pronouns.be} the first thing said about ${pronouns.object}.`,
+    ]);
+  }
+  if (build) {
+    return choose([
+      `${pronouns.possessiveCap} build ${pronouns.be} ${build}.`,
+      `${subjectCap} ${pronouns.be} ${build} in build.`,
+      `${pronouns.possessiveCap} frame ${pronouns.be} ${build}.`,
+    ]);
+  }
   return '';
 }
 
@@ -199,17 +229,29 @@ export function describeBeliefSecondPerson(beliefText: string): string {
 export function describeIdeology(
   ideology: Pick<Ideology, 'description'> | undefined,
   pronouns: NarrativePronouns,
+  /**
+   * Seeded chooser. Each ideology carries exactly one description string, so
+   * without varying the frame around it every persona holding a given outlook
+   * produced a byte-identical sentence — "Values tradition, hierarchy,
+   * continuity, and established social order" measured at 1.5% of the corpus.
+   */
+  pick?: <T>(values: T[]) => T,
 ): string {
   const description = stripTerminalPunctuation(ideology?.description || '');
   if (!description) return '';
+  const choose = pick ?? (<T,>(values: T[]): T => values[0]);
 
   if (/^(?:devoted|centered)\b/i.test(description)) {
-    return `${pronouns.possessiveCap} outlook ${pronouns.be} ${lowerFirst(description)}.`;
+    return choose([
+      `${pronouns.possessiveCap} outlook ${pronouns.be} ${lowerFirst(description)}.`,
+      `What ${pronouns.subject} ${conjugate('hold', pronouns)} to ${pronouns.be} ${lowerFirst(description)}.`,
+      `Asked what ${pronouns.subject} ${conjugate('believe', pronouns)}, ${pronouns.subject} would describe something ${lowerFirst(description)}.`,
+    ]);
   }
   if (/^(?:values|seeks|believes|emphasizes|pursues|prioritizes|champions|renounces|rejects|idealizes|bridges|sees|focuses)\b/i.test(description)) {
     const subjectCap = pronouns.subject.charAt(0).toUpperCase() + pronouns.subject.slice(1);
-    if (pronouns.subject === 'they') {
-      const pluralized = lowerFirst(description)
+    const phrase = pronouns.subject === 'they'
+      ? lowerFirst(description)
         .replace(/^values\b/i, 'value')
         .replace(/^seeks\b/i, 'seek')
         .replace(/^believes\b/i, 'believe')
@@ -222,10 +264,14 @@ export function describeIdeology(
         .replace(/^idealizes\b/i, 'idealize')
         .replace(/^bridges\b/i, 'bridge')
         .replace(/^sees\b/i, 'see')
-        .replace(/^focuses\b/i, 'focus');
-      return `${subjectCap} ${pluralized}.`;
-    }
-    return `${subjectCap} ${lowerFirst(description)}.`;
+        .replace(/^focuses\b/i, 'focus')
+      : lowerFirst(description);
+    return choose([
+      `${subjectCap} ${phrase}.`,
+      `Pressed on the matter, ${pronouns.subject} ${phrase}.`,
+      `By ${pronouns.possessive} own account ${pronouns.subject} ${phrase}.`,
+      `${subjectCap} ${phrase}, and ${conjugate('have', pronouns)} said as much in company.`,
+    ]);
   }
 
   // Noun-initial descriptions ("Buddhist path emphasizing liberation…") used to
@@ -234,8 +280,12 @@ export function describeIdeology(
   const firstWord = description.split(/\s+/)[0] ?? '';
   const isProperNoun = /^[A-Z][a-z]/.test(firstWord) && !/^(?:A|An|The)$/.test(firstWord);
   const body = isProperNoun ? description : lowerFirst(description);
-  const needsArticle = !/^(?:a|an|the)\b/i.test(body);
-  return `${pronouns.possessiveCap} outlook reflects ${needsArticle ? 'the ' : ''}${body}.`;
+  const article = /^(?:a|an|the)\b/i.test(body) ? '' : 'the ';
+  return choose([
+    `${pronouns.possessiveCap} outlook reflects ${article}${body}.`,
+    `What ${pronouns.subject} ${conjugate('hold', pronouns)} to ${pronouns.be} ${article}${body}.`,
+    `${pronouns.possessiveCap} sense of the world ${pronouns.be} ${article}${body}.`,
+  ]);
 }
 
 export function describeParents(
@@ -293,6 +343,10 @@ export function findNarrativeFailureModes(text: string): string[] {
     // "Tetanus has made…" and "A torn muscle in his ribs has made…", both fine.
     [/(?:^|\.\s)(?:Intestinal worms|Worms|Chilblains|Boils|Sores|Fits|Lice|Hives|Cramps|Convulsions) has\b/, 'plural disease name with a singular verb'],
     [/\.\s*\./, 'doubled punctuation'],
+    // Clause banks are written with `${subject}`-style placeholders. One that
+    // reaches the screen means a bank was rendered by something that does not
+    // expand them, or a placeholder was misspelled.
+    [/\$\{[A-Za-z:]+\}/, 'unexpanded clause placeholder'],
   ];
 
   return checks.filter(([pattern]) => pattern.test(text)).map(([, message]) => message);

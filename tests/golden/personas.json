@@ -16,22 +16,21 @@
       "headwearKind": "band",
       "headwearColor": "#b9bcc2",
       "garmentKind": "gown",
-      "garmentColor": "#ece5d6",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Ho Lam",
       "mother: Yee",
-      "spouse: Kin",
-      "son: Ching"
+      "brother: Siu",
+      "sister: Wai the Wanderer"
     ],
     "events": [
       "1231: Born in a small settlement to a Merchant family",
       "1245: Learned to read weather signs and where the water would still be running",
-      "1268: Mother was murdered by bandits, and the family faced new responsibilities",
-      "1275: Arranged favorable marriage for younger sister",
-      "1278: The family pooled their resources to purchase draft animals, a significant investment",
-      "1302: A sister married into a well-connected literati family, improving the family's social standing"
+      "1256: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1263: The family pooled their resources to purchase a market stall, a significant investment",
+      "1275: Arranged favorable marriage for younger sister"
     ]
   },
   "formosan-highlands-1306#2": {
@@ -49,16 +48,17 @@
     "feet": "Green Silk Shoes [Embroidered Silk]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#5a6b3b",
       "garmentKind": "jacket",
-      "garmentColor": "#ece5d6",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Koru",
       "mother: Mele",
-      "spouse: Nayeli",
-      "daughter: Lani"
+      "sister: Marama",
+      "brother: Rawiri",
+      "spouse: Mahina"
     ],
     "events": [
       "1266: Born in a small settlement to a Commoner family",
@@ -88,14 +88,14 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "jacket",
-      "garmentColor": "#33456b",
-      "backgroundBase": "#3f5a55"
+      "garmentColor": "#3a4f6d",
+      "backgroundBase": "#5a3f4a"
     },
     "family": [
       "father: Wai",
       "mother: Yoyo",
-      "brother: Chi",
-      "sister: Ka the West Village"
+      "sister: Yan",
+      "brother: Lam Tse"
     ],
     "events": [
       "1286: Born in a small settlement to a Peasant family",
@@ -123,20 +123,21 @@
       "headwearKind": "band",
       "headwearColor": "#b9bcc2",
       "garmentKind": "gown",
-      "garmentColor": "#ece5d6",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Tadashi Inoue",
-      "mother: Emiko Kobayashi"
+      "mother: Emiko Kobayashi",
+      "sister: Sayuri Inoue",
+      "brother: Katsuki Inoue"
     ],
     "events": [
       "1231: Born in a small settlement to a Merchant family",
       "1245: Learned to read the weather and the water from a parent",
-      "1268: Mother was murdered by bandits, and the family faced new responsibilities",
-      "1275: Arranged favorable marriage for younger sister",
-      "1278: The family pooled their resources to purchase draft animals, a significant investment",
-      "1302: A sister married into a well-connected literati family, improving the family's social standing"
+      "1256: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1263: The family pooled their resources to purchase a market stall, a significant investment",
+      "1275: Arranged favorable marriage for younger sister"
     ]
   },
   "japan-kyoto-1306#2": {
@@ -154,16 +155,16 @@
     "feet": "White Silk Shoes [Embroidered Silk]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "jacket",
-      "garmentColor": "#1f1d1c",
+      "garmentColor": "#1f1f22",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Haru Shimizu",
       "mother: Chiyo Shimizu",
-      "spouse: Yoko",
-      "son: Satoshi Kato"
+      "brother: Akira Shimizu",
+      "sister: Satomi Shimizu"
     ],
     "events": [
       "1266: Born in a small settlement to a Commoner family",
@@ -190,14 +191,14 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "jacket",
-      "garmentColor": "#c9a227",
+      "garmentColor": "#c8a63e",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Satoshi Kobayashi",
       "mother: Sakura Yamada",
-      "brother: Takeda Kobayashi",
-      "sister: Nana Kobayashi"
+      "sister: Risa Kobayashi",
+      "brother: Mamoru Kobayashi"
     ],
     "events": [
       "1286: Born in a small settlement to a Peasant family",
@@ -221,22 +222,22 @@
     "feet": "Ochre Evening Boots [Kid and Silk]",
     "portrait": {
       "headwearKind": "coronet",
-      "headwearColor": "#b5824f",
+      "headwearColor": "#b1803c",
       "garmentKind": "jacket",
-      "garmentColor": "#f2efe8",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Daniel Jansson",
       "mother: Lena Gunnarsdotter",
-      "spouse: Carl Oliversson",
-      "son: Marcus Eriksson"
+      "brother: Mattias Jansson",
+      "sister: Sigrid Jansson"
     ],
     "events": [
       "1839: Born in a small settlement to an Upper Class family",
       "1853: Began learning the trade of aristocrat from an experienced practitioner",
       "1869: Inherited valuable tools and a workshop from a childless uncle",
-      "1911: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1874: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "stockholm-1920#2": {
@@ -254,14 +255,16 @@
     "feet": "Oxford Shoes [Quality Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#b1803c",
       "garmentKind": "jacket",
-      "garmentColor": "#33413f",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Marcus Olsson",
-      "mother: Kristina Svensdotter"
+      "mother: Kristina Svensdotter",
+      "sister: Maja Olsson",
+      "brother: Erik Olsson"
     ],
     "events": [
       "1874: Born in a small settlement to a Middle Class family",
@@ -286,16 +289,16 @@
     "feet": "Dress Shoes [Polished Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#41608c",
       "garmentKind": "jacket",
-      "garmentColor": "#f2efe8",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Emil Hansson",
       "mother: Astrid Oliversdotter",
-      "sister: Lovisa Hansson",
-      "sister: Eva Hansson"
+      "brother: Viktor Hansson",
+      "sister: Lilly Hansson"
     ],
     "events": [
       "1899: Born in a small settlement to a Middle Class family",
@@ -320,7 +323,7 @@
     "feet": "White Silk Slippers [Embroidered Silk]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "robe",
       "garmentColor": "#cfa044",
       "backgroundBase": "#4a5a6a"
@@ -328,17 +331,17 @@
     "family": [
       "father: Leif Sigurdsson",
       "mother: Eir Ormsdóttir",
-      "spouse: Ulf Halfdansson",
-      "son: Kjartan Grimsson"
+      "sister: Gudrun Leifdóttir",
+      "brother: Magnus Leifsson"
     ],
     "events": [
       "1075: Born in a small settlement to a Merchant family",
       "1089: Began managing family stall at market, handling coins and customers",
-      "1103: Discovered untapped demand for wax in Rome",
-      "1115: Lost an entire wax shipment to war near Venice, a devastating financial blow",
-      "1128: Negotiated a lucrative contract with noble house for herring",
-      "1142: Took over the family business after a parent retired from active work",
-      "1146: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1093: Took over the family business after a parent retired from active work",
+      "1098: A sister married into a well-connected noble house, improving the family's social standing",
+      "1101: First to establish trade relations with Paris",
+      "1105: Cornered the market on timber during shortage",
+      "1109: A ship carrying valuable wool cargo sank in a terrible storm",
       "1149: Paid annual tribute to local lord"
     ]
   },
@@ -357,16 +360,19 @@
     "feet": "Pointed Shoes [Soft Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "tunic",
-      "garmentColor": "#4a4232",
+      "garmentColor": "#4f3c2b",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Vigfus Njalsson",
       "mother: Ingrid Vigfusdóttir",
-      "spouse: Thordis Arisdóttir",
-      "daughter: Aud Refsdóttir"
+      "brother: Magnus Vigfussson",
+      "sister: Dalla Vigfussdóttir",
+      "spouse: Jorunn Skulisdóttir",
+      "daughter: Astrid Einarsdóttir",
+      "son: Ulf Hjaltisson"
     ],
     "events": [
       "1110: Born in a small settlement to a Commoner family",
@@ -391,23 +397,21 @@
     "feet": "Wooden Clogs [Oak Wood]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
-      "garmentColor": "#5a5f63",
+      "garmentColor": "#566370",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Nils Larsson",
       "mother: Marie Oliversdotter",
-      "sister: Lena",
-      "sister: Kristina Nilsdotter"
+      "brother: Sven Nilssson"
     ],
     "events": [
       "1130: Born in a small settlement to a Peasant family",
-      "1144: Summoned to lord's court as witness in land dispute",
       "1145: Made a first journey with a merchant caravan, carrying valuable goods",
-      "1148: First to bring wax to local markets, earning substantial profit",
-      "1149: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1146: Negotiated a lucrative contract with noble house for honey",
+      "1149: Paid annual tribute to local lord"
     ]
   },
   "anatolia-1952#1": {
@@ -427,20 +431,23 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "gown",
-      "garmentColor": "#696969",
+      "garmentColor": "#566370",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Murat Koç",
       "mother: Merve bint Ömer",
-      "spouse: Abu Ahmet (İbrahim)",
-      "daughter: Fatma bint Özkan"
+      "sister: Burcu Koç",
+      "brother: Özkan Koç",
+      "spouse: Abu Süleyman (Selim)",
+      "daughter: Selin bint Taner",
+      "son: Gökhan Özdemir"
     ],
     "events": [
       "1871: Born in a small settlement to an Upper Class family",
       "1885: Began learning the trade of judge from an experienced practitioner",
       "1901: Inherited valuable tools and a workshop from a childless uncle",
-      "1943: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1906: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "anatolia-1952#2": {
@@ -458,16 +465,19 @@
     "feet": "Boots [Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#cfc7b4",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "robe",
-      "garmentColor": "#000080",
-      "backgroundBase": "#69725c"
+      "garmentColor": "#23304a",
+      "backgroundBase": "#725c63"
     },
     "family": [
       "father: Abu İsmail (Selim)",
       "mother: Umm Burcu (Filiz)",
-      "spouse: Umm Asiye (Sevgi)",
-      "daughter: Hülya Arslan"
+      "sister: Pınar Kaya",
+      "brother: Volkan ibn Selim",
+      "spouse: Büşra Kara",
+      "son: İbrahim ibn Serkan",
+      "daughter: Yasemin Koç"
     ],
     "events": [
       "1906: Born in a small settlement to a Middle Class family",
@@ -493,14 +503,16 @@
     "feet": "Boots [Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#cfc7b4",
+      "headwearColor": "#9c5230",
       "garmentKind": "robe",
-      "garmentColor": "#696969",
+      "garmentColor": "#566370",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Hasan Çelik",
-      "mother: Hülya Kara"
+      "mother: Hülya Kara",
+      "sister: Özge Çelik",
+      "brother: Özkan Çelik"
     ],
     "events": [
       "1931: Born in a small settlement to a Middle Class family",
@@ -527,20 +539,24 @@
       "headwearKind": "coronet",
       "headwearColor": "#cfa044",
       "garmentKind": "tunic",
-      "garmentColor": "#8B4513",
+      "garmentColor": "#a33327",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Abu Mehmet (Hüseyin)",
       "mother: İrem bint Murat",
-      "spouse: Abu İbrahim (Hakan)"
+      "brother: Serkan",
+      "spouse: Abu Burak (Tolga)",
+      "daughter: Ülkü bint Selim",
+      "son: Murat ibn Selim"
     ],
     "events": [
       "1575: Born in a small settlement to a Merchant family",
       "1589: Began learning the trade of coffeehouse keeper from an experienced practitioner",
+      "1597: A brother's marriage brought valuable new trade connections and opportunities",
       "1609: Visited Jerusalem's holy sites during pilgrimage",
-      "1630: A sister married into a well-connected merchant caravan, improving the family's social standing",
-      "1643: The family pooled their resources to purchase a market stall, a significant investment"
+      "1615: Father died from cholera despite seeking help",
+      "1622: The family pooled their resources to purchase draft animals, a significant investment"
     ]
   },
   "anatolia-1650#2": {
@@ -558,16 +574,19 @@
     "feet": "Boots [Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#cfc7b4",
+      "headwearColor": "#5b4229",
       "garmentKind": "robe",
-      "garmentColor": "#8B4513",
+      "garmentColor": "#a33327",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Nerses",
       "mother: Sona Nazarian",
-      "spouse: Zara bint Davit",
-      "daughter: Armine bint Hovhannes"
+      "sister: Armine",
+      "brother: Abu Aram (Davit)",
+      "spouse: Taline Tavitian",
+      "daughter: Maro Sarkissian",
+      "son: Aram"
     ],
     "events": [
       "1610: Born in a small settlement to a Commoner family",
@@ -594,16 +613,16 @@
     "feet": "Sandals [Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#5b4229",
       "garmentKind": "robe",
-      "garmentColor": "#8B4513",
+      "garmentColor": "#a33327",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Mehmet ibn İbrahim",
       "mother: Umm Elif (Melike)",
-      "sister: Derya Demir",
-      "sister: Tuba bint Mustafa"
+      "sister: Leyla Erdoğan",
+      "brother: Abu Fatih (Kemal)"
     ],
     "events": [
       "1630: Born in a small settlement to a Peasant family",
@@ -634,7 +653,12 @@
     },
     "family": [
       "father: Idrissa",
-      "mother: Mariam"
+      "mother: Mariam",
+      "brother: Sundiata son of Idrissa",
+      "sister: Tenin daughter of Idrissa",
+      "spouse: Mamadou, father of Amadou",
+      "son: Bakary",
+      "daughter: Sassouma"
     ],
     "events": [
       "1275: Born in a small settlement to a Merchant family",
@@ -667,8 +691,10 @@
     "family": [
       "father: Reda Brahimi",
       "mother: Soraya, mother of Imane",
-      "spouse: Sabrina Benatia",
-      "son: Yacine Belkacem"
+      "brother: Brahim Mahrez",
+      "spouse: Hakima daughter of Tahar",
+      "son: Yacine Madani",
+      "daughter: Imane daughter of Rachid"
     ],
     "events": [
       "1310: Born in a small settlement to a Commoner family",
@@ -699,14 +725,12 @@
     },
     "family": [
       "father: Salif",
-      "mother: Rokia Keita",
-      "brother: Mamadou"
+      "mother: Rokia Keita"
     ],
     "events": [
       "1330: Born in a small settlement to a Peasant family",
       "1343: Spent a first season away with the herd and came back taller",
-      "1348: Inherited valuable tools and a workshop from a childless uncle",
-      "1349: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1349: The family pooled their resources to purchase a mill share, a significant investment"
     ]
   },
   "london-1740#1": {
@@ -732,15 +756,14 @@
     "family": [
       "father: Seumas Fraser",
       "mother: Heather MacBride",
-      "spouse: Douglas Morrison"
+      "brother: Rory Fraser"
     ],
     "events": [
       "1665: Born in a small settlement to a Merchant family",
       "1679: Learned to read the weather and the water from a parent",
-      "1696: Required to provide labor for castle repairs",
-      "1696: Mother died from starvation during siege despite efforts to save her",
-      "1700: Inherited valuable tools and a workshop from a childless uncle",
-      "1723: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1707: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1712: The family pooled their resources to purchase draft animals, a significant investment",
+      "1718: Required to provide labor for castle repairs"
     ]
   },
   "london-1740#2": {
@@ -765,7 +788,9 @@
     },
     "family": [
       "father: Fergus Connolly",
-      "mother: Ciara Kelly"
+      "mother: Ciara Kelly",
+      "sister: Úna Connolly",
+      "brother: Cillian Connolly"
     ],
     "events": [
       "1700: Born in a small settlement to a Commoner family",
@@ -799,15 +824,13 @@
     "family": [
       "father: Huw Davies",
       "mother: Lowri Watkins",
-      "sister: Nerys Davies",
-      "sister: Gwen Davies"
+      "brother: Llyr Davies"
     ],
     "events": [
       "1720: Born in a small settlement to a Peasant family",
       "1735: Began learning the trade of innkeeper from an experienced practitioner",
-      "1736: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1737: Required to provide labor for castle repairs",
-      "1738: Took over the family business after a parent retired from active work"
+      "1737: Paid annual tribute to local lord",
+      "1739: The family pooled their resources to purchase a mill share, a significant investment"
     ]
   },
   "london-1870#1": {
@@ -825,20 +848,25 @@
     "feet": "Ivory Evening Boots [Kid and Silk]",
     "portrait": {
       "headwearKind": "coronet",
-      "headwearColor": "#cfcfcf",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
-      "garmentColor": "#6b4a33",
+      "garmentColor": "#6f5237",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Mark Smith",
-      "mother: Emma Wilson"
+      "mother: Emma Wilson",
+      "brother: Christopher Smith",
+      "sister: Anne Smith",
+      "spouse: Richard Carter",
+      "daughter: Agnes White",
+      "son: Thomas Lewis"
     ],
     "events": [
       "1790: Born in a small settlement to a Merchant family",
       "1804: Learned to read the weather and the water from a parent",
-      "1826: Inherited valuable tools and a workshop from a childless uncle",
-      "1852: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1835: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1839: The family pooled their resources to purchase a storage barn, a significant investment"
     ]
   },
   "london-1870#2": {
@@ -856,15 +884,19 @@
     "feet": "Dress Boots [Fine Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "doublet",
-      "garmentColor": "#2f3a40",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Diarmuid Walsh",
       "mother: Orla Murphy",
-      "spouse: Mairéad Connolly"
+      "sister: Siobhán Walsh",
+      "brother: Eamon Walsh",
+      "spouse: Brigid daughter of Eoin",
+      "daughter: Méabh Dunne",
+      "son: Séamus Doyle"
     ],
     "events": [
       "1826: Born in a small settlement to a Commoner family",
@@ -889,21 +921,20 @@
     "feet": "Work Boots [Thick Leather]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#e5e2da",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
-      "garmentColor": "#33413f",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Huw Davies",
       "mother: Lowri Watkins",
-      "sister: Sera Davies"
+      "brother: Llyr Davies"
     ],
     "events": [
       "1849: Born in a small settlement to a Peasant family",
       "1863: Began learning the trade of railway worker from an experienced practitioner",
-      "1867: Inherited valuable tools and a workshop from a childless uncle",
-      "1869: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1869: Took over the family business after a parent retired from active work"
     ]
   },
   "arabia-500#1": {
@@ -923,24 +954,25 @@
       "headwearKind": "coronet",
       "headwearColor": "#cfa044",
       "garmentKind": "tunic",
-      "garmentColor": "#3a4a48",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Khalid son of Hussein",
       "mother: Hafsa",
-      "spouse: Ahmad son of Ali",
-      "son: Zubair son of Jafar"
+      "brother: Abdul Rahman",
+      "sister: Khadija daughter of Abdul Rahman",
+      "spouse: Bilal"
     ],
     "events": [
       "425: Born in a small settlement to a Commoner family",
       "439: Learned to read weather signs and predict harvest yields from a parent",
+      "442: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "450: The mother's death changed the household",
       "451: Experimenting with a new plowing method led to a marked increase in field productivity",
       "452: Took over the family business after a parent retired from active work",
-      "461: Completed hajj to Mecca, earning title of Hajji",
-      "479: Inherited an additional field from a childless uncle, expanding the family holdings",
-      "480: A sister married into a well-connected tribal confederation, improving the family's social standing",
-      "493: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed"
+      "460: Divided the land among the children, keeping the best field for old age",
+      "461: Completed hajj to Mecca, earning title of Hajji"
     ]
   },
   "arabia-500#2": {
@@ -958,16 +990,17 @@
     "feet": "Sandals [Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#5b4229",
       "garmentKind": "robe",
-      "garmentColor": "#8B4513",
+      "garmentColor": "#a33327",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Khalid son of Ali",
       "mother: Asma",
-      "spouse: Rayhana the Early-Waking",
-      "son: Khalid son of Abdul Rahman"
+      "brother: Saad",
+      "sister: Safiyya the Blue-Eyed",
+      "spouse: Hind the Highlander"
     ],
     "events": [
       "460: Born in a small settlement to a Commoner family",
@@ -995,16 +1028,16 @@
     "feet": "Sandals [Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#b9bcc2",
       "garmentKind": "robe",
-      "garmentColor": "#33456b",
-      "backgroundBase": "#725c63"
+      "garmentColor": "#3a4f6d",
+      "backgroundBase": "#725c65"
     },
     "family": [
       "father: Yosef",
       "mother: Keturah daughter of Shimon",
-      "brother: Shmuel son of Yosef",
-      "sister: Leah"
+      "brother: Simeon son of Yosef",
+      "sister: Batya daughter of Yosef"
     ],
     "events": [
       "480: Born in a small settlement to a Peasant family",
@@ -1032,12 +1065,17 @@
       "headwearKind": "band",
       "headwearColor": "#cfa044",
       "garmentKind": "doublet",
-      "garmentColor": "#c9a227",
+      "garmentColor": "#c8a63e",
       "backgroundBase": "#4e4a6e"
     },
     "family": [
       "father: *Val",
-      "mother: *Punal"
+      "mother: *Punal",
+      "brother: *Katu",
+      "sister: *Aki the Quiet",
+      "spouse: *Nel",
+      "son: *Val",
+      "daughter: *Ammai"
     ],
     "events": [
       "-2075: Born in a small settlement to a Commoner family",
@@ -1063,13 +1101,17 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#7d2b26",
+      "garmentColor": "#8e2436",
       "backgroundBase": "#726c9d"
     },
     "family": [
       "father: *Malai",
       "mother: *Aki the Freckled",
-      "spouse: *Ammai"
+      "sister: *Vala",
+      "brother: *Arul",
+      "spouse: *Muti",
+      "daughter: *Vala",
+      "son: *Malai"
     ],
     "events": [
       "-2061: Born in a small settlement to a Commoner family",
@@ -1094,22 +1136,25 @@
     "feet": "Natural Barefoot [None]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#cfc7b4",
+      "headwearColor": "#d8cdb6",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#1f1d1c",
+      "garmentColor": "#1f1f22",
       "backgroundBase": "#484365"
     },
     "family": [
       "father: *Pon the Golden",
       "mother: *Naru",
-      "spouse: *Cempu",
-      "daughter: *Ammai"
+      "sister: *Vala",
+      "brother: *Kal",
+      "spouse: *Ceyal",
+      "daughter: *Vala",
+      "son: *Vel"
     ],
     "events": [
       "-2052: Born in a small settlement to a Peasant family",
       "-2037: Learned the marks and the ailments of every beast in the family's care",
-      "-2019: Inherited valuable tools and a workshop from a childless uncle",
-      "-2005: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "-2016: Took over the family business after a parent retired from active work",
+      "-2015: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "arnhem-1200#1": {
@@ -1135,16 +1180,16 @@
     "family": [
       "father: Anaru, father of Tane",
       "mother: Marama",
-      "spouse: Anaru",
-      "son: Anaru"
+      "sister: Tiare",
+      "brother: Hemi"
     ],
     "events": [
       "1125: Born in a small settlement to a Merchant family",
       "1139: Learned to read the weather and the water from a parent",
-      "1165: Father died from pneumonia despite seeking help",
-      "1180: Exchanged gifts with neighboring tribe, preventing conflict",
-      "1183: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1193: Inherited valuable tools and a workshop from a childless uncle"
+      "1149: Inherited valuable tools and a workshop from a childless uncle",
+      "1165: Mother died from drowning despite efforts to save her",
+      "1167: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1173: Inherited responsibility for family fishing grounds"
     ]
   },
   "arnhem-1200#2": {
@@ -1170,8 +1215,11 @@
     "family": [
       "father: Koru, father of Pita",
       "mother: Marama",
-      "spouse: Nayeli",
-      "son: Manaia, father of Rangi"
+      "sister: Leilani the Reef-Walker",
+      "brother: Manaia",
+      "spouse: Kalani, mother of Moana",
+      "daughter: Nayeli the Dark",
+      "son: Hoani"
     ],
     "events": [
       "1160: Born in a small settlement to a Commoner family",
@@ -1205,8 +1253,8 @@
     "family": [
       "father: Teiva, father of Rewi",
       "mother: Kiri",
-      "brother: Kawika",
-      "brother: Makoa"
+      "brother: Turi",
+      "sister: Lehua"
     ],
     "events": [
       "1180: Born in a small settlement to a Peasant family",
@@ -1230,24 +1278,24 @@
     "feet": "Madder Barefoot [None]",
     "portrait": {
       "headwearKind": "coronet",
-      "headwearColor": "#8c3a2e",
+      "headwearColor": "#a63a2b",
       "garmentKind": "gown",
-      "garmentColor": "#b5703c",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#6c919d"
     },
     "family": [
       "father: Tehei",
       "mother: Tarita",
-      "spouse: Pito",
-      "son: Marama"
+      "brother: Mahina",
+      "sister: Poehina the Elder"
     ],
     "events": [
       "1125: Born in a small settlement to a Merchant family",
       "1139: Learned to read weather signs and predict harvest yields from a parent",
-      "1165: Father died from pneumonia despite seeking help",
-      "1180: Exchanged gifts with neighboring tribe, preventing conflict",
-      "1183: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1193: Inherited valuable tools and a workshop from a childless uncle"
+      "1149: Inherited valuable tools and a workshop from a childless uncle",
+      "1165: Mother died from drowning despite efforts to save her",
+      "1167: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1173: Inherited responsibility for family fishing grounds"
     ]
   },
   "tahiti-1200#2": {
@@ -1273,7 +1321,11 @@
     "family": [
       "father: Keoni",
       "mother: Aroha",
-      "spouse: Kalea the Deep-Diver"
+      "sister: Ngaire",
+      "brother: Akamu",
+      "spouse: Mele, mother of Naia",
+      "son: Rangi",
+      "daughter: Kiri"
     ],
     "events": [
       "1139: Born in a small settlement to a Commoner family",
@@ -1299,14 +1351,19 @@
     "feet": "Rust Barefoot [None]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#b5563f",
+      "headwearColor": "#9c5230",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
       "backgroundBase": "#415a62"
     },
     "family": [
       "father: Manuarii",
-      "mother: Vaimiti"
+      "mother: Vaimiti",
+      "sister: Mehiata",
+      "brother: Moea",
+      "spouse: Poehina a Tuahine",
+      "daughter: Terehia the Marked",
+      "son: Heimana"
     ],
     "events": [
       "1148: Born in a small settlement to a Peasant family",
@@ -1333,21 +1390,25 @@
       "headwearKind": "band",
       "headwearColor": "#cfa044",
       "garmentKind": "jacket",
-      "garmentColor": "#b5703c",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#3d5a48"
     },
     "family": [
       "father: Huascar Cusipaucar",
       "mother: Chuya",
-      "spouse: Inti",
-      "son: Huanca"
+      "brother: Sayri Cusipaucar",
+      "sister: Yana Cusipaucar",
+      "spouse: Wayna",
+      "son: Wiraqocha Hancco",
+      "daughter: Phaway"
     ],
     "events": [
       "1425: Born in a small settlement to a Merchant family",
       "1439: Learned to read weather signs and where the water would still be running",
-      "1456: Participated in Inti Raymi sun ceremony",
-      "1481: Took over the family business after a parent retired from active work",
-      "1483: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1465: Father died from typhus despite seeking help",
+      "1467: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1472: Inherited valuable tools and a workshop from a childless uncle",
+      "1478: Participated in Inti Raymi sun ceremony"
     ]
   },
   "andes-1500#2": {
@@ -1365,7 +1426,7 @@
     "feet": "Hide Foot Wrappings [Hide]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#a63a2b",
       "garmentKind": "jacket",
       "garmentColor": "#8b7358",
       "backgroundBase": "#3d5a48"
@@ -1373,8 +1434,8 @@
     "family": [
       "father: Wiraqocha",
       "mother: Quispe",
-      "spouse: Mama Vargas",
-      "daughter: Coya Kondori"
+      "sister: Illa",
+      "brother: Vicuña Llanos"
     ],
     "events": [
       "1460: Born in a small settlement to a Commoner family",
@@ -1401,12 +1462,14 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#e0d3b0",
+      "garmentColor": "#ddd3ba",
       "backgroundBase": "#3d5a48"
     },
     "family": [
       "father: Zara the Slow-Speaking",
-      "mother: Yana"
+      "mother: Yana",
+      "sister: Illa",
+      "brother: Lloque"
     ],
     "events": [
       "1480: Born in a small settlement to a Peasant family",
@@ -1439,18 +1502,21 @@
     "family": [
       "father: Picuris",
       "mother: Mesa",
-      "spouse: Tewa",
-      "son: Popé"
+      "brother: Cochiti",
+      "sister: Hopi the Elder",
+      "spouse: Pojoaque",
+      "daughter: Turquoise",
+      "son: Payatamu"
     ],
     "events": [
       "1125: Born in a small settlement to a Commoner family",
       "1139: Learned to read weather signs and predict harvest yields from a parent",
-      "1152: A father's death changed everything for the household",
+      "1146: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1151: Inherited valuable tools and a workshop from a childless uncle",
+      "1153: Selected as keeper of sacred bundle",
+      "1154: Divided the land among the children, keeping the best field for old age",
       "1163: After years of careful selection, successfully bred a hardier variety of squash",
-      "1176: Led successful buffalo hunt, feeding village through winter",
-      "1180: Received vision during coming-of-age ceremony",
-      "1183: A sister married into a well-connected clan elders, improving the family's social standing",
-      "1185: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed"
+      "1165: A father's death changed everything for the household"
     ]
   },
   "southwest-1200#2": {
@@ -1470,14 +1536,17 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#5a5f63",
+      "garmentColor": "#566370",
       "backgroundBase": "#4b5a4e"
     },
     "family": [
       "father: Sotuknang",
       "mother: Tukwinong",
-      "spouse: Qoqole",
-      "daughter: Angwushahai"
+      "brother: Sekaquaptewa",
+      "sister: Wupamo",
+      "spouse: Sakwap",
+      "daughter: Tuwapongtumsi",
+      "son: Tawa"
     ],
     "events": [
       "1139: Born in a small settlement to a Commoner family",
@@ -1507,14 +1576,14 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#3a4250",
+      "garmentColor": "#2e3f5c",
       "backgroundBase": "#4b5a4e"
     },
     "family": [
       "father: Acoma the Lastborn",
       "mother: Aiyana",
-      "spouse: Corn-Mother",
-      "daughter: Mika the Deaf"
+      "brother: Tesuque Coyote-Clan",
+      "spouse: Mesa the South-Camp"
     ],
     "events": [
       "1148: Born in a small settlement to a Peasant family",
@@ -1542,24 +1611,25 @@
     "feet": "Ivory Evening Boots [Kid and Silk]",
     "portrait": {
       "headwearKind": "coronet",
-      "headwearColor": "#cfcfcf",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
-      "garmentColor": "#33413f",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#445a5c"
     },
     "family": [
       "father: Jacob Taylor",
       "mother: Martha Davis",
-      "spouse: Gideon Davis"
+      "brother: Isaac Taylor",
+      "sister: Bathsheba Taylor"
     ],
     "events": [
       "1705: Born in a small settlement to a Merchant family",
       "1719: Learned to read the weather and the water from a parent",
-      "1731: The mother's death changed the household",
+      "1730: Tragedy struck when a parent died from influenza",
+      "1735: Took over the family business after a parent retired from active work",
       "1740: A sister married into a well-connected religious congregation, improving the family's social standing",
       "1741: Staked claim during gold rush",
-      "1768: Elected to town council",
-      "1772: The family pooled their resources to purchase a storage barn, a significant investment"
+      "1760: Elected to town council"
     ]
   },
   "newengland-1780#2": {
@@ -1577,16 +1647,19 @@
     "feet": "Oxford Shoes [Polished Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "doublet",
-      "garmentColor": "#6b4a33",
+      "garmentColor": "#6f5237",
       "backgroundBase": "#445a5c"
     },
     "family": [
       "father: Hezekiah Harris",
       "mother: Faith",
-      "spouse: Mary",
-      "son: Barnabas Thompson"
+      "brother: Jacob Harris",
+      "sister: Sarah Harris",
+      "spouse: Sarah Lee",
+      "son: Robert Clark",
+      "daughter: Prudence Young"
     ],
     "events": [
       "1740: Born in a small settlement to a Commoner family",
@@ -1612,16 +1685,15 @@
     "feet": "Wooden Clogs [Oak Wood]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#e5e2da",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
-      "garmentColor": "#33413f",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#445a5c"
     },
     "family": [
       "father: Walter Rodriguez",
       "mother: Martha Moore",
-      "sister: Rebecca Rodriguez",
-      "sister: Faith Rodriguez"
+      "brother: Elijah Rodriguez"
     ],
     "events": [
       "1760: Born in a small settlement to a Peasant family",
@@ -1654,8 +1726,11 @@
     "family": [
       "father: Bao Yang",
       "mother: Ting Chen",
-      "spouse: Ming Li",
-      "daughter: Lien Xu"
+      "brother: Hong Yang",
+      "sister: Lien Yang",
+      "spouse: Jin Deng",
+      "son: Chao Guo",
+      "daughter: Juan Guo"
     ],
     "events": [
       "1425: Born in a small settlement to a Commoner family",
@@ -1691,8 +1766,11 @@
     "family": [
       "father: Ping Zheng",
       "mother: Yan Sun",
-      "spouse: Xue Yang",
-      "daughter: Xiao Ma"
+      "sister: Xiao Zheng",
+      "brother: Long Zheng",
+      "spouse: Hong Guo",
+      "daughter: Na Hu",
+      "son: Bao"
     ],
     "events": [
       "1460: Born in a small settlement to a Commoner family",
@@ -1727,15 +1805,15 @@
     },
     "family": [
       "father: Jin Xu",
-      "mother: Nuo Yang"
+      "mother: Nuo Yang",
+      "sister: Hong Xu",
+      "brother: Tao Xu"
     ],
     "events": [
       "1480: Born in a small settlement to a Peasant family",
       "1495: Helped with the harvest for the first season and proved capable despite a young age",
-      "1496: After years of careful selection, successfully bred a hardier variety of millet",
-      "1497: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
-      "1498: A sister married into a well-connected samurai clan, improving the family's social standing",
-      "1499: Experimenting with a new plowing method led to a marked increase in field productivity"
+      "1496: Became the first in the village to successfully grow peanuts, earning respect from neighbors",
+      "1499: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
     ]
   },
   "bengal-1900#1": {
@@ -1755,21 +1833,25 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "gown",
-      "garmentColor": "#f2efe8",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#4e4a6e"
     },
     "family": [
       "father: Ganesh Srivastava",
-      "mother: Shanti"
+      "mother: Shanti",
+      "brother: Kamlesh Srivastava",
+      "sister: Jyoti Srivastava",
+      "spouse: Rajesh Sharma",
+      "son: Rakesh Yadav",
+      "daughter: Sunita"
     ],
     "events": [
       "1819: Born in a small settlement to an Upper Class family",
       "1833: Began learning the trade of university professor from an experienced practitioner",
-      "1850: Invited to debate at prestigious the university",
-      "1854: Mother died from malaria, leaving the household in grief",
+      "1845: A sister married into a well-connected artisan guild, improving the family's social standing",
+      "1847: The family pooled their resources to purchase a market stall, a significant investment",
       "1864: Learned sacred texts under a guru's guidance",
-      "1881: The family pooled their resources to purchase a tractor, a significant investment",
-      "1895: A sister married into a well-connected warrior clan, improving the family's social standing"
+      "1886: Developed new method for statistical analysis"
     ]
   },
   "bengal-1900#2": {
@@ -1789,20 +1871,21 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#6f7a85",
+      "garmentColor": "#8a8781",
       "backgroundBase": "#726c9d"
     },
     "family": [
       "father: Rajesh Agrawal",
-      "mother: Rita daughter of Lokesh"
+      "mother: Rita daughter of Lokesh",
+      "sister: Kiran Agrawal"
     ],
     "events": [
       "1833: Born in a small settlement to a Middle Class family",
       "1845: Began learning the trade of salesman from an experienced practitioner",
       "1856: The family pooled their resources to purchase a storage barn, a significant investment",
       "1864: Learned sacred texts under a guru's guidance",
-      "1875: Secured exclusive trading rights for gems from Colombo",
-      "1890: A sister married into a well-connected Brahmin family, improving the family's social standing"
+      "1865: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1875: Secured exclusive trading rights for gems from Colombo"
     ]
   },
   "bengal-1900#3": {
@@ -1822,14 +1905,17 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#6f7a85",
+      "garmentColor": "#8a8781",
       "backgroundBase": "#484365"
     },
     "family": [
       "father: Naresh Yadav",
       "mother: Shanti Saxena",
-      "spouse: Preeti Sinha",
-      "daughter: Veena Yadav"
+      "brother: Pramod Yadav",
+      "sister: Bharti Yadav",
+      "spouse: Lakshmi Sinha",
+      "son: Vinod Pathak",
+      "daughter: Meera Rastogi"
     ],
     "events": [
       "1841: Born in a small settlement to a Working Class family",
@@ -1854,22 +1940,24 @@
     "feet": "Ochre Satin Slippers [Silk Satin]",
     "portrait": {
       "headwearKind": "coronet",
-      "headwearColor": "#b5824f",
+      "headwearColor": "#b1803c",
       "garmentKind": "gown",
-      "garmentColor": "#f2efe8",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Llewelyn Parry",
       "mother: Nerys Lewis",
-      "spouse: Emrys Watkins",
-      "son: Neirin Parry"
+      "brother: Gruffydd Parry",
+      "spouse: Jestyn Griffiths",
+      "daughter: Bethan Morris",
+      "son: Brychan Rogers"
     ],
     "events": [
       "1938: Born in a small settlement to an Upper Class family",
       "1952: Began learning the trade of judge from an experienced practitioner",
       "1968: Inherited valuable tools and a workshop from a childless uncle",
-      "2011: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1973: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "london-2020#2": {
@@ -1887,24 +1975,25 @@
     "feet": "Oxford Shoes [Quality Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#b1803c",
       "garmentKind": "jacket",
-      "garmentColor": "#33413f",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Diarmuid Walsh",
       "mother: Úna Walsh",
-      "spouse: Mairéad Murphy",
-      "daughter: Fíona Daly"
+      "brother: Ruairí Walsh",
+      "spouse: Muirenn O'Brien",
+      "son: Cillian O'Connor",
+      "daughter: Caoimhe O'Brien"
     ],
     "events": [
       "1973: Born in a small settlement to a Middle Class family",
       "1985: Began learning the trade of salesman from an experienced practitioner",
-      "1989: A sister married into a well-connected noble house, improving the family's social standing",
       "1990: Secured exclusive trading rights for automobiles from Hamburg",
-      "2000: Mother died from tuberculosis, leaving the household in grief",
-      "2009: Took over the family business after a parent retired from active work"
+      "1998: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "2000: Took over the family business after a parent retired from active work"
     ]
   },
   "london-2020#3": {
@@ -1922,21 +2011,19 @@
     "feet": "Dress Shoes [Polished Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#41608c",
       "garmentKind": "jacket",
-      "garmentColor": "#6f7a85",
+      "garmentColor": "#8a8781",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Bartholomew Fletcher",
-      "mother: Elizabeth Wright",
-      "sister: Anne Fletcher"
+      "mother: Elizabeth Wright"
     ],
     "events": [
       "1999: Born in a small settlement to a Middle Class family",
       "2014: Began learning the trade of journalist from an experienced practitioner",
-      "2017: Inherited valuable tools and a workshop from a childless uncle",
-      "2019: A brother's marriage brought valuable new trade connections and opportunities"
+      "2017: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "paris-1850#1": {
@@ -1954,22 +2041,23 @@
     "feet": "White Evening Boots [Kid and Silk]",
     "portrait": {
       "headwearKind": "coronet",
-      "headwearColor": "#e5e2da",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "gown",
-      "garmentColor": "#2f3a40",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Pierre Moreau",
       "mother: Nathalie Bertrand",
-      "spouse: Louis Richard",
-      "son: Patrick André"
+      "sister: Marguerite Moreau",
+      "brother: Louis Moreau"
     ],
     "events": [
       "1770: Born in a small settlement to a Merchant family",
       "1784: Learned to read the weather and the water from a parent",
-      "1806: Inherited valuable tools and a workshop from a childless uncle",
-      "1832: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1798: The family pooled their resources to purchase a market stall, a significant investment",
+      "1801: A sister married into a well-connected noble house, improving the family's social standing",
+      "1812: The family lost their father when he died from scarlet fever"
     ]
   },
   "paris-1850#2": {
@@ -1987,16 +2075,19 @@
     "feet": "Dress Boots [Fine Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "doublet",
-      "garmentColor": "#33413f",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Étienne Dubois",
       "mother: Céline Laurent",
-      "spouse: Véronique daughter of Nicolas",
-      "daughter: Chantal Laurent"
+      "sister: Marguerite Dubois",
+      "brother: Marcel Dubois",
+      "spouse: Valérie Lefevre",
+      "son: Philippe Richard",
+      "daughter: Aurélie Thomas"
     ],
     "events": [
       "1806: Born in a small settlement to a Commoner family",
@@ -2021,21 +2112,20 @@
     "feet": "Work Boots [Thick Leather]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#e5e2da",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
-      "garmentColor": "#33413f",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Bernard Dubois",
       "mother: Monique Lefevre",
-      "sister: Claire Dubois"
+      "brother: Philippe Dubois"
     ],
     "events": [
       "1829: Born in a small settlement to a Peasant family",
       "1843: Began learning the trade of railway worker from an experienced practitioner",
-      "1847: Inherited valuable tools and a workshop from a childless uncle",
-      "1849: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1849: Took over the family business after a parent retired from active work"
     ]
   },
   "balkans-1900#1": {
@@ -2053,23 +2143,27 @@
     "feet": "Work Boots [Thick Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#a98a63",
       "garmentKind": "gown",
-      "garmentColor": "#6b6b6b",
+      "garmentColor": "#566370",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Petar Antic",
-      "mother: Aleksandra Ilic"
+      "mother: Aleksandra Ilic",
+      "brother: Marko Antic",
+      "sister: Marija Antic",
+      "spouse: Slobodan Dimitrijevic",
+      "son: Velimir Jankovic",
+      "daughter: Jovana Bogdanovic"
     ],
     "events": [
       "1822: Born in a small settlement to a Working Class family",
       "1836: Sent to serve as squire, learning ways of war from veteran knight",
-      "1851: Served in garrison during border tensions with town council",
-      "1857: Mother died from tuberculosis, leaving the household in grief",
-      "1882: The family pooled their resources to purchase a tractor, a significant investment",
+      "1847: A sister married into a well-connected town council, improving the family's social standing",
+      "1849: The family pooled their resources to purchase a market stall, a significant investment",
       "1885: Took an arrow to the shoulder during a skirmish, which took months to heal properly",
-      "1895: A sister married into a well-connected cathedral chapter, improving the family's social standing"
+      "1887: Defended Hamburg from raiders"
     ]
   },
   "balkans-1900#2": {
@@ -2087,16 +2181,19 @@
     "feet": "Oxford Shoes [Quality Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#6f5237",
       "garmentKind": "jacket",
-      "garmentColor": "#1c1a19",
+      "garmentColor": "#1f1f22",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Athanasios Makris",
       "mother: Aphrodite Vlachos",
-      "spouse: Irini daughter of Demetrius",
-      "daughter: Katerina Vasiliou"
+      "sister: Angeliki Makris",
+      "brother: Socrates Makris",
+      "spouse: Ioanna Stavrou",
+      "son: Konstantinos Karagiannis",
+      "daughter: Georgia Alexandrou"
     ],
     "events": [
       "1855: Born in a small settlement to a Middle Class family",
@@ -2122,14 +2219,16 @@
     "feet": "Dress Shoes [Polished Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#41608c",
       "garmentKind": "jacket",
-      "garmentColor": "#33413f",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Burak Erdoğan",
-      "mother: Zeynep Demir"
+      "mother: Zeynep Demir",
+      "brother: Osman Erdoğan",
+      "sister: Derya Erdoğan"
     ],
     "events": [
       "1879: Born in a small settlement to a Middle Class family",
@@ -2153,15 +2252,19 @@
     "feet": "Designer Heels [Exotic Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#b5824f",
+      "headwearColor": "#b1803c",
       "garmentKind": "jacket",
-      "garmentColor": "#1c1a19",
+      "garmentColor": "#1f1f22",
       "backgroundBase": "#6d9c7f"
     },
     "family": [
       "father: Nicolás Vasquez",
       "mother: Mariana Hernandez",
-      "spouse: Santiago Reyes"
+      "brother: Sebastián Lopez",
+      "sister: Paulina Cruz",
+      "spouse: Nicolás Reyes",
+      "daughter: Daniela Perez",
+      "son: Joaquín Vasquez"
     ],
     "events": [
       "1908: Born in a small settlement to an Upper Class family",
@@ -2187,14 +2290,19 @@
     "feet": "Sneakers [Leather and Rubber]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#b1803c",
       "garmentKind": "work_shirt",
-      "garmentColor": "#33413f",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#3d5a48"
     },
     "family": [
       "father: Sergio Morales",
-      "mother: Mariana Lopez"
+      "mother: Mariana Lopez",
+      "sister: Gabriela Morales",
+      "brother: Joaquín Morales",
+      "spouse: Paulina Castillo",
+      "daughter: Isabella Lopez",
+      "son: Arturo Mendoza"
     ],
     "events": [
       "1943: Born in a small settlement to a Middle Class family",
@@ -2221,14 +2329,16 @@
     "feet": "Leather Loafers [Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#6f5237",
       "garmentKind": "work_shirt",
-      "garmentColor": "#f2efe8",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#6d9c7f"
     },
     "family": [
       "father: Sebastián Reyes",
-      "mother: Sofía Flores"
+      "mother: Sofía Flores",
+      "sister: Adriana Reyes",
+      "brother: Raul Reyes"
     ],
     "events": [
       "1969: Born in a small settlement to a Middle Class family",
@@ -2254,23 +2364,26 @@
     "feet": "Designer Heels [Exotic Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#b5824f",
+      "headwearColor": "#b1803c",
       "garmentKind": "work_shirt",
-      "garmentColor": "#f2efe8",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#445d66"
     },
     "family": [
       "father: Niall Fraser",
       "mother: Isla",
-      "spouse: Ruaridh MacLean",
-      "son: Duncan MacKenzie"
+      "brother: Struan Fraser",
+      "spouse: Gordon Cameron",
+      "son: Fergus Robertson",
+      "daughter: Shona Sinclair"
     ],
     "events": [
       "1928: Born in a small settlement to an Upper Class family",
       "1942: Began learning the trade of judge from an experienced practitioner",
-      "1950: The family pooled their resources to purchase a shop, a significant investment",
       "1959: Exchanged gifts with neighboring tribe, preventing conflict",
-      "2001: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1959: Mother died in a automobile accident despite efforts to save her",
+      "1963: A brother's marriage brought valuable new trade connections and opportunities",
+      "1965: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "newzealand-2010#2": {
@@ -2290,21 +2403,22 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "work_shirt",
-      "garmentColor": "#33413f",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#52717b"
     },
     "family": [
       "father: George Wilson",
       "mother: Sarah Roberts",
-      "spouse: Anne",
-      "son: Thomas Davis"
+      "sister: Emma Wilson",
+      "spouse: Diana Thompson"
     ],
     "events": [
       "1963: Born in a small settlement to a Middle Class family",
       "1975: Began learning the trade of television presenter from an experienced practitioner",
-      "1979: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1991: Inherited valuable tools and a workshop from a childless uncle",
-      "1995: Hosted important feast, strengthening clan ties"
+      "1995: Hosted important feast, strengthening clan ties",
+      "2001: A brother's marriage brought valuable new trade connections and opportunities",
+      "2005: The mother's death changed the household"
     ]
   },
   "newzealand-2010#3": {
@@ -2324,12 +2438,14 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "work_shirt",
-      "garmentColor": "#6b6b6b",
+      "garmentColor": "#566370",
       "backgroundBase": "#415a62"
     },
     "family": [
       "father: Ruaridh MacMillan",
-      "mother: Oighrig MacKenzie"
+      "mother: Oighrig MacKenzie",
+      "brother: Rory MacMillan",
+      "sister: Catriona MacMillan"
     ],
     "events": [
       "1989: Born in a small settlement to a Middle Class family",
@@ -2354,23 +2470,23 @@
     "feet": "Green Embroidered Silk Shoes [Silk]",
     "portrait": {
       "headwearKind": "band",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#5a6b3b",
       "garmentKind": "robe",
-      "garmentColor": "#ece5d6",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: *Tengri",
-      "mother: *Aba"
+      "mother: *Aba",
+      "brother: *Ulaan"
     ],
     "events": [
       "-711: Born in a small settlement to a Commoner family",
       "-697: Taken as apprentice by renowned silk weaver, bound for seven years",
-      "-681: Took over the family business after a parent retired from active work",
-      "-676: Mother died from plague, leaving the household in grief",
-      "-653: Arranged favorable marriage for younger sister",
-      "-650: A sister married into a well-connected merchant consortium, improving the family's social standing",
-      "-640: Achieved master status, allowed to take apprentices"
+      "-684: Took over the family business after a parent retired from active work",
+      "-681: A sister married into a well-connected merchant consortium, improving the family's social standing",
+      "-678: Arranged favorable marriage for younger sister",
+      "-654: Achieved master status, allowed to take apprentices"
     ]
   },
   "kazakh-steppe-636bce#2": {
@@ -2390,12 +2506,17 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "robe",
-      "garmentColor": "#33456b",
-      "backgroundBase": "#3f5a55"
+      "garmentColor": "#3a4f6d",
+      "backgroundBase": "#5a3f4a"
     },
     "family": [
       "father: *Sartaq the Carp",
-      "mother: *Sarnai"
+      "mother: *Sarnai",
+      "sister: *Chechek",
+      "brother: *Kül",
+      "spouse: *Naran",
+      "daughter: *Eke",
+      "son: *Bayar"
     ],
     "events": [
       "-676: Born in a small settlement to a Commoner family",
@@ -2423,7 +2544,7 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "robe",
-      "garmentColor": "#7d2b26",
+      "garmentColor": "#8e2436",
       "backgroundBase": "#3f5a55"
     },
     "family": [
@@ -2432,9 +2553,7 @@
     ],
     "events": [
       "-656: Born in a small settlement to a Peasant family",
-      "-641: Learned the marks and the ailments of every beast in the family's care",
-      "-638: Inherited valuable tools and a workshop from a childless uncle",
-      "-637: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "-641: Learned the marks and the ailments of every beast in the family's care"
     ]
   },
   "fujian-7000bce#1": {
@@ -2459,7 +2578,12 @@
     },
     "family": [
       "father: Ku",
-      "mother: Ji"
+      "mother: Ji",
+      "sister: Tushan",
+      "brother: Zhuanxu",
+      "spouse: Shennong",
+      "son: Fuxi",
+      "daughter: Moxi the Slow-Walking"
     ],
     "events": [
       "-7075: Born in a small settlement to a Commoner family",
@@ -2492,15 +2616,18 @@
     "family": [
       "father: Wu the Sparrow-Voiced",
       "mother: Nvjiao",
-      "spouse: Gui",
-      "daughter: Jiandi"
+      "sister: Leizu the Second Daughter",
+      "brother: Yao",
+      "spouse: Nvjiao",
+      "daughter: Luozu the One-Eyed",
+      "son: Yu"
     ],
     "events": [
       "-7040: Born in a small settlement to a Peasant family",
       "-7027: Spent a first season away with the herd and came back taller",
-      "-7023: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "-7013: Took over the family business after a parent retired from active work",
-      "-7007: Returned home to care for aging parents"
+      "-7020: Took over the family business after a parent retired from active work",
+      "-7005: Arranged favorable marriage for younger sister",
+      "-7001: A sister married into a well-connected merchant consortium, improving the family's social standing"
     ]
   },
   "fujian-7000bce#3": {
@@ -2526,13 +2653,12 @@
     "family": [
       "father: Xin",
       "mother: Nüwa",
-      "sister: Nüwa",
-      "spouse: Baosi"
+      "brother: Li",
+      "sister: Moxi"
     ],
     "events": [
       "-7020: Born in a small settlement to a Peasant family",
       "-7005: Learned the marks and the ailments of every beast in the family's care",
-      "-7002: Took over the family business after a parent retired from active work",
       "-7001: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
@@ -2551,24 +2677,29 @@
     "feet": "White Embroidered Silk Shoes [Silk]",
     "portrait": {
       "headwearKind": "band",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "gown",
-      "garmentColor": "#ece5d6",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Chan-ho Ahn",
-      "mother: Yoo-jin Jang"
+      "mother: Yoo-jin Jang",
+      "sister: Hye-won Ahn",
+      "brother: Kwang-soo Ahn",
+      "spouse: Seung-woo",
+      "daughter: Yu-na Han",
+      "son: Joon-ho Lim"
     ],
     "events": [
       "1325: Born in a small settlement to a Commoner family",
       "1339: Learned to read weather signs and predict harvest yields from a parent",
-      "1356: A terrible blight spread through the soybeans crop, ruining the harvest and making for a lean winter",
+      "1357: The family pooled their resources to purchase a new plow, a significant investment",
+      "1361: A brother's marriage brought valuable new trade connections and opportunities",
       "1363: After years of careful selection, successfully bred a hardier variety of soybeans",
-      "1374: The family pooled their resources to purchase draft animals, a significant investment",
-      "1379: Returned home to care for aging parents",
-      "1381: A sister married into a well-connected samurai clan, improving the family's social standing",
-      "1385: Experimenting with a new plowing method led to a marked increase in field productivity"
+      "1365: A father's death changed everything for the household",
+      "1371: Performed ancestral rites as eldest son",
+      "1372: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed"
     ]
   },
   "korea-1400#2": {
@@ -2586,16 +2717,18 @@
     "feet": "Silver Silk Shoes [Embroidered Silk]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#b9bcc2",
       "garmentKind": "jacket",
-      "garmentColor": "#7d2b26",
+      "garmentColor": "#8e2436",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Dong-hyun Nam",
       "mother: Mi-young Shim",
-      "spouse: Bo-ram Min",
-      "daughter: Jin-ah Shim"
+      "sister: Hae-won Nam",
+      "spouse: Ga-eun Hwang",
+      "daughter: Yu-na Hwang",
+      "son: Jun-seo Song"
     ],
     "events": [
       "1360: Born in a small settlement to a Commoner family",
@@ -2625,20 +2758,20 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "jacket",
-      "garmentColor": "#c9a227",
+      "garmentColor": "#c8a63e",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Do-yun Ryu",
-      "mother: Seo-hyun Park"
+      "mother: Seo-hyun Park",
+      "sister: So-young Ryu",
+      "brother: Hyun-woo Ryu"
     ],
     "events": [
       "1380: Born in a small settlement to a Peasant family",
       "1395: Helped with the harvest for the first season and proved capable despite a young age",
-      "1396: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "1397: Became the first in the village to successfully grow sweet potatoes, earning respect from neighbors",
-      "1398: A sister married into a well-connected Buddhist monastery, improving the family's social standing",
-      "1399: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed"
+      "1397: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1399: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
     ]
   },
   "mongolia-1250#1": {
@@ -2658,21 +2791,20 @@
       "headwearKind": "band",
       "headwearColor": "#b9bcc2",
       "garmentKind": "gown",
-      "garmentColor": "#ece5d6",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Boroldai of the Red Deer clan",
       "mother: Dokuz Khatun",
-      "spouse: Guyuk of the Silver Fox clan"
+      "brother: Belgutei of the Red Deer clan"
     ],
     "events": [
       "1175: Born in a small settlement to a Merchant family",
       "1189: Learned to read weather signs and where the water would still be running",
-      "1212: Mother was murdered by bandits, and the family faced new responsibilities",
-      "1219: Arranged favorable marriage for younger sister",
-      "1222: The family pooled their resources to purchase draft animals, a significant investment",
-      "1246: A sister married into a well-connected literati family, improving the family's social standing"
+      "1200: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1207: The family pooled their resources to purchase a market stall, a significant investment",
+      "1219: Arranged favorable marriage for younger sister"
     ]
   },
   "mongolia-1250#2": {
@@ -2690,16 +2822,18 @@
     "feet": "Silver Silk Shoes [Embroidered Silk]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#b9bcc2",
       "garmentKind": "jacket",
-      "garmentColor": "#4a6b45",
+      "garmentColor": "#5a6b3b",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Enkhbayar",
       "mother: Urantuya",
-      "spouse: Jargalmaa Zorigbat",
-      "daughter: Zolzaya Tengis"
+      "sister: Altantsetseg the Marked",
+      "spouse: Tsagaan Doljin",
+      "daughter: Altantsetseg",
+      "son: Ulziibayar the River-Side"
     ],
     "events": [
       "1210: Born in a small settlement to a Commoner family",
@@ -2729,13 +2863,13 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "jacket",
-      "garmentColor": "#7d2b26",
+      "garmentColor": "#8e2436",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Dolgorsuren Enkhbold",
       "mother: Gereltuya Doljin",
-      "sister: Altantsetseg Enkhbold"
+      "brother: Ulziibayar Enkhbold"
     ],
     "events": [
       "1230: Born in a small settlement to a Peasant family",
@@ -2763,12 +2897,17 @@
       "headwearKind": "band",
       "headwearColor": "#b9bcc2",
       "garmentKind": "gown",
-      "garmentColor": "#696969",
+      "garmentColor": "#566370",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Haru Ito",
-      "mother: Tomoko Watanabe"
+      "mother: Tomoko Watanabe",
+      "brother: Takumi Ito",
+      "sister: Hana Ito",
+      "spouse: Hayato Ishikawa",
+      "son: Akira Shimizu",
+      "daughter: Ayumi the JAPANESE"
     ],
     "events": [
       "1790: Born in a small settlement to a Commoner family",
@@ -2793,16 +2932,18 @@
     "feet": "Leather Shoes [Quality Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "jacket",
-      "garmentColor": "#000080",
+      "garmentColor": "#23304a",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Ryuu Ishikawa",
       "mother: Yoko Nakajima",
-      "spouse: Risa Matsumoto",
-      "son: Satoshi Kato"
+      "sister: Ayumi Ishikawa",
+      "spouse: Sayuri Kobayashi",
+      "daughter: Emiko Kimura",
+      "son: Yasuo Ikeda"
     ],
     "events": [
       "1826: Born in a small settlement to a Commoner family",
@@ -2831,13 +2972,14 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c0a566",
       "garmentKind": "robe",
-      "garmentColor": "#696969",
+      "garmentColor": "#566370",
       "backgroundBase": "#3f5a55"
     },
     "family": [
       "father: Yuuki Fujita",
       "mother: Reiko Matsumoto",
-      "brother: Osamu Fujita"
+      "sister: Noriko Fujita",
+      "brother: Shin Fujita"
     ],
     "events": [
       "1849: Born in a small settlement to a Peasant family",
@@ -2868,7 +3010,8 @@
     },
     "family": [
       "father: Hrewiklewos",
-      "mother: Swaduwena"
+      "mother: Swaduwena",
+      "brother: Dewostos"
     ],
     "events": [
       "-8075: Born to the band that ranged this country",
@@ -2904,8 +3047,8 @@
     "family": [
       "father: Aryomon the Goat",
       "mother: Wesutoka",
-      "spouse: Tritogena",
-      "daughter: Aryona"
+      "sister: Awsosdota the Careful",
+      "brother: Gostiregs"
     ],
     "events": [
       "-8040: Born to the band that ranged this country",
@@ -2941,7 +3084,8 @@
     "family": [
       "father: Aryomon",
       "mother: Diwosdugater",
-      "sister: Awsosdota"
+      "brother: Tritoneros the Simple",
+      "sister: Wesutoka"
     ],
     "events": [
       "-8020: Born to the band that ranged this country",
@@ -2976,13 +3120,18 @@
     },
     "family": [
       "father: Sokrates",
-      "mother: Myrrine"
+      "mother: Myrrine",
+      "brother: Philippos",
+      "sister: Aglaonike daughter of Sokrates",
+      "spouse: Herakleitos",
+      "daughter: Phaedra",
+      "son: Nikandros"
     ],
     "events": [
       "-505: Born in a small settlement to a Merchant family",
       "-491: Learned to read weather signs and where the water would still be running",
-      "-471: Inherited valuable tools and a workshop from a childless uncle",
-      "-447: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "-463: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "-458: The family pooled their resources to purchase draft animals, a significant investment"
     ]
   },
   "greece-430bce#2": {
@@ -3008,8 +3157,7 @@
     "family": [
       "father: Xenophanes son of Nikandros",
       "mother: Phaedra daughter of Zenodoros",
-      "spouse: Lasthenia daughter of Kleomenes",
-      "son: Herakleitos son of Zenodoros"
+      "sister: Theano the Poor"
     ],
     "events": [
       "-470: Born in a small settlement to a Commoner family",
@@ -3045,8 +3193,8 @@
     "family": [
       "father: Leon the Wise",
       "mother: Lasthenia the Scarred",
-      "brother: Menandros the Careful",
-      "sister: Daphne the Dark"
+      "brother: Kleomenes son of Herakleitos",
+      "sister: Kassandra daughter of Leon"
     ],
     "events": [
       "-450: Born in a small settlement to a Peasant family",
@@ -3079,13 +3227,18 @@
     },
     "family": [
       "father: Lysander of Thebes",
-      "mother: Arete of Corinth"
+      "mother: Arete of Corinth",
+      "brother: Kleomenes of Thebes",
+      "sister: Axiothea of Thebes",
+      "spouse: Menandros of Athens",
+      "son: Apollodoros of Miletos",
+      "daughter: Phaedra the Spartan"
     ],
     "events": [
       "25: Born in a small settlement to a Merchant family",
       "39: Learned to read weather signs and where the water would still be running",
-      "59: Inherited valuable tools and a workshop from a childless uncle",
-      "83: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "67: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "72: The family pooled their resources to purchase draft animals, a significant investment"
     ]
   },
   "rome-100#2": {
@@ -3110,7 +3263,12 @@
     },
     "family": [
       "father: Publius Julius",
-      "mother: Horatia Vibius"
+      "mother: Horatia Vibius",
+      "sister: Julia Julius",
+      "brother: Spurius Julius",
+      "spouse: Aemilia Caecilius",
+      "daughter: Livia",
+      "son: Kaeso Marcius"
     ],
     "events": [
       "60: Born in a small settlement to a Commoner family",
@@ -3146,7 +3304,7 @@
     "family": [
       "father: Volusus Licinius",
       "mother: Cornelia Licinius",
-      "sister: Livia Licinius"
+      "brother: Titus Licinius"
     ],
     "events": [
       "80: Born in a small settlement to a Peasant family",
@@ -3172,7 +3330,7 @@
     "feet": "White Silk Slippers [Embroidered Silk]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "robe",
       "garmentColor": "#cfa044",
       "backgroundBase": "#4a5a6a"
@@ -3180,17 +3338,17 @@
     "family": [
       "father: Ieuan son of Gwylim",
       "mother: Ffion the Hillman",
-      "spouse: Emrys son of Wil",
-      "son: Brychan the Barren"
+      "sister: Cerys the Widow",
+      "brother: Neirin"
     ],
     "events": [
       "825: Born in a small settlement to a Merchant family",
       "839: Began managing family stall at market, handling coins and customers",
-      "853: Discovered untapped demand for wax in Rome",
-      "865: Lost an entire wax shipment to war near Venice, a devastating financial blow",
-      "878: Negotiated a lucrative contract with noble house for herring",
-      "892: Took over the family business after a parent retired from active work",
-      "896: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "843: Took over the family business after a parent retired from active work",
+      "848: A sister married into a well-connected cathedral chapter, improving the family's social standing",
+      "851: First to establish trade relations with Paris",
+      "855: Cornered the market on timber during shortage",
+      "859: A ship carrying valuable wool cargo sank in a terrible storm",
       "899: Paid annual tribute to local lord"
     ]
   },
@@ -3209,16 +3367,15 @@
     "feet": "Pointed Shoes [Soft Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#ddd3ba",
       "garmentKind": "tunic",
-      "garmentColor": "#3f5378",
-      "backgroundBase": "#6a4a55"
+      "garmentColor": "#3a4f6d",
+      "backgroundBase": "#6a4a57"
     },
     "family": [
       "father: Hugo Olofsson",
       "mother: Lovisa Theosdotter",
-      "spouse: Alicia Noahsdotter",
-      "daughter: Tuva Theosdotter"
+      "sister: Vera the Poor"
     ],
     "events": [
       "860: Born in a small settlement to a Commoner family",
@@ -3246,22 +3403,22 @@
     "feet": "Wooden Clogs [Oak Wood]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#d8cdb6",
       "garmentKind": "work_shirt",
-      "garmentColor": "#5a5f63",
+      "garmentColor": "#566370",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Godric son of Aethelred",
       "mother: Eadgyth daughter of Wulfric",
-      "sister: Aelfgifu the Red"
+      "brother: Beorhtric son of Aethelred"
     ],
     "events": [
       "880: Born in a small settlement to a Peasant family",
       "895: Helped with the harvest for the first season and proved capable despite a young age",
       "896: After years of careful selection, successfully bred a hardier variety of barley",
       "897: Paid annual tribute to local lord",
-      "898: Broke ground on land nobody had ploughed before, and it paid",
+      "898: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
       "899: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
@@ -3280,16 +3437,19 @@
     "feet": "Golden Slippers [Gold and Silk]",
     "portrait": {
       "headwearKind": "hood",
-      "headwearColor": "#c9a227",
+      "headwearColor": "#c8a63e",
       "garmentKind": "robe",
-      "garmentColor": "#1c1a19",
+      "garmentColor": "#1f1f22",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Mustapha Zidane",
       "mother: Naima Zerhouni",
-      "spouse: Mehdi Zidane",
-      "son: Abdel Boumediene"
+      "sister: Sabrina Zidane",
+      "brother: Slimane Zidane",
+      "spouse: Mansour son of Hakim",
+      "daughter: Lynda Benatia",
+      "son: Amine Zerhouni"
     ],
     "events": [
       "1405: Born in a small settlement to a Commoner family",
@@ -3315,16 +3475,16 @@
     "feet": "Court Shoes [Fine Leather]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#f0e9d8",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "doublet",
-      "garmentColor": "#6b2f52",
+      "garmentColor": "#5c3f63",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Rui Teixeira",
       "mother: Marta the PORTUGUESE",
-      "spouse: Susana daughter of Fernando",
-      "daughter: Margarida Monteiro"
+      "sister: Beatriz Teixeira",
+      "brother: Luís Teixeira"
     ],
     "events": [
       "1440: Born in a small settlement to a Commoner family",
@@ -3350,22 +3510,21 @@
     "feet": "Wooden Shoes [Oak]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#c9a227",
+      "headwearColor": "#c8a63e",
       "garmentKind": "work_shirt",
-      "garmentColor": "#7d2b2e",
+      "garmentColor": "#8e2436",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Joaquín Rodriguez",
       "mother: Lucia Herrera",
-      "sister: Isabella daughter of Joaquín"
+      "brother: Salvador Martinez"
     ],
     "events": [
       "1460: Born in a small settlement to a Peasant family",
       "1475: Began learning the trade of innkeeper from an experienced practitioner",
       "1476: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1477: Required to provide labor for castle repairs",
-      "1478: Took over the family business after a parent retired from active work"
+      "1477: Required to provide labor for castle repairs"
     ]
   },
   "russia-1600#1": {
@@ -3383,22 +3542,23 @@
     "feet": "Silver Court Shoes [Velvet and Pearls]",
     "portrait": {
       "headwearKind": "hood",
-      "headwearColor": "#b0b3ba",
+      "headwearColor": "#b9bcc2",
       "garmentKind": "gown",
       "garmentColor": "#cfa044",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Artem Pavlov",
-      "mother: Nadezhda daughter of Andrei"
+      "mother: Nadezhda daughter of Andrei",
+      "brother: Maxim Fedorov",
+      "sister: Darya Nikitin"
     ],
     "events": [
       "1525: Born in a small settlement to a Merchant family",
       "1539: Learned to read weather signs and where the water would still be running",
-      "1556: Required to provide labor for castle repairs",
-      "1556: Mother died from starvation during siege despite efforts to save her",
-      "1560: Inherited valuable tools and a workshop from a childless uncle",
-      "1583: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1567: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1572: The family pooled their resources to purchase draft animals, a significant investment",
+      "1578: Required to provide labor for castle repairs"
     ]
   },
   "russia-1600#2": {
@@ -3416,14 +3576,19 @@
     "feet": "Court Shoes [Fine Leather]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#b9bcc2",
       "garmentKind": "doublet",
-      "garmentColor": "#3f4a48",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Frederik Janssen",
-      "mother: Isabelle Lefevre"
+      "mother: Isabelle Lefevre",
+      "brother: Johann Janssen",
+      "sister: Soledad Janssen",
+      "spouse: Rebecca Roberts",
+      "daughter: Beatrice Clark",
+      "son: Philip Green"
     ],
     "events": [
       "1560: Born in a small settlement to a Commoner family",
@@ -3449,22 +3614,22 @@
     "feet": "Wooden Shoes [Oak]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#c8a63e",
       "garmentKind": "work_shirt",
-      "garmentColor": "#7d2b2e",
+      "garmentColor": "#8e2436",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Boris Orlov",
       "mother: Irina Volkov",
-      "sister: Olga Orlov"
+      "brother: Evgeni Orlov",
+      "sister: Nina Orlov"
     ],
     "events": [
       "1580: Born in a small settlement to a Peasant family",
       "1595: Began learning the trade of innkeeper from an experienced practitioner",
       "1596: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1597: Required to provide labor for castle repairs",
-      "1598: Took over the family business after a parent retired from active work"
+      "1597: Required to provide labor for castle repairs"
     ]
   },
   "lowcountries-1650#1": {
@@ -3489,7 +3654,12 @@
     },
     "family": [
       "father: Paul Bonnet",
-      "mother: Céline Garcia"
+      "mother: Céline Garcia",
+      "sister: Chantal Bonnet",
+      "brother: Olivier Bonnet",
+      "spouse: Pascal Simon",
+      "daughter: Virginie André",
+      "son: Louis Leroy"
     ],
     "events": [
       "1575: Born in a small settlement to a Merchant family",
@@ -3515,24 +3685,23 @@
     "feet": "Court Shoes [Fine Leather]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "doublet",
-      "garmentColor": "#6b2f52",
+      "garmentColor": "#5c3f63",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Frederik de Wit",
       "mother: Klasina de Wit",
-      "spouse: Leonarda Vermeulen",
-      "daughter: Betje Jacobs"
+      "sister: Anna de Wit"
     ],
     "events": [
       "1610: Born in a small settlement to a Commoner family",
       "1622: Sent to serve as squire, learning ways of war from veteran knight",
-      "1631: Required to provide labor for castle repairs",
-      "1638: Fought in siege of Vienna, surviving three assaults",
-      "1646: The family pooled their resources to purchase draft animals, a significant investment",
-      "1648: A brother's marriage brought valuable new trade connections and opportunities"
+      "1628: Summoned to lord's court as witness in land dispute",
+      "1633: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1635: Took over the family business after a parent retired from active work",
+      "1638: Fought in siege of Vienna, surviving three assaults"
     ]
   },
   "lowcountries-1650#3": {
@@ -3550,22 +3719,22 @@
     "feet": "Wooden Shoes [Oak]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#c8a63e",
       "garmentKind": "work_shirt",
-      "garmentColor": "#7d2b2e",
+      "garmentColor": "#8e2436",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Martinus de Wit",
       "mother: Anna Janssen",
-      "sister: Maria de Wit"
+      "brother: Eduard de Wit",
+      "sister: Christina de Wit"
     ],
     "events": [
       "1630: Born in a small settlement to a Peasant family",
       "1645: Began learning the trade of innkeeper from an experienced practitioner",
       "1646: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1647: Required to provide labor for castle repairs",
-      "1648: Took over the family business after a parent retired from active work"
+      "1647: Required to provide labor for castle repairs"
     ]
   },
   "germany-1930#1": {
@@ -3583,23 +3752,27 @@
     "feet": "Tan Satin Slippers [Silk Satin]",
     "portrait": {
       "headwearKind": "coronet",
-      "headwearColor": "#c8ab86",
+      "headwearColor": "#a98a63",
       "garmentKind": "gown",
-      "garmentColor": "#33413f",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
       "father: Wilhelm Hoffmann",
       "mother: Gisela Schröder",
-      "spouse: Wolfgang Schneider",
-      "son: Wolfgang Bauer"
+      "brother: Rudolf Hoffmann",
+      "sister: Tanja Hoffmann",
+      "spouse: Wolfgang Schmidt",
+      "son: Ernst Klein",
+      "daughter: Stefanie Meier"
     ],
     "events": [
       "1849: Born in a small settlement to a Middle Class family",
       "1863: Took evening classes in bookkeeping while working days",
-      "1874: Discovered error in classical text, earning recognition",
-      "1895: The family pooled their resources to purchase machinery, a significant investment",
-      "1898: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1875: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1880: Invited to debate at prestigious the university",
+      "1886: Mother was killed in World War II, and the family faced new responsibilities",
+      "1895: The family pooled their resources to purchase machinery, a significant investment"
     ]
   },
   "germany-1930#2": {
@@ -3617,14 +3790,17 @@
     "feet": "Oxford Shoes [Quality Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#8a5a3b",
       "garmentKind": "jacket",
-      "garmentColor": "#2b3a5e",
-      "backgroundBase": "#6a4a53"
+      "garmentColor": "#2e3f5c",
+      "backgroundBase": "#6a4a56"
     },
     "family": [
       "father: Peter Schmitz",
-      "mother: Ingrid Schröder"
+      "mother: Ingrid Schröder",
+      "brother: Thomas Schmitz",
+      "sister: Claudia Schmitz",
+      "spouse: Renate Hartmann"
     ],
     "events": [
       "1884: Born in a small settlement to a Working Class family",
@@ -3649,9 +3825,9 @@
     "feet": "Dress Shoes [Polished Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#41608c",
       "garmentKind": "jacket",
-      "garmentColor": "#1c1a19",
+      "garmentColor": "#1f1f22",
       "backgroundBase": "#4a5a6a"
     },
     "family": [
@@ -3661,8 +3837,7 @@
     "events": [
       "1909: Born in a small settlement to a Working Class family",
       "1924: Began learning the trade of postal worker from an experienced practitioner",
-      "1927: Inherited valuable tools and a workshop from a childless uncle",
-      "1929: A brother's marriage brought valuable new trade connections and opportunities"
+      "1929: The family pooled their resources to purchase a delivery truck, a significant investment"
     ]
   },
   "egypt-1350bce#1": {
@@ -3680,16 +3855,18 @@
     "feet": "Golden Slippers [Gold and Silk]",
     "portrait": {
       "headwearKind": "veil",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#5a6b3b",
       "garmentKind": "gown",
-      "garmentColor": "#7a5433",
+      "garmentColor": "#6f5237",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Narmer",
       "mother: Neithhotep",
-      "spouse: Khenti",
-      "son: Atum"
+      "sister: Khenthap",
+      "spouse: Fayum the Generous",
+      "son: Ka",
+      "daughter: Nakhtneith"
     ],
     "events": [
       "-1425: Born in a small settlement to a Commoner family",
@@ -3717,15 +3894,17 @@
     "feet": "Leather Sandals [Quality Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#5a6b3b",
       "garmentKind": "robe",
-      "garmentColor": "#33456b",
-      "backgroundBase": "#725c63"
+      "garmentColor": "#3a4f6d",
+      "backgroundBase": "#725c65"
     },
     "family": [
       "father: Fayum",
       "mother: Ahhotep the Freckled",
-      "spouse: Neithhotep"
+      "sister: Nakhtneith",
+      "brother: Scorpion",
+      "spouse: Khenthap the Highlander"
     ],
     "events": [
       "-1390: Born in a small settlement to a Commoner family",
@@ -3753,16 +3932,16 @@
     "feet": "Reed Sandals [Woven Reed]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#a98a63",
       "garmentKind": "tunic",
-      "garmentColor": "#cbb493",
+      "garmentColor": "#d8cdb6",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Ka the One-Eyed",
       "mother: Merneith the Lion-Hearted",
-      "sister: Merneith the Younger",
-      "sister: Betresh the Guest-Feeder"
+      "sister: Nakhtneith",
+      "brother: Iry-Hor"
     ],
     "events": [
       "-1370: Born in a small settlement to a Peasant family",
@@ -3788,16 +3967,17 @@
     "feet": "Golden Slippers [Gold and Silk]",
     "portrait": {
       "headwearKind": "veil",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#c8a63e",
       "garmentKind": "gown",
-      "garmentColor": "#cbb493",
+      "garmentColor": "#d8cdb6",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Nabu",
       "mother: Ninisina",
-      "spouse: Hammurabi",
-      "son: Sargon"
+      "brother: Esarhaddon",
+      "sister: Ninkarrak the Wanderer",
+      "spouse: Sennacherib the Crooked"
     ],
     "events": [
       "-1825: Born in a small settlement to a Commoner family",
@@ -3825,15 +4005,16 @@
     "feet": "Leather Sandals [Quality Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#2e3f5c",
       "garmentKind": "robe",
-      "garmentColor": "#7a5433",
+      "garmentColor": "#6f5237",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Ashurbanipal",
       "mother: Aya",
-      "spouse: Ishtar"
+      "brother: Hammurabi the Close-Fisted",
+      "sister: Ninegal"
     ],
     "events": [
       "-1790: Born in a small settlement to a Commoner family",
@@ -3861,16 +4042,16 @@
     "feet": "Reed Sandals [Woven Reed]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#2e3f5c",
       "garmentKind": "tunic",
-      "garmentColor": "#3a4a48",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Enkidu",
       "mother: Ninegal the Trusted",
-      "brother: Marduk",
-      "brother: Nabu"
+      "brother: Atrahasis",
+      "sister: Ninlil"
     ],
     "events": [
       "-1770: Born in a small settlement to a Peasant family",
@@ -3896,14 +4077,18 @@
     "feet": "Golden Slippers [Gold and Silk]",
     "portrait": {
       "headwearKind": "veil",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#5a6b3b",
       "garmentKind": "gown",
-      "garmentColor": "#7a5433",
+      "garmentColor": "#6f5237",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Cyrus",
-      "mother: Parysatis"
+      "mother: Parysatis",
+      "brother: Mardonius son of Gobryas",
+      "spouse: Pharnabazus the Wanderer",
+      "daughter: Apama the Hawk",
+      "son: Gobryas"
     ],
     "events": [
       "-575: Born in a small settlement to a Commoner family",
@@ -3931,14 +4116,16 @@
     "feet": "Leather Sandals [Quality Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#2e3f5c",
       "garmentKind": "robe",
-      "garmentColor": "#7a5433",
+      "garmentColor": "#6f5237",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Cyrus",
-      "mother: Thessalonica"
+      "mother: Thessalonica",
+      "brother: Pharnabazus son of Cyrus",
+      "sister: Berenice daughter of Cyrus"
     ],
     "events": [
       "-540: Born in a small settlement to a Commoner family",
@@ -3966,16 +4153,16 @@
     "feet": "Reed Sandals [Woven Reed]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#c8a63e",
       "garmentKind": "tunic",
-      "garmentColor": "#33456b",
-      "backgroundBase": "#725c63"
+      "garmentColor": "#3a4f6d",
+      "backgroundBase": "#725c65"
     },
     "family": [
       "father: Phraates son of Pacorus",
       "mother: Laodice the Slow-Spoken",
-      "brother: Tissaphernes son of Phraates",
-      "brother: Datames son of Phraates"
+      "brother: Gobryas son of Phraates",
+      "sister: Amestris"
     ],
     "events": [
       "-520: Born in a small settlement to a Peasant family",
@@ -4003,18 +4190,21 @@
       "headwearKind": "coronet",
       "headwearColor": "#cfa044",
       "garmentKind": "gown",
-      "garmentColor": "#3a4a48",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Enlil son of Marduk",
-      "mother: Ninlil"
+      "mother: Ninlil",
+      "brother: Ziusudra",
+      "sister: Inanna daughter of Ziusudra",
+      "spouse: Nergal"
     ],
     "events": [
       "-45: Born in a small settlement to a Merchant family",
       "-31: Learned to read weather signs and where the water would still be running",
-      "-11: Inherited valuable tools and a workshop from a childless uncle",
-      "13: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "-3: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "2: The family pooled their resources to purchase draft animals, a significant investment"
     ]
   },
   "levant-30#2": {
@@ -4032,14 +4222,16 @@
     "feet": "Leather Sandals [Quality Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#c8a63e",
       "garmentKind": "robe",
-      "garmentColor": "#e6dcc2",
+      "garmentColor": "#e5ddd0",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Yosef son of Yitzhak",
-      "mother: Esther"
+      "mother: Esther",
+      "brother: Natan son of Yosef",
+      "sister: Sarah"
     ],
     "events": [
       "-10: Born in a small settlement to a Commoner family",
@@ -4067,16 +4259,16 @@
     "feet": "Reed Sandals [Woven Reed]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#5a6b3b",
       "garmentKind": "tunic",
-      "garmentColor": "#33456b",
-      "backgroundBase": "#725c63"
+      "garmentColor": "#3a4f6d",
+      "backgroundBase": "#725c65"
     },
     "family": [
       "father: Yosef",
       "mother: Keturah daughter of Shimon",
-      "brother: Shmuel son of Yosef",
-      "sister: Leah"
+      "brother: Simeon son of Yosef",
+      "sister: Batya daughter of Yosef"
     ],
     "events": [
       "10: Born in a small settlement to a Peasant family",
@@ -4102,14 +4294,15 @@
     "feet": "Golden Slippers [Gold and Silk]",
     "portrait": {
       "headwearKind": "veil",
-      "headwearColor": "#8c6a7a",
+      "headwearColor": "#c8a63e",
       "garmentKind": "gown",
-      "garmentColor": "#cbb493",
+      "garmentColor": "#d8cdb6",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Mohand son of Mohand",
-      "mother: Tasa"
+      "mother: Tasa",
+      "brother: Slimane"
     ],
     "events": [
       "-695: Born in a small settlement to a Commoner family",
@@ -4137,14 +4330,19 @@
     "feet": "Leather Sandals [Quality Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#2e3f5c",
       "garmentKind": "robe",
-      "garmentColor": "#7a5433",
+      "garmentColor": "#6f5237",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Massinissa son of Aurassi",
-      "mother: Tafrawt"
+      "mother: Tafrawt",
+      "brother: Ifri the Close-Fisted",
+      "sister: Dihya daughter of Amellal",
+      "spouse: Taziri",
+      "daughter: Taqbaylit daughter of Yuba",
+      "son: Amellal the Slow-Spoken"
     ],
     "events": [
       "-660: Born in a small settlement to a Commoner family",
@@ -4172,14 +4370,16 @@
     "feet": "Reed Sandals [Woven Reed]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#d9d0bb",
+      "headwearColor": "#2e3f5c",
       "garmentKind": "tunic",
-      "garmentColor": "#7a5433",
+      "garmentColor": "#6f5237",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Amyas son of Azegzaw",
-      "mother: Tiska the Well-Digger"
+      "mother: Tiska the Well-Digger",
+      "brother: Mohand son of Matoub",
+      "sister: Tafrawt daughter of Azru"
     ],
     "events": [
       "-640: Born in a small settlement to a Peasant family",
@@ -4207,18 +4407,23 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "gown",
-      "garmentColor": "#000080",
-      "backgroundBase": "#69725c"
+      "garmentColor": "#23304a",
+      "backgroundBase": "#725c63"
     },
     "family": [
       "father: Bashar ibn Bashar",
-      "mother: Mariam bint Abdallah"
+      "mother: Mariam bint Abdallah",
+      "brother: Omar ibn Yazan",
+      "sister: Umm Hanadi (Rana)",
+      "spouse: Khaled",
+      "son: Yusuf ibn Mahmoud",
+      "daughter: Dina bint Karim"
     ],
     "events": [
       "1843: Born in a small settlement to an Upper Class family",
       "1857: Began learning the trade of judge from an experienced practitioner",
       "1873: Inherited valuable tools and a workshop from a childless uncle",
-      "1915: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1878: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "baghdad-1924#2": {
@@ -4236,24 +4441,26 @@
     "feet": "Boots [Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#cfc7b4",
+      "headwearColor": "#9c5230",
       "garmentKind": "robe",
-      "garmentColor": "#000080",
-      "backgroundBase": "#69725c"
+      "garmentColor": "#23304a",
+      "backgroundBase": "#725c63"
     },
     "family": [
       "father: Marwan Qasemi",
       "mother: Yara bint Emad",
-      "spouse: Ghada",
-      "son: Diyaa Zreik"
+      "sister: Maha Qasemi",
+      "brother: Amjad Qasemi",
+      "spouse: Aisha bint Sami",
+      "daughter: Umm Iman (Hanadi)",
+      "son: Marwan ibn Jihad"
     ],
     "events": [
       "1878: Born in a small settlement to a Middle Class family",
       "1890: Began learning the trade of salesman from an experienced practitioner",
-      "1894: A sister married into a well-connected tribal confederation, improving the family's social standing",
       "1895: Secured exclusive trading rights for petroleum from Tunis",
-      "1905: Mother died from typhoid fever, leaving the household in grief",
-      "1914: Took over the family business after a parent retired from active work"
+      "1916: Inherited valuable tools and a workshop from a childless uncle",
+      "1922: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "baghdad-1924#3": {
@@ -4271,16 +4478,16 @@
     "feet": "Boots [Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#cfc7b4",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "robe",
-      "garmentColor": "#000000",
+      "garmentColor": "#1f1f22",
       "backgroundBase": "#5c6272"
     },
     "family": [
       "father: Yusuf ibn Marwan",
       "mother: Maha bint Omar",
-      "brother: Mohammed Masri",
-      "sister: Iman Khouri"
+      "brother: Abu Walid (Tareq)",
+      "sister: Umm Sara (Lina)"
     ],
     "events": [
       "1903: Born in a small settlement to a Middle Class family",
@@ -4305,7 +4512,7 @@
     "feet": "Woad Barefoot [None]",
     "portrait": {
       "headwearKind": "coronet",
-      "headwearColor": "#33456b",
+      "headwearColor": "#3a4f6d",
       "garmentKind": "work_shirt",
       "garmentColor": "#6b482f",
       "backgroundBase": "#6c929d"
@@ -4313,8 +4520,11 @@
     "family": [
       "father: Jabari",
       "mother: Amara",
-      "spouse: Jengo",
-      "son: Jengo"
+      "brother: Aman",
+      "sister: Yaa",
+      "spouse: Aman the Born-on-the-Road",
+      "daughter: Makena",
+      "son: Imara"
     ],
     "events": [
       "-9075: Born to the band that ranged this country",
@@ -4350,8 +4560,11 @@
     "family": [
       "father: Chike",
       "mother: Yaa",
-      "spouse: Kesia",
-      "son: Aman"
+      "sister: Asha",
+      "brother: Baraka",
+      "spouse: Ama",
+      "daughter: Imani the Barren",
+      "son: Zuberi"
     ],
     "events": [
       "-9040: Born to the band that ranged this country",
@@ -4414,7 +4627,7 @@
     "feet": "Woad Barefoot [None]",
     "portrait": {
       "headwearKind": "coronet",
-      "headwearColor": "#33456b",
+      "headwearColor": "#3a4f6d",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
       "backgroundBase": "#6c929d"
@@ -4422,8 +4635,11 @@
     "family": [
       "father: Jabari",
       "mother: Amara",
-      "spouse: Jengo",
-      "son: Jengo"
+      "brother: Aman",
+      "sister: Yaa",
+      "spouse: Aman the Born-on-the-Road",
+      "daughter: Makena",
+      "son: Imara"
     ],
     "events": [
       "-4375: Born in a small settlement to a Commoner family",
@@ -4451,14 +4667,17 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#e0d3b0",
+      "garmentColor": "#ddd3ba",
       "backgroundBase": "#445e66"
     },
     "family": [
       "father: Chike",
       "mother: Yaa",
-      "spouse: Kesia",
-      "son: Aman"
+      "sister: Asha",
+      "brother: Baraka",
+      "spouse: Ama",
+      "daughter: Imani the Barren",
+      "son: Zuberi"
     ],
     "events": [
       "-4340: Born in a small settlement to a Peasant family",
@@ -4495,9 +4714,7 @@
     "events": [
       "-4320: Born in a small settlement to a Peasant family",
       "-4305: Learned the marks and the ailments of every beast in the family's care",
-      "-4304: Led successful cattle raid, gaining wealth and status",
-      "-4303: A brother's marriage brought valuable new trade connections and opportunities",
-      "-4302: Took over the family business after a parent retired from active work"
+      "-4303: Led successful cattle raid, gaining wealth and status"
     ]
   },
   "ethiopia-1100#1": {
@@ -4517,12 +4734,17 @@
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#cfa044",
       "garmentKind": "tunic",
-      "garmentColor": "#5a5f63",
+      "garmentColor": "#566370",
       "backgroundBase": "#6c929d"
     },
     "family": [
       "father: Hailu",
-      "mother: Meseret"
+      "mother: Meseret",
+      "brother: Tewodros son of Hailu",
+      "sister: Liya daughter of Hailu",
+      "spouse: Abebe, father of Alemayehu",
+      "son: Zewde",
+      "daughter: Zewditu"
     ],
     "events": [
       "1025: Born in a small settlement to a Merchant family",
@@ -4547,16 +4769,18 @@
     "feet": "Leather Slippers [Soft Leather]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#d8cdb6",
       "garmentKind": "robe",
-      "garmentColor": "#5a5f63",
+      "garmentColor": "#566370",
       "backgroundBase": "#445e66"
     },
     "family": [
       "father: Haile Tsegaye",
       "mother: Kidist, mother of Workitu",
-      "spouse: Yeshi Tadesse",
-      "son: Tewodros Haile"
+      "brother: Hailu Kebede",
+      "spouse: Marta daughter of Selassie",
+      "son: Tewodros Alemu",
+      "daughter: Workitu daughter of Alemayehu"
     ],
     "events": [
       "1060: Born in a small settlement to a Commoner family",
@@ -4580,21 +4804,19 @@
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#cfc7b4",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "tunic",
-      "garmentColor": "#3f5378",
-      "backgroundBase": "#9a6779"
+      "garmentColor": "#3a4f6d",
+      "backgroundBase": "#9a677c"
     },
     "family": [
       "father: Kebede",
-      "mother: Bethlehem Wolde",
-      "brother: Abebe"
+      "mother: Bethlehem Wolde"
     ],
     "events": [
       "1080: Born in a small settlement to a Peasant family",
       "1093: Spent a first season away with the herd and came back taller",
-      "1098: Inherited valuable tools and a workshop from a childless uncle",
-      "1099: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1099: The family pooled their resources to purchase a mill share, a significant investment"
     ]
   },
   "swahili-1400#1": {
@@ -4614,20 +4836,24 @@
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#cfa044",
       "garmentKind": "tunic",
-      "garmentColor": "#4a4232",
+      "garmentColor": "#4f3c2b",
       "backgroundBase": "#6c929d"
     },
     "family": [
       "father: Folarin Akinyemi",
       "mother: Nike daughter of Chinedu",
-      "spouse: Idris son of Chinedu",
-      "son: Folarin Adewale"
+      "brother: Abebe Akinyemi",
+      "sister: Imani Akinyemi",
+      "spouse: Gbenga, father of Lanre",
+      "son: Folarin",
+      "daughter: Zola"
     ],
     "events": [
       "1325: Born in a small settlement to a Commoner family",
       "1339: Learned to read weather signs and where the water would still be running",
-      "1383: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1393: The family pooled their resources to purchase draft animals, a significant investment"
+      "1356: Father was killed in warfare despite seeking help",
+      "1372: The family pooled their resources to purchase a new plow, a significant investment",
+      "1383: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "swahili-1400#2": {
@@ -4645,16 +4871,19 @@
     "feet": "Cream Barefoot [None]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#cfc7b4",
+      "headwearColor": "#ddd3ba",
       "garmentKind": "tunic",
-      "garmentColor": "#7a3a34",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#445e66"
     },
     "family": [
       "father: Idris Akinwale",
       "mother: Yemi Akinwale",
-      "spouse: Joke daughter of Kwame",
-      "son: Chinedu"
+      "sister: Gbemi Akinwale",
+      "brother: Pelumi Akinwale",
+      "spouse: Ope daughter of Kwame",
+      "daughter: Ronke daughter of Tunde",
+      "son: Rotimi Diallo"
     ],
     "events": [
       "1339: Born in a small settlement to a Commoner family",
@@ -4679,16 +4908,19 @@
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#cfc7b4",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "tunic",
-      "garmentColor": "#4a4232",
+      "garmentColor": "#4f3c2b",
       "backgroundBase": "#52727b"
     },
     "family": [
       "father: Adebayo",
       "mother: Chiamaka Adekunle",
-      "spouse: Hadiza Ogundimu",
-      "daughter: Hadiza daughter of Segun"
+      "sister: Gbemi",
+      "brother: Idris",
+      "spouse: Ronke, mother of Imani",
+      "daughter: Wunmi, mother of Zola",
+      "son: Jide"
     ],
     "events": [
       "1348: Born in a small settlement to a Peasant family",
@@ -4712,20 +4944,25 @@
     "feet": "Ivory Designer Heels [Snakeskin]",
     "portrait": {
       "headwearKind": "band",
-      "headwearColor": "#e6ddc8",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "tunic",
-      "garmentColor": "#2f3a40",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#6c929d"
     },
     "family": [
       "father: Sbu",
-      "mother: Precious"
+      "mother: Precious",
+      "brother: Lungelo",
+      "sister: Thabile Ngcobo",
+      "spouse: Yenzokuhle",
+      "son: Nkosana son of Themba",
+      "daughter: Mbali Gumede"
     ],
     "events": [
       "1809: Born in a small settlement to a Merchant family",
       "1823: Began learning the trade of missionary from an experienced practitioner",
       "1839: Inherited valuable tools and a workshop from a childless uncle",
-      "1881: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1844: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "southafrica-1890#2": {
@@ -4743,14 +4980,16 @@
     "feet": "Leather Boots [Brown Leather]",
     "portrait": {
       "headwearKind": "helmet",
-      "headwearColor": "#cfcfcf",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "jacket",
-      "garmentColor": "#2f3a40",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#6c929d"
     },
     "family": [
       "father: Adriaan Kok",
-      "mother: Johanna Bos"
+      "mother: Johanna Bos",
+      "brother: Otto Kok",
+      "sister: Alida Kok"
     ],
     "events": [
       "1845: Born in a small settlement to a Commoner family",
@@ -4778,14 +5017,16 @@
     "feet": "Ivory Tire Sandals [Recycled Rubber]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#cfc7b4",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
-      "garmentColor": "#1c1a19",
+      "garmentColor": "#1f1f22",
       "backgroundBase": "#52727b"
     },
     "family": [
       "father: Fanele Zwane",
-      "mother: Zandile Ndlovu"
+      "mother: Zandile Ndlovu",
+      "sister: Cynthia",
+      "brother: Vusi, father of Wiseman"
     ],
     "events": [
       "1869: Born in a small settlement to a Peasant family",
@@ -4817,18 +5058,21 @@
     "family": [
       "father: Siddhartha Bajpai",
       "mother: Jyoti daughter of Vikram",
-      "spouse: Yogesh son of Rakesh",
-      "son: Dinesh Srivastava"
+      "brother: Rohan Bajpai",
+      "sister: Anjali Bajpai",
+      "spouse: Ajay son of Mukesh",
+      "daughter: Rekha Rastogi",
+      "son: Vikram son of Ramesh"
     ],
     "events": [
       "1575: Born in a small settlement to a Commoner family",
       "1589: Taken as apprentice by renowned textile weaver, bound for seven years",
-      "1603: Bathed in the Ganges during Kumbh Mela",
-      "1610: Father died from plague, leaving the family to manage affairs alone",
-      "1626: Admitted to the Textile Weaver guild after presenting masterwork",
-      "1631: Established textile workshop with English backing",
-      "1636: Took over the family business after a parent retired from active work",
-      "1648: A sister married into a well-connected artisan guild, improving the family's social standing"
+      "1598: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1600: Bathed in the Ganges during Kumbh Mela",
+      "1604: Established textile workshop with English backing",
+      "1606: Took over the family business after a parent retired from active work",
+      "1607: Mother died from starvation during famine, leaving the household in grief",
+      "1632: Admitted to the Textile Weaver guild after presenting masterwork"
     ]
   },
   "deccan-1650#2": {
@@ -4854,8 +5098,11 @@
     "family": [
       "father: Naresh Awasthi",
       "mother: Leela Thakur",
-      "spouse: Shakti daughter of Arjun",
-      "son: Vikram"
+      "sister: Mamta",
+      "brother: Lokesh",
+      "spouse: Aarti daughter of Arjun",
+      "daughter: Rekha daughter of Sunil",
+      "son: Ravi Singh"
     ],
     "events": [
       "1589: Born in a small settlement to a Commoner family",
@@ -4890,8 +5137,11 @@
     "family": [
       "father: Mukesh son of Pramod",
       "mother: Veena Mishra",
-      "spouse: Bharti",
-      "son: Rakesh"
+      "brother: Hitesh son of Amitabh",
+      "sister: Anjali daughter of Vikram",
+      "spouse: Shakti daughter of Yogesh",
+      "daughter: Veena Patel",
+      "son: Vijay Dwivedi"
     ],
     "events": [
       "1598: Born in a small settlement to a Peasant family",
@@ -4927,18 +5177,21 @@
     "family": [
       "father: Hitesh",
       "mother: Shanti",
-      "spouse: Vikram son of Rajesh",
-      "son: Pramod son of Sunil"
+      "brother: Dinesh",
+      "sister: Shakti Yadav",
+      "spouse: Kamlesh",
+      "son: Rakesh son of Ganesh",
+      "daughter: Sunita Agrawal"
     ],
     "events": [
       "1125: Born in a small settlement to a Commoner family",
       "1139: Learned to read weather signs and predict harvest yields from a parent",
-      "1142: Completed temple service during festival season",
-      "1152: A father's death changed everything for the household",
+      "1150: A terrible blight spread through the cotton crop, ruining the harvest and making for a lean winter",
+      "1157: The family pooled their resources to purchase a new plow, a significant investment",
+      "1161: A brother's marriage brought valuable new trade connections and opportunities",
       "1163: After years of careful selection, successfully bred a hardier variety of lentils",
-      "1164: Took over the family business after a parent retired from active work",
-      "1176: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
-      "1181: A sister married into a well-connected artisan guild, improving the family's social standing"
+      "1165: A father's death changed everything for the household",
+      "1172: Completed temple service during festival season"
     ]
   },
   "tamil-1200#2": {
@@ -4956,25 +5209,28 @@
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#cfc7b4",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "tunic",
-      "garmentColor": "#4a4232",
+      "garmentColor": "#4f3c2b",
       "backgroundBase": "#726c9d"
     },
     "family": [
       "father: Naresh Awasthi",
       "mother: Leela Thakur",
-      "spouse: Shakti daughter of Arjun",
-      "son: Vikram"
+      "sister: Mamta",
+      "brother: Lokesh",
+      "spouse: Aarti daughter of Arjun",
+      "daughter: Rekha daughter of Sunil",
+      "son: Ravi Singh"
     ],
     "events": [
       "1139: Born in a small settlement to a Commoner family",
       "1151: Learned to read weather signs and predict harvest yields from a parent",
-      "1171: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
-      "1179: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
-      "1180: The family pooled their resources to purchase a new plow, a significant investment",
-      "1182: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1168: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1174: A sister married into a well-connected Brahmin family, improving the family's social standing",
+      "1177: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
       "1189: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "1190: The family pooled their resources to purchase a mill share, a significant investment",
       "1191: Learned sacred texts under a guru's guidance"
     ]
   },
@@ -4993,16 +5249,19 @@
     "feet": "Cream Barefoot [None]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#cfc7b4",
+      "headwearColor": "#ddd3ba",
       "garmentKind": "tunic",
-      "garmentColor": "#3f5378",
-      "backgroundBase": "#65434f"
+      "garmentColor": "#3a4f6d",
+      "backgroundBase": "#654351"
     },
     "family": [
       "father: Mukesh son of Pramod",
       "mother: Veena Mishra",
-      "spouse: Bharti",
-      "son: Rakesh"
+      "brother: Hitesh son of Amitabh",
+      "sister: Anjali daughter of Vikram",
+      "spouse: Shakti daughter of Yogesh",
+      "daughter: Veena Patel",
+      "son: Vijay Dwivedi"
     ],
     "events": [
       "1148: Born in a small settlement to a Peasant family",
@@ -5030,7 +5289,7 @@
     "feet": "Toe Rings [Silver]",
     "portrait": {
       "headwearKind": "band",
-      "headwearColor": "#33456b",
+      "headwearColor": "#3a4f6d",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
       "backgroundBase": "#4e4a6e"
@@ -5038,8 +5297,11 @@
     "family": [
       "father: *Val",
       "mother: *Punal",
-      "spouse: *Arul",
-      "son: *Arul"
+      "brother: *Kal",
+      "sister: *Nila",
+      "spouse: *Vil the Bright",
+      "daughter: *Tay",
+      "son: *Malai"
     ],
     "events": [
       "-8075: Born to the band that ranged this country",
@@ -5069,14 +5331,14 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#e0d3b0",
+      "garmentColor": "#ddd3ba",
       "backgroundBase": "#726c9d"
     },
     "family": [
       "father: *Nel",
       "mother: *Cempu",
-      "spouse: *Naru",
-      "son: *Malai"
+      "sister: *Kanni",
+      "brother: *Kotu"
     ],
     "events": [
       "-8061: Born to the band that ranged this country",
@@ -5106,14 +5368,16 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#ece5d6",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#484365"
     },
     "family": [
       "father: *Muni",
       "mother: *Ilai",
-      "spouse: *Punal",
-      "son: *Malai"
+      "sister: *Tay",
+      "spouse: *Kanni",
+      "daughter: *Ilai the Hill-Born",
+      "son: *Cen"
     ],
     "events": [
       "-8052: Born to the band that ranged this country",
@@ -5141,7 +5405,7 @@
     "feet": "White Moccasins [Ermine Fur]",
     "portrait": {
       "headwearKind": "coronet",
-      "headwearColor": "#efe9dc",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "robe",
       "garmentColor": "#6b482f",
       "backgroundBase": "#4b5a4e"
@@ -5149,16 +5413,20 @@
     "family": [
       "father: Two Death",
       "mother: Nine Grass Many Quetzal",
-      "spouse: Crossing at the Burned Ground"
+      "sister: Came Back Late",
+      "brother: Born in Flood",
+      "spouse: Small Crocodile",
+      "son: Black Deer",
+      "daughter: Heavy Howler Monkey"
     ],
     "events": [
       "625: Born in a small settlement to a Merchant family",
       "639: Learned to read weather signs and where the water would still be running",
-      "650: Father was killed in tribal warfare despite seeking help",
+      "652: Took over the family business after a parent retired from active work",
+      "652: Mother died from ritual sacrifice, leaving the household in grief",
       "653: A sister married into a well-connected clan elders, improving the family's social standing",
       "666: Selected as keeper of sacred bundle",
-      "682: Discovered new fishing grounds during drought",
-      "696: Took over the family business after a parent retired from active work"
+      "682: Discovered new fishing grounds during drought"
     ]
   },
   "mesoamerica-700#2": {
@@ -5178,14 +5446,14 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#3f5378",
+      "garmentColor": "#3a4f6d",
       "backgroundBase": "#4b5a4e"
     },
     "family": [
       "father: Broken Howler Monkey",
       "mother: Came Back Late",
-      "spouse: Grey Peccary",
-      "son: Swift Peccary"
+      "brother: Quetzal of the Spring",
+      "sister: Swimming at the Ridge"
     ],
     "events": [
       "639: Born in a small settlement to a Commoner family",
@@ -5215,13 +5483,14 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#3f5378",
+      "garmentColor": "#3a4f6d",
       "backgroundBase": "#4b5a4e"
     },
     "family": [
       "father: Crocodile of the Dry Bed",
       "mother: Waiting at the Cave",
-      "spouse: Many Ash"
+      "brother: Swift Hummingbird",
+      "sister: Following at the Burned Ground"
     ],
     "events": [
       "648: Born in a small settlement to a Peasant family",
@@ -5249,7 +5518,7 @@
     "feet": "White Moccasins [Ermine Fur]",
     "portrait": {
       "headwearKind": "coronet",
-      "headwearColor": "#654321",
+      "headwearColor": "#5b4229",
       "garmentKind": "robe",
       "garmentColor": "#6b482f",
       "backgroundBase": "#4b5a4e"
@@ -5257,8 +5526,9 @@
     "family": [
       "father: Lone Elk",
       "mother: Swift Prairie Dog",
-      "spouse: Dark Golden Eagle",
-      "son: Circling Meadowlark"
+      "brother: Running Badger",
+      "sister: Bull Snake of the Spring",
+      "spouse: Slept in the Storm"
     ],
     "events": [
       "1425: Born in a small settlement to a Merchant family",
@@ -5285,14 +5555,16 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#8B4513",
+      "garmentColor": "#a33327",
       "backgroundBase": "#4b5a4e"
     },
     "family": [
       "father: Many Red Sky",
       "mother: Gathering at the Old Trail",
-      "spouse: Crossing at the Ash Hill",
-      "daughter: Many Bison"
+      "sister: Crossing Grey Wolf",
+      "spouse: Bison of the Wide Water",
+      "son: Swift Bison",
+      "daughter: Cried Little"
     ],
     "events": [
       "1439: Born in a small settlement to a Commoner family",
@@ -5320,12 +5592,17 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#8B4513",
+      "garmentColor": "#a33327",
       "backgroundBase": "#4b5a4e"
     },
     "family": [
       "father: Wapi",
-      "mother: Chenoa"
+      "mother: Chenoa",
+      "brother: Mahpe",
+      "sister: Ohanzee the Freckled",
+      "spouse: Papina",
+      "son: Hakan the Basket-Maker",
+      "daughter: Migina"
     ],
     "events": [
       "1448: Born in a small settlement to a Peasant family",
@@ -5358,17 +5635,20 @@
     "family": [
       "father: Iluq",
       "mother: Yura",
-      "spouse: Amarok",
-      "son: Nanook"
+      "brother: Siku",
+      "sister: Aput the Elder",
+      "spouse: Kallik",
+      "daughter: Uki",
+      "son: Nayuk"
     ],
     "events": [
       "1325: Born in a small settlement to a Commoner family",
       "1339: Learned to read the weather and the water from a parent",
-      "1350: Father was killed in tribal warfare despite seeking help",
+      "1352: Took over the family business after a parent retired from active work",
+      "1352: Mother died from ritual sacrifice, leaving the household in grief",
       "1353: A sister married into a well-connected clan elders, improving the family's social standing",
       "1366: Selected as keeper of sacred bundle",
-      "1382: Discovered new fishing grounds during drought",
-      "1396: Took over the family business after a parent retired from active work"
+      "1382: Discovered new fishing grounds during drought"
     ]
   },
   "arctic-1400#2": {
@@ -5388,22 +5668,23 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#3f5378",
+      "garmentColor": "#3a4f6d",
       "backgroundBase": "#4b5a4e"
     },
     "family": [
       "father: Char of the High Rocks",
       "mother: Walrus of the Spring",
-      "spouse: Standing Snow Owl",
-      "daughter: Sakari"
+      "sister: Sakari the Fire-Tender",
+      "brother: Qimmiq"
     ],
     "events": [
       "1339: Born in a small settlement to a Commoner family",
-      "1354: Learned to read the weather and the water from a parent",
-      "1368: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1376: Led successful buffalo hunt, feeding village through winter",
-      "1377: Selected as keeper of sacred bundle",
-      "1394: Took over the family business after a parent retired from active work"
+      "1351: Learned to read the weather and the water from a parent",
+      "1361: A sister married into a well-connected medicine society, improving the family's social standing",
+      "1372: Received vision during coming-of-age ceremony",
+      "1376: The family lost their mother when she died from pneumonia",
+      "1380: Took over the family business after a parent retired from active work",
+      "1396: Counted coup on enemy warrior, gaining honor"
     ]
   },
   "arctic-1400#3": {
@@ -5423,22 +5704,23 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#3f5378",
+      "garmentColor": "#3a4f6d",
       "backgroundBase": "#4b5a4e"
     },
     "family": [
       "father: Amarok",
       "mother: Ila the Good Host",
-      "spouse: Broken Sea Fog"
+      "sister: Miki Tupik",
+      "brother: Broken Sea Fog",
+      "spouse: Miki Kayak"
     ],
     "events": [
       "1348: Born in a small settlement to a Peasant family",
-      "1360: Went out with the adults for the first time and came back carrying a share",
-      "1364: Participated in sun dance, earning honor marks",
-      "1369: Took over the family business after a parent retired from active work",
-      "1378: Father died from ritual sacrifice, leaving the family to manage affairs alone",
-      "1382: A sister married into a well-connected medicine society, improving the family's social standing",
-      "1391: Led successful buffalo hunt, feeding village through winter"
+      "1363: Trusted alone with the traps for a season",
+      "1371: Inherited valuable tools and a workshop from a childless uncle",
+      "1378: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1393: Participated in sun dance, earning honor marks",
+      "1395: Discovered new fishing grounds during drought"
     ]
   },
   "california-1000#1": {
@@ -5464,17 +5746,20 @@
     "family": [
       "father: Sequoyah",
       "mother: Kimi the Lastborn",
-      "spouse: Maidu",
-      "son: Yokuts the Barren"
+      "sister: Zaltana",
+      "brother: Shasta",
+      "spouse: Tolowa",
+      "son: Sequoyah",
+      "daughter: Topanga"
     ],
     "events": [
       "925: Born in a small settlement to a Commoner family",
       "939: Learned to read the weather and the water from a parent",
-      "950: Father was killed in tribal warfare despite seeking help",
+      "952: Took over the family business after a parent retired from active work",
+      "952: Mother died from ritual sacrifice, leaving the household in grief",
       "953: A sister married into a well-connected clan elders, improving the family's social standing",
       "966: Selected as keeper of sacred bundle",
-      "982: Discovered new fishing grounds during drought",
-      "996: Took over the family business after a parent retired from active work"
+      "982: Discovered new fishing grounds during drought"
     ]
   },
   "california-1000#2": {
@@ -5494,14 +5779,17 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#5a5f63",
+      "garmentColor": "#566370",
       "backgroundBase": "#4b5a4e"
     },
     "family": [
       "father: Pomo",
       "mother: Wachiwi",
-      "spouse: Poloma",
-      "daughter: Luyu"
+      "brother: Cahuilla",
+      "sister: Nita",
+      "spouse: Sahale",
+      "daughter: Kimi",
+      "son: Miwok"
     ],
     "events": [
       "939: Born in a small settlement to a Commoner family",
@@ -5530,12 +5818,17 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#3a4250",
+      "garmentColor": "#2e3f5c",
       "backgroundBase": "#4b5a4e"
     },
     "family": [
       "father: Wiyot",
-      "mother: Litonya"
+      "mother: Litonya",
+      "brother: Wintu",
+      "sister: Poloma",
+      "spouse: Yoomee the Winter-Born",
+      "son: Yurok",
+      "daughter: Nita"
     ],
     "events": [
       "948: Born in a small settlement to a Peasant family",
@@ -5562,23 +5855,28 @@
     "feet": "Ivory Evening Boots [Kid and Silk]",
     "portrait": {
       "headwearKind": "coronet",
-      "headwearColor": "#cfcfcf",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
-      "garmentColor": "#33413f",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#445a5c"
     },
     "family": [
       "father: Swift Black Bear Young",
-      "mother: Spotted Black Bear"
+      "mother: Spotted Black Bear",
+      "sister: Deer of the Far Camp Young",
+      "brother: Cried Little Young",
+      "spouse: Lost the Path",
+      "son: Many Crow",
+      "daughter: Snapping Turtle of the Ridge"
     ],
     "events": [
       "1790: Born in a small settlement to a Merchant family",
       "1804: Learned to read the weather and the water from a parent",
-      "1816: The mother's death changed the household",
+      "1815: Tragedy struck when a parent died from influenza",
+      "1821: Took over the family business after a parent retired from active work",
       "1826: A sister married into a well-connected religious congregation, improving the family's social standing",
       "1828: Staked claim during gold rush",
-      "1857: Elected to town council",
-      "1861: The family pooled their resources to purchase a storage barn, a significant investment"
+      "1848: Elected to town council"
     ]
   },
   "newengland-1870#2": {
@@ -5596,16 +5894,16 @@
     "feet": "Oxford Shoes [Polished Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "doublet",
-      "garmentColor": "#6b4a33",
+      "garmentColor": "#6f5237",
       "backgroundBase": "#445a5c"
     },
     "family": [
       "father: Whitefish of the Cave O'Brien",
       "mother: Swift River Cane",
-      "spouse: Drifting at the Ridge",
-      "son: Howard"
+      "brother: Drifting Turkey O'Brien",
+      "sister: Many Deer O'Brien"
     ],
     "events": [
       "1826: Born in a small settlement to a Commoner family",
@@ -5632,16 +5930,16 @@
     "feet": "Wooden Clogs [Oak Wood]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#f0ece0",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
-      "garmentColor": "#2f3a40",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#445a5c"
     },
     "family": [
       "father: Circling Passenger Pigeon Smith",
       "mother: Standing Turkey",
-      "brother: Robert Smith",
-      "sister: Doris Smith"
+      "brother: Herman Smith",
+      "sister: Irene Smith"
     ],
     "events": [
       "1849: Born in a small settlement to a Peasant family",
@@ -5666,24 +5964,25 @@
     "feet": "Ivory Evening Boots [Kid and Silk]",
     "portrait": {
       "headwearKind": "coronet",
-      "headwearColor": "#cfcfcf",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
-      "garmentColor": "#1c1a19",
+      "garmentColor": "#1f1f22",
       "backgroundBase": "#445a5c"
     },
     "family": [
       "father: Samuel Hernandez",
       "mother: Patience Thomas",
-      "spouse: Ezekiel Jackson"
+      "sister: Temperance Hernandez",
+      "brother: David Hernandez"
     ],
     "events": [
       "1741: Born in a small settlement to a Commoner family",
       "1755: Learned to read weather signs and where the water would still be running",
-      "1767: The mother's death changed the household",
+      "1766: Tragedy struck when a parent died from influenza",
+      "1772: Took over the family business after a parent retired from active work",
       "1777: A sister married into a well-connected religious congregation, improving the family's social standing",
       "1778: Staked claim during gold rush",
-      "1808: Elected to town council",
-      "1812: The family pooled their resources to purchase a storage barn, a significant investment"
+      "1798: Elected to town council"
     ]
   },
   "louisiana-1820#2": {
@@ -5701,14 +6000,19 @@
     "feet": "Oxford Shoes [Polished Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "doublet",
-      "garmentColor": "#33413f",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#445a5c"
     },
     "family": [
       "father: Edward Thompson",
-      "mother: Silence Lewis"
+      "mother: Silence Lewis",
+      "sister: Sarah Thompson",
+      "brother: Nathaniel Thompson",
+      "spouse: Esther Garcia",
+      "daughter: Mary",
+      "son: Cornelius Lewis"
     ],
     "events": [
       "1778: Born in a small settlement to a Commoner family",
@@ -5735,16 +6039,16 @@
     "feet": "Wooden Clogs [Oak Wood]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#d8d8d8",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
-      "garmentColor": "#6b4a33",
+      "garmentColor": "#6f5237",
       "backgroundBase": "#445a5c"
     },
     "family": [
       "father: William White",
       "mother: Prudence Miller",
-      "sister: Priscilla White",
-      "sister: Silence White"
+      "sister: Temperance White",
+      "brother: Jonathan White"
     ],
     "events": [
       "1799: Born in a small settlement to a Peasant family",
@@ -5771,22 +6075,25 @@
       "headwearKind": "coronet",
       "headwearColor": "#cfa044",
       "garmentKind": "jacket",
-      "garmentColor": "#7a5433",
+      "garmentColor": "#6f5237",
       "backgroundBase": "#3d5a48"
     },
     "family": [
       "father: Sayri",
       "mother: Raymi Quespi",
-      "spouse: Amaru",
-      "son: Sayri Ttito"
+      "brother: Atawallpa",
+      "sister: Killa",
+      "spouse: Thupa the Toad",
+      "son: Sayri",
+      "daughter: Mama"
     ],
     "events": [
       "1125: Born in a small settlement to a Merchant family",
       "1139: Began learning the trade of coya from an experienced practitioner",
+      "1149: Inherited valuable tools and a workshop from a childless uncle",
       "1150: Participated in Inti Raymi sun ceremony",
-      "1165: Father died from typhoid fever despite seeking help",
-      "1180: Inherited valuable tools and a workshop from a childless uncle",
-      "1192: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1165: Mother died from starvation despite efforts to save her",
+      "1171: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "amazon-1200#2": {
@@ -5804,16 +6111,16 @@
     "feet": "Leather Shoes [Llama Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#c8a63e",
       "garmentKind": "jacket",
-      "garmentColor": "#4a6b45",
-      "backgroundBase": "#3d415a"
+      "garmentColor": "#5a6b3b",
+      "backgroundBase": "#3d5a48"
     },
     "family": [
       "father: Lloque Inca",
       "mother: Phaway",
-      "spouse: Munay Soncco",
-      "son: Apu Kondori"
+      "brother: Kuntur Inca",
+      "sister: Mama Inca"
     ],
     "events": [
       "1160: Born in a small settlement to a Commoner family",
@@ -5838,16 +6145,16 @@
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#a98a63",
       "garmentKind": "jacket",
-      "garmentColor": "#ece5d6",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#3d5a48"
     },
     "family": [
       "father: Wayna",
       "mother: Phaway Waskar",
-      "sister: Tika the Younger",
-      "sister: Tanta Ccopa"
+      "sister: Chaska",
+      "brother: Amaru"
     ],
     "events": [
       "1180: Born in a small settlement to a Peasant family",
@@ -5874,14 +6181,17 @@
       "headwearKind": "band",
       "headwearColor": "#cfa044",
       "garmentKind": "jacket",
-      "garmentColor": "#b5703c",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#3d5a48"
     },
     "family": [
       "father: Huascar Cusipaucar",
       "mother: Chuya",
-      "spouse: Inti",
-      "son: Huanca"
+      "brother: Sayri Cusipaucar",
+      "sister: Yana Cusipaucar",
+      "spouse: Wayna",
+      "son: Wiraqocha Hancco",
+      "daughter: Phaway Alanoca"
     ],
     "events": [
       "1525: Born in a small settlement to a Merchant family",
@@ -5907,16 +6217,19 @@
     "feet": "Leather Boots [Spanish Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#c8a63e",
       "garmentKind": "jacket",
-      "garmentColor": "#4a6b45",
-      "backgroundBase": "#3d415a"
+      "garmentColor": "#5a6b3b",
+      "backgroundBase": "#3d5a48"
     },
     "family": [
       "father: Lloque Inca",
       "mother: Phaway",
-      "spouse: Coya",
-      "son: Vicuña Llanos"
+      "brother: Kuntur Inca",
+      "sister: Mama Inca",
+      "spouse: Achik Inca",
+      "son: Tayta Pacco",
+      "daughter: Warmi Quiso"
     ],
     "events": [
       "1560: Born in a small settlement to a Commoner family",
@@ -5942,15 +6255,16 @@
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#6b6153",
+      "headwearColor": "#c8a63e",
       "garmentKind": "work_shirt",
-      "garmentColor": "#e0d3b0",
+      "garmentColor": "#ddd3ba",
       "backgroundBase": "#3d5a48"
     },
     "family": [
       "father: Waman Wankár",
       "mother: Phaway Waskar",
-      "brother: Puma Wankár"
+      "sister: Chaska Wankár",
+      "brother: Wayna Wankár"
     ],
     "events": [
       "1580: Born in a small settlement to a Peasant family",
@@ -5977,22 +6291,26 @@
       "headwearKind": "coronet",
       "headwearColor": "#cfa044",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#6b4a33",
+      "garmentColor": "#6f5237",
       "backgroundBase": "#3d5a48"
     },
     "family": [
       "father: Inti Zapana",
       "mother: Yana Choque",
-      "spouse: Illapa Apaza",
-      "son: Sayri Ttito"
+      "sister: Chakana Zapana",
+      "brother: Atawallpa Zapana",
+      "spouse: Illapa Flores",
+      "daughter: Umiña",
+      "son: Inti Huanca"
     ],
     "events": [
       "1799: Born in a small settlement to a Merchant family",
       "1813: Began learning the trade of landowner from an experienced practitioner",
-      "1841: Took over the family business after a parent retired from active work",
-      "1856: Participated in Inti Raymi sun ceremony",
-      "1864: Divided the land among the children, keeping the best field for old age",
-      "1872: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1825: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1826: Mother died from typhoid fever, leaving the household in grief",
+      "1827: Made offering to mountain apu for good harvest",
+      "1837: Took over the family business after a parent retired from active work",
+      "1864: Divided the land among the children, keeping the best field for old age"
     ]
   },
   "brazil-1880#2": {
@@ -6012,13 +6330,14 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "work_shirt",
-      "garmentColor": "#232323",
+      "garmentColor": "#1f1f22",
       "backgroundBase": "#3d5a48"
     },
     "family": [
       "father: Sumaq Quiso",
       "mother: Sumaq Amaru",
-      "spouse: Phaway Ramos"
+      "sister: Illa Quiso",
+      "brother: Kuntur Quiso"
     ],
     "events": [
       "1835: Born in a small settlement to a Commoner family",
@@ -6046,15 +6365,16 @@
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#f0ece0",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
-      "garmentColor": "#1c1a19",
+      "garmentColor": "#1f1f22",
       "backgroundBase": "#3d5a48"
     },
     "family": [
       "father: Inti Wankár",
       "mother: Wayna",
-      "sister: Phaway Wankár"
+      "brother: Amaru Wankár",
+      "sister: Yana Wankár"
     ],
     "events": [
       "1859: Born in a small settlement to a Peasant family",
@@ -6087,16 +6407,18 @@
     "family": [
       "father: Tomasi",
       "mother: Nanise",
-      "spouse: Kem",
-      "son: Petero"
+      "brother: Ratu",
+      "sister: Wainikiti",
+      "spouse: Jone, father of Mosese",
+      "daughter: Bulou",
+      "son: Jone"
     ],
     "events": [
       "1425: Born in a small settlement to a Merchant family",
       "1439: Learned to read weather signs and predict harvest yields from a parent",
-      "1456: Mother was murdered by sailors despite efforts to save her",
-      "1459: Inherited valuable tools and a workshop from a childless uncle",
-      "1461: Exchanged gifts with neighboring tribe, preventing conflict",
-      "1483: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1467: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1472: Inherited valuable tools and a workshop from a childless uncle",
+      "1480: Exchanged gifts with neighboring tribe, preventing conflict"
     ]
   },
   "newguinea-1500#2": {
@@ -6121,7 +6443,12 @@
     },
     "family": [
       "father: Petero, father of Waisea",
-      "mother: Talei"
+      "mother: Talei",
+      "sister: Mere the Reef-Walker",
+      "brother: Bani",
+      "spouse: Raijeli, mother of Salote",
+      "daughter: Eta the Dark",
+      "son: Filipe, father of Jone"
     ],
     "events": [
       "1460: Born in a small settlement to a Commoner family",
@@ -6154,8 +6481,8 @@
     "family": [
       "father: Mosese",
       "mother: Timoci the Lastborn",
-      "brother: Epeli",
-      "brother: Tevita"
+      "brother: Isikeli",
+      "sister: Vika"
     ],
     "events": [
       "1480: Born in a small settlement to a Peasant family",
@@ -6187,16 +6514,15 @@
     "family": [
       "father: Keawe",
       "mother: Lilia",
-      "spouse: Kawika",
-      "son: Kamal"
+      "brother: Kanoa",
+      "sister: Kailani the Elder"
     ],
     "events": [
       "1625: Born in a small settlement to a Commoner family",
       "1639: Learned to read weather signs and predict harvest yields from a parent",
-      "1656: Mother was murdered by sailors despite efforts to save her",
-      "1659: Inherited valuable tools and a workshop from a childless uncle",
-      "1661: Exchanged gifts with neighboring tribe, preventing conflict",
-      "1683: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1667: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1672: Inherited valuable tools and a workshop from a childless uncle",
+      "1680: Exchanged gifts with neighboring tribe, preventing conflict"
     ]
   },
   "hawaii-1700#2": {
@@ -6221,14 +6547,16 @@
     },
     "family": [
       "father: Kamal, father of Ulani",
-      "mother: Pikake"
+      "mother: Pikake",
+      "sister: Mele o Keoni",
+      "brother: Kamal"
     ],
     "events": [
       "1639: Born in a small settlement to a Commoner family",
       "1652: Trusted to tend the family's animals alone for the first time",
       "1659: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1685: Hosted important feast, strengthening clan ties",
-      "1697: Took over the family business after a parent retired from active work"
+      "1670: Inherited valuable tools and a workshop from a childless uncle",
+      "1672: Hosted important feast, strengthening clan ties"
     ]
   },
   "hawaii-1700#3": {
@@ -6253,7 +6581,12 @@
     },
     "family": [
       "father: Kanoa, father of Waika",
-      "mother: Lehua"
+      "mother: Lehua",
+      "brother: Kawika, father of Ikaika",
+      "sister: Ailana",
+      "spouse: Mahina",
+      "daughter: Lilia, mother of Olina",
+      "son: Lopaka"
     ],
     "events": [
       "1648: Born in a small settlement to a Peasant family",
@@ -6281,14 +6614,17 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "jacket",
-      "garmentColor": "#7a5433",
+      "garmentColor": "#6f5237",
       "backgroundBase": "#6c919d"
     },
     "family": [
       "father: Jannali",
       "mother: Yamba",
-      "spouse: Quandong",
-      "son: Darel"
+      "brother: Lachlan the Wanderer",
+      "sister: Allira",
+      "spouse: Nullah",
+      "son: Boori",
+      "daughter: Eliza"
     ],
     "events": [
       "-20075: Born to the band that ranged this country",
@@ -6318,14 +6654,14 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "bare",
-      "garmentColor": "#e0d3b0",
+      "garmentColor": "#ddd3ba",
       "backgroundBase": "#415a62"
     },
     "family": [
       "father: Warwick the Slow-Speaking",
       "mother: Coolah",
-      "spouse: Narrandera",
-      "daughter: Tallara"
+      "sister: Colebee the Leeward",
+      "brother: Birrani"
     ],
     "events": [
       "-20040: Born to the band that ranged this country",
@@ -6353,15 +6689,17 @@
     "feet": "Rust Barefoot [None]",
     "portrait": {
       "headwearKind": "band",
-      "headwearColor": "#b5563f",
+      "headwearColor": "#9c5230",
       "garmentKind": "bare",
-      "garmentColor": "#ece5d6",
+      "garmentColor": "#e8e4d9",
       "backgroundBase": "#415a62"
     },
     "family": [
       "father: Birrani",
       "mother: Tiwi",
-      "brother: Mandawuy"
+      "sister: Gindarra",
+      "brother: Bidjigal",
+      "spouse: Djarragun"
     ],
     "events": [
       "-20020: Born to the band that ranged this country",

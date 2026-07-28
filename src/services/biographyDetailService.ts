@@ -12,7 +12,7 @@
 
 import type { NarrativePronouns } from './narrativeTextService';
 import { conjugate, lowerProfession, withIndefiniteArticle } from './narrativeTextService';
-import type { HistoricalContext, LocaleType } from '../types/historicalContext';
+import type { HistoricalContext } from '../types/historicalContext';
 import type { Season } from './climateService';
 import {
   hasCapability,
@@ -20,6 +20,15 @@ import {
   type CapabilityContext,
   type SettlementRegister,
 } from '../constants/societyCapabilities';
+import {
+  classBandFor,
+  eligibleClauses,
+  renderClause,
+  selectText,
+  type Clause,
+  type ClassBand,
+  type ClauseContext,
+} from './narrativeClauseService';
 
 export interface BiographyContext {
   name: string;
@@ -35,6 +44,12 @@ export interface BiographyContext {
   season?: Season;
   historical?: HistoricalContext;
   pronouns: NarrativePronouns;
+  /**
+   * Foundational attribute ids. Some of them — bondage in particular — change
+   * which band a life belongs to more decisively than wealth or status labels
+   * do, so the band cannot be derived from `socialClass` alone.
+   */
+  attributeIds?: string[];
 }
 
 /** Seeded chooser supplied by the caller so prose stays stable per persona. */
@@ -47,6 +62,51 @@ const capabilityContext = (ctx: BiographyContext): CapabilityContext => ({
   culturalZone: ctx.historical?.culturalZone,
   placeLower: `${ctx.location ?? ''} ${ctx.region ?? ''}`.toLowerCase(),
 });
+
+/** Where this life sits in the order of its own society. */
+export function bandFor(ctx: BiographyContext): ClassBand {
+  return classBandFor({
+    socialClass: ctx.socialClass,
+    wealthLevel: ctx.wealthLevel,
+    attributeIds: ctx.attributeIds,
+  });
+}
+
+/** The context every gated clause bank is filtered against. */
+export function clauseContextFor(ctx: BiographyContext): ClauseContext {
+  const capabilities = capabilityContext(ctx);
+  return {
+    year: ctx.year,
+    zone: ctx.historical?.culturalZone,
+    register: registerFor(ctx),
+    locale: ctx.historical?.localeType ?? 'unknown',
+    band: bandFor(ctx),
+    institutions: ctx.historical?.institutions ?? [],
+    technologies: ctx.historical?.technologies ?? [],
+    hasCapability: capability => hasCapability(capability, capabilities),
+  };
+}
+
+/** Placeholders that clause text may name besides the pronouns. */
+const clauseExtras = (ctx: BiographyContext): Record<string, string | undefined> => ({
+  location: ctx.location,
+  language: ctx.language,
+  religion: ctx.religion,
+  name: ctx.name,
+});
+
+const fromBank = (bank: Clause[], ctx: BiographyContext, pick: Pick): string =>
+  selectText(bank, clauseContextFor(ctx), pick, ctx.pronouns, clauseExtras(ctx));
+
+/**
+ * Choose one fragment from a gated bank, for callers outside this module that
+ * hold their own banks — the personality traits, which are selected by
+ * temperament thresholds rather than by anything historical, but whose wording
+ * still ought to depend on when and where the person lived.
+ */
+export function selectDetail(bank: Clause[], ctx: BiographyContext, pick: Pick): string {
+  return fromBank(bank, ctx, pick);
+}
 
 /**
  * "The district" is wrong for a band that moves with the season and wrong
@@ -96,9 +156,77 @@ interface TradeTexture {
  * so they must not begin with a capital or end with punctuation.
  */
 const TRADE_TEXTURES: TradeTexture[] = [
+  // Modern variants come first so they win the match. Without them a 2028
+  // "small business owner" fell through to the pre-modern merchant family and
+  // was described as keeping a stall and judging strangers quickly.
+  {
+    match: /shopkeep|business owner|proprietor|retailer|franchise/,
+    minYear: 1950,
+    clauses: [
+      'a lease, a margin, and accounts that have to satisfy someone in an office',
+      'long hours in a small business that is one bad quarter from closing',
+      'stock, staff, and the paperwork that comes with both',
+      'a trade that competes with firms large enough not to notice it',
+    ],
+  },
+  {
+    match: /field hand|farm worker|farm labor|agricultural worker|picker/,
+    minYear: 1950,
+    clauses: [
+      'seasonal work on land owned by a company rather than a family',
+      'a crop planted, sprayed and lifted to a schedule decided somewhere else',
+      'piece rates, a contractor, and a season that ends without notice',
+    ],
+  },
+  {
+    match: /nurse|orderly|care worker|carer|paramedic|health worker/,
+    minYear: 1900,
+    clauses: [
+      'twelve-hour shifts, and a professional calm that has to be put on at the door',
+      'other people at the worst hours of their lives, handled competently and then handed over',
+      'a rota, a uniform, and more responsibility than the pay reflects',
+    ],
+  },
+  {
+    match: /cashier|checkout|shop assistant|sales assistant|retail/,
+    minYear: 1950,
+    clauses: [
+      'a till, a queue, and eight hours of being pleasant to strangers',
+      'shifts posted a week ahead and changed with less notice than that',
+      'standing in one place while the same few hundred transactions repeat',
+    ],
+  },
+  {
+    match: /programmer|developer|software|analyst|designer|consultant|marketing/,
+    minYear: 1980,
+    clauses: [
+      'work that leaves no physical trace and is described to relatives with difficulty',
+      'a screen, a calendar full of meetings, and deadlines set by people ${subject} ${verb:have} never met',
+      'a salary, a laptop, and no clear line between the working day and the rest of it',
+    ],
+  },
+  {
+    match: /driver|courier|delivery|taxi|rideshare|logistics/,
+    minYear: 1970,
+    clauses: [
+      'a route, a schedule, and a device that knows where ${subject} ${verb:be} at all times',
+      'paid by the drop, so the day is a long argument with traffic',
+      'hours on the road alone, and a depot that is only ever seen at either end of them',
+    ],
+  },
+  {
+    match: /mill hand|mill worker|factory|textile worker|jute|operative|spinning shed|plant worker/,
+    minYear: 1950,
+    clauses: [
+      'a line that sets the pace, a quota that rises, and a plant that could close',
+      'shift work, ear protection, and a job that has survived three rounds of talk about automating it',
+      'the same motion for eight hours, and a body that keeps the count even when the mind stops',
+    ],
+  },
   {
     match: /mill hand|mill worker|factory|textile worker|jute|operative|spinning shed/,
     minYear: 1760,
+    maxYear: 1949,
     clauses: [
       'fourteen hours inside the noise of the machines, and a fine deducted for every minute late at the gate',
       'tending frames that never stop, in air thick enough with lint to taste',
@@ -323,6 +451,15 @@ const TRADE_TEXTURES: TradeTexture[] = [
     ],
   },
   {
+    match: /salaryman|office worker|office manager|white collar|executive|manager/,
+    minYear: 1920,
+    clauses: [
+      'a desk, a hierarchy, and a career measured in the distance between them',
+      'work that produces no object, and is judged by people who produce none either',
+      'the same building, the same hours and the same colleagues for a very long time',
+    ],
+  },
+  {
     match: /office manager|administrator|official|bureaucrat|magistrate|judge|viceroy|governor|steward|landowner|lady|lord/,
     clauses: [
       'other people\'s affairs decided at a desk, and the consequences arriving somewhere out of sight',
@@ -358,51 +495,47 @@ const TRADE_TEXTURES: TradeTexture[] = [
 ];
 
 /**
- * Fallbacks for societies with no settled district to belong to. The previous
- * generic clauses ("the ordinary labor of the district") were being handed to
- * Paleolithic hide workers and Patagonian herders.
+ * What to say when no trade family matches, which is common: the profession
+ * tables are far wider than the texture list and always will be.
+ *
+ * These used to be two plain records keyed on register and locale, with no date
+ * on any of them, so a liberation theologian in 2003 was told his work moved
+ * when the camp moved.
  */
-const REGISTER_TEXTURES: Record<SettlementRegister, string[]> = {
-  band: [
-    'work shared out among the band as the season and the country allow',
-    'whatever the camp needs doing, done by whoever is nearest and able',
-    'skills everyone in the band holds to some degree, and a few hold better',
-  ],
-  village: [
-    'the ordinary work of the settlement, done alongside everyone else in it',
-    'a task the household has always done, and expects to go on doing',
-  ],
-  district: [],
-};
+const GENERIC_TRADE_CLAUSES: Clause[] = [
+  { text: 'work shared out among the band as the season and the country allow', register: ['band'] },
+  { text: 'whatever the camp needs doing, done by whoever is nearest and able', register: ['band'] },
+  { text: 'skills everyone in the band holds to some degree, and a few hold better', register: ['band'] },
 
-const GENERIC_TEXTURES: Record<LocaleType, string[]> = {
-  city: [
-    'a day\'s work sold in a city where there is always someone willing to do it cheaper',
-    'labor taken where it is offered, in a place with more people than employment',
-  ],
-  town: [
-    'steady enough work in a place small enough that everyone knows what it pays',
-    'a trade practiced among neighbors who have known the family for generations',
-  ],
-  rural: [
-    'work that follows the season rather than the clock',
-    'the ordinary labor of the district, done alongside everyone else who lives in it',
-  ],
-  mobile: [
-    'work that moves when the camp moves',
-    'a living made on the road, between one halt and the next',
-  ],
-  unknown: [
-    'the ordinary work of the place, done in the ordinary way',
-  ],
-};
+  { text: 'the ordinary work of the settlement, done alongside everyone else in it', register: ['village'] },
+  { text: 'a task the household has always done, and expects to go on doing', register: ['village'] },
+
+  { text: 'a day\'s work sold in a city where there is always someone willing to do it cheaper', register: ['district'], locale: ['city'], maxYear: 1930 },
+  { text: 'labor taken where it is offered, in a place with more people than employment', register: ['district'], locale: ['city'], maxYear: 1930 },
+  { text: 'steady enough work in a place small enough that everyone knows what it pays', register: ['district'], locale: ['town'], maxYear: 1930 },
+  { text: 'a trade practiced among neighbors who have known the family for generations', register: ['district'], locale: ['town'], maxYear: 1930 },
+  { text: 'work that follows the season rather than the clock', locale: ['rural'], maxYear: 1930 },
+  { text: 'the ordinary labor of the district, done alongside everyone else who lives in it', register: ['district'], locale: ['rural'], maxYear: 1930 },
+  { text: 'work that moves when the camp moves', locale: ['mobile'], maxYear: 1900 },
+  { text: 'a living made on the road, between one halt and the next', locale: ['mobile'], maxYear: 1900 },
+
+  // --- After the wage
+  { text: 'fixed hours, a fixed rate, and a job title that appears on a form somewhere', minYear: 1900 },
+  { text: 'work that is the same on Tuesday as it was on Monday, and paid at the end of the month', minYear: 1900 },
+  { text: 'a contract, a job description, and very little relation between the two', minYear: 1950 },
+  { text: 'a post in a city where the rent assumes two wages and the work provides one', locale: ['city'], minYear: 1950 },
+  { text: 'employment that has to be travelled to, which is most of what distinguishes it from ${possessive} grandparents\' work', minYear: 1950 },
+  { text: 'a living made in an economy that no longer has much use for the district it is made in', locale: ['rural'], minYear: 1960 },
+
+  // --- Last resort
+  { text: 'the ordinary work of the place, done in the ordinary way' },
+];
 
 /**
  * A sentence describing what the persona's trade actually consists of.
  */
 export function describeProfessionWork(ctx: BiographyContext, pick: Pick): string {
   const professionText = (ctx.profession || '').toLowerCase();
-  const locale = ctx.historical?.localeType ?? 'unknown';
 
   const texture = TRADE_TEXTURES.find(t =>
     t.match.test(professionText)
@@ -411,9 +544,10 @@ export function describeProfessionWork(ctx: BiographyContext, pick: Pick): strin
   );
 
   const register = registerFor(ctx);
-  const fallback = register === 'district'
-    ? (GENERIC_TEXTURES[locale] ?? GENERIC_TEXTURES.unknown)
-    : REGISTER_TEXTURES[register];
+  const eligibleGeneric = eligibleClauses(GENERIC_TRADE_CLAUSES, clauseContextFor(ctx));
+  const fallback = eligibleGeneric.length > 0
+    ? eligibleGeneric.map(clause => clause.text)
+    : ['the ordinary work of the place, done in the ordinary way'];
 
   // Wages, prices and customers presuppose a market. Outside a settled district
   // prefer the clauses in a trade family that do not assume one.
@@ -426,12 +560,69 @@ export function describeProfessionWork(ctx: BiographyContext, pick: Pick): strin
         : fallback))
     : fallback;
 
-  const clause = pick(available);
+  const clause = renderClause(pick(available), ctx.pronouns, clauseExtras(ctx));
 
   // Every opener must govern a bare noun phrase, since that is the shape all
   // the clauses take.
   const openers = ['The work means ', 'That means ', 'It comes down to ', 'The trade is '];
   return `${pick(openers)}${clause}.`;
+}
+
+/**
+ * How the persona holds their trade, as a short plain sentence.
+ *
+ * `describeProfessionWork` has exactly one register: a frame governing a
+ * compressed noun phrase — "That means fourteen hours inside the noise of the
+ * machines". It is a good register and it was the only one, so every biography
+ * in every era described work in the same aphoristic voice at the same length.
+ *
+ * These are deliberately short, plain and often flat. Their job is to break the
+ * rhythm rather than to add information.
+ */
+const TRADE_ATTITUDES: Clause[] = [
+  // --- Flat
+  { text: 'It is a job.', minYear: 1900 },
+  { text: 'It is work, and it pays.' },
+  { text: 'It is what there is.' },
+  { text: 'The work is the work.' },
+
+  // --- Content
+  { text: '${subjectCap} ${verb:be} good at it, and ${verb:know} it.' },
+  { text: '${subjectCap} ${verb:find} the work soothing, which not everyone does.' },
+  { text: 'It suits ${object}.' },
+  { text: '${subjectCap} ${verb:take} more pride in it than the pay would justify.' },
+  { text: '${subjectCap} ${verb:like} it more than ${subject} ${verb:admit}.' },
+
+  // --- Not content
+  { text: '${subjectCap} ${verb:do} not enjoy it very much.' },
+  { text: '${subjectCap} would not choose it again.' },
+  { text: 'It is not what ${subject} intended.' },
+  { text: '${subjectCap} ${verb:be} tired of it in a way that has stopped being interesting.' },
+
+  // --- Never a choice
+  { text: '${subjectCap} ${verb:have} never had much say in the matter.' },
+  { text: 'It was decided for ${object}, more or less, before ${subject} could object.' },
+  { text: 'There was never a version of ${possessive} life in which ${subject} did something else.' },
+  { text: 'Whether ${subject} ${verb:like} it has never been a question anyone thought to ask.', band: ['bonded'] },
+
+  // --- Long habit
+  { text: 'It is the only work ${subject} ${verb:have} ever done.' },
+  { text: '${subjectCap} ${verb:have} been at it long enough to stop noticing it.' },
+  { text: 'It is better than the alternative, which ${subject} ${verb:have} also done.' },
+
+  // --- After the wage
+  { text: '${subjectCap} ${verb:describe} it to strangers as fine.', minYear: 1950 },
+  { text: 'It is not a career, it is a job, and ${subject} ${verb:be} clear about the difference.', minYear: 1950 },
+  { text: '${subjectCap} ${verb:intend} to do something else, and ${verb:have} intended it for some years.', minYear: 1920 },
+  { text: 'The pay is the point, and ${subject} ${verb:have} stopped pretending otherwise.', minYear: 1950 },
+
+  // --- Station
+  { text: 'It is less an occupation than a position, and ${subject} ${verb:hold} it because of who ${possessive} father was.', band: ['elite'] },
+  { text: 'It keeps the household fed, most years.', band: ['poor', 'working'] },
+];
+
+export function describeTradeAttitude(ctx: BiographyContext, pick: Pick): string {
+  return fromBank(TRADE_ATTITUDES, ctx, pick);
 }
 
 // ---------------------------------------------------------------------------
@@ -475,43 +666,81 @@ const maternalClause = (
   profession: string | undefined,
   pronouns: NarrativePronouns,
   settled: boolean,
+  name?: string,
 ): string => {
   if (!profession) return '';
+  const ref = name ? `${pronouns.possessive} mother ${name}` : `${pronouns.possessive} mother`;
   const key = profession.trim().toLowerCase();
   const activity = (!settled && FORAGING_ACTIVITIES[key]) || MATERNAL_ACTIVITIES[key];
-  if (activity) return `${pronouns.possessive} mother ${activity}`;
-  return `${pronouns.possessive} mother worked as ${withIndefiniteArticle(lowerProfession(profession))}`;
+  if (activity) return `${ref} ${activity}`;
+  return `${ref} worked as ${withIndefiniteArticle(lowerProfession(profession))}`;
 };
 
 export function describeParentalLivelihood(
   father: { name?: string; profession?: string } | undefined,
   mother: { name?: string; profession?: string } | undefined,
   ctx: BiographyContext,
-  pick: Pick
+  pick: Pick,
+  /**
+   * Name the parents here rather than in a closing sentence. Every biography
+   * used to end with "His parents are X and Y", which measured as 2.6% of all
+   * sentences generated — a louder template signal than any single phrasing.
+   */
+  nameParents = false,
 ): string {
   const { pronouns } = ctx;
   const fatherTrade = father?.profession ? lowerProfession(father.profession) : '';
   const fatherPhrase = fatherTrade ? withIndefiniteArticle(fatherTrade) : '';
   const settled = hasCapability('settled_agriculture', capabilityContext(ctx));
-  const motherPhrase = maternalClause(mother?.profession, pronouns, settled);
+  const motherPhrase = maternalClause(
+    mother?.profession,
+    pronouns,
+    settled,
+    nameParents ? mother?.name : undefined,
+  );
   const sameTrade = fatherTrade && fatherTrade === lowerProfession(ctx.profession);
+  const fatherRef = nameParents && father?.name
+    ? `${pronouns.possessive} father ${father.name}`
+    : `${pronouns.possessive} father`;
+  const FatherRef = capitalize(fatherRef);
+
+  const band = bandFor(ctx);
+  const modern = ctx.year >= 1900;
 
   if (fatherPhrase && motherPhrase) {
     return pick([
-      `${pronouns.possessiveCap} father was ${fatherPhrase} and ${motherPhrase}; the household lived on both.`,
-      `${pronouns.possessiveCap} father was ${fatherPhrase}, while ${motherPhrase}.`,
+      `${FatherRef} was ${fatherPhrase} and ${motherPhrase}; the household lived on both.`,
+      `${FatherRef} was ${fatherPhrase}, while ${motherPhrase}.`,
+      `${FatherRef} was ${fatherPhrase}; ${motherPhrase}, which was the less visible half of it.`,
+      `The household had two livelihoods in it: ${fatherRef} was ${fatherPhrase}, and ${motherPhrase}.`,
+      ...(modern
+        ? [`${FatherRef} was ${fatherPhrase} and ${motherPhrase}, and between them they kept the family just above where it had started.`]
+        : []),
+      ...(band === 'poor' || band === 'bonded'
+        ? [`${FatherRef} was ${fatherPhrase} and ${motherPhrase}, and neither was enough on its own.`]
+        : []),
     ]);
   }
   if (fatherPhrase) {
-    return sameTrade
-      ? pick([
-        `${pronouns.possessiveCap} father was ${fatherPhrase} before ${pronouns.object}, and the trade came down as trades do.`,
-        `The work came down from ${pronouns.possessive} father, who was ${fatherPhrase} in the same district.`,
-      ])
-      : pick([
-        `${pronouns.possessiveCap} father was ${fatherPhrase}, and the household lived by it.`,
-        `The family kept itself on what ${pronouns.possessive} father earned as ${fatherPhrase}.`,
+    if (sameTrade) {
+      return pick([
+        `${FatherRef} was ${fatherPhrase} before ${pronouns.object}, and the trade came down as trades do.`,
+        `The work came down from ${fatherRef}, who was ${fatherPhrase} in the same district.`,
+        ...(modern
+          ? [`${FatherRef} did the same work, which was either an inheritance or a failure to escape, depending on who is asked.`]
+          : []),
       ]);
+    }
+    return pick([
+      `${FatherRef} was ${fatherPhrase}, and the household lived by it.`,
+      `The family kept itself on what ${fatherRef} earned as ${fatherPhrase}.`,
+      ...(band === 'elite'
+        ? [`The family's standing rested on ${fatherRef}'s position as ${fatherPhrase}.`]
+        : []),
+      ...(band === 'bonded'
+        ? [`${FatherRef} was ${fatherPhrase}, and what he produced was not, in the end, his to dispose of.`]
+        : []),
+    ]);
   }
   if (motherPhrase) {
     return `${capitalize(motherPhrase)}, which is what the household mostly ran on.`;
@@ -532,125 +761,103 @@ const SEASON_CLAUSES: Record<Season, string[]> = {
   dry: ['the dry season has hardened the ground and opened the roads', 'the water is low and every household is reckoning how far it will go'],
 };
 
-const INSTITUTION_CLAUSES: Record<string, string[]> = {
-  craft_guild: [
-    'the guild sets what may be charged and who may charge it',
-    'no one works a trade without the guild\'s leave',
-  ],
-  university: [
-    'there are scholars in the town who argue about matters no one else has heard of',
-    'the university stands over the place, a world entirely closed to most of those who live beneath it',
-  ],
-  factory: [
-    'the new manufactories have begun to take in the people the land no longer needs',
-    'the mills draw in labor from thirty miles around',
-  ],
-  modern_bureaucracy: [
-    'there are now offices that keep a record of every birth, death and holding',
-    'the state has begun to write everyone down',
-  ],
-  railway_station: [
-    'the railway has put places a week away within a day',
-    'the trains have made the district less separate than it has ever been',
-  ],
-  mass_political_party: [
-    'the parties hold meetings that fill the hall and empty the tavern',
-    'politics has become something ordinary people are expected to have a position on',
-  ],
-  organized_religion: [
-    'the calendar of the district is set by its festivals',
-    'the observances mark out the year for everyone, devout or not',
-  ],
-};
-
 /**
  * One sentence locating the persona in the material and institutional world of
- * their year and locale. Draws on data the generator already computes and
- * previously never used: institutions, technologies, season, language.
+ * their year, place and station.
+ *
+ * The zone filtering that used to live in a `zoneAllows` switch here is now
+ * expressed as clause conditions, so there is one gating mechanism rather than
+ * two. Where the old switch said "industrial institutions reached different
+ * zones at very different dates", that is now two clauses with different
+ * `zones`/`minYear` pairs.
+ *
+ * Note the `maxYear` on the novelty clauses. Without one, a persona in 2027 was
+ * being told that the trains had made the district less separate than it had
+ * ever been.
  */
-const REGISTER_WORLD_CLAUSES: Record<SettlementRegister, string[]> = {
-  band: [
-    'The band moves when the ground gives out, and everything it owns moves with it.',
-    'What the band knows about this country is held by the oldest of them and passed on by telling.',
-    'There are perhaps thirty people in the world ${subject} sees in an ordinary year.',
-  ],
-  village: [
-    'The settlement is small enough that every household knows what every other one owes.',
-    'What happens here is settled among the households themselves, there being no one else to settle it.',
-  ],
-  district: [],
-};
+const WORLD_CLAUSES: Clause[] = [
+  // --- Societies without a settled district
+  { text: 'The band moves when the ground gives out, and everything it owns moves with it.', register: ['band'] },
+  { text: 'What the band knows about this country is held by the oldest of them and passed on by telling.', register: ['band'] },
+  { text: 'There are perhaps thirty people in the world ${subject} ${verb:see} in an ordinary year.', register: ['band'] },
+  { text: 'Everything the band owns, it can carry.', register: ['band'] },
+
+  { text: 'The settlement is small enough that every household knows what every other one owes.', register: ['village'] },
+  { text: 'What happens here is settled among the households themselves, there being no one else to settle it.', register: ['village'], maxYear: 1800 },
+  { text: 'The nearest authority worth the name is a day\'s walk off, and is not often troubled.', register: ['village'], maxYear: 1850 },
+  { text: '${location} has a school, a clinic and a road out, and none of the three existed when ${possessive} grandparents were young.', register: ['village'], minYear: 1930 },
+  { text: 'Half the young people have left ${location} for the cities, and what they send back is a good part of what keeps it standing.', register: ['village'], minYear: 1950 },
+
+  // --- Institutions of the settled, urban world
+  { text: 'In ${location}, the guild sets what may be charged and who may charge it.', institution: 'craft_guild', register: ['district'], locale: ['city', 'town'], zones: ['EUROPEAN', 'MENA', 'EAST_ASIAN', 'SOUTH_ASIAN'] },
+  { text: 'In ${location}, no one works a trade without the guild\'s leave.', institution: 'craft_guild', register: ['district'], locale: ['city', 'town'], zones: ['EUROPEAN', 'MENA', 'EAST_ASIAN', 'SOUTH_ASIAN'] },
+  { text: 'There are scholars in ${location} who argue about matters no one else has heard of.', institution: 'university', register: ['district'], locale: ['city', 'town'], zones: ['EUROPEAN', 'MENA', 'SOUTH_ASIAN', 'EAST_ASIAN'] },
+  { text: 'The university stands over ${location}, a world entirely closed to most of those who live beneath it.', institution: 'university', register: ['district'], locale: ['city', 'town'], zones: ['EUROPEAN', 'MENA', 'SOUTH_ASIAN', 'EAST_ASIAN'] },
+
+  { text: 'The new manufactories have begun to take in the people the land no longer needs.', institution: 'factory', register: ['district'], locale: ['city', 'town'], zones: ['EUROPEAN', 'NORTH_AMERICAN_COLONIAL'], maxYear: 1900 },
+  { text: 'The mills draw in labor from thirty miles around.', institution: 'factory', register: ['district'], locale: ['city', 'town'], minYear: 1900, maxYear: 1970 },
+  { text: 'There are now offices in ${location} that keep a record of every birth, death and holding.', institution: 'modern_bureaucracy', register: ['district'], locale: ['city', 'town'], zones: ['EUROPEAN', 'NORTH_AMERICAN_COLONIAL'], maxYear: 1900 },
+  { text: 'The state has begun to write everyone down.', institution: 'modern_bureaucracy', register: ['district'], locale: ['city', 'town'], minYear: 1900, maxYear: 1960 },
+  { text: 'The railway has put places a week away within a day.', institution: 'railway_station', register: ['district'], locale: ['city', 'town'], maxYear: 1900 },
+  { text: 'The trains have made the district less separate than it has ever been.', institution: 'railway_station', register: ['district'], locale: ['city', 'town'], maxYear: 1930 },
+  { text: 'The line through ${location} carries freight now and passengers rarely, and half the station is shut.', institution: 'railway_station', register: ['district'], minYear: 1970 },
+  { text: 'The parties hold meetings that fill the hall and empty the tavern.', institution: 'mass_political_party', register: ['district'], locale: ['city', 'town'], maxYear: 1960 },
+  { text: 'Politics has become something ordinary people are expected to have a position on.', institution: 'mass_political_party', register: ['district'], locale: ['city', 'town'], minYear: 1900 },
+  { text: 'Printed sheets circulate in ${location} now, and there is an argument in every one of them.', technology: 'printing_press', register: ['district'], zones: ['EUROPEAN'], maxYear: 1750 },
+
+  // --- Religion, which does not stop in 1900 but changes what it is
+  { text: 'In ${location}, the calendar is set by the festivals.', institution: 'organized_religion', register: ['village', 'district'], maxYear: 1900 },
+  { text: 'In ${location}, the observances mark out the year for everyone, devout or not.', institution: 'organized_religion', register: ['village', 'district'], maxYear: 1900 },
+  { text: 'The observances still mark the year in ${location}, though fewer people keep them than say they do.', institution: 'organized_religion', register: ['village', 'district'], minYear: 1950 },
+
+  // --- The twentieth-century state and its furniture
+  { text: 'Nearly everyone in ${location} under fifty can read, which was not true of the generation before them.', institution: 'compulsory_school', minYear: 1920 },
+  { text: 'The state knows ${possessive} name, ${possessive} age and where ${subject} ${verb:sleep}, and expects to be told when any of it changes.', institution: 'identity_papers' },
+  { text: 'There is a clinic in ${location}, and the children who would once have died of a fever mostly do not.', institution: 'public_clinic', minYear: 1930 },
+  { text: 'Old age has become the state\'s business as much as the family\'s, which is a change nobody quite decided on.', institution: 'welfare_state', minYear: 1960 },
+  { text: 'There is a pension at the end of it, in principle, and a running argument about whether it will still be there.', institution: 'welfare_state', zones: ['EUROPEAN'], minYear: 1970 },
+  { text: 'What people in ${location} argue about is largely what they have all watched.', institution: 'mass_media', minYear: 1955 },
+  { text: 'What ${location} eats now arrives on a lorry rather than out of the ground around it.', institution: 'chain_retail' },
+  { text: 'Everyone in ${location} is reachable at any hour, which is far newer than it feels.', institution: 'mobile_network', minYear: 2005 },
+
+  // --- Technologies as they are actually noticed
+  { text: 'News that used to arrive with a traveler now arrives before them.', technology: 'telegraph', maxYear: 1920 },
+  { text: 'The road through ${location} carries more in a day than the old one carried in a season.', technology: 'motor_transport', minYear: 1930, maxYear: 1990 },
+  { text: 'Illnesses that killed ${possessive} grandparents are a course of tablets now, which is the great unremarked fact of ${possessive} lifetime.', technology: 'antibiotics', minYear: 1960 },
+  { text: 'The evening in ${location} belongs to the television, and the street empties for it.', technology: 'television', minYear: 1960, maxYear: 2005 },
+  { text: 'People from ${location} work in countries ${possessive} grandparents could not have named, and send the money home.', technology: 'jet_travel', minYear: 1975 },
+  { text: 'Most of ${possessive} dealings with work, the state and distant relatives now happen on a screen.', technology: 'internet', minYear: 2000 },
+  { text: 'There is a phone in every pocket in ${location}, and the day\'s news, wages and arguments all arrive through it.', technology: 'smartphone', minYear: 2012 },
+
+  // --- What the world looks like from a particular station in it
+  { text: 'What happens in ${location} is decided by perhaps a dozen households, and ${possessive} own is one of them.', band: ['elite'], register: ['village', 'district'], maxYear: 1900 },
+  { text: 'The days ${subject} ${verb:owe} are counted by someone else, and the count is not open to dispute.', band: ['bonded'] },
+  { text: 'A bad season here is not an inconvenience but the difference between the household holding together and not.', band: ['poor'], maxYear: 1900 },
+  { text: 'Rent takes the largest part of what comes in, and the rest is arithmetic done weekly.', band: ['poor'], locale: ['city', 'town'], minYear: 1850 },
+  { text: 'The household is solvent, and very nearly the whole of its anxiety is about staying so.', band: ['middling'], minYear: 1900 },
+
+  // --- Language. Filtered out below when the persona has no named language.
+  { text: '${possessiveCap} world ${be} conducted wholly in ${language}.', register: ['band', 'village'], maxYear: 1850 },
+  { text: '${possessiveCap} world ${be} conducted in ${language}, and in whatever else the market requires.', register: ['district'], maxYear: 1900 },
+  { text: 'The household speaks ${language}; the school, the office and the form are conducted in something else.', minYear: 1880 },
+  { text: '${subjectCap} ${verb:speak} ${language} at home and whatever the workplace requires outside it.', minYear: 1950 },
+];
 
 export function describeWorldTexture(ctx: BiographyContext, pick: Pick): string {
-  const options: string[] = [];
-  const { pronouns } = ctx;
-  const register = registerFor(ctx);
+  // A clause naming the language cannot be used by a persona who has none.
+  const bank = ctx.language
+    ? WORLD_CLAUSES
+    : WORLD_CLAUSES.filter(clause => !clause.text.includes('${language}'));
 
-  if (register !== 'district') {
-    // Guilds, universities and parish calendars have nothing to describe here.
-    options.push(
-      pick(REGISTER_WORLD_CLAUSES[register])
-        .replace(/\$\{subject\}/g, pronouns.subject)
-        .replace(/\bsees\b/g, pronouns.subject === 'they' ? 'see' : 'sees')
-    );
-    if (ctx.language) {
-      options.push(`${pronouns.possessiveCap} world ${pronouns.be} conducted wholly in ${ctx.language}.`);
-    }
-    return pick(options);
-  }
-
-  const institutions = ctx.historical?.institutions ?? [];
-  const zone = ctx.historical?.culturalZone;
-  // `institutionsForYear` is date-gated but not place-gated, so it will hand
-  // back a craft guild for ninth-century Cusco. Filter to the zones where each
-  // institution actually existed before putting one into prose.
-  const locale = ctx.historical?.localeType;
-  const zoneAllows = (institution: string): boolean => {
-    // These are all town-and-city institutions. `inferLocaleType` returns
-    // 'unknown' for a lot of real places, and `institutionsForYear` treats
-    // anything not explicitly rural as urban, which put craft guilds in
-    // mountain districts.
-    const urbanOnly = ['craft_guild', 'university', 'factory', 'railway_station', 'modern_bureaucracy', 'mass_political_party'];
-    if (urbanOnly.includes(institution) && locale !== 'city' && locale !== 'town') return false;
-    if (!zone) return institution === 'organized_religion';
-    switch (institution) {
-      case 'craft_guild':
-        return ['EUROPEAN', 'MENA', 'EAST_ASIAN', 'SOUTH_ASIAN'].includes(zone);
-      case 'university':
-        return ['EUROPEAN', 'MENA', 'SOUTH_ASIAN', 'EAST_ASIAN'].includes(zone);
-      case 'factory':
-      case 'railway_station':
-      case 'modern_bureaucracy':
-      case 'mass_political_party':
-        // Industrial institutions reached different zones at very different
-        // dates; the year gate alone is too generous outside the North Atlantic.
-        return ['EUROPEAN', 'NORTH_AMERICAN_COLONIAL'].includes(zone) || ctx.year >= 1900;
-      default:
-        return true;
-    }
-  };
-
-  // Prefer the most historically distinctive institution present.
-  const priority = ['railway_station', 'factory', 'mass_political_party', 'modern_bureaucracy', 'craft_guild', 'university', 'organized_religion'];
-  const institution = priority.find(id => institutions.includes(id) && zoneAllows(id));
-  if (institution && INSTITUTION_CLAUSES[institution]) {
-    options.push(`In ${ctx.location}, ${pick(INSTITUTION_CLAUSES[institution])}.`);
-  }
-
-  if (ctx.language) {
-    options.push(
-      `${pronouns.possessiveCap} world ${pronouns.be} conducted in ${ctx.language}, and in whatever else the market requires.`
-    );
-  }
+  const text = fromBank(bank, ctx, pick);
+  if (text) return text;
 
   // The season is true of everyone in the district rather than of this person,
   // so it is the last resort rather than a competitor to the sharper clauses.
-  if (options.length === 0 && ctx.season && SEASON_CLAUSES[ctx.season]) {
-    options.push(`${capitalize(pick(SEASON_CLAUSES[ctx.season]))}.`);
+  if (ctx.season && SEASON_CLAUSES[ctx.season]) {
+    return `${capitalize(pick(SEASON_CLAUSES[ctx.season]))}.`;
   }
-
-  if (options.length === 0) return '';
-  return pick(options);
+  return '';
 }
 
 // ---------------------------------------------------------------------------
@@ -685,38 +892,85 @@ const WEALTH_WORDS: Record<SettlementRegister, Record<string, string>> = {
   },
 };
 
+/**
+ * "A respectable family" and "a prosperous household" are the vocabulary of a
+ * society that ranks households by standing. After the wage and the census the
+ * ranking is by income, and the words for it are different ones.
+ */
+const MODERN_WEALTH_WORDS: Record<string, string> = {
+  poor: 'struggling',
+  modest: 'ordinary',
+  comfortable: 'comfortable',
+  wealthy: 'well-off',
+  noble: 'affluent',
+};
+
+/** Bondage is not a degree of wealth, and reads wrong when described as one. */
+const BONDED_WEALTH_WORD = 'bound';
+
 export function wealthAdjective(wealthLevel: string | undefined, ctx: BiographyContext): string {
-  const table = WEALTH_WORDS[registerFor(ctx)];
+  if (bandFor(ctx) === 'bonded') return BONDED_WEALTH_WORD;
+  const table = ctx.year >= 1900 ? MODERN_WEALTH_WORDS : WEALTH_WORDS[registerFor(ctx)];
   return (wealthLevel && table[wealthLevel]) || table.modest;
 }
 
-const CHILDHOOD_TEXTURES: Record<SettlementRegister, string[]> = {
-  band: [
-    'Childhood was spent moving with the band, learning the country by walking over it.',
-    'The children of the camp were watched by whoever was nearest, and learned by doing what the adults did.',
-    'What ${possessive} generation was taught, it was taught by copying and by being corrected.',
-  ],
-  village: [
-    'The settlement was small enough that every adult in it had some claim on ${possessive} behavior.',
-    'Childhood meant work from the moment ${subject} could be useful, which was early.',
-  ],
-  district: [
-    'Childhood meant work from the moment ${subject} could be useful, which was early.',
-    'The street ${subject} grew up on knew ${possessive} family, its trade and its debts.',
-    '${possessiveCap} early years were spent among more people than most of ${possessive} ancestors met in a lifetime.',
-  ],
-};
+/**
+ * Childhood used to be seven sentences for the whole of human history, chosen
+ * on settlement register alone. A childhood is one of the places where era and
+ * station are most legible — whether there was a school, whether there was a
+ * choice, who else had a claim on the child — so this bank is gated on both.
+ */
+const CHILDHOOD_CLAUSES: Clause[] = [
+  // --- Before farming
+  { text: 'Childhood was spent moving with the band, learning the country by walking over it.', register: ['band'] },
+  { text: 'The children of the camp were watched by whoever was nearest, and learned by doing what the adults did.', register: ['band'] },
+  { text: 'What ${possessive} generation was taught, it was taught by copying and by being corrected.', register: ['band'] },
+  { text: 'The plants worth taking, the sign of each animal and the way to water were known to ${object} before ${subject} could carry anything.', register: ['band'] },
+  { text: 'There was no day on which ${subject} started working; there was only being small enough to be carried, and then not being.', register: ['band'] },
+
+  // --- Settled, small
+  { text: 'The settlement was small enough that every adult in it had some claim on ${possessive} behavior.', register: ['village'] },
+  { text: 'Every field, byre and boundary stone within an hour of the house was known to ${object} by the age of ten.', register: ['village'], needs: ['settled_agriculture'] },
+  { text: 'The year ${subject} turned seven ${subject} was given animals to mind, and has not been without a task since.', register: ['village'] },
+
+  // --- Settled, urban, before the school
+  { text: 'The street ${subject} grew up on knew ${possessive} family, its trade and its debts.', register: ['district'], maxYear: 1900 },
+  { text: '${possessiveCap} early years were spent among more people than most of ${possessive} ancestors met in a lifetime.', register: ['district'], maxYear: 1900 },
+  { text: 'The quarter kept its own feast days, its own quarrels and its own way of settling both.', register: ['district'], maxYear: 1900 },
+
+  // --- Station, before the modern state
+  { text: 'A childhood of tutors, observances and the constant company of servants left ${object} with few memories of being alone.', band: ['elite'], register: ['district'], maxYear: 1900 },
+  { text: '${possessiveCap} upbringing was arranged rather than lived: what ${subject} would become was settled well before ${subject} could argue about it.', band: ['elite'], register: ['village', 'district'], maxYear: 1900 },
+  { text: 'The household kept a servant and worried about keeping her, which is its own particular kind of childhood.', band: ['middling'], register: ['district'], maxYear: 1950 },
+  { text: 'Hunger was not constant but it was familiar, and ${subject} learned early which neighbors could be asked.', band: ['poor'] },
+  { text: 'What ${subject} ${verb:remember} of being small is mostly being cold, and being sent on errands.', band: ['poor'], register: ['village', 'district'], maxYear: 1950 },
+  { text: 'From about the age of eight ${subject} was another pair of hands, and the household reckoned accordingly.', band: ['poor', 'working'], register: ['village', 'district'], maxYear: 1930 },
+  { text: 'The work ${possessive} family owed was owed before ${subject} was born, and ${subject} was counted into it as soon as ${subject} could lift.', band: ['bonded'] },
+  { text: 'Childhood ended at whatever age the estate decided it had, which was not an age anyone in the household chose.', band: ['bonded'] },
+
+  // --- The school arrives
+  { text: 'School took the mornings whatever the household thought of it, and that was the great difference from ${possessive} parents\' childhood.', institution: 'compulsory_school' },
+  { text: 'Childhood acquired a fixed shape: a school year, a summer, and a certificate at the end of it.', institution: 'compulsory_school', minYear: 1900 },
+  { text: 'The classroom taught a national language that was not quite the one spoken at home.', institution: 'compulsory_school', minYear: 1900 },
+  { text: 'School came second to whatever the household needed that week, and ${subject} left it earlier than the law intended.', institution: 'compulsory_school', band: ['poor', 'bonded'] },
+  { text: '${subjectCap} ${verb:be} the first in the family to stay at school past the age ${possessive} parents left it.', institution: 'compulsory_school', band: ['working'], minYear: 1930 },
+
+  // --- The twentieth century in the house
+  { text: 'The wireless was on in the evenings, and it was the first thing to bring the outside world into the house without a person carrying it.', technology: 'broadcast_radio', maxYear: 1970 },
+  { text: 'There was a television by the time ${subject} was ten, and the family arranged its evenings around it.', technology: 'television', minYear: 1955 },
+  { text: 'It was a childhood of a wage arriving weekly, which was more security than ${possessive} grandparents ever had.', band: ['working'], minYear: 1945 },
+  { text: 'Childhood was supervised, documented and organized around examinations.', band: ['middling', 'elite'], minYear: 1980 },
+  { text: 'By the time ${subject} was grown, most of what ${subject} knew about the wider world had arrived through a screen.', technology: 'internet' },
+  { text: 'Childhood ran on a school timetable and a screen, and there is very little of it that was not photographed.', technology: 'smartphone' },
+  { text: 'The household had electric light, running water and a doctor within reach — three things ${possessive} great-grandparents would have counted as wealth.', technology: 'electric_light', minYear: 1950 },
+];
 
 /**
  * One sentence of childhood texture for the origins paragraph, which otherwise
  * ran three sentences against the present paragraph's eight.
  */
 export function describeChildhood(ctx: BiographyContext, pick: Pick): string {
-  const { pronouns } = ctx;
-  return pick(CHILDHOOD_TEXTURES[registerFor(ctx)])
-    .replace(/\$\{possessiveCap\}/g, pronouns.possessiveCap)
-    .replace(/\$\{possessive\}/g, pronouns.possessive)
-    .replace(/\$\{subject\}/g, pronouns.subject);
+  return fromBank(CHILDHOOD_CLAUSES, ctx, pick);
 }
 
 // ---------------------------------------------------------------------------

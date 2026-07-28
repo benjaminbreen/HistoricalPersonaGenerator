@@ -55,6 +55,50 @@ export interface EnhancedLifeEvent {
   linkedCharacters?: string[];
 }
 
+export type KinRelation = 'sibling' | 'parent' | 'child' | 'spouse';
+
+export interface KinRequirement {
+  relation: KinRelation;
+  /** The kin's own age in the year of the event. */
+  minAge?: number;
+  maxAge?: number;
+}
+
+const RELATION_GROUPS: Record<KinRelation, string[]> = {
+  sibling: ['sibling', 'brother', 'sister'],
+  parent: ['father', 'mother'],
+  child: ['son', 'daughter'],
+  spouse: ['spouse'],
+};
+
+/**
+ * Whether some member of the required kind was alive and the right age in
+ * `eventYear`. Siblings, children and spouses carry birth and death years;
+ * parents carry a birth year, so for them this is an age test only.
+ */
+function castAllows(
+  requirement: KinRequirement | undefined,
+  family: Array<{ relation?: string; birthYear?: number; age?: number; isDeceased?: boolean; deathYear?: number }> | undefined,
+  eventYear: number,
+): boolean {
+  if (!requirement) return true;
+  const group = RELATION_GROUPS[requirement.relation];
+  return (family ?? []).some(member => {
+    if (!member.relation || !group.includes(member.relation)) return false;
+    if (typeof member.birthYear !== 'number') return false;
+    const ageAtEvent = eventYear - member.birthYear;
+    if (ageAtEvent < 0) return false;
+
+    const deathYear = member.deathYear
+      ?? (member.isDeceased && typeof member.age === 'number' ? member.birthYear + member.age : undefined);
+    if (deathYear !== undefined && eventYear > deathYear) return false;
+
+    if (requirement.minAge !== undefined && ageAtEvent < requirement.minAge) return false;
+    if (requirement.maxAge !== undefined && ageAtEvent > requirement.maxAge) return false;
+    return true;
+  });
+}
+
 interface EventTemplate {
   kind: EventKind;
   importance: EventImportance;
@@ -79,6 +123,18 @@ interface EventTemplate {
    * method". See constants/societyCapabilities.ts.
    */
   requiresCapability?: SocietyCapability;
+  /**
+   * Kin who must actually exist, and be the right age, in the year the event
+   * happens. `maxAge` on the persona is declared by exactly one of the 74
+   * templates here, and the event year is otherwise drawn uniformly between
+   * `minAge` and the persona's current age — which is how a ninety-year-old
+   * came to arrange a sibling's marriage at eighty-four.
+   *
+   * Constraining the *cast* rather than the persona's age is what makes that
+   * impossible in general: there is no living sibling of marriageable age in
+   * that year, so no such year can be drawn.
+   */
+  requiresKin?: KinRequirement;
   excludedClasses?: string[]; // Social classes that cannot have this event
   maxOccurrences?: number; // How many times this event type can occur (default 1)
   weight: number;
@@ -597,6 +653,7 @@ const CULTURAL_EVENT_MODIFIERS: Record<CulturalZone, Partial<EventTemplate>[]> =
         'Lost the crop to a typhoon and lived on fish and roots',
         'Helped raise a longhouse for a brother\'s marriage'
       ],
+      requiresKin: { relation: 'sibling', minAge: 14, maxAge: 45 },
       weight: 1.1,
       minAge: 10
     }
@@ -667,6 +724,7 @@ const CULTURAL_EVENT_MODIFIERS: Record<CulturalZone, Partial<EventTemplate>[]> =
         'Performed ancestral rites as eldest son',
         'Arranged favorable marriage for younger sister'
       ],
+      requiresKin: { relation: 'parent', minAge: 50, maxAge: 85 },
       weight: 1.2,
       minAge: 20
     }
@@ -1227,6 +1285,8 @@ const FAMILY_EVENTS: EventTemplate[] = [
       'A brother\'s marriage brought valuable new trade connections and opportunities',
       'Arranged a sibling\'s marriage carefully to strengthen the family\'s position in society'
     ],
+    // A sibling of marriageable age has to be alive to be married off.
+    requiresKin: { relation: 'sibling', minAge: 14, maxAge: 45 },
     minAge: 16,
     maxOccurrences: 2, // Limit to prevent excessive repetition
     weight: 0.8
@@ -1240,6 +1300,7 @@ const FAMILY_EVENTS: EventTemplate[] = [
       'Inherited valuable tools and a workshop from a childless uncle',
       'The family pooled their resources to purchase [ASSET], a significant investment'
     ],
+    requiresKin: { relation: 'parent', minAge: 45, maxAge: 82 },
     minAge: 18,
     weight: 0.7
   },
@@ -1688,6 +1749,15 @@ export function generateLifeHistory(
         }
       }
 
+      // Is the required kin in the cast at all? The year is settled below; this
+      // only rejects templates nobody in this family could ever satisfy.
+      if (template.requiresKin) {
+        const group = RELATION_GROUPS[template.requiresKin.relation];
+        const anyKin = (character.family ?? []).some(
+          (member: { relation?: string }) => member.relation && group.includes(member.relation));
+        if (!anyKin) return false;
+      }
+
       // Check prerequisites
       if (template.prerequisite && !usedEventKinds.includes(template.prerequisite)) {
         return false;
@@ -1753,7 +1823,7 @@ export function generateLifeHistory(
 
     if (!selectedTemplate) continue;
 
-    // Generate event year (avoid duplicates)
+    // Generate event year (avoid duplicates, and satisfy the cast)
     let eventYear: number;
     let attempts = 0;
     do {
@@ -1762,9 +1832,16 @@ export function generateLifeHistory(
       const eventAge = minAge + Math.floor(seededRandom() * Math.max(1, maxAge - minAge));
       eventYear = birthYear + eventAge;
       attempts++;
-    } while (eventYears.has(eventYear) && attempts < 10);
+    } while (
+      (eventYears.has(eventYear)
+        || !castAllows(selectedTemplate.requiresKin, character.family, eventYear))
+      && attempts < 16
+    );
 
-    if (attempts >= 10) continue; // Skip if can't find unique year
+    if (attempts >= 16) continue; // No year works for this template
+    // The loop can exhaust its attempts on the duplicate check alone, so the
+    // cast is confirmed rather than assumed before the event is committed.
+    if (!castAllows(selectedTemplate.requiresKin, character.family, eventYear)) continue;
 
     // Validate event year is within character's lifetime
     if (eventYear < birthYear || eventYear > currentYear) {

@@ -282,12 +282,66 @@ const biographies: string[] = quiet(() =>
   const paragraphCounts = biographies.map(b => b.split(/\n{2,}/).filter(Boolean).length);
   const words = biographies.map(b => b.split(/\s+/).length);
   const avgWords = words.reduce((a, b) => a + b, 0) / words.length;
-  const wrongShape = paragraphCounts.filter(c => c !== 2).length;
+  // A long life with a lot to report earns a third paragraph. What is still
+  // being guarded against is the collapse to one, and the biography that runs
+  // to three sentences.
+  const wrongShape = paragraphCounts.filter(c => c < 2 || c > 3).length;
+  const tooShort = words.filter(w => w < 70).length;
   add({
     name: 'biography-shape',
-    invariant: 'Every biography is two paragraphs and averages over 150 words',
-    measured: `${wrongShape} not two paragraphs, ${avgWords.toFixed(0)} avg words`,
-    passed: wrongShape === 0 && avgWords > 150,
+    invariant: 'Every biography is two or three paragraphs, none under 70 words, averaging over 150',
+    measured: `${wrongShape} outside 2–3 paragraphs, ${tooShort} under 70 words, ${avgWords.toFixed(0)} avg`,
+    passed: wrongShape === 0 && tooShort === 0 && avgWords > 150,
+  });
+}
+
+// --- 8b. Biography variety -------------------------------------------------
+// The clause-gating work these numbers exist to protect was prompted by a
+// measurement rather than by a defect report: on this same corpus, 46% of all
+// generated sentences appeared in nearly every era. Gating childhood, world
+// texture, trade, temperament and outlook brought that to 35%.
+//
+// The threshold is set just above what currently holds rather than at the 25%
+// that would be good, because the remaining share is dominated by life-event
+// text — "A brother's marriage brought valuable new trade connections", which
+// fires equally in 22,000 BCE and 2021 — and the event templates in
+// `lifeHistoryService` are not gated yet. Tighten this when they are.
+{
+  const skeleton = (sentence: string): string => sentence
+    .replace(/<[^>]+>/g, '')
+    .replace(/\b\d+\b/g, '#')
+    .replace(/\b[A-Z][a-z']+\b/g, 'X')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const counts = new Map<string, number>();
+  const erasFor = new Map<string, Set<string>>();
+  personas.forEach((persona, index) => {
+    const era = String(persona.historicalContext.era);
+    for (const raw of biographies[index].split(/(?<=[.!?])\s+/)) {
+      const key = skeleton(raw);
+      if (!key) continue;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+      if (!erasFor.has(key)) erasFor.set(key, new Set());
+      erasFor.get(key)!.add(era);
+    }
+  });
+
+  const total = [...counts.values()].reduce((a, b) => a + b, 0);
+  const eraCount = new Set(personas.map(p => String(p.historicalContext.era))).size;
+  const leaked = [...counts.entries()]
+    .filter(([key]) => (erasFor.get(key)?.size ?? 0) >= Math.max(2, eraCount - 1))
+    .reduce((sum, [, n]) => sum + n, 0);
+  const leakShare = leaked / total;
+  const [topSentence, topCount] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0] ?? ['', 0];
+  const topShare = topCount / total;
+
+  add({
+    name: 'biography-variety',
+    invariant: 'No sentence is over 3% of the corpus, and under 40% of sentences span nearly every era',
+    measured: `top ${(topShare * 100).toFixed(1)}%, era-agnostic ${(leakShare * 100).toFixed(1)}% (was 46%)`,
+    passed: topShare <= 0.03 && leakShare < 0.40,
+    detail: [`most repeated: ${topSentence.slice(0, 110)}`],
   });
 }
 

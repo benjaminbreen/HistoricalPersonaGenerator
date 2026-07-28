@@ -21,7 +21,7 @@ import { formatSocialStatusForEra, sampleSocialStatus } from './socialStatusServ
 import { reconcileEpithet } from '../constants/characterData/nameConventions';
 import { applyAttributeAppearance } from './attributeAppearanceService';
 import { generateOrnament } from './ornamentService';
-import { generateChildren } from './householdService';
+import { generateChildren, generateSiblings } from './householdService';
 import { isClergyRoleCompatible } from '../constants/characterData/religionClergyRoles';
 import { illnessRate, pickByPrevalence } from './diseasePrevalenceService';
 import { getAreaClimate, hemisphereFor, seasonFor, thermalNeed } from './climateService';
@@ -684,26 +684,41 @@ function generateProceduralFamily(
     });
 
     // ===== SIBLINGS =====
-    // Historical fertility rates by era
-    const siblingCounts = getHistoricalSiblingCount(era, noise);
-    const numSiblings = siblingCounts;
-
-    // Add twin if character has Twin attribute
+    // The persona's mother's other births, walked by the same model that
+    // produces the persona's own children: spacing, a fertile span that closes,
+    // and each birth tested against the survivorship curve for its own year.
+    // See householdService.
     const hasTwin = attributes.some(attr => attr.id === 'twin');
 
-    for (let i = 0; i < numSiblings; i++) {
-        // Skip one sibling if they have a twin (will be added separately)
-        if (hasTwin && i === 0) continue;
+    const siblingBirths = generateSiblings(
+        {
+            age,
+            currentYear,
+            parentAgeGap: parentAge,
+            culturalZone,
+            wealth: (character as any).wealthLevel,
+        },
+        () => noise.random(),
+    );
 
-        const siblingAgeGap = Math.floor(noise.random() * 20) - 10; // -10 to +10 years
-        const siblingAge = age + siblingAgeGap;
+    // A twin is added separately below, so one birth from the walk gives way to
+    // it rather than the twin being an extra child the mother did not bear.
+    const siblings = hasTwin ? siblingBirths.slice(1) : siblingBirths;
 
-        // Don't generate siblings older than parents or not yet born
-        if (siblingAge < 0 || siblingAge > (parentAge - 15)) continue;
+    // Parents share a household with their children, so a given name already
+    // spoken for is not drawn again. The name generator only ever checked the
+    // mother against the father; with sibships now averaging five, the pool
+    // collided within a household about one time in eight.
+    const takenGivenNames = new Set<string>([selfGiven, givenOf(fatherName), givenOf(motherName)]
+        .filter(given => given.length > 0));
 
-        const siblingGender = noise.random() > 0.5 ? 'male' : 'female';
-        const siblingBirthYear = currentYear - siblingAge;
-        const siblingGenerated = generateNpcNameDetailed(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, siblingBirthYear, noise, familyNameKey);
+    for (const birth of siblings) {
+        const siblingGender = birth.sex;
+        let siblingGenerated = generateNpcNameDetailed(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, birth.birthYear, noise, familyNameKey);
+        for (let attempt = 0; attempt < 5 && takenGivenNames.has(givenOf(siblingGenerated.given)); attempt += 1) {
+            siblingGenerated = generateNpcNameDetailed(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, birth.birthYear, noise, familyNameKey);
+        }
+        takenGivenNames.add(givenOf(siblingGenerated.given));
         // Siblings share a hereditary name, and share a father in a patronymic.
         const siblingName = inheritedFamilyName
             ? `${siblingGenerated.given} ${inheritedFamilyName}`
@@ -714,8 +729,9 @@ function generateProceduralFamily(
         character.family.push({
             name: dedupeEpithet(siblingName),
             relation: siblingGender === 'male' ? 'brother' : 'sister',
-            age: siblingAge,
-            birthYear: siblingBirthYear
+            age: birth.age,
+            birthYear: birth.birthYear,
+            ...(birth.isDeceased ? { isDeceased: true, deathYear: birth.deathYear } : {}),
         });
     }
 
@@ -880,25 +896,6 @@ function generateMotherProfession(culturalZone: CulturalZone, era: HistoricalEra
             return 'Homemaker';
         }
     }
-}
-
-/**
- * Get historical sibling count based on era
- * Pre-modern eras had higher fertility rates
- */
-function getHistoricalSiblingCount(era: HistoricalEra, noise: ValueNoise): number {
-    const fertilityByEra: Record<HistoricalEra, { min: number; max: number }> = {
-        [HistoricalEra.PREHISTORY]: { min: 2, max: 7 },
-        [HistoricalEra.ANTIQUITY]: { min: 2, max: 8 },
-        [HistoricalEra.MEDIEVAL]: { min: 3, max: 9 },
-        [HistoricalEra.RENAISSANCE_EARLY_MODERN]: { min: 3, max: 8 },
-        [HistoricalEra.INDUSTRIAL_ERA]: { min: 2, max: 7 },
-        [HistoricalEra.MODERN_ERA]: { min: 0, max: 4 },
-        [HistoricalEra.FUTURE_ERA]: { min: 0, max: 3 }
-    };
-
-    const range = fertilityByEra[era] || { min: 2, max: 6 };
-    return range.min + Math.floor(noise.random() * (range.max - range.min + 1));
 }
 
 /**

@@ -18,6 +18,11 @@ function inferLocaleType(region: string, location: string): LocaleType {
   return 'unknown';
 }
 
+/**
+ * Earliest years are the earliest anywhere; the prose that consumes these
+ * narrows further by zone, since diffusion dates differ by a century or more
+ * between the North Atlantic and everywhere else.
+ */
 function technologiesForYear(year: number): string[] {
   const technologies: string[] = [];
   if (year >= 1450) technologies.push('printing_press');
@@ -26,10 +31,20 @@ function technologiesForYear(year: number): string[] {
   if (year >= 1840) technologies.push('telegraph');
   if (year >= 1878) technologies.push('telephone');
   if (year >= 1885) technologies.push('automobile');
+  if (year >= 1890) technologies.push('electric_light');
   if (year >= 1900) technologies.push('motor_transport');
   if (year >= 1920) technologies.push('broadcast_radio');
   if (year >= 1930) technologies.push('television');
   if (year >= 1940) technologies.push('electronic_computing');
+  // The list used to stop here, which is why every post-war persona had to be
+  // described with nineteenth-century furniture.
+  if (year >= 1945) technologies.push('antibiotics');
+  if (year >= 1950) technologies.push('plastics');
+  if (year >= 1958) technologies.push('jet_travel');
+  if (year >= 1980) technologies.push('personal_computer');
+  if (year >= 1992) technologies.push('mobile_telephone');
+  if (year >= 1996) technologies.push('internet');
+  if (year >= 2008) technologies.push('smartphone');
   return technologies;
 }
 
@@ -42,6 +57,16 @@ function institutionsForYear(year: number, localeType: LocaleType): string[] {
   if (year >= 1800 && localeType !== 'rural') institutions.push('modern_bureaucracy');
   if (year >= 1830 && localeType !== 'rural') institutions.push('railway_station');
   if (year >= 1900 && localeType !== 'rural') institutions.push('mass_political_party');
+  // The institutions below reach the countryside too — that reach is most of
+  // what distinguishes a twentieth-century village from an earlier one — so
+  // they are not gated on locale the way the urban ones above are.
+  if (year >= 1870) institutions.push('compulsory_school');
+  if (year >= 1900) institutions.push('public_clinic');
+  if (year >= 1920) institutions.push('identity_papers');
+  if (year >= 1930) institutions.push('mass_media');
+  if (year >= 1945) institutions.push('welfare_state');
+  if (year >= 1960 && localeType !== 'rural') institutions.push('chain_retail');
+  if (year >= 2000) institutions.push('mobile_network');
   return institutions;
 }
 

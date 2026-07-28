@@ -34,11 +34,14 @@ import {
   describeFoundationalAttribute,
   describeParentalLivelihood,
   describeProfessionWork,
+  describeTradeAttitude,
   describeUnnamedBelief,
   describeWorldTexture,
+  selectDetail,
   wealthAdjective,
   type BiographyContext,
 } from './biographyDetailService';
+import type { Clause } from './narrativeClauseService';
 
 const capitalize = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
 
@@ -62,6 +65,90 @@ const INJURY_SITES: Record<string, string[]> = {
   'strained back': ['back'],
   'pulled muscle': ['shoulder', 'back', 'thigh', 'calf'],
 };
+
+/**
+ * Temperament, in the vocabulary of the persona's own world.
+ *
+ * These are noun phrases: each one has to sit after "Those who know him speak
+ * of …", so none of them may carry a capital or terminal punctuation. Each bank
+ * keeps one unconditioned clause so that no combination of era, place and
+ * station can leave a temperament with nothing to say.
+ */
+const TRAIT_OPEN_OUTGOING: Clause[] = [
+  { text: 'an adventurous spirit who seeks out new experiences and companions' },
+  { text: 'a restlessness that has taken ${object} further from home than most of ${possessive} neighbors have gone', maxYear: 1850 },
+  { text: 'an appetite for company and for whatever is new, which the settlement finds by turns useful and tiring', register: ['band', 'village'] },
+  { text: 'a sociability that fills the evenings and empties the wage packet', minYear: 1880, band: ['working', 'poor'] },
+  { text: 'an ease with strangers that has been worth more to ${object} than any qualification', minYear: 1950 },
+];
+
+const TRAIT_OPEN_METHODICAL: Clause[] = [
+  { text: 'a curious mind tempered by methodical discipline' },
+  { text: 'a habit of taking a thing apart to see how it is made, and putting it back properly' },
+  { text: 'a methodical curiosity that would have been called scholarship in someone better born', band: ['poor', 'working', 'bonded'], maxYear: 1900 },
+  { text: 'a precision about detail that colleagues rely on and do not thank ${object} for', minYear: 1900 },
+];
+
+const TRAIT_OPEN: Clause[] = [
+  { text: 'a thoughtful soul drawn to novel ideas and perspectives' },
+  { text: 'a turn of mind that keeps returning to questions the neighbors consider settled' },
+  { text: 'an interest in what lies beyond the district, which is not universally admired here', register: ['band', 'village'] },
+  { text: 'opinions gathered from further afield than anyone else in the household has been', minYear: 1920 },
+];
+
+const TRAIT_SETTLED: Clause[] = [
+  { text: 'a steadfast character who finds strength in tradition and routine' },
+  { text: 'a preference for the way a thing has always been done, held firmly and without apology' },
+  { text: 'a conviction that the old arrangements worked, and that whatever replaced them did not', minYear: 1900 },
+];
+
+const TRAIT_PRACTICAL: Clause[] = [
+  { text: 'a practical nature that values the proven over the experimental' },
+  { text: 'a suspicion of anything that has not already been shown to work' },
+  { text: 'a preference for what can be seen, weighed and mended', register: ['band', 'village'] },
+];
+
+const TRAIT_WARM: Clause[] = [
+  { text: 'a warm and generous presence that draws people near' },
+  { text: 'an openhandedness the household can less afford than ${subject} ${verb:admit}' },
+  { text: 'a name known at every door in ${location}, generally for the right reasons', register: ['village', 'district'] },
+];
+
+const TRAIT_GENTLE: Clause[] = [
+  { text: 'a gentle disposition that seeks harmony above conflict' },
+  { text: 'a reluctance to give offense that is sometimes mistaken for having no opinion' },
+  { text: 'a steadiness in other people\'s quarrels that gets ${object} sent for when there is one' },
+];
+
+const TRAIT_COMMITTED: Clause[] = [
+  { text: 'a compassionate heart that drives commitment to justice' },
+  { text: 'a tenderness toward the badly used that has hardened into something like a politics', minYear: 1750 },
+  { text: 'an anger on other people\'s behalf that ${subject} ${verb:have} never learned to keep quiet' },
+];
+
+const TRAIT_BLUNT: Clause[] = [
+  { text: 'a bold, uncompromising manner that some find refreshing and others find abrasive' },
+  { text: 'a bluntness ${subject} ${verb:call} honesty and others call something else' },
+  { text: 'a way of saying the thing everyone present had agreed not to say' },
+];
+
+const TRAIT_INDEPENDENT: Clause[] = [
+  { text: 'an independent streak that prizes personal freedom above social convention' },
+  { text: 'a habit of doing as ${subject} ${verb:please}, which costs ${object} more than ${subject} ${verb:reckon}' },
+  { text: 'a refusal to be placed, which in a settlement this size is a considerable undertaking', register: ['band', 'village'] },
+];
+
+const TRAIT_SCRUPULOUS: Clause[] = [
+  { text: 'a scrupulousness about obligations that neighbors rely on more than they acknowledge' },
+  { text: 'an exactness about what is owed and to whom, running in both directions' },
+  { text: 'a record-keeping habit that has settled more than one dispute in ${possessive} favor', needs: ['writing'] },
+];
+
+const TRAIT_WARY: Clause[] = [
+  { text: 'a wariness that reads trouble into quiet weeks' },
+  { text: 'a habit of expecting the worst, which has occasionally been vindicated' },
+  { text: 'a watchfulness that ${possessive} childhood taught ${object} and nothing since has undone' },
+];
 
 /** Display name for the persona's place in their own period. */
 const placeName = (persona: HistoricalPersona): string =>
@@ -138,6 +225,9 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
     })(),
     historical: persona.historicalContext,
     pronouns: narrativePronouns,
+    // Bondage places a life more decisively than any wealth label does, and it
+    // is recorded as an attribute rather than as a social class.
+    attributeIds: (character.attributes ?? []).map((attr: any) => attr?.id).filter(Boolean),
   };
 
   // "A respectable family" presupposes a society with respectability in it.
@@ -150,9 +240,21 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
   const aWealthHousehold = withIndefiniteArticle(`${wealthDesc} household`);
   const aWealthFamily = withIndefiniteArticle(`${wealthDesc} family`);
 
-  // Two paragraphs: where they came from, and where they now stand.
-  const origins: string[] = [];
-  const present: string[] = [];
+  // Sentences are collected under named beats rather than pushed into a fixed
+  // pair of arrays. A seeded plan then decides the order and which optional
+  // beats survive.
+  //
+  // The fixed order was the loudest template signal in the output: measured
+  // across six eras, every biography ran the same twelve beats in the same
+  // sequence, so varying the wording of any one of them changed very little.
+  const beats = new Map<string, string[]>();
+  const addBeat = (id: string, text: string | string[]): void => {
+    const lines = (Array.isArray(text) ? text : [text]).map(t => t.trim()).filter(Boolean);
+    if (lines.length === 0) return;
+    beats.set(id, [...(beats.get(id) ?? []), ...lines]);
+  };
+  /** A roll in 0–99, for deciding whether an optional beat is kept. */
+  const chance = (percent: number): boolean => seededIndex(100) < percent;
 
   // Vary opening phrases
   // "Born in Moscow Basin" names a map region rather than a place anyone lived
@@ -263,21 +365,16 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
     // prehistoric persona at the exact point the biography establishes them.
     opening += `, where ${pronoun} ${describeUnnamedBelief(bioContext, pickBiography)}`;
   }
-  origins.push(`${opening}.`);
+  addBeat('opening', `${opening}.`);
 
   // Foundational attributes, split between the two paragraphs by whether they
   // describe where the persona came from or what they are now.
   const foundationalAttributes = character.attributes?.filter((attr: any) => attr.foundational === true) || [];
-  const presentAttributeSentences: string[] = [];
 
   for (const attr of foundationalAttributes) {
     const rendered = describeFoundationalAttribute(attr.id, bioContext);
     if (!rendered) continue;
-    if (rendered.slot === 'origin') {
-      origins.push(rendered.text);
-    } else {
-      presentAttributeSentences.push(rendered.text);
-    }
+    addBeat(rendered.slot === 'origin' ? 'origin-attr' : 'present-attr', rendered.text);
   }
 
   // Life events: previously only the single most important one was used, out
@@ -328,23 +425,38 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
 
   const father = character.family?.find(m => m.relation === 'father');
   const mother = character.family?.find(m => m.relation === 'mother');
-  const livelihood = describeParentalLivelihood(father, mother, bioContext, pickBiography);
-  if (livelihood) origins.push(livelihood);
 
-  origins.push(describeChildhood(bioContext, pickBiography));
-
-  const physicalDescription = describePhysicalAppearance(
-    character.appearance,
-    narrativePronouns,
-    character.birthSex ?? (character.gender === 'Female' ? 'Female' : character.gender === 'Male' ? 'Male' : undefined),
+  // Naming the parents where their trades are described lets the biography end
+  // on something other than "His parents are X and Y", which every one of them
+  // used to do.
+  const canFoldParentNames = Boolean(
+    father?.name && mother?.name && father?.profession && mother?.profession
   );
-  if (physicalDescription) origins.push(physicalDescription);
+  const foldParentNames = canFoldParentNames && chance(45);
 
-  for (const { event, ageAtEvent } of chosenYouth) {
-    origins.push(describeLifeEvent(event, ageAtEvent, narrativePronouns));
+  const livelihood = describeParentalLivelihood(
+    father, mother, bioContext, pickBiography, foldParentNames,
+  );
+  addBeat('livelihood', livelihood);
+
+  // The optional beats are what make one life's biography a different length
+  // from another's, rather than every life getting the same twelve sentences.
+  if (chance(85)) addBeat('childhood', describeChildhood(bioContext, pickBiography));
+
+  if (chance(65)) {
+    addBeat('appearance', describePhysicalAppearance(
+      character.appearance,
+      narrativePronouns,
+      character.birthSex ?? (character.gender === 'Female' ? 'Female' : character.gender === 'Male' ? 'Male' : undefined),
+      pickBiography,
+    ));
   }
 
-  // ---- Second paragraph: the present ----
+  for (const { event, ageAtEvent } of chosenYouth) {
+    addBeat('youth-event', describeLifeEvent(event, ageAtEvent, narrativePronouns));
+  }
+
+  // ---- The present ----
 
   const professionName = lowerProfession(character.profession);
   const professionArticle = withIndefiniteArticle(professionName).split(' ')[0];
@@ -367,23 +479,41 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
       professionSentence += `, a gift for persuasion serving ${pronounObj} well in the market`;
     }
   }
-  const textureRoll = seededIndex(10);
+  // How the trade is told. The texture sentence is one register — a frame over
+  // a compressed noun phrase — and using it every time made every biography
+  // describe work in the same voice at the same length. The attitude sentence
+  // is short and plain, and exists to break that rhythm.
   const trade = describeProfessionWork(bioContext, pickBiography);
-  if (textureRoll < 4) {
-    // Folded in, so the paragraph does not always open on the same two beats.
-    const folded = trade.replace(/^(?:The work means|That means|It comes down to|The trade is)\s+/, '');
-    present.push(`${professionSentence} — ${folded.charAt(0).toLowerCase()}${folded.slice(1)}`);
-  } else if (textureRoll < 8) {
-    present.push(`${professionSentence}.`);
-    present.push(trade);
-  } else {
-    present.push(`${professionSentence}.`);
+  const attitude = describeTradeAttitude(bioContext, pickBiography);
+  const fold = (text: string): string => {
+    const stripped = text.replace(/^(?:The work means|That means|It comes down to|The trade is)\s+/, '');
+    return `${professionSentence} — ${stripped.charAt(0).toLowerCase()}${stripped.slice(1)}`;
+  };
+
+  switch (seededIndex(10)) {
+    case 0: case 1: case 2:
+      addBeat('profession', fold(trade));
+      break;
+    case 3: case 4:
+      addBeat('profession', `${professionSentence}.`);
+      addBeat('trade', trade);
+      break;
+    case 5: case 6:
+      addBeat('profession', [`${professionSentence}.`, attitude]);
+      break;
+    case 7:
+      addBeat('profession', [`${professionSentence}.`, attitude]);
+      addBeat('trade', trade);
+      break;
+    case 8:
+      addBeat('profession', [fold(trade), attitude]);
+      break;
+    default:
+      addBeat('profession', `${professionSentence}.`);
   }
 
-  present.push(...presentAttributeSentences);
-
   for (const { event, ageAtEvent } of chosenAdult) {
-    present.push(describeLifeEvent(event, ageAtEvent, narrativePronouns));
+    addBeat('adult-events', describeLifeEvent(event, ageAtEvent, narrativePronouns));
   }
 
   // Health status
@@ -414,13 +544,12 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
       : injury
         ? withIndefiniteArticle(diseaseName)
         : capitalize(diseaseName);
-    present.push(grave
+    addBeat('health', grave
       ? `${capitalize(subject)} ${hasVerb} ${pronounObj} now, and the household is preparing for what that usually means.`
       : `${capitalize(subject)} ${hasVerb} made ordinary labor uncertain, but ${pronoun} ${conjugate('continue', narrativePronouns)} as circumstances allow.`);
   }
 
-  const worldTexture = describeWorldTexture(bioContext, pickBiography);
-  if (worldTexture) present.push(worldTexture);
+  if (chance(80)) addBeat('world', describeWorldTexture(bioContext, pickBiography));
 
   // Helper function to get belief description
   const getBeliefDescription = (beliefs: any[]): string | null => {
@@ -457,11 +586,10 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
 
   if (character.ideology && character.ideology !== 'Pragmatism' && (!ideologyLooksModern || canCarryAbstractIdeology)) {
     const ideology = IDEOLOGIES.find((i: any) => i.id === character.ideology);
-    const ideologySentence = describeIdeology(ideology, narrativePronouns);
-    if (ideologySentence) present.push(ideologySentence);
+    addBeat('outlook', describeIdeology(ideology, narrativePronouns, pickBiography));
   } else if (beliefText) {
     // If no ideology but has beliefs, mention them
-    present.push(`${pronounPossCap} worldview ${pronounBe} shaped by the conviction that ${beliefText}.`);
+    addBeat('outlook', `${pronounPossCap} worldview ${pronounBe} shaped by the conviction that ${beliefText}.`);
   }
 
   // Personality - sophisticated and varied
@@ -475,39 +603,46 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
        character.ideology.toLowerCase().includes('radical') ||
        character.ideology.toLowerCase().includes('anarchist'));
 
-    // More nuanced personality combinations
+    // The temperament thresholds are unchanged; what each one can say is not.
+    // A single fixed string per threshold put "a practical nature that values
+    // the proven over the experimental" into every era at the same rate.
+    const trait = (bank: Parameters<typeof selectDetail>[0]): void => {
+      const text = selectDetail(bank, bioContext, pickBiography);
+      if (text) traits.push(text);
+    };
+
     if (personality.openness > 0.7 && personality.extraversion > 0.6) {
-      traits.push('an adventurous spirit who seeks out new experiences and companions');
+      trait(TRAIT_OPEN_OUTGOING);
     } else if (personality.openness > 0.7 && personality.conscientiousness > 0.6) {
-      traits.push('a curious mind tempered by methodical discipline');
+      trait(TRAIT_OPEN_METHODICAL);
     } else if (personality.openness > 0.7) {
-      traits.push('a thoughtful soul drawn to novel ideas and perspectives');
+      trait(TRAIT_OPEN);
     } else if (personality.openness < 0.3 && personality.conscientiousness > 0.7 && !isRevolutionary) {
       // Skip "tradition and routine" if revolutionary
-      traits.push('a steadfast character who finds strength in tradition and routine');
+      trait(TRAIT_SETTLED);
     } else if (personality.openness < 0.3) {
-      traits.push('a practical nature that values the proven over the experimental');
+      trait(TRAIT_PRACTICAL);
     }
 
     if (personality.agreeableness > 0.7 && personality.extraversion > 0.6 && !isRevolutionary) {
       // Skip "warm and generous" if revolutionary (conflicts with radical change)
-      traits.push('a warm and generous presence that draws people near');
+      trait(TRAIT_WARM);
     } else if (personality.agreeableness > 0.7 && !isRevolutionary) {
       // Skip "gentle disposition seeks harmony" if revolutionary (direct contradiction)
-      traits.push('a gentle disposition that seeks harmony above conflict');
+      trait(TRAIT_GENTLE);
     } else if (personality.agreeableness > 0.7 && isRevolutionary) {
       // Alternative trait for high agreeableness revolutionaries
-      traits.push('a compassionate heart that drives commitment to justice');
+      trait(TRAIT_COMMITTED);
     } else if (personality.agreeableness < 0.3 && personality.neuroticism < 0.4) {
-      traits.push('a bold, uncompromising manner that some find refreshing and others find abrasive');
+      trait(TRAIT_BLUNT);
     } else if (personality.agreeableness < 0.3) {
-      traits.push('an independent streak that prizes personal freedom above social convention');
+      trait(TRAIT_INDEPENDENT);
     }
 
     if (personality.conscientiousness > 0.75) {
-      traits.push('a scrupulousness about obligations that neighbors rely on more than they acknowledge');
+      trait(TRAIT_SCRUPULOUS);
     } else if (personality.neuroticism > 0.7) {
-      traits.push('a wariness that reads trouble into quiet weeks');
+      trait(TRAIT_WARY);
     }
 
     if (traits.length > 0) {
@@ -518,18 +653,79 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
         `${subjectCap} ${pronounBe} known for ${traits[0]}`
       ];
 
+      // Every trait that qualified used to be listed, so most personas ended on
+      // a three-clause sentence of the same shape. One trait is often the more
+      // characterful choice.
+      const traitCount = Math.min(traits.length, pickBiography([1, 1, 2, 2, 3]));
       let personalitySentence = pickBiography(personalityIntros);
-      if (traits.length > 1) personalitySentence += `, as well as ${traits[1]}`;
-      if (traits.length > 2) personalitySentence += `, and ${traits[2]}`;
-      present.push(`${personalitySentence}.`);
+      if (traitCount > 1) personalitySentence += `, as well as ${traits[1]}`;
+      if (traitCount > 2) personalitySentence += `, and ${traits[2]}`;
+      addBeat('personality', `${personalitySentence}.`);
     }
   }
 
-  // Add parent names at the end
-  if (character.family && character.family.length > 0) {
-    const parentSentence = describeParents(father?.name, mother?.name, narrativePronouns, true);
-    if (parentSentence) present.push(parentSentence);
+  // The closing roll-call of parents is dropped whenever the names have already
+  // been folded into the livelihood sentence, and often when they have not.
+  if (!foldParentNames && character.family && character.family.length > 0 && chance(55)) {
+    addBeat('parents', describeParents(father?.name, mother?.name, narrativePronouns, true));
   }
+
+  // ---- Arrangement -------------------------------------------------------
+
+  /**
+   * Orderings of the origins beats. The opening is anchored first because it
+   * carries the birth, and everything else reads as a subordinate clause of it.
+   */
+  const ORIGIN_PLANS: string[][] = [
+    ['opening', 'livelihood', 'childhood', 'appearance', 'origin-attr', 'youth-event'],
+    ['opening', 'childhood', 'livelihood', 'origin-attr', 'youth-event', 'appearance'],
+    ['opening', 'origin-attr', 'livelihood', 'childhood', 'youth-event', 'appearance'],
+    ['opening', 'livelihood', 'youth-event', 'childhood', 'origin-attr', 'appearance'],
+    ['opening', 'appearance', 'livelihood', 'childhood', 'origin-attr', 'youth-event'],
+    ['opening', 'childhood', 'origin-attr', 'appearance', 'livelihood', 'youth-event'],
+  ];
+
+  /**
+   * Orderings of the present beats. Every plan ends on the closing three, and
+   * `trade` must immediately follow `profession` in all of them: the texture
+   * sentence is a continuation of the profession sentence, and separating them
+   * produced "At 49, she works as a farm worker. At age 31, her mother died…
+   * The trade is piece rates, a contractor, and a season that ends without
+   * notice."
+   */
+  const PRESENT_PLANS: string[][] = [
+    ['profession', 'trade', 'present-attr', 'adult-events', 'health', 'world', 'outlook', 'personality', 'parents'],
+    ['profession', 'trade', 'world', 'adult-events', 'present-attr', 'health', 'personality', 'outlook', 'parents'],
+    ['adult-events', 'profession', 'trade', 'present-attr', 'health', 'world', 'personality', 'outlook', 'parents'],
+    ['world', 'profession', 'trade', 'adult-events', 'present-attr', 'health', 'outlook', 'personality', 'parents'],
+    ['profession', 'trade', 'health', 'present-attr', 'adult-events', 'world', 'outlook', 'personality', 'parents'],
+    ['present-attr', 'profession', 'trade', 'adult-events', 'world', 'health', 'personality', 'outlook', 'parents'],
+  ];
+
+  /** Beats that describe the person rather than the life, for the last break. */
+  const CLOSING_BEATS = new Set(['outlook', 'personality', 'parents']);
+
+  const render = (plan: string[]): string[] => plan.flatMap(id => beats.get(id) ?? []);
+
+  const originPlan = pickBiography(ORIGIN_PLANS);
+  const presentPlan = pickBiography(PRESENT_PLANS);
+
+  // A long life with a lot to report earns a third paragraph; a short one does
+  // not. Previously every biography was two paragraphs regardless.
+  const presentLength = render(presentPlan).length;
+  const closingIndex = presentPlan.findIndex(id => CLOSING_BEATS.has(id));
+  const splitPresent = presentLength >= 8
+    && character.age >= 40
+    && closingIndex > 0
+    && chance(45);
+
+  const paragraphSentences = splitPresent
+    ? [
+      render(originPlan),
+      render(presentPlan.slice(0, closingIndex)),
+      render(presentPlan.slice(closingIndex)),
+    ]
+    : [render(originPlan), render(presentPlan)];
 
   const cleanParagraph = (sentences: string[]): string => sentences
     .map(sentence => sentence.trim())
@@ -539,6 +735,5 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
     .replace(/\s{2,}/g, ' ')
     .trim();
 
-  const paragraphs = [cleanParagraph(origins), cleanParagraph(present)].filter(Boolean);
-  return paragraphs.join('\n\n');
+  return paragraphSentences.map(cleanParagraph).filter(Boolean).join('\n\n');
 }

@@ -127,23 +127,33 @@ function resolveSurvival(birthYear: number, ageNow: number, rng: () => number): 
 }
 
 /**
- * The births of one couple, oldest first. Returns living and dead children
- * alike; the caller decides how to present them.
+ * One woman's completed births, oldest first, each tested for survival to the
+ * present. This is the whole model; both the persona's children and the
+ * persona's own sibship are cases of it.
  */
-export function generateChildren(ctx: HouseholdContext, rng: () => number): BirthRecord[] {
-  const { age, currentYear, marriageAge } = ctx;
-  if (age <= marriageAge) return [];
-
-  // The fertile span belongs to the mother, whoever the persona is.
-  const motherAgeNow = ctx.sex === 'female' ? age : (ctx.spouseAge ?? age);
-  const motherAgeAtMarriage = ctx.sex === 'female'
-    ? marriageAge
-    : Math.max(YOUNGEST_MOTHER, marriageAge - (age - (ctx.spouseAge ?? age)));
-
+function walkBirths(
+  input: {
+    motherAgeNow: number;
+    motherAgeAtMarriage: number;
+    currentYear: number;
+    culturalZone?: CulturalZone;
+    wealth?: string;
+    /** Age at which childbearing stopped, if before menopause. */
+    spanEndsAt?: number;
+  },
+  rng: () => number,
+): BirthRecord[] {
+  const { motherAgeNow, motherAgeAtMarriage, currentYear } = input;
   if (motherAgeNow <= motherAgeAtMarriage) return [];
-  if (rng() < PRIMARY_INFERTILITY) return [];
+  const spanEnd = Math.min(MENOPAUSE_AGE, input.spanEndsAt ?? MENOPAUSE_AGE);
 
-  const target = completedFertility(currentYear, ctx.culturalZone, ctx.wealth);
+  // Fertility belongs to the years this woman was actually bearing, not to the
+  // year the persona happens to be observed in. For a sibship that is a full
+  // generation earlier, and getting it wrong hands a 1990s family size to the
+  // mother of a persona who is seventy in 1995.
+  const bearingMidpoint = currentYear - motherAgeNow
+    + (motherAgeAtMarriage + Math.min(motherAgeNow, spanEnd)) / 2;
+  const target = completedFertility(bearingMidpoint, input.culturalZone, input.wealth);
   // Spacing is what actually limits family size in a natural-fertility regime:
   // roughly two and a half years, lengthened by breastfeeding, shortened when
   // an infant dies. Dividing the fertile span by the interval, then scaling to
@@ -155,7 +165,7 @@ export function generateChildren(ctx: HouseholdContext, rng: () => number): Birt
   // First birth follows marriage by a year or two, not immediately.
   let motherAge = motherAgeAtMarriage + 1 + rng() * 1.5;
 
-  while (motherAge <= Math.min(motherAgeNow, MENOPAUSE_AGE)) {
+  while (motherAge <= Math.min(motherAgeNow, spanEnd)) {
     const childAge = Math.round(motherAgeNow - motherAge);
     const birthYear = currentYear - childAge;
     const survival = resolveSurvival(birthYear, childAge, rng);
@@ -172,6 +182,97 @@ export function generateChildren(ctx: HouseholdContext, rng: () => number): Birt
   }
 
   return births.sort((a, b) => a.birthYear - b.birthYear);
+}
+
+/**
+ * The births of one couple, oldest first. Returns living and dead children
+ * alike; the caller decides how to present them.
+ */
+export function generateChildren(ctx: HouseholdContext, rng: () => number): BirthRecord[] {
+  const { age, currentYear, marriageAge } = ctx;
+  if (age <= marriageAge) return [];
+
+  // The fertile span belongs to the mother, whoever the persona is.
+  const motherAgeNow = ctx.sex === 'female' ? age : (ctx.spouseAge ?? age);
+  const motherAgeAtMarriage = ctx.sex === 'female'
+    ? marriageAge
+    : Math.max(YOUNGEST_MOTHER, marriageAge - (age - (ctx.spouseAge ?? age)));
+
+  if (rng() < PRIMARY_INFERTILITY) return [];
+
+  return walkBirths({
+    motherAgeNow,
+    motherAgeAtMarriage,
+    currentYear,
+    culturalZone: ctx.culturalZone,
+    wealth: ctx.wealth,
+  }, rng);
+}
+
+export interface SibshipContext {
+  /** The persona's age now. */
+  age: number;
+  currentYear: number;
+  /** Years between the persona and their parents. */
+  parentAgeGap: number;
+  culturalZone?: CulturalZone;
+  wealth?: string;
+}
+
+/**
+ * The persona's own siblings: their mother's other births.
+ *
+ * This is the same walk as `generateChildren`, one generation back, and it
+ * replaces a separate and much cruder path — a uniform count from an era
+ * bucket, a uniform ±10-year age gap, no spacing, no bound on the mother's age
+ * at birth, and no mortality. That path also compared each sibling's age *now*
+ * against the parent-to-child age *gap*, so every persona over about forty had
+ * their entire sibship silently discarded: measured at 82% of pre-1800 personas
+ * with no sibling at all, and 100% of those aged 40 and over.
+ *
+ * Primary infertility is deliberately not applied here. Whatever the base rate,
+ * these particular parents demonstrably conceived at least once.
+ */
+export function generateSiblings(ctx: SibshipContext, rng: () => number): BirthRecord[] {
+  // The mother's age when she bore the persona, and therefore now.
+  const motherAgeAtPersonaBirth = Math.min(MENOPAUSE_AGE, Math.max(YOUNGEST_MOTHER, ctx.parentAgeGap));
+  const motherAgeNow = ctx.age + motherAgeAtPersonaBirth;
+  // She cannot have married after she bore the persona.
+  const motherAgeAtMarriage = Math.min(
+    Math.max(YOUNGEST_MOTHER, motherAgeAtPersonaBirth - 1),
+    YOUNGEST_MOTHER + Math.floor(rng() * 11),
+  );
+
+  // Childbearing does not reliably run to menopause. Widowhood, maternal death
+  // and secondary sterility all end it early, and without modelling that every
+  // mother bore her full complement and no persona was ever an only child.
+  // Whatever the draw, the span has to reach the persona's own birth.
+  const endsEarly = rng() < 0.38;
+  const spanEndsAt = endsEarly
+    ? motherAgeAtPersonaBirth + rng() * (MENOPAUSE_AGE - motherAgeAtPersonaBirth)
+    : MENOPAUSE_AGE;
+
+  const births = walkBirths({
+    motherAgeNow,
+    motherAgeAtMarriage,
+    currentYear: ctx.currentYear,
+    culturalZone: ctx.culturalZone,
+    wealth: ctx.wealth,
+    spanEndsAt,
+  }, rng);
+  if (births.length === 0) return [];
+
+  // One of these births is the persona. Remove whichever falls closest to their
+  // own birth year, so the sibship is what remains rather than what was added.
+  const personaBirthYear = ctx.currentYear - ctx.age;
+  let selfIndex = 0;
+  let closest = Number.POSITIVE_INFINITY;
+  births.forEach((birth, index) => {
+    const distance = Math.abs(birth.birthYear - personaBirthYear);
+    if (distance < closest) { closest = distance; selfIndex = index; }
+  });
+
+  return births.filter((_, index) => index !== selfIndex);
 }
 
 /** Children still living, which is what "how many children do you have" means. */
