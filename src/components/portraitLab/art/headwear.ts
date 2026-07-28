@@ -12,10 +12,10 @@
 
 import {
   applyContactShadow, ellipsoidShader, fillMask, MAT, Mask, makeMask,
-  maskEllipse, maskFromProfile, maskSubtract, maskUnion,
+  maskEllipse, maskFromProfile, maskSubtract, maskUnion, Raster,
 } from '../core/raster';
 import { makeNoise1D, makeNoise2D, makeRng } from '../core/rng';
-import { RenderContext } from '../render/context';
+import { RenderContext, withRaster } from '../render/context';
 import { drawOrnaments } from './ornaments';
 import { CONICAL_HAT_PATTERN, HeadwearKind } from '../spec/types';
 
@@ -107,21 +107,54 @@ function castOntoFace(context: RenderContext, mask: Mask, depth: number, strengt
   applyContactShadow(context.raster, mask, context.book, { dx: 0, dy: 1, strength, depth });
 }
 
+/**
+ * The coverings that enclose the crown, and so hide whatever hair is under
+ * them. A band or a coronet is the other sort: it is worn *in* the hair, drawn
+ * over it on purpose, and the hair above it is the point.
+ */
+const CROWN_COVERINGS: ReadonlySet<HeadwearKind> = new Set<HeadwearKind>([
+  'cap', 'brimmed_hat', 'wrapped_cloth', 'veil', 'hood', 'helmet',
+]);
+
+function drawCovering(context: RenderContext): Mask | null {
+  const { spec } = context;
+  if (!spec.headwear) return null;
+  switch (spec.headwear.kind) {
+    case 'cap': return drawCap(context);
+    case 'brimmed_hat': return drawBrimmedHat(context);
+    case 'wrapped_cloth': return drawWrappedCloth(context);
+    case 'veil': return drawVeil(context);
+    case 'hood': return drawHood(context);
+    case 'helmet': return drawHelmet(context);
+    case 'coronet': return drawCoronet(context);
+    case 'band': return drawBand(context);
+    default: return null;
+  }
+}
+
+/**
+ * The shape the covering is about to occupy, worked out before the hair is
+ * drawn so the hair can be cut to fit under it.
+ *
+ * It is obtained by drawing the covering onto a scratch raster and keeping only
+ * the mask that comes back. That looks wasteful next to a table of crown
+ * heights per kind, but every such table drifts: the fur cap grows tufts, the
+ * flat-topped cap squares its crown off afterwards, the conical hat is a
+ * different shape entirely from the brimmed hat it is routed through. Asking
+ * the covering to draw itself is the only version that cannot fall out of step
+ * with what actually lands on the portrait.
+ */
+export function coveringSilhouette(context: RenderContext): Mask | null {
+  const kind = context.spec.headwear?.kind;
+  if (!kind || !CROWN_COVERINGS.has(kind)) return null;
+  const scratch = new Raster(context.raster.width, context.raster.height);
+  return drawCovering(withRaster(context, scratch));
+}
+
 export function drawHeadwear(context: RenderContext, hairlineY: number): Mask | null {
   const { spec } = context;
   if (!spec.headwear) return null;
-  let mask: Mask | null;
-  switch (spec.headwear.kind) {
-    case 'cap': mask = drawCap(context); break;
-    case 'brimmed_hat': mask = drawBrimmedHat(context); break;
-    case 'wrapped_cloth': mask = drawWrappedCloth(context); break;
-    case 'veil': mask = drawVeil(context); break;
-    case 'hood': mask = drawHood(context); break;
-    case 'helmet': mask = drawHelmet(context); break;
-    case 'coronet': mask = drawCoronet(context); break;
-    case 'band': mask = drawBand(context); break;
-    default: mask = null;
-  }
+  const mask = drawCovering(context);
 
   // Decoration goes on last, over whatever the covering turned out to be, so a
   // plume rises out of the crown of a cap instead of being buried under it. It

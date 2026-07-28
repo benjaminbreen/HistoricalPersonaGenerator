@@ -1116,6 +1116,65 @@ function drawBinding(context: RenderContext): void {
   }
 }
 
+/**
+ * Cut the hair down to what a covering leaves showing.
+ *
+ * Headwear is drawn over the hair, so anything the two share is hidden already.
+ * What is not hidden is hair that ends up *above* the covering — a bun, a
+ * topknot, the crown of an afro — because there is nothing over it to hide
+ * behind. A pinned bun sitting a clean inch above the crown of a felt cap was
+ * the commonest version, and it reads as the hat having been drawn on top of a
+ * finished head rather than worn on one.
+ *
+ * The cut is per column rather than one horizontal line across the portrait.
+ * A single line has to be drawn at the covering's highest point to work at all,
+ * and at the sides — where a hat's crown is far lower than its centre — that
+ * line sits well above the felt and lets the same tuft through. Column by
+ * column, hair may not rise past whatever is worn over that column; past the
+ * edge of the covering the line carries on at the height it left off, so what
+ * survives is the hair coming out from *under* the hat. An afro still spreads
+ * wider than a narrow cap, it just spreads from below the cap's edge rather
+ * than sprouting out of its crown.
+ */
+export function clipHairUnderCovering(masks: HairMasks, covering: Mask, size: number): void {
+  // The cut line: the covering's own upper edge, column by column.
+  const cut = new Int16Array(size).fill(-1);
+  for (let x = 0; x < size; x += 1) {
+    for (let y = 0; y < size; y += 1) {
+      if (covering[y * size + x]) { cut[x] = y; break; }
+    }
+  }
+
+  // Carry the line out past the covering at the height of its outermost edge,
+  // instead of stopping dead where the felt stops. Stopping there leaves the
+  // column just outside the hat uncut while its neighbour is cut low, and the
+  // sliver of hair between the two reads as a fin stuck to the side of the
+  // head. Carried outward, the same rule says what it should: hair comes out
+  // from *under* the edge of a cap, not from beside its crown.
+  const covered = cut.slice();
+  let edge = -1;
+  for (let x = 0; x < size; x += 1) {
+    if (covered[x] >= 0) edge = covered[x];
+    else if (edge >= 0) cut[x] = edge;
+  }
+  edge = -1;
+  for (let x = size - 1; x >= 0; x -= 1) {
+    if (covered[x] >= 0) edge = covered[x];
+    else if (edge >= 0) cut[x] = Math.max(cut[x], edge);
+  }
+
+  const layers = [masks.back, masks.front, masks.knots, masks.braids];
+  for (let x = 0; x < size; x += 1) {
+    // Inclusive of the covering's own first row: a fur cap's silhouette is
+    // tufted rather than solid, and hair level with a single guard hair shows
+    // through the gaps beside it.
+    for (let y = 0; y <= cut[x]; y += 1) {
+      const i = y * size + x;
+      for (const layer of layers) layer[i] = 0;
+    }
+  }
+}
+
 export function drawHairBack(context: RenderContext, masks: HairMasks): void {
   const { spec } = context;
   if (spec.hairLength === 'bald' && spec.recession > 0.85 && spec.hairSilhouette !== 'tonsure') return;

@@ -29,11 +29,11 @@ import { drawBrow, drawGlabellaLines } from '../art/brows';
 import { drawEye, EyeState, makeEyePaints } from '../art/eyes';
 import { drawDimple, drawMouth, makeMouthPaints } from '../art/mouths';
 import {
-  computeHairMasks, drawFacialHair, drawHairBack, drawHairFront,
+  clipHairUnderCovering, computeHairMasks, drawFacialHair, drawHairBack, drawHairFront,
   drawHairOverShoulder, HairMasks,
 } from '../art/hair';
 import { drawGarment } from '../art/garments';
-import { drawHeadwear } from '../art/headwear';
+import { coveringSilhouette, drawHeadwear } from '../art/headwear';
 import { drawAilments, drawFaceTraits, drawGlasses, drawJewelry, drawMarkings } from '../art/details';
 import { RenderContext } from './context';
 
@@ -72,6 +72,10 @@ export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
   drawBackground(context);
 
   const hair = computeHairMasks(context);
+  // Ask the covering for its silhouette before any hair goes down, so the hair
+  // can be cut to fit under it rather than sprouting out of the top of it.
+  const covering = coveringSilhouette(context);
+  if (covering) clipHairUnderCovering(hair, covering, CANVAS);
   drawHairBack(context, hair);
 
   const { head, ears } = drawHeadAndNeck(context);
