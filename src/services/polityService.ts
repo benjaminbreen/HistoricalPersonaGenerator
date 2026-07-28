@@ -406,6 +406,7 @@ const ALLEGIANCES: Array<{
       { from: 493, until: 553, name: 'Ostrogothic Kingdom' },
       { from: 568, until: 774, name: 'Lombard Kingdom' },
       { from: 774, until: 1806, name: 'Holy Roman Empire' },
+      { from: 1815, until: 1861, name: 'the Italian states' },
       { from: 1861, name: 'Kingdom of Italy' },
     ],
   },
@@ -447,6 +448,7 @@ const ALLEGIANCES: Array<{
       { from: 1526, until: 1804, name: 'Habsburg monarchy' },
       { from: 1804, until: 1867, name: 'Austrian Empire' },
       { from: 1867, until: 1918, name: 'Austria-Hungary' },
+      { from: 1918, name: 'the Central European republics' },
     ],
   },
   {
@@ -455,6 +457,8 @@ const ALLEGIANCES: Array<{
       { from: -27, until: 395, name: 'Roman Empire' },
       { from: 395, until: 1396, name: 'Byzantine Empire' },
       { from: 1396, until: 1878, name: 'Ottoman Empire' },
+      { from: 1878, until: 1945, name: 'the Balkan kingdoms' },
+      { from: 1945, name: 'the Balkan states' },
     ],
   },
   {
@@ -466,7 +470,7 @@ const ALLEGIANCES: Array<{
     ],
   },
   {
-    match: /eastern europe|russia|moscow|volga|dnieper|steppe frontier/i,
+    match: /eastern europe|russia|moscow|volga|dnieper|steppe frontier|ural|pechora|komi/i,
     eras: [
       { from: 882, until: 1240, name: "Kievan Rus'" },
       { from: 1240, until: 1480, name: 'the Golden Horde' },
@@ -509,7 +513,7 @@ const ALLEGIANCES: Array<{
 
   // --- MENA ----------------------------------------------------------------
   {
-    match: /nile valley|egypt|nile delta|thebes|luxor|cairo/i,
+    match: /nile valley|egypt|nile delta|thebes|luxor|cairo|eastern desert|red sea/i,
     eras: [
       { from: -2686, until: -2181, name: 'the Old Kingdom of Egypt' },
       { from: -2055, until: -1650, name: 'the Middle Kingdom of Egypt' },
@@ -540,6 +544,7 @@ const ALLEGIANCES: Array<{
       { from: 1291, until: 1516, name: 'Mamluk Sultanate' },
       { from: 1516, until: 1918, name: 'Ottoman Empire' },
       { from: 1923, until: 1946, name: 'the French and British mandates' },
+      { from: 1946, name: 'the Levantine states' },
     ],
   },
   {
@@ -581,6 +586,7 @@ const ALLEGIANCES: Array<{
       { from: 1121, until: 1269, name: 'Almohad Caliphate' },
       { from: 1574, until: 1830, name: 'Ottoman Empire' },
       { from: 1830, until: 1962, name: 'French North Africa' },
+      { from: 1962, name: 'the Maghreb states' },
     ],
   },
   {
@@ -716,6 +722,7 @@ const ALLEGIANCES: Array<{
       { from: 1392, until: 1897, name: 'Joseon' },
       { from: 1897, until: 1910, name: 'Korean Empire' },
       { from: 1910, until: 1945, name: 'Japanese colonial rule' },
+      { from: 1948, name: 'the two Korean states' },
     ],
   },
   {
@@ -812,6 +819,7 @@ const ALLEGIANCES: Array<{
       { from: 1351, until: 1767, name: 'the Kingdom of Ayutthaya' },
       { from: 1782, until: 1932, name: 'the Kingdom of Siam' },
       { from: 1887, until: 1954, name: 'French Indochina' },
+      { from: 1954, name: 'the mainland Southeast Asian states' },
     ],
   },
   {
@@ -849,6 +857,7 @@ const ALLEGIANCES: Array<{
       { from: 1429, until: 1879, name: 'the Ryukyu Kingdom' },
       { from: 1683, until: 1895, name: 'Qing dynasty' },
       { from: 1895, until: 1945, name: 'Japanese colonial rule' },
+      { from: 1945, name: 'Republic of China' },
     ],
   },
   {
@@ -867,6 +876,7 @@ const ALLEGIANCES: Array<{
       { from: 1008, until: 1490, name: 'the Kingdom of Georgia' },
       { from: 1801, until: 1917, name: 'Russian Empire' },
       { from: 1922, until: 1991, name: 'Soviet Union' },
+      { from: 1991, name: 'the Caucasus republics' },
     ],
   },
   {
@@ -877,6 +887,7 @@ const ALLEGIANCES: Array<{
       { from: 350, until: 1504, name: 'the Christian Nubian kingdoms' },
       { from: 1504, until: 1821, name: 'the Funj Sultanate' },
       { from: 1899, until: 1956, name: 'Anglo-Egyptian Sudan' },
+      { from: 1956, name: 'Sudan' },
     ],
   },
 
@@ -889,6 +900,7 @@ const ALLEGIANCES: Array<{
       { from: 1464, until: 1591, name: 'Songhai Empire' },
       { from: 1804, until: 1903, name: 'Sokoto Caliphate' },
       { from: 1904, until: 1960, name: 'French West Africa' },
+      { from: 1960, name: 'the Sahelian republics' },
     ],
   },
   {
@@ -897,6 +909,7 @@ const ALLEGIANCES: Array<{
       { from: -100, until: 940, name: 'the Kingdom of Aksum' },
       { from: 1137, until: 1270, name: 'the Zagwe dynasty' },
       { from: 1270, until: 1974, name: 'Ethiopian Empire' },
+      { from: 1974, name: 'Ethiopia' },
     ],
   },
   {
@@ -905,6 +918,7 @@ const ALLEGIANCES: Array<{
       { from: 1180, until: 1897, name: 'Kingdom of Benin' },
       { from: 1390, until: 1857, name: 'Kingdom of Kongo' },
       { from: 1885, until: 1960, name: 'the Congo Free State and Belgian Congo' },
+      { from: 1960, name: 'the Congo Basin republics' },
     ],
   },
   {
@@ -915,6 +929,7 @@ const ALLEGIANCES: Array<{
       { from: 1670, until: 1902, name: 'the Ashanti Empire' },
       { from: 1600, until: 1904, name: 'the Kingdom of Dahomey' },
       { from: 1904, until: 1960, name: 'the British and French West African colonies' },
+      { from: 1960, name: 'the West African republics' },
     ],
   },
   {
@@ -923,6 +938,7 @@ const ALLEGIANCES: Array<{
       { from: 1585, until: 1889, name: 'the Luba Empire' },
       { from: 1665, until: 1887, name: 'the Lunda Empire' },
       { from: 1885, until: 1960, name: 'the Congo Free State and Belgian Congo' },
+      { from: 1960, name: 'the Congo Basin republics' },
     ],
   },
   {
@@ -941,6 +957,7 @@ const ALLEGIANCES: Array<{
       { from: 1000, until: 1505, name: 'the Swahili city-states' },
       { from: 1698, until: 1856, name: 'the Omani Sultanate' },
       { from: 1890, until: 1963, name: 'the British and German East African colonies' },
+      { from: 1963, name: 'the East African republics' },
     ],
   },
 
@@ -1036,7 +1053,8 @@ const ALLEGIANCES: Array<{
     ],
   },
   {
-    match: /amazon/i,
+    match: /amazon|southern highlands|mato grosso|brazilian highlands/i,
+    zones: ['SOUTH_AMERICAN'],
     eras: [{ from: 1822, name: 'Brazil' }],
   },
   {
@@ -1084,6 +1102,92 @@ const ALLEGIANCES: Array<{
     eras: [
       { from: 1840, until: 1907, name: 'the British colony of New Zealand' },
       { from: 1907, name: 'New Zealand' },
+    ],
+  },
+  // The Pacific had no states before contact and a great many after it. These
+  // entries begin at annexation for the same reason the Great Plains one begins
+  // at 1803: what came before was not a state, and saying so is not a gap.
+  {
+    match: /hawaii|central pacific/i,
+    eras: [
+      { from: 1795, until: 1893, name: 'the Kingdom of Hawaii' },
+      { from: 1898, name: 'United States' },
+    ],
+  },
+  {
+    match: /new guinea|melanesia/i,
+    eras: [
+      { from: 1884, until: 1975, name: 'the German, British and Australian New Guinea territories' },
+      { from: 1975, name: 'Papua New Guinea' },
+    ],
+  },
+  {
+    match: /polynesia|samoa|tahiti|tonga/i,
+    eras: [
+      { from: 1845, until: 1900, name: 'the Polynesian kingdoms' },
+      { from: 1900, name: 'the Pacific island territories' },
+    ],
+  },
+  {
+    match: /micronesia|caroline|marshall|mariana/i,
+    eras: [
+      { from: 1885, until: 1899, name: 'the Spanish East Indies' },
+      { from: 1899, until: 1914, name: 'German New Guinea' },
+      { from: 1914, until: 1945, name: 'the Japanese South Seas Mandate' },
+      { from: 1947, until: 1986, name: 'the Trust Territory of the Pacific Islands' },
+      { from: 1986, name: 'the Micronesian republics' },
+    ],
+  },
+  // Filed under Oceania by the map, but its modern history is Indonesian.
+  {
+    match: /indonesian and melanesian islands|moluccas|banda|timor/i,
+    eras: [
+      { from: 1512, until: 1800, name: 'the Dutch and Portuguese spice colonies' },
+      { from: 1800, until: 1949, name: 'the Dutch East Indies' },
+      { from: 1949, name: 'Indonesia' },
+    ],
+  },
+  // The map files Iceland, Greenland, the Azores and Cape Verde under one
+  // region, and no single answer covers them: two were Danish, two Portuguese,
+  // and they were settled centuries apart. One entry each is the only honest
+  // way to answer for any of them.
+  {
+    match: /iceland/i,
+    eras: [
+      { from: 930, until: 1262, name: 'the Icelandic Commonwealth' },
+      { from: 1262, until: 1380, name: 'Kingdom of Norway' },
+      { from: 1380, until: 1944, name: 'the Danish crown' },
+      { from: 1944, name: 'Iceland' },
+    ],
+  },
+  {
+    match: /greenland/i,
+    eras: [
+      { from: 986, until: 1408, name: 'the Norse Greenland settlements' },
+      { from: 1721, until: 1979, name: 'the Danish crown' },
+      { from: 1979, name: 'Greenland under Danish sovereignty' },
+    ],
+  },
+  {
+    match: /azores|madeira/i,
+    eras: [
+      { from: 1439, until: 1910, name: 'Kingdom of Portugal' },
+      { from: 1910, name: 'Portuguese Republic' },
+    ],
+  },
+  {
+    match: /cape verde/i,
+    eras: [
+      { from: 1462, until: 1975, name: 'Portuguese Cape Verde' },
+      { from: 1975, name: 'Cape Verde' },
+    ],
+  },
+  {
+    match: /madagascar/i,
+    eras: [
+      { from: 1787, until: 1897, name: 'the Merina Kingdom' },
+      { from: 1897, until: 1960, name: 'French Madagascar' },
+      { from: 1960, name: 'Madagascar' },
     ],
   },
 ];
