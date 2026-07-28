@@ -24,6 +24,8 @@ import {
   socialGender,
 } from './demographyService';
 import { polityFormFor, sampleSocialStatus } from './socialStatusService';
+import { sampleStratum, type SampledStratum } from './populationStrataService';
+import { disruptionRole } from './disruptionResolution';
 import { describeLifeEventSecondPerson } from './narrativeTextService';
 import { createHistoricalContext } from './historicalContextService';
 import type { HistoricalContext } from '../types/historicalContext';
@@ -112,6 +114,16 @@ export interface HistoricalPersona {
   /** How representative this draw actually was. Never hidden from the reader. */
   odds?: DrawOdds;
   samplingMode?: SamplingMode;
+  /**
+   * The standing condition this life was lived under — bondage, indenture,
+   * transportation, diaspora — where there was one. Most personas have none,
+   * and that is the correct answer for most personas.
+   */
+  socialCondition?: {
+    stratumId: string;
+    label: string;
+    clause: string;
+  };
 }
 
 // Helper to get random element from array
@@ -282,8 +294,33 @@ function generatePersonaWithSeed(
     ? params.age
     : sampleAdultAge(year, random, params.minAge, params.maxAge);
 
+  // Was this person born into a standing condition the zone tables cannot
+  // express — bondage, indenture, transportation, a diaspora? Sampled before
+  // wealth and profession because it settles both where it applies.
+  //
+  // Sampled even when the caller has pinned a profession, because the ancestry
+  // half of the answer is independent of the work: a caller asking for a
+  // carpenter in 1750 Charleston should still sometimes get an enslaved one.
+  const stratum: SampledStratum | null = sampleStratum(
+    culturalZone,
+    year,
+    region,
+    location,
+    birthSex,
+    random,
+  );
+
+  // Work the episode created that the profession table has no entry for.
+  // Only consulted when no stratum applied, because a standing condition is the
+  // stronger claim on a life than a passing one.
+  const catastropheRole = stratum
+    ? null
+    : disruptionRole(culturalZone, year, region, location, birthSex, random);
+
   // Determine wealth level
-  const wealthLevel = params.wealthLevel || sampleWealthLevel(era, random);
+  const wealthLevel = params.wealthLevel
+    || stratum?.stratum.wealthLevel
+    || sampleWealthLevel(era, random);
 
   // Generate random month and day
   const month = randomInt(1, 12, random);
@@ -325,9 +362,18 @@ function generatePersonaWithSeed(
       socialClass: socialClass,
       wealthLevel,
       religion: params.religion, // Use provided religion if available
-      profession: params.profession, // Use provided profession if available
+      // The stratum's trade, where there is one. It is drawn from a list of
+      // real occupations — cooper, midwife, boatman — never from the status
+      // itself, because the status is carried on its own axis below.
+      profession: params.profession ?? stratum?.role ?? catastropheRole ?? undefined,
       birthYear: params.birthYear, // Use provided birth year if available
       ethnicity: culturalZone, // Pass cultural zone as ethnicity to ensure proper character generation
+      // Naming, appearance and language resolve off this rather than off the
+      // location zone when the two are different answers.
+      ancestry: stratum?.ancestry,
+      // A legal condition is inherited, so the parents are inside it too and
+      // must be drawn from the same list of trades.
+      householdTrades: stratum?.stratum.roles.map(r => ({ role: r.role, gender: r.gender })),
     } as any
   );
   const character = applyPortraitAuthenticity(generatedCharacter, {
@@ -342,6 +388,12 @@ function generatePersonaWithSeed(
   character.birthSex = birthSex;
   character.gender = gender;
   if (genderRole) character.genderRole = genderRole;
+
+  if (stratum) {
+    character.legalStatus = stratum.stratum.legalStatus;
+    character.legalStatusLabel = stratum.stratum.statusLabel;
+    if (stratum.ancestry) character.ancestry = stratum.ancestry;
+  }
 
   // Generate enhanced life events using the new service
   const enhancedLifeEvents = generateLifeHistory(
@@ -361,11 +413,19 @@ function generatePersonaWithSeed(
   // Native language. Every persona gets one: the attested tables where they
   // reach, a cited deep-time attribution where they do not.
   // See docs/LANGUAGE_ATTRIBUTION.md.
+  //
+  // Somebody born elsewhere and brought here did not learn the local language
+  // at their mother's knee — that is what being first-generation means, and it
+  // is the one place where the location zone is simply the wrong input. Later
+  // generations were born here and are attributed from here, which is not
+  // assimilation so much as arithmetic.
+  const speaksFromOrigin = stratum?.ancestry?.generation === 0
+    && Boolean(stratum.ancestry.originRegion);
   const languageAttribution = attributeLanguage({
-    culturalZone,
+    culturalZone: speaksFromOrigin ? stratum!.ancestry!.originZone : culturalZone,
     year,
-    region,
-    location,
+    region: speaksFromOrigin ? stratum!.ancestry!.originRegion : region,
+    location: speaksFromOrigin ? stratum!.ancestry!.originRegion : location,
     characterName: character.name,
     profession: character.profession,
     religion: character.religion,
@@ -388,5 +448,12 @@ function generatePersonaWithSeed(
     historicalContext,
     odds: describeOdds(era, culturalZone, year),
     samplingMode,
+    socialCondition: stratum
+      ? {
+        stratumId: stratum.stratum.id,
+        label: stratum.stratum.statusLabel,
+        clause: stratum.stratum.clause,
+      }
+      : undefined,
   };
 }

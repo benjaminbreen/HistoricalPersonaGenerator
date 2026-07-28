@@ -9,6 +9,7 @@ import { FamilyMember, LifeEvent } from './npcTypes';
 import { InteriorViewState, Point } from './index';
 import { CharacterHealth } from './diseaseTypes';
 import { AttributeBadge } from './attributeTypes';
+import type { Ancestry, LegalStatus } from './socialCondition';
 import type { JournalEntry } from '../components/JournalViewport';
 
 export type EquipmentSlot = 'head' | 'torso' | 'legs' | 'feet' | 
@@ -143,6 +144,24 @@ export interface PlayerCharacter {
         description: string;
         birthSex: 'Male' | 'Female';
     };
+    /**
+     * Whether this person's labour is their own. Distinct from `socialClass`
+     * and from `wealthLevel`, both of which the app already had: a cooper who
+     * is owned and a cooper who is not do the same work at the same bench.
+     * See services/populationStrataService.ts.
+     */
+    legalStatus?: LegalStatus;
+    /** The society's own word for that condition, for display. */
+    legalStatusLabel?: string;
+
+    /**
+     * Where the line came from, when that is not where the person is. Set only
+     * for displaced, transported and diaspora populations; left undefined for
+     * the great majority of personas, whose ancestry and location are the same
+     * answer and for whom `culturalZone` already says it.
+     */
+    ancestry?: Ancestry;
+
     birthplace: string;
     birthYear?: string | number; // Year the character was born
 

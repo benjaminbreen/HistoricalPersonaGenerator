@@ -35,35 +35,35 @@
     ]
   },
   "formosan-highlands-1306#2": {
-    "name": "Tama",
+    "name": "Kai",
     "gender": "Male",
     "age": 40,
     "profession": "Rice Farmer",
     "religion": "Austronesian Traditional Religion",
-    "language": "Pre-Austronesian Taiwan (hypothetical)",
+    "language": "Formosan Austronesian (reconstructed)",
     "languageBasis": "ea-taiwan",
-    "languageConfidence": "conjectural",
+    "languageConfidence": "reconstructed",
     "odds": "the medieval period in East Asia",
-    "head": "Green Scholar Hat [Black Silk]",
-    "torso": "White Brocade Jacket [Silk Brocade]",
-    "feet": "Green Silk Shoes [Embroidered Silk]",
+    "head": "White Scholar Hat [Black Silk]",
+    "torso": "Crimson Brocade Jacket [Silk Brocade]",
+    "feet": "White Silk Shoes [Embroidered Silk]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#5a6b3b",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "jacket",
-      "garmentColor": "#e8e4d9",
+      "garmentColor": "#8e2436",
       "backgroundBase": "#3f5a55",
       "pose": null
     },
     "family": [
-      "father: Koru",
-      "mother: Mele",
-      "sister: Marama",
-      "brother: Rawiri",
-      "spouse: Mahina"
+      "father: Lok the Pine",
+      "mother: Wai Fung",
+      "sister: Mei the Late-Born",
+      "brother: Hok Shek",
+      "spouse: Ching Shek"
     ],
     "events": [
-      "1266: Born in a small settlement to a Commoner family",
+      "1266: Born in a small settlement to a Middling Sort family",
       "1278: Learned to read weather signs and predict harvest yields from a parent",
       "1288: Returned home to care for aging parents",
       "1294: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
@@ -92,7 +92,7 @@
       "garmentKind": "jacket",
       "garmentColor": "#3a4f6d",
       "backgroundBase": "#5a3f4a",
-      "pose": null
+      "pose": "humble"
     },
     "family": [
       "father: Wai",
@@ -101,7 +101,7 @@
       "brother: Lam Tse"
     ],
     "events": [
-      "1286: Born in a small settlement to a Peasant family",
+      "1286: Born in a small settlement to a Laboring Poor family",
       "1301: Helped with the harvest for the first season and proved capable despite a young age",
       "1302: Experimenting with a new plowing method led to a marked increase in field productivity",
       "1303: Became the first in the village to successfully grow sweet potatoes, earning respect from neighbors",
@@ -172,7 +172,7 @@
       "sister: Satomi Shimizu"
     ],
     "events": [
-      "1266: Born in a small settlement to a Commoner family",
+      "1266: Born in a small settlement to a Middling Sort family",
       "1278: Learned to read the weather and the water from a parent",
       "1290: The family pooled their resources to purchase a storage barn, a significant investment",
       "1294: A sister married into a well-connected Buddhist monastery, improving the family's social standing",
@@ -183,7 +183,7 @@
     "name": "Takumi Kobayashi",
     "gender": "Male",
     "age": 20,
-    "profession": "Fisherman",
+    "profession": "Lacquerware Artisan",
     "religion": "Buddhism",
     "language": "Middle Japanese",
     "languageBasis": "attested-table",
@@ -207,10 +207,10 @@
       "brother: Mamoru Kobayashi"
     ],
     "events": [
-      "1286: Born in a small settlement to a Peasant family",
-      "1301: Learned which ground gave what, and in which month",
-      "1304: Took over the family business after a parent retired from active work",
-      "1305: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1286: Born in a small settlement to a Laboring Poor family",
+      "1301: Began learning the trade of lacquerware artisan from an experienced practitioner",
+      "1304: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1305: Developed new technique for crafting"
     ]
   },
   "stockholm-1920#1": {
@@ -241,7 +241,7 @@
       "sister: Sigrid Jansson"
     ],
     "events": [
-      "1839: Born in a small settlement to an Upper Class family",
+      "1839: Born in a small settlement to a Merchant family",
       "1853: Began learning the trade of aristocrat from an experienced practitioner",
       "1869: Inherited valuable tools and a workshop from a childless uncle",
       "1874: A brother's marriage brought valuable new trade connections and opportunities"
@@ -359,7 +359,7 @@
     "name": "Ljot Vigfusson",
     "gender": "Male",
     "age": 40,
-    "profession": "Fisherman",
+    "profession": "Herbalist",
     "religion": "Roman Catholicism",
     "language": "Icelandic",
     "languageBasis": "attested-table",
@@ -386,18 +386,18 @@
       "son: Ulf Hjaltisson"
     ],
     "events": [
-      "1110: Born in a small settlement to a Commoner family",
-      "1122: Learned to read the weather and the water from a parent",
-      "1126: A sister married into a well-connected town council, improving the family's social standing",
-      "1129: Took over the family business after a parent retired from active work",
-      "1140: Summoned to lord's court as witness in land dispute"
+      "1110: Born in a small settlement to a Middling Sort family",
+      "1122: Began learning the trade of herbalist from an experienced practitioner",
+      "1133: Paid annual tribute to local lord",
+      "1135: Inherited valuable tools and a workshop from a childless uncle",
+      "1144: A sister married into a well-connected cathedral chapter, improving the family's social standing"
     ]
   },
   "stockholm-1150#3": {
     "name": "Johan Nilsson",
     "gender": "Male",
     "age": 20,
-    "profession": "Peddler",
+    "profession": "Spice Trader",
     "religion": "Roman Catholicism",
     "language": "Icelandic",
     "languageBasis": "attested-table",
@@ -420,10 +420,11 @@
       "brother: Sven Nilssson"
     ],
     "events": [
-      "1130: Born in a small settlement to a Peasant family",
+      "1130: Born in a small settlement to a Laboring Poor family",
       "1145: Made a first journey with a merchant caravan, carrying valuable goods",
-      "1146: Negotiated a lucrative contract with noble house for honey",
-      "1149: Paid annual tribute to local lord"
+      "1147: Secured exclusive trading rights for herring from Venice",
+      "1148: Summoned to lord's court as witness in land dispute",
+      "1149: The price of honey collapsed unexpectedly, forcing a sale at massive loss"
     ]
   },
   "anatolia-1952#1": {
@@ -457,10 +458,11 @@
       "son: Gökhan Özdemir"
     ],
     "events": [
-      "1871: Born in a small settlement to an Upper Class family",
+      "1871: Born in a small settlement to a Merchant family",
       "1885: Began learning the trade of judge from an experienced practitioner",
       "1901: Inherited valuable tools and a workshop from a childless uncle",
-      "1906: A brother's marriage brought valuable new trade connections and opportunities"
+      "1906: A brother's marriage brought valuable new trade connections and opportunities",
+      "1923: came under the Republic of Turkey, having been born under the Ottoman Empire"
     ]
   },
   "anatolia-1952#2": {
@@ -498,6 +500,7 @@
       "1918: Began learning the trade of salesman from an experienced practitioner",
       "1922: A sister married into a well-connected tribal confederation, improving the family's social standing",
       "1923: Secured exclusive trading rights for petroleum from Tunis",
+      "1923: saw the Ottoman Empire give way to the Republic of Turkey",
       "1933: Mother died from typhoid fever, leaving the household in grief",
       "1942: Took over the family business after a parent retired from active work"
     ]
@@ -541,53 +544,53 @@
     "name": "Umm Tuba (Hülya)",
     "gender": "Female",
     "age": 75,
-    "profession": "Coffeehouse Keeper",
+    "profession": "Tax Farmer",
     "religion": "Alevi Islam",
     "language": "Ottoman Turkish",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in the Middle East and North Africa",
-    "head": "Diadem [Gold and Gems]",
-    "torso": "Red Veil [Silk and Pearls]",
-    "feet": "Walnut Slippers [Silk and Pearls]",
+    "head": null,
+    "torso": "Red Robe [Linen]",
+    "feet": "Slippers [Leather]",
     "portrait": {
-      "headwearKind": "coronet",
-      "headwearColor": "#cfa044",
-      "garmentKind": "tunic",
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c2a463",
+      "garmentKind": "robe",
       "garmentColor": "#a33327",
       "backgroundBase": "#5c6272",
       "pose": null
     },
     "family": [
-      "father: Abu Mehmet (Hüseyin)",
+      "father: Mehmet ibn Hüseyin",
       "mother: İrem bint Murat",
-      "brother: Serkan",
-      "spouse: Abu Burak (Tolga)",
-      "daughter: Ülkü bint Selim",
-      "son: Murat ibn Selim"
+      "sister: Umm Derya (Leyla)",
+      "brother: Abu Ahmet (Cem)"
     ],
     "events": [
-      "1575: Born in a small settlement to a Merchant family",
-      "1589: Began learning the trade of coffeehouse keeper from an experienced practitioner",
-      "1597: A brother's marriage brought valuable new trade connections and opportunities",
-      "1609: Visited Jerusalem's holy sites during pilgrimage",
-      "1615: Father died from cholera despite seeking help",
-      "1622: The family pooled their resources to purchase draft animals, a significant investment"
+      "1575: Born in a small settlement to a Laboring Poor family",
+      "1589: Learned to read weather signs and predict harvest yields from a parent",
+      "1592: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1599: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1601: Broke ground on land nobody had ploughed before, and it paid",
+      "1611: Completed hajj to Mecca, earning title of Hajji",
+      "1617: Took over the family business after a parent retired from active work",
+      "1627: Inherited an additional field from a childless uncle, expanding the family holdings"
     ]
   },
   "anatolia-1650#2": {
     "name": "Abu Sarkis (Armen)",
     "gender": "Male",
     "age": 40,
-    "profession": "Weapon Smith",
+    "profession": "Tax Farmer",
     "religion": "Sunni Islam",
     "language": "Classical Armenian",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in the Middle East and North Africa",
-    "head": "Walnut Keffiyeh [Cotton]",
-    "torso": "Red Thobe [Fine Cotton]",
-    "feet": "Boots [Leather]",
+    "head": "Walnut Turban [Linen]",
+    "torso": "Red Thobe [Cotton]",
+    "feet": "Sandals [Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#5b4229",
@@ -597,7 +600,7 @@
       "pose": null
     },
     "family": [
-      "father: Nerses",
+      "father: Abu Stepan (Vahram)",
       "mother: Sona Nazarian",
       "sister: Armine",
       "brother: Abu Aram (Davit)",
@@ -606,20 +609,21 @@
       "son: Aram"
     ],
     "events": [
-      "1610: Born in a small settlement to a Commoner family",
-      "1622: Began learning the trade of weapon smith from an experienced practitioner",
-      "1633: Noble household commissioned full set of masterworks",
-      "1634: The family pooled their resources to purchase a market stall, a significant investment",
-      "1640: Admitted to the Weapon Smith guild after presenting masterwork",
-      "1641: A sister married into a well-connected tribal confederation, improving the family's social standing",
-      "1645: Studied at Al-Azhar for three years"
+      "1610: Born in a small settlement to a Middling Sort family",
+      "1622: Learned to read weather signs and predict harvest yields from a parent",
+      "1635: The family pooled their resources to purchase a market stall, a significant investment",
+      "1636: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "1639: Purchased the neighbor's plot after they decided to seek fortune in the city",
+      "1641: Visited Jerusalem's holy sites during pilgrimage",
+      "1642: Broke ground on land nobody had ploughed before, and it paid",
+      "1648: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "anatolia-1650#3": {
     "name": "Abu Deniz (Hasan)",
     "gender": "Male",
     "age": 20,
-    "profession": "Herder",
+    "profession": "Tax Farmer",
     "religion": "Judaism",
     "language": "Ottoman Turkish",
     "languageBasis": "attested-table",
@@ -637,16 +641,17 @@
       "pose": null
     },
     "family": [
-      "father: Mehmet ibn İbrahim",
-      "mother: Umm Elif (Melike)",
-      "sister: Leyla Erdoğan",
-      "brother: Abu Fatih (Kemal)"
+      "father: Ömer ibn Hasan",
+      "mother: Umm Hülya (Merve)",
+      "sister: Ülkü bint Deniz"
     ],
     "events": [
-      "1630: Born in a small settlement to a Peasant family",
-      "1645: Learned the marks and the ailments of every beast in the family's care",
-      "1647: A brother's marriage brought valuable new trade connections and opportunities",
-      "1649: The family pooled their resources to purchase a market stall, a significant investment"
+      "1630: Born in a small settlement to a Laboring Poor family",
+      "1645: Helped with the harvest for the first season and proved capable despite a young age",
+      "1646: A sister married into a well-connected military elite, improving the family's social standing",
+      "1647: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1648: Became the first in the village to successfully grow cotton, earning respect from neighbors",
+      "1649: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
     ]
   },
   "sahel-1350#1": {
@@ -683,7 +688,7 @@
       "1275: Born in a small settlement to a Merchant family",
       "1289: Began learning the trade of griot from an experienced practitioner",
       "1303: Inherited valuable tools and a workshop from a childless uncle",
-      "1305: Tragedy struck when a parent died from starvation",
+      "1305: Tragedy struck when a parent was killed in a raid",
       "1308: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
@@ -691,7 +696,7 @@
     "name": "Abubakar",
     "gender": "Male",
     "age": 40,
-    "profession": "Herder",
+    "profession": "Goat Herder",
     "religion": "West African Traditional Religion",
     "language": "Berber (attested)",
     "languageBasis": "ssa-west-sahel",
@@ -701,8 +706,8 @@
     "torso": "Slate Embroidered Robe [Cotton with Designs]",
     "feet": "Leather Slippers [Soft Leather]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#a98258",
       "garmentKind": "tunic",
       "garmentColor": "#9b704c",
       "backgroundBase": "#5c856f",
@@ -717,24 +722,24 @@
       "daughter: Jummai daughter of Ahmadu"
     ],
     "events": [
-      "1310: Born in a small settlement to a Commoner family",
-      "1323: Spent a first season away with the herd and came back taller",
-      "1328: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1334: The family pooled their resources to purchase a storage barn, a significant investment"
+      "1310: Born in a small settlement to a Middling Sort family",
+      "1322: Learned to read weather signs and where the water would still be running",
+      "1327: A sister married into a well-connected royal lineage, improving the family's social standing",
+      "1328: Took over the family business after a parent retired from active work"
     ]
   },
   "sahel-1350#3": {
     "name": "Kankan son of Salif",
     "gender": "Male",
     "age": 20,
-    "profession": "Herder",
+    "profession": "Millet Farmer",
     "religion": "Sunni Islam",
     "language": "Mande (reconstructed)",
     "languageBasis": "ssa-west-sahel",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in sub-Saharan Africa",
     "head": "Ivory Cotton Cap [Plain Cotton]",
-    "torso": "Woad Village Garment [Rough Wool]",
+    "torso": "Woad Work Blouse [Hemp Cloth]",
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": null,
@@ -749,9 +754,11 @@
       "mother: Rokia Keita"
     ],
     "events": [
-      "1330: Born in a small settlement to a Peasant family",
-      "1343: Spent a first season away with the herd and came back taller",
-      "1349: The family pooled their resources to purchase a mill share, a significant investment"
+      "1330: Born in a small settlement to a Laboring Poor family",
+      "1344: Began working family fields, learning the rotation from elders",
+      "1346: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "1348: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1349: Experimenting with a new plowing method led to a marked increase in field productivity"
     ]
   },
   "london-1740#1": {
@@ -784,6 +791,7 @@
       "1665: Born in a small settlement to a Merchant family",
       "1679: Learned to read the weather and the water from a parent",
       "1707: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1707: came under the Kingdom of Great Britain, having been born under the Kingdom of England",
       "1712: The family pooled their resources to purchase draft animals, a significant investment",
       "1718: Required to provide labor for castle repairs"
     ]
@@ -792,7 +800,7 @@
     "name": "Diarmuid Connolly",
     "gender": "Male",
     "age": 40,
-    "profession": "Mercenary",
+    "profession": "Sailor",
     "religion": "Protestantism",
     "language": "Modern English",
     "languageBasis": "attested-table",
@@ -804,7 +812,7 @@
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "doublet",
+      "garmentKind": "work_shirt",
       "garmentColor": "#5d5548",
       "backgroundBase": "#6b7570",
       "pose": null
@@ -816,19 +824,19 @@
       "brother: Cillian Connolly"
     ],
     "events": [
-      "1700: Born in a small settlement to a Commoner family",
-      "1712: Sent to serve as squire, learning ways of war from veteran knight",
-      "1721: Required to provide labor for castle repairs",
-      "1728: Fought in siege of Vienna, surviving three assaults",
-      "1736: The family pooled their resources to purchase draft animals, a significant investment",
-      "1738: A brother's marriage brought valuable new trade connections and opportunities"
+      "1700: Born in a small settlement to a Middling Sort family",
+      "1707: grew up under the Kingdom of Great Britain, which had taken the place from the Kingdom of England too early to be remembered",
+      "1712: Began learning the trade of sailor from an experienced practitioner",
+      "1723: Paid annual tribute to local lord",
+      "1725: Inherited valuable tools and a workshop from a childless uncle",
+      "1733: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "london-1740#3": {
     "name": "Cai Davies",
     "gender": "Male",
     "age": 20,
-    "profession": "Innkeeper",
+    "profession": "Surveyor",
     "religion": "Roman Catholicism",
     "language": "Modern English",
     "languageBasis": "attested-table",
@@ -851,8 +859,8 @@
       "brother: Llyr Davies"
     ],
     "events": [
-      "1720: Born in a small settlement to a Peasant family",
-      "1735: Began learning the trade of innkeeper from an experienced practitioner",
+      "1720: Born in a small settlement to a Laboring Poor family",
+      "1735: Began learning the trade of surveyor from an experienced practitioner",
       "1737: Paid annual tribute to local lord",
       "1739: The family pooled their resources to purchase a mill share, a significant investment"
     ]
@@ -889,6 +897,7 @@
     ],
     "events": [
       "1790: Born in a small settlement to a Merchant family",
+      "1801: grew up under the United Kingdom, which had taken the place from the Kingdom of Great Britain too early to be remembered",
       "1804: Learned to read the weather and the water from a parent",
       "1835: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1839: The family pooled their resources to purchase a storage barn, a significant investment"
@@ -925,7 +934,7 @@
       "son: Séamus Doyle"
     ],
     "events": [
-      "1826: Born in a small settlement to a Commoner family",
+      "1826: Born in a small settlement to a Middle Class family",
       "1838: Began learning the trade of doctor from an experienced practitioner",
       "1851: A brother's marriage brought valuable new trade connections and opportunities",
       "1855: Took over the family business after a parent retired from active work",
@@ -959,7 +968,7 @@
       "brother: Llyr Davies"
     ],
     "events": [
-      "1849: Born in a small settlement to a Peasant family",
+      "1849: Born in a small settlement to a Working Class family",
       "1863: Began learning the trade of railway worker from an experienced practitioner",
       "1869: Took over the family business after a parent retired from active work"
     ]
@@ -993,7 +1002,7 @@
       "spouse: Bilal"
     ],
     "events": [
-      "425: Born in a small settlement to a Commoner family",
+      "425: Born in a small settlement to a Middling Sort family",
       "439: Learned to read weather signs and predict harvest yields from a parent",
       "442: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "450: The mother's death changed the household",
@@ -1032,7 +1041,7 @@
       "spouse: Hind the Highlander"
     ],
     "events": [
-      "460: Born in a small settlement to a Commoner family",
+      "460: Born in a small settlement to a Middling Sort family",
       "472: Learned to read weather signs and predict harvest yields from a parent",
       "480: A brother's marriage brought valuable new trade connections and opportunities",
       "482: Broke ground on land nobody had ploughed before, and it paid",
@@ -1070,7 +1079,7 @@
       "sister: Batya daughter of Yosef"
     ],
     "events": [
-      "480: Born in a small settlement to a Peasant family",
+      "480: Born in a small settlement to a Laboring Poor family",
       "495: Helped with the harvest for the first season and proved capable despite a young age",
       "496: After years of careful selection, successfully bred a hardier variety of dates",
       "497: Experimenting with a new plowing method led to a marked increase in field productivity",
@@ -1084,9 +1093,9 @@
     "age": 75,
     "profession": "Shepherd",
     "religion": "Local Beliefs",
-    "language": "Proto-Indo-Iranian",
-    "languageBasis": "attested-table",
-    "languageConfidence": "reconstructed",
+    "language": "Harappan (unread)",
+    "languageBasis": "sa-harappan",
+    "languageConfidence": "attested",
     "odds": "antiquity in South Asia",
     "head": "Rakhdi [Diamonds and Gold]",
     "torso": "Yellow Kundan Choli [Silk with Gem Work]",
@@ -1121,9 +1130,9 @@
     "age": 61,
     "profession": "Herder",
     "religion": "Local Beliefs",
-    "language": "Proto-Indo-Iranian",
-    "languageBasis": "attested-table",
-    "languageConfidence": "reconstructed",
+    "language": "Pre-Harappan Indus (hypothetical)",
+    "languageBasis": "sa-harappan",
+    "languageConfidence": "conjectural",
     "odds": "antiquity in South Asia",
     "head": null,
     "torso": "Crimson Cotton Lungi [Plain Cotton]",
@@ -1159,8 +1168,8 @@
     "age": 52,
     "profession": "Herder",
     "religion": "Ancestor Worship",
-    "language": "Proto-Indo-Iranian",
-    "languageBasis": "attested-table",
+    "language": "Proto-Munda (reconstructed)",
+    "languageBasis": "sa-harappan",
     "languageConfidence": "reconstructed",
     "odds": "antiquity in South Asia",
     "head": "Natural Cotton Cap [White Cotton]",
@@ -1194,14 +1203,14 @@
     "name": "Naia",
     "gender": "Female",
     "age": 75,
-    "profession": "Fisher",
+    "profession": "Fisherman",
     "religion": "Local Beliefs",
     "language": "Pama-Nyungan (reconstructed)",
     "languageBasis": "oc-australia-pn",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in Oceania",
-    "head": "Rust Ochre Headband [Dyed Bark Fiber]",
-    "torso": "Natural Bark Fiber Cloth [Paperbark Fiber]",
+    "head": null,
+    "torso": "Natural Kangaroo Hide Wrap [Kangaroo Skin]",
     "feet": "Rust Barefoot [None]",
     "portrait": {
       "headwearKind": null,
@@ -1209,7 +1218,7 @@
       "garmentKind": "wrapped_garment",
       "garmentColor": "#927454",
       "backgroundBase": "#6c9d83",
-      "pose": null
+      "pose": "lame"
     },
     "family": [
       "father: Anaru, father of Tane",
@@ -1218,19 +1227,21 @@
       "brother: Hemi"
     ],
     "events": [
-      "1125: Born in a small settlement to a Merchant family",
+      "1125: Born to the band that ranged this country",
+      "1135: Learned the way to a spring that held water through the dry months",
       "1139: Learned to read the weather and the water from a parent",
-      "1149: Inherited valuable tools and a workshop from a childless uncle",
-      "1165: Mother died from drowning despite efforts to save her",
-      "1167: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1173: Inherited responsibility for family fishing grounds"
+      "1143: Was taken from the camp by the elders, kept apart, and came back changed and marked",
+      "1160: Lost a child before it could walk, and buried it under the floor of the shelter",
+      "1161: Was among the party that drove a herd into the narrows, and the band ate well for many days",
+      "1168: An elder died, and with them went the knowledge of country nobody else held",
+      "1172: Was caught by an animal that did not die quickly, and carried the scars afterwards"
     ]
   },
   "arnhem-1200#2": {
     "name": "Tama",
     "gender": "Male",
     "age": 40,
-    "profession": "Fisher",
+    "profession": "Village Fisher",
     "religion": "Local Beliefs",
     "language": "Pama-Nyungan (reconstructed)",
     "languageBasis": "oc-australia-pn",
@@ -1257,19 +1268,21 @@
       "son: Hoani"
     ],
     "events": [
-      "1160: Born in a small settlement to a Commoner family",
-      "1173: Trusted alone with the traps for a season",
-      "1178: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1184: Inherited valuable tools and a workshop from a childless uncle",
-      "1186: Hosted important feast, strengthening clan ties",
-      "1195: The family lost their father when he was killed in tribal warfare"
+      "1160: Born to the band that ranged this country",
+      "1172: Learned to read the weather and the water from a parent",
+      "1175: Sat through the long night when the songs are given to those old enough to hold them",
+      "1177: Left the band of birth to live with another, as is the custom",
+      "1181: A summer of no rain drove the band far from the usual ground, into country nobody knew",
+      "1187: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
+      "1190: Was among the party that drove a herd into the narrows, and the band ate well for many days",
+      "1191: Learned the way to a spring that held water through the dry months"
     ]
   },
   "arnhem-1200#3": {
     "name": "Tane",
     "gender": "Male",
     "age": 20,
-    "profession": "Fisher",
+    "profession": "Village Fisher",
     "religion": "Ancestor Worship",
     "language": "Pama-Nyungan (reconstructed)",
     "languageBasis": "oc-australia-pn",
@@ -1293,17 +1306,21 @@
       "sister: Lehua"
     ],
     "events": [
-      "1180: Born in a small settlement to a Peasant family",
+      "1180: Born to the band that ranged this country",
+      "1188: Walked with the band to the far camp, further than the children had ever been",
+      "1191: Went through the ice, and lost feeling in the fingers of one hand for good",
+      "1193: Brought down a large animal alone for the first time, and carried the meat back to the camp",
       "1195: Learned which ground gave what, and in which month",
-      "1197: A brother's marriage brought valuable new trade connections and opportunities",
-      "1198: Inherited valuable tools and a workshop from a childless uncle"
+      "1197: Left the band of birth to live with another, as is the custom",
+      "1198: Sat through the long night when the songs are given to those old enough to hold them",
+      "1199: Lost a child before it could walk, and buried it under the floor of the shelter"
     ]
   },
   "tahiti-1200#1": {
-    "name": "Vaiana",
+    "name": "Auo",
     "gender": "Female",
     "age": 75,
-    "profession": "Field Hand",
+    "profession": "Breadfruit Cultivator",
     "religion": "Polynesian Traditional Religion",
     "language": "Eastern Polynesian (reconstructed)",
     "languageBasis": "oc-east-polynesia",
@@ -1318,25 +1335,27 @@
       "garmentKind": "gown",
       "garmentColor": "#a8763f",
       "backgroundBase": "#6c919d",
-      "pose": null
+      "pose": "lame"
     },
     "family": [
-      "father: Tehei",
-      "mother: Tarita",
-      "brother: Mahina",
-      "sister: Poehina the Elder"
+      "father: Ori",
+      "mother: Teano",
+      "brother: Hitihiti",
+      "sister: Terero",
+      "spouse: Mahine, father of Tayeto",
+      "daughter: Poe",
+      "son: Hitihiti, father of Vaetua"
     ],
     "events": [
-      "1125: Born in a small settlement to a Merchant family",
+      "1125: Born in a small settlement to a Trade Specialist family",
       "1139: Learned to read weather signs and predict harvest yields from a parent",
-      "1149: Inherited valuable tools and a workshop from a childless uncle",
-      "1165: Mother died from drowning despite efforts to save her",
-      "1167: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1173: Inherited responsibility for family fishing grounds"
+      "1155: A sister married into a well-connected warrior band, improving the family's social standing",
+      "1192: After years of careful selection, successfully bred a hardier variety of coconuts",
+      "1197: Inherited responsibility for family fishing grounds"
     ]
   },
   "tahiti-1200#2": {
-    "name": "Rangi",
+    "name": "Toa",
     "gender": "Male",
     "age": 61,
     "profession": "Field Hand",
@@ -1357,25 +1376,21 @@
       "pose": null
     },
     "family": [
-      "father: Keoni",
-      "mother: Aroha",
-      "sister: Ngaire",
-      "brother: Akamu",
-      "spouse: Mele, mother of Naia",
-      "son: Rangi",
-      "daughter: Kiri"
+      "father: Moana",
+      "mother: Lupe",
+      "sister: Fetuao",
+      "brother: Tama"
     ],
     "events": [
       "1139: Born in a small settlement to a Commoner family",
       "1152: Trusted to tend the family's animals alone for the first time",
       "1159: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1169: Mother died from dysentery, leaving the household in grief",
-      "1170: Inherited valuable tools and a workshop from a childless uncle",
-      "1172: Hosted important feast, strengthening clan ties"
+      "1175: The family lost their father when he died from dysentery",
+      "1196: Hosted important feast, strengthening clan ties"
     ]
   },
   "tahiti-1200#3": {
-    "name": "Teriimana, father of Marama",
+    "name": "Puni, father of Tū",
     "gender": "Male",
     "age": 52,
     "profession": "Field Hand",
@@ -1396,20 +1411,20 @@
       "pose": null
     },
     "family": [
-      "father: Manuarii",
-      "mother: Vaimiti",
-      "sister: Mehiata",
-      "brother: Moea",
-      "spouse: Poehina a Tuahine",
-      "daughter: Terehia the Marked",
-      "son: Heimana"
+      "father: Vehiatua",
+      "mother: Tetupaia",
+      "sister: Teura",
+      "brother: Tū the Canoe-Builder",
+      "spouse: Teano",
+      "daughter: Itia the Quiet",
+      "son: Tupaia"
     ],
     "events": [
-      "1148: Born in a small settlement to a Peasant family",
+      "1148: Born in a small settlement to a Commoner family",
       "1163: Helped with the harvest for the first season and proved capable despite a young age",
-      "1167: Took over the family business after a parent retired from active work",
       "1177: Exchanged gifts with neighboring tribe, preventing conflict",
-      "1181: A brother's marriage brought valuable new trade connections and opportunities"
+      "1181: A brother's marriage brought valuable new trade connections and opportunities",
+      "1184: Father died from starvation, leaving the family to manage affairs alone"
     ]
   },
   "andes-1500#1": {
@@ -1444,11 +1459,10 @@
     ],
     "events": [
       "1425: Born in a small settlement to a Merchant family",
+      "1438: came under the Inca Empire, where no state had claimed the place before",
       "1439: Learned to read weather signs and where the water would still be running",
-      "1465: Father died from typhus despite seeking help",
       "1467: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1472: Inherited valuable tools and a workshop from a childless uncle",
-      "1478: Participated in Inti Raymi sun ceremony"
+      "1492: Learned healing songs from village shaman"
     ]
   },
   "andes-1500#2": {
@@ -1481,9 +1495,9 @@
     "events": [
       "1460: Born in a small settlement to a Commoner family",
       "1473: Spent a first season away with the herd and came back taller",
-      "1480: Inherited valuable tools and a workshop from a childless uncle",
-      "1490: Made offering to mountain apu for good harvest",
-      "1498: A brother's marriage brought valuable new trade connections and opportunities"
+      "1476: Learned healing songs from village shaman",
+      "1483: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1493: The family lost their mother when she was murdered"
     ]
   },
   "andes-1500#3": {
@@ -1517,8 +1531,7 @@
       "1480: Born in a small settlement to a Peasant family",
       "1495: Learned the marks and the ailments of every beast in the family's care",
       "1496: Participated in Inti Raymi sun ceremony",
-      "1497: A brother's marriage brought valuable new trade connections and opportunities",
-      "1499: Took over the family business after a parent retired from active work"
+      "1497: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "southwest-1200#1": {
@@ -1554,12 +1567,11 @@
     "events": [
       "1125: Born in a small settlement to a Commoner family",
       "1139: Learned to read weather signs and predict harvest yields from a parent",
-      "1146: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1151: Inherited valuable tools and a workshop from a childless uncle",
-      "1153: Selected as keeper of sacred bundle",
-      "1154: Divided the land among the children, keeping the best field for old age",
-      "1163: After years of careful selection, successfully bred a hardier variety of squash",
-      "1165: A father's death changed everything for the household"
+      "1143: A brother's marriage brought valuable new trade connections and opportunities",
+      "1148: Received a vision during the coming-of-age fast, and was told what it meant",
+      "1160: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "1192: Became the first in the village to successfully grow beans, earning respect from neighbors",
+      "1193: With the help of extended family, cleared new land for cultivation"
     ]
   },
   "southwest-1200#2": {
@@ -1595,12 +1607,12 @@
     "events": [
       "1139: Born in a small settlement to a Commoner family",
       "1151: Learned to read weather signs and predict harvest yields from a parent",
-      "1159: Received vision during coming-of-age ceremony",
-      "1171: The family lost their father when he died from infected wounds",
-      "1179: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
-      "1182: After years of careful selection, successfully bred a hardier variety of maize",
-      "1183: Inherited valuable tools and a workshop from a childless uncle",
-      "1187: A brother's marriage brought valuable new trade connections and opportunities"
+      "1153: Received a vision during the coming-of-age fast, and was told what it meant",
+      "1158: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1164: A brother's marriage brought valuable new trade connections and opportunities",
+      "1169: The mother's death changed the household",
+      "1195: After years of careful selection, successfully bred a hardier variety of beans",
+      "1196: With the help of extended family, cleared new land for cultivation"
     ]
   },
   "southwest-1200#3": {
@@ -1633,103 +1645,104 @@
     "events": [
       "1148: Born in a small settlement to a Peasant family",
       "1163: Helped with the harvest for the first season and proved capable despite a young age",
-      "1168: Took over the family business after a parent retired from active work",
-      "1178: After years of careful selection, successfully bred a hardier variety of maize",
-      "1179: With the help of extended family, cleared new land for cultivation",
-      "1183: The family lost their mother when she died from dysentery",
-      "1184: Received vision during coming-of-age ceremony",
-      "1189: Discovered new fishing grounds during drought"
+      "1164: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1174: Father was killed in the fighting over what was left despite seeking help",
+      "1177: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "1178: Became the first in the village to successfully grow beans, earning respect from neighbors",
+      "1184: A brother's marriage brought valuable new trade connections and opportunities",
+      "1192: Received a vision during the coming-of-age fast, and was told what it meant"
     ]
   },
   "newengland-1780#1": {
-    "name": "Susanna Taylor",
+    "name": "Deborah Garcia",
     "gender": "Female",
     "age": 75,
-    "profession": "Fisher",
+    "profession": "Factory Worker",
     "religion": "Protestantism",
     "language": "Modern English",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "Ivory Diamond Tiara [Diamonds and Platinum]",
-    "torso": "Charcoal Opera Gown [Velvet and Pearls]",
-    "feet": "Ivory Evening Boots [Kid and Silk]",
+    "head": "Ivory Kerchief [Linen]",
+    "torso": "Charcoal Work Apron [Canvas]",
+    "feet": "Work Boots [Thick Leather]",
     "portrait": {
-      "headwearKind": "coronet",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#e5ddd0",
-      "garmentKind": "gown",
+      "garmentKind": "work_shirt",
       "garmentColor": "#3a3a38",
       "backgroundBase": "#445a5c",
       "pose": null
     },
     "family": [
-      "father: Jacob Taylor",
-      "mother: Martha Davis",
-      "brother: Isaac Taylor",
-      "sister: Bathsheba Taylor"
+      "father: Ezekiel Garcia",
+      "mother: Lydia Martinez",
+      "brother: David Garcia",
+      "sister: Experience Garcia",
+      "spouse: Caleb Hall",
+      "son: Cornelius",
+      "daughter: Deborah Martin"
     ],
     "events": [
-      "1705: Born in a small settlement to a Merchant family",
-      "1719: Learned to read the weather and the water from a parent",
-      "1730: Tragedy struck when a parent died from influenza",
-      "1735: Took over the family business after a parent retired from active work",
-      "1740: A sister married into a well-connected religious congregation, improving the family's social standing",
-      "1741: Staked claim during gold rush",
-      "1760: Elected to town council"
+      "1705: Born in a small settlement to a Laboring Poor family",
+      "1719: Started working alongside father in backbreaking toil",
+      "1734: Inherited valuable tools and a workshop from a childless uncle",
+      "1735: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1752: Joined wagon train heading west for new land",
+      "1768: Elected to town council",
+      "1776: came under the United States, having been born under the British American colonies"
     ]
   },
   "newengland-1780#2": {
-    "name": "Benjamin Harris",
+    "name": "Josiah Johnson",
     "gender": "Male",
     "age": 40,
-    "profession": "Fisher",
+    "profession": "Newsboy",
     "religion": "Protestantism",
     "language": "Modern English",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "White Bowler Hat [Quality Felt]",
-    "torso": "Brown Waistcoat [Silk]",
-    "feet": "Oxford Shoes [Polished Leather]",
+    "head": "White Phrygian Cap [Red Wool]",
+    "torso": "Brown Workshop Bottoms [Coarse Wool]",
+    "feet": "Work Boots [Thick Leather]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "cap",
       "headwearColor": "#e8e4d9",
-      "garmentKind": "doublet",
+      "garmentKind": "tunic",
       "garmentColor": "#6f5237",
       "backgroundBase": "#445a5c",
       "pose": null
     },
     "family": [
-      "father: Hezekiah Harris",
-      "mother: Faith",
-      "brother: Jacob Harris",
-      "sister: Sarah Harris",
-      "spouse: Sarah Lee",
-      "son: Robert Clark",
-      "daughter: Prudence Young"
+      "father: Zechariah Johnson",
+      "mother: Lydia Jones",
+      "sister: Susanna Johnson",
+      "brother: Nathaniel Johnson"
     ],
     "events": [
-      "1740: Born in a small settlement to a Commoner family",
-      "1753: Trusted alone with the traps for a season",
-      "1764: Took over the family business after a parent retired from active work",
-      "1765: Joined wagon train heading west for new land",
-      "1769: Served as juror in important trial",
-      "1779: A sister married into a well-connected religious congregation, improving the family's social standing"
+      "1740: Born in a small settlement to a Middling Sort family",
+      "1753: Began learning the trade of newsboy from an experienced practitioner",
+      "1759: Staked claim during gold rush",
+      "1762: A brother's marriage brought valuable new trade connections and opportunities",
+      "1765: Organized petition for local improvements",
+      "1776: Took over the family business after a parent retired from active work",
+      "1776: came under the United States, having been born under the British American colonies"
     ]
   },
   "newengland-1780#3": {
     "name": "Samuel Rodriguez",
     "gender": "Male",
     "age": 20,
-    "profession": "Fisher",
+    "profession": "Factory Worker",
     "religion": "Roman Catholicism",
     "language": "Modern English",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
     "head": "White Flat Cap [Tweed]",
-    "torso": "Charcoal Factory Smock [Rough Cotton]",
-    "feet": "Wooden Clogs [Oak Wood]",
+    "torso": "Charcoal Labor Breeches [Patched Canvas]",
+    "feet": "Work Boots [Thick Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e8e4d9",
@@ -1744,11 +1757,11 @@
       "brother: Elijah Rodriguez"
     ],
     "events": [
-      "1760: Born in a small settlement to a Peasant family",
-      "1773: Trusted alone with the traps for a season",
-      "1777: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1778: Staked claim during gold rush",
-      "1779: Inherited valuable tools and a workshop from a childless uncle"
+      "1760: Born in a small settlement to a Laboring Poor family",
+      "1774: Experienced hard labor for the first time, joining work crews at dawn",
+      "1776: saw the British American colonies give way to the United States",
+      "1778: A brother's marriage brought valuable new trade connections and opportunities",
+      "1779: Staked claim during gold rush"
     ]
   },
   "ming-china-1500#1": {
@@ -1782,7 +1795,7 @@
       "daughter: Juan Guo"
     ],
     "events": [
-      "1425: Born in a small settlement to a Commoner family",
+      "1425: Born in a small settlement to a Middling Sort family",
       "1439: Learned to read weather signs and predict harvest yields from a parent",
       "1450: The mother's death changed the household",
       "1453: Returned home to care for aging parents",
@@ -1823,7 +1836,7 @@
       "son: Bao"
     ],
     "events": [
-      "1460: Born in a small settlement to a Commoner family",
+      "1460: Born in a small settlement to a Middling Sort family",
       "1472: Learned to read weather signs and predict harvest yields from a parent",
       "1482: A terrible blight spread through the soybeans crop, ruining the harvest and making for a lean winter",
       "1487: Inherited valuable tools and a workshop from a childless uncle",
@@ -1861,7 +1874,7 @@
       "brother: Tao Xu"
     ],
     "events": [
-      "1480: Born in a small settlement to a Peasant family",
+      "1480: Born in a small settlement to a Laboring Poor family",
       "1495: Helped with the harvest for the first season and proved capable despite a young age",
       "1496: Became the first in the village to successfully grow peanuts, earning respect from neighbors",
       "1499: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
@@ -1871,7 +1884,7 @@
     "name": "Kriti Srivastava",
     "gender": "Female",
     "age": 81,
-    "profession": "University Professor",
+    "profession": "Surgeon",
     "religion": "Hinduism",
     "language": "Hindi",
     "languageBasis": "attested-table",
@@ -1886,7 +1899,7 @@
       "garmentKind": "gown",
       "garmentColor": "#e8e4d9",
       "backgroundBase": "#4e4a6e",
-      "pose": null
+      "pose": "lame"
     },
     "family": [
       "father: Ganesh Srivastava",
@@ -1898,12 +1911,12 @@
       "daughter: Sunita"
     ],
     "events": [
-      "1819: Born in a small settlement to an Upper Class family",
-      "1833: Began learning the trade of university professor from an experienced practitioner",
-      "1845: A sister married into a well-connected artisan guild, improving the family's social standing",
-      "1847: The family pooled their resources to purchase a market stall, a significant investment",
-      "1864: Learned sacred texts under a guru's guidance",
-      "1886: Developed new method for statistical analysis"
+      "1819: Born in a small settlement to a Merchant family",
+      "1833: Began learning the trade of surgeon from an experienced practitioner",
+      "1858: came under the British Raj, having been born under East India Company rule",
+      "1864: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1868: Learned sacred texts under a guru's guidance",
+      "1869: Took over the family business after a parent retired from active work"
     ]
   },
   "bengal-1900#2": {
@@ -1936,6 +1949,7 @@
       "1833: Born in a small settlement to a Middle Class family",
       "1845: Began learning the trade of salesman from an experienced practitioner",
       "1856: The family pooled their resources to purchase a storage barn, a significant investment",
+      "1858: came under the British Raj, having been born under East India Company rule",
       "1864: Learned sacred texts under a guru's guidance",
       "1865: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1875: Secured exclusive trading rights for gems from Colombo"
@@ -1975,6 +1989,7 @@
       "1841: Born in a small settlement to a Working Class family",
       "1856: Began learning the trade of postal worker from an experienced practitioner",
       "1857: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1858: saw East India Company rule give way to the British Raj",
       "1881: Inherited valuable tools and a workshop from a childless uncle",
       "1894: Learned sacred texts under a guru's guidance"
     ]
@@ -2009,7 +2024,7 @@
       "son: Brychan Rogers"
     ],
     "events": [
-      "1938: Born in a small settlement to an Upper Class family",
+      "1938: Born in a small settlement to a Merchant family",
       "1952: Began learning the trade of judge from an experienced practitioner",
       "1968: Inherited valuable tools and a workshop from a childless uncle",
       "1973: A brother's marriage brought valuable new trade connections and opportunities"
@@ -2113,16 +2128,19 @@
     "events": [
       "1770: Born in a small settlement to a Merchant family",
       "1784: Learned to read the weather and the water from a parent",
+      "1792: saw the Kingdom of France give way to the French First Republic",
       "1798: The family pooled their resources to purchase a market stall, a significant investment",
       "1801: A sister married into a well-connected noble house, improving the family's social standing",
-      "1812: The family lost their father when he died from scarlet fever"
+      "1804: lived through a third change of rule, to the First French Empire",
+      "1812: The family lost their father when he died in a mining collapse",
+      "1814: lived through a fourth change of rule, to the restored French monarchy"
     ]
   },
   "paris-1850#2": {
     "name": "Pascal Dubois",
     "gender": "Male",
     "age": 44,
-    "profession": "Doctor",
+    "profession": "Lawyer",
     "religion": "Roman Catholicism",
     "language": "Modern French",
     "languageBasis": "attested-table",
@@ -2149,11 +2167,13 @@
       "daughter: Aurélie Thomas"
     ],
     "events": [
-      "1806: Born in a small settlement to a Commoner family",
-      "1818: Began learning the trade of doctor from an experienced practitioner",
+      "1806: Born in a small settlement to a Middle Class family",
+      "1814: grew up under the restored French monarchy, which had taken the place from the First French Empire too early to be remembered",
+      "1818: Began learning the trade of lawyer from an experienced practitioner",
       "1831: A brother's marriage brought valuable new trade connections and opportunities",
       "1835: Took over the family business after a parent retired from active work",
-      "1839: A father's death changed everything for the household"
+      "1839: A father's death changed everything for the household",
+      "1848: lived through a third change of rule, to the French Second Republic"
     ]
   },
   "paris-1850#3": {
@@ -2183,8 +2203,9 @@
       "brother: Philippe Dubois"
     ],
     "events": [
-      "1829: Born in a small settlement to a Peasant family",
+      "1829: Born in a small settlement to a Working Class family",
       "1843: Began learning the trade of railway worker from an experienced practitioner",
+      "1848: saw the restored French monarchy give way to the French Second Republic",
       "1849: Took over the family business after a parent retired from active work"
     ]
   },
@@ -2220,9 +2241,10 @@
     ],
     "events": [
       "1822: Born in a small settlement to a Working Class family",
-      "1836: Sent to serve as squire, learning ways of war from veteran knight",
+      "1836: Was taken on and trained in a fortnight, most of it paperwork",
       "1847: A sister married into a well-connected town council, improving the family's social standing",
       "1849: The family pooled their resources to purchase a market stall, a significant investment",
+      "1878: came under the Balkan kingdoms, having been born under the Ottoman Empire",
       "1885: Took an arrow to the shoulder during a skirmish, which took months to heal properly",
       "1887: Defended Hamburg from raiders"
     ]
@@ -2262,6 +2284,7 @@
       "1867: Began learning the trade of salesman from an experienced practitioner",
       "1871: A sister married into a well-connected noble house, improving the family's social standing",
       "1872: Secured exclusive trading rights for automobiles from Hamburg",
+      "1878: saw the Ottoman Empire give way to the Balkan kingdoms",
       "1882: Mother died from tuberculosis, leaving the household in grief",
       "1890: Took over the family business after a parent retired from active work"
     ]
@@ -2331,7 +2354,7 @@
       "son: Joaquín Vasquez"
     ],
     "events": [
-      "1908: Born in a small settlement to an Upper Class family",
+      "1908: Born in a small settlement to a Merchant family",
       "1922: Began learning the trade of judge from an experienced practitioner",
       "1935: Participated in Inti Raymi sun ceremony",
       "1939: Mother died by suicide despite efforts to save her",
@@ -2439,13 +2462,10 @@
     "family": [
       "father: Niall Fraser",
       "mother: Isla",
-      "brother: Struan Fraser",
-      "spouse: Gordon Cameron",
-      "son: Fergus Robertson",
-      "daughter: Shona Sinclair"
+      "brother: Struan Fraser"
     ],
     "events": [
-      "1928: Born in a small settlement to an Upper Class family",
+      "1928: Born in a small settlement to a Merchant family",
       "1942: Began learning the trade of judge from an experienced practitioner",
       "1959: Exchanged gifts with neighboring tribe, preventing conflict",
       "1959: Mother died in a automobile accident despite efforts to save her",
@@ -2481,7 +2501,7 @@
       "spouse: Diana Thompson"
     ],
     "events": [
-      "1963: Born in a small settlement to a Middle Class family",
+      "1963: Born in a small settlement to a Commoner family",
       "1975: Began learning the trade of television presenter from an experienced practitioner",
       "1991: Inherited valuable tools and a workshop from a childless uncle",
       "1995: Hosted important feast, strengthening clan ties",
@@ -2517,11 +2537,11 @@
       "sister: Catriona MacMillan"
     ],
     "events": [
-      "1989: Born in a small settlement to a Middle Class family",
+      "1989: Born in a small settlement to a Commoner family",
       "2004: Took evening classes in bookkeeping while working days",
-      "2005: A sister married into a well-connected trading partnership, improving the family's social standing",
-      "2007: Inherited valuable tools and a workshop from a childless uncle",
-      "2008: Discovered error in classical text, earning recognition"
+      "2007: A brother's marriage brought valuable new trade connections and opportunities",
+      "2008: Inherited valuable tools and a workshop from a childless uncle",
+      "2009: Exchanged gifts with neighboring tribe, preventing conflict"
     ]
   },
   "kazakh-steppe-636bce#1": {
@@ -2552,11 +2572,11 @@
     ],
     "events": [
       "-711: Born in a small settlement to a Commoner family",
-      "-697: Taken as apprentice by renowned silk weaver, bound for seven years",
-      "-684: Took over the family business after a parent retired from active work",
-      "-681: A sister married into a well-connected merchant consortium, improving the family's social standing",
-      "-678: Arranged favorable marriage for younger sister",
-      "-654: Achieved master status, allowed to take apprentices"
+      "-697: Took up the silk weaver's craft in the way of the household, by being there for it",
+      "-688: A sister married into a well-connected merchant consortium, improving the family's social standing",
+      "-681: Arranged favorable marriage for younger sister",
+      "-681: Tragedy struck when a parent was killed in warfare",
+      "-680: Took over the family business after a parent retired from active work"
     ]
   },
   "kazakh-steppe-636bce#2": {
@@ -2632,7 +2652,7 @@
     "name": "Nüwa",
     "gender": "Female",
     "age": 75,
-    "profession": "Shepherd",
+    "profession": "Farmer",
     "religion": "Ancestor Worship",
     "language": "Amur forager (hypothetical)",
     "languageBasis": "ea-early",
@@ -2642,8 +2662,8 @@
     "torso": "Hide Cloak [Animal Fur]",
     "feet": "Walnut Barefoot [None]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c2a463",
       "garmentKind": "jacket",
       "garmentColor": "#8b7358",
       "backgroundBase": "#3f5a55",
@@ -2659,29 +2679,32 @@
       "daughter: Moxi the Slow-Walking"
     ],
     "events": [
-      "-7075: Born in a small settlement to a Commoner family",
-      "-7061: Learned to read weather signs and where the water would still be running",
-      "-7053: A brother's marriage brought valuable new trade connections and opportunities",
-      "-7031: Arranged favorable marriage for younger sister",
-      "-7028: Took over the family business after a parent retired from active work"
+      "-7075: Born to the band that ranged this country",
+      "-7061: Learned to read weather signs and predict harvest yields from a parent",
+      "-7058: An elder died, and with them went the knowledge of country nobody else held",
+      "-7056: Received the marks that say who this person is and who they may speak to",
+      "-7038: Walked with the band to the far camp, further than the children had ever been",
+      "-7023: Took a partner from a band met at the summer gathering",
+      "-7021: Learned the way to a spring that held water through the dry months",
+      "-7018: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring"
     ]
   },
   "fujian-7000bce#2": {
     "name": "Zhou",
     "gender": "Male",
     "age": 40,
-    "profession": "Herder",
+    "profession": "Farmer",
     "religion": "Local Beliefs",
     "language": "Pre-Hmong-Mien (hypothetical)",
     "languageBasis": "ea-early",
     "languageConfidence": "conjectural",
     "odds": "prehistory in East Asia",
-    "head": null,
+    "head": "Douli [Bamboo Strips]",
     "torso": "Hide Wrap [Animal Hide]",
     "feet": "Natural Barefoot [None]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c0a566",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
       "backgroundBase": "#3f5a55",
@@ -2697,18 +2720,21 @@
       "son: Yu"
     ],
     "events": [
-      "-7040: Born in a small settlement to a Peasant family",
-      "-7027: Spent a first season away with the herd and came back taller",
-      "-7020: Took over the family business after a parent retired from active work",
-      "-7005: Arranged favorable marriage for younger sister",
-      "-7001: A sister married into a well-connected merchant consortium, improving the family's social standing"
+      "-7040: Born to the band that ranged this country",
+      "-7028: Learned to read weather signs and predict harvest yields from a parent",
+      "-7023: Followed a river further than anyone in the band had gone, and came back able to describe it",
+      "-7019: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-7013: A summer of no rain drove the band far from the usual ground, into country nobody knew",
+      "-7012: Speared a beast that had eluded the band all season",
+      "-7007: Buried a kinsman with ochre and with the things they had made",
+      "-7004: Fell badly on the rocks, and the leg never set straight"
     ]
   },
   "fujian-7000bce#3": {
     "name": "Yu",
     "gender": "Male",
     "age": 20,
-    "profession": "Herder",
+    "profession": "Farmer",
     "religion": "Ancestor Worship",
     "language": "Amur forager (hypothetical)",
     "languageBasis": "ea-early",
@@ -2732,9 +2758,14 @@
       "sister: Moxi"
     ],
     "events": [
-      "-7020: Born in a small settlement to a Peasant family",
-      "-7005: Learned the marks and the ailments of every beast in the family's care",
-      "-7001: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "-7020: Born to the band that ranged this country",
+      "-7014: The herds did not come that year, and the camp moved three times looking for them",
+      "-7012: Was caught by an animal that did not die quickly, and carried the scars afterwards",
+      "-7007: Was among the party that drove a herd into the narrows, and the band ate well for many days",
+      "-7005: Helped with the harvest for the first season and proved capable despite a young age",
+      "-7004: Walked with the band to the far camp, further than the children had ever been",
+      "-7003: Left the band of birth to live with another, as is the custom",
+      "-7002: An elder died, and with them went the knowledge of country nobody else held"
     ]
   },
   "korea-1400#1": {
@@ -2768,7 +2799,7 @@
       "son: Joon-ho Lim"
     ],
     "events": [
-      "1325: Born in a small settlement to a Commoner family",
+      "1325: Born in a small settlement to a Middling Sort family",
       "1339: Learned to read weather signs and predict harvest yields from a parent",
       "1357: The family pooled their resources to purchase a new plow, a significant investment",
       "1361: A brother's marriage brought valuable new trade connections and opportunities",
@@ -2808,14 +2839,14 @@
       "son: Jun-seo Song"
     ],
     "events": [
-      "1360: Born in a small settlement to a Commoner family",
+      "1360: Born in a small settlement to a Middling Sort family",
       "1372: Learned to read weather signs and predict harvest yields from a parent",
       "1382: Returned home to care for aging parents",
       "1388: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
       "1390: Experimenting with a new plowing method led to a marked increase in field productivity",
       "1391: The family pooled their resources to purchase a mill share, a significant investment",
-      "1393: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
-      "1395: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1392: came under Joseon, having been born under Goryeo",
+      "1393: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed"
     ]
   },
   "korea-1400#3": {
@@ -2846,7 +2877,8 @@
       "brother: Hyun-woo Ryu"
     ],
     "events": [
-      "1380: Born in a small settlement to a Peasant family",
+      "1380: Born in a small settlement to a Laboring Poor family",
+      "1392: saw Goryeo give way to Joseon",
       "1395: Helped with the harvest for the first season and proved capable despite a young age",
       "1397: Experimenting with a new plowing method led to a marked increase in field productivity",
       "1399: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
@@ -2882,6 +2914,7 @@
       "1175: Born in a small settlement to a Merchant family",
       "1189: Learned to read weather signs and where the water would still be running",
       "1200: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1206: came under the Mongol Empire, where no state had claimed the place before",
       "1207: The family pooled their resources to purchase a market stall, a significant investment",
       "1219: Arranged favorable marriage for younger sister"
     ]
@@ -2890,7 +2923,7 @@
     "name": "Batmunkh",
     "gender": "Male",
     "age": 40,
-    "profession": "Rice Farmer",
+    "profession": "Fisherman",
     "religion": "Tengrism",
     "language": "Middle Mongolian",
     "languageBasis": "attested-table",
@@ -2916,21 +2949,18 @@
       "son: Ulziibayar the River-Side"
     ],
     "events": [
-      "1210: Born in a small settlement to a Commoner family",
-      "1222: Learned to read weather signs and predict harvest yields from a parent",
-      "1232: Returned home to care for aging parents",
-      "1238: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
-      "1240: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "1241: The family pooled their resources to purchase a mill share, a significant investment",
-      "1243: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
-      "1245: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1210: Born in a small settlement to a Middling Sort family",
+      "1222: Learned to read the weather and the water from a parent",
+      "1234: The family pooled their resources to purchase a storage barn, a significant investment",
+      "1238: A sister married into a well-connected Buddhist monastery, improving the family's social standing",
+      "1243: Returned home to care for aging parents"
     ]
   },
   "mongolia-1250#3": {
     "name": "Chinbat Enkhbold",
     "gender": "Male",
     "age": 20,
-    "profession": "Rice Farmer",
+    "profession": "Carpenter",
     "religion": "Tibetan Buddhism",
     "language": "Middle Mongolian",
     "languageBasis": "attested-table",
@@ -2945,7 +2975,7 @@
       "garmentKind": "jacket",
       "garmentColor": "#8e2436",
       "backgroundBase": "#3f5a55",
-      "pose": "coward"
+      "pose": "proud"
     },
     "family": [
       "father: Dolgorsuren Enkhbold",
@@ -2953,12 +2983,10 @@
       "brother: Ulziibayar Enkhbold"
     ],
     "events": [
-      "1230: Born in a small settlement to a Peasant family",
-      "1245: Helped with the harvest for the first season and proved capable despite a young age",
-      "1246: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "1247: Became the first in the village to successfully grow sweet potatoes, earning respect from neighbors",
-      "1248: A sister married into a well-connected Buddhist monastery, improving the family's social standing",
-      "1249: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed"
+      "1230: Born in a small settlement to a Laboring Poor family",
+      "1245: Apprenticed to guild master, learning trade secrets",
+      "1248: A brother's marriage brought valuable new trade connections and opportunities",
+      "1249: Work displayed at important festival"
     ]
   },
   "japan-1870#1": {
@@ -2992,11 +3020,12 @@
       "daughter: Ayumi the JAPANESE"
     ],
     "events": [
-      "1790: Born in a small settlement to a Commoner family",
+      "1790: Born in a small settlement to a Middle Class family",
       "1804: Learned to read weather signs and where the water would still be running",
       "1813: A brother's marriage brought valuable new trade connections and opportunities",
       "1837: Arranged favorable marriage for younger sister",
-      "1839: The family pooled their resources to purchase a storage barn, a significant investment"
+      "1839: The family pooled their resources to purchase a storage barn, a significant investment",
+      "1868: came under the Empire of Japan, having been born under the Tokugawa shogunate"
     ]
   },
   "japan-1870#2": {
@@ -3029,12 +3058,13 @@
       "son: Yasuo Ikeda"
     ],
     "events": [
-      "1826: Born in a small settlement to a Commoner family",
+      "1826: Born in a small settlement to a Middle Class family",
       "1839: Apprenticed to guild master, learning trade secrets",
       "1852: The family pooled their resources to purchase draft animals, a significant investment",
       "1861: A father's death changed everything for the household",
       "1862: A brother's marriage brought valuable new trade connections and opportunities",
       "1866: Performed ancestral rites as eldest son",
+      "1868: came under the Empire of Japan, having been born under the Tokugawa shogunate",
       "1869: Admitted to the Weaver guild after presenting masterwork"
     ]
   },
@@ -3066,9 +3096,10 @@
       "brother: Shin Fujita"
     ],
     "events": [
-      "1849: Born in a small settlement to a Peasant family",
+      "1849: Born in a small settlement to a Working Class family",
       "1864: Learned the marks and the ailments of every beast in the family's care",
       "1868: Inherited valuable tools and a workshop from a childless uncle",
+      "1868: saw the Tokugawa shogunate give way to the Empire of Japan",
       "1869: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
@@ -3076,20 +3107,20 @@
     "name": "Tritogena the White",
     "gender": "Female",
     "age": 75,
-    "profession": "Shepherd",
+    "profession": "Gatherer",
     "religion": "Animism",
     "language": "Vasconic (hypothetical)",
     "languageBasis": "eu-forager",
     "languageConfidence": "conjectural",
     "odds": "prehistory in Europe",
-    "head": null,
-    "torso": "Skin Tunic [Hide and Sinew]",
+    "head": "Fur Hood [Fur]",
+    "torso": "Fur Cloak [Fur]",
     "feet": "Decorated Boots [Dyed Leather]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#6b482f",
+      "headwearKind": "hood",
+      "headwearColor": "#8b7358",
+      "garmentKind": "jacket",
+      "garmentColor": "#8b7358",
       "backgroundBase": "#4a5a6a",
       "pose": null
     },
@@ -3100,7 +3131,7 @@
     ],
     "events": [
       "-8075: Born to the band that ranged this country",
-      "-8061: Learned to read weather signs and where the water would still be running",
+      "-8061: Learned to read the weather and the water from a parent",
       "-8058: An elder died, and with them went the knowledge of country nobody else held",
       "-8056: Received the marks that say who this person is and who they may speak to",
       "-8038: Walked with the band to the far camp, further than the children had ever been",
@@ -3113,18 +3144,18 @@
     "name": "Hrewiklewos",
     "gender": "Male",
     "age": 40,
-    "profession": "Shepherd",
+    "profession": "Fisher",
     "religion": "Animism",
     "language": "Vasconic (hypothetical)",
     "languageBasis": "eu-forager",
     "languageConfidence": "conjectural",
     "odds": "prehistory in Europe",
-    "head": null,
+    "head": "Cream Hide Hood [Wolf Skin]",
     "torso": "Skin Cloak [Bear Fur]",
-    "feet": "Hide Boots [Mammoth Leather]",
+    "feet": "Cream Barefoot [None]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "hood",
+      "headwearColor": "#ddd3ba",
       "garmentKind": "jacket",
       "garmentColor": "#8b7358",
       "backgroundBase": "#4a5a6a",
@@ -3138,33 +3169,33 @@
     ],
     "events": [
       "-8040: Born to the band that ranged this country",
-      "-8027: Spent a first season away with the herd and came back taller",
-      "-8020: An elder died, and with them went the knowledge of country nobody else held",
-      "-8014: Took a partner from a band met at the summer gathering",
-      "-8013: Learned the way to a spring that held water through the dry months",
-      "-8010: Met a band nobody knew at the river, and there was trading and wariness and then singing",
-      "-8008: A birth went wrong in the night, and by morning the camp was quieter by two",
-      "-8006: Fell badly on the rocks, and the leg never set straight"
+      "-8028: Learned to read the weather and the water from a parent",
+      "-8023: Followed a river further than anyone in the band had gone, and came back able to describe it",
+      "-8019: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-8013: A summer of no rain drove the band far from the usual ground, into country nobody knew",
+      "-8012: Speared a beast that had eluded the band all season",
+      "-8007: Buried a kinsman with ochre and with the things they had made",
+      "-8004: Fell badly on the rocks, and the leg never set straight"
     ]
   },
   "europe-8000bce#3": {
     "name": "Monyemos",
     "gender": "Male",
     "age": 20,
-    "profession": "Shepherd",
+    "profession": "Fisher",
     "religion": "Shamanism",
     "language": "Pre-Neolithic European (hypothetical)",
     "languageBasis": "eu-forager",
     "languageConfidence": "conjectural",
     "odds": "prehistory in Europe",
     "head": "Fur Cap [Rabbit Fur]",
-    "torso": "Hide Wrap [Deer Hide]",
-    "feet": "Foot Wraps [Reindeer Hide]",
+    "torso": "Skin Cloak [Bear Fur]",
+    "feet": "Hide Boots [Mammoth Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#8b7358",
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#6b482f",
+      "garmentKind": "jacket",
+      "garmentColor": "#8b7358",
       "backgroundBase": "#4a5a6a",
       "pose": null
     },
@@ -3179,47 +3210,49 @@
       "-8014: The herds did not come that year, and the camp moved three times looking for them",
       "-8012: Was caught by an animal that did not die quickly, and carried the scars afterwards",
       "-8007: Was among the party that drove a herd into the narrows, and the band ate well for many days",
-      "-8005: Learned the marks and the ailments of every beast in the family's care",
+      "-8005: Learned which ground gave what, and in which month",
       "-8004: Walked with the band to the far camp, further than the children had ever been",
       "-8003: Left the band of birth to live with another, as is the custom",
       "-8002: An elder died, and with them went the knowledge of country nobody else held"
     ]
   },
   "greece-430bce#1": {
-    "name": "Xanthippe daughter of Sokrates",
+    "name": "Kassandra daughter of Herakleitos",
     "gender": "Female",
     "age": 75,
-    "profession": "Shepherd",
+    "profession": "Farmer",
     "religion": "Local Beliefs",
     "language": "Ancient Greek",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in Europe",
-    "head": "Dressed Hair With Gold Pins [Gold]",
-    "torso": "Cream Draped Palla [Imported Silk]",
-    "feet": "Soft Leather Slippers [Fine Leather]",
+    "head": "Bronze Linen Veil [Rough Linen]",
+    "torso": "Woad Slave Tunic [Coarse Linen]",
+    "feet": "Simple Sandals [Leather]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "tunic",
-      "garmentColor": "#8d4d43",
+      "garmentColor": "#9b805e",
       "backgroundBase": "#5a876b",
       "pose": null
     },
     "family": [
-      "father: Sokrates",
-      "mother: Myrrine",
-      "brother: Philippos",
-      "sister: Aglaonike daughter of Sokrates",
-      "spouse: Herakleitos",
-      "daughter: Phaedra",
-      "son: Nikandros"
+      "father: Herakleitos son of Herakleitos",
+      "mother: Gorgo",
+      "sister: Penelope daughter of Herakleitos",
+      "brother: Aristophanes son of Herakleitos",
+      "spouse: Leon son of Nikias"
     ],
     "events": [
-      "-505: Born in a small settlement to a Merchant family",
-      "-491: Learned to read weather signs and where the water would still be running",
-      "-463: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "-458: The family pooled their resources to purchase draft animals, a significant investment"
+      "-505: Born in a small settlement to a Laboring Poor family",
+      "-491: Learned to read weather signs and predict harvest yields from a parent",
+      "-488: Became the first in the village to successfully grow maize, earning respect from neighbors",
+      "-482: A sister married into a well-connected noble house, improving the family's social standing",
+      "-480: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "-475: Broke ground on land nobody had ploughed before, and it paid",
+      "-474: Took over the family business after a parent retired from active work",
+      "-472: A terrible blight spread through the rye crop, ruining the harvest and making for a lean winter"
     ]
   },
   "greece-430bce#2": {
@@ -3232,12 +3265,12 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in Europe",
-    "head": "Laurel Wreath [Bronze Leaves]",
-    "torso": "Ivory Garment [Plain Cloth]",
-    "feet": "Military Sandals [Studded Leather]",
+    "head": null,
+    "torso": "Ivory Loincloth [Hemp]",
+    "feet": "Cream Barefoot [None]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#8b7355",
       "garmentKind": "tunic",
       "garmentColor": "#9b805e",
       "backgroundBase": "#5a8771",
@@ -3246,17 +3279,17 @@
     "family": [
       "father: Xenophanes son of Nikandros",
       "mother: Phaedra daughter of Zenodoros",
-      "sister: Theano the Poor"
+      "sister: Arete the Fowler",
+      "spouse: Axiothea the Islander"
     ],
     "events": [
-      "-470: Born in a small settlement to a Commoner family",
-      "-457: Trusted to tend the family's animals alone for the first time",
-      "-454: A sister married into a well-connected noble house, improving the family's social standing",
-      "-452: Inherited valuable tools and a workshop from a childless uncle",
-      "-444: A terrible blight spread through the oats crop, ruining the harvest and making for a lean winter",
-      "-439: Became the first in the village to successfully grow maize, earning respect from neighbors",
-      "-438: Purchased the neighbor's plot after they decided to seek fortune in the city",
-      "-433: Experimenting with a new plowing method led to a marked increase in field productivity"
+      "-470: Born in a small settlement to a Middling Sort family",
+      "-458: Learned to read weather signs and predict harvest yields from a parent",
+      "-446: A terrible blight spread through the wheat crop, ruining the harvest and making for a lean winter",
+      "-443: Inherited valuable tools and a workshop from a childless uncle",
+      "-441: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "-431: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "-430: survived the sickness that emptied a third of the city"
     ]
   },
   "greece-430bce#3": {
@@ -3281,59 +3314,63 @@
       "pose": null
     },
     "family": [
-      "father: Leon the Wise",
-      "mother: Lasthenia the Scarred",
-      "brother: Kleomenes son of Herakleitos",
-      "sister: Kassandra daughter of Leon"
+      "father: Damon",
+      "mother: Timycha daughter of Philippos",
+      "sister: Myrrine the Ale-Wife",
+      "brother: Dionysios"
     ],
     "events": [
-      "-450: Born in a small settlement to a Peasant family",
+      "-450: Born in a small settlement to a Laboring Poor family",
       "-435: Helped with the harvest for the first season and proved capable despite a young age",
-      "-434: A sister married into a well-connected noble house, improving the family's social standing",
-      "-433: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "-434: Broke ground on land nobody had ploughed before, and it paid",
       "-432: Became the first in the village to successfully grow potatoes, earning respect from neighbors",
-      "-431: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
+      "-431: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "-430: survived the sickness that emptied a third of the city"
     ]
   },
   "rome-100#1": {
-    "name": "Aspasia of Thebes",
+    "name": "Axiothea of Sparta",
     "gender": "Female",
     "age": 75,
-    "profession": "Shepherd",
+    "profession": "Farmer",
     "religion": "Roman Polytheism",
     "language": "Latin",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in Europe",
-    "head": "Dressed Hair With Gold Pins [Gold]",
-    "torso": "Woad Draped Palla [Imported Silk]",
-    "feet": "Soft Leather Slippers [Fine Leather]",
+    "head": "Brown Linen Veil [Rough Linen]",
+    "torso": "Purple Slave Tunic [Coarse Linen]",
+    "feet": "Simple Sandals [Leather]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "tunic",
-      "garmentColor": "#8d4d43",
+      "garmentColor": "#9b805e",
       "backgroundBase": "#5a876b",
       "pose": null
     },
     "family": [
-      "father: Lysander of Thebes",
+      "father: Lysander of Sparta",
       "mother: Arete of Corinth",
-      "brother: Kleomenes of Thebes",
-      "sister: Axiothea of Thebes",
+      "brother: Kleomenes of Sparta",
+      "sister: Aspasia of Sparta",
       "spouse: Menandros of Athens",
-      "son: Apollodoros of Miletos",
-      "daughter: Phaedra the Spartan"
+      "son: Nikandros the Macedonian",
+      "daughter: Arete"
     ],
     "events": [
-      "25: Born in a small settlement to a Merchant family",
-      "39: Learned to read weather signs and where the water would still be running",
-      "67: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "72: The family pooled their resources to purchase draft animals, a significant investment"
+      "25: Born in a small settlement to a Laboring Poor family",
+      "39: Learned to read weather signs and predict harvest yields from a parent",
+      "42: Became the first in the village to successfully grow maize, earning respect from neighbors",
+      "48: A sister married into a well-connected noble house, improving the family's social standing",
+      "50: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "55: Broke ground on land nobody had ploughed before, and it paid",
+      "56: Took over the family business after a parent retired from active work",
+      "58: A terrible blight spread through the rye crop, ruining the harvest and making for a lean winter"
     ]
   },
   "rome-100#2": {
-    "name": "Gnaeus Julius",
+    "name": "Dionysios the Spartan",
     "gender": "Male",
     "age": 40,
     "profession": "Farmer",
@@ -3342,35 +3379,35 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in Europe",
-    "head": "Laurel Wreath [Bronze Leaves]",
-    "torso": "Madder Garment [Plain Cloth]",
-    "feet": "Military Sandals [Studded Leather]",
+    "head": null,
+    "torso": "Teal Loincloth [Hemp]",
+    "feet": "Barefoot [None]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#8b7355",
       "garmentKind": "tunic",
       "garmentColor": "#9b805e",
       "backgroundBase": "#5a8771",
       "pose": null
     },
     "family": [
-      "father: Publius Julius",
-      "mother: Horatia Vibius",
-      "sister: Julia Julius",
-      "brother: Spurius Julius",
-      "spouse: Aemilia Caecilius",
-      "daughter: Livia",
-      "son: Kaeso Marcius"
+      "father: Theophrastos the Spartan",
+      "mother: Myrrine",
+      "brother: Kleomenes",
+      "sister: Aglaonike",
+      "spouse: Timycha of Argos",
+      "son: Nikias the Macedonian",
+      "daughter: Aglaonike"
     ],
     "events": [
-      "60: Born in a small settlement to a Commoner family",
-      "73: Trusted to tend the family's animals alone for the first time",
-      "76: A sister married into a well-connected noble house, improving the family's social standing",
-      "78: Inherited valuable tools and a workshop from a childless uncle",
-      "86: A terrible blight spread through the oats crop, ruining the harvest and making for a lean winter",
-      "91: Became the first in the village to successfully grow maize, earning respect from neighbors",
-      "92: Purchased the neighbor's plot after they decided to seek fortune in the city",
-      "97: Experimenting with a new plowing method led to a marked increase in field productivity"
+      "60: Born in a small settlement to a Middling Sort family",
+      "72: Learned to read weather signs and predict harvest yields from a parent",
+      "76: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
+      "87: Inherited valuable tools and a workshop from a childless uncle",
+      "89: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "90: Purchased the neighbor's plot after they decided to seek fortune in the city",
+      "97: A brother's marriage brought valuable new trade connections and opportunities",
+      "97: The mother's death changed the household"
     ]
   },
   "rome-100#3": {
@@ -3395,12 +3432,13 @@
       "pose": "humble"
     },
     "family": [
-      "father: Volusus Licinius",
-      "mother: Cornelia Licinius",
-      "brother: Titus Licinius"
+      "father: Aulus Licinius",
+      "mother: Claudia Fabius",
+      "brother: Servius Licinius",
+      "sister: Valeria Licinius"
     ],
     "events": [
-      "80: Born in a small settlement to a Peasant family",
+      "80: Born in a small settlement to a Laboring Poor family",
       "95: Helped with the harvest for the first season and proved capable despite a young age",
       "96: A sister married into a well-connected noble house, improving the family's social standing",
       "97: Experimenting with a new plowing method led to a marked increase in field productivity",
@@ -3412,38 +3450,41 @@
     "name": "Sian Griffiths",
     "gender": "Female",
     "age": 75,
-    "profession": "Wool Merchant",
+    "profession": "Farmer",
     "religion": "Roman Catholicism",
     "language": "Old English",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in Europe",
-    "head": "White Hennin [Silk and Gems]",
-    "torso": "Noble Houppelande [Cloth of Gold]",
-    "feet": "White Silk Slippers [Embroidered Silk]",
+    "head": null,
+    "torso": "Indigo Work Dress [Hemp]",
+    "feet": "Wooden Shoes [Carved Wood]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#e8e4d9",
-      "garmentKind": "robe",
-      "garmentColor": "#cfa044",
-      "backgroundBase": "#4a5a6a",
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c2a463",
+      "garmentKind": "gown",
+      "garmentColor": "#2e3f5c",
+      "backgroundBase": "#6a4a56",
       "pose": null
     },
     "family": [
-      "father: Ieuan son of Gwylim",
-      "mother: Ffion the Hillman",
-      "sister: Cerys the Widow",
-      "brother: Neirin"
+      "father: Padrig the Younger",
+      "mother: Rhiannon daughter of Llewelyn",
+      "brother: Aneurin son of Neirin",
+      "sister: Tegan the WELSH",
+      "spouse: Neirin son of Rhys",
+      "son: Tudur son of Rhodri",
+      "daughter: Heulwen"
     ],
     "events": [
-      "825: Born in a small settlement to a Merchant family",
-      "839: Began managing family stall at market, handling coins and customers",
-      "843: Took over the family business after a parent retired from active work",
-      "848: A sister married into a well-connected cathedral chapter, improving the family's social standing",
-      "851: First to establish trade relations with Paris",
-      "855: Cornered the market on timber during shortage",
-      "859: A ship carrying valuable wool cargo sank in a terrible storm",
-      "899: Paid annual tribute to local lord"
+      "825: Born in a small settlement to a Laboring Poor family",
+      "839: Learned to read weather signs and predict harvest yields from a parent",
+      "842: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "847: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "853: Summoned to lord's court as witness in land dispute",
+      "860: Inherited valuable tools and a workshop from a childless uncle",
+      "863: A sister married into a well-connected noble house, improving the family's social standing",
+      "876: lost kin the summer the ships came up the river"
     ]
   },
   "ireland-900#2": {
@@ -3456,13 +3497,13 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in Europe",
-    "head": "Cream Felt Hat [Quality Felt]",
-    "torso": "Woad Craftsman Tunic [Fine Linen]",
-    "feet": "Pointed Shoes [Soft Leather]",
+    "head": "Harvest Cap [Rye Straw]",
+    "torso": "Woad Peasant Shirt [Hemp]",
+    "feet": "Cream Foot Wraps [Linen]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
-      "headwearColor": "#ddd3ba",
-      "garmentKind": "tunic",
+      "headwearKind": "cap",
+      "headwearColor": "#c2a463",
+      "garmentKind": "work_shirt",
       "garmentColor": "#3a4f6d",
       "backgroundBase": "#6a4a57",
       "pose": null
@@ -3470,17 +3511,20 @@
     "family": [
       "father: Hugo Olofsson",
       "mother: Lovisa Theosdotter",
-      "sister: Vera the Poor"
+      "sister: Marianne",
+      "spouse: Anna",
+      "son: Emil Danielsson",
+      "daughter: Emma Mattiasdotter"
     ],
     "events": [
-      "860: Born in a small settlement to a Commoner family",
+      "860: Born in a small settlement to a Middling Sort family",
       "872: Learned to read weather signs and predict harvest yields from a parent",
-      "874: Required to provide labor for castle repairs",
-      "880: A brother's marriage brought valuable new trade connections and opportunities",
-      "881: The family pooled their resources to purchase a mill share, a significant investment",
-      "885: Inherited an additional field from a childless uncle, expanding the family holdings",
-      "892: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "897: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
+      "878: Summoned to lord's court as witness in land dispute",
+      "881: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "887: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "890: The mother's death changed the household",
+      "895: Took over the family business after a parent retired from active work",
+      "895: lost kin the summer the ships came up the river"
     ]
   },
   "ireland-900#3": {
@@ -3505,12 +3549,13 @@
       "pose": "proud"
     },
     "family": [
-      "father: Godric son of Aethelred",
-      "mother: Eadgyth daughter of Wulfric",
-      "brother: Beorhtric son of Aethelred"
+      "father: Aelfric son of Godric",
+      "mother: Aethelburh daughter of Aethelstan",
+      "brother: Ceolwulf son of Wulfric",
+      "sister: Aetheldreda daughter of Cenwulf"
     ],
     "events": [
-      "880: Born in a small settlement to a Peasant family",
+      "880: Born in a small settlement to a Laboring Poor family",
       "895: Helped with the harvest for the first season and proved capable despite a young age",
       "896: After years of careful selection, successfully bred a hardier variety of barley",
       "897: Paid annual tribute to local lord",
@@ -3522,7 +3567,7 @@
     "name": "Zohra Zidane",
     "gender": "Female",
     "age": 75,
-    "profession": "Tapestry Weaver",
+    "profession": "Painter",
     "religion": "Roman Catholicism",
     "language": "Old Spanish",
     "languageBasis": "attested-table",
@@ -3549,19 +3594,18 @@
       "son: Amine Zerhouni"
     ],
     "events": [
-      "1405: Born in a small settlement to a Commoner family",
-      "1419: Taken as apprentice by renowned tapestry weaver, bound for seven years",
-      "1427: A brother's marriage brought valuable new trade connections and opportunities",
-      "1446: Admitted to the Tapestry Weaver guild after presenting masterwork",
-      "1448: The family pooled their resources to purchase a market stall, a significant investment",
-      "1450: Paid annual tribute to local lord"
+      "1405: Born in a small settlement to a Middling Sort family",
+      "1419: First public performance, discovering gift for entertaining crowds",
+      "1447: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1452: The family pooled their resources to purchase draft animals, a significant investment",
+      "1458: Required to provide labor for castle repairs"
     ]
   },
   "iberia-1480#2": {
     "name": "António Teixeira",
     "gender": "Male",
     "age": 40,
-    "profession": "Mercenary",
+    "profession": "Sailor",
     "religion": "Roman Catholicism",
     "language": "Old Spanish",
     "languageBasis": "attested-table",
@@ -3585,19 +3629,18 @@
       "brother: Luís Teixeira"
     ],
     "events": [
-      "1440: Born in a small settlement to a Commoner family",
-      "1452: Sent to serve as squire, learning ways of war from veteran knight",
-      "1461: Required to provide labor for castle repairs",
-      "1468: Fought in siege of Vienna, surviving three assaults",
-      "1476: The family pooled their resources to purchase draft animals, a significant investment",
-      "1478: A brother's marriage brought valuable new trade connections and opportunities"
+      "1440: Born in a small settlement to a Middling Sort family",
+      "1452: Began learning the trade of sailor from an experienced practitioner",
+      "1463: Paid annual tribute to local lord",
+      "1465: Inherited valuable tools and a workshop from a childless uncle",
+      "1473: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "iberia-1480#3": {
     "name": "Alejandro son of Joaquín",
     "gender": "Male",
     "age": 20,
-    "profession": "Innkeeper",
+    "profession": "Clockmaker",
     "religion": "Sunni Islam",
     "language": "Old Spanish",
     "languageBasis": "attested-table",
@@ -3612,7 +3655,7 @@
       "garmentKind": "work_shirt",
       "garmentColor": "#8e2436",
       "backgroundBase": "#4a5a6a",
-      "pose": "proud"
+      "pose": null
     },
     "family": [
       "father: Joaquín Rodriguez",
@@ -3620,64 +3663,69 @@
       "brother: Salvador Martinez"
     ],
     "events": [
-      "1460: Born in a small settlement to a Peasant family",
-      "1475: Began learning the trade of innkeeper from an experienced practitioner",
-      "1476: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1477: Required to provide labor for castle repairs"
+      "1460: Born in a small settlement to a Laboring Poor family",
+      "1475: Apprenticed to guild master, learning trade secrets",
+      "1476: Required to provide labor for castle repairs",
+      "1477: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "russia-1600#1": {
     "name": "Lyubov Alekseev",
     "gender": "Female",
     "age": 75,
-    "profession": "Shepherd",
+    "profession": "Painter",
     "religion": "Eastern Orthodoxy",
     "language": "Russian",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Silver Jeweled Hood [Velvet and Gems]",
-    "torso": "Noble Farthingale [Gold Brocade]",
-    "feet": "Silver Court Shoes [Velvet and Pearls]",
+    "head": "Silver Kerchief [Cotton]",
+    "torso": "Indigo Peasant Skirt [Coarse Linen]",
+    "feet": "Wooden Clogs [Carved Wood]",
     "portrait": {
-      "headwearKind": "hood",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#b9bcc2",
-      "garmentKind": "gown",
-      "garmentColor": "#cfa044",
-      "backgroundBase": "#4a5a6a",
-      "pose": "lame"
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#2e3f5c",
+      "backgroundBase": "#6a4a56",
+      "pose": null
     },
     "family": [
-      "father: Artem Pavlov",
-      "mother: Nadezhda daughter of Andrei",
-      "brother: Maxim Fedorov",
-      "sister: Darya Nikitin"
+      "father: Yuri Pavlov",
+      "mother: Irina daughter of Boris",
+      "brother: Evgeni Egorov",
+      "sister: Olga Sidorov",
+      "spouse: Vitali Makarov",
+      "son: Yuri Smirnov",
+      "daughter: Oksana Morozov"
     ],
     "events": [
-      "1525: Born in a small settlement to a Merchant family",
-      "1539: Learned to read weather signs and where the water would still be running",
-      "1567: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1572: The family pooled their resources to purchase draft animals, a significant investment",
-      "1578: Required to provide labor for castle repairs"
+      "1525: Born in a small settlement to a Laboring Poor family",
+      "1539: First public performance, discovering gift for entertaining crowds",
+      "1547: saw Grand Duchy of Moscow give way to Tsardom of Russia",
+      "1555: A sister married into a well-connected noble house, improving the family's social standing",
+      "1565: Mother was killed in religious wars despite efforts to save her",
+      "1571: Took over the family business after a parent retired from active work",
+      "1581: Paid annual tribute to local lord"
     ]
   },
   "russia-1600#2": {
     "name": "Jan Piast",
     "gender": "Male",
     "age": 40,
-    "profession": "Mercenary",
+    "profession": "Sailor",
     "religion": "Eastern Orthodoxy",
     "language": "Russian",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Cream Felt Beret [Quality Felt]",
-    "torso": "Indigo Bourgeois Jerkin [Fine Linen]",
-    "feet": "Court Shoes [Fine Leather]",
+    "head": "Cream Biggins [Rough Wool]",
+    "torso": "Indigo Peasant Shirt [Coarse Linen]",
+    "feet": "Leather Shoes [Cracked Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#ddd3ba",
-      "garmentKind": "doublet",
+      "garmentKind": "work_shirt",
       "garmentColor": "#2e3f5c",
       "backgroundBase": "#6a4a56",
       "pose": null
@@ -3690,19 +3738,18 @@
       "spouse: Marianna Sapieha"
     ],
     "events": [
-      "1560: Born in a small settlement to a Commoner family",
-      "1572: Sent to serve as squire, learning ways of war from veteran knight",
-      "1581: Required to provide labor for castle repairs",
-      "1588: Fought in siege of Vienna, surviving three assaults",
-      "1596: The family pooled their resources to purchase draft animals, a significant investment",
-      "1598: A brother's marriage brought valuable new trade connections and opportunities"
+      "1560: Born in a small settlement to a Middling Sort family",
+      "1572: Began learning the trade of sailor from an experienced practitioner",
+      "1583: Paid annual tribute to local lord",
+      "1585: Inherited valuable tools and a workshop from a childless uncle",
+      "1593: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "russia-1600#3": {
     "name": "Alexei Orlov",
     "gender": "Male",
     "age": 20,
-    "profession": "Innkeeper",
+    "profession": "Clockmaker",
     "religion": "Roman Catholicism",
     "language": "Russian",
     "languageBasis": "attested-table",
@@ -3726,10 +3773,10 @@
       "sister: Nina Orlov"
     ],
     "events": [
-      "1580: Born in a small settlement to a Peasant family",
-      "1595: Began learning the trade of innkeeper from an experienced practitioner",
-      "1596: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1597: Required to provide labor for castle repairs"
+      "1580: Born in a small settlement to a Laboring Poor family",
+      "1595: Apprenticed to guild master, learning trade secrets",
+      "1596: Required to provide labor for castle repairs",
+      "1597: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "lowcountries-1650#1": {
@@ -3764,6 +3811,7 @@
     ],
     "events": [
       "1575: Born in a small settlement to a Merchant family",
+      "1581: grew up under the Dutch Republic, which had taken the place from Habsburg Netherlands too early to be remembered",
       "1589: Learned to read weather signs and where the water would still be running",
       "1606: Required to provide labor for castle repairs",
       "1606: Mother died from starvation during siege despite efforts to save her",
@@ -3775,7 +3823,7 @@
     "name": "Gerrit de Wit",
     "gender": "Male",
     "age": 40,
-    "profession": "Mercenary",
+    "profession": "Sailor",
     "religion": "Protestantism",
     "language": "Dutch",
     "languageBasis": "attested-table",
@@ -3798,19 +3846,18 @@
       "sister: Anna de Wit"
     ],
     "events": [
-      "1610: Born in a small settlement to a Commoner family",
-      "1622: Sent to serve as squire, learning ways of war from veteran knight",
-      "1628: Summoned to lord's court as witness in land dispute",
-      "1633: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1635: Took over the family business after a parent retired from active work",
-      "1638: Fought in siege of Vienna, surviving three assaults"
+      "1610: Born in a small settlement to a Middling Sort family",
+      "1622: Began learning the trade of sailor from an experienced practitioner",
+      "1633: Paid annual tribute to local lord",
+      "1635: Inherited valuable tools and a workshop from a childless uncle",
+      "1643: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "lowcountries-1650#3": {
     "name": "Johannes de Wit",
     "gender": "Male",
     "age": 20,
-    "profession": "Innkeeper",
+    "profession": "Clockmaker",
     "religion": "Roman Catholicism",
     "language": "Dutch",
     "languageBasis": "attested-table",
@@ -3834,10 +3881,10 @@
       "sister: Christina de Wit"
     ],
     "events": [
-      "1630: Born in a small settlement to a Peasant family",
-      "1645: Began learning the trade of innkeeper from an experienced practitioner",
-      "1646: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1647: Required to provide labor for castle repairs"
+      "1630: Born in a small settlement to a Laboring Poor family",
+      "1645: Apprenticed to guild master, learning trade secrets",
+      "1646: Required to provide labor for castle repairs",
+      "1647: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "germany-1930#1": {
@@ -3873,10 +3920,12 @@
     "events": [
       "1849: Born in a small settlement to a Middle Class family",
       "1863: Took evening classes in bookkeeping while working days",
+      "1871: saw the German Confederation give way to the German Empire",
       "1875: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1880: Invited to debate at prestigious the university",
       "1886: Mother was killed in World War II, and the family faced new responsibilities",
-      "1895: The family pooled their resources to purchase machinery, a significant investment"
+      "1895: The family pooled their resources to purchase machinery, a significant investment",
+      "1918: lived through a third change of rule, to the Weimar Republic"
     ]
   },
   "germany-1930#2": {
@@ -3912,7 +3961,8 @@
       "1896: Began learning the trade of dock worker from an experienced practitioner",
       "1910: A brother's marriage brought valuable new trade connections and opportunities",
       "1914: Took over the family business after a parent retired from active work",
-      "1917: A father's death changed everything for the household"
+      "1917: A father's death changed everything for the household",
+      "1918: came under the Weimar Republic, having been born under the German Empire"
     ]
   },
   "germany-1930#3": {
@@ -3942,6 +3992,7 @@
     ],
     "events": [
       "1909: Born in a small settlement to a Working Class family",
+      "1918: grew up under the Weimar Republic, which had taken the place from the German Empire too early to be remembered",
       "1924: Began learning the trade of postal worker from an experienced practitioner",
       "1929: The family pooled their resources to purchase a delivery truck, a significant investment"
     ]
@@ -4204,14 +4255,14 @@
       "son: Gobryas"
     ],
     "events": [
-      "-575: Born in a small settlement to a Commoner family",
+      "-575: Born in a small settlement to a Middling Sort family",
       "-561: Learned to read weather signs and predict harvest yields from a parent",
       "-558: Became the first in the village to successfully grow sugarcane, earning respect from neighbors",
       "-552: A sister married into a well-connected merchant caravan, improving the family's social standing",
       "-550: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "-550: came under the Achaemenid Empire, where no state had claimed the place before",
       "-545: Broke ground on land nobody had ploughed before, and it paid",
-      "-544: Took over the family business after a parent retired from active work",
-      "-542: A terrible blight spread through the olives crop, ruining the harvest and making for a lean winter"
+      "-544: Took over the family business after a parent retired from active work"
     ]
   },
   "persia-500bce#2": {
@@ -4242,7 +4293,7 @@
       "sister: Berenice daughter of Cyrus"
     ],
     "events": [
-      "-540: Born in a small settlement to a Commoner family",
+      "-540: Born in a small settlement to a Middling Sort family",
       "-528: Learned to read weather signs and predict harvest yields from a parent",
       "-524: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
       "-513: Inherited valuable tools and a workshop from a childless uncle",
@@ -4271,7 +4322,7 @@
       "garmentKind": "tunic",
       "garmentColor": "#3a4f6d",
       "backgroundBase": "#725c65",
-      "pose": "brave"
+      "pose": null
     },
     "family": [
       "father: Phraates son of Pacorus",
@@ -4280,7 +4331,7 @@
       "sister: Amestris"
     ],
     "events": [
-      "-520: Born in a small settlement to a Peasant family",
+      "-520: Born in a small settlement to a Laboring Poor family",
       "-505: Helped with the harvest for the first season and proved capable despite a young age",
       "-504: A sister married into a well-connected military elite, improving the family's social standing",
       "-503: Experimenting with a new plowing method led to a marked increase in field productivity",
@@ -4292,35 +4343,38 @@
     "name": "Nintud",
     "gender": "Female",
     "age": 75,
-    "profession": "Shepherd",
+    "profession": "Farmer",
     "religion": "Canaanite Religion",
     "language": "Aramaic",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Royal Crown [Gold and Diamonds]",
-    "torso": "Charcoal Persian Gown [Silk and Pearls]",
-    "feet": "Golden Slippers [Gold and Silk]",
+    "head": "Crimson Linen Veil [White Linen]",
+    "torso": "Charcoal Linen Dress [Plain Linen]",
+    "feet": "Simple Sandals [Leather]",
     "portrait": {
-      "headwearKind": "coronet",
-      "headwearColor": "#cfa044",
+      "headwearKind": "veil",
+      "headwearColor": "#8e2436",
       "garmentKind": "gown",
       "garmentColor": "#3a3a38",
       "backgroundBase": "#5c6272",
       "pose": null
     },
     "family": [
-      "father: Enlil son of Marduk",
-      "mother: Ninlil",
-      "brother: Ziusudra",
-      "sister: Inanna daughter of Ziusudra",
-      "spouse: Nergal"
+      "father: Ninurta",
+      "mother: Bau daughter of Marduk",
+      "brother: Marduk son of Hammurabi",
+      "sister: Ninkarrak"
     ],
     "events": [
-      "-45: Born in a small settlement to a Merchant family",
-      "-31: Learned to read weather signs and where the water would still be running",
-      "-3: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "2: The family pooled their resources to purchase draft animals, a significant investment"
+      "-45: Born in a small settlement to a Laboring Poor family",
+      "-31: Learned to read weather signs and predict harvest yields from a parent",
+      "-28: Became the first in the village to successfully grow sugarcane, earning respect from neighbors",
+      "-22: A sister married into a well-connected merchant caravan, improving the family's social standing",
+      "-20: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "-15: Broke ground on land nobody had ploughed before, and it paid",
+      "-14: Took over the family business after a parent retired from active work",
+      "-12: A terrible blight spread through the olives crop, ruining the harvest and making for a lean winter"
     ]
   },
   "levant-30#2": {
@@ -4333,13 +4387,13 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Yellow Turban [Silk and Linen]",
-    "torso": "Ivory Linen Robe [Fine Linen]",
-    "feet": "Leather Sandals [Quality Leather]",
+    "head": "Yellow Head Cloth [Linen]",
+    "torso": "Ivory Linen Tunic [Coarse Linen]",
+    "feet": "Leather Sandals [Raw Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#c8a63e",
-      "garmentKind": "robe",
+      "garmentKind": "tunic",
       "garmentColor": "#e5ddd0",
       "backgroundBase": "#5c6272",
       "pose": null
@@ -4347,11 +4401,11 @@
     "family": [
       "father: Yosef son of Yitzhak",
       "mother: Esther",
-      "brother: Natan son of Yosef",
-      "sister: Sarah"
+      "brother: Yosef son of Yehoshua",
+      "sister: Huldah daughter of Yosef"
     ],
     "events": [
-      "-10: Born in a small settlement to a Commoner family",
+      "-10: Born in a small settlement to a Middling Sort family",
       "2: Learned to read weather signs and predict harvest yields from a parent",
       "6: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
       "17: Inherited valuable tools and a workshop from a childless uncle",
@@ -4385,11 +4439,11 @@
     "family": [
       "father: Yosef",
       "mother: Keturah daughter of Shimon",
-      "brother: Simeon son of Yosef",
-      "sister: Batya daughter of Yosef"
+      "brother: Eleazar son of Yosef",
+      "sister: Batsheva daughter of Yosef"
     ],
     "events": [
-      "10: Born in a small settlement to a Peasant family",
+      "10: Born in a small settlement to a Laboring Poor family",
       "25: Helped with the harvest for the first season and proved capable despite a young age",
       "26: A sister married into a well-connected military elite, improving the family's social standing",
       "27: Experimenting with a new plowing method led to a marked increase in field productivity",
@@ -4542,7 +4596,7 @@
       "daughter: Dina bint Karim"
     ],
     "events": [
-      "1843: Born in a small settlement to an Upper Class family",
+      "1843: Born in a small settlement to a Merchant family",
       "1857: Began learning the trade of judge from an experienced practitioner",
       "1873: Inherited valuable tools and a workshop from a childless uncle",
       "1878: A brother's marriage brought valuable new trade connections and opportunities"
@@ -4627,9 +4681,9 @@
     "age": 75,
     "profession": "Hunter",
     "religion": "Local Beliefs",
-    "language": "Proto-Afroasiatic",
-    "languageBasis": "attested-table",
-    "languageConfidence": "reconstructed",
+    "language": "Niger-Congo ancestor (hypothetical)",
+    "languageBasis": "ssa-early",
+    "languageConfidence": "inferred",
     "odds": "prehistory in sub-Saharan Africa",
     "head": "Woad Beaded Headdress [Intricate Beadwork]",
     "torso": "Beaded Apron [Leather and Beads]",
@@ -4666,10 +4720,10 @@
     "name": "Sekou",
     "gender": "Male",
     "age": 40,
-    "profession": "Hunter",
+    "profession": "Rock Painter",
     "religion": "Local Beliefs",
-    "language": "Proto-Afroasiatic",
-    "languageBasis": "attested-table",
+    "language": "Proto-Afroasiatic (reconstructed)",
+    "languageBasis": "ssa-early",
     "languageConfidence": "reconstructed",
     "odds": "prehistory in sub-Saharan Africa",
     "head": null,
@@ -4694,24 +4748,24 @@
     ],
     "events": [
       "-9040: Born to the band that ranged this country",
-      "-9027: Trusted alone with the traps for a season",
-      "-9020: An elder died, and with them went the knowledge of country nobody else held",
-      "-9014: Took a partner from a band met at the summer gathering",
-      "-9013: Learned the way to a spring that held water through the dry months",
-      "-9010: Met a band nobody knew at the river, and there was trading and wariness and then singing",
-      "-9008: A birth went wrong in the night, and by morning the camp was quieter by two",
-      "-9006: Fell badly on the rocks, and the leg never set straight"
+      "-9028: First public performance, discovering gift for entertaining crowds",
+      "-9023: Followed a river further than anyone in the band had gone, and came back able to describe it",
+      "-9019: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-9013: A summer of no rain drove the band far from the usual ground, into country nobody knew",
+      "-9012: Speared a beast that had eluded the band all season",
+      "-9007: Buried a kinsman with ochre and with the things they had made",
+      "-9004: Fell badly on the rocks, and the leg never set straight"
     ]
   },
   "sahel-9000bce#3": {
     "name": "Jabari",
     "gender": "Male",
     "age": 20,
-    "profession": "Hunter",
+    "profession": "Spirit Medium",
     "religion": "Local Beliefs",
-    "language": "Proto-Afroasiatic",
-    "languageBasis": "attested-table",
-    "languageConfidence": "reconstructed",
+    "language": "Niger-Congo ancestor (hypothetical)",
+    "languageBasis": "ssa-early",
+    "languageConfidence": "inferred",
     "odds": "prehistory in sub-Saharan Africa",
     "head": null,
     "torso": "Hide Loincloth [Antelope Hide]",
@@ -4730,20 +4784,19 @@
     ],
     "events": [
       "-9020: Born to the band that ranged this country",
-      "-9014: The herds did not come that year, and the camp moved three times looking for them",
-      "-9012: Was caught by an animal that did not die quickly, and carried the scars afterwards",
       "-9007: Was among the party that drove a herd into the narrows, and the band ate well for many days",
-      "-9005: Learned which ground gave what, and in which month",
-      "-9004: Walked with the band to the far camp, further than the children had ever been",
-      "-9003: Left the band of birth to live with another, as is the custom",
-      "-9002: An elder died, and with them went the knowledge of country nobody else held"
+      "-9006: Left the band of birth to live with another, as is the custom",
+      "-9005: Began going out with the older ones, learning the country and how to take from it",
+      "-9004: An elder died, and with them went the knowledge of country nobody else held",
+      "-9003: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-9002: Sat through the long night when the songs are given to those old enough to hold them"
     ]
   },
   "kongo-4300bce#1": {
     "name": "Nana the Elder",
     "gender": "Female",
     "age": 75,
-    "profession": "Shepherd",
+    "profession": "Hunter",
     "religion": "Local Beliefs",
     "language": "Proto-Niger-Congo",
     "languageBasis": "attested-table",
@@ -4770,19 +4823,21 @@
       "son: Imara"
     ],
     "events": [
-      "-4375: Born in a small settlement to a Commoner family",
-      "-4361: Learned to read weather signs and where the water would still be running",
-      "-4344: Mother died from infected wounds despite efforts to save her",
-      "-4343: Led successful cattle raid, gaining wealth and status",
-      "-4340: Took over the family business after a parent retired from active work",
-      "-4317: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "-4375: Born to the band that ranged this country",
+      "-4361: Learned to read the weather and the water from a parent",
+      "-4358: An elder died, and with them went the knowledge of country nobody else held",
+      "-4356: Received the marks that say who this person is and who they may speak to",
+      "-4338: Walked with the band to the far camp, further than the children had ever been",
+      "-4323: Took a partner from a band met at the summer gathering",
+      "-4321: Learned the way to a spring that held water through the dry months",
+      "-4318: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring"
     ]
   },
   "kongo-4300bce#2": {
     "name": "Sekou",
     "gender": "Male",
     "age": 40,
-    "profession": "Shepherd",
+    "profession": "Rock Painter",
     "religion": "Local Beliefs",
     "language": "Proto-Niger-Congo",
     "languageBasis": "attested-table",
@@ -4809,31 +4864,34 @@
       "son: Zuberi"
     ],
     "events": [
-      "-4340: Born in a small settlement to a Peasant family",
-      "-4327: Spent a first season away with the herd and came back taller",
-      "-4323: Led successful cattle raid, gaining wealth and status",
-      "-4308: Took over the family business after a parent retired from active work",
-      "-4302: A brother's marriage brought valuable new trade connections and opportunities"
+      "-4340: Born to the band that ranged this country",
+      "-4328: First public performance, discovering gift for entertaining crowds",
+      "-4323: Followed a river further than anyone in the band had gone, and came back able to describe it",
+      "-4319: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-4313: A summer of no rain drove the band far from the usual ground, into country nobody knew",
+      "-4312: Speared a beast that had eluded the band all season",
+      "-4307: Buried a kinsman with ochre and with the things they had made",
+      "-4304: Fell badly on the rocks, and the leg never set straight"
     ]
   },
   "kongo-4300bce#3": {
     "name": "Jabari",
     "gender": "Male",
     "age": 20,
-    "profession": "Shepherd",
+    "profession": "Spirit Medium",
     "religion": "Local Beliefs",
     "language": "Proto-Niger-Congo",
     "languageBasis": "attested-table",
     "languageConfidence": "reconstructed",
     "odds": "prehistory in sub-Saharan Africa",
     "head": null,
-    "torso": "Hide Loincloth [Antelope Hide]",
+    "torso": "Bronze Bark Cloth [Beaten Bark]",
     "feet": "Madder Barefoot [None]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "bare",
-      "garmentColor": "#6b482f",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#52727b",
       "pose": null
     },
@@ -4842,9 +4900,13 @@
       "mother: Imani"
     ],
     "events": [
-      "-4320: Born in a small settlement to a Peasant family",
-      "-4305: Learned the marks and the ailments of every beast in the family's care",
-      "-4303: Led successful cattle raid, gaining wealth and status"
+      "-4320: Born to the band that ranged this country",
+      "-4307: Was among the party that drove a herd into the narrows, and the band ate well for many days",
+      "-4306: Left the band of birth to live with another, as is the custom",
+      "-4305: Began learning the trade of spirit medium from an experienced practitioner",
+      "-4304: An elder died, and with them went the knowledge of country nobody else held",
+      "-4303: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-4302: Sat through the long night when the songs are given to those old enough to hold them"
     ]
   },
   "ethiopia-1100#1": {
@@ -4889,7 +4951,7 @@
     "name": "Menelik",
     "gender": "Male",
     "age": 40,
-    "profession": "Herder",
+    "profession": "Goat Herder",
     "religion": "Ethiopian Orthodox Christianity",
     "language": "Tigrinya",
     "languageBasis": "attested-table",
@@ -4904,7 +4966,7 @@
       "garmentKind": "robe",
       "garmentColor": "#566370",
       "backgroundBase": "#445e66",
-      "pose": "consumptive"
+      "pose": null
     },
     "family": [
       "father: Haile Tsegaye",
@@ -4915,29 +4977,29 @@
       "daughter: Workitu daughter of Alemayehu"
     ],
     "events": [
-      "1060: Born in a small settlement to a Commoner family",
-      "1073: Spent a first season away with the herd and came back taller",
-      "1078: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1084: The family pooled their resources to purchase a storage barn, a significant investment"
+      "1060: Born in a small settlement to a Middling Sort family",
+      "1072: Learned to read weather signs and where the water would still be running",
+      "1077: A sister married into a well-connected royal lineage, improving the family's social standing",
+      "1078: Took over the family business after a parent retired from active work"
     ]
   },
   "ethiopia-1100#3": {
     "name": "Menelik son of Kebede",
     "gender": "Male",
     "age": 20,
-    "profession": "Herder",
+    "profession": "Millet Farmer",
     "religion": "Sunni Islam",
     "language": "Tigrinya",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in sub-Saharan Africa",
     "head": "Ivory Cotton Cap [Plain Cotton]",
-    "torso": "Woad Village Garment [Rough Wool]",
+    "torso": "Woad Work Blouse [Hemp Cloth]",
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e5ddd0",
-      "garmentKind": "tunic",
+      "garmentKind": "work_shirt",
       "garmentColor": "#3a4f6d",
       "backgroundBase": "#9a677c",
       "pose": null
@@ -4947,65 +5009,66 @@
       "mother: Bethlehem Wolde"
     ],
     "events": [
-      "1080: Born in a small settlement to a Peasant family",
-      "1093: Spent a first season away with the herd and came back taller",
-      "1099: The family pooled their resources to purchase a mill share, a significant investment"
+      "1080: Born in a small settlement to a Laboring Poor family",
+      "1094: Began working family fields, learning the rotation from elders",
+      "1096: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
+      "1098: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1099: Experimenting with a new plowing method led to a marked increase in field productivity"
     ]
   },
   "swahili-1400#1": {
-    "name": "Ebun Akinyemi",
+    "name": "Chioma",
     "gender": "Female",
     "age": 75,
-    "profession": "Shepherd",
+    "profession": "Millet Farmer",
     "religion": "Local Beliefs",
     "language": "Classical Swahili",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in sub-Saharan Africa",
     "head": "Gold Gele [Gold-threaded Fabric]",
-    "torso": "Umber Aso Oke [Hand-woven Silk]",
-    "feet": "Cream Beaded Shoes [Velvet and Beads]",
+    "torso": "Walnut Aso Oke [Hand-woven Silk]",
+    "feet": "Grey Beaded Shoes [Velvet and Beads]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#cfa044",
       "garmentKind": "tunic",
-      "garmentColor": "#4f3c2b",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#6c929d",
       "pose": "lame"
     },
     "family": [
-      "father: Folarin Akinyemi",
-      "mother: Nike daughter of Chinedu",
-      "brother: Abebe Akinyemi",
-      "sister: Imani Akinyemi",
-      "spouse: Gbenga, father of Lanre",
-      "son: Folarin",
-      "daughter: Zola"
+      "father: Adebayo son of Abebe",
+      "mother: Lola daughter of Muyiwa",
+      "brother: Niyi, father of Hakeem"
     ],
     "events": [
-      "1325: Born in a small settlement to a Commoner family",
-      "1339: Learned to read weather signs and where the water would still be running",
-      "1356: Father was killed in warfare despite seeking help",
-      "1372: The family pooled their resources to purchase a new plow, a significant investment",
-      "1383: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1325: Born in a small settlement to a Middling Sort family",
+      "1339: Learned to read weather signs and predict harvest yields from a parent",
+      "1342: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1347: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "1356: Took over the family business after a parent retired from active work",
+      "1359: A brother's marriage brought valuable new trade connections and opportunities",
+      "1369: The family lost their mother when she died from childbirth complications",
+      "1377: Purchased the neighbor's plot after they decided to seek fortune in the city"
     ]
   },
   "swahili-1400#2": {
     "name": "Chukwuemeka Akinwale",
     "gender": "Male",
     "age": 61,
-    "profession": "Herder",
+    "profession": "Goat Herder",
     "religion": "Local Beliefs",
     "language": "Classical Swahili",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in sub-Saharan Africa",
-    "head": "Cream Cotton Cap [Plain Cotton]",
-    "torso": "Walnut Simple Tunic [Rough Cotton]",
+    "head": null,
+    "torso": "Walnut Folk Tunic [Rough Wool]",
     "feet": "Cream Barefoot [None]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#ddd3ba",
+      "headwearKind": null,
+      "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#5b4229",
       "backgroundBase": "#445e66",
@@ -5021,7 +5084,7 @@
       "son: Rotimi Diallo"
     ],
     "events": [
-      "1339: Born in a small settlement to a Commoner family",
+      "1339: Born in a small settlement to a Middling Sort family",
       "1352: Spent a first season away with the herd and came back taller",
       "1359: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1370: The family pooled their resources to purchase a storage barn, a significant investment",
@@ -5032,19 +5095,19 @@
     "name": "Chinedu",
     "gender": "Male",
     "age": 52,
-    "profession": "Herder",
+    "profession": "Millet Farmer",
     "religion": "Ancestor Worship",
     "language": "Classical Swahili",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in sub-Saharan Africa",
     "head": "White Cotton Cap [Plain Cotton]",
-    "torso": "Umber Village Garment [Rough Wool]",
+    "torso": "Umber Work Blouse [Hemp Cloth]",
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e8e4d9",
-      "garmentKind": "tunic",
+      "garmentKind": "work_shirt",
       "garmentColor": "#4f3c2b",
       "backgroundBase": "#52727b",
       "pose": null
@@ -5059,10 +5122,14 @@
       "son: Jide"
     ],
     "events": [
-      "1348: Born in a small settlement to a Peasant family",
-      "1361: Spent a first season away with the herd and came back taller",
-      "1381: Inherited valuable tools and a workshop from a childless uncle",
-      "1395: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1348: Born in a small settlement to a Laboring Poor family",
+      "1362: Began working family fields, learning the rotation from elders",
+      "1366: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1378: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1387: Became the first in the village to successfully grow groundnuts, earning respect from neighbors",
+      "1387: Mother was murdered, and the family faced new responsibilities",
+      "1388: Purchased the neighbor's plot after they decided to seek fortune in the city",
+      "1391: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "southafrica-1890#1": {
@@ -5132,7 +5199,7 @@
       "son: Nhlanhla"
     ],
     "events": [
-      "1845: Born in a small settlement to a Commoner family",
+      "1845: Born in a small settlement to a Middle Class family",
       "1857: Learned to read weather signs and predict harvest yields from a parent",
       "1861: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
       "1874: Inherited valuable tools and a workshop from a childless uncle",
@@ -5170,7 +5237,7 @@
       "brother: Vusi, father of Wiseman"
     ],
     "events": [
-      "1869: Born in a small settlement to a Peasant family",
+      "1869: Born in a small settlement to a Working Class family",
       "1884: Learned the marks and the ailments of every beast in the family's care",
       "1887: A brother's marriage brought valuable new trade connections and opportunities",
       "1888: The family pooled their resources to purchase machinery, a significant investment"
@@ -5207,7 +5274,7 @@
       "son: Vikram son of Ramesh"
     ],
     "events": [
-      "1575: Born in a small settlement to a Commoner family",
+      "1575: Born in a small settlement to a Middling Sort family",
       "1589: Taken as apprentice by renowned textile weaver, bound for seven years",
       "1598: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1600: Bathed in the Ganges during Kumbh Mela",
@@ -5221,7 +5288,7 @@
     "name": "Umesh",
     "gender": "Male",
     "age": 61,
-    "profession": "Village Potter",
+    "profession": "Barber",
     "religion": "Hinduism",
     "language": "Telugu",
     "languageBasis": "attested-table",
@@ -5248,20 +5315,20 @@
       "son: Ravi Singh"
     ],
     "events": [
-      "1589: Born in a small settlement to a Commoner family",
-      "1601: Taken as apprentice by renowned village potter, bound for seven years",
-      "1609: Learned sacred texts under a guru's guidance",
-      "1616: The guild selected a piece of work for a noble commission",
-      "1618: Established textile workshop with English backing",
-      "1640: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1643: Inherited valuable tools and a workshop from a childless uncle"
+      "1589: Born in a small settlement to a Middling Sort family",
+      "1601: Began learning the trade of barber from an experienced practitioner",
+      "1605: Bathed in the Ganges during Kumbh Mela",
+      "1609: Took over the family business after a parent retired from active work",
+      "1616: Secured pepper contract with Arab traders",
+      "1624: A father's death changed everything for the household",
+      "1641: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "deccan-1650#3": {
     "name": "Yogesh",
     "gender": "Male",
     "age": 52,
-    "profession": "Village Potter",
+    "profession": "Textile Weaver",
     "religion": "Buddhism",
     "language": "Tamil",
     "languageBasis": "attested-table",
@@ -5288,9 +5355,9 @@
       "son: Vijay Dwivedi"
     ],
     "events": [
-      "1598: Born in a small settlement to a Peasant family",
+      "1598: Born in a small settlement to a Laboring Poor family",
       "1613: Apprenticed to guild master, learning trade secrets",
-      "1630: Mother died from malaria despite efforts to save her",
+      "1630: Mother died from smallpox despite efforts to save her",
       "1634: Established textile workshop with English backing",
       "1635: The family pooled their resources to purchase a market stall, a significant investment",
       "1642: Elected as guild treasurer, managing communal funds",
@@ -5329,7 +5396,7 @@
       "daughter: Sunita Agrawal"
     ],
     "events": [
-      "1125: Born in a small settlement to a Commoner family",
+      "1125: Born in a small settlement to a Middling Sort family",
       "1139: Learned to read weather signs and predict harvest yields from a parent",
       "1150: A terrible blight spread through the cotton crop, ruining the harvest and making for a lean winter",
       "1157: The family pooled their resources to purchase a new plow, a significant investment",
@@ -5370,7 +5437,7 @@
       "son: Ravi Singh"
     ],
     "events": [
-      "1139: Born in a small settlement to a Commoner family",
+      "1139: Born in a small settlement to a Middling Sort family",
       "1151: Learned to read weather signs and predict harvest yields from a parent",
       "1168: Experimenting with a new plowing method led to a marked increase in field productivity",
       "1174: A sister married into a well-connected Brahmin family, improving the family's social standing",
@@ -5411,7 +5478,7 @@
       "son: Vijay Dwivedi"
     ],
     "events": [
-      "1148: Born in a small settlement to a Peasant family",
+      "1148: Born in a small settlement to a Laboring Poor family",
       "1163: Helped with the harvest for the first season and proved capable despite a young age",
       "1173: Experimenting with a new plowing method led to a marked increase in field productivity",
       "1184: Became the first in the village to successfully grow jute, earning respect from neighbors",
@@ -5425,20 +5492,20 @@
     "name": "*Kanni the Elder",
     "gender": "Female",
     "age": 75,
-    "profession": "Shepherd",
+    "profession": "Brick Maker",
     "religion": "Local Beliefs",
     "language": "Proto-Munda (reconstructed)",
     "languageBasis": "sa-early",
     "languageConfidence": "reconstructed",
     "odds": "prehistory in South Asia",
     "head": "Woad Flower Garland [Fresh Jasmine]",
-    "torso": "Skin Tunic [Hide and Sinew]",
+    "torso": "Fur Cloak [Fur]",
     "feet": "Toe Rings [Silver]",
     "portrait": {
       "headwearKind": "band",
       "headwearColor": "#3a4f6d",
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#6b482f",
+      "garmentKind": "jacket",
+      "garmentColor": "#8b7358",
       "backgroundBase": "#4e4a6e",
       "pose": null
     },
@@ -5453,20 +5520,20 @@
     ],
     "events": [
       "-8075: Born to the band that ranged this country",
-      "-8061: Learned to read weather signs and where the water would still be running",
-      "-8058: An elder died, and with them went the knowledge of country nobody else held",
-      "-8056: Received the marks that say who this person is and who they may speak to",
-      "-8038: Walked with the band to the far camp, further than the children had ever been",
-      "-8023: Took a partner from a band met at the summer gathering",
-      "-8021: Learned the way to a spring that held water through the dry months",
-      "-8018: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring"
+      "-8069: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
+      "-8061: Began going out with the older ones, learning the country and how to take from it",
+      "-8058: Followed a river further than anyone in the band had gone, and came back able to describe it",
+      "-8053: An elder died, and with them went the knowledge of country nobody else held",
+      "-8051: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
+      "-8042: Lost a child before it could walk, and buried it under the floor of the shelter",
+      "-8036: Fell badly on the rocks, and the leg never set straight"
     ]
   },
   "indus-8000bce#2": {
     "name": "*Vel",
     "gender": "Male",
     "age": 61,
-    "profession": "Shepherd",
+    "profession": "Brick Maker",
     "religion": "Local Beliefs",
     "language": "Proto-Munda (reconstructed)",
     "languageBasis": "sa-early",
@@ -5491,20 +5558,20 @@
     ],
     "events": [
       "-8061: Born to the band that ranged this country",
-      "-8048: Spent a first season away with the herd and came back taller",
-      "-8032: An elder died, and with them went the knowledge of country nobody else held",
-      "-8024: Took a partner from a band met at the summer gathering",
-      "-8022: Learned the way to a spring that held water through the dry months",
-      "-8015: Met a band nobody knew at the river, and there was trading and wariness and then singing",
-      "-8014: A birth went wrong in the night, and by morning the camp was quieter by two",
-      "-8009: Fell badly on the rocks, and the leg never set straight"
+      "-8054: Buried a kinsman with ochre and with the things they had made",
+      "-8049: Began going out with the older ones, learning the country and how to take from it",
+      "-8047: Left the band of birth to live with another, as is the custom",
+      "-8043: Fell badly on the rocks, and the leg never set straight",
+      "-8034: The family lost their mother when she died from starvation",
+      "-8026: A birth went wrong in the night, and by morning the camp was quieter by two",
+      "-8017: Found an outcrop of workable stone, and the band returned to it for years afterwards"
     ]
   },
   "indus-8000bce#3": {
     "name": "*Vil",
     "gender": "Male",
     "age": 52,
-    "profession": "Shepherd",
+    "profession": "Seal Carver",
     "religion": "Ancestor Worship",
     "language": "Proto-Dravidian (reconstructed)",
     "languageBasis": "sa-early",
@@ -5531,13 +5598,13 @@
     ],
     "events": [
       "-8052: Born to the band that ranged this country",
-      "-8037: Learned the marks and the ailments of every beast in the family's care",
-      "-8034: Was among the party that drove a herd into the narrows, and the band ate well for many days",
-      "-8033: Was taken from the camp by the elders, kept apart, and came back changed and marked",
-      "-8030: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
-      "-8023: A birth went wrong in the night, and by morning the camp was quieter by two",
-      "-8019: Fell badly on the rocks, and the leg never set straight",
-      "-8016: Left the band of birth to live with another, as is the custom"
+      "-8048: The herds did not come that year, and the camp moved three times looking for them",
+      "-8037: Began going out with the older ones, learning the country and how to take from it",
+      "-8028: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-8019: Learned the way to a spring that held water through the dry months",
+      "-8017: Buried a kinsman with ochre and with the things they had made",
+      "-8010: Speared a beast that had eluded the band all season",
+      "-8008: Lost a child before it could walk, and buried it under the floor of the shelter"
     ]
   },
   "mesoamerica-700#1": {
@@ -5573,11 +5640,10 @@
     "events": [
       "625: Born in a small settlement to a Merchant family",
       "639: Learned to read weather signs and where the water would still be running",
-      "652: Took over the family business after a parent retired from active work",
-      "652: Mother died from ritual sacrifice, leaving the household in grief",
-      "653: A sister married into a well-connected clan elders, improving the family's social standing",
-      "666: Selected as keeper of sacred bundle",
-      "682: Discovered new fishing grounds during drought"
+      "641: A sister married into a well-connected clan elders, improving the family's social standing",
+      "655: Tragedy struck when a parent died from ritual sacrifice",
+      "656: Took over the family business after a parent retired from active work",
+      "696: Was made keeper of a sacred bundle, and of what is owed to it"
     ]
   },
   "mesoamerica-700#2": {
@@ -5610,12 +5676,12 @@
     "events": [
       "639: Born in a small settlement to a Commoner family",
       "651: Learned to read weather signs and predict harvest yields from a parent",
-      "659: Received vision during coming-of-age ceremony",
-      "671: The family lost their father when he died from infected wounds",
-      "679: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
-      "682: After years of careful selection, successfully bred a hardier variety of maize",
-      "683: Inherited valuable tools and a workshop from a childless uncle",
-      "687: A brother's marriage brought valuable new trade connections and opportunities"
+      "653: Received a vision during the coming-of-age fast, and was told what it meant",
+      "658: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "661: A brother's marriage brought valuable new trade connections and opportunities",
+      "665: Took over the family business after a parent retired from active work",
+      "678: With the help of extended family, cleared new land for cultivation",
+      "695: After years of careful selection, successfully bred a hardier variety of beans"
     ]
   },
   "mesoamerica-700#3": {
@@ -5648,12 +5714,12 @@
     "events": [
       "648: Born in a small settlement to a Peasant family",
       "663: Helped with the harvest for the first season and proved capable despite a young age",
-      "668: Took over the family business after a parent retired from active work",
-      "678: After years of careful selection, successfully bred a hardier variety of maize",
-      "679: With the help of extended family, cleared new land for cultivation",
-      "683: The family lost their mother when she died from dysentery",
-      "684: Received vision during coming-of-age ceremony",
-      "689: Discovered new fishing grounds during drought"
+      "664: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "671: A brother's marriage brought valuable new trade connections and opportunities",
+      "678: Became the first in the village to successfully grow beans, earning respect from neighbors",
+      "684: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "685: Took over the family business after a parent retired from active work",
+      "689: A father's death changed everything for the household"
     ]
   },
   "plains-1500#1": {
@@ -5687,9 +5753,7 @@
     "events": [
       "1425: Born in a small settlement to a Merchant family",
       "1439: Learned to read weather signs and where the water would still be running",
-      "1447: A brother's marriage brought valuable new trade connections and opportunities",
-      "1467: Discovered new fishing grounds during drought",
-      "1472: Inherited valuable tools and a workshop from a childless uncle"
+      "1455: A sister married into a well-connected clan elders, improving the family's social standing"
     ]
   },
   "plains-1500#2": {
@@ -5724,10 +5788,8 @@
     "events": [
       "1439: Born in a small settlement to a Commoner family",
       "1452: Trusted to tend the family's animals alone for the first time",
-      "1457: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1475: Inherited valuable tools and a workshop from a childless uncle",
-      "1477: Tragedy struck when a parent died from typhus",
-      "1484: Led successful buffalo hunt, feeding village through winter"
+      "1455: A sister married into a well-connected warrior society, improving the family's social standing",
+      "1472: The family lost their mother when she died from typhus"
     ]
   },
   "plains-1500#3": {
@@ -5763,9 +5825,8 @@
     "events": [
       "1448: Born in a small settlement to a Peasant family",
       "1463: Helped with the harvest for the first season and proved capable despite a young age",
-      "1480: A brother's marriage brought valuable new trade connections and opportunities",
-      "1494: Counted coup on enemy warrior, gaining honor",
-      "1495: Inherited valuable tools and a workshop from a childless uncle"
+      "1476: Mother was murdered by colonists despite efforts to save her",
+      "1485: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "arctic-1400#1": {
@@ -5799,13 +5860,14 @@
       "son: Nayuk"
     ],
     "events": [
-      "1325: Born in a small settlement to a Commoner family",
+      "1325: Born to the band that ranged this country",
       "1339: Learned to read the weather and the water from a parent",
-      "1352: Took over the family business after a parent retired from active work",
-      "1352: Mother died from ritual sacrifice, leaving the household in grief",
-      "1353: A sister married into a well-connected clan elders, improving the family's social standing",
-      "1366: Selected as keeper of sacred bundle",
-      "1382: Discovered new fishing grounds during drought"
+      "1344: Found an outcrop of workable stone, and the band returned to it for years afterwards",
+      "1345: Came back to the band of birth after years away, and was taken in again",
+      "1346: Was among the party that drove a herd into the narrows, and the band ate well for many days",
+      "1349: The herds did not come that year, and the camp moved three times looking for them",
+      "1352: Mother died from starvation, leaving the household in grief",
+      "1360: Was caught by an animal that did not die quickly, and carried the scars afterwards"
     ]
   },
   "arctic-1400#2": {
@@ -5839,13 +5901,14 @@
       "son: Makoons"
     ],
     "events": [
-      "1339: Born in a small settlement to a Commoner family",
+      "1339: Born to the band that ranged this country",
       "1351: Learned to read the weather and the water from a parent",
-      "1369: Discovered new fishing grounds during drought",
-      "1374: A father's death changed everything for the household",
-      "1378: A sister married into a well-connected medicine society, improving the family's social standing",
-      "1383: Received vision during coming-of-age ceremony",
-      "1392: Took over the family business after a parent retired from active work"
+      "1358: Found fishing grounds that held when the usual ones failed",
+      "1360: Received a vision during the coming-of-age fast, and was told what it meant",
+      "1373: Walked with the band to the far camp, further than the children had ever been",
+      "1375: Lost a child before it could walk, and buried it under the floor of the shelter",
+      "1376: Found an outcrop of workable stone, and the band returned to it for years afterwards",
+      "1382: Took a partner from a band met at the summer gathering"
     ]
   },
   "arctic-1400#3": {
@@ -5877,13 +5940,14 @@
       "spouse: Anishinaabekwe the South-Camp"
     ],
     "events": [
-      "1348: Born in a small settlement to a Peasant family",
+      "1348: Born to the band that ranged this country",
       "1363: Learned which ground gave what, and in which month",
-      "1385: Inherited valuable tools and a workshop from a childless uncle",
-      "1385: The family lost their mother when she died from childbirth complications",
-      "1392: A brother's marriage brought valuable new trade connections and opportunities",
-      "1394: Selected as keeper of sacred bundle",
-      "1396: Discovered new fishing grounds during drought"
+      "1366: Went through the ice, and lost feeling in the fingers of one hand for good",
+      "1368: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
+      "1371: Found an outcrop of workable stone, and the band returned to it for years afterwards",
+      "1372: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "1373: An elder died, and with them went the knowledge of country nobody else held",
+      "1374: Speared a beast that had eluded the band all season"
     ]
   },
   "california-1000#1": {
@@ -5917,13 +5981,14 @@
       "daughter: Topanga"
     ],
     "events": [
-      "925: Born in a small settlement to a Commoner family",
+      "925: Born to the band that ranged this country",
       "939: Learned to read the weather and the water from a parent",
-      "952: Took over the family business after a parent retired from active work",
-      "952: Mother died from ritual sacrifice, leaving the household in grief",
-      "953: A sister married into a well-connected clan elders, improving the family's social standing",
-      "966: Selected as keeper of sacred bundle",
-      "982: Discovered new fishing grounds during drought"
+      "944: Found an outcrop of workable stone, and the band returned to it for years afterwards",
+      "945: Came back to the band of birth after years away, and was taken in again",
+      "946: Was among the party that drove a herd into the narrows, and the band ate well for many days",
+      "949: The herds did not come that year, and the camp moved three times looking for them",
+      "952: Mother died from starvation, leaving the household in grief",
+      "960: Was caught by an animal that did not die quickly, and carried the scars afterwards"
     ]
   },
   "california-1000#2": {
@@ -5957,13 +6022,14 @@
       "son: Miwok"
     ],
     "events": [
-      "939: Born in a small settlement to a Commoner family",
+      "939: Born to the band that ranged this country",
       "951: Learned to read the weather and the water from a parent",
-      "969: Discovered new fishing grounds during drought",
-      "974: A father's death changed everything for the household",
-      "978: A sister married into a well-connected medicine society, improving the family's social standing",
-      "983: Received vision during coming-of-age ceremony",
-      "992: Took over the family business after a parent retired from active work"
+      "958: Found fishing grounds that held when the usual ones failed",
+      "960: Received a vision during the coming-of-age fast, and was told what it meant",
+      "973: Walked with the band to the far camp, further than the children had ever been",
+      "975: Lost a child before it could walk, and buried it under the floor of the shelter",
+      "976: Found an outcrop of workable stone, and the band returned to it for years afterwards",
+      "982: Took a partner from a band met at the summer gathering"
     ]
   },
   "california-1000#3": {
@@ -5997,30 +6063,31 @@
       "daughter: Nita"
     ],
     "events": [
-      "948: Born in a small settlement to a Peasant family",
+      "948: Born to the band that ranged this country",
       "963: Learned which ground gave what, and in which month",
-      "985: Inherited valuable tools and a workshop from a childless uncle",
-      "985: The family lost their mother when she died from childbirth complications",
-      "992: A brother's marriage brought valuable new trade connections and opportunities",
-      "994: Selected as keeper of sacred bundle",
-      "996: Discovered new fishing grounds during drought"
+      "966: Went through the ice, and lost feeling in the fingers of one hand for good",
+      "968: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
+      "971: Found an outcrop of workable stone, and the band returned to it for years afterwards",
+      "972: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "973: An elder died, and with them went the knowledge of country nobody else held",
+      "974: Speared a beast that had eluded the band all season"
     ]
   },
   "newengland-1870#1": {
-    "name": "Rose Young",
+    "name": "Alice Weber",
     "gender": "Female",
     "age": 80,
     "profession": "Fisher",
     "religion": "Protestantism",
-    "language": "Italian, Yiddish or Polish (attested)",
+    "language": "English (attested)",
     "languageBasis": "nac-modern",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "Ivory Diamond Tiara [Diamonds and Platinum]",
-    "torso": "Charcoal Opera Gown [Velvet and Pearls]",
-    "feet": "Ivory Evening Boots [Kid and Silk]",
+    "head": "Ivory Work Bonnet [Cotton]",
+    "torso": "Charcoal Mill Dress [Coarse Wool]",
+    "feet": "Ivory Cloth Shoes [Canvas]",
     "portrait": {
-      "headwearKind": "coronet",
+      "headwearKind": "cap",
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
       "garmentColor": "#3a3a38",
@@ -6028,16 +6095,12 @@
       "pose": null
     },
     "family": [
-      "father: Swift Black Bear Young",
-      "mother: Spotted Black Bear",
-      "sister: Deer of the Far Camp Young",
-      "brother: Cried Little Young",
-      "spouse: Lost the Path",
-      "son: Many Crow",
-      "daughter: Snapping Turtle of the Ridge"
+      "father: Crossing at the Burned Ground Weber",
+      "mother: Thin Crow",
+      "sister: Cried Little Weber"
     ],
     "events": [
-      "1790: Born in a small settlement to a Merchant family",
+      "1790: Born in a small settlement to a Working Class family",
       "1804: Learned to read the weather and the water from a parent",
       "1815: Tragedy struck when a parent died from influenza",
       "1821: Took over the family business after a parent retired from active work",
@@ -6047,34 +6110,34 @@
     ]
   },
   "newengland-1870#2": {
-    "name": "Walter O'Brien",
+    "name": "Lloyd Davis",
     "gender": "Male",
     "age": 44,
     "profession": "Weaver",
     "religion": "Protestantism",
-    "language": "Spanish (attested)",
+    "language": "Italian, Yiddish or Polish (attested)",
     "languageBasis": "nac-modern",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "White Bowler Hat [Quality Felt]",
-    "torso": "Brown Waistcoat [Silk]",
-    "feet": "Oxford Shoes [Polished Leather]",
+    "head": "White Flat Cap [Tweed]",
+    "torso": "Brown Worker Trousers [Coarse Wool]",
+    "feet": "Wooden Clogs [Oak Wood]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "cap",
       "headwearColor": "#e8e4d9",
-      "garmentKind": "doublet",
+      "garmentKind": "work_shirt",
       "garmentColor": "#6f5237",
       "backgroundBase": "#445a5c",
       "pose": null
     },
     "family": [
-      "father: Whitefish of the Cave O'Brien",
-      "mother: Swift River Cane",
-      "brother: Drifting Turkey O'Brien",
-      "sister: Many Deer O'Brien"
+      "father: Crow of the River Mouth Davis",
+      "mother: Broken Beaver",
+      "sister: Wet Deer Davis",
+      "brother: Running at the River Mouth Davis"
     ],
     "events": [
-      "1826: Born in a small settlement to a Commoner family",
+      "1826: Born in a small settlement to a Middle Class family",
       "1839: Apprenticed to guild master, learning trade secrets",
       "1844: The family pooled their resources to purchase a delivery truck, a significant investment",
       "1847: Achieved master status, allowed to take apprentices",
@@ -6111,7 +6174,7 @@
       "sister: Irene Smith"
     ],
     "events": [
-      "1849: Born in a small settlement to a Peasant family",
+      "1849: Born in a small settlement to a Working Class family",
       "1862: Trusted alone with the traps for a season",
       "1866: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1868: Staked claim during gold rush",
@@ -6119,95 +6182,94 @@
     ]
   },
   "louisiana-1820#1": {
-    "name": "Hope Hernandez",
+    "name": "Faith Lee",
     "gender": "Female",
     "age": 79,
-    "profession": "Shepherd",
+    "profession": "Seamstress",
     "religion": "Protestantism",
     "language": "Louisiana Creole",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "Ivory Diamond Tiara [Diamonds and Platinum]",
-    "torso": "Black Opera Gown [Velvet and Pearls]",
-    "feet": "Ivory Evening Boots [Kid and Silk]",
+    "head": "White Kerchief [Linen]",
+    "torso": "Slate Work Apron [Canvas]",
+    "feet": "Work Boots [Thick Leather]",
     "portrait": {
-      "headwearKind": "coronet",
-      "headwearColor": "#e5ddd0",
-      "garmentKind": "gown",
-      "garmentColor": "#1f1f22",
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#e8e4d9",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#566370",
       "backgroundBase": "#445a5c",
-      "pose": "lame"
+      "pose": null
     },
     "family": [
-      "father: Samuel Hernandez",
-      "mother: Patience Thomas",
-      "sister: Temperance Hernandez",
-      "brother: David Hernandez"
+      "father: William Lee",
+      "mother: Hope Thompson",
+      "sister: Temperance Lee",
+      "brother: Jeremiah Lee"
     ],
     "events": [
-      "1741: Born in a small settlement to a Commoner family",
-      "1755: Learned to read weather signs and where the water would still be running",
-      "1766: Tragedy struck when a parent died from influenza",
-      "1772: Took over the family business after a parent retired from active work",
-      "1777: A sister married into a well-connected religious congregation, improving the family's social standing",
-      "1778: Staked claim during gold rush",
-      "1798: Elected to town council"
+      "1741: Born in a small settlement to a Laboring Poor family",
+      "1755: Began learning the trade of seamstress from an experienced practitioner",
+      "1760: Inherited valuable tools and a workshop from a childless uncle",
+      "1761: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1764: Staked claim during gold rush",
+      "1770: Served as juror in important trial",
+      "1785: Mother died from camp fever despite efforts to save her",
+      "1803: came under the United States, where no state had claimed the place before"
     ]
   },
   "louisiana-1820#2": {
-    "name": "Cornelius Thompson",
+    "name": "Caleb Harris",
     "gender": "Male",
     "age": 42,
-    "profession": "Herder",
+    "profession": "Police Officer",
     "religion": "Protestantism",
     "language": "Louisiana Creole",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "Ivory Bowler Hat [Quality Felt]",
-    "torso": "Charcoal Waistcoat [Silk]",
-    "feet": "Oxford Shoes [Polished Leather]",
+    "head": "Ivory Phrygian Cap [Red Wool]",
+    "torso": "Charcoal Workshop Bottoms [Coarse Wool]",
+    "feet": "Work Boots [Thick Leather]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "cap",
       "headwearColor": "#e5ddd0",
-      "garmentKind": "doublet",
+      "garmentKind": "tunic",
       "garmentColor": "#3a3a38",
       "backgroundBase": "#445a5c",
-      "pose": "consumptive"
+      "pose": null
     },
     "family": [
-      "father: Edward Thompson",
-      "mother: Silence Lewis",
-      "sister: Sarah Thompson",
-      "brother: Nathaniel Thompson",
-      "spouse: Esther Garcia",
-      "daughter: Mary",
-      "son: Cornelius Lewis"
+      "father: Thomas Harris",
+      "mother: Ruth Smith",
+      "brother: Elijah Harris",
+      "sister: Experience Harris"
     ],
     "events": [
-      "1778: Born in a small settlement to a Commoner family",
-      "1791: Spent a first season away with the herd and came back taller",
-      "1802: Took over the family business after a parent retired from active work",
-      "1804: Joined wagon train heading west for new land",
-      "1808: Served as juror in important trial",
-      "1818: Mother died by suicide, and the family faced new responsibilities",
-      "1819: A sister married into a well-connected religious congregation, improving the family's social standing"
+      "1778: Born in a small settlement to a Middling Sort family",
+      "1791: Began learning the trade of police officer from an experienced practitioner",
+      "1801: The family pooled their resources to purchase machinery, a significant investment",
+      "1803: came under the United States, where no state had claimed the place before",
+      "1808: Joined wagon train heading west for new land",
+      "1809: A brother's marriage brought valuable new trade connections and opportunities",
+      "1816: Served as juror in important trial",
+      "1819: Promoted after holding bridge against superior numbers"
     ]
   },
   "louisiana-1820#3": {
     "name": "Robert White",
     "gender": "Male",
     "age": 21,
-    "profession": "Herder",
+    "profession": "Police Officer",
     "religion": "Roman Catholicism",
     "language": "Louisiana Creole",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
     "head": "Ivory Flat Cap [Tweed]",
-    "torso": "Brown Factory Smock [Rough Cotton]",
-    "feet": "Wooden Clogs [Oak Wood]",
+    "torso": "Brown Labor Breeches [Patched Canvas]",
+    "feet": "Work Boots [Thick Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e5ddd0",
@@ -6223,11 +6285,11 @@
       "brother: Jonathan White"
     ],
     "events": [
-      "1799: Born in a small settlement to a Peasant family",
-      "1812: Spent a first season away with the herd and came back taller",
-      "1816: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1799: Born in a small settlement to a Laboring Poor family",
+      "1813: Began learning the trade of police officer from an experienced practitioner",
+      "1817: A sister married into a well-connected political party, improving the family's social standing",
       "1818: Staked claim during gold rush",
-      "1819: Inherited valuable tools and a workshop from a childless uncle"
+      "1819: The family pooled their resources to purchase a delivery truck, a significant investment"
     ]
   },
   "amazon-1200#1": {
@@ -6263,9 +6325,8 @@
     "events": [
       "1125: Born in a small settlement to a Merchant family",
       "1139: Began learning the trade of coya from an experienced practitioner",
-      "1149: Inherited valuable tools and a workshop from a childless uncle",
       "1150: Participated in Inti Raymi sun ceremony",
-      "1165: Mother died from starvation despite efforts to save her",
+      "1156: Father was murdered despite seeking help",
       "1171: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
@@ -6299,9 +6360,8 @@
     "events": [
       "1160: Born in a small settlement to a Commoner family",
       "1173: Spent a first season away with the herd and came back taller",
-      "1180: Inherited valuable tools and a workshop from a childless uncle",
-      "1182: Learned healing songs from village shaman",
-      "1191: A sister married into a well-connected ayllu, improving the family's social standing"
+      "1176: Learned healing songs from village shaman",
+      "1186: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "amazon-1200#3": {
@@ -6335,15 +6395,14 @@
       "1180: Born in a small settlement to a Peasant family",
       "1195: Learned the marks and the ailments of every beast in the family's care",
       "1196: Participated in Inti Raymi sun ceremony",
-      "1197: A brother's marriage brought valuable new trade connections and opportunities",
-      "1199: Took over the family business after a parent retired from active work"
+      "1197: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "patagonia-1600#1": {
     "name": "Coya Cusipaucar",
     "gender": "Female",
     "age": 75,
-    "profession": "Encomendero",
+    "profession": "Mission Indian",
     "religion": "Roman Catholicism",
     "language": "Chonan (attested from 1600s)",
     "languageBasis": "sam-patagonia",
@@ -6370,19 +6429,21 @@
       "daughter: Phaway Alanoca"
     ],
     "events": [
-      "1525: Born in a small settlement to a Merchant family",
-      "1539: Began learning the trade of encomendero from an experienced practitioner",
-      "1550: Participated in Inti Raymi sun ceremony",
-      "1556: Mother died from starvation despite efforts to save her",
-      "1558: A brother's marriage brought valuable new trade connections and opportunities",
-      "1559: Inherited valuable tools and a workshop from a childless uncle"
+      "1525: Born to the band that ranged this country",
+      "1531: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
+      "1539: Began learning the trade of mission indian from an experienced practitioner",
+      "1542: Followed a river further than anyone in the band had gone, and came back able to describe it",
+      "1547: An elder died, and with them went the knowledge of country nobody else held",
+      "1549: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
+      "1558: Lost a child before it could walk, and buried it under the floor of the shelter",
+      "1559: lived through the sickness that took most of the town in a season"
     ]
   },
   "patagonia-1600#2": {
     "name": "Qhapaq Inca",
     "gender": "Male",
     "age": 40,
-    "profession": "Shepherd",
+    "profession": "Muleteer",
     "religion": "Roman Catholicism",
     "language": "Ancestral Mapudungun (hypothetical)",
     "languageBasis": "sam-patagonia",
@@ -6409,19 +6470,21 @@
       "daughter: Warmi Quiso"
     ],
     "events": [
-      "1560: Born in a small settlement to a Commoner family",
-      "1572: Learned to read weather signs and where the water would still be running",
-      "1579: Took over the family business after a parent retired from active work",
-      "1583: Learned healing songs from village shaman",
-      "1592: Mother died from childbirth complications, leaving the household in grief",
-      "1594: A sister married into a well-connected merchant family, improving the family's social standing"
+      "1560: Born to the band that ranged this country",
+      "1566: Buried a kinsman with ochre and with the things they had made",
+      "1571: Sat through the long night when the songs are given to those old enough to hold them",
+      "1572: Began learning the trade of muleteer from an experienced practitioner",
+      "1574: Fell badly on the rocks, and the leg never set straight",
+      "1580: Came back to the band of birth after years away, and was taken in again",
+      "1581: The herds did not come that year, and the camp moved three times looking for them",
+      "1585: A birth went wrong in the night, and by morning the camp was quieter by two"
     ]
   },
   "patagonia-1600#3": {
     "name": "Illapa Wankár",
     "gender": "Male",
     "age": 20,
-    "profession": "Shepherd",
+    "profession": "Mission Indian",
     "religion": "Local Beliefs",
     "language": "Chonan (attested from 1600s)",
     "languageBasis": "sam-patagonia",
@@ -6429,14 +6492,14 @@
     "odds": "the early modern period in South America",
     "head": "Yellow Felt Hat [Local Felt]",
     "torso": "Cream Wool Pants [Coarse Wool]",
-    "feet": "Barefoot [None]",
+    "feet": "Leather Sandals [Raw Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c8a63e",
       "garmentKind": "work_shirt",
       "garmentColor": "#ddd3ba",
       "backgroundBase": "#3d5a48",
-      "pose": "brave"
+      "pose": null
     },
     "family": [
       "father: Waman Wankár",
@@ -6445,51 +6508,51 @@
       "brother: Wayna Wankár"
     ],
     "events": [
-      "1580: Born in a small settlement to a Peasant family",
-      "1595: Learned the marks and the ailments of every beast in the family's care",
-      "1596: Participated in Inti Raymi sun ceremony",
-      "1597: A brother's marriage brought valuable new trade connections and opportunities",
-      "1599: Inherited valuable tools and a workshop from a childless uncle"
+      "1580: Born to the band that ranged this country",
+      "1588: lived through the sickness that took most of the town in a season",
+      "1593: Was among the party that drove a herd into the narrows, and the band ate well for many days",
+      "1594: Left the band of birth to live with another, as is the custom",
+      "1595: Began learning the trade of mission indian from an experienced practitioner",
+      "1596: An elder died, and with them went the knowledge of country nobody else held",
+      "1597: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "1598: Sat through the long night when the songs are given to those old enough to hold them"
     ]
   },
   "brazil-1880#1": {
-    "name": "Phuyupatamanta Zapana",
+    "name": "Khuya Amaru",
     "gender": "Female",
     "age": 81,
-    "profession": "Landowner",
+    "profession": "Shepherd",
     "religion": "Roman Catholicism",
     "language": "Modern Portuguese",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in South America",
-    "head": "Jeweled Tiara [Diamonds and Gold]",
-    "torso": "Brown Fur Stole [Chinchilla]",
-    "feet": "Ivory Silk Pumps [Beaded Silk]",
+    "head": "Ivory Head Wrap [Cotton]",
+    "torso": "Brown Work Apron [Canvas]",
+    "feet": "Ivory Cloth Shoes [Canvas]",
     "portrait": {
-      "headwearKind": "coronet",
-      "headwearColor": "#cfa044",
-      "garmentKind": "wrapped_garment",
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#e5ddd0",
+      "garmentKind": "work_shirt",
       "garmentColor": "#6f5237",
       "backgroundBase": "#3d5a48",
-      "pose": "lame"
+      "pose": null
     },
     "family": [
-      "father: Inti Zapana",
-      "mother: Yana Choque",
-      "sister: Chakana Zapana",
-      "brother: Atawallpa Zapana",
-      "spouse: Illapa Flores",
-      "daughter: Umiña",
-      "son: Inti Huanca"
+      "father: Kuntur Amaru",
+      "mother: Yaku Choque",
+      "brother: Illapa Amaru",
+      "sister: Chakana Amaru"
     ],
     "events": [
-      "1799: Born in a small settlement to a Merchant family",
-      "1813: Began learning the trade of landowner from an experienced practitioner",
-      "1825: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1826: Mother died from typhoid fever, leaving the household in grief",
-      "1827: Made offering to mountain apu for good harvest",
-      "1837: Took over the family business after a parent retired from active work",
-      "1864: Divided the land among the children, keeping the best field for old age"
+      "1799: Born in a small settlement to a Working Class family",
+      "1813: Learned to read weather signs and where the water would still be running",
+      "1815: saw Portuguese Brazil give way to the Empire of Brazil",
+      "1839: Father died from malaria despite seeking help",
+      "1844: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1849: The family pooled their resources to purchase a storage barn, a significant investment",
+      "1856: Participated in Inti Raymi sun ceremony"
     ]
   },
   "brazil-1880#2": {
@@ -6502,25 +6565,25 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in South America",
-    "head": "Panama Hat [Toquilla Straw]",
-    "torso": "Black Cotton Guayabera [White Cotton]",
-    "feet": "Leather Shoes [Brown Leather]",
+    "head": "White Panama Hat [Toquilla Palm]",
+    "torso": "Black Canvas Pants [Heavy Canvas]",
+    "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#c2a463",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
       "garmentColor": "#1f1f22",
       "backgroundBase": "#3d5a48",
       "pose": null
     },
     "family": [
-      "father: Sumaq Quiso",
-      "mother: Sumaq Amaru",
-      "sister: Illa Quiso",
-      "brother: Kuntur Quiso"
+      "father: Huanca Quiso",
+      "mother: Chaska Waman",
+      "sister: Kusi Quiso",
+      "brother: Kimsa Quiso"
     ],
     "events": [
-      "1835: Born in a small settlement to a Commoner family",
+      "1835: Born in a small settlement to a Middle Class family",
       "1847: Learned to read weather signs and predict harvest yields from a parent",
       "1852: Learned healing songs from village shaman",
       "1853: Arranged a sibling's marriage carefully to strengthen the family's position in society",
@@ -6558,7 +6621,7 @@
       "sister: Yana Wankár"
     ],
     "events": [
-      "1859: Born in a small settlement to a Peasant family",
+      "1859: Born in a small settlement to a Working Class family",
       "1874: Learned the marks and the ailments of every beast in the family's care",
       "1876: Participated in Inti Raymi sun ceremony",
       "1877: A brother's marriage brought valuable new trade connections and opportunities",
@@ -6566,17 +6629,17 @@
     ]
   },
   "newguinea-1500#1": {
-    "name": "Veniana",
+    "name": "Sinaka",
     "gender": "Female",
     "age": 75,
-    "profession": "Field Hand",
+    "profession": "Trading Post Worker",
     "religion": "Melanesian Traditional Religion",
     "language": "Papuan highland language (hypothetical)",
     "languageBasis": "oc-new-guinea",
     "languageConfidence": "inferred",
     "odds": "the early modern period in Oceania",
-    "head": "Pearl Tiara [Local Pearls and Gold]",
-    "torso": "Royal Tapa [Finest Bark Cloth over Silk]",
+    "head": null,
+    "torso": "Fur Cloak [Fur]",
     "feet": "Madder Barefoot [None]",
     "portrait": {
       "headwearKind": null,
@@ -6584,34 +6647,33 @@
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
       "backgroundBase": "#7b8e7b",
-      "pose": null
+      "pose": "lame"
     },
     "family": [
-      "father: Tomasi",
-      "mother: Nanise",
-      "brother: Ratu",
-      "sister: Wainikiti",
-      "spouse: Jone, father of Mosese",
-      "daughter: Bulou",
-      "son: Jone"
+      "father: Daera",
+      "mother: Mea",
+      "brother: Tau",
+      "sister: Bore",
+      "spouse: Rei, father of ToKilang",
+      "daughter: Gaudi",
+      "son: Rei"
     ],
     "events": [
-      "1425: Born in a small settlement to a Merchant family",
-      "1439: Learned to read weather signs and predict harvest yields from a parent",
-      "1467: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1472: Inherited valuable tools and a workshop from a childless uncle",
-      "1480: Exchanged gifts with neighboring tribe, preventing conflict"
+      "1425: Born in a small settlement to a Trade Specialist family",
+      "1439: Began learning the trade of trading post worker from an experienced practitioner",
+      "1455: Exchanged gifts with neighboring tribe, preventing conflict",
+      "1458: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "newguinea-1500#2": {
-    "name": "Filipe",
+    "name": "Roi Mata",
     "gender": "Male",
     "age": 40,
     "profession": "Field Hand",
     "religion": "Melanesian Traditional Religion",
-    "language": "Papuan highland language (hypothetical)",
+    "language": "Trans-New Guinea (reconstructed)",
     "languageBasis": "oc-new-guinea",
-    "languageConfidence": "inferred",
+    "languageConfidence": "reconstructed",
     "odds": "the early modern period in Oceania",
     "head": "Madder Felt Hat [Trade Felt]",
     "torso": "Cream Hybrid Shirt [Cotton and Tapa]",
@@ -6625,31 +6687,30 @@
       "pose": null
     },
     "family": [
-      "father: Petero, father of Waisea",
-      "mother: Talei",
-      "sister: Mere the Reef-Walker",
-      "brother: Bani",
-      "spouse: Raijeli, mother of Salote",
-      "daughter: Eta the Dark",
-      "son: Filipe, father of Jone"
+      "father: Basiana, father of ToVue",
+      "mother: Mea",
+      "sister: Igo the Reef-Walker",
+      "brother: Lohia",
+      "spouse: IaMur, mother of Heni",
+      "daughter: Rutu the Dark",
+      "son: Roi Mata, father of Rei"
     ],
     "events": [
       "1460: Born in a small settlement to a Commoner family",
       "1473: Trusted to tend the family's animals alone for the first time",
       "1478: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1492: Hosted important feast, strengthening clan ties",
-      "1498: Took over the family business after a parent retired from active work"
+      "1499: Exchanged gifts with neighboring tribe, preventing conflict"
     ]
   },
   "newguinea-1500#3": {
-    "name": "Bani",
+    "name": "Lohia",
     "gender": "Male",
     "age": 20,
     "profession": "Field Hand",
     "religion": "Melanesian Traditional Religion",
-    "language": "Trans-New Guinea (reconstructed)",
+    "language": "Papuan highland language (hypothetical)",
     "languageBasis": "oc-new-guinea",
-    "languageConfidence": "reconstructed",
+    "languageConfidence": "inferred",
     "odds": "the early modern period in Oceania",
     "head": "Lauhala Hat [Pandanus Leaves]",
     "torso": "Tapa Wrap [Local Bark Cloth]",
@@ -6663,20 +6724,19 @@
       "pose": null
     },
     "family": [
-      "father: Mosese",
-      "mother: Timoci the Lastborn",
-      "brother: Isikeli",
-      "sister: Vika"
+      "father: ToKilang",
+      "mother: IaMur the Lastborn",
+      "brother: Ramo",
+      "sister: Boio"
     ],
     "events": [
-      "1480: Born in a small settlement to a Peasant family",
+      "1480: Born in a small settlement to a Commoner family",
       "1495: Helped with the harvest for the first season and proved capable despite a young age",
-      "1497: A brother's marriage brought valuable new trade connections and opportunities",
-      "1499: Inherited valuable tools and a workshop from a childless uncle"
+      "1497: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "hawaii-1700#1": {
-    "name": "Mailani",
+    "name": "Kekuiapoiwa",
     "gender": "Female",
     "age": 75,
     "profession": "Field Hand",
@@ -6697,21 +6757,24 @@
       "pose": null
     },
     "family": [
-      "father: Keawe",
-      "mother: Lilia",
-      "brother: Kanoa",
-      "sister: Kailani the Elder"
+      "father: Kaʻiana",
+      "mother: Kekelaokalani",
+      "brother: Kahekili",
+      "sister: Lonomaʻaikanaka",
+      "spouse: Keōua, father of Kaumualiʻi",
+      "daughter: Kalanikauleleiaiwi",
+      "son: Keōua"
     ],
     "events": [
       "1625: Born in a small settlement to a Commoner family",
       "1639: Learned to read weather signs and predict harvest yields from a parent",
+      "1655: Tragedy struck when a parent died from starvation",
       "1667: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1672: Inherited valuable tools and a workshop from a childless uncle",
-      "1680: Exchanged gifts with neighboring tribe, preventing conflict"
+      "1693: Inherited responsibility for family fishing grounds"
     ]
   },
   "hawaii-1700#2": {
-    "name": "Kaipo",
+    "name": "Māʻilikūkahi",
     "gender": "Male",
     "age": 61,
     "profession": "Field Hand",
@@ -6732,21 +6795,21 @@
       "pose": null
     },
     "family": [
-      "father: Kamal, father of Ulani",
-      "mother: Pikake",
-      "sister: Mele o Keoni",
-      "brother: Kamal"
+      "father: Kākuhihewa, father of Peleioholani",
+      "mother: Kekelaokalani",
+      "sister: Piʻikea the Reef-Walker",
+      "brother: Līloa",
+      "spouse: Kapukini the Canoe-Builder"
     ],
     "events": [
       "1639: Born in a small settlement to a Commoner family",
       "1652: Trusted to tend the family's animals alone for the first time",
       "1659: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1670: Inherited valuable tools and a workshop from a childless uncle",
-      "1672: Hosted important feast, strengthening clan ties"
+      "1698: Exchanged gifts with neighboring tribe, preventing conflict"
     ]
   },
   "hawaii-1700#3": {
-    "name": "Koa",
+    "name": "Līloa",
     "gender": "Male",
     "age": 52,
     "profession": "Field Hand",
@@ -6767,28 +6830,26 @@
       "pose": null
     },
     "family": [
-      "father: Kanoa, father of Waika",
-      "mother: Lehua",
-      "brother: Kawika, father of Ikaika",
-      "sister: Ailana",
-      "spouse: Mahina",
-      "daughter: Lilia, mother of Olina",
-      "son: Lopaka"
+      "father: Kahekili, father of Kahahana",
+      "mother: Keakamahana",
+      "brother: ʻUmi, father of Hākau",
+      "sister: Manono",
+      "spouse: Piʻikea",
+      "daughter: Kalola, mother of Lonomaʻaikanaka",
+      "son: Kihapiʻilani"
     ],
     "events": [
-      "1648: Born in a small settlement to a Peasant family",
+      "1648: Born in a small settlement to a Commoner family",
       "1663: Helped with the harvest for the first season and proved capable despite a young age",
-      "1676: Hosted important feast, strengthening clan ties",
-      "1680: Mother died from typhoid fever, and the family faced new responsibilities",
       "1681: A brother's marriage brought valuable new trade connections and opportunities",
-      "1684: Took over the family business after a parent retired from active work"
+      "1685: Exchanged gifts with neighboring tribe, preventing conflict"
     ]
   },
   "australia-20000bce#1": {
     "name": "Marlee the Grey",
     "gender": "Female",
     "age": 75,
-    "profession": "Hunter",
+    "profession": "Gatherer",
     "religion": "Local Beliefs",
     "language": "Unrecorded language of the region",
     "languageBasis": "none",
@@ -6829,18 +6890,18 @@
     "name": "Wagga",
     "gender": "Male",
     "age": 40,
-    "profession": "Hunter",
+    "profession": "Fish Trapper",
     "religion": "Local Beliefs",
     "language": "Unrecorded language of the region",
     "languageBasis": "none",
     "languageConfidence": "conjectural",
     "odds": "prehistory in Oceania",
-    "head": null,
+    "head": "Madder Feather Band [Bird Feathers]",
     "torso": "Cream Fiber Loincloth [Plant Fiber]",
     "feet": "Madder Barefoot [None]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "band",
+      "headwearColor": "#a63a2b",
       "garmentKind": "bare",
       "garmentColor": "#ddd3ba",
       "backgroundBase": "#415a62",
@@ -6854,20 +6915,20 @@
     ],
     "events": [
       "-20040: Born to the band that ranged this country",
-      "-20027: Trusted alone with the traps for a season",
-      "-20020: An elder died, and with them went the knowledge of country nobody else held",
-      "-20014: Took a partner from a band met at the summer gathering",
-      "-20013: Learned the way to a spring that held water through the dry months",
-      "-20010: Met a band nobody knew at the river, and there was trading and wariness and then singing",
-      "-20008: A birth went wrong in the night, and by morning the camp was quieter by two",
-      "-20006: Fell badly on the rocks, and the leg never set straight"
+      "-20028: Learned to read the weather and the water from a parent",
+      "-20023: Followed a river further than anyone in the band had gone, and came back able to describe it",
+      "-20019: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-20013: A summer of no rain drove the band far from the usual ground, into country nobody knew",
+      "-20012: Speared a beast that had eluded the band all season",
+      "-20007: Buried a kinsman with ochre and with the things they had made",
+      "-20004: Fell badly on the rocks, and the leg never set straight"
     ]
   },
   "australia-20000bce#3": {
     "name": "Koori",
     "gender": "Male",
     "age": 20,
-    "profession": "Hunter",
+    "profession": "Fish Trapper",
     "religion": "Ancestor Worship",
     "language": "Unrecorded language of the region",
     "languageBasis": "none",

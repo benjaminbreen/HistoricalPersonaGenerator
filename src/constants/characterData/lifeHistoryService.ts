@@ -24,6 +24,7 @@ import {
 } from '../societyCapabilities';
 import { withIndefiniteArticle } from '../../services/narrativeTextService';
 import { getPolityAt, getPolityChanges, withPolityArticle } from '../../services/polityService';
+import { disruptionDeathCauses, disruptionLifeEvents } from '../../services/disruptionResolution';
 import { random as seededRandom } from '../../utils/seededRandom';
 
 // ============================================================================
@@ -2041,7 +2042,22 @@ export function generateLifeHistory(
   if (character.age > 30 && seededRandom() > 0.5) {
     const parentDeathAge = 25 + Math.floor(seededRandom() * 20);
     if (parentDeathAge < character.age) {
-      const allCausesOfDeath = HISTORICAL_CAUSES_OF_DEATH[era][culturalZone] || ['illness'];
+      const parentDeathYear_ = birthYear + parentDeathAge;
+      // A father who "was killed in warfare" in a year and place with no war in
+      // it is the failure this fixes. The era table describes how people
+      // ordinarily died; these are the ways this particular place and year
+      // added, and they are weighted heavily enough to dominate where the
+      // episode was severe. Duplication is the weighting mechanism because the
+      // draw below is uniform over the list.
+      const localCauses = disruptionDeathCauses(
+        culturalZone,
+        parentDeathYear_,
+        capabilityPlace,
+      );
+      const eraCauses = HISTORICAL_CAUSES_OF_DEATH[era][culturalZone] || ['illness'];
+      const allCausesOfDeath = localCauses.length > 0
+        ? [...eraCauses, ...Array.from({ length: Math.ceil(eraCauses.length / 2) }, () => localCauses).flat()]
+        : eraCauses;
 
       // Determine which parent dies, prioritizing one that hasn't already died
       const isMotherDeath = seededRandom() < 0.5;
@@ -2136,11 +2152,55 @@ export function generateLifeHistory(
   }
 
   events.push(...regimeChangeEvents(capabilityPlace, culturalZone, birthYear, currentYear));
+  events.push(...catastropheEvents(capabilityPlace, culturalZone, birthYear, currentYear));
 
   // Sort events chronologically
   events.sort((a, b) => a.year - b.year);
 
   return events;
+}
+
+/**
+ * The wars, famines and occupations that actually reached this life.
+ *
+ * The sibling of `regimeChangeEvents`, and dated the same way and for the same
+ * reason: these sentences can only be written in a year and a place where the
+ * thing was really happening, so they cannot leak across eras the way the
+ * template pools can. See `auditNarrative`.
+ *
+ * The events come back as candidates already filtered by age and rolled against
+ * the episode's severity — so two personas who lived through the same siege get
+ * different biographies out of it, and some get none, which is what living
+ * through a siege is actually like.
+ */
+function catastropheEvents(
+  place: string,
+  culturalZone: CulturalZone,
+  birthYear: number,
+  currentYear: number,
+): EnhancedLifeEvent[] {
+  const IMPORTANCE: Record<string, EventImportance> = {
+    tragedy: EventImportance.TRAGEDY,
+    injury: EventImportance.INJURY,
+    milestone: EventImportance.MILESTONE,
+    opportunity: EventImportance.OPPORTUNITY,
+    mundane: EventImportance.MUNDANE,
+  };
+
+  return disruptionLifeEvents({
+    zone: culturalZone,
+    birthYear,
+    currentYear,
+    region: place,
+    random: seededRandom,
+  }).map(event => ({
+    year: event.year,
+    kind: event.kind as EventKind,
+    importance: IMPORTANCE[event.importance] ?? EventImportance.TRAGEDY,
+    title: event.title,
+    text: event.text,
+    culturalContext: event.windowLabel,
+  }));
 }
 
 /** "second", "third" — only as far as a single lifetime plausibly reaches. */

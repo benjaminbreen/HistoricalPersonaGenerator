@@ -1,6 +1,7 @@
 import type { HistoricalContext } from '../types/historicalContext';
 import type { CulturalZone } from '../types/characterData';
 import { hasCapability } from '../constants/societyCapabilities';
+import { disruptionProfessionMultiplier } from './disruptionResolution';
 
 interface ProfessionAvailabilityRule {
   pattern: RegExp;
@@ -264,6 +265,32 @@ const NEEDS_AGRICULTURE =
  */
 const FORAGING_LIVELIHOOD = /\b(?:forager|seed gatherer|acorn processor|root digger|wild plant gatherer)\b/i;
 
+/**
+ * Professions tied to one place inside their cultural zone.
+ *
+ * The profession tables are keyed by zone, era and class, and a zone is a
+ * continent. Several entries carry a `keywords` string naming the place they
+ * belong to — 'Tango Musician' says "music argentina buenos aires" — but
+ * nothing reads `keywords`: grep the tree and it has no consumers at all. It is
+ * documentation that looks like a constraint. So a tango musician was reachable
+ * anywhere in South America, and one turned up in Maracaibo, about four
+ * thousand kilometres from the Río de la Plata.
+ *
+ * Each entry pairs a profession pattern with the places it is plausible in,
+ * matched against location and region. Only genuinely place-bound work belongs
+ * here: a baker or a clerk existed everywhere and must not be listed.
+ */
+const PLACE_BOUND_PROFESSIONS: Array<{ profession: RegExp; places: RegExp }> = [
+  // Tango is a Río de la Plata form — Buenos Aires and Montevideo.
+  { profession: /\btango\b/i, places: /pampas|plata|paran|buenos aires|montevideo|uruguay|santa fe|c[oó]rdoba/i },
+  // Andean highland pastoralism. Llamas and alpacas are not lowland animals.
+  { profession: /\b(?:llama|alpaca)\b/i, places: /andes|altiplano|titicaca|yungas|cusco|quito|puna|highland/i },
+  // The rubber boom was an Amazon and Acre phenomenon.
+  { profession: /\brubber tapper\b/i, places: /amazon|acre|manaus|negro|tapaj|xingu|varzea|purus|madeira/i },
+  // Gaucho and vaquero work belongs to the grass, not the rainforest.
+  { profession: /\b(?:gaucho|vaquero)\b/i, places: /pampas|plata|chaco|llanos|patagonia|banda oriental|uruguay/i },
+];
+
 export function isProfessionHistoricallyAvailable(
   profession: string,
   context: HistoricalContext,
@@ -281,6 +308,13 @@ export function isProfessionHistoricallyAvailable(
   });
 
   if (NEEDS_AGRICULTURE.test(profession) && !farms) return false;
+
+  // Work that belongs to a particular corner of its zone. `farmingPlace` is
+  // already the location and region lowercased, which is exactly what these
+  // need.
+  for (const { profession: pattern, places } of PLACE_BOUND_PROFESSIONS) {
+    if (pattern.test(profession) && !places.test(farmingPlace)) return false;
+  }
 
   // And the reverse. Foraging for a living is a livelihood where there is no
   // farming and a supplement where there is: people in farming societies still
@@ -424,6 +458,12 @@ export function getProfessionSelectionWeight(
       weight *= 1.4;
     }
   }
+
+  // What was actually happening here. Everything above this line describes an
+  // ordinary year; this is the correction for the years that were not ordinary.
+  // It is applied last and bounded on both sides, so a war zone shifts the
+  // distribution rather than replacing it — see `disruptionResolution`.
+  weight *= disruptionProfessionMultiplier(profession, context);
 
   return weight;
 }

@@ -107,9 +107,16 @@ const biographies: string[] = quiet(() =>
   const zoneViolations = personas.filter(p => {
     const ld = p.languageData;
     if (!ld || p.languageAttribution?.basis !== 'attested-table') return false;
-    const zone = p.historicalContext.culturalZone;
+    // Either zone is a correct answer for a displaced persona, and which one
+    // depends on where they were born. Someone carried from Upper Guinea to
+    // Charleston at seventeen speaks Mandinka in South Carolina, and a check
+    // that reads the location zone alone calls that a fault — it is the whole
+    // point of the ancestry axis. Their locally born grandchildren are held to
+    // the location zone as before.
+    const zones = [p.historicalContext.culturalZone];
+    if (p.character.ancestry?.generation === 0) zones.push(p.character.ancestry.originZone);
     return Array.isArray(ld.culturalZones) && ld.culturalZones.length > 0
-      && !ld.culturalZones.includes(zone);
+      && !ld.culturalZones.some(z => zones.includes(z));
   }).length;
   const periodViolations = personas.filter(p => {
     const ld = p.languageData;

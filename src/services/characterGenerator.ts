@@ -12,6 +12,8 @@ import { mapLocationToCulture } from '../utils/mapUtils';
 import { hexToColorName } from '../utils/colorUtils';
 import { COLOR_WORDS, hasIntrinsicColor, nameForHex } from '../constants/gameData/colorNames';
 import { CharacterSpecification } from './worldWeaverService';
+import { ancestryNameKeys } from './populationStrataService';
+import type { Ancestry } from '../types/socialCondition';
 import DiseaseService from './diseaseService';
 import { AttributeBadgeService } from './attributeBadgeService';
 import { findAttributeById } from '../constants/attributeDefinitions';
@@ -600,7 +602,18 @@ function generateProceduralFamily(
      */
     fathersGivenName?: string,
     /** When the character carries a hereditary name, the family carries it too. */
-    inheritedFamilyName?: string
+    inheritedFamilyName?: string,
+    /**
+     * The trades worked by the persona's own household, where a standing
+     * condition settles what they can be.
+     *
+     * Without this the parents were drawn from the era table, which gave an
+     * enslaved woman in the Virginia tidewater a father who was a miner and a
+     * mother who sold at market — two occupations that describe free people
+     * with somewhere to go. A condition of this kind is inherited, so the
+     * household is inside it too.
+     */
+    householdTrades?: Array<{ role: string; gender?: 'Male' | 'Female' }>
 ): void {
     const age = character.age;
 
@@ -665,10 +678,20 @@ function generateProceduralFamily(
     }
 
     // Generate father's profession
-    const fatherProfession = generateParentProfession('male', culturalZone, era, noise, currentYear, region);
+    // The trades carry their own gender restrictions and they have to be
+    // honoured here too, or the household comes out with a father who is a
+    // washerwoman and a mother who is a cooper.
+    const pickHouseholdTrade = (who: 'Male' | 'Female'): string | undefined => {
+        if (!householdTrades || householdTrades.length === 0) return undefined;
+        const open = householdTrades.filter(t => !t.gender || t.gender === who);
+        const pool = open.length > 0 ? open : householdTrades;
+        return pool[Math.floor(noise.random() * pool.length)].role;
+    };
+    const fatherProfession = pickHouseholdTrade('Male')
+        ?? generateParentProfession('male', culturalZone, era, noise, currentYear, region);
 
     // Generate mother's profession (historically accurate)
-    const motherProfession = generateMotherProfession(culturalZone, era, noise);
+    const motherProfession = pickHouseholdTrade('Female') ?? generateMotherProfession(culturalZone, era, noise);
 
     character.family.push({
         name: dedupeEpithet(fatherName),
@@ -1146,14 +1169,30 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         baseProfile.stats
     );
 
+    // Where the line came from, when that is not where the person is. Set for
+    // displaced, transported and diaspora populations and undefined for
+    // everyone else — see services/populationStrataService.ts.
+    const ancestry = (spec as CharacterSpecification & { ancestry?: Ancestry }).ancestry;
+    const householdTrades = (spec as CharacterSpecification & { householdTrades?: Array<{ role: string; gender?: 'Male' | 'Female' }> }).householdTrades;
+
     // Generate name - use custom if provided, otherwise prefer a coordinated
     // place/religion track when the broad cultural-zone routing is too coarse.
-    const contextualNameKey = resolveContextualNameKey(
-        context,
-        dateInfo.year,
-        baseProfile.religion,
-        noise
-    );
+    //
+    // Ancestry outranks place here, because place is exactly what it is
+    // correcting for: a woman born in Senegambia and sold into the Carolina
+    // lowcountry is not named out of the lowcountry name tables, and the
+    // generation depth decides which of her descendants are.
+    const ancestralNameKeys = ancestry
+        ? ancestryNameKeys(ancestry, () => noise.random())
+        : [];
+    const contextualNameKey = ancestralNameKeys.length > 0
+        ? ancestralNameKeys[Math.floor(noise.random() * ancestralNameKeys.length)]
+        : resolveContextualNameKey(
+            context,
+            dateInfo.year,
+            baseProfile.religion,
+            noise
+        );
     // Keep the structure of the name, not just the text: if it is a patronymic
     // the father has to actually be called that.
     const generatedName = generateNpcNameDetailed(
@@ -1162,7 +1201,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         context.region,
         dateInfo.year,
         noise,
-        contextualNameKey
+        contextualNameKey,
+        { ancestral: ancestralNameKeys.length > 0 },
     );
     const name = spec.name || generatedName.full;
     const fathersGivenName = spec.name ? undefined : generatedName.patronymicFrom;
@@ -1181,7 +1221,20 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             ),
         };
     }
-    
+
+    // Ancestry decides appearance last, and unlike the name it does not fade
+    // with generation depth. A fourth-generation woman in the lowcountry is
+    // named Sarah out of the local register and still looks like her
+    // great-grandmother; the name assimilates and the face does not. Placed
+    // after the name-detection block above so it wins over a guess made from
+    // the very name this ancestry just chose.
+    if (ancestry && ancestry.originZone !== culturalZone) {
+        baseProfile.appearance = {
+            ...baseProfile.appearance,
+            ...generateCulturalAppearance(ancestry.originZone, noise, context.region),
+        };
+    }
+
     // Create a minimal character first for companion generation
     const tempCharacter: Partial<PlayerCharacter> = {
         name,
@@ -1630,7 +1683,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         // Aboriginal persona French or Scottish parents.
         resolvedNameKey,
         fathersGivenName,
-        inheritedFamilyName
+        inheritedFamilyName,
+        householdTrades
     );
 
     // Initialize disease health with potential disease based on stats and setting

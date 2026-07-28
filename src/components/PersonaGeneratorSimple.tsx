@@ -4740,6 +4740,31 @@ export default function PersonaGenerator() {
                       <span className="label">{statusFieldLabel(persona)}</span>
                       <span className="value">{persona.character.class || 'Unknown'}</span>
                     </div>
+                    {/* Legal condition is a separate axis from social class and
+                        from wealth, and it is the one that places a life most
+                        decisively. Shown only where there is one to show: for
+                        most personas the honest answer is nothing at all. */}
+                    {persona.character.legalStatusLabel && (
+                      <div className="info-item">
+                        <span className="label">Legal Standing</span>
+                        <span className="value">{persona.character.legalStatusLabel}</span>
+                      </div>
+                    )}
+                    {persona.character.ancestry && (
+                      <div className="info-item">
+                        <span className="label">Ancestry</span>
+                        <span className="value">
+                          {persona.character.ancestry.originLabel}
+                          <span style={{ fontSize: '0.85em', marginLeft: '4px', opacity: 0.7 }}>
+                            ({persona.character.ancestry.generation === 0
+                              ? 'born overseas'
+                              : persona.character.ancestry.generation === 1
+                                ? 'first generation here'
+                                : `${persona.character.ancestry.generation} generations here`})
+                          </span>
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

@@ -235,7 +235,15 @@ export function generateNpcNameDetailed(
     region: string | undefined,
     year: number,
     noise: ValueNoise,
-    professionNameKey?: string
+    professionNameKey?: string,
+    /**
+     * `ancestral` marks a key that came from the persona's ancestry rather than
+     * from their location, and it defends that key against the post-contact
+     * reset below. Without it, an Afro-Brazilian name in 1780 Bahia was
+     * discarded — the reset exists to stop a stale Muisca profession key from
+     * naming a modern Colombian, and it cannot tell the two cases apart.
+     */
+    options: { ancestral?: boolean } = {}
 ): FormattedName {
     // Fallback paths hand back a bare name; wrap them so every exit has the
     // same shape.
@@ -265,7 +273,7 @@ export function generateNpcNameDetailed(
             SOUTH_AMERICAN: 1533,
         };
         const contactYear = postContactZones[culturalZone as string];
-        if (contactYear !== undefined && year > contactYear) {
+        if (contactYear !== undefined && year > contactYear && !options.ancestral) {
             nameKeyToUse = undefined;
         }
 

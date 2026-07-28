@@ -19,6 +19,7 @@ import { getAreaClimate, hemisphereFor, seasonFor } from './climateService';
 import { historicalPlaceLabel } from '../constants/gameData/placeLabels';
 import { describeBirthplace } from './birthplaceService';
 import { getPolityAt, isPluralPolity, rulerTitleFor, withPolityArticle } from './polityService';
+import { disruptionClause } from './disruptionResolution';
 import {
   conjugate,
   describeIdeology,
@@ -585,6 +586,31 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
           : `Authority here runs up to ${state}, and has since ${formatYear(standing.since)}.`);
   }
 
+  // What was happening here that the steady-state tables know nothing about.
+  //
+  // This sits next to `polity` on purpose: both answer "what kind of year is
+  // this to be alive in", and both are dated from a table rather than drawn
+  // from a pool, so neither can drift across eras the way the template banks
+  // do. The clause is rolled against the episode's severity inside
+  // `disruptionClause`, so a low-severity window mentions itself rarely and a
+  // catastrophic one almost always — which is the honest distribution.
+  const catastrophe = disruptionClause(
+    persona.historicalContext?.culturalZone ?? persona.character.culturalZone,
+    persona.year,
+    persona.region,
+    persona.location,
+    () => seededIndex(1000) / 1000,
+  );
+  if (catastrophe) addBeat('disruption', catastrophe);
+
+  // The standing condition the work is done under, where there is one.
+  //
+  // Unrolled, unlike the disruption clause: an episode may or may not have
+  // reached a given life, but a legal condition reached all of it, every day,
+  // and a biography that mentions the cooperage without mentioning who owns
+  // the cooper is not describing the same life.
+  if (persona.socialCondition) addBeat('condition', persona.socialCondition.clause);
+
   // Helper function to get belief description
   const getBeliefDescription = (beliefs: any[]): string | null => {
     if (!beliefs || beliefs.length === 0) return null;
@@ -728,12 +754,12 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
    * notice."
    */
   const PRESENT_PLANS: string[][] = [
-    ['profession', 'trade', 'present-attr', 'adult-events', 'health', 'world', 'polity', 'outlook', 'personality', 'parents'],
-    ['profession', 'trade', 'world', 'polity', 'adult-events', 'present-attr', 'health', 'personality', 'outlook', 'parents'],
-    ['adult-events', 'profession', 'trade', 'present-attr', 'polity', 'health', 'world', 'personality', 'outlook', 'parents'],
-    ['polity', 'world', 'profession', 'trade', 'adult-events', 'present-attr', 'health', 'outlook', 'personality', 'parents'],
-    ['profession', 'trade', 'health', 'present-attr', 'adult-events', 'world', 'polity', 'outlook', 'personality', 'parents'],
-    ['present-attr', 'profession', 'trade', 'polity', 'adult-events', 'world', 'health', 'personality', 'outlook', 'parents'],
+    ['profession', 'trade', 'condition', 'present-attr', 'adult-events', 'health', 'world', 'polity', 'disruption', 'outlook', 'personality', 'parents'],
+    ['profession', 'trade', 'condition', 'world', 'disruption', 'polity', 'adult-events', 'present-attr', 'health', 'personality', 'outlook', 'parents'],
+    ['adult-events', 'profession', 'trade', 'condition', 'present-attr', 'polity', 'disruption', 'health', 'world', 'personality', 'outlook', 'parents'],
+    ['disruption', 'polity', 'world', 'profession', 'trade', 'condition', 'adult-events', 'present-attr', 'health', 'outlook', 'personality', 'parents'],
+    ['profession', 'trade', 'condition', 'health', 'disruption', 'present-attr', 'adult-events', 'world', 'polity', 'outlook', 'personality', 'parents'],
+    ['present-attr', 'profession', 'trade', 'condition', 'polity', 'disruption', 'adult-events', 'world', 'health', 'personality', 'outlook', 'parents'],
   ];
 
   /** Beats that describe the person rather than the life, for the last break. */
