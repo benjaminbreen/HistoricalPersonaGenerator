@@ -16,6 +16,7 @@ import {
 } from '../core/raster';
 import { makeNoise1D, makeNoise2D, makeRng } from '../core/rng';
 import { RenderContext } from '../render/context';
+import { drawOrnaments } from './ornaments';
 import { CONICAL_HAT_PATTERN, HeadwearKind } from '../spec/types';
 
 /**
@@ -106,20 +107,29 @@ function castOntoFace(context: RenderContext, mask: Mask, depth: number, strengt
   applyContactShadow(context.raster, mask, context.book, { dx: 0, dy: 1, strength, depth });
 }
 
-export function drawHeadwear(context: RenderContext): Mask | null {
+export function drawHeadwear(context: RenderContext, hairlineY: number): Mask | null {
   const { spec } = context;
   if (!spec.headwear) return null;
+  let mask: Mask | null;
   switch (spec.headwear.kind) {
-    case 'cap': return drawCap(context);
-    case 'brimmed_hat': return drawBrimmedHat(context);
-    case 'wrapped_cloth': return drawWrappedCloth(context);
-    case 'veil': return drawVeil(context);
-    case 'hood': return drawHood(context);
-    case 'helmet': return drawHelmet(context);
-    case 'coronet': return drawCoronet(context);
-    case 'band': return drawBand(context);
-    default: return null;
+    case 'cap': mask = drawCap(context); break;
+    case 'brimmed_hat': mask = drawBrimmedHat(context); break;
+    case 'wrapped_cloth': mask = drawWrappedCloth(context); break;
+    case 'veil': mask = drawVeil(context); break;
+    case 'hood': mask = drawHood(context); break;
+    case 'helmet': mask = drawHelmet(context); break;
+    case 'coronet': mask = drawCoronet(context); break;
+    case 'band': mask = drawBand(context); break;
+    default: mask = null;
   }
+
+  // Decoration goes on last, over whatever the covering turned out to be, so a
+  // plume rises out of the crown of a cap instead of being buried under it. It
+  // also runs when there is no covering at all — a hairpin worn in bare hair is
+  // the commonest case in the whole table, and the one that started this.
+  drawOrnaments(context, spec.headwear.ornaments, hairlineY);
+
+  return mask;
 }
 
 /**
@@ -635,19 +645,15 @@ function drawBand(context: RenderContext): Mask {
   const leafy = /wreath|garland/.test(name);
   const beaded = /bead|pearl|shell|bone/.test(name);
 
-  // A hairpin, comb or flower is worn *in* the hair, not around the brow. A
-  // full band for these would cover a third of the head for a two-pixel object.
-  if (/pin|comb|flower/.test(name)) {
-    const side = spec.seed % 2 === 0 ? -1 : 1;
-    const x0 = centerX + side * Math.round(anatomy.headHalfWidth * 0.62);
-    const y0 = anatomy.headTop + 8;
-    for (let i = 0; i < 3; i += 1) {
-      const x = x0 + side * i;
-      const y = y0 + (i % 2);
-      if (raster.matAt(x, y) !== MAT.HAIR && raster.matAt(x, y) !== MAT.SKIN) continue;
-      raster.set(x, y, ramps.headwear.steps[i === 1 ? 0 : 2], MAT.HEADWEAR, i === 1 ? 0 : 2);
-      mask[y * size + x] = 1;
-    }
+  // Some of the things classified `band` are not bands at all. A hairpin, a
+  // comb, a feather ornament or a flower is worn *in* the hair, and a strip
+  // across the brow for one is both wrong and ugly — a hard grey bar over the
+  // forehead of someone whose item is a kingfisher feather. Where the ornament
+  // layer has already found the parts this item is actually made of, it *is*
+  // the item, and the band adds nothing but a stripe. Names that genuinely
+  // describe a circle of stuff round the head keep theirs.
+  const encircles = /band|fillet|circlet|headband|wreath|garland|diadem|tiara|crown|chaplet|gele|tie/.test(name);
+  if (spec.headwear!.ornaments.length > 0 && !encircles) {
     return mask;
   }
 

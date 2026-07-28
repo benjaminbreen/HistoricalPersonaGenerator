@@ -129,6 +129,60 @@ export interface HeadwearSpec {
   color: string;
   accent: string;
   ornament: number;
+  /** The decorative parts this item is made of, read out of its own name. */
+  ornaments: OrnamentSpec[];
+}
+
+/**
+ * The decorative parts an item is *made of*, as opposed to what shape it is.
+ *
+ * The clothing tables carry 263 distinct headgear names and this renderer had
+ * nine forms to draw them with, so a Kingfisher-Feather Hair Ornament, a Gilt
+ * Hairpin Set and a plain linen fillet all came out as the same strip across
+ * the brow. Enumerating the 263 is not a plan — the list grows — but counting
+ * the words in those names shows the decoration is drawn from a much smaller
+ * pot than the names are: 48 mention feathers, 50 a precious metal, 46 a stone
+ * or a bead, 15 flowers, and so on down.
+ *
+ * So the parts are the vocabulary, and the items are compositions of them. A
+ * kingfisher ornament is a gilt pin plus a feather in kingfisher blue; an
+ * ostrich plume headdress is the same feather at a different scale and
+ * material. Eight primitives, authored once and carefully, cover the corpus.
+ */
+export type OrnamentKind =
+  | 'feather'    // a single quill, spine lit, barbs notched
+  | 'plume'      // a spray of them, opening away from the head
+  | 'pin'        // a shaft with a worked head — hairpin, stickpin, skewer
+  | 'comb'       // a toothed crest set into the hair
+  | 'beadStrand' // beads hung in a line, swinging free
+  | 'gem'        // one set stone, in a claw or a bezel
+  | 'flower'     // fresh or worked
+  | 'medallion'; // a flat disc, boss or plaque
+
+/**
+ * What the part is made of. This is where the vividness lives: at 96px a bead
+ * is three pixels and the *relationship* between those three colours is the
+ * entire illusion of the material.
+ */
+export type OrnamentMaterial =
+  | 'gold' | 'gilt' | 'silver' | 'bronze' | 'copper'
+  | 'jade' | 'turquoise' | 'lapis' | 'coral' | 'amber' | 'ruby' | 'emerald'
+  | 'pearl' | 'kingfisher' | 'shell' | 'bone' | 'wood' | 'lacquer'
+  | 'plumeDark' | 'plumeWhite' | 'plumeBright' | 'cloth';
+
+/** Where on the head the part sits. */
+export type OrnamentPlacement = 'crown' | 'temple' | 'brow' | 'side';
+
+export interface OrnamentSpec {
+  kind: OrnamentKind;
+  material: OrnamentMaterial;
+  placement: OrnamentPlacement;
+  /** How many, before the frame gets a say. */
+  count: number;
+  /** 0..1 — how showy. Drives size, and whether a pin gets a gem on its head. */
+  scale: number;
+  /** Mirrored on both sides, or worn on one only. */
+  paired: boolean;
 }
 
 export interface JewelrySpec {

@@ -128,7 +128,7 @@ export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
 
   drawHairOverShoulder(context, hair);
   drawHairFront(context, hair);
-  drawHeadwear(context);
+  drawHeadwear(context, hair.hairlineY);
   drawFacialHair(context, head);
   drawJewelry(context);
   drawGlasses(context);

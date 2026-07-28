@@ -181,6 +181,9 @@ const diseases: Counted = {};
 const ageBands: Counted = {};
 const greyBands: Counted = {};
 const restingFaces: Counted = {};
+const ornamentKinds: Counted = {};
+const ornamentMaterials: Counted = {};
+const plainHeadwear: Counted = {};
 const severities: Counted = {};
 
 const unmatchedGarments: Counted = {};
@@ -246,6 +249,17 @@ for (let i = 0; i < count; i += 1) {
     // exist because a threshold was once calibrated against a range the app
     // never produced, and nothing reported the resulting zero.
     bump(restingFaces, restingExpression(spec.mood, spec.condition));
+    // Which decorative parts the item vocabulary actually produces, and which
+    // named head items still come out undecorated. The second list is the one
+    // that matters: it is where the next batch of keywords comes from, and it
+    // is what stops 263 named items quietly reverting to plain bands.
+    if (spec.headwear) {
+      if (spec.headwear.ornaments.length === 0) bump(plainHeadwear, spec.headwear.name);
+      for (const o of spec.headwear.ornaments) {
+        bump(ornamentKinds, o.kind);
+        bump(ornamentMaterials, o.material);
+      }
+    }
     bump(severities, `severity ${spec.condition.severity}`);
     for (const disease of spec.condition.diseases) bump(diseases, disease);
 
@@ -381,6 +395,12 @@ rule('Age');
 table(ageBands, rendered);
 rule('Greying');
 table(greyBands, rendered);
+rule('Ornament parts drawn');
+table(ornamentKinds, rendered);
+rule('Ornament materials drawn');
+table(ornamentMaterials, rendered);
+rule('UNDECORATED head items (no ornament found in the name)');
+table(plainHeadwear, rendered);
 rule('Resting expression');
 table(restingFaces, rendered);
 rule('Illness severity');

@@ -30,6 +30,8 @@ import {
   FaceTraits,
   MarkingSpec,
   MoodSpec,
+  OrnamentMaterial,
+  OrnamentSpec,
   PortraitSpec,
 } from './types';
 
@@ -119,7 +121,12 @@ const HEADWEAR_KEYWORDS: Array<[RegExp, HeadwearKind]> = [
   [/(hood|cowl|capuche|zukin|chaperon)/i, 'hood'],
   [/(helmet|helm|casque|morion|sallet|kabuto)/i, 'helmet'],
   [/(crown|diadem|coronet|tiara|headdress|headpiece|sacred feather)/i, 'coronet'],
-  [/(circlet|band|fillet|wreath|garland|ornament|passa|jadai|chaplet|hairpin|hair pin|comb|hair flower|laurel|tikka|patti|rakhdi|fascinator|hairpiece|bindi)/i, 'band'],
+  // `ornament` used to live in this rule and had to come out: it is a word
+  // that attaches to other nouns. "Turban with Gold Ornament" matched here,
+  // before the `wrapped_cloth` rule below ever saw it, and the persona lost
+  // their turban to keep a hairpin. The late ornament rule at the bottom picks
+  // up the genuinely ornament-only names once every covering has had its turn.
+  [/(circlet|band|fillet|wreath|garland|passa|jadai|chaplet|hairpin|hair pin|comb|hair flower|laurel|tikka|patti|rakhdi|fascinator|hairpiece|bindi)/i, 'band'],
   [/(turban|headcloth|head cloth|headwrap|head wrap|head tie|gele|keffiyeh|shemagh|pagri|scarf|kerchief|tignon|wrap|duku|gele)/i, 'wrapped_cloth'],
   // Fur headgear is soft and brimless. This has to precede the generic `hat`
   // rule below, or a "Fur Hat" picks up a stiff felt brim.
@@ -128,6 +135,19 @@ const HEADWEAR_KEYWORDS: Array<[RegExp, HeadwearKind]> = [
   // `dou li` is written with a space in the item data, so the old `douli`
   // spelling never matched and those hats fell through to the `cap` fallback.
   [/(brim|tricorn|bicorne|sombrero|straw|petasos|boater|bowler|fedora|homburg|visor|top hat|wide[- ]?hat|conical|dou ?li|bamboo|sedge|sugegasa|kasa|salakot|non la|cheese-cutter|hat)/i, 'brimmed_hat'],
+  /**
+   * Things that are decoration and nothing else, caught last so that anything
+   * which is genuinely a covering has already won. Order is the whole point
+   * here: a "Felt Cap with Feather" is a cap and must be matched by the cap
+   * rule above, while a "Coral Stickpin" is not a hat of any kind.
+   *
+   * Before this existed those fell through to the `cap` fallback and were
+   * drawn as skullcaps — which is how a stickpin ended up rendering as a solid
+   * gold bowl over someone's head, the pin itself a rounding error beside it.
+   * They route to `band`, whose own drawing steps aside when the ornament
+   * layer has found what the item actually is.
+   */
+  [/(pin|bodkin|kanzashi|skewer|plume|feather|quill|strand|brooch|medallion|boss|plaque|roundel|flower|blossom|bead|pearl|jewel|gem|stone|coral|amber|jade|shell|ornament)/i, 'band'],
 ];
 
 /**
@@ -192,6 +212,144 @@ export function classifyHairstyleName(name: string): { silhouette: HairSilhouett
     if (pattern.test(name)) return { silhouette, matched: true };
   }
   return { silhouette: 'loose', matched: false };
+}
+
+// ---------------------------------------------------------------------------
+// Ornaments
+// ---------------------------------------------------------------------------
+
+/**
+ * What an item is made of, read out of its own name and material.
+ *
+ * Order matters twice over. The *material* table is consulted first and the
+ * first hit wins, so the specific stones precede the generic metals — a "Gilt
+ * Silver and Feather" ornament should take its bead colour from the gilt, not
+ * from the word silver buried in the middle. And within the shape table, the
+ * compound forms precede their parts: `hairpin` must beat `pin`, and
+ * `kingfisher` must be tested before `feather` or the signature material of the
+ * whole set resolves to a generic dark plume.
+ */
+const ORNAMENT_MATERIAL_KEYWORDS: Array<[RegExp, OrnamentMaterial]> = [
+  [/kingfisher|tian.?tsui/i, 'kingfisher'],
+  [/jade|nephrite|jadeite/i, 'jade'],
+  [/turquoise/i, 'turquoise'],
+  [/lapis|azurite/i, 'lapis'],
+  [/coral/i, 'coral'],
+  [/amber/i, 'amber'],
+  [/ruby|garnet|carnelian/i, 'ruby'],
+  [/emerald|malachite/i, 'emerald'],
+  [/pearl|nacre|mother.of.pearl/i, 'pearl'],
+  [/lacquer|cinnabar/i, 'lacquer'],
+  [/shell|cowrie|cowry|conch/i, 'shell'],
+  [/gilt|gilded|vermeil/i, 'gilt'],
+  [/gold|golden/i, 'gold'],
+  [/silver/i, 'silver'],
+  [/bronze|brass/i, 'bronze'],
+  [/copper/i, 'copper'],
+  [/bone|ivory|tusk|antler/i, 'bone'],
+  [/wood|ebony|sandalwood|bamboo/i, 'wood'],
+  // Feathers by value band. Species is not legible at 96px; brightness is.
+  // Birds only. `scarlet` and `crimson` used to live in the second of these and
+  // had to come out: they are colour words, and the generator prefixes colours
+  // onto item names freely, so a "Crimson Jeweled Veil" was having the *stone*
+  // in it classified as a bright feather.
+  [/ostrich|egret|swan|heron/i, 'plumeWhite'],
+  [/peacock|macaw|parrot|quetzal|pheasant/i, 'plumeBright'],
+  [/feather|plume|quill/i, 'plumeDark'],
+  [/diamond|crystal|glass|gem|jewel/i, 'silver'],
+];
+
+interface OrnamentRule {
+  pattern: RegExp;
+  kind: OrnamentSpec['kind'];
+  placement: OrnamentSpec['placement'];
+  paired?: boolean;
+  count?: number;
+  /**
+   * Rules sharing a group are alternatives, not additions. A "Feathered
+   * Headdress" matches both the plume rule and the feather rule beneath it, and
+   * without this it came out wearing a spray of feathers *and* a single feather
+   * next to it — two answers to the same question stuck in one head.
+   */
+  group?: string;
+}
+
+const ORNAMENT_SHAPE_KEYWORDS: OrnamentRule[] = [
+  // Feathered forms. A headdress of them is a spray; one named feather is one.
+  { pattern: /plume|panache|aigrette|kalgi|feathered head|feather head/i, kind: 'plume', placement: 'crown', count: 3, group: 'feathery' },
+  { pattern: /feathers/i, kind: 'plume', placement: 'crown', count: 3, group: 'feathery' },
+  { pattern: /feather|quill/i, kind: 'feather', placement: 'crown', group: 'feathery' },
+
+  // Worn *in* the hair rather than around the head.
+  { pattern: /hairpin|hair pin|kanzashi|stickpin|skewer|bodkin/i, kind: 'pin', placement: 'temple' },
+  { pattern: /comb|peineta/i, kind: 'comb', placement: 'crown' },
+
+  // Hanging and set forms.
+  { pattern: /strand|string|dangle|pendant|drop|tassel|fringe/i, kind: 'beadStrand', placement: 'side', paired: true },
+  { pattern: /flower|blossom|rose|lotus|jasmine|marigold|bloom/i, kind: 'flower', placement: 'temple' },
+  { pattern: /medallion|boss|plaque|disc|roundel|badge|brooch/i, kind: 'medallion', placement: 'brow' },
+  { pattern: /bead|pearl|shell|cowrie/i, kind: 'beadStrand', placement: 'side', paired: true },
+  { pattern: /jewel|gem|stone|jade|turquoise|coral|amber|ruby|emerald|diamond/i, kind: 'gem', placement: 'brow' },
+  // A fitting, where the name says there is one. This deliberately does *not*
+  // fire on a bare metal word: "Gold-Threaded Silk Turban" is a turban woven
+  // with gold, not a turban with a gold pin in it, and an earlier version that
+  // matched any precious metal stuck a hairpin into one head in twelve.
+  { pattern: /ornament|filigree|inlaid|set with|studded|mounted|worked/i, kind: 'pin', placement: 'temple' },
+];
+
+function ornamentMaterialFor(text: string, fallback: OrnamentMaterial): OrnamentMaterial {
+  for (const [pattern, material] of ORNAMENT_MATERIAL_KEYWORDS) {
+    if (pattern.test(text)) return material;
+  }
+  return fallback;
+}
+
+/**
+ * Read the decorative parts out of a head item.
+ *
+ * Returns at most two, and the drawing layer trims further. Restraint is the
+ * whole difficulty here: the names are florid — "Gilt Silver and Kingfisher-
+ * Feather Hair Ornament with Pearl Drops" is a real shape of thing in this data
+ * — and honouring every noun in one produces a head that looks like a tackle
+ * box. Two parts is enough to say what an object is.
+ */
+export function ornamentsFor(
+  name: string,
+  material: string,
+  wealth: number
+): { ornaments: OrnamentSpec[]; matched: boolean } {
+  const text = `${name} ${material}`;
+  const ornaments: OrnamentSpec[] = [];
+  const used = new Set<string>();
+
+  for (const rule of ORNAMENT_SHAPE_KEYWORDS) {
+    if (ornaments.length >= 2) break;
+    if (!rule.pattern.test(text)) continue;
+    // A rule is spent once its kind is taken, and once anything in its group is.
+    if (used.has(rule.kind) || (rule.group && used.has(rule.group))) continue;
+    used.add(rule.kind);
+    if (rule.group) used.add(rule.group);
+
+    // Feathered forms take a feather colour; everything else takes the stone or
+    // metal it is named for, falling back to something plausible for the shape.
+    const feathery = rule.kind === 'feather' || rule.kind === 'plume';
+    const material_ = feathery
+      ? ornamentMaterialFor(text, 'plumeDark')
+      : ornamentMaterialFor(text, rule.kind === 'comb' ? 'bone' : 'gilt');
+
+    ornaments.push({
+      kind: rule.kind,
+      material: material_,
+      placement: rule.placement,
+      count: rule.count ?? 1,
+      // Wealth buys size and stones, which is the one place it should show on a
+      // head: a rich woman's hairpin is the same pin with a bigger jewel on it.
+      scale: clamp01(0.3 + wealth * 0.7),
+      paired: Boolean(rule.paired),
+    });
+  }
+
+  return { ornaments, matched: ornaments.length > 0 };
 }
 
 function classify<T>(name: string, table: Array<[RegExp, T]>, fallback: T): T {
@@ -729,6 +887,7 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
         || headPiece?.color || colorForMaterial(headPiece?.material) || palette.secondary || '#5c5347',
       accent: palette.accent || '#a8834f',
       ornament: ornamentBase,
+      ornaments: ornamentsFor(name, headPiece?.material || '', ornamentBase).ornaments,
     };
   }
 
