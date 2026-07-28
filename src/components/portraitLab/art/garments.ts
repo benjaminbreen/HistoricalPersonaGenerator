@@ -587,7 +587,11 @@ function drawGenericConstruction(context: RenderContext, body: Mask): void {
         const x = Math.round(centerX + side * (from + i));
         const y = Math.round(anatomy.collarY - 1 + t * t * 9);
         if (!onBody(x, y)) continue;
-        raster.shift(x, y, 1, book);
+        // Two steps, not one. The cloth underneath is dithered across a whole
+        // ramp step already, so a single-step line is inside the noise floor —
+        // the first version of this seam was drawn correctly and simply could
+        // not be seen against its own fabric.
+        raster.shift(x, y, 2, book);
         // A lit thread on the upper side turns the seam from a scratch into
         // two pieces of cloth meeting.
         if (onBody(x, y - 1)) raster.shift(x, y - 1, -1, book);
@@ -623,11 +627,18 @@ function drawGenericConstruction(context: RenderContext, body: Mask): void {
     // Buttons, hooks, toggles or ties — at this size they are all the same two
     // pixels, so the only question is how many and how bright. Metal for
     // anyone who can afford it, self-coloured cord for anyone who cannot.
+    //
+    // Spacing is set by the frame rather than by the garment: there are only
+    // seventeen rows below the collar before the canvas ends, so the original
+    // six-pixel pitch put half of a doublet's buttons off the bottom edge and
+    // the persona came back wearing two.
     const metal = spec.garment.ornament > 0.3;
-    const count = kind === 'doublet' ? 4 : 3;
+    const count = kind === 'doublet' ? 3 : 2;
+    const pitch = 5;
     for (let i = 0; i < count; i += 1) {
-      const y = anatomy.collarY + 5 + i * 6;
+      const y = anatomy.collarY + 4 + i * pitch;
       const x = centerX + offset - 2;
+      if (y >= size - 1) break;
       if (!onBody(x, y)) continue;
       if (metal) {
         raster.set(x, y, ramps.metal.steps[1], MAT.METAL, 1);
@@ -658,17 +669,10 @@ function drawGenericConstruction(context: RenderContext, body: Mask): void {
     }
   }
 
-  // --- a belt or sash, where the crop reaches one --------------------------
-  // Only the very top of it, at the bottom edge of the frame — but a tunic or
-  // robe hanging loose to the frame edge reads as a sack, and two rows of a
-  // darker value at the hem is enough to say it is gathered at the waist.
-  if ((kind === 'tunic' || kind === 'robe') && anatomy.collarY + 26 < size) {
-    const y0 = size - 4;
-    for (let y = y0; y < size; y += 1) {
-      for (let x = 0; x < size; x += 1) {
-        if (!onBody(x, y)) continue;
-        raster.shift(x, y, y === y0 ? 2 : 1, book);
-      }
-    }
-  }
+  // No belt, and this is deliberate. An earlier pass darkened the last few rows
+  // of a tunic or robe to suggest a sash gathered at the waist, on the theory
+  // that a garment hanging loose to the frame edge reads as a sack. It does not
+  // work: a real waist is far below this crop, so the band lands hard against
+  // the bottom of the canvas and reads as a vignette or a printing error rather
+  // than as clothing. The frame gets to veto an idea, and this one it vetoed.
 }
