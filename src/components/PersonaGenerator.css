@@ -6338,3 +6338,169 @@ body.dark-mode .sampling-mode {
     margin-top: var(--sp-xs);
   }
 }
+
+/* ── Polity badge ────────────────────────────────────────────────────────────
+   Sits under the date in the card header. Deliberately quiet: the date is the
+   header's anchor and the badge is a caption to it, so it takes the secondary
+   text colour and a hairline rather than a filled pill. */
+.polity-badge-wrap {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.polity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 15rem;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  color: inherit;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  cursor: help;
+  opacity: 0.9;
+  transition: opacity 120ms ease, border-color 120ms ease;
+}
+
+.polity-badge:hover,
+.polity-badge:focus-visible {
+  opacity: 1;
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.polity-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The emblem carries a hairline of its own because several devices are white
+   at the edge — the Hinomaru, St George's cross — and would otherwise bleed
+   into a light header. */
+.polity-emblem {
+  display: block;
+  flex-shrink: 0;
+  width: 1.15rem;
+  height: 0.77rem;
+  border-radius: 1px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.28);
+}
+
+.polity-emblem svg,
+.polity-emblem img,
+.polity-card-emblem svg,
+.polity-card-emblem img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Fetched flags come at their own aspect ratio — some are square, some 2:3 —
+     so they are cropped to the badge's rectangle rather than letterboxed. */
+  object-fit: cover;
+}
+
+.polity-card {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 40;
+  width: min(20rem, 78vw);
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--color-border, rgba(0, 0, 0, 0.14));
+  border-radius: 10px;
+  background: var(--color-surface, #fff);
+  color: var(--color-text-primary, #1c1917);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+  text-align: left;
+  font-family: var(--font-sans);
+  animation: polity-card-in 130ms ease-out;
+}
+
+@keyframes polity-card-in {
+  from { opacity: 0; transform: translateY(-3px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.polity-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-bottom: 0.5rem;
+}
+
+.polity-card-head strong {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.polity-card-emblem {
+  display: block;
+  flex-shrink: 0;
+  width: 1.9rem;
+  height: 1.27rem;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.polity-card-since {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.76rem;
+  color: var(--color-text-secondary, #57534e);
+}
+
+.polity-card-emblem-note {
+  margin: 0 0 0.5rem;
+  font-size: 0.73rem;
+  font-style: italic;
+  color: var(--color-text-secondary, #57534e);
+}
+
+.polity-card-extract {
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--color-text-primary, #1c1917);
+  /* Wikipedia's first paragraph runs long for major states; four lines is
+     enough to place the polity without turning the card into an article. */
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.polity-card-extract.muted,
+.polity-card-emblem-note.muted {
+  color: var(--color-text-secondary, #57534e);
+  opacity: 0.85;
+}
+
+.polity-card-link {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-accent, #c2683f);
+  text-decoration: none;
+}
+
+.polity-card-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 720px) {
+  .polity-card {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(19rem, 88vw);
+  }
+}

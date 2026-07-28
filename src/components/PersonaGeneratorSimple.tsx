@@ -199,6 +199,7 @@ import {
 import { generateNarrativeBiography } from '../services/narrativeBiographyService';
 import { polityFormFor, socialStatusFieldLabel } from '../services/socialStatusService';
 import { describeYear, getPolityAt, withPolityArticle } from '../services/polityService';
+import { PolityBadge } from './PolityBadge';
 import { historicalPlaceLabel } from '../constants/gameData/placeLabels';
 import { zoneAccent } from '../constants/gameData/zonePalette';
 import { devLog } from '../utils/devLog';
@@ -1182,6 +1183,20 @@ export default function PersonaGenerator() {
     0,
     (persona?.character?.inventory?.length || 0) - MAX_INVENTORY
   );
+
+  /**
+   * The state claiming this place in this year. Undefined for most of
+   * prehistory and for the regions that had no state, in which case the header
+   * simply does not carry a badge.
+   */
+  const headerPolity = useMemo(() => (persona
+    ? getPolityAt({
+      year: persona.year,
+      region: persona.region,
+      location: persona.location,
+      culturalZone: normalizeDisplayZone(persona.culturalZone),
+    })
+    : undefined), [persona]);
 
   const updateOldBaileyFilters = (updater: (filters: OldBaileyRandomFilters) => OldBaileyRandomFilters) => {
     setOldBaileySelectionActive(true);
@@ -4628,6 +4643,7 @@ export default function PersonaGenerator() {
               <div className="header-right">
                 <div className="header-date">{formatYear(persona.year)}</div>
                 <div className="exact-date">{getMonthName(persona.month)} {persona.day}</div>
+                {headerPolity && <PolityBadge polity={headerPolity} year={persona.year} />}
               </div>
             </div>
 

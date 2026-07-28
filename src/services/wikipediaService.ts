@@ -351,3 +351,85 @@ export function clearWikipediaCache(): void {
     console.error('Error clearing Wikipedia cache:', error);
   }
 }
+
+export interface ArticleSummary {
+  title: string;
+  extract: string;
+  url: string;
+  /** The article's lead image, but only when it is actually a flag. See `flagFromThumbnail`. */
+  flagUrl?: string;
+  /** Years the flag file names for itself, where its filename carries a range. */
+  flagFrom?: number;
+  flagUntil?: number;
+}
+
+/**
+ * A flag from an article's lead image, or nothing.
+ *
+ * The lead image of a polity article is the infobox flag maybe two times in
+ * five; the rest of the time it is a map, and a map dropped into a 20px flag
+ * slot is a smear. Measured over twenty polities, the filename is a reliable
+ * discriminator where the image itself is not: every lead image whose file was
+ * named "Flag of…", "…banner…" or "…standard…" was genuinely a flag, and every
+ * map was named for a map.
+ *
+ * Filenames also tend to carry the years the flag was used —
+ * "Flag_of_China_(1889–1912)" — which is worth parsing, since it is the only
+ * thing standing between a 1700 Qing persona and an 1889 dragon flag. Both en
+ * dashes and hyphens appear in these names.
+ */
+function flagFromThumbnail(source: string | undefined): Pick<ArticleSummary, 'flagUrl' | 'flagFrom' | 'flagUntil'> {
+  if (!source) return {};
+  const file = decodeURIComponent(source.split('/').pop() ?? '');
+  if (!/flag|banner|standard/i.test(file)) return {};
+
+  // Thumbnails arrive at whatever width the API chose; the badge wants a small one.
+  const flagUrl = source.replace(/\/\d+px-/, '/80px-');
+  const span = file.match(/\((\d{3,4})\s*[–—-]\s*(\d{3,4})\)/);
+  return span
+    ? { flagUrl, flagFrom: Number(span[1]), flagUntil: Number(span[2]) }
+    : { flagUrl };
+}
+
+const SUMMARY_CACHE_PREFIX = `${CACHE_PREFIX}summary_`;
+
+/**
+ * A short summary of a named article, for hover cards.
+ *
+ * `resolveWikipediaArticle` picks an article from zone, region and year through
+ * a chain of fallbacks, which is right when the caller only knows roughly where
+ * it is. A polity already knows its own article, so this takes the title
+ * directly and skips the guessing.
+ *
+ * Failures resolve to null rather than throwing: a tooltip that cannot reach
+ * Wikipedia should show the name it already has, not break the header.
+ */
+export async function getArticleSummary(articleTitle: string): Promise<ArticleSummary | null> {
+  const cacheKey = SUMMARY_CACHE_PREFIX + articleTitle;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const parsed = JSON.parse(cached) as ArticleSummary & { cachedAt: number };
+      if (Date.now() - parsed.cachedAt < CACHE_DURATION_MS) return parsed;
+    }
+  } catch {
+    // A malformed or unreadable cache entry is not worth failing over.
+  }
+
+  const summary = await fetchWikipediaSummary(articleTitle);
+  if (!summary) return null;
+
+  const result: ArticleSummary = {
+    title: summary.title || articleTitle.replace(/_/g, ' '),
+    extract: summary.extract || '',
+    url: `https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle)}`,
+    ...flagFromThumbnail(summary.thumbnail?.source),
+  };
+
+  try {
+    localStorage.setItem(cacheKey, JSON.stringify({ ...result, cachedAt: Date.now() }));
+  } catch {
+    // Quota exhausted; the fetch still succeeded and the caller gets its data.
+  }
+  return result;
+}

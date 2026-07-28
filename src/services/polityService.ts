@@ -42,6 +42,23 @@ export interface PolityContext {
   culturalZone?: CulturalZone;
 }
 
+/**
+ * A device the state actually used, and what kind of thing it was.
+ *
+ * The distinction is the point. Most states in this table never had a flag —
+ * flags as state identity are largely post-1700 — and several had heraldic or
+ * dynastic devices, which are a different sort of object. `from` matters as
+ * much as the image: the Ottoman star and crescent standardised in the 1840s,
+ * so an Ottoman persona in 1650 must not be shown one.
+ */
+export interface PolityEmblem {
+  kind: 'flag' | 'banner' | 'arms';
+  /** The earliest year this device is attested. Below it, nothing is shown. */
+  from: number;
+  /** Key into the drawn emblem set in `components/polityEmblems`. */
+  id: string;
+}
+
 export interface ResolvedPolity {
   /** The state's name, as it would be given in a reference work. */
   name: string;
@@ -49,6 +66,245 @@ export interface ResolvedPolity {
   since: number;
   /** The year it ended here, if the table knows of an end. */
   until?: number;
+  /** Wikipedia article title, for the badge's hover card. */
+  wikipedia: string;
+  /** Present only where a device is attested and the year is late enough. */
+  emblem?: PolityEmblem;
+  /** A Commons flag image, where one is held for this polity and this year. */
+  flagUrl?: string;
+}
+
+/**
+ * Devices, keyed by polity name so one entry covers every region the state
+ * appears in — "United Kingdom" is reached from the British Isles, Scotland and
+ * Ireland entries alike.
+ *
+ * Nothing is here that I could not point at a source for, which is why the list
+ * is shorter than the polity table by a wide margin. Two deliberate omissions
+ * rather than oversights: Nazi Germany, whose flag I will not draw, and the
+ * Confederate States, which is a live enough symbol that it should be your call
+ * and not a side effect of a data commit. Both fall back to a name-only chip,
+ * which is the same treatment the Inca Empire and Srivijaya get for the simpler
+ * reason that they had no such thing.
+ */
+const EMBLEMS: Record<string, PolityEmblem> = {
+  'Kingdom of England': { kind: 'banner', from: 1270, id: 'st-george' },
+  'Kingdom of Scotland': { kind: 'banner', from: 1385, id: 'saltire' },
+  'Kingdom of Great Britain': { kind: 'flag', from: 1707, id: 'union-1707' },
+  'United Kingdom': { kind: 'flag', from: 1801, id: 'union-1801' },
+  'Kingdom of France': { kind: 'banner', from: 1376, id: 'france-ancien' },
+  'French First Republic': { kind: 'flag', from: 1794, id: 'tricolore' },
+  'First French Empire': { kind: 'flag', from: 1804, id: 'tricolore' },
+  'French Second Republic': { kind: 'flag', from: 1848, id: 'tricolore' },
+  'Second French Empire': { kind: 'flag', from: 1852, id: 'tricolore' },
+  'French Third Republic': { kind: 'flag', from: 1870, id: 'tricolore' },
+  'French Republic': { kind: 'flag', from: 1946, id: 'tricolore' },
+  'Dutch Republic': { kind: 'flag', from: 1596, id: 'netherlands' },
+  'Kingdom of the Netherlands': { kind: 'flag', from: 1815, id: 'netherlands' },
+  'Russian Empire': { kind: 'flag', from: 1705, id: 'russia' },
+  'Russian Federation': { kind: 'flag', from: 1991, id: 'russia' },
+  'Soviet Union': { kind: 'flag', from: 1923, id: 'ussr' },
+  'German Empire': { kind: 'flag', from: 1871, id: 'german-empire' },
+  'Weimar Republic': { kind: 'flag', from: 1919, id: 'germany' },
+  'Germany': { kind: 'flag', from: 1949, id: 'germany' },
+  'Ottoman Empire': { kind: 'flag', from: 1844, id: 'ottoman' },
+  'Republic of Turkey': { kind: 'flag', from: 1923, id: 'turkey' },
+  'Kingdom of Greece': { kind: 'flag', from: 1822, id: 'greece' },
+  'Empire of Japan': { kind: 'flag', from: 1870, id: 'hinomaru' },
+  'Japan': { kind: 'flag', from: 1947, id: 'hinomaru' },
+  'United States': { kind: 'flag', from: 1777, id: 'stars-and-stripes' },
+  "People's Republic of China": { kind: 'flag', from: 1949, id: 'prc' },
+  'Spanish monarchy': { kind: 'flag', from: 1785, id: 'spain' },
+  'Kingdom of Spain': { kind: 'flag', from: 1785, id: 'spain' },
+};
+
+/**
+ * Wikimedia Commons files, for polities whose Wikipedia lead image is a map.
+ *
+ * The badge's automatic path takes the article's lead image and keeps it only
+ * when the filename says "flag", "banner" or "standard" — a good filter, since
+ * measured across the table the lead image is a map more often than a flag, and
+ * a map at 20px is a smear. But it means the Achaemenid Empire got nothing
+ * despite the Standard of Cyrus sitting on its page, and the same for Rome,
+ * Byzantium and the Mughals.
+ *
+ * These fill that gap. Every filename here was verified to exist against the
+ * Commons API rather than guessed — an earlier pass of hand-written guesses
+ * resolved 15 of 60, and the difference was mostly a missing User-Agent, so the
+ * check is worth redoing if this list is ever extended.
+ *
+ * Several are reconstructions rather than contemporary artefacts, which is a
+ * deliberate loosening: the standard here is what Wikipedia shows, not what a
+ * vexillologist would defend. Where a filename carries a date range it is
+ * parsed below and the flag is withheld outside it, so a Qing subject in 1700
+ * still gets no 1889 dragon flag.
+ */
+const FLAG_FILES: Record<string, string> = {
+  'Achaemenid Empire': 'Standard of Cyrus the Great (Achaemenid Empire).svg',
+  'Roman Empire': 'Vexilloid of the Roman Empire.svg',
+  'Roman Republic': 'Vexilloid of the Roman Empire.svg',
+  'Byzantine Empire': 'Byzantine imperial flag, 14th century, square.svg',
+  'Ottoman Empire': 'Flag of the Ottoman Empire (1844–1922).svg',
+  'Mughal Empire': 'Alam of the Mughal Empire.svg',
+  'Safavid Empire': 'Safavid Flag.svg',
+  'Qajar Persia': 'Flag of Persia (1907-1933).svg',
+  'Pahlavi Iran': 'Flag of Iran (1964-1980).svg',
+  'Islamic Republic of Iran': 'Flag of Iran.svg',
+  'Republic of Venice': 'Flag of Most Serene Republic of Venice.svg',
+  'Kingdom of Italy': 'Flag of Italy (1861-1946).svg',
+  'Austrian Empire': 'Flag of the Habsburg Monarchy.svg',
+  'Habsburg monarchy': 'Flag of the Habsburg Monarchy.svg',
+  'Austria-Hungary': 'Flag of Austria-Hungary (1869-1918).svg',
+  'German Empire': 'Flag of the German Empire.svg',
+  'Weimar Republic': 'Flag of Germany (3-2).svg',
+  'German Confederation': 'Flag of the German Confederation (war).svg',
+  'Russian Empire': 'Flag of Russia.svg',
+  'Russian Federation': 'Flag of Russia.svg',
+  'Tsardom of Russia': 'Flag of Russia.svg',
+  'Soviet Union': 'Flag of the Soviet Union.svg',
+  'Kingdom of Poland': 'Flag of Poland.svg',
+  'Poland': 'Flag of Poland.svg',
+  'Dutch Republic': 'Statenvlag.svg',
+  'Kingdom of Greece': 'Flag of Greece (1822-1978).svg',
+  'Empire of Japan': 'Flag of Japan.svg',
+  'Tokugawa shogunate': 'Flag of the Tokugawa Shogunate.svg',
+  'Joseon': 'Flag of Korea (1882–1910).svg',
+  "People's Republic of China": 'Flag of China.svg',
+  'Republic of China': 'Flag of the Republic of China.svg',
+  'the Ashanti Empire': 'Flag of Ashanti.svg',
+  'Ethiopian Empire': 'Flag of Ethiopia (1897-1974).svg',
+  'Kingdom of Portugal': 'Flag Portugal (1707).svg',
+  'Kingdom of Spain': 'Flag of Spain.svg',
+  'Kingdom of Hungary': 'Flag of Hungary (1867-1918).svg',
+  'the Dutch East Indies': 'Flag of the Netherlands.svg',
+  'Kingdom of Iraq': 'Flag of Iraq (1924–1959).svg',
+  'Kingdom of Saudi Arabia': 'Flag of Saudi Arabia.svg',
+  'Kingdom of Egypt': 'Flag of Egypt (1922–1958).svg',
+  'Republic of Egypt': 'Flag of Egypt.svg',
+  'Commonwealth of Australia': 'Flag of Australia.svg',
+  'New Zealand': 'Flag of New Zealand.svg',
+  'Indonesia': 'Flag of Indonesia.svg',
+  'the Republic of the Philippines': 'Flag of the Philippines.svg',
+  'Sri Lanka': 'Flag of Sri Lanka.svg',
+  'the Ryukyu Kingdom': 'Flag of Ryukyu.svg',
+  'the Tibetan Empire': 'Flag of Tibet.svg',
+  'Republic of Turkey': 'Flag of Turkey.svg',
+  'the Mongol Empire': 'Flag of the Mongol Empire.svg',
+  'the Timurid Empire': 'Timurid.svg',
+};
+
+/** Commons renders SVGs to PNG at whatever width is asked for. */
+const commonsUrl = (file: string): string =>
+  `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file.replace(/ /g, '_'))}?width=80`;
+
+/** Years a flag filename claims for itself — "(1889–1912)". En dashes and hyphens both occur. */
+function spanFromFilename(file: string): { from?: number; until?: number } {
+  const span = file.match(/\((\d{3,4})\s*[–—-]\s*(\d{3,4})\)/);
+  return span ? { from: Number(span[1]), until: Number(span[2]) } : {};
+}
+
+/**
+ * Article titles that the default derivation below gets wrong. Everything else
+ * is the name with a leading article stripped and spaces underscored, which is
+ * already correct for "Mughal Empire", "Qing dynasty" and most of the table.
+ */
+const WIKIPEDIA_OVERRIDES: Record<string, string> = {
+  'the Arab caliphates': 'Caliphate',
+  'the partitioning empires': 'Partitions_of_Poland',
+  'the British American colonies': 'Thirteen_Colonies',
+  'the taifa kingdoms of al-Andalus': 'Taifa',
+  'the Nordic kingdoms': 'Nordic_countries',
+  'the Central American republics': 'Central_America',
+  'the Caribbean republics and colonies': 'History_of_the_Caribbean',
+  'the French and British sugar colonies': 'West_Indies',
+  'the Spanish Caribbean': 'Spanish_West_Indies',
+  'the Guiana colonies': 'Guianas',
+  'the Christian Nubian kingdoms': 'Nubia',
+  'the British and French West African colonies': 'Colonisation_of_Africa',
+  'the British and German East African colonies': 'Scramble_for_Africa',
+  'the Congo Free State and Belgian Congo': 'Belgian_Congo',
+  'the partitioning empires ': 'Partitions_of_Poland',
+  'the Swahili city-states': 'Swahili_coast',
+  'the Hellenistic successor kingdoms': 'Diadochi',
+  'the French and British mandates': 'Mandatory_Palestine',
+  'the Crusader states': 'Crusader_states',
+  'the Turkic Khaganate': 'Turkic_Khaganate',
+  'the Xiongnu confederation': 'Xiongnu',
+  'the Third Dynasty of Ur': 'Third_Dynasty_of_Ur',
+  'the Old Kingdom of Egypt': 'Old_Kingdom_of_Egypt',
+  'the Middle Kingdom of Egypt': 'Middle_Kingdom_of_Egypt',
+  'the New Kingdom of Egypt': 'New_Kingdom_of_Egypt',
+  'the kingdoms of Israel and Judah': 'Kingdom_of_Israel_(Samaria)',
+  'Roman and Byzantine Egypt': 'Egypt_(Roman_province)',
+  'Roman and Byzantine Syria': 'Syria_(Roman_province)',
+  'the Aztec Triple Alliance': 'Aztec_Empire',
+  'Argentina and Chile': 'Patagonia',
+  'restored French monarchy': 'Bourbon_Restoration_in_France',
+  'Vichy France under German occupation': 'Vichy_France',
+  'the Kingdom of Zimbabwe': 'Kingdom_of_Zimbabwe',
+  'the Dutch Cape Colony': 'Dutch_Cape_Colony',
+  'the British Cape Colony': 'Cape_Colony',
+  'the Federal Republic of Central America': 'Federal_Republic_of_Central_America',
+  'the American colonial Philippines': 'Insular_Government_of_the_Philippine_Islands',
+  'the Dutch East India Company': 'Dutch_East_India_Company',
+  'the Dutch East Indies': 'Dutch_East_Indies',
+  'the Malacca Sultanate': 'Malacca_Sultanate',
+  'the Kingdom of Kandy': 'Kingdom_of_Kandy',
+  'the Anuradhapura Kingdom': 'Anuradhapura_Kingdom',
+  'the Polonnaruwa Kingdom': 'Kingdom_of_Polonnaruwa',
+  'the Ryukyu Kingdom': 'Ryukyu_Kingdom',
+  'the Ganden Phodrang': 'Ganden_Phodrang',
+  'the Kingdom of Nepal': 'Kingdom_of_Nepal',
+  'the Kingdom of Armenia': 'Kingdom_of_Armenia_(antiquity)',
+  'the Kingdom of Georgia': 'Kingdom_of_Georgia',
+  'the Kingdom of Kush': 'Kingdom_of_Kush',
+  'the Kingdom of Meroë': 'Kingdom_of_Kush',
+  'the Funj Sultanate': 'Sennar_Sultanate',
+  'the Ghana Empire': 'Ghana_Empire',
+  'the Zagwe dynasty': 'Zagwe_dynasty',
+  'the Kingdom of Aksum': 'Kingdom_of_Aksum',
+  'the Oyo Empire': 'Oyo_Empire',
+  'the Ashanti Empire': 'Ashanti_Empire',
+  'the Kingdom of Dahomey': 'Kingdom_of_Dahomey',
+  'the Luba Empire': 'Kingdom_of_Luba',
+  'the Lunda Empire': 'Kingdom_of_Lunda',
+  'the Inca Empire': 'Inca_Empire',
+  'the Wari Empire': 'Wari_Empire',
+  'the Viceroyalty of New Spain': 'Viceroyalty_of_New_Spain',
+  'the Viceroyalty of Peru': 'Viceroyalty_of_Peru',
+  'the Viceroyalty of New Granada': 'Viceroyalty_of_New_Granada',
+  'the Viceroyalty of the Río de la Plata': 'Viceroyalty_of_the_Río_de_la_Plata',
+  'the Toltec state': 'Toltec',
+  'the British Australian colonies': 'History_of_Australia_(1788–1850)',
+  'the British colony of New Zealand': 'Colony_of_New_Zealand',
+  'the Chagatai Khanate': 'Chagatai_Khanate',
+  'the Samanid Empire': 'Samanid_Empire',
+  'the Ilkhanate': 'Ilkhanate',
+  'the Golden Horde': 'Golden_Horde',
+  'the Khmer Empire': 'Khmer_Empire',
+  'the Pagan Kingdom': 'Pagan_Kingdom',
+  'the Kingdom of Ayutthaya': 'Ayutthaya_Kingdom',
+  'the Kingdom of Siam': 'Rattanakosin_Kingdom',
+  'the Majapahit Empire': 'Majapahit',
+  'the Spanish East Indies': 'Captaincy_General_of_the_Philippines',
+  'the Lordship of Ireland': 'Lordship_of_Ireland',
+  'the Omani Sultanate': 'Omani_Empire',
+  'the Tibetan Empire': 'Tibetan_Empire',
+  'the Zulu Kingdom': 'Zulu_Kingdom',
+  'the Confederate States': 'Confederate_States_of_America',
+  'the Nara court': 'Nara_period',
+  'the Heian court': 'Heian_period',
+  'East India Company rule': 'Company_rule_in_India',
+  'Japanese colonial rule': 'Korea_under_Japanese_rule',
+  'the Old Babylonian Kingdom': 'First_Babylonian_dynasty',
+  'the Indus Valley civilization': 'Indus_Valley_Civilisation',
+  'the Rashtrakuta empire': 'Rashtrakuta_dynasty',
+  'the Rashidun Caliphate': 'Rashidun_Caliphate',
+};
+
+function wikipediaTitleFor(name: string): string {
+  return WIKIPEDIA_OVERRIDES[name]
+    ?? name.replace(/^the\s+/i, '').replace(/\s+/g, '_');
 }
 
 /**
@@ -788,7 +1044,24 @@ export function getPolityAt(ctx: PolityContext): ResolvedPolity | undefined {
 
     const era = entry.eras.find(candidate =>
       ctx.year >= candidate.from && (candidate.until === undefined || ctx.year < candidate.until));
-    if (era) return { name: era.name, since: era.from, until: era.until };
+    if (!era) continue;
+
+    // A device the state adopted later in its life is not available to someone
+    // living before it did, which is most of what this test is for.
+    const attested = EMBLEMS[era.name];
+    const file = FLAG_FILES[era.name];
+    const span = file ? spanFromFilename(file) : {};
+    const inSpan = (span.from === undefined || ctx.year >= span.from)
+      && (span.until === undefined || ctx.year <= span.until);
+
+    return {
+      name: era.name,
+      since: era.from,
+      until: era.until,
+      wikipedia: wikipediaTitleFor(era.name),
+      emblem: attested && ctx.year >= attested.from ? attested : undefined,
+      flagUrl: file && inSpan ? commonsUrl(file) : undefined,
+    };
   }
   return undefined;
 }
@@ -807,6 +1080,49 @@ export function withPolityArticle(name: string): string {
   return /\b(empire|kingdom|republic|sultanate|caliphate|dynasty|confederation|federation|union|states|raj|commonwealth|shogunate|khanate|lordship|monarchy|colonies|colony|court|protectorate|khedivate|viceroyalty)\b/i.test(name)
     ? `the ${name}`
     : name;
+}
+
+/**
+ * Whether the name takes a plural verb.
+ *
+ * Not every entry in this table is one state. "The Swahili city-states", "the
+ * taifa kingdoms of al-Andalus" and "Argentina and Chile" are all honest
+ * answers to which power held a place, and all of them read as broken with a
+ * singular verb — "The Swahili city-states has held this country".
+ *
+ * "United States" is the exception the rule needs: plural in form, singular in
+ * every English sentence written since about 1865.
+ */
+export function isPluralPolity(name: string): boolean {
+  if (/United States/i.test(name)) return false;
+  return / and /.test(name)
+    || /\b(kingdoms|colonies|republics|empires|caliphates|city-states|states|principalities|emirates|mandates)\b/i.test(name);
+}
+
+/**
+ * The office a subject of this state answers to — "the Mughal emperor", "the
+ * Ottoman sultan" — or nothing where the name will not carry the construction.
+ *
+ * Only names shaped "<Adjective> <Type>" work: "Mughal Empire" yields "Mughal",
+ * "Kingdom of Scotland" does not yield anything usable and gets no title rather
+ * than "the Scotland king". Republics and confederations have no such office at
+ * all, which is a fact about them and not a gap.
+ *
+ * The office, not the person: this table knows which state held a place in a
+ * year and has no idea who was on the throne, so it will not assert a monarch's
+ * name or gender.
+ */
+export function rulerTitleFor(name: string): string | undefined {
+  const shape = name.match(/^([A-Z][\w'’-]+) (Empire|dynasty|Sultanate|Caliphate|shogunate|Khanate)$/);
+  if (!shape) return undefined;
+  const [, adjective, type] = shape;
+
+  const office = type === 'Sultanate' ? 'sultan'
+    : type === 'Caliphate' ? 'caliph'
+      : type === 'shogunate' ? 'shogun'
+        : type === 'Khanate' ? 'khan'
+          : 'emperor';
+  return `the ${adjective} ${office}`;
 }
 
 /**

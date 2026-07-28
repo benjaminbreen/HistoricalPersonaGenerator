@@ -18,6 +18,7 @@ import { IDEOLOGIES, PERSONAL_BELIEFS } from '../constants';
 import { getAreaClimate, hemisphereFor, seasonFor } from './climateService';
 import { historicalPlaceLabel } from '../constants/gameData/placeLabels';
 import { describeBirthplace } from './birthplaceService';
+import { getPolityAt, isPluralPolity, rulerTitleFor, withPolityArticle } from './polityService';
 import {
   conjugate,
   describeIdeology,
@@ -551,6 +552,39 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
 
   if (chance(80)) addBeat('world', describeWorldTexture(bioContext, pickBiography));
 
+  // Who the persona answers to, where there is anyone. Most of the table's
+  // states are not a going concern in a subject's daily life, so this is one
+  // short sentence and it is skipped a fifth of the time.
+  //
+  // Which sentence is chosen by how long the regime has held the place rather
+  // than at random. That is the difference between a detail and filler: a state
+  // four hundred years old and one eleven years old are different things to
+  // live under, and the shapes stay distinct under `auditNarrative`'s
+  // skeletonizer, which erases the proper nouns before it counts.
+  const standing = getPolityAt({
+    year: persona.year,
+    region: persona.region,
+    location: persona.location,
+    culturalZone: persona.culturalZone as CulturalZone,
+  });
+  if (standing && chance(80)) {
+    const held = persona.year - standing.since;
+    const title = rulerTitleFor(standing.name);
+    const state = withPolityArticle(standing.name);
+
+    // "The Swahili city-states has held this country" — several entries in the
+    // table are a set of powers rather than one, and they need the plural verb.
+    const plural = isPluralPolity(standing.name);
+
+    addBeat('polity', title && chance(55)
+      ? `${capitalize(pronoun)} ${pronounBe} a subject of ${title}.`
+      : held <= 25
+        ? `${capitalize(state)} ${plural ? 'are' : 'is'} new here, ${held} years in and not yet settled into the habits of rule.`
+        : held >= 150
+          ? `${capitalize(state)} ${plural ? 'have' : 'has'} held this country since ${formatYear(standing.since)}, beyond anyone's memory.`
+          : `Authority here runs up to ${state}, and has since ${formatYear(standing.since)}.`);
+  }
+
   // Helper function to get belief description
   const getBeliefDescription = (beliefs: any[]): string | null => {
     if (!beliefs || beliefs.length === 0) return null;
@@ -694,12 +728,12 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
    * notice."
    */
   const PRESENT_PLANS: string[][] = [
-    ['profession', 'trade', 'present-attr', 'adult-events', 'health', 'world', 'outlook', 'personality', 'parents'],
-    ['profession', 'trade', 'world', 'adult-events', 'present-attr', 'health', 'personality', 'outlook', 'parents'],
-    ['adult-events', 'profession', 'trade', 'present-attr', 'health', 'world', 'personality', 'outlook', 'parents'],
-    ['world', 'profession', 'trade', 'adult-events', 'present-attr', 'health', 'outlook', 'personality', 'parents'],
-    ['profession', 'trade', 'health', 'present-attr', 'adult-events', 'world', 'outlook', 'personality', 'parents'],
-    ['present-attr', 'profession', 'trade', 'adult-events', 'world', 'health', 'personality', 'outlook', 'parents'],
+    ['profession', 'trade', 'present-attr', 'adult-events', 'health', 'world', 'polity', 'outlook', 'personality', 'parents'],
+    ['profession', 'trade', 'world', 'polity', 'adult-events', 'present-attr', 'health', 'personality', 'outlook', 'parents'],
+    ['adult-events', 'profession', 'trade', 'present-attr', 'polity', 'health', 'world', 'personality', 'outlook', 'parents'],
+    ['polity', 'world', 'profession', 'trade', 'adult-events', 'present-attr', 'health', 'outlook', 'personality', 'parents'],
+    ['profession', 'trade', 'health', 'present-attr', 'adult-events', 'world', 'polity', 'outlook', 'personality', 'parents'],
+    ['present-attr', 'profession', 'trade', 'polity', 'adult-events', 'world', 'health', 'personality', 'outlook', 'parents'],
   ];
 
   /** Beats that describe the person rather than the life, for the last break. */
