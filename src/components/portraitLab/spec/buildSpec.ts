@@ -55,6 +55,8 @@ export interface PortraitSource {
    * that at every call site.
    */
   personality?: {
+    openness?: number;
+    conscientiousness?: number;
     extraversion?: number;
     agreeableness?: number;
     neuroticism?: number;
@@ -413,10 +415,28 @@ function buildCondition(source: PortraitSource): ConditionSpec {
     .map(entry => (entry?.disease?.name || '').toLowerCase())
     .filter(Boolean);
 
+  // Severity comes from what the illness *is*, not from how much health is
+  // left. That distinction matters because the health figure barely moves: over
+  // four hundred personas it ran 0.79 to 0.99, so the old ladder's `< 0.6` and
+  // `< 0.35` rungs were unreachable and severity never once left 0 or 1 — even
+  // though two personas in five are carrying something. A scraped knee and
+  // tuberculosis both produced severity 1, and nobody ever looked ill.
+  //
+  // The disease *names* are the signal that was going unused, and they separate
+  // cleanly. What a face shows is not how dangerous a thing is but how long it
+  // has been draining you: a broken finger hurts more than worms this week and
+  // shows less than worms this year.
+  // Anything not on this list stays at severity 1, which is the right home for
+  // both a sprained ankle and a name the table has not learned yet.
+  const WASTING = /(worm|tubercul|consumption|malaria|ague|rickets|scurvy|typhoid|dysenter|cholera|plague|leprosy|syphilis|tularemia|quinsy|influenza|fever|pox|palsy|dropsy|gout|wasting|flux)/;
+  const wasting = diseases.filter(name => WASTING.test(name)).length;
+
   let severity: 0 | 1 | 2 | 3 = 0;
   if (diseases.length > 0) severity = 1;
-  if (diseases.length > 0 && healthRatio < 0.6) severity = 2;
-  if (diseases.length > 1 || healthRatio < 0.35) severity = 3;
+  if (wasting > 0) severity = 2;
+  // Two chronic conditions at once, or one carried by someone already old
+  // enough for it to be doing real damage.
+  if (wasting > 1 || (wasting > 0 && ((source.age ?? 30) > 55 || healthRatio < 0.84))) severity = 3;
 
   const feverish = diseases.some(name =>
     /(fever|influenza|typhoid|malaria|pneumonia|infection|plague|smallpox|measles)/.test(name)
@@ -458,14 +478,78 @@ function buildMood(source: PortraitSource, condition: ConditionSpec): MoodSpec {
     valence: Math.max(-1, Math.min(1, valence)),
     energy: clamp01(energy),
     guarded: clamp01(guarded),
+    disposition: dispositionFor(personality),
   };
+}
+
+/**
+ * The handful of people whose personality shows on their face as something
+ * more specific than cheerful or grim.
+ *
+ * Every threshold here is deliberately extreme, because this is meant to be a
+ * face you notice once in a wall of forty rather than a fourth common mood.
+ * `openness` and `conscientiousness` do the work, and both were being thrown
+ * away — the adapter read three of the five traits the app generates, and the
+ * two it ignored are precisely the two that distinguish a considering face
+ * from a determined one. Valence cannot express either: a very curious person
+ * is not happier than average, they simply look like they are thinking.
+ *
+ * Order is most-specific first, and each rule is written to be narrow rather
+ * than to cover its trait's whole upper range.
+ */
+function dispositionFor(personality: {
+  openness?: number;
+  conscientiousness?: number;
+  extraversion?: number;
+  agreeableness?: number;
+  neuroticism?: number;
+}): Expression | null {
+  const openness = personality.openness ?? 0.5;
+  const conscientiousness = personality.conscientiousness ?? 0.5;
+  const extraversion = personality.extraversion ?? 0.5;
+  const agreeableness = personality.agreeableness ?? 0.5;
+  const neuroticism = personality.neuroticism ?? 0.5;
+
+  // Sly rather than merely disagreeable: curious, sociable, and not especially
+  // interested in being liked.
+  if (openness > 0.72 && agreeableness < 0.34 && extraversion > 0.55) return 'smirk';
+
+  // Steady and driven, and untroubled enough to hold a course.
+  if (conscientiousness > 0.86 && neuroticism < 0.42) return 'determined';
+
+  // Turned inward. The low extraversion matters: without it this fires on
+  // gregarious people who read as animated, not contemplative.
+  if (openness > 0.82 && extraversion < 0.45) return 'thinking';
+
+  // No `grin` rule, and not for want of trying. A grin needs high extraversion
+  // and high agreeableness, and those two are most of what `valence` is built
+  // from — so anyone who qualifies has already been caught by the `content`
+  // branch above, which is checked first and rightly so. Every set of
+  // thresholds that reached a grin also required a neuroticism low enough to
+  // contradict itself. Content already owns that face; a second, louder
+  // version of it is not worth an unreachable branch.
+  return null;
 }
 
 /** The resting face a persona wears when nothing else is driving it. */
 export function restingExpression(mood: MoodSpec, condition: ConditionSpec): Expression {
-  if (condition.severity >= 2 || condition.fatigueRatio > 0.7) return 'weary';
+  // Illness, and illness only. Fatigue used to share this test at `> 0.7`,
+  // against a value whose measured range across eight hundred personas is
+  // 0.04–0.20 with a mean of 0.15 — so it never fired at all. Moving the bound
+  // into the real band did not fix it either: at 0.18 it caught a third of the
+  // population, because that range is not a spread so much as a cluster with a
+  // little noise on it. A signal with no dynamic range cannot be thresholded
+  // into a meaningful minority, and pretending otherwise just relocates the
+  // bug. Fatigue still tells on the face through pallor and through the drag
+  // it puts on valence and energy; it no longer decides this.
+  if (condition.severity >= 2) return 'weary';
+
+  // The strong moods keep their faces. A disposition never overrides someone
+  // who is plainly delighted or plainly furious — it is a tie-breaker for the
+  // large middle of the population, which is where the dull faces were.
   if (mood.valence > 0.42) return 'content';
   if (mood.valence < -0.42) return mood.guarded > 0.6 ? 'scowl' : 'sad';
+  if (mood.disposition) return mood.disposition;
   if (mood.guarded > 0.68) return 'guarded';
   if (mood.valence > 0.18) return 'content';
   if (mood.valence < -0.18) return 'concern';

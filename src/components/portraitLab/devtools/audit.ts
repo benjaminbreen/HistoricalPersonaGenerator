@@ -40,8 +40,8 @@ import { MAT, Raster } from '../core/raster';
 import {
   buildPortraitSpec, classifyGarmentName, classifyHairstyleName, classifyHeadwearName, restingExpression,
 } from '../spec/buildSpec';
-import { PortraitSpec } from '../spec/types';
-import { compilePortrait, renderFrame } from '../render/pipeline';
+import { Expression, PortraitSpec } from '../spec/types';
+import { compilePortrait, poseForExpression, renderFrame } from '../render/pipeline';
 import { idleFrame } from '../render/animation';
 import { encodePNG, scaleRGBA } from './png';
 
@@ -90,7 +90,7 @@ const bump = (table: Counted, key: string) => {
  * portraits nobody is going to catch these by eye, but they are trivial to
  * catch by counting materials in the finished raster.
  */
-function inspect(raster: Raster, spec: PortraitSpec): string[] {
+function inspect(raster: Raster, spec: PortraitSpec, expression: Expression): string[] {
   const counts: Counted = {};
   for (let i = 0; i < raster.mat.length; i += 1) {
     bump(counts, String(raster.mat[i]));
@@ -99,8 +99,19 @@ function inspect(raster: Raster, spec: PortraitSpec): string[] {
   const problems: string[] = [];
 
   if (at(MAT.SKIN) < 220) problems.push(`almost no visible skin (${at(MAT.SKIN)}px)`);
-  if (at(MAT.SCLERA) === 0) problems.push('no visible eyes');
-  else if (at(MAT.SCLERA) < 14) problems.push(`eyes almost fully occluded (${at(MAT.SCLERA)}px)`);
+  // The occlusion check exists to catch a hat brim or a hank of hair sitting
+  // over the eyes. It is not supposed to catch the renderer doing exactly what
+  // it was told: a weary face is half-lidded and a smile squints, and both
+  // legitimately show a fraction of the sclera an open eye does. Wiring illness
+  // through to the resting face turned 353 correct half-lidded portraits into
+  // 353 findings, which is a report calling its own art a bug.
+  const eyeState = poseForExpression(expression).eyes;
+  const narrowed = eyeState === 'half' || eyeState === 'squint' || eyeState === 'closed';
+  const floor = narrowed ? 3 : 14;
+  if (at(MAT.SCLERA) === 0 && eyeState !== 'closed') problems.push('no visible eyes');
+  else if (at(MAT.SCLERA) > 0 && at(MAT.SCLERA) < floor) {
+    problems.push(`eyes almost fully occluded (${at(MAT.SCLERA)}px, ${expression})`);
+  }
   if (at(MAT.IRIS) === 0 && at(MAT.SCLERA) > 0) problems.push('sclera but no iris');
   const wearsLipPlate = spec.markings.some(
     m => m.type === 'structural' && /plate|plug|disc/.test(m.pattern || '') && m.location !== 'ear'
@@ -169,6 +180,8 @@ const markingPatterns: Counted = {};
 const diseases: Counted = {};
 const ageBands: Counted = {};
 const greyBands: Counted = {};
+const restingFaces: Counted = {};
+const severities: Counted = {};
 
 const unmatchedGarments: Counted = {};
 const unmatchedHeadwear: Counted = {};
@@ -229,6 +242,11 @@ for (let i = 0; i < count; i += 1) {
       : spec.age < 65 ? '50-64' : '65+';
     bump(ageBands, band);
     bump(greyBands, spec.grayAmount < 0.05 ? 'none' : spec.grayAmount < 0.35 ? 'some' : 'mostly grey');
+    // Which face the population actually rests on, and how ill it is. Both
+    // exist because a threshold was once calibrated against a range the app
+    // never produced, and nothing reported the resulting zero.
+    bump(restingFaces, restingExpression(spec.mood, spec.condition));
+    bump(severities, `severity ${spec.condition.severity}`);
     for (const disease of spec.condition.diseases) bump(diseases, disease);
 
     // Where did the adapter have to guess?
@@ -260,19 +278,16 @@ for (let i = 0; i < count; i += 1) {
     compileTotal += Date.now() - started;
 
     const target = new Raster(CELL, CELL);
-    renderFrame(
-      compiled,
-      idleFrame(0, {
-        seed: spec.seed,
-        resting: restingExpression(spec.mood, spec.condition),
-        mood: spec.mood,
-        hairMoves: false,
-        reducedMotion: true,
-      }),
-      target
-    );
+    const frame = idleFrame(0, {
+      seed: spec.seed,
+      resting: restingExpression(spec.mood, spec.condition),
+      mood: spec.mood,
+      hairMoves: false,
+      reducedMotion: true,
+    });
+    renderFrame(compiled, frame, target);
 
-    for (const problem of inspect(target, spec)) {
+    for (const problem of inspect(target, spec, frame.expression)) {
       findings.push({ index: i, name: personaName, detail: problem });
     }
     rasters.push({ raster: target, label: personaName });
@@ -366,6 +381,10 @@ rule('Age');
 table(ageBands, rendered);
 rule('Greying');
 table(greyBands, rendered);
+rule('Resting expression');
+table(restingFaces, rendered);
+rule('Illness severity');
+table(severities, rendered);
 rule('Cultural zones');
 table(zones, rendered);
 rule('Eras');

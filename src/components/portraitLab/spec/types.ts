@@ -169,6 +169,21 @@ export interface MoodSpec {
   energy: number;
   /** 0 open .. 1 closed off. Narrows the eyes and lowers the brow. */
   guarded: number;
+  /**
+   * A face this persona wears *instead of* the one their valence implies,
+   * when their personality is pronounced enough to deserve one.
+   *
+   * Valence, energy and guardedness are three axes and between them they can
+   * only really say cheerful, grim or neither — which is why most of the
+   * expression vocabulary was only ever reachable by hovering. Someone very
+   * curious does not look happier than average; they look like they are
+   * thinking. Kept on the mood rather than passed as another argument so that
+   * `restingExpression` keeps its two-parameter signature and every existing
+   * caller — the component, both sheets, the audit — goes on working.
+   *
+   * Null for the large majority. It is meant to be rare.
+   */
+  disposition: Expression | null;
 }
 
 export interface BackgroundSpec {
