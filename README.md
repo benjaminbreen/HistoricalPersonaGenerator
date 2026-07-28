@@ -128,8 +128,33 @@ For production-style local serving:
 
 ```bash
 npm run build
-GEMINI_API_KEY=your_key_here npm start
+npm start
 ```
+
+`npm start` reads `.env.local` (then `.env`) directly; real environment variables still win, so `GEMINI_API_KEY=... npm start` also works.
+
+### What each AI action costs
+
+Two model actions exist, and they are priced very differently per persona:
+
+| Action | Tokens (in/out) | Cost | Triggered by |
+| --- | --- | --- | --- |
+| `generate_sketch` | ~1.6k / 0.2k | ~0.07¢ | **Use AI to Develop Persona** (the default) |
+| `generate_annotation` | ~7.5k / 1.6k | ~0.43¢ | **AI Schema Record**, and the Source Studio flows |
+
+The annotation prompt carries the whole JSON schema — about 6,500 tokens of the 7,500 it sends — which is why it dominates. The default AI path therefore builds the schema record locally from the procedural seed and pays only for the biography. Both the schema path and any repeat of the default path ask the user to confirm first, and mention donating.
+
+### Rate limits
+
+`/api/gemini-persona` is public, so every route enforces a cost-weighted limit (a schema record counts six times a biography). Defaults, overridable per environment:
+
+```bash
+LLM_HOURLY_COST_PER_IP=30     # ~30 biographies or 5 schema records per IP per hour
+LLM_DAILY_COST_PER_IP=120
+LLM_DAILY_COST_GLOBAL=3000    # backstop on the daily bill (~$3/day at current prices)
+```
+
+Over the limit the route returns `429` with `Retry-After`, and the app falls back to procedural generation with a visible notice. Counters live in process memory, so on Vercel they are per warm instance; move them to KV if you need a hard global cap.
 
 Current source-backed records use annotation schema `1.1.0`. The schema keeps `1.0.0` records valid, while new generation prefers compact cross-cultural fields for social position, constraint regimes, public world, religious practice, normative world, and interaction style.
 

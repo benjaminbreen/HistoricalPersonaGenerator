@@ -800,6 +800,50 @@ body.dark-mode .top-bar {
   }
 }
 
+.ai-cost-modal {
+  max-width: 30rem;
+}
+
+.ai-cost-body p {
+  margin: 0 0 var(--sp-md);
+}
+
+.ai-cost-body .ai-cost-ask {
+  border-left: 3px solid var(--color-accent, #b4643c);
+  padding-left: var(--sp-md);
+  font-style: italic;
+}
+
+.ai-cost-actions {
+  display: flex;
+  gap: var(--sp-md);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: var(--sp-lg);
+}
+
+.generation-fallback-notice {
+  border-left: 3px solid var(--color-accent, #b4643c);
+  background: var(--color-surface-elevated);
+  padding: var(--sp-sm) var(--sp-md);
+  margin-bottom: var(--sp-lg);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.generation-fallback-notice strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.generation-fallback-notice ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
 .source-sketch {
   display: grid;
   gap: var(--sp-md);

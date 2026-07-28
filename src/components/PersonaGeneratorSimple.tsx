@@ -630,6 +630,35 @@ const SOCIAL_CLASSES = [
 
 type BiographyTab = 'biography' | 'family' | 'lifeEvents' | 'innerLife';
 
+/** Which AI action the cost confirmation is standing in front of. */
+type AiCostKind = 'schema' | 'repeat_prose';
+
+const AI_COST_COPY: Record<AiCostKind, { title: string; lead: string; detail: string; confirm: string }> = {
+  schema: {
+    title: 'Build the full schema record?',
+    lead: 'This asks the model to fill the whole JSONL annotation record — the evidence-tagged fields behind the character sheet.',
+    detail: 'It costs about six times as much per persona as the standard AI biography, because the entire schema goes to the model with every request.',
+    confirm: 'Build schema record',
+  },
+  repeat_prose: {
+    title: 'Generate another AI persona?',
+    lead: 'You have already developed a persona with AI this session.',
+    detail: 'Each run costs a fraction of a cent in API fees. That is small alone and adds up quickly across everyone using the site.',
+    confirm: 'Generate anyway',
+  },
+};
+
+/** A stage that fell back to offline generation, and why it did. */
+type GenerationFallback = {
+  stage: 'record' | 'prose';
+  reason: string;
+};
+
+const FALLBACK_STAGE_LABELS: Record<GenerationFallback['stage'], string> = {
+  record: 'Schema record filled offline from source keywords',
+  prose: 'Biography written from a local template, not by the model',
+};
+
 const SOURCE_FIELD_LABELS: Record<MaterialSupportTag, string> = {
   explicit: 'source-supported',
   'strong-inference': 'strong inference',
@@ -1032,6 +1061,14 @@ export default function PersonaGenerator() {
   const [sourcePortraitUrl, setSourcePortraitUrl] = useState<string | null>(null);
   const [sourcePortraitAttribution, setSourcePortraitAttribution] = useState<string | null>(null);
   const [personaSketch, setPersonaSketch] = useState<string | null>(null);
+  // Which parts of this persona came from the offline fallback rather than the
+  // model. Kept next to the biography so a failed call cannot masquerade as a
+  // successful one.
+  const [generationFallbacks, setGenerationFallbacks] = useState<GenerationFallback[]>([]);
+  // Every model call costs real money and this tool is free, so repeat use and
+  // the expensive schema path both pause for an explicit confirmation.
+  const [aiProseRuns, setAiProseRuns] = useState(0);
+  const [costConfirm, setCostConfirm] = useState<{ kind: AiCostKind; run: () => Promise<void> } | null>(null);
   const [editableJsonl, setEditableJsonl] = useState('');
   const [fieldEditStatus, setFieldEditStatus] = useState<string | null>(null);
   const [isSourceGenerating, setIsSourceGenerating] = useState(false);
@@ -1327,9 +1364,45 @@ export default function PersonaGenerator() {
     setSourcePortraitUrl(null);
     setSourcePortraitAttribution(null);
     setPersonaSketch(null);
+    setGenerationFallbacks([]);
     setEditableJsonl('');
     setDeathRevealState('prompt'); // Reset death reveal for new persona
     setDeathInfo(null);
+  };
+
+  /**
+   * Gate a model-backed action behind the cost confirmation. The first prose
+   * run of a session goes straight through; the schema path and every repeat
+   * prose run stop for a confirmation that also asks about donating.
+   */
+  const requestAiRun = (kind: AiCostKind, run: () => Promise<void>) => {
+    if (isSourceGenerating) return;
+    if (kind === 'schema' && !useGeminiExtraction) {
+      // Nothing is sent to the model with extraction switched off, so there is
+      // no cost to warn about.
+      void run();
+      return;
+    }
+    if (kind === 'repeat_prose' && aiProseRuns === 0) {
+      setAiProseRuns(runs => runs + 1);
+      void run();
+      return;
+    }
+    setCostConfirm({ kind, run });
+  };
+
+  const confirmAiRun = () => {
+    const pending = costConfirm;
+    setCostConfirm(null);
+    if (!pending) return;
+    if (pending.kind === 'repeat_prose') setAiProseRuns(runs => runs + 1);
+    void pending.run();
+  };
+
+  const noteGenerationFallback = (stage: GenerationFallback['stage'], reason: string) => {
+    setGenerationFallbacks(previous => (
+      previous.some(entry => entry.stage === stage) ? previous : [...previous, { stage, reason }]
+    ));
   };
 
   const localPersonaSketch = (record: HistoricalPersonaAnnotationRecord): string => {
@@ -1416,13 +1489,22 @@ export default function PersonaGenerator() {
       setPersonaSketch('Writing source-grounded sketch...');
       try {
         const sketch = await generatePersonaSketchWithGemini(record);
-        setPersonaSketch(sketch || localPersonaSketch(record));
+        if (sketch) {
+          setPersonaSketch(sketch);
+        } else {
+          setPersonaSketch(localPersonaSketch(record));
+          noteGenerationFallback('prose', 'The model returned an empty sketch.');
+        }
       } catch (error) {
         setPersonaSketch(localPersonaSketch(record));
+        noteGenerationFallback('prose', error instanceof Error ? error.message : 'Sketch generation failed.');
         setSourceIngestionStatus(error instanceof Error ? `${error.message} Showing local sketch fallback.` : 'Sketch generation failed. Showing local sketch fallback.');
       }
     } else {
       setPersonaSketch(localPersonaSketch(record));
+      noteGenerationFallback('prose', options.generateSketch
+        ? 'Model-written prose is switched off.'
+        : 'Rebuilt from the record without asking the model for new prose.');
     }
   };
 
@@ -1456,6 +1538,8 @@ export default function PersonaGenerator() {
         setSourceIngestionStatus(error instanceof Error
           ? `${error.message} Using local source-based fallback instead of a synthetic placeholder.`
           : 'Gemini/schema generation failed. Using local source-based fallback instead of a synthetic placeholder.');
+        noteGenerationFallback('record', error instanceof Error ? error.message : 'Schema generation failed.');
+        noteGenerationFallback('prose', 'Written from the offline record instead.');
         const record = createAnnotationRecordFromSource(sourceForFallback);
         await generateFromAnnotationRecord(record, {
           useSourceTitleAsName: true,
@@ -1475,7 +1559,9 @@ export default function PersonaGenerator() {
     source: ReturnType<typeof createPastedTextSource>,
     options?: { target?: PersonaGenerationTarget }
   ) => {
+    setGenerationFallbacks([]);
     if (!useGeminiExtraction) {
+      noteGenerationFallback('record', 'Model schema filling is switched off.');
       return createAnnotationRecordFromSource(source);
     }
 
@@ -1485,6 +1571,7 @@ export default function PersonaGenerator() {
         preferredMoment: preferredMoment.trim() || undefined,
       });
     } catch (error) {
+      noteGenerationFallback('record', error instanceof Error ? error.message : 'Schema generation failed.');
       setSourceIngestionStatus(error instanceof Error
         ? `${error.message} Using local source-based fallback instead.`
         : 'Gemini schema generation failed. Using local source-based fallback instead.');
@@ -1606,6 +1693,8 @@ export default function PersonaGenerator() {
         return;
       }
       setEditableJsonl(annotationRecordToJsonl(parsed));
+      // The edited record supersedes whatever the previous run fell back on.
+      setGenerationFallbacks([]);
       await generateFromAnnotationRecord(parsed, {
         useSourceTitleAsName: sourceTarget === 'named_subject',
         portraitUrl: sourcePortraitUrl || undefined,
@@ -2165,6 +2254,7 @@ export default function PersonaGenerator() {
     setSourcePortraitUrl(null);
     setSourcePortraitAttribution(null);
     setPersonaSketch(null);
+    setGenerationFallbacks([]);
     setEditableJsonl('');
     setActiveTab('biography'); // Reset to biography tab on new generation
     setDeathRevealState('prompt'); // Reset death reveal for new persona
@@ -2175,8 +2265,11 @@ export default function PersonaGenerator() {
     applyProceduralPersona(generateHistoricalPersona({ samplingMode }));
   };
 
-  const generateCompletelyRandom = async () => {
-    if (isSourceGenerating) return;
+  /**
+   * Shared setup for both AI paths: a procedural seed, loaded into the Source
+   * Studio, with the persona view cleared and ready to receive the result.
+   */
+  const beginAiRunFromProceduralSeed = () => {
     resetSharedPersonaState();
     setIsSourceGenerating(true);
     setSourcePanelCollapsed(true);
@@ -2184,6 +2277,7 @@ export default function PersonaGenerator() {
     setPersona(null);
     setAnnotationRecord(null);
     setPersonaSketch(null);
+    setGenerationFallbacks([]);
     setEditableJsonl('');
     setDeathRevealState('prompt');
     setDeathInfo(null);
@@ -2194,6 +2288,39 @@ export default function PersonaGenerator() {
     setSourceText(source.text);
     setSourceUrl('');
     setOldBaileySelectionActive(false);
+    return { proceduralPersona, source };
+  };
+
+  /**
+   * The default AI path: prose only.
+   *
+   * The schema record is built locally from the seed we already generated, so
+   * this makes a single model call for the biography instead of two. The
+   * expensive call was spending most of its tokens restating a persona this app
+   * had just invented, only for lockProceduralSeedRecord to overwrite the
+   * identity fields again.
+   */
+  const developPersonaProse = async () => {
+    if (isSourceGenerating) return;
+    const { proceduralPersona, source } = beginAiRunFromProceduralSeed();
+    setSourceIngestionStatus(useGeminiExtraction
+      ? `Generated ${proceduralPersona.character.name} as a procedural seed. Asking the model for the biography...`
+      : `Generated ${proceduralPersona.character.name} as a procedural seed. Writing a local biography...`);
+    try {
+      const record = lockProceduralSeedRecord(createAnnotationRecordFromSource(source), proceduralPersona);
+      await generateFromAnnotationRecord(record, { useSourceTitleAsName: true, generateSketch: true });
+      setSourceIngestionStatus(`Developed ${proceduralPersona.character.name} from a locally built schema record.`);
+    } catch (error) {
+      setSourceIngestionStatus(error instanceof Error ? error.message : 'Persona development failed.');
+    } finally {
+      setIsSourceGenerating(false);
+    }
+  };
+
+  /** The opt-in path: pay for a model-filled schema record, then the biography. */
+  const generateCompletelyRandom = async () => {
+    if (isSourceGenerating) return;
+    const { proceduralPersona, source } = beginAiRunFromProceduralSeed();
     setSourceIngestionStatus(useGeminiExtraction
       ? `Generated ${proceduralPersona.character.name} as a procedural seed. Asking Gemini to populate the schema...`
       : `Generated ${proceduralPersona.character.name} as a procedural seed. Building a heuristic schema record...`);
@@ -2210,6 +2337,8 @@ export default function PersonaGenerator() {
       setSourceIngestionStatus(error instanceof Error
         ? `${error.message} Showing local source-based fallback instead.`
         : 'Schema generation failed. Showing local source-based fallback instead.');
+      noteGenerationFallback('record', error instanceof Error ? error.message : 'Schema generation failed.');
+      noteGenerationFallback('prose', 'Written from the offline record instead.');
       const record = lockProceduralSeedRecord(createAnnotationRecordFromSource(source), proceduralPersona);
       await generateFromAnnotationRecord(record, { useSourceTitleAsName: true, generateSketch: false });
     } finally {
@@ -3832,13 +3961,23 @@ export default function PersonaGenerator() {
           </button>
           <button
             className="btn btn-secondary generation-ai-button"
-            onClick={generateCompletelyRandom}
+            onClick={() => requestAiRun('repeat_prose', developPersonaProse)}
             disabled={isSourceGenerating}
-            title="Generate a persona and have a language model expand it into a fuller narrative. Slower, and needs an API key."
+            title="Generate a persona and have a language model write its biography. One model call; the schema record is built locally."
             aria-label="Generate a persona and develop it with AI"
           >
             <IoSparkles aria-hidden="true" />
             {isSourceGenerating ? 'Developing…' : 'Use AI to Develop Persona'}
+          </button>
+          <button
+            className="btn btn-tertiary generation-schema-button"
+            onClick={() => requestAiRun('schema', generateCompletelyRandom)}
+            disabled={isSourceGenerating}
+            title="Also ask the model to fill the full JSONL annotation record. Roughly six times the cost of the standard AI biography."
+            aria-label="Generate a persona with a model-filled schema record"
+          >
+            <IoDocumentText aria-hidden="true" />
+            AI Schema Record
           </button>
           <div className="sampling-mode" role="group" aria-label="How personas are sampled">
             <button
@@ -4014,7 +4153,7 @@ export default function PersonaGenerator() {
                 </span>
                 <div className="source-workspace-action-buttons">
                   {(sourceStudioView === 'wikipedia' || sourceStudioView === 'full') && (
-                    <button className="btn btn-secondary" onClick={generateRandomAnnotationPersona} disabled={isSourceGenerating} aria-label="Generate a surprise Wikipedia-backed schema persona">
+                    <button className="btn btn-secondary" onClick={() => requestAiRun('schema', generateRandomAnnotationPersona)} disabled={isSourceGenerating} aria-label="Generate a surprise Wikipedia-backed schema persona">
                       <IoDocumentText aria-hidden="true" />
                       {isSourceGenerating ? 'Finding Source...' : 'Surprise Wikipedia Persona'}
                     </button>
@@ -4051,7 +4190,7 @@ export default function PersonaGenerator() {
                           }}
                           placeholder={sourceStudioView === 'web' ? 'https://archive.org/...' : 'https://en.wikipedia.org/wiki/...'}
                         />
-                        <button className="btn btn-secondary" onClick={ingestUrl} disabled={isSourceGenerating}>
+                        <button className="btn btn-secondary" onClick={() => requestAiRun('schema', ingestUrl)} disabled={isSourceGenerating}>
                           {isSourceGenerating ? 'Working...' : 'Load URL'}
                         </button>
                       </div>
@@ -4082,7 +4221,7 @@ export default function PersonaGenerator() {
                 <div className="old-bailey-source-box">
                   <div className="old-bailey-source-heading">
                     <span>Old Bailey Proceedings</span>
-                    <button className="btn btn-secondary" onClick={ingestRandomOldBailey} disabled={isSourceGenerating}>
+                    <button className="btn btn-secondary" onClick={() => requestAiRun('schema', ingestRandomOldBailey)} disabled={isSourceGenerating}>
                       {isSourceGenerating ? 'Searching...' : 'Random Trial'}
                     </button>
                   </div>
@@ -4165,7 +4304,7 @@ export default function PersonaGenerator() {
               )}
               <div className="source-actions">
                 {(sourceStudioView === 'text' || sourceStudioView === 'full') && (
-                  <button className="btn btn-primary" onClick={generateFromAvailableSource} disabled={isSourceGenerating}>
+                  <button className="btn btn-primary" onClick={() => requestAiRun('schema', generateFromAvailableSource)} disabled={isSourceGenerating}>
                     {isSourceGenerating
                       ? 'Generating...'
                       : sourceStudioView === 'text'
@@ -4601,6 +4740,18 @@ export default function PersonaGenerator() {
                           }
                         }}
                       >
+                        {generationFallbacks.length > 0 && (
+                          <div className="generation-fallback-notice" role="status">
+                            <strong>Offline fallback in use</strong>
+                            <ul>
+                              {generationFallbacks.map(fallback => (
+                                <li key={fallback.stage}>
+                                  {FALLBACK_STAGE_LABELS[fallback.stage]} — {fallback.reason}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                         {annotationRecord && personaSketch ? (
                           <div className="source-sketch">
                             {personaSketch.split(/\n{2,}/).map((paragraph, index) => (
@@ -5845,6 +5996,56 @@ export default function PersonaGenerator() {
               </button>
             </div>
           </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {costConfirm && (
+        <motion.div
+          className="modal-overlay"
+          onClick={() => setCostConfirm(null)}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ai-cost-modal-title"
+        >
+          <motion.div
+            className="modal ai-cost-modal"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.94, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.94, y: 16 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+          >
+            <div className="modal-header">
+              <h2 id="ai-cost-modal-title">{AI_COST_COPY[costConfirm.kind].title}</h2>
+              <button className="modal-close" onClick={() => setCostConfirm(null)} aria-label="Close dialog">
+                <IoClose aria-hidden="true" />
+              </button>
+            </div>
+            <div className="modal-body ai-cost-body">
+              <p>{AI_COST_COPY[costConfirm.kind].lead}</p>
+              <p>{AI_COST_COPY[costConfirm.kind].detail}</p>
+              <p className="ai-cost-ask">
+                This tool is free and carries no ads; the API bill is paid out of pocket.
+                If you get use out of it, please consider chipping in.
+              </p>
+              <div className="ai-cost-actions">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => { setCostConfirm(null); setShowDonate(true); }}
+                >
+                  <IoHeart aria-hidden="true" />
+                  Donate
+                </button>
+                <button className="btn btn-primary" onClick={confirmAiRun}>
+                  {AI_COST_COPY[costConfirm.kind].confirm}
+                </button>
+              </div>
+            </div>
           </motion.div>
         </motion.div>
       )}

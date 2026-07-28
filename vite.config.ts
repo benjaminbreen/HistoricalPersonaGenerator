@@ -3,6 +3,17 @@ import react from '@vitejs/plugin-react'
 import fs from 'node:fs'
 import path from 'node:path'
 import personaShareHandler from './api/persona-share.js'
+// @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
+import { parseJsonObject } from './api/_lib/llmJson.js'
+// @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
+import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './api/_lib/rateLimit.js'
+// @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
+import {
+  ANNOTATION_TEMPERATURE,
+  SKETCH_TEMPERATURE,
+  buildAnnotationPrompt,
+  buildSketchPrompt,
+} from './api/_lib/personaPrompts.js'
 
 const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite'
 const DEFAULT_OPENAI_MODEL = 'gpt-5-nano'
@@ -13,26 +24,6 @@ const readRequestBody = async (req: any): Promise<any> => {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
   }
   return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}')
-}
-
-const stripCodeFence = (text: string): string => {
-  const trimmed = text.trim()
-  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i)
-  return fenced ? fenced[1].trim() : trimmed
-}
-
-const parseJsonObject = (text: string): unknown => {
-  const stripped = stripCodeFence(text)
-  try {
-    return JSON.parse(stripped)
-  } catch {
-    const firstBrace = stripped.indexOf('{')
-    const lastBrace = stripped.lastIndexOf('}')
-    if (firstBrace >= 0 && lastBrace > firstBrace) {
-      return JSON.parse(stripped.slice(firstBrace, lastBrace + 1))
-    }
-    throw new Error('Gemini did not return parseable JSON.')
-  }
 }
 
 const geminiText = async (prompt: string, env: Record<string, string>, options: { json?: boolean; temperature?: number } = {}): Promise<string> => {
@@ -87,68 +78,6 @@ const llmText = (prompt: string, env: Record<string, string>, options: { json?: 
   if (provider === 'gemini') return geminiText(prompt, env, options)
   throw new Error('Unsupported LLM_PROVIDER.')
 }
-
-const buildAnnotationPrompt = (source: any, options: any, annotationSchema: unknown): string => {
-  const targetInstruction = options?.target === 'named_subject'
-    ? `Generate the persona record for the named subject of the source if the source clearly has one. For a Wikipedia biography, this means the article subject. Use a historically situated moment during that person's life, not a posthumous summary.`
-    : `Generate a plausible ordinary person from the source world, not the famous subject unless the source itself is ordinary-person evidence.`
-
-  return [
-    'You are filling a strict JSONL annotation record for a historical persona generator.',
-    'Return exactly one JSON object and no markdown.',
-    targetInstruction,
-    options?.preferredMoment ? `Preferred moment or angle: ${options.preferredMoment}` : '',
-    'Use schema_version "1.1.0".',
-    'The output must conform to this JSON Schema. Do not include properties outside the schema:',
-    JSON.stringify(annotationSchema),
-    '',
-    'Evidence rules:',
-    '- Fill every required field.',
-    '- Prefer direct evidence from the source.',
-    '- Use conservative historical inference for guessable fields.',
-    '- Use plausible synthesis only for mundane gaps like dwelling, food security, clothing, temperament, or concerns.',
-    '- Mark synthesized or inferred fields in field_evidence using support_level.',
-    '- Fill persona_seed.identity_name for ordinary fictional personas or inferred source-world people. Use historically plausible names for the place, language, status, gender role, and period; mark support_level and confidence.',
-    '- Fill persona_seed.social_position, persona_seed.constraint_regimes, persona_seed.public_world, persona_seed.religious_practice, persona_seed.normative_world, and persona_seed.interaction_style when evidence or conservative inference supports them.',
-    '- Use the new compact fields to classify portable dimensions: social/economic security, autonomy, structural constraints, public-world scale, religious or ritual practice, normative frame, and behavior under social conditions. Put culturally specific terms in detail fields rather than inventing narrow enum values.',
-    '- For literary salons, reform circles, artistic circles, or public intellectual communities, prefer public_world.scale "cultural_or_reform_network" over ritual_or_scholarly_network unless ritual institutions or formal scholarship are central.',
-    '- For unpaid editorial, household, or business collaboration within a marriage or family enterprise, prefer work.labor_relation "family_enterprise_or_spousal_collaboration" over self_employed.',
-    '- For work.workplace, use only schema enum values: household, field, workshop, shop, street, dock, office, kitchen, ship, barracks, court, religious_house, factory, mixed.',
-    '- For persona_seed.place.residence_locale and activity_locale, use only schema enum values. If unsure, use urban_neighborhood for residence_locale and mixed_or_itinerant for activity_locale.',
-    '- Ensure persona_seed.temporal.period_bucket contains persona_seed.temporal.specific_year.',
-    '- Fill persona_seed.family.members when parents, spouse, children, or siblings are known or can be conservatively inferred. Use real known family for named historical subjects when available; otherwise use sparse plausible placeholders and mark support_level synthetic_fill or weak_inference.',
-    '- Fill persona_seed.temperament_and_voice.personality_traits as Big Five values from 0 to 1. Ground them in the source where possible; otherwise infer conservatively from temperament, voice, work, and social position.',
-    '- Keep source_snippets short.',
-    '- Use evidence.bias_flags to note Wikipedia/reference source limitations, elite bias, model_synthesized_gaps, and uncertainty.',
-    '- Do not give modern concepts, later hindsight, or broad omniscience to the persona.',
-    '- If the named subject is elite or famous, household economy and material life should reflect their actual social position rather than ordinary defaults.',
-    '- Choose a specific_year between 1400 and 1930. For biography pages, choose a meaningful living-year moment supported by the page.',
-    '',
-    'Source metadata:',
-    JSON.stringify({
-      title: source.title,
-      url: source.url,
-      citation_label: source.citationLabel,
-      source_basis: source.sourceBasis,
-      extraction_method: source.extractionMethod,
-      reliability_notes: source.reliabilityNotes,
-    }),
-    '',
-    'Source text:',
-    String(source.text || '').slice(0, 30000),
-  ].filter(Boolean).join('\n')
-}
-
-const buildSketchPrompt = (record: unknown): string => [
-  'Write a historically grounded persona sketch from this annotation record.',
-  'Write exactly two compact paragraphs, totaling 120-170 words.',
-  'Each paragraph should earn its place: prioritize source-specific circumstances, work, stakes, and voice over general historical atmosphere.',
-  'Do not write a generic encyclopedia biography. Write a vivid but sober character sheet sketch anchored to the selected year, social position, work, household economy, material life, concerns, and worldview.',
-  'Distinguish direct evidence from plausible inference in natural prose without footnotes.',
-  'Avoid modern hindsight and anachronistic vocabulary.',
-  'Return plain text only.',
-  JSON.stringify(record),
-].join('\n\n')
 
 const OLD_BAILEY_API = 'https://www.dhi.ac.uk/api/data/oldbailey_record'
 const OLD_BAILEY_SINGLE_API = 'https://www.dhi.ac.uk/api/data/oldbailey_record_single'
@@ -476,8 +405,19 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
 
         try {
           const body = await readRequestBody(req)
+          if (body.action === 'generate_annotation' || body.action === 'generate_sketch') {
+            const verdict = checkRateLimit(clientIpFromRequest(req), body.action)
+            if (!verdict.allowed) {
+              res.statusCode = 429
+              res.setHeader('Content-Type', 'application/json')
+              res.setHeader('Retry-After', String(verdict.retryAfterSeconds))
+              res.end(JSON.stringify({ error: rateLimitMessage(verdict.scope), retryAfterSeconds: verdict.retryAfterSeconds }))
+              return
+            }
+          }
+
           if (body.action === 'generate_annotation') {
-            const text = await llmText(buildAnnotationPrompt(body.source, body.options, annotationSchema), env, { json: true, temperature: 0.35 })
+            const text = await llmText(buildAnnotationPrompt(body.source, body.options, annotationSchema), env, { json: true, temperature: ANNOTATION_TEMPERATURE })
             res.setHeader('Content-Type', 'application/json')
             res.setHeader('Cache-Control', 'no-store')
             res.end(JSON.stringify({ record: parseJsonObject(text) }))
@@ -485,7 +425,7 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
           }
 
           if (body.action === 'generate_sketch') {
-            const sketch = await llmText(buildSketchPrompt(body.record), env, { temperature: 0.45 })
+            const sketch = await llmText(buildSketchPrompt(body.record), env, { temperature: SKETCH_TEMPERATURE })
             res.setHeader('Content-Type', 'application/json')
             res.setHeader('Cache-Control', 'no-store')
             res.end(JSON.stringify({ sketch: sketch.trim() }))
