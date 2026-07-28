@@ -105,7 +105,7 @@ export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
     }
   }
   drawAgeLines(context, head);
-  drawMarkings(context);
+  drawMarkings(context, hair.hairlineY);
   drawAilments(context);
   drawFaceTraits(context);
 
@@ -279,6 +279,7 @@ export function renderFrame(
     y: anatomy.mouthY,
     ageThinning: spec.ageLines,
     toothless: spec.traits.toothless,
+    dental: spec.dental,
   });
 
   const smiling = state.expression === 'smile' || state.expression === 'grin' || state.expression === 'content';

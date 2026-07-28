@@ -12,11 +12,12 @@
  */
 
 import { MAT, RampBook, Raster } from '../core/raster';
+import { hexToRgb } from '../core/color';
 import {
   drawStamp, endCurve, insertRows, PaintTable, rampPaint, relativePaints,
   removeRow, rgbPaint, Stamp, stamp, widenStamp,
 } from '../core/stamp';
-import { Expression, LipShape } from '../spec/types';
+import { DentalWork, Expression, LipShape } from '../spec/types';
 import { PortraitRamps } from './palette';
 
 /*
@@ -58,6 +59,50 @@ const OPEN = stamp(
   ..umoooooum..
   ...dDDDDDd...
   ....-===-....
+  `,
+  { anchor: { x: 6, y: 2 } }
+);
+
+/**
+ * Lips resting closed, but not sealed — one row of teeth showing between them.
+ *
+ * This exists for modified teeth. Blackened, filed or inlaid teeth are worked
+ * on precisely so that they are seen, and a portrait of someone who has had
+ * that done with the mouth shut is a portrait that omits the thing. The grin is
+ * the wrong instrument: it puts a broad smile on every persona who lacquered
+ * their teeth, when the practice belonged to composed married women as often as
+ * to anyone. A parted lip shows the work without inventing the mood.
+ */
+const PARTED = stamp(
+  `
+  ....-----....
+  ..uuUUuUUuu..
+  .mtttttttttm.
+  ..ddDDDDDdd..
+  ...ddddddd...
+  ...-=====-...
+  `,
+  { anchor: { x: 6, y: 2 } }
+);
+
+/**
+ * The same parting, one row deeper, for lacquered teeth.
+ *
+ * A single row of enamel is enough to show white teeth against a lip, and not
+ * nearly enough to show black ones: laid over the row where the mouth line
+ * already sits, blackened teeth came out looking exactly like a closed mouth.
+ * The modification has to be visible as an *opening* before its colour can say
+ * anything, so the lacquer gets two rows and the white does not.
+ */
+const PARTED_DEEP = stamp(
+  `
+  ....-----....
+  ..uuUUuUUuu..
+  .mtttttttttm.
+  .mtttttttttm.
+  ..ddDDDDDdd..
+  ...ddddddd...
+  ...-=====-...
   `,
   { anchor: { x: 6, y: 2 } }
 );
@@ -151,6 +196,8 @@ export interface DrawMouthOptions {
   ageThinning?: number;
   /** No teeth behind the lips: they fall inward and the mouth sinks. */
   toothless?: boolean;
+  /** Blackened, filed or inlaid teeth. Parts the lips so they can be seen. */
+  dental?: DentalWork | null;
 }
 
 /**
@@ -162,13 +209,19 @@ const MOUTH_SURFACE = new Set<number>([MAT.SKIN, MAT.LIP, MAT.TEETH, MAT.PAINT])
 export function drawMouth(options: DrawMouthOptions): void {
   const {
     raster, book, paints, expression, lipShape, centerX, y,
-    bendBias = 0, ageThinning = 0, toothless = false,
+    bendBias = 0, ageThinning = 0, toothless = false, dental = null,
   } = options;
   const pose = poseFor(expression);
   // Losing teeth thins the lips past anything age alone does, because there is
   // nothing behind them to hold their shape.
   const thinning = toothless ? Math.max(ageThinning, 0.92) : ageThinning;
-  const art = shapeMouth(pose.base, lipShape, thinning);
+  // Modified teeth part a mouth that would otherwise be shut — but only one
+  // that is shut. An expression that already opens the mouth, or one held
+  // deliberately tight, keeps its own pose; overriding those would flatten
+  // thirteen expressions back down to one.
+  const showTeeth = dental && !toothless && pose.base === CLOSED;
+  const parted = dental?.style === 'blackened' ? PARTED_DEEP : PARTED;
+  const art = shapeMouth(showTeeth ? parted : pose.base, lipShape, thinning);
   const bend = pose.bend + bendBias;
 
   drawStamp(raster, art, centerX, y, paints, book, {
@@ -194,6 +247,52 @@ export function drawMouth(options: DrawMouthOptions): void {
       for (const dy of [-3, -2, 3, 4] as const) {
         if (raster.matAt(x, y + dy) !== MAT.SKIN) continue;
         raster.shift(x, y + dy, Math.abs(dy) > 2 ? 1 : 2, book);
+      }
+    }
+  }
+
+  if (dental && !toothless) drawDentalWork(raster, dental, centerX, y);
+}
+
+/**
+ * What was done to the teeth, worked over whatever enamel the mouth exposed.
+ *
+ * Driven off the material rather than off the stamp, so it lands correctly on a
+ * parted lip, a grin and an open mouth alike, and lands on nothing at all when
+ * the expression happens to hide the teeth. That last case is the reason this
+ * is not drawn as a marking: a marking would have painted a black bar across
+ * the closed lips of anyone who had lacquered their teeth.
+ */
+function drawDentalWork(
+  raster: Raster,
+  dental: DentalWork,
+  centerX: number,
+  mouthY: number
+): void {
+  const stone = hexToRgb(dental.color);
+  for (let dy = -4; dy <= 4; dy += 1) {
+    const y = mouthY + dy;
+    for (let dx = -8; dx <= 8; dx += 1) {
+      const x = centerX + dx;
+      if (raster.matAt(x, y) !== MAT.TEETH) continue;
+      switch (dental.style) {
+        case 'blackened':
+          // Lacquer, not decay: near-black but wet, so it keeps a highlight
+          // along the upper row where a flat black would kill the whole mouth.
+          raster.set(x, y, dy < 0 && (dx === -2 || dx === -1)
+            ? { r: 74, g: 66, b: 62 }
+            : { r: 24, g: 19, b: 20 }, MAT.TEETH);
+          break;
+        case 'filed':
+          // Points. Every other tooth taken back to the dark of the mouth,
+          // which at this size is the only way a sawtooth edge reads as one.
+          if ((dx + 16) % 2 === 0) raster.set(x, y, { r: 46, g: 26, b: 28 }, MAT.TEETH);
+          break;
+        case 'inlay':
+          // A stone set into one of the front teeth, off centre because a
+          // symmetrical pair reads as a mistake rather than as jewellery.
+          if (dx === 1) raster.set(x, y, stone, MAT.GEM);
+          break;
       }
     }
   }

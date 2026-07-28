@@ -32,12 +32,20 @@ interface Anchor {
   halfWidth: number;
 }
 
-function anchorFor(context: RenderContext, location: string): Anchor {
+function anchorFor(context: RenderContext, location: string, hairlineY: number): Anchor {
   const { anatomy } = context;
   const { centerX } = anatomy;
   switch (location) {
     case 'forehead':
-      return { x: centerX, y: anatomy.browY - 7, halfWidth: anatomy.headHalfWidth * 0.62 };
+      // Below the hairline, wherever that turned out to be. A bindi, a mehndi
+      // rosette or a caste mark drawn at a fixed height above the brow lands
+      // under the fringe of anyone with one and is never seen again — the paint
+      // goes down before the hair does.
+      return {
+        x: centerX,
+        y: Math.max(anatomy.browY - 7, Math.round(hairlineY) + 2),
+        halfWidth: anatomy.headHalfWidth * 0.62,
+      };
     case 'cheek':
       return { x: centerX, y: anatomy.cheekY - 1, halfWidth: anatomy.headHalfWidth * 0.72 };
     case 'chin':
@@ -80,13 +88,13 @@ function paint(
   raster.blend(x, y, ramp.steps[index], alpha, material, index);
 }
 
-export function drawMarkings(context: RenderContext): void {
+export function drawMarkings(context: RenderContext, hairlineY: number): void {
   const { raster, spec, anatomy, book } = context;
   const noise = makeNoise1D(spec.seed ^ 0x71a3);
 
   spec.markings.forEach((marking: MarkingSpec, index: number) => {
     if (marking.type === 'freckles') return; // handled with the complexion
-    const anchor = anchorFor(context, marking.location);
+    const anchor = anchorFor(context, marking.location, hairlineY);
     const scale = SIZE_SCALE[marking.size] ?? 1;
     const pigment = buildRamp(marking.color || '#8b5a3c', { contrast: 0.9, shift: 0.3, saturation: 1.05 });
     const pattern = marking.pattern || 'solid';
@@ -224,6 +232,8 @@ function drawPattern(
       break;
     }
     case 'horizontal_lines':
+    case 'horizontal_stripes':
+    case 'geometric_bands':
     case 'stripes': {
       const count = Math.max(2, Math.round(3 * scale));
       for (let i = 0; i < count; i += 1) {
@@ -307,6 +317,61 @@ function drawPattern(
       }
       break;
     }
+    case 'flower':
+    case 'floral': {
+      // A rosette — the mehndi motif and the flower-shaped forehead mark are
+      // the same drawing at this size: a centre with petals set round it.
+      const r = Math.max(2, 2.4 * scale);
+      paint(raster, pigment, Math.round(anchor.x), anchor.y, alpha);
+      for (let i = 0; i < 6; i += 1) {
+        const angle = (i / 6) * Math.PI * 2;
+        paint(
+          raster, pigment,
+          Math.round(anchor.x + Math.cos(angle) * r),
+          Math.round(anchor.y + Math.sin(angle) * r * 0.8),
+          alpha
+        );
+      }
+      break;
+    }
+    case 'handprint': {
+      // A hand laid on the face in paint. It has to be drawn at the size a
+      // hand actually is — palm across the cheek, fingers reaching up past the
+      // brow — because a hand scaled down to fit politely inside one cheek is
+      // not a hand, it is a red smear under an eye, which is what the first
+      // version of this looked like. Offset to one side, never centred:
+      // symmetry would turn a gesture into a pattern.
+      const side = rng() > 0.5 ? 1 : -1;
+      const cx = Math.round(anchor.x + side * half * 0.3);
+      const w = Math.max(5, Math.round(half * 0.55));
+      const palmTop = anchor.y - 3;
+      const palmDepth = Math.max(4, Math.round(half * 0.42));
+      for (let dy = 0; dy <= palmDepth; dy += 1) {
+        // The heel of the hand narrows toward the jaw.
+        const taper = Math.round((dy / palmDepth) ** 2 * 3);
+        line(cx - w + taper, palmTop + dy, cx + w - taper, palmTop + dy);
+      }
+      for (let f = 0; f < 4; f += 1) {
+        const fx = Math.round(cx - w + 1 + f * ((2 * w - 2) / 3));
+        // The outer fingers are shorter, which is most of what makes a row of
+        // strokes read as a hand rather than as a comb.
+        const reach = Math.round((f === 0 || f === 3 ? 7 : 10) * scale);
+        for (let dy = 1; dy <= reach; dy += 1) {
+          paint(raster, pigment, fx, palmTop - dy, alpha);
+          paint(raster, pigment, fx + 1, palmTop - dy, alpha);
+        }
+      }
+      // Thumb, swung out and down away from the fingers.
+      for (let i = 0; i < Math.round(5 * scale); i += 1) {
+        paint(raster, pigment, cx - side * (w + i - 1), palmTop + 1 + i, alpha);
+        paint(raster, pigment, cx - side * (w + i - 1), palmTop + 2 + i, alpha);
+      }
+      break;
+    }
+    // The marking tables spell several of these out more fully than the
+    // renderer's vocabulary does. Two names for one drawing is how a Berber
+    // chin tattoo and a row of war paint ended up as the fallback stroke.
+    case 'berber_geometric':
     case 'geometric':
     case 'berber': {
       line(anchor.x - 3 * scale, anchor.y - 3 * scale, anchor.x + 3 * scale, anchor.y - 3 * scale);
@@ -419,29 +484,71 @@ function drawPiercing(
 }
 
 /**
- * Lip plates, ear plugs and neck coils.
+ * Lip plates, cheek plugs, stretched lobes and neck coils.
  *
- * Cranial elongation and dental modification are deliberately not drawn:
- * the first needs a different skull, and the second needs an open mouth. A
- * marking rendered wrongly is worse than one left out, and both are rare.
+ * Cranial elongation and dental modification arrive here too, and are handled
+ * nowhere in this file: neither can be laid onto a finished face. The skull is
+ * reshaped in `anatomy.ts` and the teeth are drawn with the mouth, both off
+ * fields the spec lifts out of the marking list. They are silently ignored here
+ * rather than falling to a stroke.
  */
 function drawStructural(context: RenderContext, marking: MarkingSpec, scale: number): void {
   const { raster, anatomy, ramps } = context;
   const { centerX } = anatomy;
   const pattern = marking.pattern || '';
 
-  if (/plate|plug|disc/.test(pattern)) {
-    const radius = Math.max(2, Math.round((pattern === 'plate' ? 4 : 2.5) * scale));
-    const lip = marking.location === 'ear';
-    const cx = lip ? centerX + anatomy.earX - 1 : centerX;
-    const cy = lip ? anatomy.earBottomY : anatomy.mouthY + 2;
-    for (let dy = -radius; dy <= radius; dy += 1) {
-      for (let dx = -radius; dx <= radius; dx += 1) {
-        if (dx * dx + dy * dy > radius * radius) continue;
-        const rim = dx * dx + dy * dy > (radius - 1) * (radius - 1);
+  // A disc of clay, wood or bone, and — the part that matters — the flesh it
+  // has been stretched through. Drawn as a disc alone it reads as a coin held
+  // against a face; what makes it read as a modification is the ring of the
+  // person's own lip or lobe carried around it.
+  const disc = (cx: number, cy: number, radius: number, collar: Ramp | null) => {
+    for (let dy = -radius - 1; dy <= radius + 1; dy += 1) {
+      for (let dx = -radius - 1; dx <= radius + 1; dx += 1) {
+        const d2 = dx * dx + dy * dy;
+        if (d2 > (radius + 1) * (radius + 1)) continue;
+        if (d2 > radius * radius) {
+          // The stretched flesh: thinner at the top where it is under most
+          // tension, and taking the light from above like any other surface.
+          if (!collar || raster.alphaAt(cx + dx, cy + dy) === 0) continue;
+          raster.set(cx + dx, cy + dy, collar.steps[dy < 0 ? 2 : 5], MAT.SKIN, dy < 0 ? 2 : 5);
+          continue;
+        }
+        const rim = d2 > (radius - 1) * (radius - 1);
         const index = rim ? 5 : dx + dy < 0 ? 2 : 3;
         raster.set(cx + dx, cy + dy, ramps.leather.steps[index], MAT.LEATHER, index);
       }
+    }
+  };
+
+  if (/cheek/.test(pattern) || (marking.location === 'cheek' && /plug|disc/.test(pattern))) {
+    // Through the cheek, one each side, sitting level with the mouth.
+    const radius = Math.max(3, Math.round(3 * scale));
+    for (const side of [-1, 1] as const) {
+      disc(
+        Math.round(centerX + side * anatomy.headHalfWidth * 0.54),
+        anatomy.mouthY - 2,
+        radius,
+        ramps.skin
+      );
+    }
+    return;
+  }
+
+  if (/plate/.test(pattern)) {
+    // A lip plate is worn in the lower lip, which it holds open and carries
+    // forward — so it hangs *below* the mouth line rather than covering it, and
+    // the lip itself is the ring around it.
+    const radius = Math.max(3, Math.round(4.5 * scale));
+    disc(centerX, anatomy.mouthY + radius, radius, ramps.lip);
+    return;
+  }
+
+  if (/plug|disc/.test(pattern)) {
+    // Stretched lobes. The plug fills the opening and the lobe survives as a
+    // loop of skin under it, which is the whole silhouette of the thing.
+    const radius = Math.max(2, Math.round(2.6 * scale));
+    for (const side of [-1, 1] as const) {
+      disc(centerX + side * (anatomy.earX - 1), anatomy.earBottomY, radius, ramps.skin);
     }
     return;
   }

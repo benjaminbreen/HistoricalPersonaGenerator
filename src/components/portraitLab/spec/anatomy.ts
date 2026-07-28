@@ -11,7 +11,7 @@
  */
 
 import { unit } from '../core/rng';
-import { PortraitSpec } from './types';
+import { PortraitSpec, SkullShape } from './types';
 
 export const CANVAS = 96;
 
@@ -26,6 +26,12 @@ export interface Anatomy {
   headHeight: number;
   headHalfWidth: number;
   headProfile: ProfileKeys;
+  /**
+   * How far the cranium has been extended above where it would naturally sit,
+   * in pixels. Zero for every unbound skull. Read by the hair, which has to
+   * know that the vault above the hairline is taller than the face implies.
+   */
+  craniumRise: number;
 
   browY: number;
   eyeY: number;
@@ -268,7 +274,7 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
   const neckHalf = Math.round((female ? 8.4 : 9.8) * (spec.build === 'imposing' ? 1.15 : spec.build === 'slight' ? 0.9 : 1));
   const shoulderHalf = (SHOULDER_HALF[spec.build] ?? 33) * (female ? 0.9 : 1);
 
-  return {
+  return applySkullShape({
     size: CANVAS,
     centerX,
 
@@ -277,6 +283,7 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
     headHeight,
     headHalfWidth,
     headProfile: keys,
+    craniumRise: 0,
 
     // Far enough above the lash line that brow and eye stay two forms rather
     // than merging into one dark slab.
@@ -319,5 +326,49 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
       noseLean: asymPick('nose-lean', 0.8),
       mouthLean: asymPick('mouth-lean', 0.8),
     },
+  }, spec.skull);
+}
+
+/**
+ * A skull bound in infancy.
+ *
+ * The modification is to the cranium, not to the face: binding a child's head
+ * moves the vault up and back and leaves the eyes, nose and mouth where they
+ * were. So this runs *after* every feature has been placed and touches only the
+ * three things that describe the vault — where it starts, how tall it is, and
+ * how wide it is on the way up. Everything that draws itself against the skull
+ * rather than against a fixed row follows for free: the hair grows over the new
+ * dome, a cap fits it, the shading ellipsoid stretches with it.
+ *
+ * The vault narrows as it rises, on a curve rather than a taper. Straight sides
+ * give a cone; what the Paracas and Alemannic skulls actually show is a long
+ * dome that keeps its roundness right to the top.
+ */
+function applySkullShape(anatomy: Anatomy, shape: SkullShape): Anatomy {
+  if (shape !== 'elongated') return anatomy;
+
+  const rise = Math.round(anatomy.headHeight * 0.2);
+  const newTop = anatomy.headTop - rise;
+  const newHeight = anatomy.headHeight + rise;
+  const share = rise / newHeight;
+
+  // The old profile still describes the face; it just occupies less of the
+  // skull's height than it did.
+  const remapped: ProfileKeys = anatomy.headProfile.map(([t, half]) =>
+    [share + t * (1 - share), half] as [number, number]);
+
+  const crownHalf = anatomy.headProfile[0][1];
+  const vault: ProfileKeys = [];
+  for (let i = 0; i < 4; i += 1) {
+    const u = i / 4;
+    vault.push([u * share, crownHalf * (0.54 + 0.46 * Math.sqrt(u))]);
+  }
+
+  return {
+    ...anatomy,
+    headTop: newTop,
+    headHeight: newHeight,
+    headProfile: [...vault, ...remapped],
+    craniumRise: rise,
   };
 }

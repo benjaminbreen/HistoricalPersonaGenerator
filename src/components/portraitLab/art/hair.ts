@@ -171,7 +171,14 @@ function edgeJitter(texture: HairTexture, seed: number): (t: number, side: -1 | 
 function hairlineAt(context: RenderContext, dx: number, style: StyleProfile): number {
   const { anatomy, spec } = context;
   const t = Math.min(1, Math.abs(dx) / Math.max(1, anatomy.headHalfWidth));
-  const base = anatomy.browY - 8 + spec.recession * 4 - style.hairlineShift;
+  // A bound skull carries its hairline up with it. The vault is what the
+  // binding lengthened, and a hairline left at its usual distance above the
+  // brow buries the whole modification under hair — the head reads as an odd
+  // hairstyle rather than as a shaped skull, which is the one thing this must
+  // not do. Two thirds of the rise, so a tall bare forehead shows and the hair
+  // still sits on the crown rather than being pushed off the top of it.
+  const bound = anatomy.craniumRise * 0.66;
+  const base = anatomy.browY - 8 - bound + spec.recession * 4 - style.hairlineShift;
   const templeDip = 3.4 * t * t;
   const recessionBump = spec.recession * 8 * Math.exp(-((t - 0.66) ** 2) / 0.09);
   // A slight widow's peak keeps the centre from reading as a straight cut.
@@ -250,8 +257,15 @@ export function computeHairMasks(context: RenderContext): HairMasks {
       const [t1, h1] = source[idx + 1];
       const u = t1 === t0 ? 0 : (clamped - t0) / (t1 - t0);
       half = h0 + (h1 - h0) * u + profile.puff;
-      // Above the crown the hair rounds over the top of the skull.
-      if (headT < 0) half = anatomy.headHalfWidth * 0.55;
+      // Above the crown the hair rounds over the top of the skull. On a bound
+      // skull the cap has to follow the vault instead: that vault is far
+      // narrower than half the head's width, so the usual figure flares the
+      // hair out into a chimney standing above the head.
+      if (headT < 0) {
+        half = anatomy.craniumRise > 0
+          ? anatomy.headProfile[0][1] * 0.95
+          : anatomy.headHalfWidth * 0.55;
+      }
     } else {
       // Past the jaw: hair falls, widening slightly toward the shoulders.
       const fall = Math.min(1, (headT - 1) / 0.6);

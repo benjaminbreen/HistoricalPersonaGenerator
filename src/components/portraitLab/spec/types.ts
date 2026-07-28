@@ -225,6 +225,20 @@ export interface JewelrySpec {
   style: 'simple' | 'ornate' | 'delicate' | 'chunky';
 }
 
+/**
+ * A skull shaped in infancy by binding. Practised independently across the
+ * Andes, Mesoamerica, the Eurasian steppe, Merovingian Europe and elsewhere,
+ * and unmistakable at any resolution — which is the point of drawing it.
+ */
+export type SkullShape = 'natural' | 'elongated';
+
+export interface DentalWork {
+  /** Lacquered black (ohaguro and its relatives), filed to points, or inlaid. */
+  style: 'blackened' | 'filed' | 'inlay';
+  /** Inlay stone: jade, turquoise, gold. Ignored by the other two. */
+  color: string;
+}
+
 export interface MarkingSpec {
   /**
    * `culturalMarkings.ts` emits more than the portrait vocabulary originally
@@ -348,6 +362,17 @@ export interface PortraitSpec {
   headwear: HeadwearSpec | null;
   jewelry: JewelrySpec[];
   markings: MarkingSpec[];
+  /**
+   * Body modification that cannot be laid on top of a finished face, because it
+   * changed the face itself. A bound skull is a different skull and blackened
+   * teeth need a mouth that shows them, so both are lifted out of `markings`
+   * and into the anatomy and the mouth respectively. Left in the marking list
+   * they were silently dropped: the renderer had no case for either, and a
+   * persona whose own description says the skull was shaped in infancy came out
+   * with an ordinary head.
+   */
+  skull: SkullShape;
+  dental: DentalWork | null;
   glasses: { style: 'round' | 'square' | 'oval' | 'half_rim' } | null;
 
   condition: ConditionSpec;

@@ -19,6 +19,7 @@ import {
   BackgroundSpec,
   Build,
   ConditionSpec,
+  DentalWork,
   Expression,
   GarmentKind,
   GarmentSpec,
@@ -34,6 +35,7 @@ import {
   OrnamentMaterial,
   OrnamentSpec,
   PortraitSpec,
+  SkullShape,
 } from './types';
 
 export interface PortraitSource {
@@ -1038,6 +1040,10 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
   const facialHairWanted =
     gender !== 'Female' && Boolean(appearance.facialHair) && age >= 15;
 
+  const markings = attributeMarkings.length
+    ? [...((appearance.markings || []) as MarkingSpec[]), ...attributeMarkings]
+    : (appearance.markings || []) as MarkingSpec[];
+
   return {
     seed,
     gender,
@@ -1079,9 +1085,9 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     garment,
     headwear,
     jewelry: (appearance.jewelry || []) as JewelrySpec[],
-    markings: attributeMarkings.length
-      ? [...((appearance.markings || []) as MarkingSpec[]), ...attributeMarkings]
-      : (appearance.markings || []) as MarkingSpec[],
+    markings,
+    skull: skullShapeFrom(markings),
+    dental: dentalWorkFrom(markings),
     glasses: appearance.hasGlasses ? { style: appearance.glassesStyle || 'round' } : null,
 
     condition,
@@ -1097,6 +1103,33 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     era: source.era,
     wealth,
   };
+}
+
+/**
+ * Modification that has to leave the marking list to be drawn at all.
+ *
+ * Both of these arrive from `culturalMarkings.ts` as `structural` markings with
+ * a pattern string, and both were falling through every case in the drawing
+ * code, because neither is something you can stamp onto a finished face: one is
+ * a different skull and the other is only visible if the mouth opens. Reading
+ * them here turns them into anatomy and into a mouth pose instead.
+ */
+function skullShapeFrom(markings: MarkingSpec[]): SkullShape {
+  for (const marking of markings) {
+    const pattern = marking.pattern || '';
+    if (/cranial_elongation|elongat/.test(pattern)) return 'elongated';
+  }
+  return 'natural';
+}
+
+function dentalWorkFrom(markings: MarkingSpec[]): DentalWork | null {
+  for (const marking of markings) {
+    const pattern = marking.pattern || '';
+    if (pattern === 'teeth_black') return { style: 'blackened', color: '#14100f' };
+    if (pattern === 'teeth_filed') return { style: 'filed', color: '#e8e0d0' };
+    if (pattern === 'teeth_inlay') return { style: 'inlay', color: marking.color || '#4f9d7a' };
+  }
+  return null;
 }
 
 /** Map the app's expression vocabulary onto the renderer's. */

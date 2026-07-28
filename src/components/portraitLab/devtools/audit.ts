@@ -132,9 +132,16 @@ function inspect(raster: Raster, spec: PortraitSpec, expression: Expression): st
 /** Patterns the renderer draws deliberately. Anything else falls to a stroke. */
 const KNOWN_PATTERNS = new Set([
   'three_lines', 'vertical_lines', 'lines', 'scarification', 'ritual_scar',
-  'horizontal_lines', 'stripes', 'eye_band', 'dots', 'dot', 'spots', 'cross',
-  'vertical_v', 'zigzag', 'geometric', 'berber', 'swirls', 'celtic',
+  'horizontal_lines', 'horizontal_stripes', 'geometric_bands', 'stripes',
+  'eye_liner', 'eye_band', 'dots', 'dot', 'spots', 'cross',
+  'vertical_v', 'zigzag', 'geometric', 'berber', 'berber_geometric',
+  'flower', 'floral', 'handprint', 'swirls', 'celtic',
   'maori_spiral', 'maori_full', 'solid', 'hair_ochre',
+  // Structural: the disc and the flesh stretched around it.
+  'plate', 'plug', 'disc', 'cheek_plug', 'coils', 'ring',
+  // Lifted out of the marking list entirely — see `skull` and `dental` on the
+  // spec. Listed as known because they are drawn, just not from here.
+  'cranial_elongation', 'teeth_black', 'teeth_filed', 'teeth_inlay',
 ]);
 
 /** Marking types handled as a whole, whatever pattern string they carry. */
@@ -143,13 +150,13 @@ const TYPES_HANDLED_WHOLESALE = new Set([
 ]);
 
 /**
- * Modifications left undrawn on purpose. Cranial elongation needs a different
- * skull and dental modification needs an open mouth; a marking rendered wrongly
- * is worse than one left out, and both are rare. Reported separately so the
- * distinction between "not done yet" and "decided against" stays visible.
+ * Modifications left undrawn on purpose — because the portrait is cropped above
+ * them, not because they are hard. Bound feet and a mourning amputation are
+ * both real and both below the frame. Reported separately so the distinction
+ * between "not done yet" and "cannot be seen from here" stays visible.
  */
 const DELIBERATELY_SKIPPED = new Set([
-  'cranial_elongation', 'teeth_filed', 'teeth_black', 'teeth_inlay',
+  'foot_binding', 'amputation',
 ]);
 
 // ---------------------------------------------------------------------------
@@ -283,7 +290,13 @@ for (let i = 0; i < count; i += 1) {
       if (DELIBERATELY_SKIPPED.has(pattern)) {
         bump(skippedPatterns, pattern);
       } else if (marking.type === 'structural') {
-        if (!/plate|plug|disc|coil|ring/.test(pattern)) bump(unknownPatterns, `structural:${pattern}`);
+        // The skull and the teeth are drawn from the spec's own `skull` and
+        // `dental` fields rather than from this list, so they count as handled
+        // here even though nothing in `details.ts` touches them.
+        const elsewhere = /cranial_elongation|teeth_black|teeth_filed|teeth_inlay/.test(pattern);
+        if (!elsewhere && !/plate|plug|disc|coil|ring/.test(pattern)) {
+          bump(unknownPatterns, `structural:${pattern}`);
+        }
       } else if (!TYPES_HANDLED_WHOLESALE.has(marking.type) && !KNOWN_PATTERNS.has(pattern)) {
         bump(unknownPatterns, pattern);
       }
