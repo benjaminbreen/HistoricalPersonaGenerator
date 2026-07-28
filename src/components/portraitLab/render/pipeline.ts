@@ -104,7 +104,7 @@ export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
   });
   if (spec.ageLines > 0.4) {
     for (const side of [-1, 1] as const) {
-      drawNasolabialFold(base, ramps.book, anatomy.centerX, anatomy.noseBaseY - 2, side, spec.ageLines);
+      drawNasolabialFold(base, ramps.book, anatomy.faceX, anatomy.noseBaseY - 2, side, spec.ageLines);
     }
   }
   drawAgeLines(context, head);

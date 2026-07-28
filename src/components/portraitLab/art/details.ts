@@ -252,7 +252,7 @@ function drawPattern(
       // covered: the line is laid on the lid above the opening and along the
       // rim below it, and the parts that cross the eye simply do not take.
       for (const side of [-1, 1] as const) {
-        const cx = anatomy.centerX + side * anatomy.eyeDX;
+        const cx = anatomy.faceX + side * anatomy.eyeDX;
         const rx = Math.max(4, Math.round(5 * scale));
         for (let dx = -rx; dx <= rx; dx += 1) {
           const outward = side < 0 ? -dx : dx;
@@ -785,7 +785,7 @@ export function drawGlasses(context: RenderContext): void {
   };
 
   for (const side of [-1, 1] as const) {
-    const cx = centerX + side * anatomy.eyeDX;
+    const cx = anatomy.faceX + side * anatomy.eyeDX;
     if (style === 'square' || style === 'half_rim') {
       for (let dx = -rx; dx <= rx; dx += 1) {
         frame(cx + dx, anatomy.eyeY - ry, 2);
@@ -808,13 +808,13 @@ export function drawGlasses(context: RenderContext): void {
     }
   }
   // Bridge.
-  for (let x = centerX - anatomy.eyeDX + rx; x <= centerX + anatomy.eyeDX - rx; x += 1) {
+  for (let x = anatomy.faceX - anatomy.eyeDX + rx; x <= anatomy.faceX + anatomy.eyeDX - rx; x += 1) {
     frame(x, anatomy.eyeY - 1, 3);
   }
 
   // A single specular streak across each lens sells them as glass.
   for (const side of [-1, 1] as const) {
-    const cx = centerX + side * anatomy.eyeDX;
+    const cx = anatomy.faceX + side * anatomy.eyeDX;
     for (let i = 0; i < 3; i += 1) {
       raster.blend(cx - 4 + i, anatomy.eyeY - 3 + i, { r: 226, g: 236, b: 244 }, 0.5, MAT.GLASS, 1);
     }
@@ -890,7 +890,7 @@ export function drawAilments(context: RenderContext): void {
   if ((has('cholera') || has('tuberculosis')) && severity >= 2) {
     // Sunken eyes and hollow temples.
     for (const side of [-1, 1] as const) {
-      const x0 = centerX + side * anatomy.eyeDX;
+      const x0 = anatomy.faceX + side * anatomy.eyeDX;
       for (let dx = -5; dx <= 5; dx += 1) {
         raster.shift(x0 + dx, anatomy.eyeY + 5, 1, book);
         raster.shift(x0 + dx, anatomy.eyeY + 6, 1, book);

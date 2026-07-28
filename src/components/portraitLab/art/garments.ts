@@ -79,14 +79,24 @@ function poseShoulders(context: RenderContext, mask: Mask): Mask {
     // shifting the whole side down as a block detaches it from the collar.
     const reach = Math.min(1, Math.max(0, Math.abs(t) - 0.18) / 0.6);
     const dropped = t * side > 0 ? shoulderDrop * reach : 0;
-    // A stoop lifts the cloth beside the neck and leaves the points of the
-    // shoulders where they are, which is what rounds the line over.
-    const rounded = hunch * 3.4 * Math.exp(-((Math.abs(t) - 0.32) ** 2) / 0.09);
+    // A stoop lifts the slope between neck and shoulder point and leaves the
+    // point itself where it is, which is what rounds the line over.
+    //
+    // The hump has to sit where the shoulder can actually be seen. Centred
+    // near the neck — where the anatomy says the trapezius is — every pixel it
+    // moved was behind the jaw, and a stoop rendered identically to an upright
+    // back. At bust crop the visible shoulder starts at the edge of the head,
+    // around |t| = 0.7, and there is no point lifting cloth inside that.
+    const u = Math.min(1, Math.abs(t));
+    const visible = Math.max(0, Math.min(1, (u - 0.45) / 0.55));
+    const rounded = hunch * 4.5 * Math.sin(Math.PI * visible);
 
+    // Unconditional from here down. Testing the source mask as well — which
+    // the first version did — quietly discards every row a *raised* shoulder
+    // gains, because those rows are by definition ones the source mask does
+    // not have. A stoop drew nothing at all until this stopped consulting it.
     const start = Math.max(0, Math.round(top + dropped - rounded));
-    for (let y = start; y < size; y += 1) {
-      if (y >= top || mask[y * size + x]) out[y * size + x] = 1;
-    }
+    for (let y = start; y < size; y += 1) out[y * size + x] = 1;
   }
   return out;
 }

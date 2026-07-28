@@ -860,6 +860,8 @@ type PoseFamily = 'size' | 'address' | 'carriage';
 interface PoseSignal {
   /** The attribute id, or a predicate over the whole persona. */
   when: string | ((ids: Set<string>, build: Build, wealth: string) => boolean);
+  /** What the audit calls this. Required for predicates, which have no id. */
+  label?: string;
   family: PoseFamily;
   pose: Partial<PoseSpec>;
 }
@@ -894,10 +896,16 @@ const POSE_SIGNALS: PoseSignal[] = [
   { when: 'consumptive', family: 'carriage', pose: { square: -0.7, hunch: 0.3 } },
   {
     when: (_ids, build) => build === 'imposing' || build === 'stocky',
+    label: 'build:broad',
     family: 'carriage',
     pose: { square: 0.5 },
   },
-  { when: (_ids, build) => build === 'slight', family: 'carriage', pose: { square: -0.4 } },
+  {
+    when: (_ids, build) => build === 'slight',
+    label: 'build:slight',
+    family: 'carriage',
+    pose: { square: -0.4 },
+  },
 
   // Address: how they meet the viewer. Chin up is command, chin tucked is
   // wariness, and turning off-axis is refusal to be looked at straight.
@@ -917,6 +925,7 @@ const POSE_SIGNALS: PoseSignal[] = [
   // where status rather than body decides how a head is held.
   {
     when: (_ids, _build, wealth) => wealth === 'noble',
+    label: 'noble',
     family: 'address',
     pose: { chin: -1 },
   },
@@ -931,7 +940,7 @@ function buildPose(ids: Set<string>, build: Build, wealth: string): PoseSpec {
 
   const secondary = POSE_SIGNALS.find(s => s.family !== primary.family && fires(s));
   const label = (signal: PoseSignal) =>
-    typeof signal.when === 'string' ? signal.when : `${signal.family}:build`;
+    signal.label ?? (typeof signal.when === 'string' ? signal.when : signal.family);
 
   // Added rather than assigned. The families own an axis each *mostly* — a
   // hunched back also drops the whole figure a pixel, which is a size axis —

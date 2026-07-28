@@ -115,7 +115,7 @@ function drawFacialModelling(context: RenderContext, head: Mask): Mask {
   // Brow ridge: a lit ledge with a shadow beneath it. Heavier on male faces.
   const ridgeLift = female ? -1 : -1;
   for (const side of [-1, 1] as const) {
-    const eyeX = centerX + side * anatomy.eyeDX;
+    const eyeX = anatomy.faceX + side * anatomy.eyeDX;
     for (let dx = -6; dx <= 6; dx += 1) {
       const falloff = 1 - Math.abs(dx) / 7;
       if (falloff <= 0.15) continue;
@@ -126,7 +126,7 @@ function drawFacialModelling(context: RenderContext, head: Mask): Mask {
 
   // Eye sockets. Deeper at the top where the lid sits under the ridge.
   for (const side of [-1, 1] as const) {
-    const eyeX = centerX + side * anatomy.eyeDX;
+    const eyeX = anatomy.faceX + side * anatomy.eyeDX;
     const socket = maskEllipse(size, size, eyeX, anatomy.eyeY - 2.4, 6.2, 3.6);
     shiftInside(socket, 1);
     const deep = maskEllipse(size, size, eyeX, anatomy.eyeY - 4, 5.2, 1.8);
@@ -333,7 +333,7 @@ export function drawAgeLines(context: RenderContext, head: Mask): void {
   if (strength > 0.34) {
     const length = 2 + Math.round(strength * 2);
     for (const side of [-1, 1] as const) {
-      const x0 = centerX + side * (anatomy.eyeDX + 5);
+      const x0 = anatomy.faceX + side * (anatomy.eyeDX + 5);
       for (const slope of [-0.55, 0.55]) {
         for (let i = 1; i <= length; i += 1) {
           const x = x0 + side * i;
@@ -356,7 +356,7 @@ export function drawAgeLines(context: RenderContext, head: Mask): void {
   const tired = Math.max(strength - 0.4, spec.condition.fatigueRatio - 0.3);
   if (tired > 0.1) {
     for (const side of [-1, 1] as const) {
-      const x0 = centerX + side * anatomy.eyeDX;
+      const x0 = anatomy.faceX + side * anatomy.eyeDX;
       for (let dx = -4; dx <= 4; dx += 1) {
         const x = x0 + dx;
         const y = anatomy.eyeY + 5;
@@ -367,7 +367,7 @@ export function drawAgeLines(context: RenderContext, head: Mask): void {
   }
   if (strength > 0.6) {
     for (const side of [-1, 1] as const) {
-      const x0 = centerX + side * anatomy.eyeDX;
+      const x0 = anatomy.faceX + side * anatomy.eyeDX;
       for (let dx = -4; dx <= 4; dx += 1) {
         const x = x0 + dx;
         const taper = 1 - Math.abs(dx) / 5;
@@ -384,7 +384,7 @@ export function drawAgeLines(context: RenderContext, head: Mask): void {
   if (spec.lidDroop > 0.15) {
     const rows = spec.lidDroop > 0.6 ? 2 : 1;
     for (const side of [-1, 1] as const) {
-      const x0 = centerX + side * anatomy.eyeDX;
+      const x0 = anatomy.faceX + side * anatomy.eyeDX;
       for (let dx = -5; dx <= 5; dx += 1) {
         const x = x0 + dx;
         const taper = 1 - Math.abs(dx) / 6;
