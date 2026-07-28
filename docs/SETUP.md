@@ -1,0 +1,127 @@
+# Setup
+
+Everything needed to run, configure, and deploy the app. The [README](../README.md) covers what it does.
+
+## Getting Started
+
+### Install
+
+```bash
+npm install
+```
+
+### Run Locally
+
+```bash
+npm run dev
+```
+
+The app will be available at:
+
+```text
+http://localhost:3001
+```
+
+### Build
+
+```bash
+npm run build
+```
+
+### Preview Production Build
+
+```bash
+npm run preview
+```
+
+## Gemini Setup
+
+Source-backed persona generation can use Gemini to fill the historical persona annotation schema. For local development, add a Gemini key to `.env.local`:
+
+```bash
+GEMINI_API_KEY=your_key_here
+GEMINI_MODEL=gemini-3.1-flash-lite
+```
+
+The Vite dev server exposes a local `/api/gemini-persona` middleware and keeps this key server-side during development. The static browser bundle does not call Gemini directly. Do not use `VITE_GEMINI_API_KEY` or any other `VITE_*` variable for secrets: Vite includes those values in the browser build.
+
+To compare GPT-5 nano, use server-only environment variables instead. The client never selects the provider and cannot read either key:
+
+```bash
+LLM_PROVIDER=openai
+OPENAI_API_KEY=your_key_here
+OPENAI_MODEL=gpt-5-nano
+```
+
+On Vercel, add only the selected provider's variables in **Project Settings → Environment Variables** (Production, Preview, and/or Development as appropriate). Do not create `VITE_GEMINI_API_KEY`, `VITE_GOOGLE_AI_API_KEY`, or `VITE_OPENAI_API_KEY` variables.
+
+For production-style local serving:
+
+```bash
+npm run build
+npm start
+```
+
+`npm start` reads `.env.local` (then `.env`) directly; real environment variables still win, so `GEMINI_API_KEY=... npm start` also works.
+
+### What each AI action costs
+
+Two model actions exist, and they are priced very differently per persona:
+
+| Action | Tokens (in/out) | Cost | Triggered by |
+| --- | --- | --- | --- |
+| `generate_sketch` | ~1.6k / 0.2k | ~0.07¢ | **Use AI to Develop Persona** (the default) |
+| `generate_annotation` | ~7.5k / 1.6k | ~0.43¢ | **AI Schema Record**, and the Source Studio flows |
+
+The annotation prompt carries the whole JSON schema — about 6,500 tokens of the 7,500 it sends — which is why it dominates. The default AI path therefore builds the schema record locally from the procedural seed and pays only for the biography. Both the schema path and any repeat of the default path ask the user to confirm first, and mention donating.
+
+### Rate limits
+
+`/api/gemini-persona` is public, so every route enforces a cost-weighted limit (a schema record counts six times a biography). Defaults, overridable per environment:
+
+```bash
+LLM_HOURLY_COST_PER_IP=30     # ~30 biographies or 5 schema records per IP per hour
+LLM_DAILY_COST_PER_IP=120
+LLM_DAILY_COST_GLOBAL=3000    # backstop on the daily bill (~$3/day at current prices)
+```
+
+Over the limit the route returns `429` with `Retry-After`, and the app falls back to procedural generation with a visible notice. Counters live in process memory, so on Vercel they are per warm instance; move them to KV if you need a hard global cap.
+
+Current source-backed records use annotation schema `1.1.0`. The schema keeps `1.0.0` records valid, while new generation prefers compact cross-cultural fields for social position, constraint regimes, public world, religious practice, normative world, and interaction style.
+
+## Persona Share Links
+
+The Share action saves an immutable, versioned snapshot and produces a short URL
+such as `/?p=AbCdEf123...`. This preserves the exact procedural or LLM-generated
+persona instead of trying to reproduce it from a random seed.
+
+For Vercel production:
+
+1. Open the project’s **Storage** tab.
+2. Create a **Private Blob** store and connect it to the project.
+3. Confirm that Vercel added `BLOB_READ_WRITE_TOKEN`, or the OIDC-based
+   `BLOB_STORE_ID` configuration, to the project.
+4. Redeploy.
+
+No storage credential is exposed to the browser. `/api/persona-share` validates,
+sanitizes, size-limits, and stores each snapshot server-side. Locally, when Blob
+credentials are absent, the same endpoint writes ignored development records to
+`.persona-shares/`.
+
+Shared snapshots include the rendered character data, selected portrait engine,
+and—when present—the displayed annotation/evidence record and generated sketch.
+They deliberately exclude raw pasted source text, uploaded document contents,
+source-input form state, and API credentials. Share links should still be
+treated as public: anyone with the URL can view the saved persona.
+
+## Developer Tools
+
+### Portrait Gallery
+
+A lightweight portrait QA gallery is available during development:
+
+```text
+http://localhost:3001/#portrait-gallery
+```
+
+It shows fixed seeded fixtures for checking clothing, headgear, source-derived visual cues, scars/weathering, and regional portrait behavior.

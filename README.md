@@ -1,233 +1,124 @@
-```text
-╔══════════════════════════════════════════════════════════════════════╗
-║                                                                      ║
-║        H I S T O R I C A L   P E R S O N A   G E N E R A T O R       ║
-║                                                                      ║
-║             ┌──────────┐      evidence      ┌──────────┐             ║
-║             │  source  │  ───────────────▶  │ persona  │             ║
-║             │  text    │   inference        │ material │             ║
-║             └────┬─────┘  ───────────────▶  └────┬─────┘             ║
-║                  │          synthesis             │                   ║
-║                  ▼                                ▼                   ║
-║             archival fragments          portrait + life world         ║
-║                                                                      ║
-╚══════════════════════════════════════════════════════════════════════╝
-```
-
 # Historical Persona Generator
 
-Historical Persona Generator is an experimental, source-first web app for turning historical documents, reference pages, and archival fragments into plausible historical personas rooted in a specific time and place.
+**Live: https://historical-persona-generator.vercel.app**
 
-The project began as a procedural character generator extracted from the Universal History Simulator. It is now moving toward a historical persona studio: the user supplies source material, the app extracts context and evidence, and the existing procedural system completes a character while preserving what came from the source, what was inferred, and what was plausibly synthesized.
+![Atossa, a farmer in the Chechen Highlands, 42 CE](docs/images/hero-atossa.jpg)
 
-## What It Does
+A generator that produces a plausible ordinary person from a given time and place: name, age, household, trade, possessions, beliefs, health, language, and the state they were living under, with a procedurally drawn portrait. I teach world history at UC Santa Cruz and built it as a fast, accessible way for students to explore the range of lives a period actually contained rather than the handful that show up in a textbook. The classroom exercise it was designed for is simple — each student generates a persona, then reconstructs a day in that life while fact-checking the text and other information displayed. Most of the work happens in the fact-checking.
 
-- **Source-backed generation**: Paste source text, enter Wikipedia/readable URLs, or sample Old Bailey trial material.
-- **Evidence-aware persona material**: Convert source material into compact JSON records with confidence and support labels.
-- **Historical context extraction**: Track decade, region, polity, status, work, household economy, material life, concerns, worldview, and source bias.
-- **Procedural completion**: Use the existing character generator to turn source constraints into names, family, backstory, possessions, beliefs, and daily-life details.
-- **Procedural portraits**: Render seeded pixel-style SVG portraits with clothing, headgear, health cues, markings, and source-derived visual overrides.
-- **Inspectable outputs**: Review source-supported fields, uncertainty labels, consistency warnings, and exportable JSON material.
+This project began as a procedural historical character generator for the (overly ambitious, now defunct) [Universal History Simulator](https://github.com/benjaminbreen/UHS). As I kept working on it, AI coding tools made things feasible that I wouldn't have attempted alone — the portrait engine, most obviously — and it turned into a longer experiment: how far can a purely procedural system be pushed while staying roughly accurate? It does produce errors. The aim is an educated guess from available evidence, with the reasoning inspectable.
 
-## Source-First Workflow
+## What gets generated
 
-1. Provide a source:
-   - pasted text
-   - Wikipedia URL
-   - readable historical web page
-   - Old Bailey trial sample
-2. The app extracts source metadata and clean text.
-3. Gemini can fill the persona annotation schema, or the app can fall back to heuristic source parsing.
-4. The material record is validated and adapted into generation parameters.
-5. The procedural generator creates a full persona from those constraints.
-6. The UI labels source-supported, inferred, synthesized, and uncertain details.
+Each persona is assembled from constraints rather than sampled from a list of archetypes:
 
-The goal is not to claim that every generated detail is true. The goal is to make historical imagination more explicit about its evidence.
+- **Place and polity** — a birthplace, and which state actually held it that year, from ~400 dated polity spans. A life that begins under Roman Britain and ends under something else says so.
+- **Social position and work** — status, trade, and household economy filtered by what existed in that region and century.
+- **Material life** — possessions, crops, clothing, and tools from regional material availability, not a generic medieval-Europe default.
+- **Body and health** — age, disease exposure, and prevalence weighted by period demography.
+- **Language** — 137 languages across 73 deep-time windows. Where the record can't supply one the app makes a weighted guess and shows its reasoning and sources.
+- **Belief and worldview** — from ~100 belief profiles, with religious practice and personal concerns.
+- **Biography** — a short life history written procedurally from all of the above, with dated life events.
 
-## Supported Contexts
+Coverage runs 40,000 BCE through the present across nine cultural zones, tightest between roughly 1500 and 1930.
 
-The procedural layer currently supports broad regions and eras:
+### A note on where personas come from
 
-### Cultural Zones
+"Generate a random historical persona" contains a hidden claim: that the persona is drawn from some population. The naive answer — uniform over the options in a dropdown — is off by more than an order of magnitude. So the app models the actual distribution of human lives.
 
-- European
-- East Asian
-- South Asian
-- Middle East and North Africa
-- Sub-Saharan African
-- Oceania
-- North American, pre-Columbian
-- North American, colonial
-- South American
+Era weights come from the Population Reference Bureau's birth table (Haub 1995, updated Kaneda 2022), integrated rather than guessed: roughly **117 billion humans ever born**. Regional weights are person-year estimates triangulated from McEvedy & Jones. The results are counterintuitive. Antiquity (3000 BCE–500 CE) holds about 40% of all human lives — a long window, populations already in the hundreds of millions, birth rates at their historical maximum. The early modern period (1450–1750), which *feels* central because that is where the archives are, is under 8%. Oceania is about one human life in two hundred.
 
-### Historical Eras
+Sampling by those weights, the likeliest draws are:
 
-- Prehistory
-- Antiquity
-- Medieval
-- Renaissance and Early Modern
-- Industrial Era
-- Modern Era
+| Era and region | Share of all human lives |
+| --- | --- |
+| Antiquity (3000 BCE–500 CE), South Asia | ~9% |
+| Antiquity, East Asia | ~9% |
+| Antiquity, Middle East and North Africa | ~7% |
+| Medieval (500–1450), South Asia | ~6% |
+| Medieval, East Asia | ~6% |
+| Antiquity, Europe | ~6% |
 
-Source-backed generation is most useful for roughly 1500-1930 material, where the persona annotation schema is currently most tightly defined.
+There are two sampling modes, and the toggle sits next to the generate button:
 
-## Getting Started
+- **True Frequency** is an attempt to reproduce those real proportions as closely as the estimates allow. Pick a random human life and this is roughly what you get: most often a farmer in ancient or medieval South or East Asia.
+- **Explore** raises the same weights to a fractional power. The ordering survives — antiquity still comes up more often than the industrial era — but the extremes pull in far enough that the whole world is reachable in one sitting, including the Oceanic, Sahelian, and pre-Columbian material that true weighting would surface roughly once in two hundred spins.
 
-### Install
+In both modes the card prints the real odds of the combination it drew — *roughly 1 in 20 human lives* — so the flattening is never silent. The full methodology, including what was measured and corrected, is in [docs/DEMOGRAPHY.md](docs/DEMOGRAPHY.md).
+
+![Ling Guo, a postal worker in the Gobi Desert, 1954 CE](docs/images/persona-ling-guo.jpg)
+
+## Portraits
+
+![A grid of generated portraits](docs/images/portrait-grid.png)
+
+Seeded SVG. No stock art and no image model: the same seed always renders the same face, and every portrait above is a separate draw from the same code.
+
+The renderer works like a print process rather than a paper doll. Colour ramps and a pixel buffer sit at the bottom (`core/`), with masks, lighting, and a small stamp format for reusable pixel shapes. Above that, one file per feature (`art/`) — `face`, `eyes`, `brows`, `noses`, `mouths`, `ears`, `hair`, `headwear`, `garments`, `garmentSurface`, `garmentFeatures`, `ornaments`, `details`, `background`, `palette` — each drawing its own layer into the buffer, so a hat brim and a nose bridge can be worked on independently. `spec/anatomy.ts` holds the proportions everything hangs off.
+
+The bridge is `spec/buildSpec.ts`, the only file that knows about the app's character model. It resolves a portrait spec by precedence: evidence-derived visual overrides from the source document beat what the persona is actually wearing, which beats the procedural fallback. Colour names resolve through `constants/gameData/colorNames.ts` so that "woad" and "madder" reach the renderer as pigments rather than strings, and health, fatigue, age, and wealth feed weathering, scarring, dentition, and expression.
+
+`npm run portrait-audit` runs the real persona generator, renders every result headlessly, and reports which garments, coverings, ages, and markings actually occurred, plus any portrait that came out structurally broken. The first run flagged 97 problems in 200 personas — 80 faces whose eyes were down to two visible pixels, 25 whose entire garment was buried under a veil — none of which were reachable from the hand-picked fixture set.
+
+## Language
+
+![The language modal for Prakrits](docs/images/language-prakrits.jpg)
+
+Every persona gets a native language. Click it and the modal gives the family, script, period, regions, and a few common phrases, along with **how this was arrived at**: attested from written records for that region and period, or inferred, with the scholarship cited — Glottolog and 58 other sources. Where nothing can be named honestly it says so. The comparative method reaches back about eight thousand years, which is why the generator stops at 10,000 BCE.
+
+Terms in the biography carry the same treatment. Hover one and you get the word in the persona's own language, with a gloss.
+
+![Zhen, a duck herder in the Qaidam Basin, 91 CE, with a Classical Chinese tooltip](docs/images/persona-zhen.jpg)
+
+## Source Studio
+
+The bar above the persona card takes a **Wikipedia article** (or a surprise one), any **readable web page**, **pasted text** from a document, or a real **Old Bailey trial record**. The app reads it for period, place, and social world, then generates someone plausible from that source's world — not the author or the named subject, but a person who could have been in the room.
+
+Fields are labeled by provenance: supported by the source, inferred from context, plausibly synthesized, or too uncertain to state. An optional model call fills the annotation schema when heuristic parsing is not enough; without an API key the app falls back to heuristics and still works.
+
+## Everything else
+
+- **Save as PDF** — a two-page print sheet: portrait, profile, and equipment on the first page, the dated life chronicle on the second. This is the handout version for section.
+- **Share** — creates an immutable public snapshot at a short URL, so a specific persona survives instead of being re-rolled from a seed. Raw pasted text, uploaded documents, and credentials are never included.
+
+  ![The share dialog](docs/images/share-dialog.jpg)
+
+- **JSON schema record** — the full persona machine-readable with confidence and support labels intact (annotation schema `1.1.0`). This is what I use for experiments with historical LLM personas and related AI research, where a life flattened into prose loses the part you need.
+- **Use AI to Develop Persona** — an optional model pass that writes a longer biography from a persona the generator has already built.
+- **Tabs** — Biography, Family, Life Events, and Inner Life, each generated from the same constraint set.
+- **Wikipedia links** — place names, religions, and languages in the biography link out, so fact-checking is one click rather than a search.
+- **Dark mode**, and an **About** panel describing the method.
+
+## Running it
 
 ```bash
 npm install
-```
-
-### Run Locally
-
-```bash
 npm run dev
 ```
 
-The app will be available at:
+Serves at `http://localhost:3001`. No API key required. Model setup, rate limits, deployment, and share-link storage are in [docs/SETUP.md](docs/SETUP.md).
 
-```text
-http://localhost:3001
-```
+## Accuracy
 
-### Build
+A generator like this fails quietly. Anachronism creeps in, every life gets written in the same three sentence shapes, a Javanese farmer ends up dressed like a Yorkshire one — and none of it throws an error. So there is a set of checks that run against real generator output:
 
 ```bash
-npm run build
+npm run verify
 ```
 
-### Preview Production Build
+- **Golden personas** pin a fixed matrix of seeds and compare the whole rendered persona against a committed file, line by line. Nobody has to predict the fault in advance; they only have to notice that a line changed. Every defect found by hand in the first week — a Japanese sedge hat on a Formosan farmer, a Swedish Muslim in 1920, "a sprained ankle in his ankle" — had passed every property-based assertion in the suite and was caught by a person reading one card. This is the net for that.
+- **Cultural fit** asks whether names come from the right tradition for the place (a colonial-pool name in a colonised region is the failure to count), and whether the assigned language is an actual language rather than a family label like "Niger-Congo language of the region" — an honest answer for 8000 BCE and a bad one for 1997.
+- **Anachronism risk** looks for lookup tables keyed by a bucket too coarse to be true across its own span, which is how `samurai clan` was once offered to a Formosan Austronesian and `killed in World War I` to a death in 1897.
+- **Narrative variety** measures how repetitive the generated prose is across a large corpus of biographies. It strips names and numbers out of every sentence to get its skeleton, then checks two things: that no single skeleton accounts for more than 3% of all sentences, and that fewer than 40% of them are era-agnostic — appearing in nearly every period, which means they are filler rather than history. That second figure was 46% when first measured; gating childhood, trade, temperament, and outlook by era brought it to 35%.
+- **Portrait audit** renders a large sample and reports structural breakage and the actual distribution of garments, coverings, and markings.
 
-```bash
-npm run preview
-```
+Most of these are thresholds rather than pass/fail assertions. Each is committed just above what currently holds, so when a number improves the threshold is tightened to follow it and the old, worse level stops being acceptable. The point is that quality cannot quietly slide back to where it was. [docs/FAILURE_MODES.md](docs/FAILURE_MODES.md) is the running list of ways the generator has been wrong.
 
-## Gemini Setup
-
-Source-backed persona generation can use Gemini to fill the historical persona annotation schema. For local development, add a Gemini key to `.env.local`:
-
-```bash
-GEMINI_API_KEY=your_key_here
-GEMINI_MODEL=gemini-3.1-flash-lite
-```
-
-The Vite dev server exposes a local `/api/gemini-persona` middleware and keeps this key server-side during development. The static browser bundle does not call Gemini directly. Do not use `VITE_GEMINI_API_KEY` or any other `VITE_*` variable for secrets: Vite includes those values in the browser build.
-
-To compare GPT-5 nano, use server-only environment variables instead. The client never selects the provider and cannot read either key:
-
-```bash
-LLM_PROVIDER=openai
-OPENAI_API_KEY=your_key_here
-OPENAI_MODEL=gpt-5-nano
-```
-
-On Vercel, add only the selected provider's variables in **Project Settings → Environment Variables** (Production, Preview, and/or Development as appropriate). Do not create `VITE_GEMINI_API_KEY`, `VITE_GOOGLE_AI_API_KEY`, or `VITE_OPENAI_API_KEY` variables.
-
-For production-style local serving:
-
-```bash
-npm run build
-npm start
-```
-
-`npm start` reads `.env.local` (then `.env`) directly; real environment variables still win, so `GEMINI_API_KEY=... npm start` also works.
-
-### What each AI action costs
-
-Two model actions exist, and they are priced very differently per persona:
-
-| Action | Tokens (in/out) | Cost | Triggered by |
-| --- | --- | --- | --- |
-| `generate_sketch` | ~1.6k / 0.2k | ~0.07¢ | **Use AI to Develop Persona** (the default) |
-| `generate_annotation` | ~7.5k / 1.6k | ~0.43¢ | **AI Schema Record**, and the Source Studio flows |
-
-The annotation prompt carries the whole JSON schema — about 6,500 tokens of the 7,500 it sends — which is why it dominates. The default AI path therefore builds the schema record locally from the procedural seed and pays only for the biography. Both the schema path and any repeat of the default path ask the user to confirm first, and mention donating.
-
-### Rate limits
-
-`/api/gemini-persona` is public, so every route enforces a cost-weighted limit (a schema record counts six times a biography). Defaults, overridable per environment:
-
-```bash
-LLM_HOURLY_COST_PER_IP=30     # ~30 biographies or 5 schema records per IP per hour
-LLM_DAILY_COST_PER_IP=120
-LLM_DAILY_COST_GLOBAL=3000    # backstop on the daily bill (~$3/day at current prices)
-```
-
-Over the limit the route returns `429` with `Retry-After`, and the app falls back to procedural generation with a visible notice. Counters live in process memory, so on Vercel they are per warm instance; move them to KV if you need a hard global cap.
-
-Current source-backed records use annotation schema `1.1.0`. The schema keeps `1.0.0` records valid, while new generation prefers compact cross-cultural fields for social position, constraint regimes, public world, religious practice, normative world, and interaction style.
-
-## Persona Share Links
-
-The Share action saves an immutable, versioned snapshot and produces a short URL
-such as `/?p=AbCdEf123...`. This preserves the exact procedural or LLM-generated
-persona instead of trying to reproduce it from a random seed.
-
-For Vercel production:
-
-1. Open the project’s **Storage** tab.
-2. Create a **Private Blob** store and connect it to the project.
-3. Confirm that Vercel added `BLOB_READ_WRITE_TOKEN`, or the OIDC-based
-   `BLOB_STORE_ID` configuration, to the project.
-4. Redeploy.
-
-No storage credential is exposed to the browser. `/api/persona-share` validates,
-sanitizes, size-limits, and stores each snapshot server-side. Locally, when Blob
-credentials are absent, the same endpoint writes ignored development records to
-`.persona-shares/`.
-
-Shared snapshots include the rendered character data, selected portrait engine,
-and—when present—the displayed annotation/evidence record and generated sketch.
-They deliberately exclude raw pasted source text, uploaded document contents,
-source-input form state, and API credentials. Share links should still be
-treated as public: anyone with the URL can view the saved persona.
-
-## Developer Tools
-
-### Portrait Gallery
-
-A lightweight portrait QA gallery is available during development:
-
-```text
-http://localhost:3001/#portrait-gallery
-```
-
-It shows fixed seeded fixtures for checking clothing, headgear, source-derived visual cues, scars/weathering, and regional portrait behavior.
-
-## How It Works
-
-The source-first flow has two layers:
-
-1. **Material record layer**
-   - ingests text and metadata
-   - identifies explicit source evidence
-   - fills a compact persona annotation record
-   - validates confidence, support labels, and schema shape
-
-2. **Procedural persona layer**
-   - maps source material into generation parameters
-   - generates or adapts a character profile
-   - overlays source-derived profession, status, clothing, possessions, concerns, worldview, family, and life events
-   - renders a seeded portrait from procedural and source-derived visual constraints
-
-The app treats sources as evidence, not decorative flavor. A probate inventory, trial transcript, ship log, or Wikipedia event page can inspire an ordinary person from the source world, not only the author or named subject.
-
-## Technology Stack
-
-- **React 19** for the UI
-- **TypeScript** for application code and schema-facing types
-- **Vite** for development and builds
-- **AJV** for JSON Schema validation
-- **Gemini** for optional schema filling from source text
-- **Vercel Blob** for immutable persona share snapshots
-- **SVG** for procedural pixel portraits
+**React 19 · TypeScript · Vite · AJV · SVG**
 
 ## Credits
 
-Created by [Benjamin Breen](https://benjaminpbreen.com), Associate Professor of History at UC Santa Cruz.
-
-Originally extracted from the Universal History Simulator, an educational history simulation project.
+By [Benjamin Breen](https://benjaminpbreen.com), Associate Professor of History at UC Santa Cruz. Originally extracted from the Universal History Simulator. Free to use.
 
 ## License
 
