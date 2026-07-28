@@ -335,9 +335,14 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             "Maroni Basin": { name: "Maroni Basin", climate: ClimateType.TROPICAL, archetype: MapArchetype.RIVER_PORT },
             "Rupununi Savannah": { name: "Rupununi Savannah", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND },
             "Kaieteur Plateau": { name: "Kaieteur Plateau", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND },
-             "Guyana Highlands": { name: "Guyana Highlands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false },
-            "Pantanal Wetlands": { name: "Pantanal Wetlands", climate: ClimateType.TROPICAL, archetype: MapArchetype.SWAMP, hasLakes: true },
-            "Maracaibo Basin": { name: "Maracaibo Basin", climate: ClimateType.TROPICAL, archetype: MapArchetype.BAY }
+            "Guyana Highlands": { name: "Guyana Highlands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false }
+            // "Pantanal Wetlands" and "Maracaibo Basin" used to sit here. Every
+            // subsystem — polity, language, naming, religion — reads the
+            // *macro*-region, so filing a place under the wrong one is not a
+            // cosmetic error: it decides what country you are in. The Pantanal
+            // entry was also a straight duplicate of "Pantanal" under Gran
+            // Chaco and Pampas, which is where it belongs, so it is gone rather
+            // than moved. Maracaibo moved to Llanos and Orinoco below.
         },
         "Patagonia": {
             "Valdés Peninsula": { name: "Valdés Peninsula", climate: ClimateType.TEMPERATE, archetype: MapArchetype.PENINSULA },
@@ -361,7 +366,12 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             "Llanos Floodplain": { name: "Llanos Floodplain", climate: ClimateType.TROPICAL, archetype: MapArchetype.DELTA },
             "Villavicencio Foothills": { name: "Villavicencio Foothills", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND },
             "Arauca Borderlands": { name: "Arauca Borderlands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND },
-            "Orinoco Rapids": { name: "Orinoco Rapids", climate: ClimateType.TROPICAL, archetype: MapArchetype.RIVER_PORT }
+            "Orinoco Rapids": { name: "Orinoco Rapids", climate: ClimateType.TROPICAL, archetype: MapArchetype.RIVER_PORT },
+            // Venezuela, a thousand kilometres west of the Guiana Shield it was
+            // filed under. That filing gave a woman in 1973 Maracaibo a Dutch
+            // colonial surname, Arawakan as a native language, and "the Guiana
+            // colonies" as her state.
+            "Maracaibo Basin": { name: "Maracaibo Basin", climate: ClimateType.TROPICAL, archetype: MapArchetype.BAY }
         }
     },
     "MENA": {

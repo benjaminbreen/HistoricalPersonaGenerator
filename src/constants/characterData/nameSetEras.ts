@@ -58,14 +58,37 @@ const NAME_SET_EARLIEST: Record<string, number> = {
   INCA: 1200,
   INUIT: -2000,
 
-  // Oceania. Settlement dates matter here: Remote Oceania was reached late.
-  MELANESIAN: -3000,
-  FIJIAN: -1000,
-  SAMOAN: -800,
-  TONGAN: -800,
-  POLYNESIAN: -1000,
-  TAHITIAN: 200,
-  HAWAIIAN: 400,
+  // Oceania. Two different dates are needed here and only one was being used.
+  //
+  // Settlement says when the people arrived: Lapita in Fiji-Tonga-Samoa around
+  // 1000-800 BCE, and — on the radiocarbon chronology rather than the long one
+  // these floors were built on — the Societies around 1025-1120 CE and Hawaiʻi,
+  // Rapa Nui and Aotearoa around 1190-1290 CE, not 200 and 400.
+  //
+  // The *mission* says when the names in these sets came into use, and that is
+  // what these lists actually contain. Sione, Ioane, Viliami, Iakopo, Kawika,
+  // Keoni, Lopaka, Jone, Mosese, Maria, Amelia, Filomena: Polynesian and
+  // Fijian renderings of Christian names, none of them possible before the
+  // press and the font. Floored at settlement, they reached back to the Bronze
+  // Age, and a woman on Samoa in 771 BCE was called Amelia.
+  //
+  // So each of these is floored at its mission and paired with a
+  // `_PRECONTACT` set covering settlement to that date.
+  MELANESIAN: 1840,
+  MELANESIAN_PRECONTACT: -3000,
+  FIJIAN: 1835,
+  FIJIAN_PRECONTACT: -1000,
+  SAMOAN: 1830,
+  SAMOAN_PRECONTACT: -800,
+  TONGAN: 1826,
+  TONGAN_PRECONTACT: -800,
+  POLYNESIAN: 1814,
+  POLYNESIAN_PRECONTACT: -800,
+  MAORI_PRECONTACT: 1250,
+  TAHITIAN: 1797,
+  TAHITIAN_PRECONTACT: 1000,
+  HAWAIIAN: 1820,
+  HAWAIIAN_PRECONTACT: 1000,
 
   // Named North American nations. The ethnonyms are historically attested; the
   // broader language families below are given an earlier floor.
@@ -195,6 +218,20 @@ const NAME_SET_LATEST: Record<string, number> = {
   PREHISTORIC_AMERICAN: 500,
   PREHISTORIC_OCEANIC: -800,
 
+  // Oceania before the missions. Each of these hands over to the mission-era
+  // set of the same archipelago on the date that mission landed. Fiji is given
+  // until the conversion of Bau in 1854 rather than the Wesleyan arrival in
+  // 1835, because the interval is exactly when the old names were still in use
+  // and the mission was not.
+  POLYNESIAN_PRECONTACT: 1830,
+  MAORI_PRECONTACT: 1840,
+  SAMOAN_PRECONTACT: 1830,
+  TONGAN_PRECONTACT: 1826,
+  TAHITIAN_PRECONTACT: 1797,
+  HAWAIIAN_PRECONTACT: 1850,
+  FIJIAN_PRECONTACT: 1854,
+  MELANESIAN_PRECONTACT: 1884,
+
   // Ancient traditions, ending roughly where the naming world changes.
   MESOPOTAMIAN_ANCIENT: 100,
   ANCIENT_GREEK: 400,
@@ -252,7 +289,10 @@ const SUCCESSOR_BY_ZONE: Record<string, Array<{ from: number; key: string }>> = 
   SOUTH_ASIAN: [{ from: 1200, key: 'HINDI' }],
   SOUTHEAST_ASIAN: [{ from: 600, key: 'MALAY' }],
   SUB_SAHARAN_AFRICAN: [{ from: 800, key: 'YORUBA' }],
-  OCEANIA: [{ from: -800, key: 'POLYNESIAN' }],
+  OCEANIA: [
+    { from: -800, key: 'POLYNESIAN_PRECONTACT' },
+    { from: 1830, key: 'POLYNESIAN' },
+  ],
   SOUTH_AMERICAN: [{ from: 1580, key: 'SPANISH_LATIN_AMERICAN' }],
 };
 

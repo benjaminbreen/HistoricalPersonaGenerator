@@ -353,6 +353,8 @@ const WIKIPEDIA_OVERRIDES: Record<string, string> = {
   'the French and British sugar colonies': 'West_Indies',
   'the Spanish Caribbean': 'Spanish_West_Indies',
   'the Guiana colonies': 'Guianas',
+  'the Dutch Guianas': 'Dutch_Guiana',
+  'Guyana, Suriname and French Guiana': 'Guianas',
   'the Christian Nubian kingdoms': 'Nubia',
   'the British and French West African colonies': 'Colonisation_of_Africa',
   'the British and German East African colonies': 'Scramble_for_Africa',
@@ -1207,8 +1209,19 @@ const ALLEGIANCES: Array<{
     ],
   },
   {
-    match: /guiana shield|guiana|surinam/i,
-    eras: [{ from: 1667, until: 1975, name: 'the Guiana colonies' }],
+    // One band from 1667 to 1975 had two faults. It ran past decolonisation —
+    // Guyana went independent in 1966, Suriname in 1975, and French Guiana
+    // became a department of France in 1946 — so a persona in 1973 was told he
+    // lived in "the Guiana colonies". And it stopped dead in 1975 with no
+    // successor, leaving every year after that with no polity at all.
+    match: /guiana shield|guiana|surinam|essequibo|demerara|maroni|rupununi|kaieteur/i,
+    eras: [
+      { from: 1667, until: 1814, name: 'the Dutch Guianas' },
+      // Anglo-Dutch Treaty of 1814: Essequibo, Demerara and Berbice to Britain,
+      // Suriname retained by the Dutch. Three rival colonies, not one polity.
+      { from: 1814, until: 1966, name: 'the Guiana colonies' },
+      { from: 1966, name: 'Guyana, Suriname and French Guiana' },
+    ],
   },
   {
     match: /patagonia/i,

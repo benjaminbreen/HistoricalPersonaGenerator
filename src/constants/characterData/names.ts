@@ -131,9 +131,21 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
 
+    /**
+     * The Lapita horizon in Near and Western Oceania, before any Polynesian
+     * tradition is recoverable.
+     *
+     * This list used to be Maui, Tane, Tangaroa, Rongo, Pele, Hina, Mahuika —
+     * which is not a naming tradition but a pantheon, and mostly an East
+     * Polynesian one recorded three thousand years after this set's window
+     * closes. It made the deep Pacific past look like a room full of gods.
+     * These are reconstructed Proto-Oceanic and Proto-Polynesian lexical forms
+     * used as name-shaped placeholders, marked with the asterisk this file uses
+     * for reconstructions. Not one personal name survives from Lapita.
+     */
     PREHISTORIC_OCEANIC: {
-        male: ['Maui', 'Tane', 'Rangi', 'Papa', 'Tangaroa', 'Rongo', 'Tu', 'Tawhiri', 'Haumia', 'Ruaumoko', 'Kupe', 'Tiki', 'Paikea', 'Tinirau', 'Turi', 'Whatonga', 'Hoturapa', 'Pourangahua', 'Tama', 'Rua'],
-        female: ['Hina', 'Pele', 'Namaka', 'Poliahu', 'Lilinoe', 'Waiau', 'Kahoupokane', 'Laka', 'Kapo', 'Hiiaka', 'Sina', 'Taranga', 'Murirangawhenua', 'Rongomaiwahine', 'Wairaka', 'Hinemoa', 'Mahuika', 'Muriranga', 'Para', 'Kui'],
+        male: ['*Tangata', '*Ariki', '*Toa', '*Vaka', '*Manu', '*Ika', '*Fatu', '*Matangi', '*Laqaa', '*Afi', '*Rakau', '*Puaka', '*Tolu', '*Ao', '*Hau', '*Tupuna'],
+        female: ['*Fafine', '*Maasina', '*Fetuqu', '*Vai', '*Moana', '*Ua', '*Lau', '*One', '*Niu', '*Fenua', '*Poo', '*Fua', '*Fue', '*Loto'],
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
     
@@ -422,27 +434,100 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
     },
     
     // === SOUTH AMERICAN CULTURES ===
+    /**
+     * Quechua-speaking Andes under and before Tawantinsuyu.
+     *
+     * Inti, Illapa and Killa are the sun, thunder and moon: gods, not people.
+     * Mama, Coya, Ñusta and Palla are forms of address by rank — lady, queen,
+     * princess, noblewoman — and not birth names either. Condor was the Spanish
+     * spelling sitting next to its own Quechua original, Kuntur.
+     *
+     * The Andean record is the best in South America, so this leans on it: the
+     * Sapa Inca succession from Manco Cápac, the generals and claimants of the
+     * conquest years, and — unusually — a real run of named women, because the
+     * coya and the aclla were recorded. Ocllo and Huaco recur across
+     * generations the way Sinaitakala does in Tonga. The rest is ordinary
+     * Quechua naming stock: stone, star, flower, falcon, gold.
+     */
     INCA: {
-        male: ['Inti', 'Manco', 'Tupac', 'Huascar', 'Atahualpa', 'Pachacuti', 'Viracocha', 'Ayar', 'Sinchi', 'Capac', 'Quispe', 'Yupanqui', 'Amaru', 'Condor', 'Puma', 'Waman', 'Kuntur', 'Qori', 'Rumi', 'Sami'],
-        female: ['Mama', 'Coya', 'Ñusta', 'Palla', 'Quilla', 'Killa', 'Chaska', 'Illapa', 'Mayu', 'Qoyllur', 'Sisa', 'Tika', 'Wara', 'Yma', 'Sumaq', 'Munay', 'Nayra', 'Pallay', 'Qara', 'Rimay'],
+        male: ['Manco', 'Sinchi Roca', 'Lloque Yupanqui', 'Mayta Cápac', 'Cápac Yupanqui', 'Inca Roca', 'Yahuar Huaca', 'Viracocha Inca', 'Pachacútec', 'Túpac Yupanqui', 'Huayna Cápac', 'Huáscar', 'Atahualpa', 'Rumiñahui', 'Quizquiz', 'Chalcuchímac', 'Titu Cusi', 'Sayri Túpac', 'Ayar', 'Quispe', 'Waman', 'Kuntur', 'Qori', 'Rumi', 'Amaru', 'Kusi'],
+        female: ['Ocllo', 'Huaco', 'Anahuarque', 'Chimpu', 'Cusi Chimbo', 'Rahua Ocllo', 'Añas Colque', 'Quispe Sisa', 'Cura Ocllo', 'Asarpay', 'Chuqui Huipa', 'Mama Runtu', 'Ipa Huaco', 'Tocto', 'Sisa', 'Tika', 'Qoyllur', 'Chaska', 'Wara', 'Sumaq', 'Rimay', 'Pallay'],
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
     
+    /**
+     * Tupinambá and related Tupi-Guarani speakers of the Brazilian coast.
+     *
+     * Three separate things had to come out of this list. Vitória, Yasmin,
+     * Nina, Samara, Murilo and Kaique are Portuguese, Arabic and modern
+     * Brazilian given names, and belong to `PORTUGUESE_BRAZIL`. Tupã, Jaci,
+     * Guaraci, Anhangá, Curupira, Boitatá, Saci and Caipora are deities and
+     * folklore beings, not people — the same mistake the Oceanic set made with
+     * Maui and Tangaroa. And Iracema, Moema, Peri, Ubirajara and Ubiratan are
+     * inventions of José de Alencar's Indianist novels of the 1850s and 60s;
+     * they are real Brazilian names today, three centuries too late for anyone
+     * generated here.
+     *
+     * What replaces them: chiefs recorded by Hans Staden (1557), Jean de Léry
+     * (1578) and Gabriel Soares de Sousa, including the warrior names in
+     * -açu/-guaçu ("great") and -mirim/-miri ("lesser") that the sources show
+     * being taken and re-taken for deeds in war; and animal, plant and quality
+     * words of the kind those names were built from. Women are far worse
+     * recorded than men — Paraguaçu and Bartira survive largely because both
+     * were married to Portuguese settlers.
+     */
     TUPI: {
-        male: ['Peri', 'Caubi', 'Guaraci', 'Jaci', 'Tupã', 'Anhangá', 'Curupira', 'Iara', 'Boitatá', 'Saci', 'Caipora', 'Ubirajara', 'Iberê', 'Itiberê', 'Piatã', 'Raoni', 'Ubiratan', 'Cauã', 'Kaique', 'Murilo'],
-        female: ['Iracema', 'Jandira', 'Jurema', 'Taina', 'Yara', 'Araci', 'Janaina', 'Moema', 'Potira', 'Iara', 'Jacira', 'Mara', 'Nina', 'Raissa', 'Samara', 'Thaynara', 'Uira', 'Vitoria', 'Xavante', 'Yasmin'],
+        male: ['Cunhambebe', 'Aimberê', 'Tibiriçá', 'Araribóia', 'Piquerobi', 'Caiubi', 'Pindobuçu', 'Japiaçu', 'Guaixará', 'Nhaêpepô-açu', 'Vratinge-açu', 'Alkindar-miri', 'Jeppipó-açu', 'Taquaruçu', 'Abati-poçanga', 'Ipiru-guaçu', 'Tatamirim', 'Karuatá', 'Itaguaçu', 'Jaguaraçu', 'Pirajá', 'Abaeté', 'Karaí', 'Kunumiaçu'],
+        female: ['Paraguaçu', 'Bartira', 'Mbicy', 'Potira', 'Jandira', 'Jurema', 'Pitanga', 'Sumaúma', 'Kunhã', 'Kunhataĩ', 'Muirá', 'Arasy', 'Ybytu'],
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
     
+    /**
+     * Muisca of the Altiplano Cundiboyacense.
+     *
+     * Bochica, Chiminigagua, Chibchacum, Fomagata, Bachué and Huitaca are the
+     * Muisca pantheon and had to go. Zipa and Zaque are the two paramount
+     * titles, not names. Bacatá and Muyquytá are the same place — Bogotá — and
+     * Suba, Fucha and Usa are its modern boroughs, which is how a Muisca woman
+     * in 1300 came to be called after a Bogotá bus interchange. `Gaia` is
+     * Greek and nobody can account for it.
+     *
+     * The men are the zipas of Bacatá, zaques of Hunza and iracas of Sugamuxi
+     * named in the Spanish record. Several are cacicazgo names — a cacique was
+     * ordinarily called by the seat he held, and that is exactly how the
+     * conquistadors wrote them down.
+     *
+     * The women are the weak point and are marked as such: outside Zoratama,
+     * kept in colonial legend, virtually no Muisca woman's name survives, so
+     * the rest is Muisca-language material — chie moon, sua sun, sie water,
+     * fiba wind, gata fire — used as name-shaped placeholders. It is the least
+     * certain list in this file.
+     */
     MUISCA: {
-        male: ['Bacatá', 'Zipa', 'Zaque', 'Tisquesusa', 'Nemequene', 'Quemuenchatocha', 'Aquiminzaque', 'Hunzahúa', 'Thomagata', 'Fomagata', 'Idacansas', 'Bochica', 'Chiminigagua', 'Chibchacum', 'Saguamanchica', 'Meicuchuca', 'Tutazua', 'Sugamuxi', 'Tundama', 'Saymoso'],
-        female: ['Bachué', 'Huitaca', 'Chía', 'Furatena', 'Uaia', 'Faravita', 'Gualcalá', 'Ata', 'Bague', 'Caga', 'Fucha', 'Gaia', 'Ie', 'Muyquyta', 'Oba', 'Paba', 'Quica', 'Suba', 'Tiba', 'Usa'],
+        male: ['Tisquesusa', 'Nemequene', 'Quemuenchatocha', 'Aquiminzaque', 'Hunzahúa', 'Saguamanchica', 'Meicuchuca', 'Michuá', 'Sagipa', 'Tundama', 'Sugamuxi', 'Nompanim', 'Popón', 'Tutazúa', 'Firavitoba', 'Idacansás', 'Susa', 'Guatavita', 'Ubaque', 'Turmequé'],
+        female: ['Zoratama', 'Furatena', 'Faravita', 'Gualcalá', 'Chía', 'Chie', 'Sua', 'Sie', 'Fiba', 'Gata', 'Quyca', 'Guasgua'],
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
     
+    /**
+     * Mapuche of the Araucanía and the Argentine cordillera.
+     *
+     * Paloma, Xaviera, Zulema and Inara are Spanish and Arabic; Inti and Amaru
+     * are Quechua, from six hundred miles north. All are gone. Fresia and
+     * Guacolda, the two Mapuche women everyone can name, are absent for a
+     * different reason: Ercilla invented them for *La Araucana* in 1569.
+     *
+     * Unlike the Polynesian sets, this one is not split by contact. Mapudungun
+     * naming survived the Spanish, survived the independent Araucanía, and was
+     * still being used when Chile occupied it in 1883 — so one list covers the
+     * whole span. The men are the toquis and lonkos of the chronicles; the
+     * women are compounds in the ordinary Mapudungun pattern, colour or
+     * material plus a noun (kallfü blue, millа gold, likan quartz, rayen
+     * flower, wangülen star), because the chroniclers recorded warriors.
+     */
     MAPUCHE: {
-        male: ['Lautaro', 'Caupolicán', 'Colocolo', 'Galvarino', 'Leftrarü', 'Pelantaro', 'Lientur', 'Quilapán', 'Nahuel', 'Huenul', 'Curiche', 'Millal', 'Rayen', 'Newen', 'Antü', 'Kalfu', 'Kurü', 'Lafken', 'Likan', 'Meli'],
-        female: ['Millaray', 'Sayen', 'Ayelen', 'Rayen', 'Amaru', 'Ayelén', 'Inara', 'Inti', 'Mailen', 'Nahiara', 'Paloma', 'Quillén', 'Rayén', 'Suyai', 'Tahiel', 'Uyara', 'Waikura', 'Xaviera', 'Yaima', 'Zulema'],
+        male: ['Leftraru', 'Kallfülikan', 'Kolo Kolo', 'Galvarino', 'Lincoyán', 'Tucapel', 'Rengo', 'Pelantaro', 'Anganamón', 'Lientur', 'Millalelmu', 'Curiñancu', 'Painenancu', 'Cadeguala', 'Guanoalca', 'Paillamachu', 'Antüpaingi', 'Nawelkura', 'Kurüwilu', 'Wenchulaf', 'Millapangi', 'Mankelef'],
+        female: ['Wangülen', 'Kuyen', 'Millaray', 'Kallfüray', 'Likanray', 'Rayen', 'Malen', 'Pewma', 'Foye', 'Aliwen', 'Kolüray', 'Ligray', 'Ñamku', 'Kinturay', 'Ayün', 'Antüray'],
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
 
@@ -854,9 +939,23 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         female: ['Coya', 'Killa', 'Mama', 'Ñusta', 'Quispe', 'Sisa', 'Sumaq', 'Tika', 'Urpi', 'Wayna', 'Yaku', 'Chaska', 'Chuya', 'Illa', 'Inti', 'Kusi', 'Phuyupatamanta', 'Qori', 'Raymi', 'Sarita', 'Tanta', 'Umiña', 'Warmi', 'Yana', 'Achik', 'Chakana', 'Hanan', 'Khuya', 'Munay', 'Phaway'],
         surname: ['Yupanki', 'Wankár', 'Quespi', 'Kondori', 'Waman', 'Amaru', 'Choque', 'Quispe', 'Huanca', 'Mamani', 'Apaza', 'Ccopa', 'Cusipaucar', 'Hancco', 'Inca', 'Llanos', 'Marca', 'Nina', 'Pacco', 'Quiso', 'Soncco', 'Ttito', 'Waskar', 'Xerez', 'Yabar', 'Zapana', 'Alanoca']
     },
+    /**
+     * Guaraní of Paraguay, the Paraná and the Jesuit reduction country.
+     *
+     * Caetano, Karim and Açucena were Portuguese, Arabic and Spanish; Iansã is
+     * a Yoruba orisha that arrived in Brazil with the slave trade; Tupã, Jaci,
+     * Rudá and Boitatá are deities; Iracema, Moema, Ceci, Peri and Ubirajara
+     * are Alencar's again. `Guaraní` was in its own list as a given name.
+     *
+     * What is left is attested caciques and shamans from the Spanish and Jesuit
+     * record — Lambaré, Paraguá, Guarambaré, and the two shamans Ñezú and
+     * Guiravera who led the risings against the reductions in the 1620s and
+     * 30s — plus Guaraní nature and quality words, which is what the rest of
+     * the naming drew on.
+     */
     GUARANI: {
-        male: ['Arandu', 'Carai', 'Guyrá', 'Jagua', 'Karai', 'Mandu', 'Nande', 'Paraguasu', 'Ruvicha', 'Sepé', 'Tabare', 'Ubiratan', 'Yaci', 'Aimberê', 'Caetano', 'Guaraci', 'Ibiapina', 'Jaci', 'Karim', 'Moacir', 'Peri', 'Rudá', 'Tupã', 'Ubirajara', 'Abeguar', 'Boitatá', 'Cunhambebe', 'Guaraní', 'Iara', 'Jandira'],
-        female: ['Iara', 'Jaci', 'Jurema', 'Maiara', 'Potira', 'Raoni', 'Tainá', 'Uiara', 'Yara', 'Aracy', 'Ceci', 'Iracema', 'Janaína', 'Moema', 'Naiá', 'Potyra', 'Rudá', 'Tainá', 'Ubiratã', 'Yacy', 'Açucena', 'Cauã', 'Guaraci', 'Iansan', 'Jandaira', 'Kauê', 'Maíra', 'Naara', 'Piraí', 'Samaúma'],
+        male: ['Lambaré', 'Paraguá', 'Guarambaré', 'Yanduazubí', 'Ñezú', 'Guiravera', 'Arandu', 'Karaí', 'Guyrá', 'Yaguá', 'Mbaracá', 'Takuara', 'Yvyrá', 'Aguará', 'Tatú', 'Avaeté', 'Tavaí', 'Mbói', 'Ñanduá', 'Ruvichá'],
+        female: ['Panambi', 'Yvoty', 'Poty', 'Ysapy', 'Kuñataĩ', 'Guavirá', 'Pytã', 'Mbyja', 'Yrupé', 'Takuarí', 'Kaʻaguy', 'Aramí'],
         surname: []
     },
 
@@ -1080,6 +1179,136 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         male: ['Jone', 'Ratu', 'Seru', 'Temo', 'Viliame', 'Watisoni', 'Aminiasi', 'Josaia', 'Lemeki', 'Marika', 'Penioni', 'Sakiasi', 'Tomasi', 'Alipate', 'Isoa', 'Kolinio', 'Manasa', 'Neumi', 'Pauliasi', 'Semiti', 'Uraia', 'Viliami', 'Apakuki', 'Ilaisa', 'Kitione', 'Milika', 'Osea', 'Seremaia', 'Tevita', 'Waisea'],
         female: ['Mere', 'Salote', 'Ana', 'Litia', 'Maria', 'Sala', 'Teresia', 'Adi', 'Bulou', 'Episalote', 'Kesaia', 'Makereta', 'Salanieta', 'Talei', 'Vasiti', 'Alisi', 'Fulori', 'Kelera', 'Lusi', 'Naomi', 'Salote', 'Tokasa', 'Varanisese', 'Asenaca', 'Ilisapeci', 'Loloma', 'Milika', 'Raijeli', 'Sera', 'Una'],
         surname: ['Bose', 'Dakuwaqa', 'Leweniqila', 'Mataitoga', 'Nailatikau', 'Ratunabuabua', 'Seniloli', 'Tavatavanawai', 'Vuanirewa', 'Waqa', 'Cakobau', 'Ganilau', 'Koroilavesau', 'Mara', 'Qarase', 'Roko', 'Tui', 'Vuki', 'Bolabola', 'Cavuilati']
+    },
+
+    // === OCEANIA BEFORE THE MISSIONS ===
+    /**
+     * Every set above this comment — SAMOAN, TONGAN, FIJIAN, HAWAIIAN,
+     * TAHITIAN, MELANESIAN, POLYNESIAN — is a *mission-era* register, and the
+     * era gate had them floored at the settlement date of the islands instead.
+     * Settlement certifies that the people were there. It says nothing about
+     * when the names were used. So Sione and Ioane (John), Viliami (William),
+     * Iakopo (Jacob), Mose, Maria, Kawika (David), Keoni (John), Lopaka
+     * (Robert), Jone, Petero, Mosese — and the Amelia, Filomena and Lavinia in
+     * the Tongan list — were all reachable in the Bronze Age, roughly 2,600
+     * years before the London Missionary Society reached Tahiti.
+     *
+     * The sets below cover the period from settlement to the mission. They draw
+     * on three things, in descending order of confidence: individuals named in
+     * recorded genealogy (Tuʻi Tonga succession, Hawaiian moʻokūʻauhau, Māori
+     * whakapapa, the sons of Pili in Samoa); individuals recorded by the first
+     * European visitors before missionaries arrived — Wallis and Cook in the
+     * Societies, Cook in Tonga and Hawaiʻi; and, where those run out, ordinary
+     * compounds built from the naming elements those sources show in use (Te-,
+     * Tu-, Ka-, Hine-, -ariki/-aliki/-aliʻi, -lani/-rangi/-lagi, -nui, -roa).
+     * The female lists are shorter than the male ones everywhere, because the
+     * record is: chiefly genealogy names women when they carry rank and title,
+     * and the European visitors mostly wrote down men.
+     *
+     * Three honest limits. Polynesian names were freely coined and frequently
+     * changed — at an event, on taking a title, or when a chief's name became
+     * tapu — so any fixed list understates how inventive the real system was.
+     * No name here is a surname: descent was stated as a phrase, and rank came
+     * from titles held rather than names inherited. And the attested
+     * individuals cluster in the last few centuries of each window, because
+     * that is where the genealogies are dense and the visitors were writing —
+     * so a persona in 1200 may carry the name of someone recorded in 1770.
+     * That is a real error, but a much smaller one than the mission names it
+     * replaces: Kaʻahumanu and Cakobau are ordinary formations in a continuous
+     * tradition, whereas Amelia and Sione could not exist before the press.
+     */
+    POLYNESIAN_PRECONTACT: {
+        male: ['Tui', 'Aliki', 'Toa', 'Tautai', 'Fetu', 'Malama', 'Matagi', 'Moana', 'Manu', 'Vaka', 'Tama', 'Hau', 'Fatu', 'Lagi', 'Vasa', 'Fanua', 'Ao', 'Mahina', 'Tupua', 'Kaveinga'],
+        female: ['Sina', 'Hina', 'Lupe', 'Masina', 'Fetuao', 'Moana', 'Vai', 'Lagi', 'Ata', 'Malama', 'Ua', 'Alofa', 'Vaine', 'Marama', 'Fua', 'Niu', 'Mahina', 'Tiare'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
+    },
+
+    /** Aotearoa from settlement (c. 1250) to the mission presses of the 1810s. */
+    MAORI_PRECONTACT: {
+        male: ['Kupe', 'Toi', 'Whātonga', 'Turi', 'Hoturoa', 'Tamatea', 'Ngātoro-i-rangi', 'Tama-te-kapua', 'Rakaihautū', 'Paikea', 'Uenuku', 'Rangitihi', 'Tūhourangi', 'Porourangi', 'Tahupōtiki', 'Rongokako', 'Kahungunu', 'Ruapani', 'Māhaki', 'Manaia', 'Ruaeo', 'Tūwharetoa', 'Tūtānekai', 'Hotunui', 'Marutūāhu', 'Rāhiri', 'Nukutawhiti', 'Toroa', 'Puhi', 'Whakatau'],
+        female: ['Kuramārōtini', 'Rongomaiwahine', 'Hinemoa', 'Wairaka', 'Muriwai', 'Mahinaarangi', 'Whakaotirangi', 'Ruapūtahanga', 'Hinematioro', 'Hinerupe', 'Waimirirangi', 'Torere', 'Rerenga', 'Papauma', 'Hinepare', 'Rongomaipapa', 'Hinekehu', 'Marama'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
+    },
+
+    /**
+     * Samoa from the Lapita landfall to the arrival of John Williams in 1830.
+     * Pili and his sons Ātua, Tua, Saga and Tolufale are the founding division
+     * of the islands in Samoan tradition; Salamāsina, who held all four papā
+     * titles around 1500, and her kin are the best-attested named individuals
+     * before contact.
+     */
+    SAMOAN_PRECONTACT: {
+        male: ['Pili', 'Ātua', 'Tua', 'Saga', 'Tolufale', 'Fonotī', 'Tigilau', 'Sāveasiʻuleo', 'Muagututiʻa', 'Tupua', 'Galumalemana', 'Tamālelagi', 'Fitisemanu', 'Ulufanuaseseʻe', 'Lāfai', 'Alo', 'Vaea', 'Tuilagi', 'Manaia', 'Fetū'],
+        female: ['Sinā', 'Nāfanua', 'Salamāsina', 'Levālasi', 'Fenunuivao', 'Vaetoeifaga', 'Taemā', 'Tilafaigā', 'Gauifaleai', 'Fofoaivaoʻese', 'Vaetamasoāliʻi', 'Lupe', 'Masina', 'Fetūao', 'Alofa', 'Moana', 'Lagi', 'Teuila'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
+    },
+
+    /**
+     * Tonga to the Wesleyan mission of 1826. The male list runs down the Tuʻi
+     * Tonga succession from ʻAhoʻeitu, and includes the chiefs Cook met in
+     * 1773–77 — Paulaho, Finau, Maealiuaki, Mumui — under the names he was
+     * given. Sinaitakala is the recurring name of the Tuʻi Tonga Fefine.
+     */
+    TONGAN_PRECONTACT: {
+        male: ['ʻAhoʻeitu', 'Lolofakangalo', 'Momo', 'Tuʻitātui', 'Talatama', 'Havea', 'Takalaua', 'Kauʻulufonua', 'Ngata', 'Fatafehi', 'Paulaho', 'Maealiuaki', 'Finau', 'Mumui', 'Vuna', 'Ata', 'Veʻehala', 'Luani', 'Tungī', 'Maʻafu'],
+        female: ['Sinaitakala', 'Tupoumoheofo', 'Halaevalu', 'Fusipala', 'Lātūfuipeka', 'Tuʻimala', 'Toafilimoeʻunga', 'Fatafehi', 'Talafaiva', 'Hina', 'Lupe', 'Nanasipauʻu', 'ʻOfa', 'Moheofo', 'Tuputupu', 'Kaloafu'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
+    },
+
+    /**
+     * The Society Islands from settlement (c. 1000–1100) to the London
+     * Missionary Society landing of 1797. Tupaia, Ahutoru, Purea, Tū, Vehiatua
+     * and Ori are recorded by Wallis, Bougainville and Cook between 1767 and
+     * 1777 — a thirty-year window of Tahitian names written down before any
+     * mission. The remainder are compounds in Te-/-ariʻi/-nui/-rai.
+     */
+    TAHITIAN_PRECONTACT: {
+        male: ['Tū', 'Tūteha', 'Amo', 'Vehiatua', 'Tupaia', 'Ahutoru', 'Hitihiti', 'Mahine', 'Puni', 'Ori', 'Reti', 'Poeno', 'Tepau', 'Vaetua', 'Ariipaea', 'Teriirere', 'Tayeto', 'Marua', 'Tuiterai', 'Teraʻimana'],
+        female: ['Purea', 'Itia', 'Tetupaia', 'Marama', 'Taurua', 'Poe', 'Teano', 'Vavea', 'Auo', 'Teura', 'Fatuarai', 'Vaiareti', 'Tetuanui', 'Maerehia', 'Terero', 'Hinaariʻi'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
+    },
+
+    /**
+     * Hawaiʻi from settlement (c. 1000–1200) to the first company of American
+     * missionaries in 1820. Almost all of these are named in the recorded
+     * moʻokūʻauhau of the ruling lines of Hawaiʻi, Maui, Oʻahu and Kauaʻi;
+     * Kalaniʻōpuʻu, Kīwalaʻō, Kahekili, Kaʻiana and Kekūhaupiʻo are the chiefs
+     * of Cook's visit and the wars that followed it.
+     */
+    HAWAIIAN_PRECONTACT: {
+        male: ['Līloa', 'ʻUmi', 'Hākau', 'Keawe', 'Kalaniʻōpuʻu', 'Kīwalaʻō', 'Kahekili', 'Keōua', 'Kekūhaupiʻo', 'Kaʻiana', 'Piʻilani', 'Kihapiʻilani', 'Lonoikamakahiki', 'Kūaliʻi', 'Peleioholani', 'Kahahana', 'Kaumualiʻi', 'Māʻilikūkahi', 'Kākuhihewa', 'Kekaulike'],
+        female: ['Akahiakuleana', 'Piʻikea', 'Kaikilani', 'Keakamahana', 'Keakealaniwahine', 'Kalanikauleleiaiwi', 'Kekelaokalani', 'Kalola', 'Kekuiapoiwa', 'Kaʻahumanu', 'Keōpūolani', 'Manono', 'Namahana', 'Kapukini', 'Kaneikapolei', 'Lonomaʻaikanaka', 'Kahakuhaʻakoi'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
+    },
+
+    /**
+     * Fiji before the Wesleyan mission of 1835 and the conversion of Bau in
+     * 1854. Seru, Naulivou, Tanoa, Cakobau, Qaraniqio and Nailatikau are all
+     * attested; Koroi and Bati are war-names earned rather than given at birth,
+     * which is itself how a good deal of Fijian male naming worked. The female
+     * list is short and partly built from Fijian lexical material — Adi and
+     * Bulou are ranks of address, not birth names — because the pre-Christian
+     * record for women is thin.
+     */
+    FIJIAN_PRECONTACT: {
+        male: ['Seru', 'Naulivou', 'Tanoa', 'Udreudre', 'Qaraniqio', 'Nailatikau', 'Rokomoutu', 'Vueti', 'Cakobau', 'Rasolo', 'Koroi', 'Bati', 'Waqa', 'Naivalu', 'Matanitobua', 'Kubunavanua'],
+        female: ['Talei', 'Loloma', 'Tokasa', 'Vasemaca', 'Bulou', 'Marama', 'Vani', 'Sereana', 'Naibuka', 'Torika', 'Adi'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
+    },
+
+    /**
+     * A composite, and flagged as one. "Melanesian" covers New Guinea, the
+     * Bismarcks, the Solomons, Vanuatu and New Caledonia — well over a thousand
+     * languages and no shared naming system, so no honest single list exists.
+     * These are drawn from the traditions with the best early record: Motu of
+     * the Papuan coast, Tolai of the Gazelle Peninsula (whose To- and Ia-
+     * prefixes mark male and female), and the Solomons. Roi Mata is the
+     * Vanuatu paramount whose c. 1600 burial was excavated at Retoka.
+     */
+    MELANESIAN_PRECONTACT: {
+        male: ['Lohia', 'Vagi', 'Kila', 'Morea', 'Hitolo', 'Bada', 'Tau', 'Rei', 'Gau', 'Daera', 'Koani', 'Rakatani', 'Vaburi', 'Sisia', 'ToVue', 'ToLiman', 'ToKilang', 'Roi Mata', 'Basiana', 'Ramo'],
+        female: ['Heni', 'Igo', 'Boio', 'Nou', 'Gaudi', 'Mea', 'Dika', 'Sinaka', 'Vani', 'IaMur', 'IaVaira', 'IaTagul', 'Bore', 'Rutu'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
 
     // === NATIVE AMERICAN TRIBAL SPECIFICS ===
@@ -2117,35 +2346,50 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1829, keys: ['ABORIGINAL_AUSTRALIAN', 'ABORIGINAL_AUSTRALIAN', 'ENGLISH'] }
         ],
         // Pacific Islands
+        //
+        // Every rule below is split on the *mission*, not on first European
+        // sight of the island. The two are decades apart and only the second
+        // one changed anyone's name: Cook reached Hawaiʻi in 1778 and the
+        // Hawaiian naming world was intact until the Thaddeus landed the first
+        // American company in 1820. Splitting on contact instead would have put
+        // Kawika and Keoni — David and John — in Kamehameha's boyhood.
         "New Zealand": [
-            { before: 1840, keys: ['POLYNESIAN'] },
+            { before: 1814, keys: ['MAORI_PRECONTACT'] },
+            // Marsden's mission, 1814, and the printed transliterations that
+            // followed it. Māori naming did not stop; it gained a second layer.
+            { after: 1814, before: 1840, keys: ['MAORI_PRECONTACT', 'MAORI_PRECONTACT', 'POLYNESIAN'] },
             { after: 1840, keys: ['ENGLISH', 'SCOTTISH', 'POLYNESIAN'] }
         ],
         "New Guinea and Melanesia": [
-            { before: 1884, keys: ['MELANESIAN'] },
+            { before: 1840, keys: ['MELANESIAN_PRECONTACT'] },
             // Cultural zone OCEANIA denotes a local persona; colonial presence alone
             // should not randomly replace that person's naming tradition.
+            { after: 1840, before: 1884, keys: ['MELANESIAN_PRECONTACT', 'MELANESIAN'] },
             { after: 1884, keys: ['MELANESIAN'] }
         ],
         "Polynesia": [
-            { before: 1767, keys: ['TAHITIAN', 'TONGAN', 'SAMOAN', 'POLYNESIAN'] },
-            { after: 1767, keys: ['TAHITIAN', 'SAMOAN', 'TONGAN', 'FRENCH', 'ENGLISH', 'GERMAN'] }
+            { before: 1797, keys: ['TAHITIAN_PRECONTACT', 'TONGAN_PRECONTACT', 'SAMOAN_PRECONTACT', 'POLYNESIAN_PRECONTACT'] },
+            // LMS Tahiti 1797, Wesleyan Tonga 1826, Williams in Samoa 1830. The
+            // middle window is genuinely mixed and weighted towards the older
+            // names, which is what the mission rolls themselves show.
+            { after: 1797, before: 1830, keys: ['TAHITIAN_PRECONTACT', 'TONGAN_PRECONTACT', 'SAMOAN_PRECONTACT', 'POLYNESIAN_PRECONTACT', 'TAHITIAN'] },
+            { after: 1830, keys: ['TAHITIAN', 'SAMOAN', 'TONGAN', 'FRENCH', 'ENGLISH', 'GERMAN'] }
         ],
         "Micronesia": [
-            { before: 1668, keys: ['POLYNESIAN', 'MELANESIAN'] },
+            { before: 1668, keys: ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT'] },
             { after: 1668, keys: ['SPANISH_CASTILIAN', 'GERMAN', 'JAPANESE', 'ENGLISH'] }
         ],
         "Hawaii and Central Pacific": [
-            { before: 1778, keys: ['HAWAIIAN'] },
-            { after: 1778, keys: ['HAWAIIAN', 'ENGLISH', 'CHINESE_CANTONESE', 'JAPANESE', 'PORTUGUESE', 'FILIPINO'] }
+            { before: 1820, keys: ['HAWAIIAN_PRECONTACT'] },
+            { after: 1820, keys: ['HAWAIIAN', 'HAWAIIAN_PRECONTACT', 'ENGLISH', 'CHINESE_CANTONESE', 'JAPANESE', 'PORTUGUESE', 'FILIPINO'] }
         ],
         "Indonesian and Melanesian Islands": [
-            { before: 1512, keys: ['INDONESIAN', 'MALAY', 'MELANESIAN'] },
+            { before: 1512, keys: ['INDONESIAN', 'MALAY', 'MELANESIAN_PRECONTACT'] },
             { after: 1512, before: 1949, keys: ['INDONESIAN', 'MALAY', 'MELANESIAN', 'PORTUGUESE', 'DUTCH'] },
             { after: 1949, keys: ['INDONESIAN', 'MALAY'] }
         ],
         "Major Seas and Oceans": [
-            { before: 1500, keys: ['POLYNESIAN', 'MELANESIAN', 'SWAHILI_COASTAL', 'ARABIAN_HEJAZ', 'CHINESE_CANTONESE'] },
+            { before: 1500, keys: ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT', 'SWAHILI_COASTAL', 'ARABIAN_HEJAZ', 'CHINESE_CANTONESE'] },
             { after: 1500, keys: ['ENGLISH', 'SPANISH_CASTILIAN', 'PORTUGUESE', 'DUTCH', 'FRENCH', 'POLYNESIAN'] }
         ]
     }
@@ -2254,12 +2498,14 @@ const PERIOD_NAME_MAPPING: Record<string, Record<string, string[]>> = {
         'modern': ['SPANISH_CASTILIAN', 'PORTUGUESE']
     },
     'OCEANIA': {
-        'antiquity': ['POLYNESIAN', 'MELANESIAN'],
-        'early_medieval': ['POLYNESIAN', 'MELANESIAN'],
-        'high_medieval': ['POLYNESIAN', 'MELANESIAN'],
-        'late_medieval': ['POLYNESIAN', 'MELANESIAN'],
-        'renaissance': ['POLYNESIAN', 'MELANESIAN'],
-        'early_modern': ['POLYNESIAN', 'MELANESIAN', 'ENGLISH'],
+        // Everything before the industrial period predates the missions that
+        // produced the unsuffixed sets, so it takes the pre-contact ones.
+        'antiquity': ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT'],
+        'early_medieval': ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT'],
+        'high_medieval': ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT'],
+        'late_medieval': ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT'],
+        'renaissance': ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT'],
+        'early_modern': ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT', 'ENGLISH'],
         'industrial': ['ENGLISH', 'POLYNESIAN', 'MELANESIAN'],
         'modern': ['ENGLISH', 'POLYNESIAN', 'MELANESIAN']
     }
@@ -2445,10 +2691,10 @@ export function getEraSpecificFallback(zone: CulturalZone, year: number): Fallba
             };
 
         case 'OCEANIA':
-            // Polynesian names work broadly for the region
-            if (year < 1280) {
-                // Before New Zealand settlement
-                return { groups: ['POLYNESIAN', 'MELANESIAN', 'ABORIGINAL_AUSTRALIAN'] };
+            // Split on the missions, as the region rules are: the unsuffixed
+            // Oceanic sets are mission-era registers and must not run backwards.
+            if (year < 1830) {
+                return { groups: ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT', 'ABORIGINAL_AUSTRALIAN'] };
             } else {
                 return { groups: ['POLYNESIAN', 'HAWAIIAN', 'SAMOAN', 'OCEANIA'] };
             }
@@ -2619,7 +2865,9 @@ export function getCulturalGroupsByZone(zone: CulturalZone): string[] {
             );
         case 'OCEANIA':
             return groups.filter(g => 
-                ['POLYNESIAN', 'MELANESIAN', 'ABORIGINAL_AUSTRALIAN', 'HAWAIIAN', 'TAHITIAN', 'SAMOAN', 'TONGAN', 'FIJIAN', 'OCEANIA'].includes(g)
+                ['POLYNESIAN', 'MELANESIAN', 'ABORIGINAL_AUSTRALIAN', 'HAWAIIAN', 'TAHITIAN', 'SAMOAN', 'TONGAN', 'FIJIAN', 'OCEANIA',
+                 'POLYNESIAN_PRECONTACT', 'MAORI_PRECONTACT', 'MELANESIAN_PRECONTACT', 'HAWAIIAN_PRECONTACT',
+                 'TAHITIAN_PRECONTACT', 'SAMOAN_PRECONTACT', 'TONGAN_PRECONTACT', 'FIJIAN_PRECONTACT'].includes(g)
             );
         case 'SOUTH_AMERICAN':
             return groups.filter(g => 
