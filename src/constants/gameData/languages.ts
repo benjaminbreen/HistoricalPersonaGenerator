@@ -3271,6 +3271,31 @@ export const LANGUAGES: Record<string, LanguageData> = {
     historicalContext: 'The literary language of the Uyghur Khaganate (744-840) and Silk Road city-states.',
   },
 
+  // The vernacular of the Tarim Basin oases, and the entry the table did not
+  // have: OLD_UYGHUR ends at 1500 and nothing carried the language forward, so
+  // after that date the region's own speech was simply not an option and the
+  // resolver fell through to whatever else called itself East Asian.
+  UYGHUR: {
+    id: 'UYGHUR',
+    name: 'Uyghur',
+    nativeName: 'ئۇيغۇر تىلى',
+    family: LANGUAGE_FAMILIES.TURKIC,
+    script: ['Perso-Arabic', 'Cyrillic', 'Latin'],
+    period: [1500, 2030],
+    regions: ['Tarim Basin', 'Xinjiang', 'Kashgar', 'Turpan', 'Hotan', 'Urumqi', 'Yarkand', 'Dzungaria'],
+    culturalZones: ['EAST_ASIAN' as CulturalZone],
+    predecessors: ['OLD_UYGHUR'],
+    greetings: {
+      hello: 'Ässalamu äläykum',
+      goodbye: 'Xosh',
+      yes: 'Hä',
+      no: 'Yaq',
+      thanks: 'Rähmät',
+    },
+    llmPrompt: 'Emulate Uyghur, a Karluk Turkic language of the Tarim Basin oases. SOV word order, agglutinative suffixing, vowel harmony. Persian and Arabic loanwords through Islam, Chagatai literary vocabulary, and — from the twentieth century — Russian and then Mandarin administrative loanwords. Registers range from oasis market speech to the formal language of the mosque and the madrasa.',
+    historicalContext: 'Uyghur descends from the Karluk Turkic of the Kara-Khanid realm through Chagatai, the shared literary language of Central Asia, and is the everyday speech of the oasis towns ringing the Taklamakan.',
+  },
+
   // === CHINESE DIALECTS ===
 
   MIN: {
@@ -7962,20 +7987,26 @@ export function getLanguageForCharacter(
   const fallbackLangId = fallbackLanguages[culturalZone]?.[period];
   if (fallbackLangId) {
     const fallbackLang = LANGUAGES[fallbackLangId];
-    // Validate that the fallback language is actually valid for this year
-    if (fallbackLang && year >= fallbackLang.period[0] && year <= fallbackLang.period[1]) {
+    // Validate that the fallback language is actually valid for this year.
+    // The caller's veto applies here as much as anywhere else: a zone default
+    // is a guess about a continent, and a guess the caller has already said is
+    // wrong for this place should not outrank an honest "no answer".
+    if (fallbackLang
+      && year >= fallbackLang.period[0] && year <= fallbackLang.period[1]
+      && (!accept || accept(fallbackLang.id))) {
+      if (trace) trace.basis = 'zone-scan';
       return fallbackLang;
-    }
-    // If fallback is invalid, try to find ANY language for this cultural zone and year
-    for (const lang of Object.values(LANGUAGES)) {
-      if (year >= lang.period[0] && year <= lang.period[1]) {
-        if (lang.culturalZones?.includes(culturalZone as CulturalZone)) {
-          return lang;
-        }
-      }
     }
   }
 
+  // There used to be a last resort here: the first entry in declaration order
+  // that shared the cultural zone and was alive in this year. It consulted
+  // neither the caller's veto nor anything about the place, and the zones are
+  // continent-sized, so it was the worst answer in the pipeline produced by the
+  // path with the least checking — a persona in the 1993 Tarim Basin came back
+  // speaking Modern Japanese, because that is the first EAST_ASIAN entry in the
+  // table still current in 1993. Returning nothing is better: the caller falls
+  // through to a language-family label, which is vague but true.
   return undefined;
 }
 

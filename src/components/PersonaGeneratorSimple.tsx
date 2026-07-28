@@ -197,6 +197,7 @@ import {
   getNarrativePronouns,
 } from '../services/narrativeTextService';
 import { generateNarrativeBiography } from '../services/narrativeBiographyService';
+import { polityFormFor, socialStatusFieldLabel } from '../services/socialStatusService';
 import { historicalPlaceLabel } from '../constants/gameData/placeLabels';
 import { zoneAccent } from '../constants/gameData/zonePalette';
 import { devLog } from '../utils/devLog';
@@ -216,6 +217,18 @@ import {
 } from '../types/sharedPersona';
 import { getDisplayZone } from '../utils/zoneDisplayUtils';
 import './PersonaGenerator.css';
+
+/**
+ * What to call the social-position field for this persona's kind of society.
+ * A band has standing, not social status, and printing "Social Status: Band
+ * Member" under a heading that promises a rank order overstates what is there.
+ */
+const statusFieldLabel = (persona: HistoricalPersona): string =>
+  socialStatusFieldLabel(polityFormFor({
+    year: persona.year,
+    culturalZone: persona.historicalContext?.culturalZone ?? persona.character.culturalZone,
+    placeLower: `${persona.location ?? ''} ${persona.region ?? ''}`.toLowerCase(),
+  }));
 
 type SourceStudioView = 'full' | 'wikipedia' | 'web' | 'text' | 'old_bailey';
 
@@ -1068,6 +1081,14 @@ export default function PersonaGenerator() {
   // Every model call costs real money and this tool is free, so repeat use and
   // the expensive schema path both pause for an explicit confirmation.
   const [aiProseRuns, setAiProseRuns] = useState(0);
+  /**
+   * Whether the reader has asked for the AI path at all. The schema record is
+   * the expensive, specialist option — roughly six times the cost of the
+   * standard biography — and offering it in the top row to someone who has not
+   * yet chosen to involve a model at all put the most costly control on screen
+   * before the cheapest one had been tried. It appears once AI is in play.
+   */
+  const [hasRequestedAi, setHasRequestedAi] = useState(false);
   const [costConfirm, setCostConfirm] = useState<{ kind: AiCostKind; run: () => Promise<void> } | null>(null);
   const [editableJsonl, setEditableJsonl] = useState('');
   const [fieldEditStatus, setFieldEditStatus] = useState<string | null>(null);
@@ -3517,7 +3538,8 @@ export default function PersonaGenerator() {
       'artistic': <IoTrophy />,
       'agricultural': <IoHammer />,
       'maritime': <IoBoat />,
-      'death': <IoSkull />
+      'death': <IoSkull />,
+      'mundane': <IoHammer />
     };
     return iconMap[kind] || <IoEllipseOutline />;
   };
@@ -3959,9 +3981,16 @@ export default function PersonaGenerator() {
             <IoShuffle aria-hidden="true" />
             Generate Random Persona
           </button>
+          {/* The AI path, the schema record and the sampling toggle are all
+              modifiers on the primary action rather than actions in their own
+              right, so they share one row and one visual weight. */}
+          <div className="generation-mode-row">
           <button
             className="btn btn-secondary generation-ai-button"
-            onClick={() => requestAiRun('repeat_prose', developPersonaProse)}
+            onClick={() => {
+              setHasRequestedAi(true);
+              requestAiRun('repeat_prose', developPersonaProse);
+            }}
             disabled={isSourceGenerating}
             title="Generate a persona and have a language model write its biography. One model call; the schema record is built locally."
             aria-label="Generate a persona and develop it with AI"
@@ -3969,6 +3998,7 @@ export default function PersonaGenerator() {
             <IoSparkles aria-hidden="true" />
             {isSourceGenerating ? 'Developing…' : 'Use AI to Develop Persona'}
           </button>
+          {hasRequestedAi && (
           <button
             className="btn btn-tertiary generation-schema-button"
             onClick={() => requestAiRun('schema', generateCompletelyRandom)}
@@ -3979,6 +4009,7 @@ export default function PersonaGenerator() {
             <IoDocumentText aria-hidden="true" />
             AI Schema Record
           </button>
+          )}
           <div className="sampling-mode" role="group" aria-label="How personas are sampled">
             <button
               type="button"
@@ -3996,6 +4027,7 @@ export default function PersonaGenerator() {
             >
               True frequency
             </button>
+          </div>
           </div>
           {sharedPersonaId && (
             <span className="shared-persona-badge">
@@ -4667,7 +4699,7 @@ export default function PersonaGenerator() {
                       </div>
                     )}
                     <div className="info-item">
-                      <span className="label">Social Status</span>
+                      <span className="label">{statusFieldLabel(persona)}</span>
                       <span className="value">{persona.character.class || 'Unknown'}</span>
                     </div>
                   </div>
@@ -6508,7 +6540,7 @@ export default function PersonaGenerator() {
                       </span>
                     </div>
                     <div className="info-item">
-                      <span className="label">Social Status</span>
+                      <span className="label">{statusFieldLabel(persona)}</span>
                       <span className="value">{persona.character.class || 'Unknown'}</span>
                     </div>
                     <div className="info-item">

@@ -86,6 +86,21 @@ const PROFESSION_AVAILABILITY_RULES: ProfessionAvailabilityRule[] = [
     pattern: /\b(?:chinampero|chinampa|cacao|cocoa|tribute collector|pochteca|calpixqui|nahual|curandero|codex painter|obsidian knapper|featherworker|jade carver|ball court player|ticitl|herbatero|sobador)\b/i,
     places: /\b(?:mexico|maya|yucatan|oaxaca|guatemala|chiapas|belize|honduras|central highlands|mesoameric|tenochtitlan|teotihuacan|veracruz|isthmus|central america|caribbean|antill)\b/i,
   },
+  {
+    // Rice is a wet crop, and the profession tables offer it zone-wide across
+    // an EAST_ASIAN zone that includes the Taklamakan. Oasis agriculture in the
+    // Tarim is wheat, cotton, melons and fruit; a rice farmer there was two
+    // in every ten personas. The exclusion is by aridity, not by country.
+    pattern: /\brice (?:farmer|grower|planter|cultivator)\b/i,
+    excludePlaces: /\b(?:tarim|taklamakan|xinjiang|kashgar|turfan|hotan|dzungar|gobi|ordos|steppe|altai|tian shan|mongolia|tibet|himalaya|kham|amdo|hokkaido|sakhalin|manchurian steppe)\b/i,
+  },
+  {
+    // A word for a specific postwar Japanese institution, offered to the whole
+    // zone. It is also not a job a woman held, and the batch produced female
+    // ones; the gender bias on the entry does not survive the pool draw.
+    pattern: /\bsalaryman\b/i,
+    places: /\b(?:japan|tokyo|osaka|kyoto|nagoya|fukuoka|hokkaido|kanto|kansai|honshu|kyushu|okinawa)\b/i,
+  },
   // North American culture areas. Now that the `Woodlands` and `Plains` blocks
   // are reachable at all, they need pinning to the ground they describe, or the
   // Baffin coast fills up with buffalo hunters and wampum makers.

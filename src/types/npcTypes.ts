@@ -83,6 +83,14 @@ export interface NpcEntity {
     personality: NpcPersonality;
     socialContext: NpcSocialContext;
     class: string; // e.g., 'ARTISAN', 'COMMONER'
+    /**
+     * The persona's station, in the vocabulary of its own kind of society —
+     * "Peasant" in an agrarian state, "Band Member" in a foraging band, "Middling
+     * Sort" in a commercial one. Written by `socialStatusService`; read by the
+     * life-history and biography services. `PlayerCharacter` has always declared
+     * it and this did not, so every read went through a cast that did not compile.
+     */
+    socialClass?: string;
     role: string; // e.g., 'Blacksmith', 'Farmer'
     
     // Visual "Baseline Truth"

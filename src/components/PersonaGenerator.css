@@ -524,17 +524,49 @@ body.dark-mode .top-bar {
   box-shadow: 0 5px 16px color-mix(in srgb, var(--color-accent-primary) 18%, transparent);
 }
 
-/* The AI path sits beside the primary action rather than replacing it: same
-   height so the pair reads as one control group, quieter fill so the fast
-   local generation stays the obvious default. */
-.generation-ai-button {
-  min-height: 2.85rem;
-  padding-inline: 1.1rem;
-  font-size: 0.8rem;
+/* The AI path is a modifier on the primary action, not a rival to it. It used
+   to match the primary button's height and sat next to a second, equally large
+   button for the schema record — so the two costliest controls were also the
+   two largest, and the fast local default was outweighed two to one. They now
+   share the sampling toggle's pill so the whole row reads as one set of
+   options about *how* to generate. */
+.generation-mode-row {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: var(--sp-sm);
+  flex-wrap: nowrap;
+}
+
+.control-buttons .generation-ai-button,
+.control-buttons .generation-schema-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  min-height: 0;
+  padding: 0.22rem 0.7rem;
+  border: 1px solid var(--color-border, #d8cec0);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
+  box-shadow: none;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.control-buttons .generation-ai-button:hover:not(:disabled),
+.control-buttons .generation-schema-button:hover:not(:disabled) {
+  color: var(--color-text, #2a2320);
+  background: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
+}
+
+/* The toggle supplies its own left margin for the old layout; inside the row
+   the flex gap already does it. */
+.generation-mode-row .sampling-mode {
+  margin-left: 0;
 }
 
 .generation-ai-button:disabled {
@@ -6097,6 +6129,15 @@ body.dark-mode .sampling-mode {
   .generation-random-button {
     width: 100%;
     justify-content: center;
+  }
+
+  /* `.control-buttons` becomes a column here, so the row is one item in it.
+     It stays horizontal internally — the AI button, the schema record and the
+     sampling toggle are all one line at every width. */
+  .generation-mode-row {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: nowrap;
   }
 
   /* Provenance matters, but it is not what a reader came for. It stays

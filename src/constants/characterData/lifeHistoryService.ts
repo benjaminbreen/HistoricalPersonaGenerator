@@ -15,7 +15,13 @@ import {
   FamilyMember
 } from '../../types';
 import { filterByCulture, resolveCulture } from '../../services/cultureResolution';
-import { hasCapability, type CapabilityContext, type SocietyCapability } from '../societyCapabilities';
+import {
+  hasCapability,
+  subsistenceMode,
+  type CapabilityContext,
+  type SocietyCapability,
+  type SubsistenceMode,
+} from '../societyCapabilities';
 import { withIndefiniteArticle } from '../../services/narrativeTextService';
 import { random as seededRandom } from '../../utils/seededRandom';
 
@@ -37,7 +43,12 @@ export type EventKind =
   | 'childbirth' | 'battle' | 'discovery' | 'journey' | 'tragedy'
   | 'plague' | 'achievement' | 'study' | 'guild' | 'rival' | 'injury'
   | 'fire' | 'travel' | 'religious' | 'political' | 'trade' | 'family'
-  | 'legal' | 'artistic' | 'agricultural' | 'maritime' | 'death';
+  | 'legal' | 'artistic' | 'agricultural' | 'maritime' | 'death'
+  // Ordinary work begun without training or ceremony — the laborer's entry into
+  // it. `generateEarlyLifeEvent` has always returned this and the union has
+  // never carried it, so the value fell through `getEventIcon`'s fallback to a
+  // blank dot and could never match a `prerequisite` or `incompatibleWith`.
+  | 'mundane';
 
 export interface EnhancedLifeEvent {
   year: number;
@@ -123,6 +134,13 @@ interface EventTemplate {
    * method". See constants/societyCapabilities.ts.
    */
   requiresCapability?: SocietyCapability;
+  /**
+   * Ways of making a living this event is possible under. Declaring it also
+   * lets a culturally-specific template survive into a foraging life: the
+   * zone modifier lists are otherwise dropped wholesale for foragers, because
+   * most of them describe manors, examinations and caravans.
+   */
+  subsistence?: SubsistenceMode[];
   /**
    * Kin who must actually exist, and be the right age, in the year the event
    * happens. `maxAge` on the persona is declared by exactly one of the 74
@@ -347,6 +365,18 @@ const TRADE_GOODS: Record<CulturalZone, Record<HistoricalEra, string[]>> = {
 // PROFESSION-SPECIFIC EVENT TEMPLATES
 // ============================================================================
 
+/**
+ * Stations from which manuscripts and debating chairs were out of reach.
+ *
+ * Matched as substrings against the persona's status label, so this has to
+ * carry every vocabulary `socialStatusService` can produce, not only the four
+ * medieval-European terms it used to be able to.
+ */
+const SCHOLARLY_EXCLUSIONS = [
+  'commoner', 'peasant', 'slave', 'serf', 'laborer',
+  'band member', 'householder', 'laboring poor', 'working class', 'bonded',
+];
+
 const MERCHANT_EVENTS: EventTemplate[] = [
   {
     kind: 'trade',
@@ -360,6 +390,8 @@ const MERCHANT_EVENTS: EventTemplate[] = [
     ],
     minAge: 16,
     weight: 1.2,
+    // Exclusive rights, profit and cornering a market are all one institution.
+    requiresCapability: 'market_exchange',
     professionKeywords: ['merchant', 'trader', 'vendor', 'salesman', 'peddler']
   },
   {
@@ -374,6 +406,7 @@ const MERCHANT_EVENTS: EventTemplate[] = [
     ],
     minAge: 18,
     weight: 0.8,
+    requiresCapability: 'market_exchange',
     professionKeywords: ['merchant', 'trader']
   },
   {
@@ -387,6 +420,7 @@ const MERCHANT_EVENTS: EventTemplate[] = [
     ],
     minAge: 25,
     weight: 0.5,
+    requiresCapability: 'market_exchange',
     professionKeywords: ['merchant', 'trader', 'explorer']
   }
 ];
@@ -405,7 +439,8 @@ const SCHOLAR_EVENTS: EventTemplate[] = [
     minAge: 18,
     weight: 1.0,
     requiresLiteracy: true,
-    excludedClasses: ['commoner', 'peasant', 'slave', 'serf', 'laborer'],
+    requiresCapability: 'writing',
+    excludedClasses: SCHOLARLY_EXCLUSIONS,
     professionKeywords: ['scholar', 'scribe', 'philosopher', 'teacher', 'professor', 'librarian']
   },
   {
@@ -421,7 +456,8 @@ const SCHOLAR_EVENTS: EventTemplate[] = [
     minAge: 20,
     weight: 0.8,
     requiresLiteracy: true,
-    excludedClasses: ['commoner', 'peasant', 'slave', 'serf', 'laborer'],
+    requiresCapability: 'writing',
+    excludedClasses: SCHOLARLY_EXCLUSIONS,
     professionKeywords: ['scholar', 'philosopher', 'mathematician', 'astronomer']
   }
 ];
@@ -439,6 +475,8 @@ const CRAFTSMAN_EVENTS: EventTemplate[] = [
     ],
     minAge: 20,
     weight: 1.0,
+    // Guild treasurers and masterworks presented for admission.
+    requiresCapability: 'guilds',
     professionKeywords: ['smith', 'carpenter', 'mason', 'weaver', 'potter', 'jeweler', 'baker']
   },
   {
@@ -453,6 +491,8 @@ const CRAFTSMAN_EVENTS: EventTemplate[] = [
     ],
     minAge: 18,
     weight: 1.2,
+    // A market square to draw crowds to, and a household rich enough to commission.
+    requiresCapability: 'market_exchange',
     professionKeywords: ['craftsman', 'artisan', 'smith', 'carpenter']
   }
 ];
@@ -470,6 +510,8 @@ const SOLDIER_EVENTS: EventTemplate[] = [
     ],
     minAge: 16,
     weight: 1.5,
+    // Sieges, garrisons and borders are what states have; raiding is not this.
+    requiresCapability: 'urban_settlement',
     professionKeywords: ['soldier', 'guard', 'warrior', 'knight', 'samurai', 'mercenary']
   },
   {
@@ -514,6 +556,7 @@ const FARMER_EVENTS: EventTemplate[] = [
     ],
     minAge: 16,
     weight: 1.0,
+    requiresCapability: 'settled_agriculture',
     // Herders and ranchers are not croppers; they have their own events below.
     professionKeywords: ['farmer', 'peasant', 'planter', 'cultivator', 'grower']
   },
@@ -543,6 +586,7 @@ const FARMER_EVENTS: EventTemplate[] = [
     ],
     minAge: 16,
     weight: 0.9,
+    requiresCapability: 'settled_agriculture',
     professionKeywords: ['farmer', 'peasant']
   },
   {
@@ -557,6 +601,8 @@ const FARMER_EVENTS: EventTemplate[] = [
     ],
     minAge: 25,
     weight: 0.7,
+    // Inheriting a field, buying a plot, dividing land among heirs.
+    requiresCapability: 'heritable_land',
     professionKeywords: ['farmer', 'landowner']
   }
 ];
@@ -574,6 +620,7 @@ const RELIGIOUS_EVENTS: EventTemplate[] = [
     ],
     minAge: 18,
     weight: 1.2,
+    requiresCapability: 'writing',
     professionKeywords: ['priest', 'monk', 'imam', 'rabbi', 'shaman', 'nun']
   },
   {
@@ -797,12 +844,12 @@ const CULTURAL_EVENT_MODIFIERS: Record<CulturalZone, Partial<EventTemplate>[]> =
       importance: EventImportance.MILESTONE,
       titles: ['Vision Quest', 'Sacred Ceremony'],
       templates: [
-        'Received vision during coming-of-age ceremony',
-        'Participated in sun dance, earning honor marks',
-        'Selected as keeper of sacred bundle'
+        'Received a vision during the coming-of-age fast, and was told what it meant',
+        'Was made keeper of a sacred bundle, and of what is owed to it'
       ],
       weight: 1.3,
       minAge: 14,
+      subsistence: ['foraging', 'pastoral', 'horticultural', 'agrarian'],
       eraWeights: {
         [HistoricalEra.PREHISTORY]: 1.2,
         [HistoricalEra.MEDIEVAL]: 1.3
@@ -811,14 +858,34 @@ const CULTURAL_EVENT_MODIFIERS: Record<CulturalZone, Partial<EventTemplate>[]> =
     {
       kind: 'achievement',
       importance: EventImportance.OPPORTUNITY,
-      titles: ['Hunting Success', 'Tribal Honor'],
+      titles: ['Hunting Success', 'A Good Season'],
       templates: [
-        'Led successful buffalo hunt, feeding village through winter',
-        'Counted coup on enemy warrior, gaining honor',
-        'Discovered new fishing grounds during drought'
+        // "Feeding village through winter" was the register bug in visible
+        // form: pedestrian bison hunters on the open Plains did not have a
+        // village, and the word arrived from a zone-level agriculture date
+        // borrowed from the maize Southwest.
+        'Led a successful hunt, and the camp ate through the winter',
+        'Found fishing grounds that held when the usual ones failed',
+        'Read the herd right when nobody else did, and the drive came off'
       ],
       weight: 1.1,
-      minAge: 16
+      minAge: 16,
+      subsistence: ['foraging', 'pastoral', 'horticultural']
+    },
+    {
+      // Counting coup belongs to the mounted Plains war complex, which needs
+      // the horse. Ungated, it reached bison hunters two thousand years early.
+      kind: 'battle',
+      importance: EventImportance.MILESTONE,
+      titles: ['Counting Coup', 'War Honor'],
+      templates: [
+        'Counted coup on an enemy warrior, and had the right to say so',
+        'Rode in a horse raid against a rival band and came back mounted'
+      ],
+      weight: 1.0,
+      minAge: 16,
+      minYear: 1700,
+      subsistence: ['foraging', 'pastoral', 'horticultural']
     }
   ],
   NORTH_AMERICAN_COLONIAL: [
@@ -1289,6 +1356,10 @@ const FAMILY_EVENTS: EventTemplate[] = [
     requiresKin: { relation: 'sibling', minAge: 14, maxAge: 45 },
     minAge: 16,
     maxOccurrences: 2, // Limit to prevent excessive repetition
+    // Marriage improves "the family's position in society" only where standing
+    // is a transmissible thing a marriage can move. Kin-reckoned societies
+    // marry to make alliances too, but not to climb.
+    requiresCapability: 'heritable_land',
     weight: 0.8
   },
   {
@@ -1302,6 +1373,11 @@ const FAMILY_EVENTS: EventTemplate[] = [
     ],
     requiresKin: { relation: 'parent', minAge: 45, maxAge: 82 },
     minAge: 18,
+    // Three separate anachronisms were stacked here: the firm as a heritable
+    // going concern, retirement, and purchase as investment. All three need a
+    // world that prices things. This is what put "took over the family
+    // business" into a bison-hunting band in 157 BCE.
+    requiresCapability: 'market_exchange',
     weight: 0.7
   },
   {
@@ -1327,9 +1403,20 @@ function generateEarlyLifeEvent(
   profession: string,
   gender: string,
   socialClass: string,
-  birthYear = 0
+  birthYear = 0,
+  /**
+   * What the society could do in the year this training began. Without it this
+   * function was the last ungated path into the biography: it hands out guild
+   * masters, trading companies and court scribes purely on a profession-name
+   * match, which put an apprenticeship "to guild master" into 9136 BCE and a
+   * "first journey with a merchant caravan" into a foraging band.
+   */
+  capabilities?: CapabilityContext,
 ): { kind: EventKind; title: string; text: string } | null {
   const profLower = profession.toLowerCase();
+  const trainingYear = birthYear + 13;
+  const can = (capability: SocietyCapability): boolean =>
+    !capabilities || hasCapability(capability, { ...capabilities, year: trainingYear });
 
   // Crafts & Trades - Traditional apprenticeship
   const craftProfessions = ['blacksmith', 'carpenter', 'mason', 'weaver', 'potter', 'tanner',
@@ -1337,11 +1424,22 @@ function generateEarlyLifeEvent(
     'instrument maker', 'clockmaker', 'glassblower', 'chandler'];
 
   if (craftProfessions.some(p => profLower.includes(p))) {
-    const variants = [
-      `Began apprenticeship as a ${profession} under skilled master craftsman`,
-      `Apprenticed to ${profession === 'Blacksmith' ? 'forge master' : 'guild master'}, learning trade secrets`,
-      `Taken as apprentice by renowned ${profession}, bound for seven years`
-    ];
+    // `guilds` says a craft corporation exists; `guild_apprenticeship` says it
+    // is still how a trade is entered. The distinction matters at the modern
+    // end, where the guilds are gone and the indenture with them.
+    const variants = can('guild_apprenticeship')
+      ? [
+        `Began apprenticeship as a ${profession} under skilled master craftsman`,
+        `Apprenticed to ${profession === 'Blacksmith' ? 'forge master' : 'guild master'}, learning trade secrets`,
+        `Taken as apprentice by renowned ${profession}, bound for seven years`,
+      ]
+      : [
+        // No corporation to be bound to, and no indenture to be bound by:
+        // the craft passes through the household and through watching.
+        `Learned the ${profLower}'s work by doing it badly alongside someone who did it well`,
+        `Was set to the simple part of the work, and kept at it until the hands knew it`,
+        `Took up the ${profLower}'s craft in the way of the household, by being there for it`,
+      ];
     return {
       kind: 'apprenticeship',
       title: 'Apprenticeship',
@@ -1408,11 +1506,13 @@ function generateEarlyLifeEvent(
   // Merchants & Traders
   const merchantProfessions = ['merchant', 'trader', 'peddler', 'shopkeeper', 'vendor'];
 
-  if (merchantProfessions.some(p => profLower.includes(p))) {
+  if (merchantProfessions.some(p => profLower.includes(p)) && can('market_exchange')) {
     const variants = [
       `Sent to apprentice with trading company, learning accounts and negotiation`,
       `Made a first journey with a merchant caravan, carrying valuable goods`,
-      `Began managing family stall at market, handling coins and customers`
+      can('coinage')
+        ? `Began managing family stall at market, handling coins and customers`
+        : `Began keeping the family's stall, and learned what a thing was worth in another thing`,
     ];
     return {
       kind: 'trade',
@@ -1443,11 +1543,11 @@ function generateEarlyLifeEvent(
   const scholarProfessions = ['scribe', 'scholar', 'teacher', 'tutor', 'philosopher',
     'librarian', 'clerk'];
 
-  if (scholarProfessions.some(p => profLower.includes(p))) {
+  if (scholarProfessions.some(p => profLower.includes(p)) && can('writing')) {
     // A court scribe is not where a nineteenth-century bank clerk learned the
     // trade. "clerk" matches this list, so without a date these medieval
     // variants reached straight into 1920 Stockholm.
-    const schoolingYear = birthYear + 13;
+    const schoolingYear = trainingYear;
     const variants = schoolingYear >= 1850
       ? [
         `Began formal schooling, learning letters, arithmetic and a clear hand`,
@@ -1491,11 +1591,21 @@ function generateEarlyLifeEvent(
     'archer', 'spearman'];
 
   if (militaryProfessions.some(p => profLower.includes(p))) {
-    const variants = [
-      `Began martial training, learning swordplay and formation fighting`,
-      `Enlisted in local militia, issued first real weapon`,
-      `Sent to serve as squire, learning ways of war from veteran knight`
-    ];
+    // "guard" matches this list, so a supermarket security guard in 1993 was
+    // being sent to squire for a knight. Swordplay and squires belong to a
+    // world that has a lord to be retained by; where there is not one, the
+    // training is the state's, or there is no training at all.
+    const variants = can('retained_military_service')
+      ? [
+        `Began martial training, learning swordplay and formation fighting`,
+        `Enlisted in local militia, issued first real weapon`,
+        `Sent to serve as squire, learning ways of war from veteran knight`,
+      ]
+      : [
+        `Enlisted, and learned the drill before learning anything else`,
+        `Did national service, and stayed on when the term was up`,
+        `Was taken on and trained in a fortnight, most of it paperwork`,
+      ];
     return {
       kind: 'battle',
       title: 'Military Training',
@@ -1589,10 +1699,34 @@ export function generateLifeHistory(
   character: PlayerCharacter | NpcEntity,
   currentYear: number,
   culturalZone: CulturalZone,
-  era: HistoricalEra
+  era: HistoricalEra,
+  /**
+   * Location and region, for the place overrides in `societyCapabilities`.
+   * Those are written against region names — "great plains", "arctic",
+   * "california" — and the character object does not reliably carry one, so
+   * relying on `character.hometown` matched no override and fell through to the
+   * zone default, which is the earliest date anywhere in the zone.
+   */
+  place?: string,
 ): EnhancedLifeEvent[] {
   const events: EnhancedLifeEvent[] = [];
   const birthYear = currentYear - character.age;
+
+  // The general pools describe a world of markets, guilds, inheritance and
+  // social standing. Whether that world exists is a question about how a life
+  // is provisioned, not about its date: gating on `birthYear < -8000` gave
+  // every Plains bison hunter, Aboriginal Australian and Arctic sealer since
+  // the Neolithic a family business to inherit. Ask the place and the trade.
+  const capabilityPlace = [
+    place ?? '',
+    (character as { hometown?: string }).hometown ?? '',
+    (character as { birthplace?: string }).birthplace ?? '',
+  ].join(' ').toLowerCase();
+  const subsistence = subsistenceMode(
+    { year: birthYear, culturalZone, placeLower: capabilityPlace },
+    (character.profession ?? '').toLowerCase(),
+  );
+  const isForagingLife = subsistence === 'foraging' || subsistence === 'pastoral';
 
   // Always start with birth
   events.push({
@@ -1602,19 +1736,17 @@ export function generateLifeHistory(
     title: 'Birth',
     text: (() => {
       const home = (character as { hometown?: string }).hometown;
-      return birthYear < -8000
+      // The band phrasing was gated on the same stale date test as the event
+      // pools, so a foraging life after 8000 BCE fell through to the status
+      // label — which now reads "born to a Band Member family", a sentence
+      // that names the absence of rank as though it were a rank.
+      return isForagingLife
         ? `Born to the band that ranged ${home || 'this country'}`
         // "to a Upper Class family" — the article has to agree with whatever
         // the social class happens to start with.
         : `Born in ${home || 'a small settlement'} to ${withIndefiniteArticle(`${character.socialClass || 'common'} family`)}`;
     })()
   });
-
-  // Before agriculture the general pools describe a world that does not exist
-  // yet — markets, guilds, inheritance, social standing. Gate on the year, not
-  // the era: PREHISTORY now spans 37,000 years and its late end is Neolithic.
-  const FORAGING_THRESHOLD_YEAR = -8000;
-  const isForagingLife = birthYear < FORAGING_THRESHOLD_YEAR;
 
   let eventPool: EventTemplate[] = isForagingLife
     ? [...FORAGER_EVENTS]
@@ -1628,10 +1760,17 @@ export function generateLifeHistory(
         ...FAMILY_EVENTS
       ];
 
-  // Add cultural modifiers
-  if (!isForagingLife && CULTURAL_EVENT_MODIFIERS[culturalZone]) {
-    eventPool = [...eventPool, ...CULTURAL_EVENT_MODIFIERS[culturalZone]];
-  }
+  // Add cultural modifiers. For a foraging life only those that say they fit
+  // one survive — the rest of each zone list is manors, examinations and
+  // caravans — which is what keeps a Plains hunter's vision quest and buffalo
+  // drive while dropping the feudal obligations alongside them.
+  const modifiers = (CULTURAL_EVENT_MODIFIERS[culturalZone] ?? []) as EventTemplate[];
+  eventPool = [
+    ...eventPool,
+    ...(isForagingLife
+      ? modifiers.filter(t => t.subsistence?.includes(subsistence))
+      : modifiers),
+  ];
 
   // Filter by profession keywords
   const profession = character.profession?.toLowerCase() || '';
@@ -1663,7 +1802,10 @@ export function generateLifeHistory(
 
     // Only add if within character's lifetime
     if (earlyYear >= birthYear && earlyYear <= currentYear) {
-      const earlyLifeEvent = generateEarlyLifeEvent(profession, character.gender, socialClass, birthYear);
+      const earlyLifeEvent = generateEarlyLifeEvent(
+        profession, character.gender, socialClass, birthYear,
+        { year: birthYear, culturalZone, placeLower: capabilityPlace },
+      );
 
       if (earlyLifeEvent) {
         events.push({
@@ -1711,14 +1853,16 @@ export function generateLifeHistory(
       const templateId = `${template.kind}-${template.titles[0]}`;
       if (usedEventTemplates.has(templateId)) return false;
 
+      // A template that names the ways of living it fits must match this one.
+      if (template.subsistence && !template.subsistence.includes(subsistence)) return false;
+
       // Check that the society could do this at all
       if (template.requiresCapability) {
         const templateBirthYear = (character as { birthYear?: number }).birthYear ?? birthYear;
-        const place = ((character as { hometown?: string }).hometown ?? '').toLowerCase();
         if (!hasCapability(template.requiresCapability, {
           year: templateBirthYear + eventAge,
           culturalZone,
-          placeLower: place,
+          placeLower: capabilityPlace,
         })) return false;
       }
 

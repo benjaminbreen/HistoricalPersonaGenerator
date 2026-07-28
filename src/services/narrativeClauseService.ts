@@ -55,15 +55,28 @@ export function classBandFor(input: {
   const wealthy = wealth === 'wealthy' || wealth === 'noble';
   const comfortable = wealthy || wealth === 'comfortable';
 
-  if (status === 'noble' || status === 'upper class') return 'elite';
+  if (status === 'noble' || status === 'upper class' || status === 'gentry'
+    || status === 'chiefly lineage') return 'elite';
   // A merchant commands other people's labor but is not born to rule; only the
   // ones who have converted trade into standing read as elite.
   if (status === 'merchant') return wealth === 'noble' ? 'elite' : 'middling';
-  if (status === 'middle class') return wealthy ? 'elite' : 'middling';
+  if (status === 'middle class' || status === 'middling sort') return wealthy ? 'elite' : 'middling';
   if (status === 'commoner') return comfortable ? 'middling' : 'working';
   if (status === 'peasant' || status === 'working class') {
     return wealth === 'poor' ? 'poor' : 'working';
   }
+  // Vocabularies for the societies that are not agrarian states. A band or a
+  // tribe has no station that commands other people's labor, so none of these
+  // may reach 'elite': without this they fell through to the wealth-only
+  // fallback below, where a comfortable hunter came out middling and a wealthy
+  // one came out elite, and the elite clause banks talk about servants and
+  // commissions.
+  if (status === 'band member' || status === 'householder') {
+    return wealth === 'poor' ? 'poor' : 'working';
+  }
+  if (status === 'laboring poor') return 'poor';
+  if (status === 'lineage head' || status === 'trade partner'
+    || status === 'trade specialist') return 'middling';
 
   // No usable status label: fall back to wealth alone.
   if (wealth === 'poor') return 'poor';

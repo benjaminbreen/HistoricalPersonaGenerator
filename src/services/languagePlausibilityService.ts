@@ -76,12 +76,14 @@ const LITURGICAL: Record<string, RegisterRule> = {
     // Romance vernaculars separate out of it.
     vernacular: { places: /rome|roman|italy|latium|campania|etruria|hispania|gaul|africa proconsularis|dacia|pannonia/i, until: 600 },
   },
-  MEDIEVAL_LATIN: {
-    religions: /catholic|christian/i,
-    roles: /priest|bishop|monk|friar|abbot|abbess|nun|cardinal|deacon|clerk|scribe|notary|jurist|physician|professor|scholar|student/i,
+  // The table's ids are OLD_SLAVONIC and OLD_CHURCH_SLAVONIC; a rule keyed on
+  // plain CHURCH_SLAVONIC matched neither and so never ran.
+  OLD_CHURCH_SLAVONIC: {
+    religions: /orthodox|christian/i,
+    roles: /priest|monk|deacon|scribe|icon|scholar/i,
     requiresRole: true,
   },
-  CHURCH_SLAVONIC: {
+  OLD_SLAVONIC: {
     religions: /orthodox|christian/i,
     roles: /priest|monk|deacon|scribe|icon|scholar/i,
     requiresRole: true,
@@ -116,19 +118,10 @@ const LITURGICAL: Record<string, RegisterRule> = {
     // below — Middle Chinese, Early Mandarin, Mandarin — carry the later eras.
     vernacular: { until: 600 },
   },
-  GEEZ: {
+  // GEEZ and ETHIOPIC_GEEZ were both written here; the table's id is ETHIOPIC.
+  ETHIOPIC: {
     religions: /orthodox|christian|ethiopian/i,
     roles: /priest|monk|deacon|scribe|debtera|scholar/i,
-    requiresRole: true,
-  },
-  ETHIOPIC_GEEZ: {
-    religions: /orthodox|christian|ethiopian/i,
-    roles: /priest|monk|deacon|scribe|debtera|scholar/i,
-    requiresRole: true,
-  },
-  PALI: {
-    religions: /buddh/i,
-    roles: /monk|bhikkhu|abbot|novice|scholar|scribe/i,
     requiresRole: true,
   },
   // The table's ids are ANCIENT_HEBREW and MISHNAIC_HEBREW; a rule keyed on
@@ -145,21 +138,9 @@ const LITURGICAL: Record<string, RegisterRule> = {
     roles: /rabbi|cantor|hazzan|maggid|scribe|sofer|scholar|teacher/i,
     requiresRole: true,
   },
-  HEBREW: {
-    religions: /jud|jewish|hebrew|israelite/i,
-    roles: /rabbi|cantor|hazzan|maggid|scribe|sofer|scholar/i,
-    // A spoken language in Iron Age Israel and Judah, and a language of
-    // scripture and study afterwards: by the first century the street in
-    // Jerusalem spoke Aramaic, which is why a Judean labourer in 30 CE should
-    // not come back as a Hebrew speaker.
-    requiresRole: true,
-    vernacular: { places: /israel|judah|judea|canaan|samaria|jerusalem|levant/i, until: -200 },
-  },
-  AVESTAN: {
-    religions: /zoroastr|mazda/i,
-    roles: /priest|magus|mobed|scholar/i,
-    requiresRole: true,
-  },
+  // A rule keyed on plain HEBREW is gone: the two entries it was meant for have
+  // their own rules above, and the table's only other Hebrew is MODERN_HEBREW,
+  // which after the revival is an ordinary vernacular and must not be gated.
 };
 
 /**
@@ -226,9 +207,7 @@ const PLACE_RULES: Record<string, PlaceRule> = {
   MANDINKA: { places: /mali|manden|gambia|senegal|casamance|guinea|western sudan|sahel/i, from: 1200 },
   BAMBARA: { places: /mali|segou|bamako|niger bend|western sudan/i, from: 1600 },
   FULA: { places: /fouta|futa|sahel|senegal|guinea|mali|niger|nigeria|cameroon|adamawa|savanna/i, from: 900 },
-  FULFULDE: { places: /fouta|futa|sahel|senegal|guinea|mali|niger|nigeria|cameroon|adamawa|savanna/i, from: 900 },
   AKAN: { places: /akan|asante|ashanti|gold coast|ghana|volta|forest/i, from: 1000 },
-  TWI: { places: /akan|asante|ashanti|gold coast|ghana|volta|forest/i, from: 1000 },
   YORUBA: { places: /yoruba|oyo|ife|lagos|benin|niger delta|lower guinea|west african forest|dahomey/i, from: 800 },
   IGBO: { places: /igbo|niger delta|biafra|eastern nigeria|lower guinea|west african forest/i, from: 800 },
   SWAHILI_CLASSICAL: { places: /swahili|zanzibar|kilwa|mombasa|lamu|east african coast|comoro|pemba|indian ocean/i, from: 800 },
@@ -269,8 +248,7 @@ const PLACE_RULES: Record<string, PlaceRule> = {
   // Tigrinya and Amharic for personas in Gondar and Axum.
   SOMALI: { places: /somal|ogaden|djibouti|danakil|berbera|mogadishu|jubba|puntland|hargeisa/i, from: 900 },
   AMHARIC: { places: /ethiop|abyssin|amhara|shewa|gondar|horn/i, from: 1150 },
-  ETHIOPIC_GEEZ: { places: /ethiop|abyssin|axum|aksum|tigray|eritrea|horn/i, from: -100, until: 1400 },
-  GEEZ: { places: /ethiop|abyssin|axum|aksum|tigray|eritrea|horn/i, from: -100, until: 1400 },
+  ETHIOPIC: { places: /ethiop|abyssin|axum|aksum|tigray|eritrea|horn/i, from: -100, until: 1400 },
 
   // MENA, where a handful of entries roam well outside where they were spoken.
   // Ancient South Arabian is Sabaean, Minaean and their neighbours in the Yemeni
@@ -309,13 +287,36 @@ const PLACE_RULES: Record<string, PlaceRule> = {
   // South and East Asia, where the zone is likewise far too broad.
   TAMIL: { places: /tamil|chola|pandya|madurai|coromandel|deccan|sri lanka|ceylon|south india/i, from: -300 },
   BENGALI: { places: /bengal|bangla|gangetic delta|dhaka|calcutta|kolkata|assam/i, from: 1100 },
-  PUNJABI: { places: /punjab|lahore|indus|five rivers|sikh/i, from: 1000 },
   MUGHAL_URDU: { places: /delhi|agra|lucknow|hindustan|deccan|hyderabad|punjab|gangetic/i, from: 1550 },
   MIDDLE_MONGOLIAN: { places: /mongol|steppe|orkhon|karakorum|gobi|altai|manchuria|dzungar/i, from: 1150, until: 1700 },
   MANCHU: { places: /manchuria|amur|jilin|liaoning|beijing|qing/i, from: 1600 },
   TIBETAN: { places: /tibet|lhasa|himalaya|kham|amdo|ladakh|bhutan/i, from: 600 },
-  UYGHUR: { places: /tarim|turfan|kashgar|xinjiang|uygh|dzungar|central asia/i, from: 700 },
+  // Karluk Turkic in the Tarim oases: the medieval literary language and the
+  // modern vernacular that continues it.
+  OLD_UYGHUR: { places: /tarim|turfan|kashgar|xinjiang|uygh|dzungar|central asia/i, from: 700 },
+  UYGHUR: { places: /tarim|turfan|kashgar|xinjiang|uygh|hotan|yarkand|urumqi|dzungar|central asia/i, from: 1500 },
 };
+
+/**
+ * Every language id the two gates above are keyed on, labelled by which table
+ * names it, so the audit can check that each one resolves to a real entry.
+ *
+ * A rule keyed on an id that is not in LANGUAGES is a silent no-op: the gate it
+ * was written to be never runs, and the language it was written about — if the
+ * table spells it differently, or does not carry it at all — passes unchecked.
+ * That has happened twice already. `HEBREW` was written here when the table's
+ * ids are ANCIENT_HEBREW and MISHNAIC_HEBREW, so a Galilean carpenter in 30 CE
+ * came back speaking Ancient Hebrew; and `UYGHUR` is keyed on a language the
+ * table simply does not have, which is why nothing stopped the 1993 Tarim Basin
+ * from being handed Modern Japanese. Both were found by a reader noticing a
+ * wrong persona. This list is so the build finds the next one instead.
+ */
+export function gatedLanguageIds(): { id: string; table: string }[] {
+  return [
+    ...Object.keys(PLACE_RULES).map(id => ({ id, table: 'place rule' })),
+    ...Object.keys(LITURGICAL).map(id => ({ id, table: 'register rule' })),
+  ];
+}
 
 /**
  * Whether the gate has an opinion about where this language was spoken. A

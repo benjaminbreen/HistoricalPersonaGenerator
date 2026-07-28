@@ -115,7 +115,7 @@ export function selectDetail(bank: Clause[], ctx: BiographyContext, pick: Pick):
 const SETTLED_TRADES = /farm|field hand|miller|plough|plow|harvest|vintner|planter|shopkeep|clerk|scribe|weaver|potter|smith|mason|carpenter|baker|innkeep|merchant/i;
 
 export function registerFor(ctx: BiographyContext): SettlementRegister {
-  let base = settlementRegister(capabilityContext(ctx));
+  let base = settlementRegister(capabilityContext(ctx), (ctx.profession || '').toLowerCase());
   // A persona who works fields or keeps a shop does not live in a band,
   // whatever the zone-level table says; describing them as both is worse than
   // describing them as settled.

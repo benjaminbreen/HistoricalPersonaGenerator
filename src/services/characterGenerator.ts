@@ -17,7 +17,7 @@ import { AttributeBadgeService } from './attributeBadgeService';
 import { findAttributeById } from '../constants/attributeDefinitions';
 import { hasCapability } from '../constants/societyCapabilities';
 import { getMarkingsForCharacter, selectRandomMarking, getRandomPattern, convertToAppearanceMarking, getMarkingProbability } from '../constants/characterData/culturalMarkings';
-import { formatSocialStatusForEra, sampleSocialStatus } from './socialStatusService';
+import { formatSocialStatus, polityFormFor, sampleSocialStatus } from './socialStatusService';
 import { reconcileEpithet } from '../constants/characterData/nameConventions';
 import { applyAttributeAppearance } from './attributeAppearanceService';
 import { generateOrnament } from './ornamentService';
@@ -1052,16 +1052,21 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     // no longer dictates that every wealthy person is a merchant or every poor
     // person a peasant. Explicit status also leaves an independently supplied
     // wealth level intact.
+    const statusPlace = {
+        year: dateInfo.year,
+        culturalZone: generationContext.culturalZone,
+        placeLower: `${context.location ?? ''} ${context.region ?? ''}`.toLowerCase(),
+    };
+    const polity = polityFormFor(statusPlace);
     const sampledStatus = sampleSocialStatus(
         generationContext.era,
         baseProfile.wealthLevel,
         () => noise.random(),
         historicalContext.localeType,
+        polity,
     );
-    const socialClass = formatSocialStatusForEra(
-        spec.socialClass || sampledStatus,
-        generationContext.era
-    );
+    // The label is the society's own word for the station, not a period label.
+    const socialClass = formatSocialStatus(spec.socialClass || sampledStatus, statusPlace);
 
     let role = determineSocialRole(
         baseProfile,

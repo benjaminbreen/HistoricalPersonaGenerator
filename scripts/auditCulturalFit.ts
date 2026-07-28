@@ -67,11 +67,13 @@ const [
   { LANGUAGES, REGIONAL_LANGUAGE_MAPPINGS },
   { GEOGRAPHICAL_DATA },
   { generateHistoricalPersona },
+  { gatedLanguageIds },
 ] = await Promise.all([
   import('../src/constants/characterData/names'),
   import('../src/constants/gameData/languages'),
   import('../src/constants/gameData/geography'),
   import('../src/services/personaGenerator'),
+  import('../src/services/languagePlausibilityService'),
 ]);
 
 /**
@@ -124,6 +126,15 @@ const deadLanguages = new Map<string, number>();
       const label = `${entry.language} (namePattern)`;
       if (!known.has(entry.language)) deadLanguages.set(label, (deadLanguages.get(label) ?? 0) + 1);
     }
+  }
+  // The same bug again on the gates rather than the mappings. A place or
+  // register rule keyed on an id the table does not carry never runs, so the
+  // language it was meant to constrain is unconstrained — which is the more
+  // dangerous direction, because a dead mapping entry only loses a candidate
+  // while a dead gate lets a wrong one through.
+  for (const { id, table } of gatedLanguageIds()) {
+    const label = `${id} (${table})`;
+    if (!known.has(id)) deadLanguages.set(label, (deadLanguages.get(label) ?? 0) + 1);
   }
 }
 

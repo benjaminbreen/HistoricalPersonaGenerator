@@ -425,12 +425,17 @@ function settleDescriptiveForms(profile: ConventionProfile, year: number): Conve
   if (year < CIVIL_REGISTRATION) return profile;
   const descriptive = profile.patronymic === PLAIN_PATRONYMIC;
   const teknonymic = profile.teknonym === PLAIN_TEKNONYM;
-  if (!descriptive && !teknonymic) return profile;
+  if (!descriptive && !teknonymic && !profile.weights.epithet) return profile;
 
   const weights = { ...profile.weights };
   let folded = 0;
   if (descriptive && weights.patronymic) { folded += weights.patronymic; delete weights.patronymic; }
   if (teknonymic && weights.teknonym) { folded += weights.teknonym; delete weights.teknonym; }
+  // A byname is descriptive in exactly the same way, and was left behind when
+  // the patronymic was folded: the zone defaults carry an epithet weight with
+  // no date on it at all, so a fifth of personas in 1993 Xinjiang were called
+  // "Alisher the Frugal" — a saga byname on a man with an identity card.
+  if (weights.epithet) { folded += weights.epithet; delete weights.epithet; }
   if (folded === 0) return profile;
   weights.inherited = (weights.inherited ?? 0) + folded;
   return { ...profile, weights };

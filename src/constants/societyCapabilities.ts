@@ -27,7 +27,33 @@ export type SocietyCapability =
   | 'guilds'             // formal craft corporations
   | 'coinage'
   | 'urban_settlement'
-  | 'european_contact'; // sustained contact with European material culture
+  | 'european_contact' // sustained contact with European material culture
+  /**
+   * Impersonal exchange at a price: marketplaces, traded staples, a going
+   * concern that can be sold or handed on. Deliberately not the same as
+   * `coinage` — Mesoamerica had dense market systems and no coin, and the Inca
+   * state had cities, roads and metallurgy but redistributed rather than sold.
+   * This is the gate for anything phrased as business, profit or investment.
+   */
+  | 'market_exchange'
+  /**
+   * Working for a wage as an ordinary way to live, rather than owing labor,
+   * working one's own land, or being fed by kin. The gate for the modern
+   * grammar of employment: a job, a wage packet, retirement.
+   */
+  | 'wage_labor'
+  /**
+   * Personal military service owed to a lord, entered as a youth in his
+   * household and trained there: the squire, the retainer, the household
+   * warrior. It ends, and this is the first capability here that does.
+   */
+  | 'retained_military_service'
+  /**
+   * A trade entered by binding oneself to a master for a term of years, under
+   * a craft corporation that controls entry to it. Ends where the guilds are
+   * abolished and the factory and the technical school replace them.
+   */
+  | 'guild_apprenticeship';
 
 export interface CapabilityContext {
   year: number;
@@ -149,6 +175,62 @@ const EARLIEST: Record<SocietyCapability, Partial<Record<CulturalZone, number>>>
     NORTH_AMERICAN_COLONIAL: 1600,
     OCEANIA: 1790,
   },
+  /**
+   * Dates are for markets an ordinary person would use, not for the earliest
+   * long-distance prestige exchange, which is far older everywhere and is not
+   * the same institution.
+   */
+  market_exchange: {
+    MENA: -3000,
+    SOUTH_ASIAN: -2500,
+    EAST_ASIAN: -1500,
+    EUROPEAN: -1000,
+    SOUTHEAST_ASIAN: -200,
+    SUB_SAHARAN_AFRICAN: -200,
+    // The Andean state ran on tribute, labor levies and redistribution; the
+    // marketplace arrives with the Spanish. Mesoamerica is the exception and
+    // carries it in the place overrides.
+    SOUTH_AMERICAN: 1532,
+    NORTH_AMERICAN_PRE_COLUMBIAN: NEVER,
+    NORTH_AMERICAN_COLONIAL: 1600,
+    OCEANIA: 1800,
+  },
+  wage_labor: {
+    MENA: -2000,
+    EUROPEAN: -500,
+    EAST_ASIAN: -500,
+    SOUTH_ASIAN: -300,
+    SOUTHEAST_ASIAN: 800,
+    SUB_SAHARAN_AFRICAN: 1000,
+    SOUTH_AMERICAN: 1540,
+    NORTH_AMERICAN_PRE_COLUMBIAN: NEVER,
+    NORTH_AMERICAN_COLONIAL: 1620,
+    OCEANIA: 1800,
+  },
+  retained_military_service: {
+    MENA: -2500,
+    EUROPEAN: -700,
+    EAST_ASIAN: -1200,
+    SOUTH_ASIAN: -600,
+    SOUTHEAST_ASIAN: 400,
+    SUB_SAHARAN_AFRICAN: 800,
+    SOUTH_AMERICAN: 1200,      // Inca and their predecessors; not a general fact of the zone
+    NORTH_AMERICAN_PRE_COLUMBIAN: NEVER,
+    NORTH_AMERICAN_COLONIAL: NEVER,
+    OCEANIA: 1300,             // Chiefly warrior retinues in Polynesia
+  },
+  guild_apprenticeship: {
+    MENA: -1800,
+    EUROPEAN: -200,
+    EAST_ASIAN: -600,
+    SOUTH_ASIAN: -500,
+    SOUTHEAST_ASIAN: 900,
+    SUB_SAHARAN_AFRICAN: 1000,
+    SOUTH_AMERICAN: 1540,
+    NORTH_AMERICAN_PRE_COLUMBIAN: NEVER,
+    NORTH_AMERICAN_COLONIAL: 1650,
+    OCEANIA: NEVER,
+  },
   urban_settlement: {
     MENA: -3500,
     SOUTH_ASIAN: -2600,
@@ -186,6 +268,9 @@ const PLACE_OVERRIDES: PlaceOverride[] = [
       metallurgy: 800,
       settled_agriculture: -4000,
       heritable_land: -1200,
+      // Dense, regulated marketplaces and a professional merchant class, with
+      // cacao and cloth as money and no coin anywhere.
+      market_exchange: -500,
     },
   },
   {
@@ -216,6 +301,8 @@ const PLACE_OVERRIDES: PlaceOverride[] = [
       urban_settlement: 1850,
       writing: 1850,
       european_contact: 1860,
+      market_exchange: 1880,
+      wage_labor: 1880,
     },
   },
   {
@@ -253,7 +340,10 @@ const PLACE_OVERRIDES: PlaceOverride[] = [
     // matches the same words and is a settled, literate, metalworking region.
     match: /\b(arctic|subarctic|inuit|thule|greenland|aleut|yupik)\b/,
     zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'NORTH_AMERICAN_COLONIAL'],
-    capabilities: { settled_agriculture: NEVER, heritable_land: NEVER, urban_settlement: NEVER },
+    capabilities: {
+      settled_agriculture: NEVER, heritable_land: NEVER, urban_settlement: NEVER,
+      market_exchange: 1850, wage_labor: 1900,
+    },
   },
   {
     // Interior Australia: foraging economies into the modern period.
@@ -272,14 +362,19 @@ const PLACE_OVERRIDES: PlaceOverride[] = [
     // rule above. Naming it bare took maize away from the Ancestral Puebloans.
     match: /\b(great basin|northern rockies|columbia plateau|snake river|yellowstone|nevada|utah|glacier|absaroka|salmon river|bitterroot|cascade)\b/,
     zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'NORTH_AMERICAN_COLONIAL'],
-    capabilities: { settled_agriculture: 1860, heritable_land: 1860, urban_settlement: 1860 },
+    capabilities: {
+      settled_agriculture: 1860, heritable_land: 1860, urban_settlement: 1860,
+      market_exchange: 1860, wage_labor: 1860,
+    },
   },
   {
     // The Northwest Coast: dense, sedentary, ranked societies with plank houses
     // and stored surplus — and no agriculture. Salmon, not seed corn.
     match: /\b(pacific coast|northwest|puget|salish|fraser|haida|olympic|vancouver|cascad)\b/,
     zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'NORTH_AMERICAN_COLONIAL'],
-    capabilities: { settled_agriculture: 1850, heritable_land: 1850 },
+    // Ranked, sedentary and wealthy, with an elaborate exchange of prestige
+    // goods that is emphatically not a market: the potlatch gives away.
+    capabilities: { settled_agriculture: 1850, heritable_land: 1850, market_exchange: 1850 },
   },
   {
     // California: acorn economies, likewise sedentary and likewise not farming.
@@ -323,20 +418,128 @@ export function capabilityAvailableFrom(
   return EARLIEST[capability][ctx.culturalZone] ?? NEVER;
 }
 
+/**
+ * The last year a capability is plausible in this context, or Infinity.
+ *
+ * The table was one-sided until now: it could say a thing did not exist yet and
+ * not that it had stopped existing. Everything the earliest column admits, it
+ * admitted forever — which is why a security guard in 1993 Xinjiang was sent to
+ * serve as a squire under a veteran knight, and why the clause banks had each
+ * grown their own hand-written `birthYear >= 1850` test to paper over it, one
+ * bank at a time, as each wrong biography was noticed.
+ *
+ * Most capabilities genuinely have no end: writing, metallurgy and markets did
+ * not go away. Only the institutions that did are listed.
+ */
+const LATEST: Partial<Record<SocietyCapability, Partial<Record<CulturalZone, number>>>> = {
+  retained_military_service: {
+    // Standing state armies and then conscription replace the lord's household.
+    EUROPEAN: 1650,
+    MENA: 1850,
+    EAST_ASIAN: 1870,          // Meiji abolition of the samurai; the Qing new armies
+    SOUTH_ASIAN: 1860,
+    SOUTHEAST_ASIAN: 1900,
+    SUB_SAHARAN_AFRICAN: 1900,
+    SOUTH_AMERICAN: 1540,
+    OCEANIA: 1870,
+  },
+  guild_apprenticeship: {
+    // Guilds are abolished or wither across the nineteenth century, and the
+    // factory, the trade union and the technical school take over entry to a
+    // trade. An indenture "bound for seven years" after this is a costume.
+    EUROPEAN: 1880,
+    MENA: 1900,
+    EAST_ASIAN: 1900,
+    SOUTH_ASIAN: 1900,
+    SOUTHEAST_ASIAN: 1930,
+    SUB_SAHARAN_AFRICAN: 1950,
+    SOUTH_AMERICAN: 1900,
+    NORTH_AMERICAN_COLONIAL: 1880,
+  },
+};
+
+export function capabilityAvailableUntil(
+  capability: SocietyCapability,
+  ctx: CapabilityContext
+): number {
+  if (!ctx.culturalZone) return NEVER;
+  return LATEST[capability]?.[ctx.culturalZone] ?? NEVER;
+}
+
 /** Whether this society could do this, here, now. */
 export function hasCapability(capability: SocietyCapability, ctx: CapabilityContext): boolean {
-  return ctx.year >= capabilityAvailableFrom(capability, ctx);
+  return ctx.year >= capabilityAvailableFrom(capability, ctx)
+    && ctx.year <= capabilityAvailableUntil(capability, ctx);
+}
+
+/**
+ * How a life is provisioned. This is the axis the generators were missing.
+ *
+ * Several of them were reaching for `era` or for a bare year — the life-event
+ * pools switched on `birthYear < -8000` — as a proxy for "does this person live
+ * in a world with markets and inheritance in it". That proxy is wrong for a
+ * large share of the human past this app covers: Plains bison hunters in 157
+ * BCE, Aboriginal Australians in 1700, Arctic and Amazonian and Kalahari
+ * peoples at any date at all. None of them are prehistoric and none of them
+ * have a family business.
+ *
+ * Resolved from place and year, and from the trade where the trade settles it.
+ */
+export type SubsistenceMode =
+  | 'foraging'
+  | 'pastoral'
+  | 'horticultural'
+  | 'agrarian'
+  | 'commercial'
+  | 'industrial';
+
+/** Trades that mean the persona lives off herds rather than off fields. */
+const HERDING_TRADE = /herder|shepherd|cowherd|goatherd|swineherd|pastoralist|drover|stockman|reindeer/i;
+
+export function subsistenceMode(
+  ctx: CapabilityContext,
+  professionLower?: string,
+): SubsistenceMode {
+  const has = (capability: SocietyCapability) => hasCapability(capability, ctx);
+
+  if (!has('settled_agriculture')) {
+    return professionLower && HERDING_TRADE.test(professionLower) ? 'pastoral' : 'foraging';
+  }
+  // Industrialisation lags the capability dates in exactly the zones where the
+  // wage arrives late, which is the behaviour wanted; the bare year alone would
+  // industrialise everyone at once.
+  if (ctx.year >= 1850 && has('wage_labor') && has('urban_settlement')) return 'industrial';
+  if (has('market_exchange') && has('coinage') && has('urban_settlement')) return 'commercial';
+  if (has('heritable_land')) return 'agrarian';
+  return 'horticultural';
 }
 
 /**
  * How a persona's own community should be described. Prose that says "the
  * district" and "the calendar of the parish" is wrong for a band that moves
  * with the season.
+ *
+ * Derived from subsistence rather than from `settled_agriculture` directly.
+ * The zone-level date is the earliest anywhere in the zone — 2000 BCE for North
+ * America, which is the maize Southwest's — so asking it about the open Plains
+ * returned "village" for people who did not live in one, and that one word was
+ * upstream of "feeding village through winter" and of the whole settled-world
+ * clause pool opening up.
  */
 export type SettlementRegister = 'band' | 'village' | 'district';
 
-export function settlementRegister(ctx: CapabilityContext): SettlementRegister {
-  if (!hasCapability('settled_agriculture', ctx)) return 'band';
-  if (!hasCapability('urban_settlement', ctx)) return 'village';
-  return 'district';
+export function settlementRegister(
+  ctx: CapabilityContext,
+  professionLower?: string,
+): SettlementRegister {
+  switch (subsistenceMode(ctx, professionLower)) {
+    case 'foraging':
+    case 'pastoral':
+      return 'band';
+    case 'commercial':
+    case 'industrial':
+      return 'district';
+    default:
+      return 'village';
+  }
 }

@@ -23,7 +23,7 @@ import {
   sampleYearInEra,
   socialGender,
 } from './demographyService';
-import { sampleSocialStatus } from './socialStatusService';
+import { polityFormFor, sampleSocialStatus } from './socialStatusService';
 import { describeLifeEventSecondPerson } from './narrativeTextService';
 import { createHistoricalContext } from './historicalContextService';
 import type { HistoricalContext } from '../types/historicalContext';
@@ -304,6 +304,7 @@ function generatePersonaWithSeed(
     wealthLevel,
     random,
     historicalContext.localeType,
+    polityFormFor({ year, culturalZone, placeLower: `${location} ${region}`.toLowerCase() }),
   );
 
   // Generate the character
@@ -347,7 +348,8 @@ function generatePersonaWithSeed(
     character,
     year,
     culturalZone,
-    era
+    era,
+    `${location} ${region}`,
   );
 
   // Append life event-based sentence to backstory if there's a significant event
