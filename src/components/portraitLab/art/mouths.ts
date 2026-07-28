@@ -149,6 +149,8 @@ export interface DrawMouthOptions {
   bendBias?: number;
   /** 0..1; thins the lips the way age does. */
   ageThinning?: number;
+  /** No teeth behind the lips: they fall inward and the mouth sinks. */
+  toothless?: boolean;
 }
 
 /**
@@ -158,9 +160,15 @@ export interface DrawMouthOptions {
 const MOUTH_SURFACE = new Set<number>([MAT.SKIN, MAT.LIP, MAT.TEETH, MAT.PAINT]);
 
 export function drawMouth(options: DrawMouthOptions): void {
-  const { raster, book, paints, expression, lipShape, centerX, y, bendBias = 0, ageThinning = 0 } = options;
+  const {
+    raster, book, paints, expression, lipShape, centerX, y,
+    bendBias = 0, ageThinning = 0, toothless = false,
+  } = options;
   const pose = poseFor(expression);
-  const art = shapeMouth(pose.base, lipShape, ageThinning);
+  // Losing teeth thins the lips past anything age alone does, because there is
+  // nothing behind them to hold their shape.
+  const thinning = toothless ? Math.max(ageThinning, 0.92) : ageThinning;
+  const art = shapeMouth(pose.base, lipShape, thinning);
   const bend = pose.bend + bendBias;
 
   drawStamp(raster, art, centerX, y, paints, book, {
@@ -169,6 +177,26 @@ export function drawMouth(options: DrawMouthOptions): void {
       ? undefined
       : endCurve(art.width, bend, pose.asymmetry),
   });
+
+  if (toothless) {
+    // Thin lips alone read as a stern mouth, not an empty one. What actually
+    // says "no teeth" is that the whole area *sinks*: the upper lip falls in
+    // against the gum and the chin rides up beneath. Two shallow bands of
+    // shadow, one above and one below, and the mouth stops being a line on a
+    // face and starts being a hollow in it.
+    const half = Math.round(art.width / 2) - 1;
+    for (let dx = -half; dx <= half; dx += 1) {
+      // Narrower at the ends, so the sinking follows the mouth's own curve
+      // instead of sitting on it as a rectangle.
+      const taper = 1 - Math.pow(Math.abs(dx) / Math.max(1, half), 2);
+      if (taper < 0.3) continue;
+      const x = centerX + dx;
+      for (const dy of [-3, -2, 3, 4] as const) {
+        if (raster.matAt(x, y + dy) !== MAT.SKIN) continue;
+        raster.shift(x, y + dy, Math.abs(dy) > 2 ? 1 : 2, book);
+      }
+    }
+  }
 }
 
 /**

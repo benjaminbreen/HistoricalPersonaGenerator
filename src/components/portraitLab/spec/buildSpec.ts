@@ -27,6 +27,7 @@ import {
   HeadwearKind,
   HeadwearSpec,
   JewelrySpec,
+  FaceTraits,
   MarkingSpec,
   MoodSpec,
   PortraitSpec,
@@ -63,6 +64,11 @@ export interface PortraitSource {
   };
   /** Accepted from callers and ignored — nothing here is drawn from stats. */
   stats?: object;
+  /**
+   * The app's trait list. Only the handful that are about a face are read;
+   * `left_handed` and `can_swim` are not going to show at 96px.
+   */
+  attributes?: Array<{ id?: string } | null | undefined>;
   diseaseHealth?: { currentDiseases?: Array<{ disease?: { name?: string } }> };
   equippedItems?: Record<string, { name?: string; material?: string; color?: string } | undefined>;
   appearance?: Record<string, any>;
@@ -531,6 +537,40 @@ function dispositionFor(personality: {
   return null;
 }
 
+// ---------------------------------------------------------------------------
+// Attributes that show on a face
+// ---------------------------------------------------------------------------
+
+/**
+ * Attributes that already have art, routed into the marking pipeline.
+ *
+ * `details.ts` has drawn scars, tattoos, scarification and birthmarks since it
+ * was written — for `culturalMarkings`, which is a different source of the same
+ * shapes. So most of this costs nothing but a mapping: a persona marked
+ * `scarred` gets the scar that was always available to draw, and the audit's
+ * existing marking coverage report picks it up for free.
+ *
+ * Location and size are chosen so the face still reads. A large marking on the
+ * cheek is fine; the same marking across both eyes is how an earlier version of
+ * this renderer buried eighty faces.
+ */
+const ATTRIBUTE_MARKINGS: Record<string, Omit<MarkingSpec, 'color'> & { color?: string }> = {
+  scarred: { type: 'scar', location: 'cheek', size: 'medium', pattern: 'solid' },
+  burn_scarred: { type: 'scar', location: 'jaw', size: 'large', pattern: 'burn' },
+  scarified: { type: 'scarification', location: 'cheek', size: 'medium', pattern: 'scarification' },
+  kin_tattoos: { type: 'tattoo', location: 'cheek', size: 'medium', pattern: 'lines' },
+  birthmark_omen: { type: 'birthmark', location: 'temple', size: 'medium', pattern: 'solid' },
+};
+
+function buildFaceTraits(ids: Set<string>): FaceTraits {
+  return {
+    gaunt: ids.has('gaunt') || ids.has('frail'),
+    poxScarred: ids.has('pox_scarred'),
+    toothless: ids.has('toothless'),
+    blind: ids.has('blind'),
+  };
+}
+
 /** The resting face a persona wears when nothing else is driving it. */
 export function restingExpression(mood: MoodSpec, condition: ConditionSpec): Expression {
   // Illness, and illness only. Fatigue used to share this test at `> 0.7`,
@@ -696,6 +736,26 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
   const condition = buildCondition(source);
   const mood = buildMood(source, condition);
 
+  // --- attributes that show on a face ---------------------------------------
+  const attributeIds = new Set(
+    (source.attributes || [])
+      .map(entry => String(entry?.id || ''))
+      .filter(Boolean)
+  );
+  const traits = buildFaceTraits(attributeIds);
+  const attributeMarkings: MarkingSpec[] = [];
+  for (const [id, marking] of Object.entries(ATTRIBUTE_MARKINGS)) {
+    if (!attributeIds.has(id)) continue;
+    attributeMarkings.push({
+      ...marking,
+      // Scars and healed tissue read as a shade of the persona's own skin
+      // rather than as a colour of their own; the drawing code shifts against
+      // whatever is underneath, so this is mostly a fallback for the cases
+      // that do paint.
+      color: marking.color || (marking.type === 'tattoo' ? '#2f3a44' : appearance.skinColor || '#c58f68'),
+    } as MarkingSpec);
+  }
+
   const facialHairWanted =
     gender !== 'Female' && Boolean(appearance.facialHair) && age >= 15;
 
@@ -740,10 +800,13 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     garment,
     headwear,
     jewelry: (appearance.jewelry || []) as JewelrySpec[],
-    markings: (appearance.markings || []) as MarkingSpec[],
+    markings: attributeMarkings.length
+      ? [...((appearance.markings || []) as MarkingSpec[]), ...attributeMarkings]
+      : (appearance.markings || []) as MarkingSpec[],
     glasses: appearance.hasGlasses ? { style: appearance.glassesStyle || 'round' } : null,
 
     condition,
+    traits,
     mood,
     // The garment's primary is what actually fills the lower two-thirds of the
     // frame, so it constrains the backdrop alongside the complexion.

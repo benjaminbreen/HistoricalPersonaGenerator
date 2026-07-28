@@ -152,6 +152,30 @@ export interface MarkingSpec {
   pattern?: string;
 }
 
+/**
+ * Permanent facts about a face, as distinct from what is currently wrong with
+ * one. `ConditionSpec` says a persona has smallpox; this says they survived it
+ * thirty years ago and carry the pits. Both can be true, and they are drawn
+ * differently — an active rash is red and raised, an old pock is a colourless
+ * pit — so they are separate fields rather than one.
+ *
+ * These come from the app's `attributes`, which the adapter ignored entirely
+ * until now. That mattered more than the usual missing-axis complaint: a
+ * persona whose own attribute list says `pox_scarred` was rendering with clear
+ * skin, on a card that prints the attribute in words directly beside the
+ * portrait. The picture was contradicting the text about the same person.
+ */
+export interface FaceTraits {
+  /** Hollow cheeks and temples. Not thinness — the face, specifically. */
+  gaunt: boolean;
+  /** Healed smallpox pits. */
+  poxScarred: boolean;
+  /** Lost teeth: the lips fall inward and the mouth narrows. */
+  toothless: boolean;
+  /** One or both eyes clouded. */
+  blind: boolean;
+}
+
 export interface ConditionSpec {
   healthRatio: number;
   fatigueRatio: number;
@@ -239,6 +263,7 @@ export interface PortraitSpec {
   glasses: { style: 'round' | 'square' | 'oval' | 'half_rim' } | null;
 
   condition: ConditionSpec;
+  traits: FaceTraits;
   mood: MoodSpec;
   background: BackgroundSpec;
 

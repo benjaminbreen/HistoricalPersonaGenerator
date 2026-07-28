@@ -802,3 +802,84 @@ export function drawAilments(context: RenderContext): void {
   }
 
 }
+
+/**
+ * The permanent marks — what a life left on a face, rather than what is wrong
+ * with it today.
+ *
+ * Drawn after `drawAilments` and before anything is laid over the face, so an
+ * old pock and a current rash can coexist on the same cheek without one
+ * overwriting the other. That happens: a persona can be `pox_scarred` from
+ * childhood and have typhoid now, and both are true of them.
+ */
+export function drawFaceTraits(context: RenderContext): void {
+  const { raster, spec, anatomy, book } = context;
+  const { gaunt, poxScarred } = spec.traits;
+  if (!gaunt && !poxScarred) return;
+
+  const { centerX } = anatomy;
+  const rng = makeRng(spec.seed ^ 0x9f21);
+  const onFace = (x: number, y: number) => raster.matAt(x, y) === MAT.SKIN;
+
+  if (gaunt) {
+    // Three hollows, in the order they actually read at this size: under the
+    // cheekbone first, then the temple, then the eye socket. Drawing them as
+    // shadow rather than as line matters — a gaunt face is not a face with
+    // extra creases in it, it is a face with less under the skin, and the
+    // difference between those two readings is whether the dark areas have
+    // edges. These do not.
+    for (const side of [-1, 1] as const) {
+      // The hollow beneath the zygomatic arch, curving down toward the jaw.
+      for (let i = 0; i < 9; i += 1) {
+        const t = i / 8;
+        const x = Math.round(centerX + side * (anatomy.headHalfWidth * (0.72 - t * 0.16)));
+        const y = Math.round(anatomy.cheekY + t * 7);
+        for (let d = 0; d < 3; d += 1) {
+          const px = x - side * d;
+          if (!onFace(px, y)) continue;
+          raster.shift(px, y, d === 0 ? 2 : 1, book);
+        }
+      }
+      // The temple, above the cheekbone and behind the brow.
+      for (let i = 0; i < 5; i += 1) {
+        const x = Math.round(centerX + side * (anatomy.headHalfWidth * 0.76));
+        const y = anatomy.browY - 2 + i;
+        for (let d = 0; d < 2; d += 1) {
+          const px = x - side * d;
+          if (!onFace(px, y)) continue;
+          raster.shift(px, y, 1, book);
+        }
+      }
+    }
+    // A lit ridge along the cheekbone itself. Without it the hollows read as
+    // dirt; with it they read as bone showing through.
+    for (const side of [-1, 1] as const) {
+      for (let i = 0; i < 6; i += 1) {
+        const x = Math.round(centerX + side * (anatomy.headHalfWidth * (0.5 + i * 0.045)));
+        const y = anatomy.cheekY - 2 - Math.round(i * 0.4);
+        if (!onFace(x, y)) continue;
+        raster.shift(x, y, -1, book);
+      }
+    }
+  }
+
+  if (poxScarred) {
+    // Healed pits, not an active rash: no colour, only the pit and its lit rim.
+    // They cluster on the forehead and cheeks, which is where they scar worst
+    // and — conveniently — where the face has room to show them.
+    const count = 22;
+    for (let i = 0; i < count; i += 1) {
+      const onForehead = rng() > 0.55;
+      const x = Math.round(centerX + (rng() * 2 - 1) * anatomy.headHalfWidth * 0.78);
+      const y = onForehead
+        ? Math.round(anatomy.browY - 3 - rng() * 7)
+        : Math.round(anatomy.cheekY - 3 + rng() * 12);
+      if (!onFace(x, y)) continue;
+      // Never on the lash line: pocks over an eye read as damage to the
+      // drawing rather than to the person.
+      if (Math.abs(y - anatomy.eyeY) < 3) continue;
+      raster.shift(x, y, 2, book);
+      if (onFace(x - 1, y - 1)) raster.shift(x - 1, y - 1, -1, book);
+    }
+  }
+}

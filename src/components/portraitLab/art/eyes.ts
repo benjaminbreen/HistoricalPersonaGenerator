@@ -231,6 +231,8 @@ export interface DrawEyeOptions {
   gazeX?: number;
   gazeY?: number;
   eyelashes?: 'short' | 'medium' | 'long';
+  /** A clouded eye: the iris pales toward the sclera and the pupil goes. */
+  clouded?: boolean;
   /** Pupils widen in low light and with strong feeling; 0..1. */
   dilation?: number;
   /** 0..1 age-related hooding; high values get the fold regardless of shape. */
@@ -245,7 +247,7 @@ export function drawEye(options: DrawEyeOptions): void {
   const {
     raster, book, paints, shape, state,
     centerX, centerY, side, gazeX = 0, gazeY = 0,
-    eyelashes = 'medium', dilation = 0, droop = 0,
+    eyelashes = 'medium', dilation = 0, droop = 0, clouded = false,
   } = options;
 
   const flip = side === 1;
@@ -263,6 +265,23 @@ export function drawEye(options: DrawEyeOptions): void {
       flipX: flip,
       onlyOver: SCLERA_ONLY,
     });
+    if (clouded) {
+      // A mature cataract, which is what blindness looks like from outside at
+      // this distance: the iris pales toward the sclera and the pupil stops
+      // being a dark point. Drawn over the finished iris rather than instead
+      // of it, so the eye keeps its shape, its lid and its lashes and only the
+      // window in the middle goes. The gaze offset is deliberately ignored —
+      // an eye that cannot see does not track.
+      for (let dy = -2; dy <= 2; dy += 1) {
+        for (let dx = -2; dx <= 2; dx += 1) {
+          if (dx * dx + dy * dy > 5) continue;
+          const x = centerX + dx;
+          const y = centerY + dy;
+          if (raster.matAt(x, y) !== MAT.IRIS) continue;
+          raster.blend(x, y, { r: 196, g: 198, b: 190 }, 0.72, MAT.IRIS, 2);
+        }
+      }
+    }
   }
 
   if (shape === 'narrow' && state !== 'closed') {

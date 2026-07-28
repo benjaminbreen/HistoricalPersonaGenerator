@@ -34,7 +34,7 @@ import {
 } from '../art/hair';
 import { drawGarment } from '../art/garments';
 import { drawHeadwear } from '../art/headwear';
-import { drawAilments, drawGlasses, drawJewelry, drawMarkings } from '../art/details';
+import { drawAilments, drawFaceTraits, drawGlasses, drawJewelry, drawMarkings } from '../art/details';
 import { RenderContext } from './context';
 
 export interface CompiledPortrait {
@@ -103,6 +103,7 @@ export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
   drawAgeLines(context, head);
   drawMarkings(context);
   drawAilments(context);
+  drawFaceTraits(context);
 
   drawGarment(context);
 
@@ -257,6 +258,7 @@ export function renderFrame(
       gazeX: state.gazeX,
       gazeY: state.gazeY,
       eyelashes: spec.eyelashes,
+      clouded: spec.traits.blind,
       dilation: pose.dilation,
       droop: spec.lidDroop,
     });
@@ -272,6 +274,7 @@ export function renderFrame(
     centerX: anatomy.centerX + anatomy.asymmetry.mouthLean,
     y: anatomy.mouthY,
     ageThinning: spec.ageLines,
+    toothless: spec.traits.toothless,
   });
 
   const smiling = state.expression === 'smile' || state.expression === 'grin' || state.expression === 'content';
