@@ -37,6 +37,7 @@ import {
   PortraitSpec,
   PoseSpec,
   SkullShape,
+  SpecColorSet,
 } from './types';
 
 export interface PortraitSource {
@@ -607,6 +608,44 @@ const hueGap = (a: number, b: number): number =>
  * so the ground never competes with the figure, and value is pushed away from
  * the skin's.
  */
+/**
+ * Hold a garment's three colours apart in value.
+ *
+ * Every named feature — a lapel facing, a sari border, a poncho band, a stoop
+ * of fringe — is drawn in the secondary or the accent against the primary, and
+ * a feature drawn in a colour that matches its ground is not drawn at all. The
+ * clothing tables' palettes are not chosen with that in mind: they are chosen
+ * to look like a wardrobe, and a wardrobe is full of three browns.
+ *
+ * So this is a floor, not a scheme. Hue is left exactly where the palette put
+ * it — the historical claim is in the hue and it is not this function's to
+ * make. Only lightness moves, and only when two colours are close enough that
+ * one would vanish into the other.
+ */
+function separateGarmentColors(primary: string, secondary: string, accent: string): SpecColorSet {
+  const GAP = 0.17;
+  const shift = (hex: string, from: string): string => {
+    const a = rgbToHsl(hexToRgb(hex));
+    const b = rgbToHsl(hexToRgb(from));
+    const delta = a.l - b.l;
+    if (Math.abs(delta) >= GAP) return hex;
+    // Move away from whichever side has room. Pushing a pale cloth paler until
+    // it clips is how you get two whites instead of a white and a grey.
+    const away = delta === 0 ? (b.l > 0.5 ? -1 : 1) : Math.sign(delta);
+    const target = b.l + away * GAP;
+    const clamped = target > 0.94 ? b.l - GAP : target < 0.08 ? b.l + GAP : target;
+    return rgbToHex(hslToRgb({ h: a.h, s: a.s, l: Math.max(0.05, Math.min(0.95, clamped)) }));
+  };
+  const nextSecondary = shift(secondary, primary);
+  return {
+    primary,
+    secondary: nextSecondary,
+    // The accent has to clear both, or a trim can be legible against the cloth
+    // and invisible against the facing it runs along.
+    accent: shift(shift(accent, primary), nextSecondary),
+  };
+}
+
 function separateFromFigure(
   hex: string,
   skinHex: string,
@@ -1095,17 +1134,17 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     kind: isEmptyPiece(garmentPiece) && !palette.primary ? 'tunic' : garmentKind,
     name: garmentPiece.name || 'Simple Garment',
     material: (garmentPiece.material || 'wool').toLowerCase(),
-    colors: {
+    colors: separateGarmentColors(
       // An intrinsic material outranks whatever colour the generator picked.
       // Straw is the colour of straw; leather is the colour of leather. The
       // old precedence let a generated palette entry paint a sedge sunhat
       // lilac and a bark-cloth wrap sky blue.
-      primary: intrinsicColorFor(garmentPiece.material)
+      intrinsicColorFor(garmentPiece.material)
         || resolveColor(garmentPiece.color) || colorFromName(garmentPiece.name)
         || resolveColor(palette.primary) || '#7c6a54',
-      secondary: resolveColor(palette.secondary) || '#9a8768',
-      accent: resolveColor(palette.accent) || '#a8834f',
-    },
+      resolveColor(palette.secondary) || '#9a8768',
+      resolveColor(palette.accent) || '#a8834f'
+    ),
     ornament: ornamentBase,
     surfaces: garmentSurfacesFor(
       garmentPiece.name || '', garmentPiece.material || '', ornamentBase).surfaces,

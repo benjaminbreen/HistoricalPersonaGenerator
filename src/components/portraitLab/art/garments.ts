@@ -22,6 +22,7 @@ import { choose, makeNoise1D, makeNoise2D, makeRng } from '../core/rng';
 import { RenderContext } from '../render/context';
 import { GarmentKind } from '../spec/types';
 import { drawGarmentSurface } from './garmentSurface';
+import { drawGarmentFeature, garmentFeatureFor, GarmentFeature } from './garmentFeatures';
 
 export interface BodyMasks {
   body: Mask;
@@ -289,9 +290,19 @@ export function drawGarment(context: RenderContext): BodyMasks {
   drawGarmentSurface(context, body, opening);
   drawFolds(context, body);
   drawCollar(context, body, opening);
-  drawContextDetails(context, body);
 
+  // What this garment is called, as opposed to what shape it is. Resolved
+  // before the construction pass so that pass can leave the centre front alone
+  // when the feature is going to occupy it.
+  const feature = garmentFeatureFor(spec.garment);
+
+  // The shift worn under everything goes down before the named feature, not
+  // after it. It fills the neckline opening, which is exactly where a lapel, a
+  // tie and a standing collar live — running it afterwards repainted all three
+  // as plain undershirt, and a Savile Row suit came back as a smock.
   drawUndergarment(context, opening, body);
+  drawContextDetails(context, body, feature);
+  if (feature) drawGarmentFeature(context, body, shoulders, feature);
 
   // The garment sits behind the neck, so the neck casts onto it.
   applyContactShadow(raster, maskSubtract(shoulders, body), book, { dx: 0, dy: 1, strength: 1, depth: 1 });
@@ -480,7 +491,7 @@ function drawShoulderWrap(context: RenderContext, shoulders: Mask): void {
 /**
  * The bespoke passes for the five deeply-treated context packs.
  */
-function drawContextDetails(context: RenderContext, body: Mask): void {
+function drawContextDetails(context: RenderContext, body: Mask, feature: GarmentFeature | null): void {
   const { raster, spec, anatomy, ramps, book } = context;
   const { size, centerX } = anatomy;
 
@@ -619,7 +630,7 @@ function drawContextDetails(context: RenderContext, body: Mask): void {
     }
 
     default:
-      drawGenericConstruction(context, body);
+      drawGenericConstruction(context, body, feature);
       break;
   }
 }
@@ -636,7 +647,7 @@ function drawContextDetails(context: RenderContext, body: Mask): void {
  * *any* cut-and-sewn garment has, anywhere, in any century. Drawing them says
  * "this is a made thing" without saying anything that could be wrong.
  */
-function drawGenericConstruction(context: RenderContext, body: Mask): void {
+function drawGenericConstruction(context: RenderContext, body: Mask, feature: GarmentFeature | null): void {
   const { raster, spec, anatomy, ramps, book } = context;
   const { size, centerX } = anatomy;
   const kind = spec.garment.kind;
@@ -686,7 +697,8 @@ function drawGenericConstruction(context: RenderContext, body: Mask): void {
 
   // --- front opening --------------------------------------------------------
   // Garments that open at the front, and the fastenings that hold them shut.
-  const opens = kind === 'jacket' || kind === 'doublet' || kind === 'work_shirt';
+  const opens = !feature?.ownsFront
+    && (kind === 'jacket' || kind === 'doublet' || kind === 'work_shirt');
   if (opens) {
     const offset = kind === 'work_shirt' ? 0 : 1;
     for (let y = anatomy.collarY + 1; y < size; y += 1) {

@@ -125,7 +125,12 @@ function drawCovering(context: RenderContext): Mask | null {
     case 'wrapped_cloth': return drawWrappedCloth(context);
     case 'veil': return drawVeil(context);
     case 'hood': return drawHood(context);
-    case 'helmet': return drawHelmet(context);
+    case 'helmet':
+      // A pith helmet is cork and canvas. Sent through the metal dome it came
+      // out a burnished steel bowl on a district officer.
+      return /pith|sola|safari/i.test(spec.headwear.name)
+        ? drawBrimmedHat(context)
+        : drawHelmet(context);
     case 'coronet': return drawCoronet(context);
     case 'band': return drawBand(context);
     default: return null;
@@ -244,10 +249,175 @@ function applyFur(context: RenderContext, mask: Mask): Mask {
   return grown;
 }
 
+/**
+ * The soft caps that are a shape rather than a dome.
+ *
+ * `cap` is the fallback kind, so it collects forty-nine distinct names and used
+ * to draw one skullcap for all of them. A newsboy cap, a beret, a fez and a
+ * baseball cap have almost nothing in common except that none of them is a
+ * smooth hemisphere, and each is defined by a single silhouette move: a peak
+ * jutting forward, a disc slumped to one side, a flat truncated top, a curved
+ * bill. Those moves are cheap and they are the entire recognition.
+ */
+// Gandhi's cap is deliberately absent: it is a brimless boat-shaped khadi cap
+// and giving it a peak turns a piece of political dress into a workman's cap.
+const PEAKED_CAP = /newsboy|flat cap|cheese-cutter|baseball|snapback|mao cap|zhongshan cap|visor|official cap|guan cap/i;
+const BERET = /beret|tam|balmoral/i;
+const FEZ = /fez|tarboosh|kufi|taqiyah|kofia|topi|songkok/i;
+const PILLBOX = /pillbox|toque/i;
+
+function drawPeakedCap(context: RenderContext, soft: boolean): Mask {
+  const { anatomy, raster, ramps, spec, book } = context;
+  const { size, centerX } = anatomy;
+
+  // The crown. A newsboy's is slack and sits wide of the skull; a baseball
+  // cap's is fitted. Both are lower at the back than a skullcap would be.
+  const bottom = anatomy.browY - 2;
+  const crown = crownMask(context, soft ? 3.4 : 1.4, soft ? 3 : 2, bottom);
+  fillHeadwear(context, crown, { dither: soft ? 0.55 : 0.35 });
+
+  const mask = crown.slice();
+
+  // The peak: a stiff shelf thrown forward over the brow, dark underneath
+  // because nothing lights the underside of a brim.
+  const peakY = bottom - 1;
+  const peakHalf = anatomy.headHalfWidth * (soft ? 0.86 : 0.94);
+  const reach = soft ? 3 : 5;
+  for (let dy = 0; dy <= reach; dy += 1) {
+    const t = dy / reach;
+    const half = peakHalf * Math.sqrt(Math.max(0, 1 - t * t * 0.82));
+    for (let x = Math.round(centerX - half); x <= Math.round(centerX + half); x += 1) {
+      const y = peakY + dy;
+      if (x < 0 || y < 0 || x >= size || y >= size) continue;
+      const index = dy === 0 ? 1.5 : 4.4 + t * 1.6;
+      raster.set(x, y, ramps.headwear.steps[Math.round(index)], MAT.HEADWEAR, Math.round(index));
+      mask[y * size + x] = 1;
+    }
+  }
+
+  if (soft) {
+    // A newsboy cap is panelled and slouches forward over its own peak. One
+    // seam and one fold is the whole difference from a felt bowl.
+    const noise = makeNoise1D(spec.seed ^ 0x3c19);
+    for (let y = anatomy.headTop - 3; y < peakY; y += 1) {
+      const x = Math.round(centerX + 2 + noise(y * 0.3) * 3);
+      if (!mask[y * size + x]) continue;
+      raster.shift(x, y, 2, book);
+      raster.shift(x - 1, y, -1, book);
+    }
+    // The button at the crown, which every one of these has.
+    raster.set(centerX, anatomy.headTop - 3, ramps.headwear.steps[1], MAT.HEADWEAR, 1);
+  }
+
+  applyContactShadow(raster, mask, book, { dx: 0, dy: 1, strength: 2, depth: 4 });
+  for (let y = peakY + reach + 1; y < anatomy.eyeY; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (raster.matAt(x, y) === MAT.SKIN) raster.shift(x, y, 1, book);
+    }
+  }
+  return mask;
+}
+
+/** A beret: a soft disc that slumps to one side and has no structure at all. */
+function drawBeret(context: RenderContext): Mask {
+  const { anatomy, raster, ramps, spec, book } = context;
+  const { size, centerX } = anatomy;
+  const side = (spec.seed & 2) === 0 ? 1 : -1;
+
+  const mask = makeMask(size, size);
+  const cy = anatomy.headTop + 2;
+  const rx = anatomy.headHalfWidth * 1.16;
+  const ry = 8.5;
+  for (let y = Math.round(cy - ry); y <= Math.round(cy + ry); y += 1) {
+    for (let x = Math.round(centerX - rx); x <= Math.round(centerX + rx); x += 1) {
+      // The disc is pulled down over one ear and lifts off the other, so its
+      // centre is offset from the skull's rather than sitting on it.
+      const dx = (x - (centerX + side * 3)) / rx;
+      const dy = (y - cy) / ry;
+      if (dx * dx + dy * dy > 1) continue;
+      if (x < 0 || y < 0 || x >= size || y >= size) continue;
+      mask[y * size + x] = 1;
+    }
+  }
+  // It still has to sit on the head rather than float above it.
+  const seat = crownMask(context, 0.6, -2, anatomy.browY - 5);
+  for (let i = 0; i < mask.length; i += 1) if (seat[i]) mask[i] = 1;
+
+  fillHeadwear(context, mask, { dither: 0.5, gain: 5.4 });
+  // The stalk at the centre of the crown.
+  raster.set(centerX + side * 2, Math.round(cy - ry) + 1, ramps.headwear.steps[1], MAT.HEADWEAR, 1);
+  applyContactShadow(raster, mask, book, { dx: 0, dy: 1, strength: 2, depth: 2 });
+  return mask;
+}
+
+/** A truncated cone worn upright — fez, kufi, taqiyah, topi. */
+function drawFez(context: RenderContext, tassel: boolean): Mask {
+  const { anatomy, raster, ramps, book } = context;
+  const { size, centerX } = anatomy;
+  const mask = makeMask(size, size);
+
+  const top = anatomy.headTop - (tassel ? 5 : 0);
+  const bottom = anatomy.browY - 4;
+  const span = Math.max(1, bottom - top);
+  for (let y = top; y <= bottom; y += 1) {
+    const t = (y - top) / span;
+    // Straight sides, flat top: the shape is a section of a cylinder, and any
+    // curvature at the crown turns it back into a skullcap.
+    const half = anatomy.headHalfWidth * (0.74 + t * 0.3);
+    for (let x = Math.round(centerX - half); x <= Math.round(centerX + half); x += 1) {
+      if (x < 0 || y < 0 || x >= size || y >= size) continue;
+      mask[y * size + x] = 1;
+    }
+  }
+  fillHeadwear(context, mask, { dither: 0.3, gain: 5 });
+  // A flat top takes light square on, so it reads brighter than the sides.
+  for (let x = 0; x < size; x += 1) {
+    if (mask[top * size + x]) raster.set(x, top, ramps.headwear.steps[1], MAT.HEADWEAR, 1);
+  }
+
+  if (tassel) {
+    // The tassel hangs off the crown down one side.
+    for (let i = 0; i < 9; i += 1) {
+      const x = centerX + Math.round(anatomy.headHalfWidth * 0.8) + (i > 3 ? 1 : 0);
+      const y = top + i;
+      if (x < 0 || y < 0 || x >= size || y >= size) continue;
+      raster.set(x, y, ramps.clothC.steps[i > 6 ? 1 : 3], MAT.CLOTH_C, i > 6 ? 1 : 3);
+    }
+  }
+  applyContactShadow(raster, mask, book, { dx: 0, dy: 1, strength: 2, depth: 3 });
+  return mask;
+}
+
+/** A pillbox: a short flat-topped cylinder perched high on the head. */
+function drawPillbox(context: RenderContext): Mask {
+  const { anatomy, raster, ramps, book } = context;
+  const { size, centerX } = anatomy;
+  const mask = makeMask(size, size);
+  const top = anatomy.headTop + 1;
+  const half = anatomy.headHalfWidth * 0.78;
+  for (let y = top; y <= top + 8; y += 1) {
+    for (let x = Math.round(centerX - half); x <= Math.round(centerX + half); x += 1) {
+      if (x < 0 || y < 0 || x >= size || y >= size) continue;
+      mask[y * size + x] = 1;
+    }
+  }
+  fillHeadwear(context, mask, { dither: 0.25, gain: 4.6 });
+  for (let x = 0; x < size; x += 1) {
+    if (mask[top * size + x]) raster.set(x, top, ramps.headwear.steps[1], MAT.HEADWEAR, 1);
+  }
+  applyContactShadow(raster, mask, book, { dx: 0, dy: 1, strength: 2, depth: 2 });
+  return mask;
+}
+
 function drawCap(context: RenderContext): Mask {
   const { spec, anatomy, raster, ramps } = context;
   const name = spec.headwear!.name.toLowerCase();
   const material = spec.headwear!.material.toLowerCase();
+
+  if (PEAKED_CAP.test(name)) return drawPeakedCap(context, /newsboy|flat cap|cheese/i.test(name));
+  if (BERET.test(name)) return drawBeret(context);
+  if (PILLBOX.test(name)) return drawPillbox(context);
+  if (FEZ.test(name)) return drawFez(context, /fez|tarboosh/i.test(name));
 
   // A coif covers the ears and frames the whole face; a scholar's cap or a
   // skullcap sits high on the crown. Same primitive, different bottom edge.
@@ -439,9 +609,20 @@ function drawBrimmedHat(context: RenderContext): Mask {
   const conical = CONICAL_HAT_PATTERN.test(`${name} ${material}`);
   // Some hats are frayed and some are new; seeded so a given persona keeps theirs.
   if (conical) return drawConicalHat(context, makeRng(spec.seed ^ 0x7f31)() > 0.45);
+  // A pillbox is called a hat and has no brim whatever. Routed through the
+  // brimmed classifier by its own name, it came out a bowler.
+  if (PILLBOX.test(name)) return drawPillbox(context);
 
   const brimY = anatomy.browY - 5;
   const crownBottom = brimY + 1;
+  // Hats that are one shape with one move. Each of these is drawn as a bowler
+  // plus that move rather than from scratch, because the brim, the shadow and
+  // the seating on the skull are the same problem every time and only the
+  // crown differs.
+  const creased = /fedora|homburg|trilby|panama/i.test(name);
+  const flatTop = /boater|pork ?pie/i.test(name);
+  const tricorn = /tricorn|bicorne/i.test(name);
+  const pith = /pith|sola|safari/i.test(name);
   const crown = conical
     ? (() => {
         const cone = makeMask(size, size);
@@ -458,10 +639,44 @@ function drawBrimmedHat(context: RenderContext): Mask {
       })()
     : crownMask(context, 1.8, tall ? 14 : 4, crownBottom);
 
-  const brimHalf = anatomy.headHalfWidth * (conical ? 1.62 : 1.42);
-  const brim = maskEllipse(size, size, centerX, brimY + 1, brimHalf, conical ? 4.5 : 3.6);
+  const brimHalf = anatomy.headHalfWidth * (conical ? 1.62 : tricorn ? 1.5 : pith ? 1.58 : 1.42);
+  const brim = maskEllipse(size, size, centerX, brimY + 1, brimHalf, conical ? 4.5 : pith ? 4.2 : 3.6);
 
-  fillHeadwear(context, crown, { dither: 0.35 });
+  fillHeadwear(context, crown, { dither: pith ? 0.2 : 0.35 });
+
+  if (flatTop) {
+    // A boater's crown is a cylinder with a flat lid, not a dome. Squaring the
+    // top off is the entire recognition.
+    for (let y = anatomy.headTop - 4; y < anatomy.headTop; y += 1) {
+      for (let x = centerX - 14; x <= centerX + 14; x += 1) {
+        if (x < 0 || y < 0 || x >= size) continue;
+        if (Math.abs(x - centerX) > anatomy.headHalfWidth * 0.92) continue;
+        const index = y === anatomy.headTop - 4 ? 1 : 3;
+        raster.set(x, y, ramps.headwear.steps[index], MAT.HEADWEAR, index);
+        crown[y * size + x] = 1;
+      }
+    }
+  }
+
+  if (creased) {
+    // The lengthwise crease and the two pinches at the front of a soft felt
+    // hat. Without them a fedora is a bowler, which is a different decade and
+    // a different class.
+    for (let y = anatomy.headTop - 3; y < brimY - 6; y += 1) {
+      const x = centerX;
+      if (!crown[y * size + x]) continue;
+      raster.shift(x, y, 3, book);
+      raster.shift(x - 1, y, -1, book);
+      raster.shift(x + 1, y, -1, book);
+    }
+    for (const side of [-1, 1] as const) {
+      for (let y = anatomy.headTop - 1; y < anatomy.headTop + 5; y += 1) {
+        const x = Math.round(centerX + side * anatomy.headHalfWidth * 0.62);
+        if (!crown[y * size + x]) continue;
+        raster.shift(x, y, 2, book);
+      }
+    }
+  }
 
   // The brim is lit on top and dark underneath — that value split is the brim.
   fillMask(raster, brim, ramps.headwear, MAT.HEADWEAR, (x, y) => {
@@ -469,6 +684,24 @@ function drawBrimmedHat(context: RenderContext): Mask {
     const dx = (x - centerX) / brimHalf;
     return (dy < 0 ? 2.1 : 4.6) + Math.abs(dx) * 0.9 + (dx > 0.2 ? 0.4 : 0);
   }, { dither: 0.4 });
+
+  if (tricorn) {
+    // Three sides of the brim cocked up against the crown. Drawn as two wings
+    // rising off the sides, which is what the shape reads as from the front.
+    for (const side of [-1, 1] as const) {
+      for (let i = 0; i < 12; i += 1) {
+        const x = Math.round(centerX + side * (anatomy.headHalfWidth * 0.55 + i));
+        const lift = Math.round(i * 0.9);
+        for (let dy = 0; dy < 3; dy += 1) {
+          const y = brimY - lift + dy;
+          if (x < 0 || y < 0 || x >= size || y >= size) continue;
+          const index = dy === 0 ? 1.4 : 4.6;
+          raster.set(x, y, ramps.headwear.steps[Math.round(index)], MAT.HEADWEAR, Math.round(index));
+          brim[y * size + x] = 1;
+        }
+      }
+    }
+  }
 
   // Hat band.
   if (spec.headwear!.ornament > 0.2 && !conical) {
