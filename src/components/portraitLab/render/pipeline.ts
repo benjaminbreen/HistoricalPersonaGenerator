@@ -70,6 +70,9 @@ export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
   };
 
   drawBackground(context);
+  // Kept so a tilted head has something to leave behind it. See `applyTilt`.
+  const backdrop = new Raster(CANVAS, CANVAS);
+  backdrop.copyFrom(base);
 
   const hair = computeHairMasks(context);
   // Ask the covering for its silhouette before any hair goes down, so the hair
@@ -95,7 +98,7 @@ export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
     book: ramps.book,
     paints: skinPaints,
     shape: spec.noseShape,
-    centerX: anatomy.centerX + anatomy.asymmetry.noseLean,
+    centerX: anatomy.faceX + anatomy.asymmetry.noseLean,
     baseY: anatomy.noseBaseY,
     ageLines: spec.ageLines,
   });
@@ -137,6 +140,11 @@ export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
   drawJewelry(context);
   drawGlasses(context);
 
+  // Last, so the shear carries everything the head is wearing with it, and
+  // first of the finishing passes, so the outline traces where the head ended
+  // up rather than where it started.
+  applyTilt(base, backdrop, anatomy, spec.pose.tilt);
+
   applyRimLight(base, 1);
   applyOutline(base, ramps.book);
 
@@ -154,6 +162,84 @@ export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
     headMask: head,
     sway,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Tilt
+// ---------------------------------------------------------------------------
+
+/**
+ * How far a given row has been carried sideways by the head's tilt.
+ *
+ * Exported because the per-frame features are drawn *after* the shear and would
+ * otherwise land on a head that is no longer under them. Each of them occupies
+ * one narrow band of rows, so one offset per feature is enough — there is no
+ * need to shear the eyes themselves at 96 pixels.
+ */
+export function tiltAt(anatomy: Anatomy, tilt: number, y: number): number {
+  if (tilt === 0) return 0;
+  const pivotY = anatomy.chinY + 6;
+  if (y >= pivotY) return 0;
+  return Math.round(tilt * (pivotY - y) / Math.max(1, pivotY - anatomy.headTop));
+}
+
+/**
+ * Lean the head.
+ *
+ * A row-by-row horizontal shear about a pivot down in the neck, applied to the
+ * finished head so that hair, hat, jewellery and paint all come with it — the
+ * alternative, teaching nine drawing modules to take an angle, would put the
+ * same rotation in nine places and get it slightly wrong in three of them.
+ *
+ * Only the foreground moves. The backdrop is a dithered gradient, and shearing
+ * it along with the head drags a visible staircase through the halo behind the
+ * ear; so each row is first restored from the backdrop as it was drawn, and
+ * then the head's own pixels are laid back down displaced.
+ */
+function applyTilt(base: Raster, backdrop: Raster, anatomy: Anatomy, tilt: number): void {
+  if (tilt === 0) return;
+  const size = base.width;
+  const pivotY = anatomy.chinY + 6;
+
+  for (let y = 0; y < Math.min(pivotY, size); y += 1) {
+    const dx = tiltAt(anatomy, tilt, y);
+    if (dx === 0) continue;
+
+    // Lift this row's foreground before the row is wiped.
+    const kept: Array<{ x: number; r: number; g: number; b: number; mat: number; shade: number }> = [];
+    for (let x = 0; x < size; x += 1) {
+      const i = y * size + x;
+      if (base.mat[i] === MAT.BG || base.data[i * 4 + 3] === 0) continue;
+      kept.push({
+        x,
+        r: base.data[i * 4], g: base.data[i * 4 + 1], b: base.data[i * 4 + 2],
+        mat: base.mat[i], shade: base.shade[i],
+      });
+    }
+    if (!kept.length) continue;
+
+    for (let x = 0; x < size; x += 1) {
+      const i = y * size + x;
+      base.data[i * 4] = backdrop.data[i * 4];
+      base.data[i * 4 + 1] = backdrop.data[i * 4 + 1];
+      base.data[i * 4 + 2] = backdrop.data[i * 4 + 2];
+      base.data[i * 4 + 3] = backdrop.data[i * 4 + 3];
+      base.mat[i] = backdrop.mat[i];
+      base.shade[i] = backdrop.shade[i];
+    }
+
+    for (const pixel of kept) {
+      const x = pixel.x + dx;
+      if (x < 0 || x >= size) continue;
+      const i = y * size + x;
+      base.data[i * 4] = pixel.r;
+      base.data[i * 4 + 1] = pixel.g;
+      base.data[i * 4 + 2] = pixel.b;
+      base.data[i * 4 + 3] = 255;
+      base.mat[i] = pixel.mat;
+      base.shade[i] = pixel.shade;
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -233,7 +319,7 @@ export function renderFrame(
       ramps,
       shape: spec.browShape,
       thickness: spec.browThickness,
-      centerX: anatomy.centerX + side * anatomy.eyeDX,
+      centerX: anatomy.faceX + side * anatomy.eyeDX + tiltAt(anatomy, spec.pose.tilt, anatomy.browY),
       baseY: anatomy.browY + anatomy.asymmetry.browY[side === -1 ? 0 : 1]
         + Math.round(pose.browLift - asymmetric),
       side,
@@ -243,7 +329,7 @@ export function renderFrame(
       ageLines: spec.ageLines,
     });
   }
-  drawGlabellaLines(target, book, anatomy.centerX, anatomy.browY - 3, pose.glabella + spec.ageLines * 0.3);
+  drawGlabellaLines(target, book, anatomy.faceX + tiltAt(anatomy, spec.pose.tilt, anatomy.browY), anatomy.browY - 3, pose.glabella + spec.ageLines * 0.3);
 
   // --- eyes ----------------------------------------------------------------
   const eyeState: EyeState =
@@ -256,7 +342,7 @@ export function renderFrame(
       paints: eyePaints,
       shape: spec.eyeShape,
       state: eyeState,
-      centerX: anatomy.centerX + side * anatomy.eyeDX,
+      centerX: anatomy.faceX + side * anatomy.eyeDX + tiltAt(anatomy, spec.pose.tilt, anatomy.eyeY),
       centerY: anatomy.eyeY + anatomy.asymmetry.eyeY[side === -1 ? 0 : 1],
       side,
       gazeX: state.gazeX,
@@ -275,7 +361,7 @@ export function renderFrame(
     paints: mouthPaints,
     expression: state.expression,
     lipShape: spec.lipShape,
-    centerX: anatomy.centerX + anatomy.asymmetry.mouthLean,
+    centerX: anatomy.faceX + anatomy.asymmetry.mouthLean + tiltAt(anatomy, spec.pose.tilt, anatomy.mouthY),
     y: anatomy.mouthY,
     ageThinning: spec.ageLines,
     toothless: spec.traits.toothless,
@@ -285,8 +371,9 @@ export function renderFrame(
   const smiling = state.expression === 'smile' || state.expression === 'grin' || state.expression === 'content';
   if (smiling) {
     const width = spec.lipShape === 'wide' ? 10 : 8;
-    drawDimple(target, book, anatomy.centerX - width, anatomy.mouthY + 1);
-    drawDimple(target, book, anatomy.centerX + width, anatomy.mouthY + 1);
+    const cx = anatomy.faceX + tiltAt(anatomy, spec.pose.tilt, anatomy.mouthY);
+    drawDimple(target, book, cx - width, anatomy.mouthY + 1);
+    drawDimple(target, book, cx + width, anatomy.mouthY + 1);
   }
 }
 

@@ -188,6 +188,7 @@ const diseases: Counted = {};
 const ageBands: Counted = {};
 const greyBands: Counted = {};
 const restingFaces: Counted = {};
+const poseReasons: Counted = {};
 const ornamentKinds: Counted = {};
 const garmentSurfaces: Counted = {};
 const ornamentMaterials: Counted = {};
@@ -247,6 +248,7 @@ for (let i = 0; i < count; i += 1) {
     bump(hairLengths, spec.hairLength);
     bump(hairTextures, spec.hairTexture);
     bump(hairSilhouettes, spec.hairSilhouette);
+    bump(poseReasons, spec.pose.reason ?? '(canonical bust)');
     bump(eras, String(spec.era));
     bump(zones, String(spec.culturalZone));
     const band = spec.age < 20 ? '00-19' : spec.age < 35 ? '20-34' : spec.age < 50 ? '35-49'
@@ -420,6 +422,8 @@ rule('UNDECORATED head items (no ornament found in the name)');
 table(plainHeadwear, rendered);
 rule('Resting expression');
 table(restingFaces, rendered);
+rule('Pose — what departs from the canonical bust, and why');
+table(poseReasons, rendered);
 rule('Illness severity');
 table(severities, rendered);
 rule('Cultural zones');

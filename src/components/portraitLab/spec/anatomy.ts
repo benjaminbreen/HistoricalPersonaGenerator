@@ -11,7 +11,7 @@
  */
 
 import { unit } from '../core/rng';
-import { PortraitSpec, SkullShape } from './types';
+import { PortraitSpec, PoseSpec, SkullShape } from './types';
 
 export const CANVAS = 96;
 
@@ -32,6 +32,15 @@ export interface Anatomy {
    * know that the vault above the hairline is taller than the face implies.
    */
   craniumRise: number;
+
+  /**
+   * The centre line the *features* sit on, as distinct from the centre line the
+   * skull sits on. They are the same for a head facing square on, and a couple
+   * of pixels apart for one turned slightly away — which at this size is what a
+   * turn is: the eyes, nose and mouth slide within a silhouette that does not
+   * move, exactly as they do in a painted three-quarter view seen small.
+   */
+  faceX: number;
 
   browY: number;
   eyeY: number;
@@ -274,7 +283,7 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
   const neckHalf = Math.round((female ? 8.4 : 9.8) * (spec.build === 'imposing' ? 1.15 : spec.build === 'slight' ? 0.9 : 1));
   const shoulderHalf = (SHOULDER_HALF[spec.build] ?? 33) * (female ? 0.9 : 1);
 
-  return applySkullShape({
+  return applyPose(applySkullShape({
     size: CANVAS,
     centerX,
 
@@ -284,6 +293,7 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
     headHalfWidth,
     headProfile: keys,
     craniumRise: 0,
+    faceX: centerX,
 
     // Far enough above the lash line that brow and eye stay two forms rather
     // than merging into one dark slab.
@@ -326,7 +336,74 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
       noseLean: asymPick('nose-lean', 0.8),
       mouthLean: asymPick('mouth-lean', 0.8),
     },
-  }, spec.skull);
+  }, spec.skull), spec.pose);
+}
+
+/**
+ * How this persona is holding themselves, applied to the finished measurements.
+ *
+ * Everything here is a transform of an anatomy that has already been built,
+ * rather than a set of knobs threaded through the construction above. That is
+ * deliberate: the pose is a *departure* from the canonical bust, and writing it
+ * as one keeps the canonical bust legible as the thing it departs from — which
+ * matters when the whole design rests on most portraits not departing at all.
+ *
+ * The head scales about the chin rather than about its own centre, so a bigger
+ * person's head grows up into the frame instead of sinking into their collar.
+ */
+function applyPose(anatomy: Anatomy, pose: PoseSpec): Anatomy {
+  const { scale, offsetY, square, chin: pitch, turn } = pose;
+  if (scale === 1 && offsetY === 0 && square === 0 && pitch === 0 && turn === 0) return anatomy;
+
+  const chin = anatomy.chinY;
+  const up = (y: number) => Math.round(chin + (y - chin) * scale) + offsetY;
+  const down = (y: number) => Math.round(y) + offsetY;
+
+  // Raising or tucking the chin foreshortens the face, and it does not do so
+  // evenly: tucking opens up the forehead and closes the distance from nose to
+  // chin, and raising it does the reverse. Sliding every feature by the same
+  // amount instead just moves the face down the skull, which reads as a long
+  // forehead rather than as a head held at an angle. The weights are the
+  // foreshortening.
+  const pitched = (y: number, weight: number) => Math.round(y + pitch * weight);
+
+  // Squared shoulders are wider, and they sit higher — a thick trapezius eats
+  // the neck, which is most of why a strong figure reads as strong at this
+  // size. Negative runs the other way: narrow shoulders and a long thin neck.
+  const shoulderHalf = anatomy.shoulderHalf * (1 + square * 0.1);
+  const neckHalf = anatomy.neckHalf * (1 + square * 0.06);
+  const shoulderLift = Math.round(square * 2);
+
+  return {
+    ...anatomy,
+    headTop: up(anatomy.headTop),
+    chinY: chin + offsetY,
+    headHeight: anatomy.headHeight * scale,
+    headHalfWidth: anatomy.headHalfWidth * scale,
+    headProfile: anatomy.headProfile.map(([t, half]) => [t, half * scale] as [number, number]),
+
+    faceX: anatomy.faceX + turn,
+
+    browY: pitched(up(anatomy.browY), 1.4),
+    eyeY: pitched(up(anatomy.eyeY), 1.15),
+    eyeDX: Math.round(anatomy.eyeDX * scale),
+    cheekY: pitched(up(anatomy.cheekY), 0.9),
+    noseBridgeY: pitched(up(anatomy.noseBridgeY), 1),
+    noseBaseY: pitched(up(anatomy.noseBaseY), 0.8),
+    mouthY: pitched(up(anatomy.mouthY), 0.6),
+
+    earTopY: up(anatomy.earTopY),
+    earBottomY: up(anatomy.earBottomY),
+    earX: Math.round(anatomy.earX * scale),
+
+    neckTop: down(anatomy.neckTop),
+    neckBottom: down(anatomy.neckBottom),
+    neckHalf,
+
+    shoulderTop: down(anatomy.shoulderTop) - shoulderLift,
+    shoulderHalf,
+    collarY: down(anatomy.collarY) - shoulderLift,
+  };
 }
 
 /**

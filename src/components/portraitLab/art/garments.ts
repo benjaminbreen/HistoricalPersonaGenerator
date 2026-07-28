@@ -31,7 +31,7 @@ export interface BodyMasks {
 function shoulderMask(context: RenderContext): Mask {
   const { anatomy } = context;
   const { size } = anatomy;
-  return maskFromProfile(size, size, {
+  const mask = maskFromProfile(size, size, {
     keys: [
       [0, anatomy.neckHalf + 2.5],
       [0.22, anatomy.shoulderHalf * 0.7],
@@ -43,6 +43,52 @@ function shoulderMask(context: RenderContext): Mask {
     bottom: size + 5,
     centerX: anatomy.centerX,
   });
+  return poseShoulders(context, mask);
+}
+
+/**
+ * The two things a body does that a symmetric profile cannot say: carry one
+ * shoulder lower than the other, and round forward.
+ *
+ * Both are applied to the finished silhouette as a per-column vertical shift
+ * rather than being written into the profile, because the profile is mirrored
+ * about the centre by construction and a dropped shoulder is the one shape that
+ * is definitionally not. The body runs off the bottom of the frame, so a column
+ * only ever needs its *top* edge moved: find where the cloth starts and start
+ * it somewhere else.
+ */
+function poseShoulders(context: RenderContext, mask: Mask): Mask {
+  const { anatomy, spec } = context;
+  const { size, centerX } = anatomy;
+  const { shoulderDrop, hunch } = spec.pose;
+  if (shoulderDrop === 0 && hunch === 0) return mask;
+
+  // Which shoulder hangs is fixed per persona rather than random: it reads as a
+  // fact about the body, and a fact that changed between renders would not.
+  const side = (spec.seed & 1) === 0 ? 1 : -1;
+  const out = makeMask(size, size);
+  for (let x = 0; x < size; x += 1) {
+    let top = -1;
+    for (let y = 0; y < size; y += 1) {
+      if (mask[y * size + x]) { top = y; break; }
+    }
+    if (top < 0) continue;
+
+    const t = (x + 0.5 - centerX) / Math.max(1, anatomy.shoulderHalf);
+    // The drop is nothing at the neck and full at the point of the shoulder —
+    // shifting the whole side down as a block detaches it from the collar.
+    const reach = Math.min(1, Math.max(0, Math.abs(t) - 0.18) / 0.6);
+    const dropped = t * side > 0 ? shoulderDrop * reach : 0;
+    // A stoop lifts the cloth beside the neck and leaves the points of the
+    // shoulders where they are, which is what rounds the line over.
+    const rounded = hunch * 3.4 * Math.exp(-((Math.abs(t) - 0.32) ** 2) / 0.09);
+
+    const start = Math.max(0, Math.round(top + dropped - rounded));
+    for (let y = start; y < size; y += 1) {
+      if (y >= top || mask[y * size + x]) out[y * size + x] = 1;
+    }
+  }
+  return out;
 }
 
 type NecklineShape =

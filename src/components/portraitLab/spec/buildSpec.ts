@@ -35,6 +35,7 @@ import {
   OrnamentMaterial,
   OrnamentSpec,
   PortraitSpec,
+  PoseSpec,
   SkullShape,
 } from './types';
 
@@ -837,6 +838,122 @@ const ATTRIBUTE_MARKINGS: Record<string, Omit<MarkingSpec, 'color'> & { color?: 
   birthmark_omen: { type: 'birthmark', location: 'temple', size: 'medium', pattern: 'solid' },
 };
 
+// ---------------------------------------------------------------------------
+// Pose
+// ---------------------------------------------------------------------------
+
+const CANONICAL_POSE: PoseSpec = {
+  scale: 1, offsetY: 0, chin: 0, tilt: 0, turn: 0,
+  shoulderDrop: 0, hunch: 0, square: 0, reason: null,
+};
+
+/**
+ * Which axes a signal is allowed to touch.
+ *
+ * A persona gets at most one signal per family, so two signals can never fight
+ * over the same number. Without that, a `frail shy stooped` persona accumulates
+ * three deviations that cancel into a fourth meaning nobody can read — which is
+ * the failure mode that makes pose look like noise rather than information.
+ */
+type PoseFamily = 'size' | 'address' | 'carriage';
+
+interface PoseSignal {
+  /** The attribute id, or a predicate over the whole persona. */
+  when: string | ((ids: Set<string>, build: Build, wealth: string) => boolean);
+  family: PoseFamily;
+  pose: Partial<PoseSpec>;
+}
+
+/**
+ * Read in order. The first match becomes the persona's pose; the first match in
+ * a *different* family may join it. Two is the cap — a portrait carrying three
+ * simultaneous departures from the canonical bust stops reading as a person
+ * held a certain way and starts reading as a mistake.
+ *
+ * The order is by how much the thing would actually have struck someone in the
+ * room. A missing arm changes a silhouette more than a shy disposition does.
+ */
+const POSE_SIGNALS: PoseSignal[] = [
+  // Carriage: bodies shaped by injury, work, or illness.
+  { when: 'one_armed', family: 'carriage', pose: { shoulderDrop: 3, hunch: 0.2 } },
+  { when: 'hunchback', family: 'carriage', pose: { hunch: 1, offsetY: 1 } },
+  { when: 'weavers_stoop', family: 'carriage', pose: { hunch: 0.55 } },
+  { when: 'lame', family: 'carriage', pose: { shoulderDrop: 2 } },
+  { when: 'palsied', family: 'address', pose: { tilt: 2 } },
+
+  // Size: how much of the frame this person takes up.
+  { when: 'towering', family: 'size', pose: { scale: 1.07, offsetY: -2 } },
+  { when: 'diminutive', family: 'size', pose: { scale: 0.93, offsetY: 2 } },
+  { when: 'corpulent', family: 'size', pose: { scale: 1.04 } },
+  { when: 'frail', family: 'size', pose: { scale: 0.95, offsetY: 1 } },
+
+  // Strength and its absence, in the shoulders rather than the head.
+  { when: 'strong', family: 'carriage', pose: { square: 0.85 } },
+  { when: 'athletic', family: 'carriage', pose: { square: 0.6 } },
+  { when: 'gaunt', family: 'carriage', pose: { square: -0.6 } },
+  { when: 'consumptive', family: 'carriage', pose: { square: -0.7, hunch: 0.3 } },
+  {
+    when: (_ids, build) => build === 'imposing' || build === 'stocky',
+    family: 'carriage',
+    pose: { square: 0.5 },
+  },
+  { when: (_ids, build) => build === 'slight', family: 'carriage', pose: { square: -0.4 } },
+
+  // Address: how they meet the viewer. Chin up is command, chin tucked is
+  // wariness, and turning off-axis is refusal to be looked at straight.
+  { when: 'proud', family: 'address', pose: { chin: -2 } },
+  { when: 'coward', family: 'address', pose: { chin: 2, turn: -2 } },
+  { when: 'crowd_averse', family: 'address', pose: { chin: 1, turn: -2 } },
+  { when: 'shy', family: 'address', pose: { chin: 2, turn: -1 } },
+  { when: 'brave', family: 'address', pose: { chin: -1 } },
+  { when: 'loner', family: 'address', pose: { turn: -2 } },
+  { when: 'taciturn', family: 'address', pose: { turn: -1 } },
+  { when: 'cunning', family: 'address', pose: { turn: 2 } },
+  { when: 'humble', family: 'address', pose: { chin: 1 } },
+  { when: 'curious', family: 'address', pose: { tilt: 3 } },
+  { when: 'dreamer', family: 'address', pose: { tilt: 3, chin: -1 } },
+
+  // The sitter's own century had a convention for this, and it is the one place
+  // where status rather than body decides how a head is held.
+  {
+    when: (_ids, _build, wealth) => wealth === 'noble',
+    family: 'address',
+    pose: { chin: -1 },
+  },
+];
+
+function buildPose(ids: Set<string>, build: Build, wealth: string): PoseSpec {
+  const fires = (signal: PoseSignal) =>
+    typeof signal.when === 'string' ? ids.has(signal.when) : signal.when(ids, build, wealth);
+
+  const primary = POSE_SIGNALS.find(fires);
+  if (!primary) return CANONICAL_POSE;
+
+  const secondary = POSE_SIGNALS.find(s => s.family !== primary.family && fires(s));
+  const label = (signal: PoseSignal) =>
+    typeof signal.when === 'string' ? signal.when : `${signal.family}:build`;
+
+  // Added rather than assigned. The families own an axis each *mostly* — a
+  // hunched back also drops the whole figure a pixel, which is a size axis —
+  // and spreading the second signal over the first would silently discard
+  // whichever of them wrote that number second.
+  const pose = { ...CANONICAL_POSE };
+  for (const part of secondary ? [primary.pose, secondary.pose] : [primary.pose]) {
+    pose.scale *= part.scale ?? 1;
+    pose.offsetY += part.offsetY ?? 0;
+    pose.chin += part.chin ?? 0;
+    pose.tilt += part.tilt ?? 0;
+    pose.turn += part.turn ?? 0;
+    pose.shoulderDrop += part.shoulderDrop ?? 0;
+    pose.hunch += part.hunch ?? 0;
+    pose.square += part.square ?? 0;
+  }
+  pose.hunch = Math.min(1, pose.hunch);
+  pose.square = Math.max(-1, Math.min(1, pose.square));
+  pose.reason = secondary ? `${label(primary)}+${label(secondary)}` : label(primary);
+  return pose;
+}
+
 function buildFaceTraits(ids: Set<string>): FaceTraits {
   return {
     gaunt: ids.has('gaunt') || ids.has('frail'),
@@ -1088,6 +1205,7 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     markings,
     skull: skullShapeFrom(markings),
     dental: dentalWorkFrom(markings),
+    pose: buildPose(attributeIds, (appearance.build || 'average') as Build, wealth),
     glasses: appearance.hasGlasses ? { style: appearance.glassesStyle || 'round' } : null,
 
     condition,

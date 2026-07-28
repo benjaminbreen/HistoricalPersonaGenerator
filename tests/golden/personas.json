@@ -17,7 +17,8 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "gown",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": "lame"
     },
     "family": [
       "father: Ho Lam",
@@ -51,7 +52,8 @@
       "headwearColor": "#5a6b3b",
       "garmentKind": "jacket",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Koru",
@@ -89,7 +91,8 @@
       "headwearColor": "#c2a463",
       "garmentKind": "jacket",
       "garmentColor": "#3a4f6d",
-      "backgroundBase": "#5a3f4a"
+      "backgroundBase": "#5a3f4a",
+      "pose": null
     },
     "family": [
       "father: Wai",
@@ -124,7 +127,8 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "gown",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Tadashi Inoue",
@@ -158,7 +162,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "jacket",
       "garmentColor": "#1f1f22",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Haru Shimizu",
@@ -192,7 +197,8 @@
       "headwearColor": "#c2a463",
       "garmentKind": "jacket",
       "garmentColor": "#c8a63e",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Satoshi Kobayashi",
@@ -225,7 +231,8 @@
       "headwearColor": "#b1803c",
       "garmentKind": "jacket",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Daniel Jansson",
@@ -258,7 +265,8 @@
       "headwearColor": "#b1803c",
       "garmentKind": "jacket",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Marcus Olsson",
@@ -292,7 +300,8 @@
       "headwearColor": "#41608c",
       "garmentKind": "jacket",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Emil Hansson",
@@ -326,7 +335,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "robe",
       "garmentColor": "#cfa044",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": "lame"
     },
     "family": [
       "father: Leif Sigurdsson",
@@ -363,7 +373,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "tunic",
       "garmentColor": "#4f3c2b",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Vigfus Njalsson",
@@ -400,7 +411,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
       "garmentColor": "#566370",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Nils Larsson",
@@ -432,7 +444,8 @@
       "headwearColor": null,
       "garmentKind": "gown",
       "garmentColor": "#566370",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Murat Koç",
@@ -468,7 +481,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "robe",
       "garmentColor": "#23304a",
-      "backgroundBase": "#725c63"
+      "backgroundBase": "#725c63",
+      "pose": null
     },
     "family": [
       "father: Abu İsmail (Selim)",
@@ -506,7 +520,8 @@
       "headwearColor": "#9c5230",
       "garmentKind": "robe",
       "garmentColor": "#566370",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Hasan Çelik",
@@ -540,7 +555,8 @@
       "headwearColor": "#cfa044",
       "garmentKind": "tunic",
       "garmentColor": "#a33327",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Abu Mehmet (Hüseyin)",
@@ -577,7 +593,8 @@
       "headwearColor": "#5b4229",
       "garmentKind": "robe",
       "garmentColor": "#a33327",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Nerses",
@@ -616,7 +633,8 @@
       "headwearColor": "#5b4229",
       "garmentKind": "robe",
       "garmentColor": "#a33327",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Mehmet ibn İbrahim",
@@ -649,7 +667,8 @@
       "headwearColor": null,
       "garmentKind": "robe",
       "garmentColor": "#40516a",
-      "backgroundBase": "#6e9b83"
+      "backgroundBase": "#6e9b83",
+      "pose": "lame"
     },
     "family": [
       "father: Idrissa",
@@ -686,7 +705,8 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#9b704c",
-      "backgroundBase": "#5c856f"
+      "backgroundBase": "#5c856f",
+      "pose": null
     },
     "family": [
       "father: Reda Brahimi",
@@ -721,7 +741,8 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#9b704c",
-      "backgroundBase": "#5c8570"
+      "backgroundBase": "#5c8570",
+      "pose": null
     },
     "family": [
       "father: Salif",
@@ -751,7 +772,8 @@
       "headwearColor": "#ddd5c3",
       "garmentKind": "gown",
       "garmentColor": "#574153",
-      "backgroundBase": "#6b756f"
+      "backgroundBase": "#6b756f",
+      "pose": null
     },
     "family": [
       "father: Seumas Fraser",
@@ -784,7 +806,8 @@
       "headwearColor": null,
       "garmentKind": "doublet",
       "garmentColor": "#5d5548",
-      "backgroundBase": "#6b7570"
+      "backgroundBase": "#6b7570",
+      "pose": null
     },
     "family": [
       "father: Fergus Connolly",
@@ -819,7 +842,8 @@
       "headwearColor": null,
       "garmentKind": "doublet",
       "garmentColor": "#5d5548",
-      "backgroundBase": "#6b7570"
+      "backgroundBase": "#6b7570",
+      "pose": null
     },
     "family": [
       "father: Huw Davies",
@@ -851,7 +875,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
       "garmentColor": "#6f5237",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Mark Smith",
@@ -887,7 +912,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "doublet",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Diarmuid Walsh",
@@ -924,7 +950,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Huw Davies",
@@ -955,7 +982,8 @@
       "headwearColor": "#cfa044",
       "garmentKind": "tunic",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": "lame"
     },
     "family": [
       "father: Khalid son of Hussein",
@@ -993,7 +1021,8 @@
       "headwearColor": "#5b4229",
       "garmentKind": "robe",
       "garmentColor": "#a33327",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Khalid son of Ali",
@@ -1031,7 +1060,8 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "robe",
       "garmentColor": "#3a4f6d",
-      "backgroundBase": "#725c65"
+      "backgroundBase": "#725c65",
+      "pose": null
     },
     "family": [
       "father: Yosef",
@@ -1066,7 +1096,8 @@
       "headwearColor": "#cfa044",
       "garmentKind": "doublet",
       "garmentColor": "#c8a63e",
-      "backgroundBase": "#4e4a6e"
+      "backgroundBase": "#4e4a6e",
+      "pose": null
     },
     "family": [
       "father: *Val",
@@ -1102,7 +1133,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#8e2436",
-      "backgroundBase": "#726c9d"
+      "backgroundBase": "#726c9d",
+      "pose": null
     },
     "family": [
       "father: *Malai",
@@ -1139,7 +1171,8 @@
       "headwearColor": "#d8cdb6",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#1f1f22",
-      "backgroundBase": "#484365"
+      "backgroundBase": "#484365",
+      "pose": null
     },
     "family": [
       "father: *Pon the Golden",
@@ -1175,7 +1208,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#927454",
-      "backgroundBase": "#6c9d83"
+      "backgroundBase": "#6c9d83",
+      "pose": null
     },
     "family": [
       "father: Anaru, father of Tane",
@@ -1210,7 +1244,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#927454",
-      "backgroundBase": "#557f6e"
+      "backgroundBase": "#557f6e",
+      "pose": null
     },
     "family": [
       "father: Koru, father of Pita",
@@ -1248,7 +1283,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#927454",
-      "backgroundBase": "#436557"
+      "backgroundBase": "#436557",
+      "pose": null
     },
     "family": [
       "father: Teiva, father of Rewi",
@@ -1281,7 +1317,8 @@
       "headwearColor": "#a63a2b",
       "garmentKind": "gown",
       "garmentColor": "#a8763f",
-      "backgroundBase": "#6c919d"
+      "backgroundBase": "#6c919d",
+      "pose": null
     },
     "family": [
       "father: Tehei",
@@ -1316,7 +1353,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
-      "backgroundBase": "#415a62"
+      "backgroundBase": "#415a62",
+      "pose": null
     },
     "family": [
       "father: Keoni",
@@ -1354,7 +1392,8 @@
       "headwearColor": "#9c5230",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
-      "backgroundBase": "#415a62"
+      "backgroundBase": "#415a62",
+      "pose": null
     },
     "family": [
       "father: Manuarii",
@@ -1391,7 +1430,8 @@
       "headwearColor": "#cfa044",
       "garmentKind": "jacket",
       "garmentColor": "#a8763f",
-      "backgroundBase": "#3d5a48"
+      "backgroundBase": "#3d5a48",
+      "pose": "lame"
     },
     "family": [
       "father: Huascar Cusipaucar",
@@ -1429,7 +1469,8 @@
       "headwearColor": "#a63a2b",
       "garmentKind": "jacket",
       "garmentColor": "#8b7358",
-      "backgroundBase": "#3d5a48"
+      "backgroundBase": "#3d5a48",
+      "pose": null
     },
     "family": [
       "father: Wiraqocha",
@@ -1463,7 +1504,8 @@
       "headwearColor": null,
       "garmentKind": "work_shirt",
       "garmentColor": "#ddd3ba",
-      "backgroundBase": "#3d5a48"
+      "backgroundBase": "#3d5a48",
+      "pose": null
     },
     "family": [
       "father: Zara the Slow-Speaking",
@@ -1497,7 +1539,8 @@
       "headwearColor": "#ddd8cf",
       "garmentKind": "robe",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": null
     },
     "family": [
       "father: Picuris",
@@ -1537,7 +1580,8 @@
       "headwearColor": "#c2a463",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#566370",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": null
     },
     "family": [
       "father: Sotuknang",
@@ -1577,7 +1621,8 @@
       "headwearColor": "#c2a463",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#2e3f5c",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": "proud"
     },
     "family": [
       "father: Acoma the Lastborn",
@@ -1614,7 +1659,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#445a5c"
+      "backgroundBase": "#445a5c",
+      "pose": null
     },
     "family": [
       "father: Jacob Taylor",
@@ -1650,7 +1696,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "doublet",
       "garmentColor": "#6f5237",
-      "backgroundBase": "#445a5c"
+      "backgroundBase": "#445a5c",
+      "pose": null
     },
     "family": [
       "father: Hezekiah Harris",
@@ -1688,7 +1735,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#445a5c"
+      "backgroundBase": "#445a5c",
+      "pose": null
     },
     "family": [
       "father: Walter Rodriguez",
@@ -1721,7 +1769,8 @@
       "headwearColor": null,
       "garmentKind": "robe",
       "garmentColor": "#5a4b63",
-      "backgroundBase": "#6c766b"
+      "backgroundBase": "#6c766b",
+      "pose": "lame"
     },
     "family": [
       "father: Bao Yang",
@@ -1761,7 +1810,8 @@
       "headwearColor": "#4b463d",
       "garmentKind": "robe",
       "garmentColor": "#59645d",
-      "backgroundBase": "#6c766b"
+      "backgroundBase": "#6c766b",
+      "pose": null
     },
     "family": [
       "father: Ping Zheng",
@@ -1801,7 +1851,8 @@
       "headwearColor": null,
       "garmentKind": "robe",
       "garmentColor": "#59645d",
-      "backgroundBase": "#6c766b"
+      "backgroundBase": "#6c766b",
+      "pose": null
     },
     "family": [
       "father: Jin Xu",
@@ -1834,7 +1885,8 @@
       "headwearColor": null,
       "garmentKind": "gown",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#4e4a6e"
+      "backgroundBase": "#4e4a6e",
+      "pose": null
     },
     "family": [
       "father: Ganesh Srivastava",
@@ -1872,7 +1924,8 @@
       "headwearColor": null,
       "garmentKind": "work_shirt",
       "garmentColor": "#8a8781",
-      "backgroundBase": "#726c9d"
+      "backgroundBase": "#726c9d",
+      "pose": null
     },
     "family": [
       "father: Rajesh Agrawal",
@@ -1906,7 +1959,8 @@
       "headwearColor": null,
       "garmentKind": "work_shirt",
       "garmentColor": "#8a8781",
-      "backgroundBase": "#484365"
+      "backgroundBase": "#484365",
+      "pose": "brave"
     },
     "family": [
       "father: Naresh Yadav",
@@ -1943,7 +1997,8 @@
       "headwearColor": "#b1803c",
       "garmentKind": "gown",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Llewelyn Parry",
@@ -1978,7 +2033,8 @@
       "headwearColor": "#b1803c",
       "garmentKind": "jacket",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Diarmuid Walsh",
@@ -2014,7 +2070,8 @@
       "headwearColor": "#41608c",
       "garmentKind": "jacket",
       "garmentColor": "#8a8781",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Bartholomew Fletcher",
@@ -2044,7 +2101,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "gown",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Pierre Moreau",
@@ -2078,7 +2136,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "doublet",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Étienne Dubois",
@@ -2115,7 +2174,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Bernard Dubois",
@@ -2146,7 +2206,8 @@
       "headwearColor": "#a98a63",
       "garmentKind": "gown",
       "garmentColor": "#566370",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Petar Antic",
@@ -2184,7 +2245,8 @@
       "headwearColor": "#6f5237",
       "garmentKind": "jacket",
       "garmentColor": "#1f1f22",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Athanasios Makris",
@@ -2222,7 +2284,8 @@
       "headwearColor": "#41608c",
       "garmentKind": "jacket",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Burak Erdoğan",
@@ -2255,7 +2318,8 @@
       "headwearColor": "#b1803c",
       "garmentKind": "jacket",
       "garmentColor": "#1f1f22",
-      "backgroundBase": "#6d9c7f"
+      "backgroundBase": "#6d9c7f",
+      "pose": null
     },
     "family": [
       "father: Nicolás Vasquez",
@@ -2293,7 +2357,8 @@
       "headwearColor": "#b1803c",
       "garmentKind": "work_shirt",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#3d5a48"
+      "backgroundBase": "#3d5a48",
+      "pose": null
     },
     "family": [
       "father: Sergio Morales",
@@ -2332,7 +2397,8 @@
       "headwearColor": "#6f5237",
       "garmentKind": "work_shirt",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#6d9c7f"
+      "backgroundBase": "#6d9c7f",
+      "pose": "humble"
     },
     "family": [
       "father: Sebastián Reyes",
@@ -2367,7 +2433,8 @@
       "headwearColor": "#b1803c",
       "garmentKind": "work_shirt",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#445d66"
+      "backgroundBase": "#445d66",
+      "pose": null
     },
     "family": [
       "father: Niall Fraser",
@@ -2404,7 +2471,8 @@
       "headwearColor": "#c2a463",
       "garmentKind": "work_shirt",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#52717b"
+      "backgroundBase": "#52717b",
+      "pose": null
     },
     "family": [
       "father: George Wilson",
@@ -2439,7 +2507,8 @@
       "headwearColor": "#c2a463",
       "garmentKind": "work_shirt",
       "garmentColor": "#566370",
-      "backgroundBase": "#415a62"
+      "backgroundBase": "#415a62",
+      "pose": null
     },
     "family": [
       "father: Ruaridh MacMillan",
@@ -2473,7 +2542,8 @@
       "headwearColor": "#5a6b3b",
       "garmentKind": "robe",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: *Tengri",
@@ -2507,7 +2577,8 @@
       "headwearColor": null,
       "garmentKind": "robe",
       "garmentColor": "#3a4f6d",
-      "backgroundBase": "#5a3f4a"
+      "backgroundBase": "#5a3f4a",
+      "pose": null
     },
     "family": [
       "father: *Sartaq the Carp",
@@ -2545,7 +2616,8 @@
       "headwearColor": "#c2a463",
       "garmentKind": "robe",
       "garmentColor": "#8e2436",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: *Tengri",
@@ -2574,7 +2646,8 @@
       "headwearColor": null,
       "garmentKind": "jacket",
       "garmentColor": "#8b7358",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Ku",
@@ -2611,7 +2684,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Wu the Sparrow-Voiced",
@@ -2648,7 +2722,8 @@
       "headwearColor": "#c0a566",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Xin",
@@ -2680,7 +2755,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "gown",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Chan-ho Ahn",
@@ -2720,7 +2796,8 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "jacket",
       "garmentColor": "#8e2436",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Dong-hyun Nam",
@@ -2759,7 +2836,8 @@
       "headwearColor": "#c2a463",
       "garmentKind": "jacket",
       "garmentColor": "#c8a63e",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Do-yun Ryu",
@@ -2792,7 +2870,8 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "gown",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Boroldai of the Red Deer clan",
@@ -2825,7 +2904,8 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "jacket",
       "garmentColor": "#5a6b3b",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Enkhbayar",
@@ -2864,7 +2944,8 @@
       "headwearColor": "#c2a463",
       "garmentKind": "jacket",
       "garmentColor": "#8e2436",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": "coward"
     },
     "family": [
       "father: Dolgorsuren Enkhbold",
@@ -2898,7 +2979,8 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "gown",
       "garmentColor": "#566370",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": "lame"
     },
     "family": [
       "father: Haru Ito",
@@ -2935,7 +3017,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "jacket",
       "garmentColor": "#23304a",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Ryuu Ishikawa",
@@ -2973,7 +3056,8 @@
       "headwearColor": "#c0a566",
       "garmentKind": "robe",
       "garmentColor": "#566370",
-      "backgroundBase": "#3f5a55"
+      "backgroundBase": "#3f5a55",
+      "pose": null
     },
     "family": [
       "father: Yuuki Fujita",
@@ -3006,7 +3090,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Hrewiklewos",
@@ -3042,7 +3127,8 @@
       "headwearColor": null,
       "garmentKind": "jacket",
       "garmentColor": "#8b7358",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Aryomon the Goat",
@@ -3079,7 +3165,8 @@
       "headwearColor": "#8b7358",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Aryomon",
@@ -3116,7 +3203,8 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#8d4d43",
-      "backgroundBase": "#5a876b"
+      "backgroundBase": "#5a876b",
+      "pose": null
     },
     "family": [
       "father: Sokrates",
@@ -3152,7 +3240,8 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#9b805e",
-      "backgroundBase": "#5a8771"
+      "backgroundBase": "#5a8771",
+      "pose": null
     },
     "family": [
       "father: Xenophanes son of Nikandros",
@@ -3188,7 +3277,8 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#9b805e",
-      "backgroundBase": "#5a8770"
+      "backgroundBase": "#5a8770",
+      "pose": null
     },
     "family": [
       "father: Leon the Wise",
@@ -3223,7 +3313,8 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#8d4d43",
-      "backgroundBase": "#5a876b"
+      "backgroundBase": "#5a876b",
+      "pose": null
     },
     "family": [
       "father: Lysander of Thebes",
@@ -3259,7 +3350,8 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#9b805e",
-      "backgroundBase": "#5a8771"
+      "backgroundBase": "#5a8771",
+      "pose": null
     },
     "family": [
       "father: Publius Julius",
@@ -3299,7 +3391,8 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#9b805e",
-      "backgroundBase": "#5a8770"
+      "backgroundBase": "#5a8770",
+      "pose": "humble"
     },
     "family": [
       "father: Volusus Licinius",
@@ -3333,7 +3426,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "robe",
       "garmentColor": "#cfa044",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Ieuan son of Gwylim",
@@ -3370,7 +3464,8 @@
       "headwearColor": "#ddd3ba",
       "garmentKind": "tunic",
       "garmentColor": "#3a4f6d",
-      "backgroundBase": "#6a4a57"
+      "backgroundBase": "#6a4a57",
+      "pose": null
     },
     "family": [
       "father: Hugo Olofsson",
@@ -3406,7 +3501,8 @@
       "headwearColor": "#d8cdb6",
       "garmentKind": "work_shirt",
       "garmentColor": "#566370",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": "proud"
     },
     "family": [
       "father: Godric son of Aethelred",
@@ -3440,7 +3536,8 @@
       "headwearColor": "#c8a63e",
       "garmentKind": "robe",
       "garmentColor": "#1f1f22",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Mustapha Zidane",
@@ -3478,7 +3575,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "doublet",
       "garmentColor": "#5c3f63",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Rui Teixeira",
@@ -3513,7 +3611,8 @@
       "headwearColor": "#c8a63e",
       "garmentKind": "work_shirt",
       "garmentColor": "#8e2436",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": "proud"
     },
     "family": [
       "father: Joaquín Rodriguez",
@@ -3545,7 +3644,8 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "gown",
       "garmentColor": "#cfa044",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": "lame"
     },
     "family": [
       "father: Artem Pavlov",
@@ -3579,7 +3679,8 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "doublet",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Frederik Janssen",
@@ -3617,7 +3718,8 @@
       "headwearColor": "#c8a63e",
       "garmentKind": "work_shirt",
       "garmentColor": "#8e2436",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Boris Orlov",
@@ -3650,7 +3752,8 @@
       "headwearColor": "#cfa044",
       "garmentKind": "gown",
       "garmentColor": "#cfa044",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": "lame"
     },
     "family": [
       "father: Paul Bonnet",
@@ -3688,7 +3791,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "doublet",
       "garmentColor": "#5c3f63",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Frederik de Wit",
@@ -3722,7 +3826,8 @@
       "headwearColor": "#c8a63e",
       "garmentKind": "work_shirt",
       "garmentColor": "#8e2436",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Martinus de Wit",
@@ -3755,7 +3860,8 @@
       "headwearColor": "#a98a63",
       "garmentKind": "gown",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": null
     },
     "family": [
       "father: Wilhelm Hoffmann",
@@ -3793,7 +3899,8 @@
       "headwearColor": "#8a5a3b",
       "garmentKind": "jacket",
       "garmentColor": "#2e3f5c",
-      "backgroundBase": "#6a4a56"
+      "backgroundBase": "#6a4a56",
+      "pose": null
     },
     "family": [
       "father: Peter Schmitz",
@@ -3828,7 +3935,8 @@
       "headwearColor": "#41608c",
       "garmentKind": "jacket",
       "garmentColor": "#1f1f22",
-      "backgroundBase": "#4a5a6a"
+      "backgroundBase": "#4a5a6a",
+      "pose": "brave"
     },
     "family": [
       "father: Florian Braun",
@@ -3858,7 +3966,8 @@
       "headwearColor": "#5a6b3b",
       "garmentKind": "gown",
       "garmentColor": "#6f5237",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Narmer",
@@ -3897,7 +4006,8 @@
       "headwearColor": "#5a6b3b",
       "garmentKind": "robe",
       "garmentColor": "#3a4f6d",
-      "backgroundBase": "#725c65"
+      "backgroundBase": "#725c65",
+      "pose": null
     },
     "family": [
       "father: Fayum",
@@ -3935,7 +4045,8 @@
       "headwearColor": "#a98a63",
       "garmentKind": "tunic",
       "garmentColor": "#d8cdb6",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": "brave"
     },
     "family": [
       "father: Ka the One-Eyed",
@@ -3970,7 +4081,8 @@
       "headwearColor": "#c8a63e",
       "garmentKind": "gown",
       "garmentColor": "#d8cdb6",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Nabu",
@@ -4008,7 +4120,8 @@
       "headwearColor": "#2e3f5c",
       "garmentKind": "robe",
       "garmentColor": "#6f5237",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Ashurbanipal",
@@ -4045,7 +4158,8 @@
       "headwearColor": "#2e3f5c",
       "garmentKind": "tunic",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": "brave"
     },
     "family": [
       "father: Enkidu",
@@ -4080,7 +4194,8 @@
       "headwearColor": "#5a6b3b",
       "garmentKind": "gown",
       "garmentColor": "#6f5237",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Cyrus",
@@ -4119,7 +4234,8 @@
       "headwearColor": "#2e3f5c",
       "garmentKind": "robe",
       "garmentColor": "#6f5237",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Cyrus",
@@ -4156,7 +4272,8 @@
       "headwearColor": "#c8a63e",
       "garmentKind": "tunic",
       "garmentColor": "#3a4f6d",
-      "backgroundBase": "#725c65"
+      "backgroundBase": "#725c65",
+      "pose": "brave"
     },
     "family": [
       "father: Phraates son of Pacorus",
@@ -4191,7 +4308,8 @@
       "headwearColor": "#cfa044",
       "garmentKind": "gown",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Enlil son of Marduk",
@@ -4225,7 +4343,8 @@
       "headwearColor": "#c8a63e",
       "garmentKind": "robe",
       "garmentColor": "#e5ddd0",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Yosef son of Yitzhak",
@@ -4262,7 +4381,8 @@
       "headwearColor": "#5a6b3b",
       "garmentKind": "tunic",
       "garmentColor": "#3a4f6d",
-      "backgroundBase": "#725c65"
+      "backgroundBase": "#725c65",
+      "pose": null
     },
     "family": [
       "father: Yosef",
@@ -4297,7 +4417,8 @@
       "headwearColor": "#c8a63e",
       "garmentKind": "gown",
       "garmentColor": "#d8cdb6",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Mohand son of Mohand",
@@ -4333,7 +4454,8 @@
       "headwearColor": "#2e3f5c",
       "garmentKind": "robe",
       "garmentColor": "#6f5237",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Massinissa son of Aurassi",
@@ -4373,7 +4495,8 @@
       "headwearColor": "#2e3f5c",
       "garmentKind": "tunic",
       "garmentColor": "#6f5237",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": "coward"
     },
     "family": [
       "father: Amyas son of Azegzaw",
@@ -4408,7 +4531,8 @@
       "headwearColor": null,
       "garmentKind": "gown",
       "garmentColor": "#23304a",
-      "backgroundBase": "#725c63"
+      "backgroundBase": "#725c63",
+      "pose": null
     },
     "family": [
       "father: Bashar ibn Bashar",
@@ -4444,7 +4568,8 @@
       "headwearColor": "#9c5230",
       "garmentKind": "robe",
       "garmentColor": "#23304a",
-      "backgroundBase": "#725c63"
+      "backgroundBase": "#725c63",
+      "pose": null
     },
     "family": [
       "father: Marwan Qasemi",
@@ -4481,7 +4606,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "robe",
       "garmentColor": "#1f1f22",
-      "backgroundBase": "#5c6272"
+      "backgroundBase": "#5c6272",
+      "pose": null
     },
     "family": [
       "father: Yusuf ibn Marwan",
@@ -4515,7 +4641,8 @@
       "headwearColor": "#3a4f6d",
       "garmentKind": "work_shirt",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#6c929d"
+      "backgroundBase": "#6c929d",
+      "pose": null
     },
     "family": [
       "father: Jabari",
@@ -4555,7 +4682,8 @@
       "headwearColor": null,
       "garmentKind": "bare",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#445e66"
+      "backgroundBase": "#445e66",
+      "pose": null
     },
     "family": [
       "father: Chike",
@@ -4595,7 +4723,8 @@
       "headwearColor": null,
       "garmentKind": "bare",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#52727b"
+      "backgroundBase": "#52727b",
+      "pose": null
     },
     "family": [
       "father: Aman",
@@ -4630,7 +4759,8 @@
       "headwearColor": "#3a4f6d",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
-      "backgroundBase": "#6c929d"
+      "backgroundBase": "#6c929d",
+      "pose": null
     },
     "family": [
       "father: Jabari",
@@ -4668,7 +4798,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#ddd3ba",
-      "backgroundBase": "#445e66"
+      "backgroundBase": "#445e66",
+      "pose": null
     },
     "family": [
       "father: Chike",
@@ -4705,7 +4836,8 @@
       "headwearColor": null,
       "garmentKind": "bare",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#52727b"
+      "backgroundBase": "#52727b",
+      "pose": null
     },
     "family": [
       "father: Aman",
@@ -4735,7 +4867,8 @@
       "headwearColor": "#cfa044",
       "garmentKind": "tunic",
       "garmentColor": "#566370",
-      "backgroundBase": "#6c929d"
+      "backgroundBase": "#6c929d",
+      "pose": null
     },
     "family": [
       "father: Hailu",
@@ -4772,7 +4905,8 @@
       "headwearColor": "#d8cdb6",
       "garmentKind": "robe",
       "garmentColor": "#566370",
-      "backgroundBase": "#445e66"
+      "backgroundBase": "#445e66",
+      "pose": "consumptive"
     },
     "family": [
       "father: Haile Tsegaye",
@@ -4807,7 +4941,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "tunic",
       "garmentColor": "#3a4f6d",
-      "backgroundBase": "#9a677c"
+      "backgroundBase": "#9a677c",
+      "pose": null
     },
     "family": [
       "father: Kebede",
@@ -4837,7 +4972,8 @@
       "headwearColor": "#cfa044",
       "garmentKind": "tunic",
       "garmentColor": "#4f3c2b",
-      "backgroundBase": "#6c929d"
+      "backgroundBase": "#6c929d",
+      "pose": "lame"
     },
     "family": [
       "father: Folarin Akinyemi",
@@ -4874,7 +5010,8 @@
       "headwearColor": "#ddd3ba",
       "garmentKind": "tunic",
       "garmentColor": "#5b4229",
-      "backgroundBase": "#445e66"
+      "backgroundBase": "#445e66",
+      "pose": null
     },
     "family": [
       "father: Idris Akinwale",
@@ -4911,7 +5048,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "tunic",
       "garmentColor": "#4f3c2b",
-      "backgroundBase": "#52727b"
+      "backgroundBase": "#52727b",
+      "pose": null
     },
     "family": [
       "father: Adebayo",
@@ -4947,7 +5085,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "tunic",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#6c929d"
+      "backgroundBase": "#6c929d",
+      "pose": "lame"
     },
     "family": [
       "father: Sbu",
@@ -4983,7 +5122,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "jacket",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#6c929d"
+      "backgroundBase": "#6c929d",
+      "pose": null
     },
     "family": [
       "father: Adriaan Kok",
@@ -5020,7 +5160,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
       "garmentColor": "#1f1f22",
-      "backgroundBase": "#52727b"
+      "backgroundBase": "#52727b",
+      "pose": null
     },
     "family": [
       "father: Fanele Zwane",
@@ -5053,7 +5194,8 @@
       "headwearColor": "#b49a78",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#76545f",
-      "backgroundBase": "#557f6e"
+      "backgroundBase": "#557f6e",
+      "pose": null
     },
     "family": [
       "father: Siddhartha Bajpai",
@@ -5093,7 +5235,8 @@
       "headwearColor": null,
       "garmentKind": "robe",
       "garmentColor": "#83705a",
-      "backgroundBase": "#6c9d83"
+      "backgroundBase": "#6c9d83",
+      "pose": null
     },
     "family": [
       "father: Naresh Awasthi",
@@ -5132,7 +5275,8 @@
       "headwearColor": "#a68a68",
       "garmentKind": "robe",
       "garmentColor": "#83705a",
-      "backgroundBase": "#436557"
+      "backgroundBase": "#436557",
+      "pose": null
     },
     "family": [
       "father: Mukesh son of Pramod",
@@ -5172,7 +5316,8 @@
       "headwearColor": "#cfa044",
       "garmentKind": "gown",
       "garmentColor": "#cfa044",
-      "backgroundBase": "#4e4a6e"
+      "backgroundBase": "#4e4a6e",
+      "pose": "lame"
     },
     "family": [
       "father: Hitesh",
@@ -5212,7 +5357,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "tunic",
       "garmentColor": "#4f3c2b",
-      "backgroundBase": "#726c9d"
+      "backgroundBase": "#726c9d",
+      "pose": null
     },
     "family": [
       "father: Naresh Awasthi",
@@ -5252,7 +5398,8 @@
       "headwearColor": "#ddd3ba",
       "garmentKind": "tunic",
       "garmentColor": "#3a4f6d",
-      "backgroundBase": "#654351"
+      "backgroundBase": "#654351",
+      "pose": "humble"
     },
     "family": [
       "father: Mukesh son of Pramod",
@@ -5292,7 +5439,8 @@
       "headwearColor": "#3a4f6d",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#4e4a6e"
+      "backgroundBase": "#4e4a6e",
+      "pose": null
     },
     "family": [
       "father: *Val",
@@ -5332,7 +5480,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#ddd3ba",
-      "backgroundBase": "#726c9d"
+      "backgroundBase": "#726c9d",
+      "pose": null
     },
     "family": [
       "father: *Nel",
@@ -5369,7 +5518,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#484365"
+      "backgroundBase": "#484365",
+      "pose": null
     },
     "family": [
       "father: *Muni",
@@ -5408,7 +5558,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "robe",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": null
     },
     "family": [
       "father: Two Death",
@@ -5447,7 +5598,8 @@
       "headwearColor": "#c2a463",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#3a4f6d",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": null
     },
     "family": [
       "father: Broken Howler Monkey",
@@ -5484,7 +5636,8 @@
       "headwearColor": "#c2a463",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#3a4f6d",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": "proud"
     },
     "family": [
       "father: Crocodile of the Dry Bed",
@@ -5521,7 +5674,8 @@
       "headwearColor": "#5b4229",
       "garmentKind": "robe",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": null
     },
     "family": [
       "father: Lone Elk",
@@ -5556,7 +5710,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a33327",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": null
     },
     "family": [
       "father: Many Red Sky",
@@ -5593,7 +5748,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a33327",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": null
     },
     "family": [
       "father: Wapi",
@@ -5630,7 +5786,8 @@
       "headwearColor": "#ddd8cf",
       "garmentKind": "robe",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": null
     },
     "family": [
       "father: Iluq",
@@ -5669,7 +5826,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#3a4f6d",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": null
     },
     "family": [
       "father: Char of the High Rocks",
@@ -5705,7 +5863,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#3a4f6d",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": null
     },
     "family": [
       "father: Amarok",
@@ -5741,7 +5900,8 @@
       "headwearColor": "#8d8a80",
       "garmentKind": "robe",
       "garmentColor": "#6b482f",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": null
     },
     "family": [
       "father: Sequoyah",
@@ -5780,7 +5940,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#566370",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": null
     },
     "family": [
       "father: Pomo",
@@ -5819,7 +5980,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#2e3f5c",
-      "backgroundBase": "#4b5a4e"
+      "backgroundBase": "#4b5a4e",
+      "pose": null
     },
     "family": [
       "father: Wiyot",
@@ -5858,7 +6020,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#445a5c"
+      "backgroundBase": "#445a5c",
+      "pose": null
     },
     "family": [
       "father: Swift Black Bear Young",
@@ -5897,7 +6060,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "doublet",
       "garmentColor": "#6f5237",
-      "backgroundBase": "#445a5c"
+      "backgroundBase": "#445a5c",
+      "pose": null
     },
     "family": [
       "father: Whitefish of the Cave O'Brien",
@@ -5933,7 +6097,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#445a5c"
+      "backgroundBase": "#445a5c",
+      "pose": null
     },
     "family": [
       "father: Circling Passenger Pigeon Smith",
@@ -5967,7 +6132,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
       "garmentColor": "#1f1f22",
-      "backgroundBase": "#445a5c"
+      "backgroundBase": "#445a5c",
+      "pose": "lame"
     },
     "family": [
       "father: Samuel Hernandez",
@@ -6003,7 +6169,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "doublet",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#445a5c"
+      "backgroundBase": "#445a5c",
+      "pose": "consumptive"
     },
     "family": [
       "father: Edward Thompson",
@@ -6042,7 +6209,8 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
       "garmentColor": "#6f5237",
-      "backgroundBase": "#445a5c"
+      "backgroundBase": "#445a5c",
+      "pose": null
     },
     "family": [
       "father: William White",
@@ -6076,7 +6244,8 @@
       "headwearColor": "#cfa044",
       "garmentKind": "jacket",
       "garmentColor": "#6f5237",
-      "backgroundBase": "#3d5a48"
+      "backgroundBase": "#3d5a48",
+      "pose": null
     },
     "family": [
       "father: Sayri",
@@ -6114,7 +6283,8 @@
       "headwearColor": "#c8a63e",
       "garmentKind": "jacket",
       "garmentColor": "#5a6b3b",
-      "backgroundBase": "#3d5a48"
+      "backgroundBase": "#3d5a48",
+      "pose": null
     },
     "family": [
       "father: Lloque Inca",
@@ -6148,7 +6318,8 @@
       "headwearColor": "#a98a63",
       "garmentKind": "jacket",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#3d5a48"
+      "backgroundBase": "#3d5a48",
+      "pose": null
     },
     "family": [
       "father: Wayna",
@@ -6182,7 +6353,8 @@
       "headwearColor": "#cfa044",
       "garmentKind": "jacket",
       "garmentColor": "#a8763f",
-      "backgroundBase": "#3d5a48"
+      "backgroundBase": "#3d5a48",
+      "pose": null
     },
     "family": [
       "father: Huascar Cusipaucar",
@@ -6220,7 +6392,8 @@
       "headwearColor": "#c8a63e",
       "garmentKind": "jacket",
       "garmentColor": "#5a6b3b",
-      "backgroundBase": "#3d5a48"
+      "backgroundBase": "#3d5a48",
+      "pose": null
     },
     "family": [
       "father: Lloque Inca",
@@ -6258,7 +6431,8 @@
       "headwearColor": "#c8a63e",
       "garmentKind": "work_shirt",
       "garmentColor": "#ddd3ba",
-      "backgroundBase": "#3d5a48"
+      "backgroundBase": "#3d5a48",
+      "pose": "brave"
     },
     "family": [
       "father: Waman Wankár",
@@ -6292,7 +6466,8 @@
       "headwearColor": "#cfa044",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6f5237",
-      "backgroundBase": "#3d5a48"
+      "backgroundBase": "#3d5a48",
+      "pose": "lame"
     },
     "family": [
       "father: Inti Zapana",
@@ -6331,7 +6506,8 @@
       "headwearColor": "#c2a463",
       "garmentKind": "work_shirt",
       "garmentColor": "#1f1f22",
-      "backgroundBase": "#3d5a48"
+      "backgroundBase": "#3d5a48",
+      "pose": null
     },
     "family": [
       "father: Sumaq Quiso",
@@ -6368,7 +6544,8 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
       "garmentColor": "#1f1f22",
-      "backgroundBase": "#3d5a48"
+      "backgroundBase": "#3d5a48",
+      "pose": null
     },
     "family": [
       "father: Inti Wankár",
@@ -6402,7 +6579,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
-      "backgroundBase": "#7b8e7b"
+      "backgroundBase": "#7b8e7b",
+      "pose": null
     },
     "family": [
       "father: Tomasi",
@@ -6439,7 +6617,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
-      "backgroundBase": "#627262"
+      "backgroundBase": "#627262",
+      "pose": null
     },
     "family": [
       "father: Petero, father of Waisea",
@@ -6476,7 +6655,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
-      "backgroundBase": "#4e5b4e"
+      "backgroundBase": "#4e5b4e",
+      "pose": null
     },
     "family": [
       "father: Mosese",
@@ -6509,7 +6689,8 @@
       "headwearColor": "#cfa044",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#8c6a7a",
-      "backgroundBase": "#6c919d"
+      "backgroundBase": "#6c919d",
+      "pose": null
     },
     "family": [
       "father: Keawe",
@@ -6543,7 +6724,8 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
-      "backgroundBase": "#415a62"
+      "backgroundBase": "#415a62",
+      "pose": null
     },
     "family": [
       "father: Kamal, father of Ulani",
@@ -6577,7 +6759,8 @@
       "headwearColor": "#c0a566",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
-      "backgroundBase": "#415a62"
+      "backgroundBase": "#415a62",
+      "pose": null
     },
     "family": [
       "father: Kanoa, father of Waika",
@@ -6615,7 +6798,8 @@
       "headwearColor": null,
       "garmentKind": "jacket",
       "garmentColor": "#6f5237",
-      "backgroundBase": "#6c919d"
+      "backgroundBase": "#6c919d",
+      "pose": null
     },
     "family": [
       "father: Jannali",
@@ -6655,7 +6839,8 @@
       "headwearColor": null,
       "garmentKind": "bare",
       "garmentColor": "#ddd3ba",
-      "backgroundBase": "#415a62"
+      "backgroundBase": "#415a62",
+      "pose": null
     },
     "family": [
       "father: Warwick the Slow-Speaking",
@@ -6692,7 +6877,8 @@
       "headwearColor": "#9c5230",
       "garmentKind": "bare",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#415a62"
+      "backgroundBase": "#415a62",
+      "pose": null
     },
     "family": [
       "father: Birrani",

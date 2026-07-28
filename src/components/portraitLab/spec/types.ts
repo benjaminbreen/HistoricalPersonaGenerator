@@ -239,6 +239,47 @@ export interface DentalWork {
   color: string;
 }
 
+/**
+ * How this persona is holding themselves.
+ *
+ * A portrait set where every sitter faces the lens square-on at the same size
+ * reads as generated no matter how well each individual face is drawn — it is
+ * the one thing a hundred portraits have in common that a hundred real ones
+ * never would. But pose used as decoration is worse than none: a random tilt
+ * says nothing, and the viewer learns to ignore it.
+ *
+ * So pose is a *signal*. The canonical bust is the default and stays the
+ * default for most of the population; a deviation appears only when the persona
+ * is an outlier on some axis the app already tracks, and the same deviation
+ * always means the same thing. Someone who reads fifty of these should be able
+ * to learn the vocabulary without being told it: the big ones fill the frame,
+ * the wary ones draw back, the ones bent by their work are bent in the picture.
+ *
+ * `reason` carries the attribute that claimed the pose, for the audit — the
+ * point of the whole exercise is that most portraits have no reason at all, and
+ * that is measurable rather than hoped for.
+ */
+export interface PoseSpec {
+  /** Head scale about the chin. 1 is canonical; the frame does not move. */
+  scale: number;
+  /** Whole figure up (negative) or down the frame, in pixels. */
+  offsetY: number;
+  /** Chin raised (negative) or tucked (positive), in pixels of feature shift. */
+  chin: number;
+  /** Head roll, in pixels of horizontal shear per row. Positive leans right. */
+  tilt: number;
+  /** Head turned off-axis, in pixels. Positive turns to the viewer's right. */
+  turn: number;
+  /** Shoulder line: one side dropped, in pixels. */
+  shoulderDrop: number;
+  /** Shoulders pulled forward and up — a stoop, or a flinch. 0..1. */
+  hunch: number;
+  /** Shoulders squared and the neck shortened; negative narrows and lengthens. */
+  square: number;
+  /** The attribute this pose came from, or null for the canonical bust. */
+  reason: string | null;
+}
+
 export interface MarkingSpec {
   /**
    * `culturalMarkings.ts` emits more than the portrait vocabulary originally
@@ -373,6 +414,7 @@ export interface PortraitSpec {
    */
   skull: SkullShape;
   dental: DentalWork | null;
+  pose: PoseSpec;
   glasses: { style: 'round' | 'square' | 'oval' | 'half_rim' } | null;
 
   condition: ConditionSpec;

@@ -169,6 +169,11 @@ function snapshot(persona: any): Record<string, unknown> {
       garmentKind: (spec as any).garment?.kind ?? null,
       garmentColor: (spec as any).garment?.colors?.primary ?? null,
       backgroundBase: (spec as any).background?.base ?? null,
+      // Which outlier, if any, claimed this persona's pose. The snapshot holds
+      // no pixels, so this is the only thing standing between a change in the
+      // pose table and nobody noticing that half the population started
+      // leaning.
+      pose: (spec as any).pose?.reason ?? null,
     },
     // One member per relation kind rather than the first four. `family` is
     // ordered parents, siblings, spouse, children, and sibships now average
