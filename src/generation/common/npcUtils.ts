@@ -181,6 +181,36 @@ export function determineReligion(
 }
 
 
+/**
+ * Draw one naming tradition from a region rule, respecting its weights.
+ *
+ * The uniform draw this replaces read a rule's list as "these are equally
+ * likely", so a region whose rule named its own tradition alongside three
+ * colonial ones produced a colonial name three times out of four. See the
+ * `weights` note on REGION_NAME_MAPPING.
+ */
+function pickWeightedNameKey(
+    usable: string[],
+    weights: Record<string, number> | undefined,
+    noise: ValueNoise,
+): string {
+    if (!weights) return usable[Math.floor(noise.random() * usable.length)];
+
+    const weightOf = (key: string) => Math.max(0, weights[key] ?? 1);
+    const total = usable.reduce((sum, key) => sum + weightOf(key), 0);
+    // Every surviving option weighed zero. Fall back to uniform rather than
+    // returning nothing, which would drop the rule and reach the broad-zone
+    // pool — the failure this function exists to prevent.
+    if (total <= 0) return usable[Math.floor(noise.random() * usable.length)];
+
+    let roll = noise.random() * total;
+    for (const key of usable) {
+        roll -= weightOf(key);
+        if (roll <= 0) return key;
+    }
+    return usable[usable.length - 1];
+}
+
 // Enhanced name generation with fallbacks and region/year specificity
 export function generateNpcName(
     gender: Gender,
@@ -268,7 +298,7 @@ export function generateNpcNameDetailed(
                                 nameKeyToUse = resolveNameKey(rule.keys[0], culturalZone, year, region || '');
                                 break;
                             }
-                            nameKeyToUse = usable[Math.floor(noise.random() * usable.length)];
+                            nameKeyToUse = pickWeightedNameKey(usable, rule.weights, noise);
                             break;
                         }
                     }
@@ -304,7 +334,7 @@ export function generateNpcNameDetailed(
                                 nameKeyToUse = resolveNameKey(rule.keys[0], culturalZone, year, region || '');
                                 break;
                             }
-                            nameKeyToUse = usable[Math.floor(noise.random() * usable.length)];
+                            nameKeyToUse = pickWeightedNameKey(usable, rule.weights, noise);
                             break;
                         }
                     }

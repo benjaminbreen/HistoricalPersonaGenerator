@@ -1162,10 +1162,25 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
     }
 };
 
+/**
+ * Which naming traditions a region could draw on, in a given window of years.
+ *
+ * `keys` were drawn from uniformly, which is a claim about demography nobody
+ * made on purpose: listing the region's own tradition beside the language of
+ * whoever administered it gave a colonial name to half the personas born there.
+ * A quarter of everyone in 1940s Tanganyika came out German. `weights` says how
+ * common each tradition actually was among ordinary people — not among the
+ * people who wrote the records — and anything unlisted weighs 1.
+ *
+ * Weights are relative within a rule, so a settler minority is written as the
+ * small number it was: `{ SWAHILI_INTERIOR: 30, ENGLISH: 1 }` is a region where
+ * roughly one persona in thirty-one is a settler, which is still generous.
+ */
 export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
     before?: number;
     after?: number;
     keys: string[];
+    weights?: Record<string, number>;
 }>>> = {
    "EUROPEAN": {
     // British Isles
@@ -1229,21 +1244,21 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         { before: -100, keys: ['PREHISTORIC_PROTO_CELTIC', 'CELTIC_ANCIENT'] }, // Celtic heartland (e.g., Boii)
         { after: -100, before: 500, keys: ['PREHISTORIC_PROTO_GERMANIC', 'GERMAN'] }, // Germanic migrations
         { after: 500, before: 900, keys: ['SLAVIC_MEDIEVAL', 'FRANKISH_CAROLINGIAN', 'BOHEMIAN'] }, // Slavic migrations
-        { after: 900, before: 1918, keys: ['GERMAN', 'BOHEMIAN', 'HUNGARIAN', 'POLISH'] },
+        { after: 900, before: 1918, keys: ['GERMAN', 'BOHEMIAN', 'HUNGARIAN_MEDIEVAL', 'HUNGARIAN_MODERN', 'POLISH_MEDIEVAL', 'POLISH_MODERN'] },
         { after: 1918, keys: ['CZECH_MODERN', 'SLOVAK_MODERN', 'HUNGARIAN_MODERN', 'GERMAN'] }
     ],
     "Carpathian Foothills": [
         { before: -100, keys: ['PREHISTORIC_PROTO_CELTIC'] },
         { after: -100, before: 500, keys: ['PREHISTORIC_PROTO_GERMANIC', 'GERMAN'] },
         { after: 500, before: 900, keys: ['SLAVIC_MEDIEVAL'] },
-        { after: 900, before: 1526, keys: ['HUNGARIAN', 'POLISH', 'TRANSYLVANIAN'] },
-        { after: 1526, before: 1918, keys: ['HUNGARIAN', 'POLISH', 'TRANSYLVANIAN', 'ROMANIAN', 'GERMAN'] },
+        { after: 900, before: 1526, keys: ['HUNGARIAN_MEDIEVAL', 'HUNGARIAN_MODERN', 'POLISH_MEDIEVAL', 'POLISH_MODERN', 'TRANSYLVANIAN'] },
+        { after: 1526, before: 1918, keys: ['HUNGARIAN_MEDIEVAL', 'HUNGARIAN_MODERN', 'POLISH_MEDIEVAL', 'POLISH_MODERN', 'TRANSYLVANIAN', 'ROMANIAN', 'GERMAN'] },
         { after: 1918, keys: ['HUNGARIAN_MODERN', 'POLISH_MODERN', 'SLOVAK_MODERN', 'ROMANIAN'] }
     ],
      "Transylvania": [
         { before: 100, keys: ['CELTIC_ANCIENT'] }, // Dacian/Celtic period
         { after: 100, before: 900, keys: ['SLAVIC_MEDIEVAL', 'GERMAN'] },
-        { after: 900, before: 1918, keys: ['TRANSYLVANIAN', 'HUNGARIAN', 'ROMANIAN', 'GERMAN'] },
+        { after: 900, before: 1918, keys: ['TRANSYLVANIAN', 'HUNGARIAN_MEDIEVAL', 'HUNGARIAN_MODERN', 'ROMANIAN', 'GERMAN'] },
         { after: 1918, keys: ['ROMANIAN', 'HUNGARIAN_MODERN', 'GERMAN'] }
     ],
     // Balkans
@@ -1261,8 +1276,8 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         { before: -100, keys: ['PREHISTORIC_PROTO_CELTIC'] }, // Illyrian/Celtic tribes
         { after: -100, before: 395, keys: ['ANCIENT_ROMAN'] },
         { after: 395, before: 925, keys: ['SLAVIC_MEDIEVAL', 'BYZANTINE'] },
-        { after: 925, before: 1527, keys: ['CROATIAN', 'HUNGARIAN'] },
-        { after: 1527, before: 1918, keys: ['CROATIAN', 'HUNGARIAN', 'GERMAN'] },
+        { after: 925, before: 1527, keys: ['CROATIAN', 'HUNGARIAN_MEDIEVAL', 'HUNGARIAN_MODERN'] },
+        { after: 1527, before: 1918, keys: ['CROATIAN', 'HUNGARIAN_MEDIEVAL', 'HUNGARIAN_MODERN', 'GERMAN'] },
         { after: 1918, before: 1991, keys: ['YUGOSLAV'] },
         { after: 1991, keys: ['CROATIAN'] }
     ],
@@ -1324,7 +1339,7 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         { before: 870, keys: ['SCANDINAVIAN'] }, // Norse settlement of Iceland
         { after: 870, before: 1100, keys: ['SCANDINAVIAN', 'ICELANDIC'] }, // Viking Age
         { after: 1100, before: 1400, keys: ['ICELANDIC', 'SCANDINAVIAN'] }, // Medieval Iceland
-        { after: 1400, keys: ['ICELANDIC', 'SCANDINAVIAN', 'IRISH', 'PORTUGUESE'] } // Later periods with diverse settlements
+        { after: 1400, keys: ['ICELANDIC', 'SCANDINAVIAN', 'CELTIC_IRISH', 'PORTUGUESE'] } // Later periods with diverse settlements
     ],
     // Eastern Europe
     "Eastern Europe": [
@@ -1333,7 +1348,7 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         { after: 500, before: 882, keys: ['SLAVIC_MEDIEVAL', 'SCANDINAVIAN', 'BYZANTINE'] },
         { after: 882, before: 1240, keys: ['RUSSIAN', 'SLAVIC_MEDIEVAL'] }, // Kievan Rus'
         { after: 1240, before: 1480, keys: ['RUSSIAN', 'MONGOLIAN_TRADITIONAL', 'TURKIC_STEPPE'] }, // Mongol Yoke
-        { after: 1480, before: 1721, keys: ['RUSSIAN', 'POLISH'] },
+        { after: 1480, before: 1721, keys: ['RUSSIAN', 'POLISH_MEDIEVAL', 'POLISH_MODERN'] },
         { after: 1721, keys: ['RUSSIAN', 'RUSSIAN', 'RUSSIAN', 'POLISH_MODERN', 'JEWISH_ASHKENAZI'] }
     ],
     // Low Countries
@@ -1390,7 +1405,7 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
     "Baltic Sea": [
         { before: -400, keys: ['PREHISTORIC_PROTO_INDO_EUROPEAN'] },
         { after: -400, before: 200, keys: ['PREHISTORIC_PROTO_GERMANIC'] },
-        { after: 200, keys: ['SCANDINAVIAN', 'GERMAN', 'POLISH', 'RUSSIAN'] }
+        { after: 200, keys: ['SCANDINAVIAN', 'GERMAN', 'POLISH_MEDIEVAL', 'POLISH_MODERN', 'RUSSIAN'] }
     ],
     "Aegean Sea": [
         { before: -1200, keys: ['PREHISTORIC_PROTO_INDO_EUROPEAN'] },
@@ -1456,13 +1471,13 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         ],
         // North
         "Arctic and Subarctic": [
-            { keys: ['INUIT', 'SUBARCTIC_NATIVE'] }
+            { keys: ['INUIT', 'NORTH_AMERICAN_ALGONQUIAN'] }
         ],
         "Canada": [
             { keys: ['ALGONQUIAN', 'IROQUOIS_HAUDENOSAUNEE', 'INUIT'] }
         ],
         "Hudson Bay": [
-            { keys: ['INUIT', 'SUBARCTIC_NATIVE'] }
+            { keys: ['INUIT', 'NORTH_AMERICAN_ALGONQUIAN'] }
         ],
         "Northwest Territory": [
             { keys: ['GREAT_BASIN_NATIVE', 'PLAINS_NATIVE'] }
@@ -1544,7 +1559,7 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         "Northeast Woodlands": [
             { before: 1600, keys: ['IROQUOIS_HAUDENOSAUNEE', 'ALGONQUIAN'] },
             { after: 1600, before: 1783, keys: ['NORTH_AMERICAN_COLONIAL', 'FRENCH', 'DUTCH', 'IROQUOIS_HAUDENOSAUNEE'] },
-            { after: 1783, keys: ['ENGLISH', 'FRENCH', 'GERMAN', 'CELTIC_IRISH', 'ITALIAN', 'POLISH'] }
+            { after: 1783, keys: ['ENGLISH', 'FRENCH', 'GERMAN', 'CELTIC_IRISH', 'ITALIAN', 'POLISH_MEDIEVAL', 'POLISH_MODERN'] }
         ],
         "Northeastern Seaboard": [
             { before: 1600, keys: ['IROQUOIS_HAUDENOSAUNEE', 'ALGONQUIAN'] },
@@ -1787,57 +1802,156 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1800, keys: ['ARMENIAN', 'GEORGIAN', 'RUSSIAN'] }
         ]
     },
+    /**
+     * Sub-Saharan Africa. Every rule here previously named an African tradition
+     * first and then two or three European ones, and the draw was uniform, so
+     * the colonial pool won most of the time — and the African key it was
+     * competing against ('YORUBA', 'SWAHILI') was not a key in CHARACTER_NAMES
+     * at all, so it lost every draw it did win. The real sets are era-qualified
+     * (YORUBA_TRADITIONAL / YORUBA_MODERN, SWAHILI_COASTAL / SWAHILI_INTERIOR);
+     * both eras are listed and the era gate in filterNameKeys drops whichever
+     * cannot exist yet.
+     *
+     * The weights are deliberately not equal. Settler populations in colonial
+     * Africa were small — a few per cent of the whole even at their height, and
+     * far less outside the towns — so a settler name is written as the rare
+     * outcome it was rather than as a coin flip.
+     */
     "SUB_SAHARAN_AFRICAN": {
         "Sahel": [
             { before: 800, keys: ['WEST_AFRICAN_SAHEL'] },
-            { after: 800, before: 1900, keys: ['WEST_AFRICAN_SAHEL', 'MAGHREBI'] },
-            { after: 1900, keys: ['WEST_AFRICAN_SAHEL', 'FRENCH'] }
+            {
+                after: 800, before: 1900, keys: ['WEST_AFRICAN_SAHEL', 'HAUSA', 'MAGHREBI'],
+                // Maghrebi names come with the trans-Saharan trade and the
+                // towns it fed, not with the countryside.
+                weights: { WEST_AFRICAN_SAHEL: 12, HAUSA: 8, MAGHREBI: 2 },
+            },
+            {
+                after: 1900, keys: ['WEST_AFRICAN_SAHEL', 'HAUSA', 'FRENCH'],
+                weights: { WEST_AFRICAN_SAHEL: 12, HAUSA: 8, FRENCH: 1 },
+            }
         ],
         "Upper Guinea": [
-            { before: 1500, keys: ['YORUBA', 'WEST_AFRICAN_SAHEL'] },
-            { after: 1500, before: 1960, keys: ['YORUBA', 'PORTUGUESE', 'ENGLISH', 'FRENCH'] },
-            { after: 1960, keys: ['YORUBA', 'WEST_AFRICAN_SAHEL'] }
+            { before: 1500, keys: ['YORUBA_TRADITIONAL', 'WEST_AFRICAN_SAHEL'] },
+            {
+                // AFRICAN_AMERICAN covers the Americo-Liberian and Sierra
+                // Leone Krio settlements — freed and recaptured people landed
+                // on this coast from the 1790s, carrying anglophone names. A
+                // real population, and a small one against the interior.
+                after: 1500, before: 1960,
+                keys: ['YORUBA_TRADITIONAL', 'YORUBA_MODERN', 'WEST_AFRICAN_SAHEL', 'AFRICAN_AMERICAN', 'PORTUGUESE', 'ENGLISH', 'FRENCH'],
+                weights: { YORUBA_TRADITIONAL: 10, YORUBA_MODERN: 6, WEST_AFRICAN_SAHEL: 8, AFRICAN_AMERICAN: 2, PORTUGUESE: 1, ENGLISH: 1, FRENCH: 1 },
+            },
+            {
+                after: 1960, keys: ['YORUBA_MODERN', 'YORUBA_TRADITIONAL', 'WEST_AFRICAN_SAHEL'],
+                weights: { YORUBA_MODERN: 10, YORUBA_TRADITIONAL: 6, WEST_AFRICAN_SAHEL: 8 },
+            }
         ],
         "Lower Guinea and Congo Basin": [
-            { before: 1480, keys: ['YORUBA', 'SUB_SAHARAN_AFRICAN'] },
-            { after: 1480, before: 1960, keys: ['YORUBA', 'PORTUGUESE', 'FRENCH', 'DUTCH'] },
-            { after: 1960, keys: ['YORUBA', 'FRENCH'] }
+            { before: 1480, keys: ['YORUBA_TRADITIONAL', 'SUB_SAHARAN_AFRICAN'] },
+            {
+                after: 1480, before: 1960,
+                keys: ['YORUBA_TRADITIONAL', 'YORUBA_MODERN', 'SUB_SAHARAN_AFRICAN', 'PORTUGUESE', 'FRENCH', 'DUTCH'],
+                weights: { YORUBA_TRADITIONAL: 10, YORUBA_MODERN: 5, SUB_SAHARAN_AFRICAN: 8, PORTUGUESE: 1, FRENCH: 1, DUTCH: 1 },
+            },
+            {
+                after: 1960, keys: ['YORUBA_MODERN', 'SUB_SAHARAN_AFRICAN', 'FRENCH'],
+                weights: { YORUBA_MODERN: 10, SUB_SAHARAN_AFRICAN: 8, FRENCH: 1 },
+            }
         ],
         "Horn of Africa": [
             { before: 1270, keys: ['ETHIOPIAN_HIGHLAND'] },
-            { after: 1270, before: 1936, keys: ['AMHARIC', 'SWAHILI'] },
-            { after: 1936, keys: ['AMHARIC', 'ITALIAN'] }
+            {
+                after: 1270, before: 1936, keys: ['AMHARIC', 'SOMALI', 'ETHIOPIAN_HIGHLAND'],
+                weights: { AMHARIC: 10, SOMALI: 8, ETHIOPIAN_HIGHLAND: 4 },
+            },
+            {
+                // Italian rule over Ethiopia lasted five years and never
+                // displaced local naming; Somali and Amharic names are the
+                // ordinary case throughout.
+                after: 1936, keys: ['AMHARIC', 'SOMALI', 'ITALIAN'],
+                weights: { AMHARIC: 12, SOMALI: 10, ITALIAN: 1 },
+            }
         ],
         "East African Rift": [
             { before: 700, keys: ['PREHISTORIC_AFRICAN'] },
-            { after: 700, before: 1880, keys: ['SWAHILI', 'ARABIAN_HEJAZ', 'RWANDA_BURUNDI'] },
-            { after: 1880, keys: ['SWAHILI', 'ENGLISH', 'GERMAN', 'HINDI'] }
+            {
+                after: 700, before: 1880, keys: ['SWAHILI_INTERIOR', 'RWANDA_BURUNDI', 'ARABIAN_HEJAZ'],
+                // Arab names reach the interior along the caravan roads, and
+                // then only near them.
+                weights: { SWAHILI_INTERIOR: 12, RWANDA_BURUNDI: 8, ARABIAN_HEJAZ: 2 },
+            },
+            {
+                // Tanganyika, Kenya and Uganda under British and (to 1919)
+                // German administration. The European settler population of
+                // Kenya peaked around sixty thousand against some six million
+                // Africans; the South Asian population was larger but still a
+                // small minority, and concentrated in the towns and the trades.
+                after: 1880, keys: ['SWAHILI_INTERIOR', 'RWANDA_BURUNDI', 'HINDI', 'ENGLISH'],
+                weights: { SWAHILI_INTERIOR: 30, RWANDA_BURUNDI: 12, HINDI: 2, ENGLISH: 1 },
+            }
         ],
         "Swahili Coast": [
-            { before: 700, keys: ['SWAHILI'] },
-            { after: 700, before: 1500, keys: ['SWAHILI', 'ARABIAN_HEJAZ', 'PERSIAN_FARSI'] },
-            { after: 1500, before: 1960, keys: ['SWAHILI', 'PORTUGUESE', 'ARABIAN_HEJAZ', 'ENGLISH'] },
-            { after: 1960, keys: ['SWAHILI'] }
+            { before: 700, keys: ['SWAHILI_COASTAL'] },
+            {
+                after: 700, before: 1500, keys: ['SWAHILI_COASTAL', 'ARABIAN_HEJAZ', 'PERSIAN_FARSI'],
+                // The Shirazi and Omani presence on the coast is real and old,
+                // and the Swahili towns were Muslim, but the population was
+                // overwhelmingly local.
+                weights: { SWAHILI_COASTAL: 14, ARABIAN_HEJAZ: 4, PERSIAN_FARSI: 2 },
+            },
+            {
+                after: 1500, before: 1960, keys: ['SWAHILI_COASTAL', 'ARABIAN_HEJAZ', 'PORTUGUESE', 'ENGLISH'],
+                weights: { SWAHILI_COASTAL: 20, ARABIAN_HEJAZ: 5, PORTUGUESE: 1, ENGLISH: 1 },
+            },
+            { after: 1960, keys: ['SWAHILI_COASTAL'] }
         ],
         "Southern Africa": [
             { before: 1652, keys: ['ZULU', 'SUB_SAHARAN_AFRICAN'] },
-            { after: 1652, before: 1994, keys: ['ZULU', 'DUTCH', 'ENGLISH', 'GERMAN'] },
-            { after: 1994, keys: ['ZULU', 'ENGLISH', 'DUTCH'] }
+            {
+                // The one region where a settler pool genuinely deserves real
+                // weight: by 1900 whites were about a fifth of the population
+                // of what became South Africa. Still not half, which is what a
+                // uniform draw over four keys was giving them.
+                after: 1652, before: 1994, keys: ['ZULU', 'SUB_SAHARAN_AFRICAN', 'DUTCH', 'ENGLISH'],
+                weights: { ZULU: 10, SUB_SAHARAN_AFRICAN: 6, DUTCH: 2, ENGLISH: 2 },
+            },
+            {
+                after: 1994, keys: ['ZULU', 'SUB_SAHARAN_AFRICAN', 'ENGLISH', 'DUTCH'],
+                weights: { ZULU: 10, SUB_SAHARAN_AFRICAN: 6, ENGLISH: 2, DUTCH: 1 },
+            }
         ],
         "Central Africa": [
             { before: 1870, keys: ['SUB_SAHARAN_AFRICAN', 'RWANDA_BURUNDI'] },
-            { after: 1870, keys: ['FRENCH', 'PORTUGUESE', 'RWANDA_BURUNDI'] }
+            {
+                // Belgian and French Central Africa had among the smallest
+                // settler populations on the continent. The old rule listed
+                // no African set at all for this window, so every persona in
+                // the Congo basin after 1870 came out French or Portuguese.
+                after: 1870, keys: ['SUB_SAHARAN_AFRICAN', 'RWANDA_BURUNDI', 'FRENCH', 'PORTUGUESE'],
+                weights: { SUB_SAHARAN_AFRICAN: 16, RWANDA_BURUNDI: 10, FRENCH: 1, PORTUGUESE: 1 },
+            }
         ],
         "West African Forests": [
-            { before: 1600, keys: ['YORUBA'] },
-            { after: 1600, before: 1960, keys: ['YORUBA', 'ENGLISH', 'AFRICAN_AMERICAN'] },
-            { after: 1960, keys: ['YORUBA'] }
+            { before: 1600, keys: ['YORUBA_TRADITIONAL', 'AKAN'] },
+            {
+                after: 1600, before: 1960,
+                keys: ['YORUBA_TRADITIONAL', 'YORUBA_MODERN', 'AKAN', 'ENGLISH'],
+                weights: { YORUBA_TRADITIONAL: 10, YORUBA_MODERN: 5, AKAN: 10, ENGLISH: 1 },
+            },
+            {
+                after: 1960, keys: ['YORUBA_MODERN', 'YORUBA_TRADITIONAL', 'AKAN'],
+                weights: { YORUBA_MODERN: 10, YORUBA_TRADITIONAL: 5, AKAN: 10 },
+            }
         ],
         "Madagascar and Islands": [
-            { before: 1000, keys: ['MALAGASY_SAKALAVA', 'SWAHILI'] },
+            { before: 1000, keys: ['MALAGASY_SAKALAVA', 'SWAHILI_COASTAL'] },
             { after: 1000, before: 1817, keys: ['MALAGASY_SAKALAVA', 'MALAGASY_BETSILEO'] },
             { after: 1817, before: 1897, keys: ['MALAGASY_MERINA', 'MALAGASY_BETSILEO', 'MALAGASY_SAKALAVA'] },
-            { after: 1897, keys: ['MALAGASY_MERINA', 'FRENCH'] }
+            {
+                after: 1897, keys: ['MALAGASY_MERINA', 'MALAGASY_BETSILEO', 'MALAGASY_SAKALAVA', 'FRENCH'],
+                weights: { MALAGASY_MERINA: 10, MALAGASY_BETSILEO: 6, MALAGASY_SAKALAVA: 6, FRENCH: 1 },
+            }
         ]
     },
     /**
@@ -1881,7 +1995,7 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         "Gangetic Plain": [
             { before: 1206, keys: ['SANSKRIT_CLASSICAL', 'HINDI'] },
             { after: 1206, before: 1857, keys: ['HINDI', 'PERSIAN_FARSI', 'RAJPUT'] },
-            { after: 1857, keys: ['HINDI', 'BENGALI', 'ENGLISH'] }
+            { after: 1857, keys: ['HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'ENGLISH'] }
         ],
         "Deccan Plateau": [
             { before: 1347, keys: ['DRAVIDIAN', 'TAMIL'] },
@@ -1889,11 +2003,11 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1857, keys: ['TAMIL', 'DRAVIDIAN', 'HINDI', 'ENGLISH'] }
         ],
         "Himalayas and Northeast": [
-            { keys: ['SANSKRIT_CLASSICAL', 'HINDI', 'BENGALI', 'CHINESE_MANDARIN'] }
+            { keys: ['SANSKRIT_CLASSICAL', 'HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'CHINESE_MANDARIN'] }
         ],
         "Central India": [
             { before: 1200, keys: ['SANSKRIT_CLASSICAL', 'DRAVIDIAN'] },
-            { after: 1200, keys: ['HINDI', 'RAJPUT', 'BENGALI'] }
+            { after: 1200, keys: ['HINDI', 'RAJPUT', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN'] }
         ],
         "Sri Lanka": [
             { before: 1505, keys: ['DRAVIDIAN', 'TAMIL', 'SANSKRIT_CLASSICAL'] },
@@ -2031,7 +2145,7 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1949, keys: ['INDONESIAN', 'MALAY'] }
         ],
         "Major Seas and Oceans": [
-            { before: 1500, keys: ['POLYNESIAN', 'MELANESIAN', 'SWAHILI', 'ARABIAN_HEJAZ', 'CHINESE_CANTONESE'] },
+            { before: 1500, keys: ['POLYNESIAN', 'MELANESIAN', 'SWAHILI_COASTAL', 'ARABIAN_HEJAZ', 'CHINESE_CANTONESE'] },
             { after: 1500, keys: ['ENGLISH', 'SPANISH_CASTILIAN', 'PORTUGUESE', 'DUTCH', 'FRENCH', 'POLYNESIAN'] }
         ]
     }
@@ -2101,23 +2215,23 @@ const PERIOD_NAME_MAPPING: Record<string, Record<string, string[]>> = {
     },
     'SOUTH_ASIAN': {
         'antiquity': ['SANSKRIT_CLASSICAL', 'TAMIL'],
-        'early_medieval': ['SANSKRIT_CLASSICAL', 'TAMIL', 'BENGALI'],
-        'high_medieval': ['SANSKRIT_CLASSICAL', 'TAMIL', 'BENGALI', 'HINDI'],
-        'late_medieval': ['PERSIAN_FARSI', 'SANSKRIT_CLASSICAL', 'TAMIL', 'BENGALI'],
-        'renaissance': ['PERSIAN_FARSI', 'SANSKRIT_CLASSICAL', 'HINDI', 'BENGALI'],
-        'early_modern': ['PERSIAN_FARSI', 'HINDI', 'BENGALI', 'TAMIL'],
-        'industrial': ['ENGLISH', 'HINDI', 'BENGALI', 'TAMIL'],
-        'modern': ['HINDI', 'BENGALI', 'TAMIL', 'PUNJABI']
+        'early_medieval': ['SANSKRIT_CLASSICAL', 'TAMIL', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN'],
+        'high_medieval': ['SANSKRIT_CLASSICAL', 'TAMIL', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'HINDI'],
+        'late_medieval': ['PERSIAN_FARSI', 'SANSKRIT_CLASSICAL', 'TAMIL', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN'],
+        'renaissance': ['PERSIAN_FARSI', 'SANSKRIT_CLASSICAL', 'HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN'],
+        'early_modern': ['PERSIAN_FARSI', 'HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'TAMIL'],
+        'industrial': ['ENGLISH', 'HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'TAMIL'],
+        'modern': ['HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'TAMIL', 'PUNJABI']
     },
     'SUB_SAHARAN_AFRICAN': {
         'antiquity': ['NUBIAN', 'ETHIOPIAN_HIGHLAND'],
-        'early_medieval': ['NUBIAN', 'ETHIOPIAN_HIGHLAND', 'SWAHILI'],
-        'high_medieval': ['WEST_AFRICAN_SAHEL', 'SWAHILI', 'ETHIOPIAN_HIGHLAND'],
-        'late_medieval': ['WEST_AFRICAN_SAHEL', 'SWAHILI', 'ETHIOPIAN_HIGHLAND'],
-        'renaissance': ['WEST_AFRICAN_SAHEL', 'SWAHILI', 'ETHIOPIAN_HIGHLAND'],
-        'early_modern': ['WEST_AFRICAN_SAHEL', 'SWAHILI', 'ETHIOPIAN_HIGHLAND'],
-        'industrial': ['WEST_AFRICAN_SAHEL', 'SWAHILI', 'ETHIOPIAN_HIGHLAND'],
-        'modern': ['WEST_AFRICAN_SAHEL', 'SWAHILI', 'ETHIOPIAN_HIGHLAND', 'ENGLISH', 'FRENCH']
+        'early_medieval': ['NUBIAN', 'ETHIOPIAN_HIGHLAND', 'SWAHILI_COASTAL'],
+        'high_medieval': ['WEST_AFRICAN_SAHEL', 'SWAHILI_COASTAL', 'ETHIOPIAN_HIGHLAND'],
+        'late_medieval': ['WEST_AFRICAN_SAHEL', 'SWAHILI_COASTAL', 'ETHIOPIAN_HIGHLAND'],
+        'renaissance': ['WEST_AFRICAN_SAHEL', 'SWAHILI_COASTAL', 'ETHIOPIAN_HIGHLAND'],
+        'early_modern': ['WEST_AFRICAN_SAHEL', 'SWAHILI_COASTAL', 'ETHIOPIAN_HIGHLAND'],
+        'industrial': ['WEST_AFRICAN_SAHEL', 'SWAHILI_COASTAL', 'ETHIOPIAN_HIGHLAND'],
+        'modern': ['WEST_AFRICAN_SAHEL', 'SWAHILI_COASTAL', 'ETHIOPIAN_HIGHLAND', 'ENGLISH', 'FRENCH']
     },
     'NORTH_AMERICAN_PRE_COLUMBIAN': {
         'antiquity': ['AZTEC', 'INUIT'],
@@ -2310,12 +2424,25 @@ export function getEraSpecificFallback(zone: CulturalZone, year: number): Fallba
             if (year < 500) {
                 return { groups: ['HINDI', 'TAMIL'] }; // Ancient Sanskrit-derived
             } else {
-                return { groups: ['HINDI', 'BENGALI', 'TAMIL', 'PUNJABI'] };
+                return { groups: ['HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'TAMIL', 'PUNJABI'] };
             }
 
         case 'SUB_SAHARAN_AFRICAN':
-            // Regional diversity - use broad African names
-            return { groups: ['YORUBA', 'SWAHILI', 'AMHARIC', 'ZULU', 'SUB_SAHARAN_AFRICAN'] };
+            // Every other zone here branches on the year; this one did not, and
+            // two of the five sets it named ('YORUBA', 'SWAHILI') were not keys
+            // in CHARACTER_NAMES, so two draws in five fell through again to
+            // the last-resort pool.
+            if (year < -1000) return { groups: ['PREHISTORIC_AFRICAN'] };
+            if (year < 800) {
+                return { groups: ['PREHISTORIC_AFRICAN', 'ETHIOPIAN_HIGHLAND', 'SUB_SAHARAN_AFRICAN'] };
+            }
+            return {
+                groups: [
+                    'YORUBA_TRADITIONAL', 'AKAN', 'HAUSA', 'WEST_AFRICAN_SAHEL',
+                    'SWAHILI_COASTAL', 'SWAHILI_INTERIOR', 'AMHARIC', 'SOMALI',
+                    'ZULU', 'RWANDA_BURUNDI', 'SUB_SAHARAN_AFRICAN',
+                ],
+            };
 
         case 'OCEANIA':
             // Polynesian names work broadly for the region
@@ -2467,7 +2594,7 @@ export function getCulturalGroupsByZone(zone: CulturalZone): string[] {
     switch (zone) {
         case 'EUROPEAN':
             return groups.filter(g => 
-                ['ANCIENT_GREEK', 'ANCIENT_ROMAN', 'FRANKISH_MEROVINGIAN', 'FRANKISH_CAROLINGIAN', 'SAXON_EARLY_MEDIEVAL', 'NORMAN_FRENCH', 'FRENCH_MEDIEVAL', 'ENGLISH_ANGLO_SAXON', 'ENGLISH_MEDIEVAL', 'ENGLISH', 'SPANISH_CASTILIAN', 'PORTUGUESE', 'ITALIAN', 'FRENCH', 'GERMAN', 'RUSSIAN', 'GREEK', 'CELTIC_IRISH', 'WELSH', 'SCOTTISH', 'DUTCH', 'SCANDINAVIAN', 'BYZANTINE', 'SLAVIC_MEDIEVAL', 'HUNGARIAN', 'POLISH', 'CZECH', 'ROMANIAN', 'BULGARIAN', 'SERBIAN', 'CROATIAN', 'ICELANDIC', 'BOHEMIAN', 'ARMENIAN', 'GEORGIAN', 'EUROPEAN'].includes(g)
+                ['ANCIENT_GREEK', 'ANCIENT_ROMAN', 'FRANKISH_MEROVINGIAN', 'FRANKISH_CAROLINGIAN', 'SAXON_EARLY_MEDIEVAL', 'NORMAN_FRENCH', 'FRENCH_MEDIEVAL', 'ENGLISH_ANGLO_SAXON', 'ENGLISH_MEDIEVAL', 'ENGLISH', 'SPANISH_CASTILIAN', 'PORTUGUESE', 'ITALIAN', 'FRENCH', 'GERMAN', 'RUSSIAN', 'GREEK', 'CELTIC_IRISH', 'WELSH', 'SCOTTISH', 'DUTCH', 'SCANDINAVIAN', 'BYZANTINE', 'SLAVIC_MEDIEVAL', 'HUNGARIAN_MEDIEVAL', 'HUNGARIAN_MODERN', 'POLISH_MEDIEVAL', 'POLISH_MODERN', 'CZECH', 'ROMANIAN', 'BULGARIAN', 'SERBIAN', 'CROATIAN', 'ICELANDIC', 'BOHEMIAN', 'ARMENIAN', 'GEORGIAN', 'EUROPEAN'].includes(g)
             );
         case 'EAST_ASIAN':
             return groups.filter(g => 
@@ -2479,7 +2606,7 @@ export function getCulturalGroupsByZone(zone: CulturalZone): string[] {
             );
         case 'SOUTH_ASIAN':
             return groups.filter(g => 
-                ['HINDI', 'BENGALI', 'TAMIL', 'PUNJABI', 'SOUTH_ASIAN'].includes(g)
+                ['HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'TAMIL', 'PUNJABI', 'SOUTH_ASIAN'].includes(g)
             );
         case 'SOUTHEAST_ASIAN':
             return groups.filter(g =>
@@ -2488,7 +2615,7 @@ export function getCulturalGroupsByZone(zone: CulturalZone): string[] {
             );
         case 'SUB_SAHARAN_AFRICAN':
             return groups.filter(g => 
-                ['YORUBA', 'SWAHILI', 'AMHARIC', 'ZULU', 'MALAGASY_MERINA', 'MALAGASY_BETSILEO', 'MALAGASY_SAKALAVA', 'SUB_SAHARAN_AFRICAN'].includes(g)
+                ['YORUBA_TRADITIONAL', 'YORUBA_MODERN', 'SWAHILI_COASTAL', 'SWAHILI_INTERIOR', 'AKAN', 'HAUSA', 'SOMALI', 'WEST_AFRICAN_SAHEL', 'RWANDA_BURUNDI', 'AMHARIC', 'ZULU', 'MALAGASY_MERINA', 'MALAGASY_BETSILEO', 'MALAGASY_SAKALAVA', 'SUB_SAHARAN_AFRICAN'].includes(g)
             );
         case 'OCEANIA':
             return groups.filter(g => 

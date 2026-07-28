@@ -1602,6 +1602,13 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         partialCharacter.lifeEvents.push({ year: birthYear + 22, event: `Left home to seek fortune.`});
     }
 
+    // Which tradition the name was drawn from. Nothing downstream could see
+    // this, so no check could tell a persona named from the region's own
+    // tradition apart from one named out of the settler pool listed beside it —
+    // and the audit that counts that rate needs to know.
+    const resolvedNameKey = generatedName.nameKey || contextualNameKey || detectNameListKey(name);
+    (partialCharacter as any).nameKey = resolvedNameKey;
+
     // Generate comprehensive family
     // CRITICAL: Pass birthYear explicitly to maintain temporal consistency for family navigation
     generateProceduralFamily(
@@ -1616,7 +1623,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         // The set the persona's own name came from. Re-detecting it from the
         // finished string picked the wrong list often enough to give an
         // Aboriginal persona French or Scottish parents.
-        generatedName.nameKey || contextualNameKey || detectNameListKey(name),
+        resolvedNameKey,
         fathersGivenName,
         inheritedFamilyName
     );

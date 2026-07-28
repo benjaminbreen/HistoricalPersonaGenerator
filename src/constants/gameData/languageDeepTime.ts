@@ -71,7 +71,11 @@ export const ATTRIBUTION_WINDOWS: AttributionWindow[] = [
   // =========================================================================
   {
     id: 'eu-basque-refuge',
-    yearRange: [-10000, 1500],
+    // Ended at 1500, and a place-scoped window outranks the attested table, so
+    // a Basque speaker in 1480 — a century after the language is first written
+    // down — was told they spoke a hypothetical Vasconic. Once Basque is
+    // attested, the table should answer.
+    yearRange: [-10000, 1000],
     zones: ['EUROPEAN'],
     places: /\b(basque|pyren|navarre|vasconia|gascony|aquitain)\b/,
     hypotheses: [

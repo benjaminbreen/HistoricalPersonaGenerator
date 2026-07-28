@@ -25,7 +25,7 @@ import {
   type LanguageHypothesis,
 } from '../constants/gameData/languageDeepTime';
 import { getSources, type ScholarlySource } from '../constants/gameData/scholarlySources';
-import { languageIsPlausible } from './languagePlausibilityService';
+import { languageIsPlausible, hasPlaceRule } from './languagePlausibilityService';
 
 export interface LanguageAttributionInput {
   culturalZone: CulturalZone;
@@ -143,6 +143,7 @@ export function regionAffinity(lang: LanguageData, region?: string, location?: s
 /** The best same-zone, in-period entry whose declared regions include this place. */
 function findAttestedByRegion(
   input: LanguageAttributionInput,
+  key?: string,
 ): LanguageData | undefined {
   const { culturalZone: zone, year, region, location } = input;
   const candidates = Object.values(LANGUAGES).filter(lang =>
@@ -155,7 +156,15 @@ function findAttestedByRegion(
     if (recon !== 0) return recon;
     return (a.period[1] - a.period[0]) - (b.period[1] - b.period[0]);
   });
-  return candidates[0];
+  // Among entries that are equally good by those two tests there is nothing to
+  // choose, and always taking the first gave a whole region one language. Vary
+  // within the tied leaders only, so the ranking above still decides.
+  if (!key) return candidates[0];
+  const best = candidates[0];
+  const tied = candidates.filter(lang =>
+    !!lang.isReconstructed === !!best.isReconstructed
+    && (lang.period[1] - lang.period[0]) === (best.period[1] - best.period[0]));
+  return tied[Math.floor(hashUnit(key, 0) * tied.length)] ?? best;
 }
 
 export function attestedEntryIsValid(
@@ -260,6 +269,7 @@ export function attributeLanguage(input: LanguageAttributionInput): LanguageAttr
   if (placeWindow) return fromWindow(placeWindow, key, seed);
 
   // 2. The attested table, with its own declared constraints enforced.
+  const attestedTrace: { basis?: 'name' | 'profession' | 'regional-mapping' | 'zone-scan' } = {};
   const attested = getLanguageForCharacter(
     input.culturalZone,
     input.year,
@@ -267,14 +277,37 @@ export function attributeLanguage(input: LanguageAttributionInput): LanguageAttr
     input.location,
     input.characterName,
     input.profession,
+    // Vary the draw per persona, and reject implausible candidates while the
+    // mapping still has alternatives to offer. Checking only afterwards meant a
+    // region whose front-runner failed the place test — Swahili anywhere inland
+    // of the coast — produced no attested answer at all and fell through to a
+    // language-family label.
+    `${key}|${seed}`,
+    languageId => languageIsPlausible(languageId, {
+      year: input.year,
+      region: input.region,
+      location: input.location,
+      religion: input.religion,
+      profession: input.profession,
+    }),
+    attestedTrace,
   );
 
   if (attested && attestedEntryIsValid(attested, input.culturalZone, input.year, input)) {
-    // Zone and period are satisfied, but the selector is only zone-accurate.
-    // Prefer an entry whose declared regions actually cover this place.
-    const better = regionAffinity(attested, input.region, input.location)
-      ? attested
-      : (findAttestedByRegion(input) ?? attested);
+    // Zone and period are satisfied, but the selector used to be only
+    // zone-accurate, so an entry whose declared regions cover this place was
+    // preferred over it. That override now does more harm than good: the
+    // selector is given the place gate directly (above), so anything it returns
+    // with an explicit rule has been positively placed here — while the search
+    // that replaced it ranks by whichever attested window is narrowest, which
+    // is not an argument about geography at all. It was promoting Ndebele, a
+    // language of western Zimbabwe with a tight 1830 start, over Sotho-Tswana
+    // for personas on the highveld.
+    const placed = attestedTrace.basis === 'regional-mapping'
+      || attestedTrace.basis === 'name'
+      || hasPlaceRule(attested.id)
+      || regionAffinity(attested, input.region, input.location);
+    const better = placed ? attested : (findAttestedByRegion(input, `${key}|${seed}`) ?? attested);
     return asAttestedAttribution(better);
   }
 
@@ -283,7 +316,7 @@ export function attributeLanguage(input: LanguageAttributionInput): LanguageAttr
   //     answer — it is evidence the selector missed. Ask the table directly
   //     before falling through to deep time, or a 1952 Anatolian ends up with
   //     a label built for the Neolithic.
-  const byRegion = findAttestedByRegion(input);
+  const byRegion = findAttestedByRegion(input, `${key}|${seed}`);
   if (byRegion) return asAttestedAttribution(byRegion);
 
   // 3. and 4. Zone window, then the backstop. Every zone has a backstop across

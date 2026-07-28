@@ -43,6 +43,10 @@ export const LANGUAGE_FAMILIES = {
   SINO_TIBETAN: 'Sino-Tibetan',
   AFRO_ASIATIC: 'Afro-Asiatic',
   NIGER_CONGO: 'Niger-Congo',
+  // Referenced by four entries before it was ever defined here, so their
+  // `family` read `undefined` and no grouping or display that keys on family
+  // could see them.
+  NILO_SAHARAN: 'Nilo-Saharan',
   AUSTRONESIAN: 'Austronesian',
   DRAVIDIAN: 'Dravidian',
   TURKIC: 'Turkic',
@@ -50,6 +54,8 @@ export const LANGUAGE_FAMILIES = {
   URALIC: 'Uralic',
   ALGONQUIAN: 'Algonquian',
   SIOUAN_CATAWBAN: 'Siouan-Catawban',
+  /** Referenced but undefined, like NILO_SAHARAN above. */
+  SIOUAN: 'Siouan',
   IROQUOIAN: 'Iroquoian',
   UTO_AZTECAN: 'Uto-Aztecan',
   MAYAN: 'Mayan',
@@ -338,7 +344,13 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Sermo Vulgaris',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [200, 800],
+    // Ended at 800, while its successors here begin at 842 (Old French) and
+    // 1200 (Italian) — so the ninth to twelfth centuries in Italy had no
+    // vernacular in the table at all and personas there were told they spoke
+    // "an Indo-European language of the region". Nothing happened in 800 to
+    // end it: the speech of that period is precisely what this entry names,
+    // and the successors are literary standards that emerge from it gradually.
+    period: [200, 1200],
     regions: ['Western Roman Empire', 'Gaul', 'Hispania', 'Italy', 'Dacia', 'North Africa'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['LATIN'],
@@ -705,7 +717,11 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'प्राकृत',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: ['Brahmi', 'Kharosthi', 'Devanagari'],
-    period: [-500, 1000],
+    // Ended at 1000 while Hindi begins at 1100, leaving the eleventh century
+    // with no North Indian vernacular at all. The late Prakrit or Apabhramsha
+    // stage is exactly that century's speech, and the modern languages emerge
+    // out of it rather than replacing it on a date.
+    period: [-500, 1150],
     regions: ['North India', 'Central India', 'Deccan', 'Western India'],
     culturalZones: ['SOUTH_ASIAN' as CulturalZone],
     predecessors: ['SANSKRIT'],
@@ -1228,7 +1244,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     isReconstructed: true,
     period: [-5000, -1000],
     regions: ['Australia', 'Central Desert', 'Eastern Coast'],
-    culturalZones: ['OCEANIAN' as CulturalZone],
+    culturalZones: ['OCEANIA' as CulturalZone],
     successors: ['WARLPIRI', 'ARRERNTE', 'KAURNA'],
     description: 'Reconstructed ancestral language of most Australian Aboriginal groups.',
     llmPrompt: 'This is a reconstructed language. Generate plausible speech using the common features of the Pama-Nyungan family. The grammar should be agglutinative and suffixing, with an ergative-absolutive case system. Word order is typically very free due to the case marking. The vocabulary should be concrete and deeply connected to the natural landscape.',
@@ -1259,7 +1275,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     isReconstructed: true,
     period: [-1500, 500],
     regions: ['Polynesia', 'Pacific Islands'],
-    culturalZones: ['OCEANIAN' as CulturalZone],
+    culturalZones: ['OCEANIA' as CulturalZone],
     predecessors: ['PROTO_AUSTRONESIAN'],
     successors: ['HAWAIIAN', 'MAORI', 'TAHITIAN', 'SAMOAN', 'TONGAN', 'FIJIAN'],
     description: 'Reconstructed ancestral language of Polynesian peoples.',
@@ -3881,7 +3897,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     family: LANGUAGE_FAMILIES.PAMA_NYUNGAN,
     period: [1000, 2030],
     regions: ['Central Australia', 'Northern Territory'],
-    culturalZones: ['OCEANIAN' as CulturalZone],
+    culturalZones: ['OCEANIA' as CulturalZone],
     predecessors: ['PROTO_PAMA_NYUNGAN'],
     greetings: {
       hello: 'Yuwayi',
@@ -3899,7 +3915,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     family: LANGUAGE_FAMILIES.AUSTRALIAN_NON_PAMA_NYUNGAN,
     period: [1000, 2030],
     regions: ['Arnhem Land', 'Northern Australia'],
-    culturalZones: ['OCEANIAN' as CulturalZone],
+    culturalZones: ['OCEANIA' as CulturalZone],
     greetings: {
       hello: 'Manymak',
       goodbye: 'Yaka',
@@ -3983,7 +3999,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     script: 'Latin',
     period: [500, 2030],
     regions: ['Hawaii', 'Hawaiian Islands'],
-    culturalZones: ['OCEANIAN' as CulturalZone],
+    culturalZones: ['OCEANIA' as CulturalZone],
     predecessors: ['PROTO_POLYNESIAN'],
     greetings: {
       hello: 'Aloha',
@@ -4003,7 +4019,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     script: 'Latin',
     period: [1200, 2030],
     regions: ['New Zealand', 'Aotearoa'],
-    culturalZones: ['OCEANIAN' as CulturalZone],
+    culturalZones: ['OCEANIA' as CulturalZone],
     predecessors: ['PROTO_POLYNESIAN'],
     greetings: {
       hello: 'Kia ora',
@@ -4022,7 +4038,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     script: 'Latin',
     period: [500, 2030],
     regions: ['Samoa', 'American Samoa', 'Samoa Archipelago'],
-    culturalZones: ['OCEANIAN' as CulturalZone],
+    culturalZones: ['OCEANIA' as CulturalZone],
     predecessors: ['PROTO_POLYNESIAN'],
     greetings: {
       hello: 'Talofa',
@@ -4041,7 +4057,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     script: 'Latin',
     period: [500, 2030],
     regions: ['Tahiti', 'Society Islands', 'French Polynesia'],
-    culturalZones: ['OCEANIAN' as CulturalZone],
+    culturalZones: ['OCEANIA' as CulturalZone],
     predecessors: ['PROTO_POLYNESIAN'],
     greetings: {
       hello: 'Ia ora na',
@@ -4060,7 +4076,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     script: 'Latin',
     period: [500, 2030],
     regions: ['Tonga', 'Tonga Ridge', 'Tongatapu'],
-    culturalZones: ['OCEANIAN' as CulturalZone],
+    culturalZones: ['OCEANIA' as CulturalZone],
     predecessors: ['PROTO_POLYNESIAN'],
     greetings: {
       hello: 'Mālō e lelei',
@@ -4079,7 +4095,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     script: 'Latin',
     period: [500, 2030],
     regions: ['Fiji', 'Viti Levu', 'Vanua Levu'],
-    culturalZones: ['OCEANIAN' as CulturalZone],
+    culturalZones: ['OCEANIA' as CulturalZone],
     predecessors: ['PROTO_POLYNESIAN'],
     greetings: {
       hello: 'Bula',
@@ -4169,7 +4185,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     family: LANGUAGE_FAMILIES.PIDGIN,
     period: [1800, 2030],
     regions: ['Papua New Guinea', 'Solomon Islands', 'Vanuatu', 'New Caledonia'],
-    culturalZones: ['OCEANIAN' as CulturalZone],
+    culturalZones: ['OCEANIA' as CulturalZone],
     description: 'English-based pidgin of Melanesia, now creolized',
     greetings: {
       hello: 'Gude',
@@ -4416,6 +4432,667 @@ export const LANGUAGES: Record<string, LanguageData> = {
       thanks: 'Gangans',
     },
     llmPrompt: 'Emulate Nama/Khoekhoe. This language has the most complex click consonant system (ǃ ǀ ǁ ǂ). It is a tonal language with grammatical gender. Use SOV word order.',
+  },
+
+  // ===========================================================================
+  // The African interior
+  //
+  // The table above covers West Africa, the Horn and the far south, and had
+  // nothing at all between them: no language of the Rift, the Great Lakes, the
+  // Congo basin or the highveld. A persona born anywhere in that band could
+  // only be given a coastal or West African language, and the plausibility gate
+  // correctly refused it, so the resolver fell through to a family label and
+  // reported that a Kenyan farmer in 1997 spoke "a Niger-Congo language of the
+  // region". These are the vernaculars that band actually speaks.
+  //
+  // Start years are when the language is recognisable as itself in that place,
+  // not when its family arrived. They are conservative; Bantu speech reached
+  // most of these regions many centuries earlier as something ancestral to what
+  // is listed here.
+  // ===========================================================================
+
+  GIKUYU: {
+    id: 'GIKUYU',
+    name: 'Gikuyu',
+    nativeName: 'Gĩkũyũ',
+    family: LANGUAGE_FAMILIES.NIGER_CONGO,
+    script: 'Latin',
+    period: [1200, 2030],
+    regions: ['Central Kenya', 'Mount Kenya', 'Kikuyu Highlands', 'East African Rift'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Wĩmwega', goodbye: 'Tigwo na wega', yes: 'Ĩĩ', no: 'Aca', thanks: 'Nĩ wega' },
+    llmPrompt: 'Emulate Gikuyu. A Bantu language of the central Kenyan highlands with seven vowels and two tones. Noun classes govern agreement across the sentence. Speech leans on proverb and indirect reference, especially between generations.',
+    historicalContext: 'The language of the agricultural communities of the Mount Kenya highlands, and the one in which much of the Mau Mau war against British settlement was argued and remembered.',
+  },
+
+  LUO: {
+    id: 'LUO',
+    name: 'Luo (Dholuo)',
+    nativeName: 'Dholuo',
+    family: LANGUAGE_FAMILIES.NILO_SAHARAN,
+    script: 'Latin',
+    period: [1500, 2030],
+    regions: ['Lake Victoria', 'Nyanza', 'Western Kenya', 'East African Rift'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Misawa', goodbye: 'Oriti', yes: 'Ee', no: 'Ooyo', thanks: 'Erokamano' },
+    llmPrompt: 'Emulate Dholuo. A Western Nilotic language, unrelated to the Bantu languages around it: no noun classes, but tone carries grammatical work and vowels divide by tongue-root position. Lake and cattle vocabulary is rich and specific.',
+    historicalContext: 'Carried south from the Sudanese Nile by migrations from about the fifteenth century, Dholuo is the main Nilotic language of the Lake Victoria basin and an island of Nilo-Saharan speech in Bantu country.',
+  },
+
+  KALENJIN: {
+    id: 'KALENJIN',
+    name: 'Kalenjin',
+    nativeName: 'Kalenjin',
+    family: LANGUAGE_FAMILIES.NILO_SAHARAN,
+    script: 'Latin',
+    period: [1000, 2030],
+    regions: ['Rift Valley', 'Western Highlands', 'Mara', 'East African Rift'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Chamgei', goodbye: 'Sait ne bo', yes: 'Ee', no: 'Achicha', thanks: 'Kongoi' },
+    llmPrompt: 'Emulate Kalenjin. A Southern Nilotic cluster of the western Rift highlands, tonal, with tongue-root vowel harmony. Age-set membership and cattle are the organising vocabulary of social life.',
+    historicalContext: 'The Southern Nilotic languages of the western Rift, spoken by herding and farming communities who have held the highlands since well before the Bantu expansion reached them.',
+  },
+
+  MAASAI: {
+    id: 'MAASAI',
+    name: 'Maasai',
+    nativeName: 'ɔl Maa',
+    family: LANGUAGE_FAMILIES.NILO_SAHARAN,
+    script: 'Latin',
+    period: [1500, 2030],
+    regions: ['Rift Valley', 'Serengeti', 'Mara', 'Kajiado', 'East African Rift'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Supa', goodbye: 'Sere', yes: 'Ee', no: 'Meeta', thanks: 'Ashe' },
+    llmPrompt: 'Emulate Maa. An Eastern Nilotic language with verb-initial word order, grammatical gender, and tone. Cattle vocabulary is enormously detailed — coat pattern, horn shape and descent each have their own words.',
+    historicalContext: 'The language of the pastoralists who dominated the Rift grasslands from the seventeenth century until rinderpest, smallpox and colonial land seizure broke their hold in the 1890s.',
+  },
+
+  KURIA: {
+    id: 'KURIA',
+    name: 'Kuria',
+    nativeName: 'Igikuria',
+    family: LANGUAGE_FAMILIES.NIGER_CONGO,
+    script: 'Latin',
+    period: [1400, 2030],
+    regions: ['Mara', 'Mara River Valley', 'Lake Victoria', 'East African Rift'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Bhwakire', goodbye: 'Ohore', yes: 'Ee', no: 'Hai', thanks: 'Tigite' },
+    llmPrompt: 'Emulate Kuria. A Bantu language of the Mara basin astride the Kenya-Tanzania border, with noun classes and tone, and long-standing borrowing from the Nilotic languages of the surrounding plains.',
+    historicalContext: 'A Bantu farming and cattle-keeping language of the Mara river country, spoken across a border drawn through the middle of its speakers in 1885.',
+  },
+
+  SUKUMA: {
+    id: 'SUKUMA',
+    name: 'Sukuma',
+    nativeName: 'Kɪsukuma',
+    family: LANGUAGE_FAMILIES.NIGER_CONGO,
+    script: 'Latin',
+    period: [1300, 2030],
+    regions: ['Lake Victoria', 'Tanganyika', 'Shinyanga', 'East African Rift'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Mwangaluka', goodbye: 'Tʊlabhonana', yes: 'Ee', no: 'Ndalɪ', thanks: 'Nakʊlumba' },
+    llmPrompt: 'Emulate Sukuma. A Bantu language south of Lake Victoria, tonal, with noun classes. The largest single language community in Tanzania, and a heavy borrower from Swahili.',
+    historicalContext: 'The most widely spoken first language of Tanzania, in the cotton and cattle country south of Lake Victoria.',
+  },
+
+  LUGANDA: {
+    id: 'LUGANDA',
+    name: 'Luganda',
+    nativeName: 'Oluganda',
+    family: LANGUAGE_FAMILIES.NIGER_CONGO,
+    script: 'Latin',
+    period: [1300, 2030],
+    regions: ['Buganda', 'Uganda', 'Lake Victoria', 'Great Lakes'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Ki kati', goodbye: 'Weeraba', yes: 'Yee', no: 'Nedda', thanks: 'Weebale' },
+    llmPrompt: 'Emulate Luganda. A Bantu language with an unusually elaborate noun class system, contrastive consonant length, and tone. Court speech is formal and layered with honorifics.',
+    historicalContext: 'The language of the kingdom of Buganda, whose court was literate in it well before British administration, and which became the working language of southern Uganda.',
+  },
+
+  KINYARWANDA: {
+    id: 'KINYARWANDA',
+    name: 'Kinyarwanda',
+    nativeName: 'Ikinyarwanda',
+    family: LANGUAGE_FAMILIES.NIGER_CONGO,
+    script: 'Latin',
+    period: [1200, 2030],
+    regions: ['Rwanda', 'Burundi', 'Great Lakes', 'East African Rift'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Muraho', goodbye: 'Murabeho', yes: 'Yego', no: 'Oya', thanks: 'Murakoze' },
+    llmPrompt: 'Emulate Kinyarwanda. A Bantu language with sixteen noun classes and complex tone. Nearly everyone in Rwanda speaks it, across every social division, which is unusual in Africa.',
+    historicalContext: 'One of the very few African countries where effectively the whole population shares a first language; the divisions that mattered in Rwanda were never linguistic ones.',
+  },
+
+  KIKONGO: {
+    id: 'KIKONGO',
+    name: 'Kikongo',
+    nativeName: 'Kikóngo',
+    family: LANGUAGE_FAMILIES.NIGER_CONGO,
+    script: 'Latin',
+    period: [1300, 2030],
+    regions: ['Kongo', 'Lower Congo', 'Angola', 'Congo Basin'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Mbote', goodbye: 'Kenda mbote', yes: 'Inga', no: 'Ve', thanks: 'Matondo' },
+    llmPrompt: 'Emulate Kikongo. A Bantu language of the lower Congo with noun classes and tone, and — from four centuries of Portuguese contact — a layer of Portuguese loanwords older than most colonial vocabulary anywhere in Africa.',
+    historicalContext: 'The language of the kingdom of Kongo, written in Latin script from the early sixteenth century, and carried to the Americas by the slave trade in greater numbers than almost any other African language.',
+  },
+
+  LINGALA: {
+    id: 'LINGALA',
+    name: 'Lingala',
+    nativeName: 'Lingála',
+    family: LANGUAGE_FAMILIES.NIGER_CONGO,
+    script: 'Latin',
+    period: [1880, 2030],
+    regions: ['Congo River', 'Kinshasa', 'Brazzaville', 'Congo Basin'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Mbote', goodbye: 'Kende malamu', yes: 'Ee', no: 'Te', thanks: 'Melesi' },
+    llmPrompt: 'Emulate Lingala. A Bantu trade language of the Congo river, simplified in its noun class agreement relative to its parent languages, and full of French borrowings. The register is urban and quick.',
+    historicalContext: 'Formed along the river as a trade language in the late nineteenth century, spread by the colonial army and the riverboats, and made continentally famous by Congolese rumba.',
+  },
+
+  TSHILUBA: {
+    id: 'TSHILUBA',
+    name: 'Tshiluba',
+    nativeName: 'Tshilubà',
+    family: LANGUAGE_FAMILIES.NIGER_CONGO,
+    script: 'Latin',
+    period: [1400, 2030],
+    regions: ['Kasai', 'Congo Basin', 'Central Africa'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Moyo', goodbye: 'Shala bimpe', yes: 'Eyowa', no: 'Tòo', thanks: 'Tuasakidila' },
+    llmPrompt: 'Emulate Tshiluba. A Bantu language of the Kasai with a full noun class system and tone.',
+    historicalContext: 'The language of the Luba states of the Kasai and one of the four national languages of the Congo.',
+  },
+
+  SHONA: {
+    id: 'SHONA',
+    name: 'Shona',
+    nativeName: 'chiShona',
+    family: LANGUAGE_FAMILIES.NIGER_CONGO,
+    script: 'Latin',
+    period: [1100, 2030],
+    regions: ['Zimbabwe', 'Great Zimbabwe', 'Mashonaland', 'Zambezi'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Mhoro', goodbye: 'Chisarai', yes: 'Ehe', no: 'Kwete', thanks: 'Ndatenda' },
+    llmPrompt: 'Emulate Shona. A Bantu language of the Zimbabwean plateau, tonal, with noun classes and a large stock of ideophones — vivid single words standing for a whole manner of moving or sounding.',
+    historicalContext: 'Spoken on the plateau that built Great Zimbabwe and traded gold to the Swahili coast; the stone city was abandoned long before Europeans arrived, though they long refused to believe Africans had built it.',
+  },
+
+  SOTHO_TSWANA: {
+    id: 'SOTHO_TSWANA',
+    name: 'Sotho-Tswana',
+    nativeName: 'Sesotho / Setswana',
+    family: LANGUAGE_FAMILIES.NIGER_CONGO,
+    script: 'Latin',
+    period: [1400, 2030],
+    regions: ['Highveld', 'Lesotho', 'Botswana', 'Transvaal', 'Southern Africa'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Dumela', goodbye: 'Sala hantle', yes: 'Ee', no: 'Tjhe', thanks: 'Kea leboha' },
+    llmPrompt: 'Emulate Sesotho and Setswana, closely related languages of the interior plateau. Bantu noun classes and tone, written with words separated in a way that makes them look shorter than Nguni languages on the page.',
+    historicalContext: 'The languages of the highveld communities that reassembled themselves under Moshoeshoe and others during the upheavals of the early nineteenth century.',
+  },
+
+  NDEBELE: {
+    id: 'NDEBELE',
+    name: 'Ndebele',
+    nativeName: 'isiNdebele',
+    family: LANGUAGE_FAMILIES.NIGER_CONGO,
+    script: 'Latin',
+    period: [1830, 2030],
+    regions: ['Matabeleland', 'Bulawayo', 'Zimbabwe', 'Southern Africa'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Sawubona', goodbye: 'Lisale kuhle', yes: 'Yebo', no: 'Hatshi', thanks: 'Ngiyabonga' },
+    llmPrompt: 'Emulate isiNdebele. An Nguni language close to Zulu, with clicks and noun classes, spoken in western Zimbabwe.',
+    historicalContext: 'Carried north of the Limpopo in the 1830s by Mzilikazi and his followers, moving away from Zulu expansion and then from Boer commandos.',
+  },
+
+  SWAHILI_MODERN: {
+    id: 'SWAHILI_MODERN',
+    name: 'Swahili',
+    nativeName: 'Kiswahili',
+    family: LANGUAGE_FAMILIES.NIGER_CONGO,
+    script: 'Latin',
+    period: [1890, 2050],
+    regions: ['East Africa', 'Kenya', 'Tanzania', 'Uganda', 'Congo Basin', 'East African Rift'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Habari', goodbye: 'Kwa heri', yes: 'Ndiyo', no: 'Hapana', thanks: 'Asante' },
+    llmPrompt: 'Emulate modern standard Swahili. Bantu structure with noun class agreement throughout, Latin script, an older Arabic layer of vocabulary and a newer English one. Register is unmarked and everyday rather than courtly.',
+    historicalContext: 'Standardised on the Zanzibar dialect in the 1920s and adopted as a national language by Tanzania and Kenya after independence; most of its speakers now learn it as a second language and speak something else at home.',
+  },
+
+  // ===========================================================================
+  // Languages the regional mappings already asked for by name
+  //
+  // Each of these was referenced by a region mapping that had no matching entry
+  // in this table, so the reference did nothing and the region fell through to
+  // whatever else its mapping listed — or, where it listed nothing else, to a
+  // language-family label. Modern Mandarin is the starkest of them: the most
+  // widely spoken language in the world, named by the China mapping for
+  // 1900 onward, and absent, which is why personas in modern China were being
+  // told they spoke "a Sinitic language of the region".
+  // ===========================================================================
+
+  MANDARIN: {
+    id: 'MANDARIN',
+    name: 'Mandarin Chinese',
+    nativeName: '普通话 / 國語',
+    family: LANGUAGE_FAMILIES.SINO_TIBETAN,
+    script: ['Chinese'],
+    period: [1900, 2050],
+    regions: ['China', 'North China', 'Beijing', 'Taiwan', 'Manchuria'],
+    culturalZones: ['EAST_ASIAN' as CulturalZone],
+    greetings: { hello: '你好', goodbye: '再见', yes: '是', no: '不是', thanks: '谢谢' },
+    llmPrompt: 'Emulate modern Mandarin. Four tones and a neutral one; no inflection, so grammar is carried by word order and particles. Measure words are obligatory with counted nouns. Register shifts sharply between the written and the spoken.',
+    historicalContext: 'Promoted as a national standard from the 1910s on the basis of the Beijing dialect, and spread through schooling and broadcasting to become the common speech of a country that still holds hundreds of mutually unintelligible varieties.',
+  },
+
+  MALAY: {
+    id: 'MALAY',
+    name: 'Malay',
+    nativeName: 'Bahasa Melayu',
+    family: LANGUAGE_FAMILIES.AUSTRONESIAN,
+    script: ['Jawi', 'Latin'],
+    period: [1400, 2050],
+    regions: ['Malay Peninsula', 'Malacca', 'Sumatra', 'Borneo', 'Riau'],
+    culturalZones: ['SOUTHEAST_ASIAN' as CulturalZone],
+    greetings: { hello: 'Apa khabar', goodbye: 'Selamat tinggal', yes: 'Ya', no: 'Tidak', thanks: 'Terima kasih' },
+    llmPrompt: 'Emulate Malay. Austronesian, uninflected, with meaning built by affixes and reduplication rather than tense marking. Layers of Sanskrit, Arabic and later English borrowing sit on a plain everyday core.',
+    historicalContext: 'The trade language of the archipelago for centuries before any European arrived, written in Arabic script as Jawi, and the ancestor of both modern Malaysian and Indonesian.',
+  },
+
+  MALAYALAM: {
+    id: 'MALAYALAM',
+    name: 'Malayalam',
+    nativeName: 'മലയാളം',
+    family: LANGUAGE_FAMILIES.DRAVIDIAN,
+    script: 'Malayalam',
+    period: [900, 2030],
+    regions: ['Malabar Coast', 'Kerala', 'Cochin', 'Travancore'],
+    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    greetings: { hello: 'Namaskaram', goodbye: 'Poyi varatte', yes: 'Athe', no: 'Alla', thanks: 'Nanni' },
+    llmPrompt: 'Emulate Malayalam. Dravidian, agglutinative, with an unusually heavy Sanskrit vocabulary layer and no person marking on the verb. Word order is verb-final.',
+    historicalContext: 'Separated from Tamil around the ninth century on the far side of the Western Ghats, and shaped by a coast that traded with Rome, Arabia and China in turn.',
+  },
+
+  TELUGU: {
+    id: 'TELUGU',
+    name: 'Telugu',
+    nativeName: 'తెలుగు',
+    family: LANGUAGE_FAMILIES.DRAVIDIAN,
+    script: 'Telugu',
+    period: [600, 2030],
+    regions: ['Andhra', 'Deccan Plateau', 'Coromandel Coast', 'Golconda'],
+    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    greetings: { hello: 'Namaskaram', goodbye: 'Selavu', yes: 'Avunu', no: 'Kaadu', thanks: 'Dhanyavaadalu' },
+    llmPrompt: 'Emulate Telugu. Dravidian, agglutinative, verb-final, with vowel-final words that gave it a reputation for sounding musical. Sanskrit borrowing is heavy in formal registers.',
+    historicalContext: 'The language of the Andhra country and of the Vijayanagara court in its later years; the most spoken Dravidian language after Tamil.',
+  },
+
+  KANNADA: {
+    id: 'KANNADA',
+    name: 'Kannada',
+    nativeName: 'ಕನ್ನಡ',
+    family: LANGUAGE_FAMILIES.DRAVIDIAN,
+    script: 'Kannada',
+    period: [500, 2030],
+    regions: ['Karnataka', 'Deccan Plateau', 'Mysore', 'Vijayanagara'],
+    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    greetings: { hello: 'Namaskara', goodbye: 'Hogi barteeni', yes: 'Houdu', no: 'Illa', thanks: 'Dhanyavada' },
+    llmPrompt: 'Emulate Kannada. Dravidian, agglutinative and verb-final, with inscriptions running back to the fifth century and a strong tradition of devotional verse in plain speech.',
+    historicalContext: 'The language of the western Deccan and of the Vijayanagara heartland, with one of the oldest continuous literary records in India.',
+  },
+
+  SCOTS_GAELIC: {
+    id: 'SCOTS_GAELIC',
+    name: 'Scottish Gaelic',
+    nativeName: 'Gàidhlig',
+    family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
+    script: 'Latin',
+    period: [900, 2030],
+    regions: ['Highlands', 'Hebrides', 'Argyll', 'Scotland'],
+    culturalZones: ['EUROPEAN' as CulturalZone],
+    greetings: { hello: 'Halò', goodbye: 'Mar sin leat', yes: 'Tha', no: 'Chan eil', thanks: 'Tapadh leat' },
+    llmPrompt: 'Emulate Scottish Gaelic. Verb-subject-object order, initial consonant mutation, and no plain word for yes or no — agreement is made by repeating the verb.',
+    historicalContext: 'Carried from Ireland into Argyll and spread across the Highlands, then driven back by the Statutes of Iona, the Clearances and a schooling system that punished children for speaking it.',
+  },
+
+  TUAREG: {
+    id: 'TUAREG',
+    name: 'Tuareg (Tamasheq)',
+    nativeName: 'Tamašeq',
+    family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
+    script: ['Tifinagh', 'Arabic', 'Latin'],
+    period: [-500, 2030],
+    regions: ['Sahara', 'Air Massif', 'Hoggar', 'Timbuktu', 'Sahel'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone, 'MENA' as CulturalZone],
+    greetings: { hello: 'Ma toulid', goodbye: 'Ar assaka', yes: 'Awa', no: 'Kala', thanks: 'Tanemmirt' },
+    llmPrompt: 'Emulate Tamasheq. A Berber language of the central Sahara, verb-initial, written in the Tifinagh consonantal script that women in particular maintained. Camel, water and route vocabulary is precise and extensive.',
+    historicalContext: 'The language of the Saharan caravan confederations, whose Tifinagh script descends from the Libyco-Berber writing of antiquity and is one of the few African scripts of indigenous origin still in use.',
+  },
+
+  AYMARA: {
+    id: 'AYMARA',
+    name: 'Aymara',
+    nativeName: 'Aymar aru',
+    family: LANGUAGE_FAMILIES.ISOLATE,
+    script: 'Latin',
+    period: [400, 2030],
+    regions: ['Altiplano', 'Lake Titicaca', 'Bolivia', 'Andes', 'Southern Highlands'],
+    culturalZones: ['SOUTH_AMERICAN' as CulturalZone],
+    greetings: { hello: 'Kamisaraki', goodbye: 'Jikisiñkama', yes: 'Jisa', no: 'Janiwa', thanks: 'Jallalla' },
+    llmPrompt: 'Emulate Aymara. Agglutinative and suffix-only, with obligatory marking of how the speaker knows what they are asserting. The future is spoken of as behind the speaker and the past as in front, because the past is what can be seen.',
+    historicalContext: 'The language of the high plateau around Titicaca, older there than Quechua and never displaced by it, spoken continuously through Inca and then Spanish rule.',
+  },
+
+  MAPUDUNGUN: {
+    id: 'MAPUDUNGUN',
+    name: 'Mapudungun',
+    nativeName: 'Mapudungun',
+    family: LANGUAGE_FAMILIES.ISOLATE,
+    script: 'Latin',
+    period: [1000, 2030],
+    regions: ['Araucania', 'Southern Chile', 'Patagonia', 'Chile'],
+    culturalZones: ['SOUTH_AMERICAN' as CulturalZone],
+    greetings: { hello: 'Mari mari', goodbye: 'Pewkayal', yes: 'May', no: 'Felelay', thanks: 'Chaltu' },
+    llmPrompt: 'Emulate Mapudungun. Highly agglutinative, with long verbs carrying subject, object, direction and evidence in a single word. Not demonstrably related to any other family.',
+    historicalContext: 'The language of the people who held the country south of the Biobío against Inca and then Spanish expansion for three centuries, until the Chilean campaigns of the 1880s.',
+  },
+
+  HERERO: {
+    id: 'HERERO',
+    name: 'Herero',
+    nativeName: 'Otjiherero',
+    family: LANGUAGE_FAMILIES.NIGER_CONGO,
+    script: 'Latin',
+    period: [1600, 2030],
+    regions: ['Namibia', 'Kaokoveld', 'Damaraland', 'Southern Africa'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Moro', goodbye: 'Kara nawa', yes: 'Ii', no: 'Kako', thanks: 'Okuhepa' },
+    llmPrompt: 'Emulate Otjiherero. A Bantu language of the Namibian cattle country, tonal, with noun classes. Cattle descent and colour terms are elaborate, and genealogy is recited at length.',
+    historicalContext: 'The language of the pastoralists of central Namibia, some sixty-five to eighty per cent of whom were killed in the German extermination campaign of 1904-08.',
+  },
+
+  CHAMORRO: {
+    id: 'CHAMORRO',
+    name: 'Chamorro',
+    nativeName: 'Fino’ CHamoru',
+    family: LANGUAGE_FAMILIES.AUSTRONESIAN,
+    script: 'Latin',
+    period: [-1500, 2030],
+    regions: ['Mariana Islands', 'Guam', 'Saipan', 'Micronesia'],
+    culturalZones: ['OCEANIA' as CulturalZone],
+    greetings: { hello: 'Håfa adai', goodbye: 'Adios', yes: 'Hunggan', no: 'Åhe', thanks: 'Si Yu’os ma’åse’' },
+    llmPrompt: 'Emulate Chamorro. Austronesian, verb-initial, with infixation and a heavy layer of Spanish borrowing — numbers, days and much everyday vocabulary — from three centuries of colonial rule.',
+    historicalContext: 'Spoken in the Marianas for over three thousand years; the population fell by more than ninety per cent under Spanish rule, and the language survived largely through the women who kept it at home.',
+  },
+
+  GREENLANDIC: {
+    id: 'GREENLANDIC',
+    name: 'Greenlandic (Kalaallisut)',
+    nativeName: 'Kalaallisut',
+    family: LANGUAGE_FAMILIES.ISOLATE,
+    script: 'Latin',
+    period: [1200, 2030],
+    regions: ['Greenland', 'Arctic', 'Baffin Bay'],
+    culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
+    greetings: { hello: 'Aluu', goodbye: 'Baaj', yes: 'Aap', no: 'Naamik', thanks: 'Qujanaq' },
+    llmPrompt: 'Emulate Kalaallisut. Polysynthetic: a single word routinely carries what English needs a clause for, built by stacking suffixes. Ice, snow and sea conditions are named with great precision because the distinctions matter.',
+    historicalContext: 'Brought to Greenland by the Thule migration around 1200 and the only Inuit language that is the official language of a country.',
+  },
+
+  ROMANSH: {
+    id: 'ROMANSH',
+    name: 'Romansh',
+    nativeName: 'Rumantsch',
+    family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
+    script: 'Latin',
+    period: [800, 2030],
+    regions: ['Grisons', 'Alps', 'Switzerland', 'Engadine'],
+    culturalZones: ['EUROPEAN' as CulturalZone],
+    greetings: { hello: 'Allegra', goodbye: 'A revair', yes: 'Gea', no: 'Na', thanks: 'Grazia fitg' },
+    llmPrompt: 'Emulate Romansh. A Rhaeto-Romance language descended from the Latin of the Roman province of Raetia, with German loanwords throughout and five written varieties that differ valley by valley.',
+    historicalContext: 'The last survival of the Latin once spoken across the eastern Alps, held in the side valleys of the Grisons as German advanced around it.',
+  },
+
+  TEHUELCHE: {
+    id: 'TEHUELCHE',
+    name: 'Tehuelche',
+    nativeName: 'Aonek’o ’a’ien',
+    family: LANGUAGE_FAMILIES.ISOLATE,
+    script: 'Latin',
+    period: [-1000, 1960],
+    regions: ['Patagonia', 'Santa Cruz', 'Tierra del Fuego', 'Southern Cone'],
+    culturalZones: ['SOUTH_AMERICAN' as CulturalZone],
+    greetings: { hello: 'Gutkzé', goodbye: 'Kenk', yes: 'Ta', no: 'Kaj', thanks: 'Kelénkenk' },
+    llmPrompt: 'Emulate Aonekko ’a’ien. A Chonan language of the Patagonian steppe with an unusually large consonant inventory including ejectives. Vocabulary centres on guanaco hunting and long overland movement.',
+    historicalContext: 'The language of the Patagonian hunters the first European accounts called giants; the last fluent speakers died in the twentieth century.',
+  },
+
+  // ===========================================================================
+  // The Balkans and southern France
+  //
+  // Neither had any entry. There was no South Slavic language in the table at
+  // all — no Serbo-Croatian, Bulgarian, Slovene or Albanian — so personas from
+  // the Dinaric Alps to the Thracian plain were told they spoke "an
+  // Indo-European language of the region", which narrows it to most of Europe.
+  // ===========================================================================
+
+  COMMON_SLAVIC: {
+    id: 'COMMON_SLAVIC',
+    name: 'Common Slavic',
+    nativeName: '*slověnьskъ',
+    family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
+    isReconstructed: true,
+    script: 'Latin',
+    period: [400, 900],
+    regions: ['Central Europe', 'Bohemia', 'Danube', 'Balkans', 'Eastern Europe'],
+    culturalZones: ['EUROPEAN' as CulturalZone],
+    successors: ['OLD_CHURCH_SLAVONIC', 'CZECH', 'POLISH', 'SERBO_CROATIAN', 'BULGARIAN', 'RUSSIAN'],
+    greetings: { hello: 'Sъdravъ', goodbye: 'Sъ bogomь', yes: 'Da', no: 'Ne' },
+    llmPrompt: 'Reconstructed Common Slavic. Open syllables throughout, seven cases, a dual number alongside singular and plural, and verbal aspect already marked. Vocabulary centres on forest, farming and kin.',
+    historicalContext: 'Still close enough to a single language in the seventh century that speakers from the Elbe to the Dnieper could understand one another; the dialects that became Czech, Polish, Serbian and Russian had not yet parted.',
+  },
+
+  SERBO_CROATIAN: {
+    id: 'SERBO_CROATIAN',
+    name: 'Serbo-Croatian',
+    nativeName: 'Srpskohrvatski / Српскохрватски',
+    family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
+    script: ['Latin', 'Cyrillic'],
+    period: [900, 2030],
+    regions: ['Balkans', 'Serbia', 'Croatia', 'Bosnia', 'Dalmatian Coast', 'Dinaric Alps'],
+    culturalZones: ['EUROPEAN' as CulturalZone],
+    greetings: { hello: 'Zdravo', goodbye: 'Doviđenja', yes: 'Da', no: 'Ne', thanks: 'Hvala' },
+    llmPrompt: 'Emulate Serbo-Croatian. Seven cases, pitch accent, and free word order used for emphasis. Written in Latin or Cyrillic depending on where the speaker is from, with the two scripts in one-to-one correspondence.',
+    historicalContext: 'One language by every linguistic measure and four by every political one; the epic decasyllabic songs collected from its singers in the nineteenth century shaped the whole European study of oral poetry.',
+  },
+
+  BULGARIAN: {
+    id: 'BULGARIAN',
+    name: 'Bulgarian',
+    nativeName: 'Български',
+    family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
+    script: 'Cyrillic',
+    period: [900, 2030],
+    regions: ['Bulgaria', 'Thracian Plain', 'Balkans', 'Macedonia', 'Vardar Valley'],
+    culturalZones: ['EUROPEAN' as CulturalZone],
+    greetings: { hello: 'Zdravei', goodbye: 'Dovizhdane', yes: 'Da', no: 'Ne', thanks: 'Blagodarya' },
+    llmPrompt: 'Emulate Bulgarian. Alone among the Slavic languages it has lost its noun cases and gained a definite article suffixed to the word; it also marks whether the speaker witnessed what they report.',
+    historicalContext: 'The first Slavic language committed to writing, and the basis of the Church Slavonic that carried literacy to Russia and Serbia.',
+  },
+
+  ALBANIAN: {
+    id: 'ALBANIAN',
+    name: 'Albanian',
+    nativeName: 'Shqip',
+    family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
+    script: 'Latin',
+    period: [1000, 2030],
+    regions: ['Albania', 'Epirus', 'Kosovo', 'Pindus Mountains', 'Balkans'],
+    culturalZones: ['EUROPEAN' as CulturalZone],
+    greetings: { hello: 'Përshëndetje', goodbye: 'Mirupafshim', yes: 'Po', no: 'Jo', thanks: 'Faleminderit' },
+    llmPrompt: 'Emulate Albanian. Its own branch of Indo-European with no close living relative, heavily layered with Latin, Slavic and Turkish borrowing over a small inherited core.',
+    historicalContext: 'A branch of Indo-European by itself, probably descended from ancient Illyrian, and first attested in writing only in the fifteenth century.',
+  },
+
+  OCCITAN: {
+    id: 'OCCITAN',
+    name: 'Occitan',
+    nativeName: 'Occitan / Lenga d’òc',
+    family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
+    script: 'Latin',
+    period: [900, 2030],
+    regions: ['Languedoc', 'Provence', 'Gascony', 'Pyrenees Foothills', 'Southern France'],
+    culturalZones: ['EUROPEAN' as CulturalZone],
+    greetings: { hello: 'Bonjorn', goodbye: 'Al reveire', yes: 'Òc', no: 'Non', thanks: 'Mercés' },
+    llmPrompt: 'Emulate Occitan. A Romance language of southern France, closer to Catalan than to French, with clear vowels and a literary register formed by the troubadours.',
+    historicalContext: 'The language of the troubadours and the first Romance vernacular with a literature of its own; suppressed as a patois by French schooling from the Revolution onward.',
+  },
+
+  // ===========================================================================
+  // Spoken Arabic
+  //
+  // The table had Classical Arabic and Modern Standard Arabic and nothing else,
+  // and neither is anybody's mother tongue — the first is the language of the
+  // Qur'an and the second a nineteenth-century written standard. So every
+  // persona from Morocco to Oman either "spoke Classical Arabic", which is
+  // roughly the claim that a modern Roman speaks Latin, or fell through the
+  // register check to "an Afroasiatic language of the region". These are the
+  // languages people actually grew up speaking, and they are far enough apart
+  // that a Moroccan and an Iraqi cannot hold a conversation in them.
+  //
+  // Start dates are when Arabic became the everyday speech of the region, which
+  // is generations after the conquest in every case.
+  // ===========================================================================
+
+  TIGRINYA: {
+    id: 'TIGRINYA',
+    name: 'Tigrinya',
+    nativeName: 'ትግርኛ',
+    family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
+    script: 'Ethiopic',
+    period: [1000, 2030],
+    regions: ['Tigray', 'Eritrea', 'Axum', 'Ethiopian Highlands', 'Horn of Africa'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Selam', goodbye: "Dehan kun", yes: 'Ewe', no: 'Aykonen', thanks: "Yekeniyeley" },
+    llmPrompt: 'Emulate Tigrinya. A South Semitic language written in the Ethiopic syllabary, with root-and-pattern morphology and verb-final word order. Closer to Ge\'ez than Amharic is.',
+    historicalContext: 'Spoken in the highlands around Axum, where Ge\'ez was written; the closest living relative of the liturgical language of the Ethiopian church.',
+  },
+
+  SOMALI: {
+    id: 'SOMALI',
+    name: 'Somali',
+    nativeName: 'Af-Soomaali',
+    family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
+    script: ['Latin', 'Arabic'],
+    period: [900, 2030],
+    regions: ['Somalia', 'Ogaden', 'Djibouti', 'Horn of Africa', 'Danakil'],
+    culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Iska warran', goodbye: 'Nabadgelyo', yes: 'Haa', no: 'Maya', thanks: 'Mahadsanid' },
+    llmPrompt: 'Emulate Somali. A Cushitic language with tone that marks case and gender, and an oral poetic tradition — gabay and buraanbur — held in such regard that poets could start or end feuds.',
+    historicalContext: 'Written only from 1972, when a Latin orthography was finally chosen after decades of argument; before that a language of enormous memorised poetry and almost no books.',
+  },
+
+  NOBIIN: {
+    id: 'NOBIIN',
+    name: 'Nobiin (Nubian)',
+    nativeName: 'Nobíin',
+    family: LANGUAGE_FAMILIES.NILO_SAHARAN,
+    script: ['Latin', 'Coptic', 'Arabic'],
+    period: [1400, 2030],
+    regions: ['Nubia', 'Nubian Desert', 'Dongola', 'Wadi Halfa', 'Aswan'],
+    culturalZones: ['MENA' as CulturalZone, 'SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Ay salaam', goodbye: 'Deyri', yes: 'Awa', no: 'Mindo', thanks: 'Shukran' },
+    llmPrompt: 'Emulate Nobiin. A Nile Nubian language, verb-final and tonal, with a long written tradition in an adapted Coptic alphabet and heavy Arabic borrowing in the modern period.',
+    historicalContext: 'The direct descendant of Old Nubian, in which the Christian kingdoms of the middle Nile wrote for eight centuries; much of its homeland was flooded by the Aswan High Dam in the 1960s.',
+  },
+
+  SUDANESE_ARABIC: {
+    id: 'SUDANESE_ARABIC',
+    name: 'Sudanese Arabic',
+    nativeName: 'اللهجة السودانية',
+    family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
+    script: 'Arabic',
+    period: [1500, 2030],
+    regions: ['Sudan', 'Nubia', 'Khartoum', 'Kordofan', 'Nubian Desert'],
+    culturalZones: ['MENA' as CulturalZone, 'SUB_SAHARAN_AFRICAN' as CulturalZone],
+    greetings: { hello: 'Kayf al-hal', goodbye: "Ma'a salama", yes: 'Aywa', no: 'La', thanks: 'Shukran' },
+    llmPrompt: 'Emulate Sudanese Arabic. Conservative consonants close to the classical language, a Nubian and Beja substrate, and a reputation among other Arabic speakers for being unusually clear.',
+    historicalContext: 'Spread up the Nile with the Arab migrations that followed the fall of the Christian Nubian kingdoms, and now the first language of most of northern Sudan.',
+  },
+
+  EGYPTIAN_ARABIC: {
+    id: 'EGYPTIAN_ARABIC',
+    name: 'Egyptian Arabic',
+    nativeName: 'اللهجة المصرية',
+    family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
+    script: 'Arabic',
+    period: [900, 2030],
+    regions: ['Egypt', 'Nile Valley', 'Nile Delta', 'Cairo', 'Alexandria'],
+    culturalZones: ['MENA' as CulturalZone],
+    greetings: { hello: 'Izzayyak', goodbye: "Ma'a salama", yes: 'Aywa', no: "La'", thanks: 'Shukran' },
+    llmPrompt: 'Emulate Egyptian Arabic. Distinguished by pronouncing jim as a hard g, by keeping question words at the end of the sentence, and by a Coptic substrate. Confident, quick and full of set phrases and blessings.',
+    historicalContext: 'Displaced Coptic as the everyday speech of Egypt over several centuries after the conquest; twentieth-century cinema and radio then made it the most widely understood Arabic in the world.',
+  },
+
+  LEVANTINE_ARABIC: {
+    id: 'LEVANTINE_ARABIC',
+    name: 'Levantine Arabic',
+    nativeName: 'اللهجة الشامية',
+    family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
+    script: 'Arabic',
+    period: [800, 2030],
+    regions: ['Levant', 'Syria', 'Lebanon', 'Palestine', 'Damascus', 'Jerusalem'],
+    culturalZones: ['MENA' as CulturalZone],
+    greetings: { hello: 'Kifak', goodbye: "Ma'a salameh", yes: 'Eh', no: "La'", thanks: 'Shukran' },
+    llmPrompt: 'Emulate Levantine Arabic. A soft accent with the qaf often dropped to a glottal stop, an Aramaic substrate in farming and household vocabulary, and elaborate reciprocal blessings in everyday greeting.',
+    historicalContext: 'Grew up over the Aramaic of the Syrian countryside, which it replaced slowly enough that Aramaic survived in a few mountain villages into the present.',
+  },
+
+  MESOPOTAMIAN_ARABIC: {
+    id: 'MESOPOTAMIAN_ARABIC',
+    name: 'Iraqi Arabic',
+    nativeName: 'اللهجة العراقية',
+    family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
+    script: 'Arabic',
+    period: [800, 2030],
+    regions: ['Mesopotamia', 'Tigris', 'Euphrates', 'Baghdad', 'Basra'],
+    culturalZones: ['MENA' as CulturalZone],
+    greetings: { hello: 'Shlonak', goodbye: 'Fiman illah', yes: 'Ee', no: 'La', thanks: 'Shukran' },
+    llmPrompt: 'Emulate Iraqi Arabic. Keeps the qaf, turns kaf to ch in many words, and carries Aramaic, Persian and Turkish borrowings. The greeting asks literally what colour you are.',
+    historicalContext: 'Formed in the Abbasid heartland over an Aramaic-speaking population, and split between the gelet dialects of the south and the qeltu speech of the northern towns.',
+  },
+
+  GULF_ARABIC: {
+    id: 'GULF_ARABIC',
+    name: 'Gulf and Peninsular Arabic',
+    nativeName: 'اللهجة الخليجية',
+    family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
+    script: 'Arabic',
+    // Old Arabic covers the peninsula to 600; this takes over from there rather
+    // than competing with it, or a pre-Islamic persona on the Najd came back
+    // speaking a modern Gulf dialect.
+    period: [600, 2030],
+    regions: ['Arabian Peninsula', 'Hejaz', 'Najd', 'Yemen', 'Oman', 'Persian Gulf'],
+    culturalZones: ['MENA' as CulturalZone],
+    greetings: { hello: 'Shlonak', goodbye: "Ma'a salama", yes: "Na'am", no: 'La', thanks: 'Mashkoor' },
+    llmPrompt: 'Emulate the spoken Arabic of the peninsula. Conservative in its consonants, close to the classical language in vocabulary, and rich in poetry, genealogy and precise terms for camels, wells and grazing.',
+    historicalContext: 'The peninsula is the one place where Arabic was already the ordinary spoken language before Islam rather than after it, and the Bedouin dialects were treated by early grammarians as the purest form.',
+  },
+
+  MAGHREBI_ARABIC: {
+    id: 'MAGHREBI_ARABIC',
+    name: 'Maghrebi Arabic (Darija)',
+    nativeName: 'الدارجة',
+    family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
+    script: 'Arabic',
+    period: [1000, 2030],
+    regions: ['Maghreb', 'Morocco', 'Algeria', 'Tunisia', 'Atlas Mountains', 'Fez'],
+    culturalZones: ['MENA' as CulturalZone],
+    greetings: { hello: 'Labas', goodbye: 'Bslama', yes: 'Iyeh', no: 'La', thanks: 'Shukran' },
+    llmPrompt: 'Emulate Darija. Short vowels drop out until words look consonant-heavy, the Berber substrate is strong, and French or Spanish borrowings are everywhere. Speakers of eastern Arabic often cannot follow it.',
+    historicalContext: 'Shaped by the Berber it grew up beside and by the Bedouin migrations of the eleventh century; far enough from eastern Arabic that Moroccan films are subtitled for Egyptian audiences.',
   },
 
   // Creole Languages
@@ -4913,6 +5590,16 @@ interface NamePattern {
   pattern: RegExp;
   language: string;
   weight: number;
+  /**
+   * When this name-to-language mapping applies. Twelve entries already declared
+   * it — the Chinese and Indian tables map the same surnames to a different
+   * language per era — but the field was not on the type and the matcher never
+   * read it, so every era's row matched every year and the first one whose
+   * language happened to be in period won. A Ming farmer called Yang matched
+   * the row written for the Han dynasty and came back speaking Classical
+   * Chinese.
+   */
+  period?: [number, number];
 }
 
 interface RegionLanguageMapping {
@@ -4922,7 +5609,7 @@ interface RegionLanguageMapping {
 }
 
 // Comprehensive regional language mappings
-const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
+export const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   // === EUROPE ===
   // Northern German coast and continental Saxon country
   {
@@ -4949,7 +5636,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'DUTCH', period: [1500, 2030], weight: 60 },
       { id: 'OLD_FRENCH', period: [1500, 1700], weight: 30 },
-      { id: 'FRENCH_MEDIEVAL', period: [1100, 1500], weight: 30 },
+      { id: 'OLD_FRENCH', period: [1100, 1400], weight: 30 },
       { id: 'GERMAN', period: [1500, 2030], weight: 5 },
       { id: 'EARLY_SPANISH', period: [1550, 1700], weight: 5 },
     ],
@@ -5036,6 +5723,14 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['central europe', 'danube bend', 'bohemian plateau', 'carpathian foothills', 'vienna basin', 'moravian gate', 'tatra mountains'],
     languages: [
       { id: 'LATIN', period: [500, 1500], weight: 20 }, // Church and administration
+      // Nothing here started before 800 except Latin, which is a language of
+      // the church rather than of the home, so sixth- and seventh-century
+      // personas in Bohemia and the Danube fell through to a family label.
+      // This is the period the Slavs arrive in and the Germanic west is
+      // speaking the ancestor of Old High German.
+      { id: 'COMMON_SLAVIC', period: [500, 900], weight: 40 },
+      { id: 'FRANKISH', period: [400, 900], weight: 20 },
+      { id: 'OLD_HIGH_GERMAN', period: [700, 1050], weight: 25 },
       { id: 'GERMAN', period: [800, 2030], weight: 35 }, // Holy Roman Empire influence
       { id: 'CZECH', period: [800, 2030], weight: 25 },
       { id: 'POLISH', period: [800, 2030], weight: 20 },
@@ -5115,12 +5810,51 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
 
   // Iberian Peninsula (general regions)
   {
+    // France, Italy and the Balkans had no mapping of any kind, so their
+    // personas reached the zone backstop and were told they spoke "an
+    // Indo-European language of the region". Vulgar Latin covers the centuries
+    // between the empire and the first Romance vernaculars, which is exactly
+    // the gap the backstop was filling.
+    patterns: ['france', 'paris basin', 'loire valley', 'normandy', 'languedoc', 'marseille coast', 'pyrenees foothills', 'gaul', 'aquitaine', 'burgundy'],
+    languages: [
+      { id: 'VULGAR_LATIN', period: [200, 850], weight: 70 },
+      { id: 'FRANKISH', period: [400, 900], weight: 25 },
+      { id: 'OLD_FRENCH', period: [842, 1400], weight: 70 },
+      { id: 'MIDDLE_FRENCH', period: [1400, 1600], weight: 70 },
+      { id: 'FRENCH', period: [1600, 2030], weight: 75 },
+      { id: 'OCCITAN', period: [900, 2030], weight: 30 },
+    ],
+  },
+  {
+    patterns: ['italy', 'roman campagna', 'po valley', 'bay of naples', 'florence hills', 'apennine foothills', 'venetian lagoon', 'sicily', 'tuscany', 'lombardy'],
+    languages: [
+      { id: 'LATIN', period: [-300, 200], weight: 70 },
+      { id: 'VULGAR_LATIN', period: [200, 1200], weight: 70 },
+      { id: 'ITALIAN', period: [1200, 2030], weight: 70 },
+      { id: 'VENETIAN', period: [1200, 2030], weight: 20 },
+      { id: 'GOTHIC', period: [489, 553], weight: 10 },
+      { id: 'BYZANTINE_GREEK', period: [535, 1071], weight: 12 },
+    ],
+  },
+  {
+    patterns: ['balkans', 'dinaric alps', 'dalmatian coast', 'thracian plain', 'vardar valley', 'pindus mountains', 'serbia', 'bosnia', 'bulgaria', 'illyria', 'epirus'],
+    languages: [
+      { id: 'LATIN', period: [-100, 400], weight: 40 },
+      { id: 'BYZANTINE_GREEK', period: [300, 1453], weight: 30 },
+      { id: 'SERBO_CROATIAN', period: [900, 2030], weight: 55 },
+      { id: 'BULGARIAN', period: [900, 2030], weight: 45 },
+      { id: 'ALBANIAN', period: [1000, 2030], weight: 25 },
+      { id: 'ROMANIAN', period: [800, 2030], weight: 20 },
+      { id: 'OTTOMAN_TURKISH', period: [1400, 1918], weight: 12 },
+    ],
+  },
+  {
     patterns: ['iberia', 'ebro valley', 'toledo plateau', 'andalusian plain', 'lisbon coast', 'strait of gibraltar'],
     languages: [
       // 1059 is medieval period - blend of Arabic and Romance languages
       { id: 'CLASSICAL_ARABIC', period: [711, 1492], weight: 40 },  // Al-Andalus influence
       { id: 'LATIN', period: [0, 1200], weight: 30 },  // Church and educated class
-      { id: 'FRENCH_MEDIEVAL', period: [900, 1300], weight: 20 },  // Occitan/Provencal influence in north
+      { id: 'OLD_FRENCH', period: [900, 1300], weight: 20 },  // Occitan/Provencal influence in north
       { id: 'BASQUE', period: [-2000, 2030], weight: 5 },  // Basque substrate
       { id: 'EARLY_SPANISH', period: [1500, 2030], weight: 60 },  // Later period
       { id: 'EARLY_PORTUGUESE', period: [1500, 2030], weight: 20 },  // Portuguese areas
@@ -5148,7 +5882,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'OLD_MALAY', period: [600, 1500], weight: 70 },
       { id: 'OLD_JAVANESE', period: [800, 1500], weight: 20 },
-      { id: 'CLASSICAL_MALAY', period: [1500, 2030], weight: 80 },
+      { id: 'MALAY', period: [1500, 2030], weight: 80 },
       { id: 'CLASSICAL_ARABIC', period: [1200, 2030], weight: 10 }, // Islamic influence
     ],
     namePatterns: [
@@ -5259,7 +5993,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['malay peninsula', 'singapore', 'johor', 'kelantan', 'terengganu', 'pahang'],
     languages: [
       { id: 'OLD_MALAY', period: [600, 1500], weight: 60 },
-      { id: 'CLASSICAL_MALAY', period: [1500, 2030], weight: 70 },
+      { id: 'MALAY', period: [1500, 2030], weight: 70 },
       { id: 'CLASSICAL_ARABIC', period: [1300, 2030], weight: 10 },
       { id: 'TAMIL', period: [1000, 2030], weight: 10 },
       { id: 'EARLY_MODERN_ENGLISH', period: [1819, 2030], weight: 20 }, // Colonial
@@ -5523,21 +6257,97 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'PROTO_AFROASIATIC', period: [-10000, -5000], weight: 40 },
       { id: 'PROTO_CUSHITIC', period: [-5000, -500], weight: 70 },
-      { id: 'GEEZ', period: [-500, 1000], weight: 50 },
-      { id: 'AMHARIC', period: [1000, 2030], weight: 60 },
-      { id: 'CLASSICAL_ARABIC', period: [700, 2030], weight: 30 },
-      { id: 'SWAHILI_CLASSICAL', period: [1200, 2030], weight: 20 },
+      { id: 'ETHIOPIC', period: [-500, 1000], weight: 50 },
+      // Ge'ez is the church's language, not the home's, so once the register
+      // check started enforcing that, the Horn between 1000 and 1200 had
+      // nothing left and personas there were handed Classical Arabic — which
+      // was never the everyday speech of the Ethiopian highlands either.
+      { id: 'TIGRINYA', period: [1000, 2030], weight: 45 },
+      { id: 'SOMALI', period: [900, 2030], weight: 50 },
+      { id: 'AMHARIC', period: [1150, 2030], weight: 60 },
+      { id: 'CLASSICAL_ARABIC', period: [700, 2030], weight: 12 },
     ],
   },
+  // The Mara basin specifically. The broad East African entry below would give
+  // it Gikuyu about a fifth of the time, and Kikuyu country is two hundred
+  // kilometres east across the Rift. This is Kuria farmland, Maasai grazing and
+  // Luo country toward the lake.
   {
-    patterns: ['east africa', 'serengeti', 'kilimanjaro', 'victoria', 'kenya', 'tanzania', 'uganda', 'swahili coast', 'mara', 'rift valley', 'lake victoria', 'great rift'],
+    patterns: ['mara', 'mara river valley', 'tarime', 'musoma', 'narok', 'serengeti', 'maasai mara'],
+    languages: [
+      { id: 'PROTO_BANTU', period: [-3000, 500], weight: 50 },
+      { id: 'KURIA', period: [1400, 2030], weight: 45 },
+      { id: 'MAASAI', period: [1500, 2030], weight: 40 },
+      { id: 'LUO', period: [1500, 2030], weight: 30 },
+      { id: 'KALENJIN', period: [1000, 2030], weight: 20 },
+      { id: 'SWAHILI_MODERN', period: [1890, 2030], weight: 20 },
+    ],
+  },
+  // Interior East Africa. Swahili was the only post-1000 option here, and it is
+  // a coastal language — the plausibility gate refused it inland, correctly,
+  // and left nothing behind, so everyone from the Rift got a family label
+  // instead of a language. These are the languages of the interior itself.
+  // Swahili stays, because from the caravan era onward it genuinely is spoken
+  // inland, but as a second language and so at a lower weight than the local
+  // mother tongues.
+  {
+    patterns: [
+      'east africa', 'serengeti', 'kilimanjaro', 'victoria', 'kenya', 'tanzania',
+      'uganda', 'swahili coast', 'mara', 'rift valley', 'lake victoria', 'great rift',
+      'east african rift', 'nyanza', 'kikuyu', 'mount kenya', 'shinyanga', 'kajiado',
+    ],
     languages: [
       { id: 'PROTO_CUSHITIC', period: [-5000, -2000], weight: 50 },
       { id: 'PROTO_BANTU', period: [-3000, 500], weight: 60 },
       { id: 'PROTO_NIGER_CONGO', period: [-5000, -1000], weight: 40 },
-      { id: 'SWAHILI_CLASSICAL', period: [1000, 2030], weight: 70 },
-      { id: 'CLASSICAL_ARABIC', period: [1200, 2030], weight: 20 },
-      { id: 'AMHARIC', period: [1000, 2030], weight: 10 },
+      { id: 'GIKUYU', period: [1200, 2030], weight: 45 },
+      { id: 'KURIA', period: [1400, 2030], weight: 30 },
+      { id: 'SUKUMA', period: [1300, 2030], weight: 35 },
+      { id: 'KALENJIN', period: [1000, 2030], weight: 35 },
+      { id: 'LUO', period: [1500, 2030], weight: 40 },
+      { id: 'MAASAI', period: [1500, 2030], weight: 30 },
+      { id: 'LUGANDA', period: [1300, 2030], weight: 30 },
+      { id: 'KINYARWANDA', period: [1200, 2030], weight: 30 },
+      { id: 'SWAHILI_CLASSICAL', period: [1000, 1890], weight: 25 },
+      { id: 'SWAHILI_MODERN', period: [1890, 2030], weight: 30 },
+      { id: 'CLASSICAL_ARABIC', period: [1200, 2030], weight: 8 },
+    ],
+  },
+  // The Congo basin and the Great Lakes, which had no entry of any kind.
+  {
+    patterns: [
+      'congo', 'congo basin', 'kongo', 'kinshasa', 'brazzaville', 'kasai', 'katanga',
+      'central africa', 'rwanda', 'burundi', 'great lakes', 'lower guinea and congo basin',
+      'ubangi', 'lualaba',
+    ],
+    languages: [
+      { id: 'PROTO_BANTU', period: [-3000, 500], weight: 60 },
+      { id: 'KIKONGO', period: [1300, 2030], weight: 45 },
+      { id: 'TSHILUBA', period: [1400, 2030], weight: 35 },
+      { id: 'KINYARWANDA', period: [1200, 2030], weight: 35 },
+      { id: 'LINGALA', period: [1880, 2030], weight: 40 },
+      { id: 'SWAHILI_MODERN', period: [1890, 2030], weight: 20 },
+      { id: 'MODERN_PORTUGUESE', period: [1600, 2030], weight: 5 },
+    ],
+  },
+  // Southern Africa beyond the Cape. The existing entry covered the Cape
+  // Colony and its cities only, so the highveld and the Zimbabwean plateau
+  // fell through to the family label.
+  {
+    patterns: [
+      'southern africa', 'highveld', 'zimbabwe', 'zambezi', 'limpopo', 'matabeleland',
+      'mashonaland', 'bulawayo', 'lesotho', 'botswana', 'kalahari', 'natal', 'zululand',
+      'drakensberg', 'witwatersrand',
+    ],
+    languages: [
+      { id: 'NAMA', period: [-2000, 2030], weight: 25 },
+      { id: 'SHONA', period: [1100, 2030], weight: 40 },
+      { id: 'SOTHO_TSWANA', period: [1400, 2030], weight: 45 },
+      { id: 'ZULU', period: [1500, 2030], weight: 40 },
+      { id: 'XHOSA', period: [1500, 2030], weight: 30 },
+      { id: 'NDEBELE', period: [1830, 2030], weight: 25 },
+      { id: 'AFRIKAANS', period: [1750, 2030], weight: 15 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1850, 2030], weight: 8 },
     ],
   },
   // South Africa
@@ -5625,11 +6435,11 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
 
   // India - Enhanced with proper archaic Sanskrit forms
   {
-    patterns: ['india', 'ganges', 'gangetic', 'indus', 'punjab', 'delhi', 'agra', 'varanasi', 'patna', 'pataliputra', 'hastinapura', 'mathura', 'awadh', 'bengal', 'bihar', 'vedic', 'arya', 'bharata'],
+    patterns: ['india', 'ganges', 'gangetic', 'indus', 'punjab', 'delhi', 'agra', 'varanasi', 'patna', 'pataliputra', 'hastinapura', 'mathura', 'awadh', 'bengal', 'bihar', 'vedic', 'arya', 'bharata', 'allahabad', 'harappa', 'sindh', 'salt range', 'rann of kutch', 'sundarbans', 'malwa', 'vindhya', 'narmada', 'satpura', 'gondwana', 'chota nagpur'],
     languages: [
       { id: 'VEDIC_SANSKRIT', period: [-1500, -500], weight: 90 },
       { id: 'CLASSICAL_SANSKRIT', period: [-500, 1400], weight: 85 },
-      { id: 'PRAKRIT', period: [-300, 1000], weight: 60 },
+      { id: 'PRAKRITS', period: [-300, 1150], weight: 60 },
       { id: 'HINDI', period: [1000, 2030], weight: 80 },
       { id: 'PERSIAN', period: [1200, 1800], weight: 25 },
       { id: 'MODERN_ENGLISH', period: [1800, 1947], weight: 15 },
@@ -5638,6 +6448,85 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { pattern: /Singh|Sharma|Gupta|Agarwal|Mishra|Yadav|Verma|Srivastava|Rai|Jha/i, language: 'VEDIC_SANSKRIT', period: [-1500, -500], weight: 95 },
       { pattern: /Singh|Sharma|Gupta|Agarwal|Mishra|Yadav|Verma|Srivastava|Rai|Jha/i, language: 'CLASSICAL_SANSKRIT', period: [-500, 1000], weight: 95 },
       { pattern: /Singh|Sharma|Gupta|Agarwal|Mishra|Yadav|Verma|Srivastava|Rai|Jha/i, language: 'HINDI', period: [1000, 2030], weight: 95 },
+    ],
+  },
+  // Peninsular India. Only the Coromandel had a mapping, so the Malabar coast
+  // and the Kannada and Telugu country fell through to the North Indian entry
+  // above — and once the register check stopped handing out Sanskrit, to a
+  // language-family label. These are Dravidian regions and always were.
+  // The Himalayas and the northeast, which had no mapping and so reached the
+  // South Asian backstop — a persona in the Naga Hills was told they spoke "a
+  // Dravidian language of the region", and Dravidian languages are spoken two
+  // thousand kilometres to the south. This is Tibeto-Burman country, with
+  // Indo-Aryan along the Brahmaputra and in the Kashmir valley.
+  {
+    patterns: [
+      'himalaya', 'himalayas and northeast', 'naga hills', 'naga', 'darjeeling',
+      'sikkim', 'assam', 'brahmaputra', 'kashmir', 'ladakh', 'bhutan', 'nepal',
+      'manipur', 'arunachal', 'meghalaya', 'northeast india',
+    ],
+    languages: [
+      { id: 'PROTO_TIBETO_BURMAN', period: [-2500, -1000], weight: 50 },
+      { id: 'TIBETAN', period: [600, 2030], weight: 55 },
+      { id: 'NEPALI', period: [1200, 2030], weight: 40 },
+      { id: 'BENGALI', period: [1000, 2030], weight: 30 },
+      { id: 'PRAKRITS', period: [-300, 1150], weight: 35 },
+    ],
+  },
+  {
+    patterns: ['coromandel', 'coromandel coast', 'tamil', 'tamil nadu', 'chola', 'pandya', 'madurai', 'tanjore', 'thanjavur', 'kanchipuram'],
+    languages: [
+      { id: 'TAMIL', period: [-300, 2030], weight: 85 },
+      { id: 'TELUGU', period: [600, 2030], weight: 10 },
+      { id: 'EARLY_PORTUGUESE', period: [1510, 1750], weight: 4 },
+    ],
+    namePatterns: [
+      { pattern: /Arul|Nadarajah|Subramani|Pillai|Raman|Murugan|Selvam/i, language: 'TAMIL', weight: 92 },
+    ],
+  },
+  // Kerala separately from the rest of the peninsula: Malayalam only separates
+  // from Tamil around the ninth century, so before that the coast is Tamil
+  // country and after it is not, and neither Telugu nor Kannada was ever spoken
+  // across the Ghats here.
+  {
+    patterns: ['malabar', 'malabar coast', 'kerala', 'cochin', 'travancore', 'calicut', 'kozhikode'],
+    languages: [
+      { id: 'TAMIL', period: [-300, 1100], weight: 55 },
+      { id: 'MALAYALAM', period: [900, 2030], weight: 70 },
+      { id: 'EARLY_PORTUGUESE', period: [1510, 1750], weight: 6 },
+    ],
+    namePatterns: [
+      { pattern: /Nair|Menon|Pillai|Namboothiri|Kurup|Varma/i, language: 'MALAYALAM', weight: 90 },
+    ],
+  },
+  {
+    patterns: [
+      'karnataka', 'mysore', 'vijayanagara', 'andhra', 'golconda', 'hyderabad',
+      'deccan', 'deccan plateau', 'south india', 'carnatic', 'konkan', 'goa',
+      'western ghats', 'eastern ghats',
+    ],
+    languages: [
+      { id: 'PRAKRITS', period: [-300, 1000], weight: 25 },
+      { id: 'TAMIL', period: [-300, 2030], weight: 45 },
+      { id: 'KANNADA', period: [500, 2030], weight: 40 },
+      { id: 'TELUGU', period: [600, 2030], weight: 40 },
+      { id: 'MARATHI', period: [1000, 2030], weight: 30 },
+      { id: 'EARLY_PORTUGUESE', period: [1510, 1750], weight: 6 },
+    ],
+    namePatterns: [
+      { pattern: /Reddy|Naidu|Rao|Chowdary|Sastry/i, language: 'TELUGU', weight: 88 },
+      { pattern: /Gowda|Shetty|Hegde|Kamath|Rai/i, language: 'KANNADA', weight: 85 },
+    ],
+  },
+  // The Thar and the western desert: Rajasthani and Gujarati country, which the
+  // table has no separate entries for, so the nearest true answers are the
+  // Prakrit of the period and later Hindi.
+  {
+    patterns: ['thar', 'thar desert', 'rajasthan', 'rajputana', 'marwar', 'mewar', 'jaisalmer', 'gujarat', 'kathiawar', 'kutch'],
+    languages: [
+      { id: 'PRAKRITS', period: [-300, 1000], weight: 50 },
+      { id: 'HINDI', period: [1000, 2030], weight: 60 },
+      { id: 'MARATHI', period: [1100, 2030], weight: 15 },
     ],
   },
   // Sri Lanka/Ceylon - keep coastal and island contexts from falling back to North Indian defaults
@@ -5923,7 +6812,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'OLD_UYGHUR', period: [700, 1500], weight: 35 },
       { id: 'TIBETAN', period: [600, 900], weight: 10 }, // Tibetan Empire control
       { id: 'CLASSICAL_CHINESE', period: [-200, 1900], weight: 15 }, // Han dynasty onwards
-      { id: 'MONGOLIAN', period: [1200, 1400], weight: 5 }, // Mongol period
+      { id: 'MIDDLE_MONGOLIAN', period: [1200, 1400], weight: 5 }, // Mongol period
     ],
     namePatterns: [
       { pattern: /Kuchean|Agnean/i, language: 'TOCHARIAN', weight: 85 },
@@ -6025,7 +6914,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'CHAMORRO', period: [1800, 2030], weight: 10 },
       { id: 'EARLY_SPANISH', period: [1565, 1898], weight: 10 },
       { id: 'EARLY_MODERN_ENGLISH', period: [1898, 2030], weight: 5 },
-      { id: 'JAPANESE', period: [1914, 1945], weight: 5 },
+      { id: 'MODERN_JAPANESE', period: [1914, 1945], weight: 5 },
     ],
   },
 
@@ -6068,8 +6957,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['arabian desert', 'rub al khali', 'empty quarter', 'najd', 'bedouin'],
     languages: [
+      { id: 'GULF_ARABIC', period: [600, 2030], weight: 90 },
       { id: 'CLASSICAL_ARABIC', period: [500, 2030], weight: 90 },
-      { id: 'OLD_ARABIC', period: [-500, 500], weight: 10 },
+      { id: 'OLD_ARABIC', period: [-500, 600], weight: 80 },
     ],
   },
 
@@ -6114,7 +7004,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
 
   // Andes South & Altiplano (Spanish with strong indigenous)
   {
-    patterns: ['cuzco', 'cusco', 'altiplano', 'lake titicaca', 'la paz', 'potosí', 'sucre', 'cochabamba', 'tarija', 'mendoza'],
+    patterns: ['cuzco', 'cusco', 'altiplano', 'lake titicaca', 'la paz', 'potosí', 'potosi', 'sucre', 'tarija', 'oruro', 'southern highlands', 'cochabamba', 'tarija', 'mendoza'],
     languages: [
       { id: 'QUECHUA_ANCIENT', period: [-500, 1530], weight: 70 },
       { id: 'AYMARA', period: [-500, 2050], weight: 30 },
@@ -6402,6 +7292,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['mesopotamia', 'tigris', 'euphrates', 'babylon region', 'nineveh plain', 'marsh arab', 'zagros foothills', 'diyala valley', 'tigris–euphrates'],
     languages: [
+      { id: 'MESOPOTAMIAN_ARABIC', period: [800, 2030], weight: 90 },
       { id: 'SUMERIAN', period: [-3500, -1750], weight: 95 },
       { id: 'AKKADIAN', period: [-2500, -100], weight: 90 },
       { id: 'ARAMAIC', period: [-1000, 700], weight: 70 },
@@ -6421,6 +7312,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['levant', 'jerusalem hills', 'bekaa valley', 'dead sea', 'golan', 'galilee', 'mount lebanon', 'jordan valley'],
     languages: [
+      { id: 'LEVANTINE_ARABIC', period: [800, 2030], weight: 90 },
       { id: 'ANCIENT_HEBREW', period: [-1000, 500], weight: 60 },
       { id: 'PHOENICIAN', period: [-1200, -300], weight: 50 },
       { id: 'ARAMAIC', period: [-800, 700], weight: 75 },
@@ -6484,6 +7376,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['nile valley', 'thebes valley', 'nile delta', 'aswan', 'faiyum oasis', 'alexandria coast', 'upper egypt', 'lower egypt'],
     languages: [
+      { id: 'EGYPTIAN_ARABIC', period: [900, 2030], weight: 90 },
       { id: 'ANCIENT_EGYPTIAN', period: [-3100, -700], weight: 95 },
       { id: 'DEMOTIC', period: [-700, 400], weight: 80 },
       { id: 'COPTIC', period: [100, 1700], weight: 70 },
@@ -6503,6 +7396,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['arabian peninsula', 'hejaz', 'empty quarter', 'hadhramaut', 'dhofar', 'najd plateau', 'red sea coast', 'yemen', 'mecca', 'medina'],
     languages: [
+      { id: 'GULF_ARABIC', period: [600, 2030], weight: 90 },
+      { id: 'OLD_ARABIC', period: [-500, 600], weight: 80 },
       { id: 'ANCIENT_SOUTH_ARABIAN', period: [-1000, 600], weight: 80 },
       { id: 'CLASSICAL_ARABIC', period: [400, 2030], weight: 95 },
       { id: 'ETHIOPIC', period: [100, 1000], weight: 15 }, // Trade influence
@@ -6517,6 +7412,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['maghreb', 'atlas mountains', 'fez plateau', 'tunisian sahel', 'rif coast', 'draa valley', 'tripolitania', 'tell atlas', 'cyrenaica'],
     languages: [
+      { id: 'MAGHREBI_ARABIC', period: [1000, 2030], weight: 85 },
       { id: 'PHOENICIAN', period: [-814, -146], weight: 40 }, // Carthage
       { id: 'LATIN', period: [-146, 429], weight: 35 },
       { id: 'BERBER', period: [-3000, 2030], weight: 50 },
@@ -6537,6 +7433,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'ANCIENT_EGYPTIAN', period: [-2500, -500], weight: 40 },
       { id: 'MEROITIC', period: [-300, 400], weight: 70 },
       { id: 'OLD_NUBIAN', period: [400, 1500], weight: 60 },
+      // Old Nubian ends in 1500 and nothing replaced it, so the middle
+      // Nile after the fall of the Christian kingdoms had no language.
+      { id: 'NOBIIN', period: [1400, 2030], weight: 45 },
+      { id: 'SUDANESE_ARABIC', period: [1500, 2030], weight: 60 },
       { id: 'COPTIC', period: [400, 1200], weight: 30 },
       { id: 'CLASSICAL_ARABIC', period: [1200, 2030], weight: 75 },
     ],
@@ -6598,6 +7498,45 @@ const GENERIC_PLACE_WORDS = new Set([
   'gulf', 'interior', 'frontier', 'sierra', 'cordillera',
 ]);
 
+/**
+ * A number in [0,1) from a string. Personas are generated from a seed and must
+ * regenerate identically from it — a shared link showing the recipient a
+ * different life than the sender saw is the bug this avoids — so the draw is a
+ * hash of the persona's own identifying key rather than anything stateful.
+ */
+const hashUnit = (key: string): number => {
+  let hash = 2166136261;
+  for (let index = 0; index < key.length; index += 1) {
+    hash ^= key.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return ((hash >>> 0) % 100000) / 100000;
+};
+
+/**
+ * How wide a reconstructed language's attested span may be before it stops
+ * being a claim about a particular time. Proto-Indo-European and Proto-Bantu
+ * run for thousands of years; Common Slavic and Old Church Slavonic run for a
+ * few hundred and are datable enough to name a persona's actual speech.
+ */
+const RECONSTRUCTION_MAX_SPAN = 800;
+
+/** Weighted draw over in-period candidates, deterministic in `key`. */
+const pickWeighted = <T extends { id: string; weight: number }>(
+  candidates: T[],
+  key: string | undefined,
+): T => {
+  if (candidates.length === 1 || !key) return candidates[0];
+  const total = candidates.reduce((sum, candidate) => sum + Math.max(0, candidate.weight), 0);
+  if (total <= 0) return candidates[0];
+  let roll = hashUnit(key) * total;
+  for (const candidate of candidates) {
+    roll -= Math.max(0, candidate.weight);
+    if (roll <= 0) return candidate;
+  }
+  return candidates[candidates.length - 1];
+};
+
 const getRegionalMappingScore = (
   mapping: RegionLanguageMapping,
   searchTerms: string[]
@@ -6646,7 +7585,25 @@ export function getLanguageForCharacter(
   region?: string,
   localArea?: string,
   npcName?: string,
-  profession?: string
+  profession?: string,
+  /**
+   * Which persona is asking. Regional mappings list several languages with
+   * weights; without a key the draw cannot vary and the whole region speaks the
+   * front-runner. Optional so existing callers still compile — they get the old
+   * deterministic behaviour.
+   */
+  drawKey?: string,
+  /**
+   * A caller-supplied veto, so a candidate the caller would reject anyway is
+   * skipped while alternatives remain rather than after they are gone.
+   */
+  accept?: (languageId: string) => boolean,
+  /**
+   * Filled in with how the answer was reached. A hand-authored regional mapping
+   * is a claim about this specific place; the generic scan at the end is only a
+   * claim about the cultural zone, and callers rightly treat those differently.
+   */
+  trace?: { basis?: 'name' | 'profession' | 'regional-mapping' | 'zone-scan' },
 ): LanguageData | undefined {
   // STEP 1: Name-based detection (highest priority)
   if (npcName) {
@@ -6671,12 +7628,27 @@ export function getLanguageForCharacter(
       if (mapping.namePatterns) {
         for (const namePattern of mapping.namePatterns) {
           if (namePattern.pattern.test(fullName) || namePattern.pattern.test(surname)) {
+            // The row's own era, where it declares one.
+            if (namePattern.period
+              && (year < namePattern.period[0] || year > namePattern.period[1])) {
+              continue;
+            }
             const lang = LANGUAGES[namePattern.language];
             // Skip reconstructed proto-languages for historical periods (after -3000 BCE)
             if (lang && year >= lang.period[0] && year <= lang.period[1]) {
               if (lang.isReconstructed && year > -3000) {
                 continue; // Skip proto-languages in historical periods
               }
+              // The caller's test applies here too. It did not, so a name
+              // pattern could return a language of scripture and return early,
+              // skipping every later step: a Ming farmer called Wang came back
+              // speaking Classical Chinese because his surname matched, and the
+              // regional mapping that would have said Early Mandarin was never
+              // consulted.
+              if (accept && !accept(namePattern.language)) {
+                continue;
+              }
+              if (trace) trace.basis = 'name';
               // A name is weaker evidence than a place. Diaspora is real, but a
               // Scottish-looking name in 1780 Rwanda should not make the persona
               // a Scots speaker; require the language to belong in this zone.
@@ -6739,8 +7711,18 @@ export function getLanguageForCharacter(
         .filter(lang => {
           if (year < lang.period[0] || year > lang.period[1]) return false;
           const language = LANGUAGES[lang.id];
-          // Skip reconstructed proto-languages for historical periods (after -3000 BCE)
-          if (language && language.isReconstructed && year > -3000) return false;
+          // Reconstructed languages were skipped outright after 3000 BCE, to
+          // stop Proto-Indo-European turning up in the Middle Ages. But the
+          // problem there is the span, not the reconstruction: a proto-language
+          // covers millennia, so its period says almost nothing about whether
+          // it fits a given year. A tightly dated reconstruction like Common
+          // Slavic is a real, specific, honestly labelled answer — and refusing
+          // it left sixth-century Bohemia with "an Indo-European language of
+          // the region", which is worse in every way.
+          if (language?.isReconstructed && year > -3000) {
+            const span = language.period[1] - language.period[0];
+            if (span > RECONSTRUCTION_MAX_SPAN) return false;
+          }
           // Same guard STEP 1 applies to name evidence: a place mapping that
           // scored on a loose substring must not hand back a language from
           // another part of the world.
@@ -6748,15 +7730,23 @@ export function getLanguageForCharacter(
             && Array.isArray(language.culturalZones)
             && language.culturalZones.length > 0
             && !language.culturalZones.includes(culturalZone as CulturalZone)) return false;
+          // The caller's own test — in practice whether the persona could have
+          // been in the right place to learn it, and whether it is anybody's
+          // mother tongue. Applying it here rather than after the fact is what
+          // lets a rejected front-runner fall through to the next candidate
+          // instead of collapsing the whole lookup to a family label.
+          if (accept && !accept(lang.id)) return false;
           return true;
         })
         .sort((a, b) => b.weight - a.weight);
 
       if (validLanguages.length > 0) {
-        // Could implement weighted random selection here
-        // For now, just pick the highest weight
-        const selected = validLanguages[0];
-        return LANGUAGES[selected.id];
+        // Taking the highest weight meant every persona from a region spoke the
+        // same language as every other: one language per place per era, for the
+        // whole of history. The weights were being read as a ranking when they
+        // were written as a distribution. Draw from them.
+        if (trace) trace.basis = 'regional-mapping';
+        return LANGUAGES[pickWeighted(validLanguages, drawKey).id];
       }
       // Nothing in this mapping fits; keep looking rather than stopping at the
       // best-scoring place.
@@ -6775,9 +7765,11 @@ export function getLanguageForCharacter(
       if (lang.culturalZones.includes(culturalZone as CulturalZone)) {
         // Check specific region match
         if (region && lang.regions.some(r => region.toLowerCase().includes(r.toLowerCase()))) {
+          if (trace) trace.basis = 'zone-scan';
           return lang;
         }
         if (localArea && lang.regions.some(r => localArea.toLowerCase().includes(r.toLowerCase()))) {
+          if (trace) trace.basis = 'zone-scan';
           return lang;
         }
       }

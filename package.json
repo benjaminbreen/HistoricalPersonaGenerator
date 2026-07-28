@@ -11,6 +11,7 @@
     "typecheck:ratchet": "node scripts/typecheckRatchet.mjs",
     "persona-batch": "esbuild scripts/generatePersonaBatch.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/generatePersonaBatch.mjs && node node_modules/.cache/generatePersonaBatch.mjs",
     "persona-audit": "esbuild scripts/auditHistoricalGeneration.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditHistoricalGeneration.mjs && node node_modules/.cache/auditHistoricalGeneration.mjs",
+    "culture-audit": "esbuild scripts/auditCulturalFit.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditCulturalFit.mjs && node node_modules/.cache/auditCulturalFit.mjs",
     "narrative-audit": "esbuild scripts/auditNarrative.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditNarrative.mjs && node node_modules/.cache/auditNarrative.mjs",
     "wiki-audit": "esbuild scripts/auditWikipediaLinks.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditWikipediaLinks.mjs && node node_modules/.cache/auditWikipediaLinks.mjs",
     "share-test": "node scripts/testPersonaShare.mjs",
@@ -23,7 +24,7 @@
     "hair-sheet": "esbuild src/components/portraitLab/devtools/hairSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/hairSheet.mjs --log-level=error && node node_modules/.cache/hairSheet.mjs",
     "face-sheet": "esbuild src/components/portraitLab/devtools/faceSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/faceSheet.mjs --log-level=error && node node_modules/.cache/faceSheet.mjs",
     "garment-sheet": "esbuild src/components/portraitLab/devtools/garmentSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/garmentSheet.mjs --log-level=error && node node_modules/.cache/garmentSheet.mjs",
-    "verify": "npm run typecheck:ratchet && npm run golden:verify && npm run narrative-audit && npm run persona-audit > /dev/null && npm run portrait-audit > /dev/null && echo \"all checks passed\"",
+    "verify": "npm run typecheck:ratchet && npm run golden:verify && npm run culture-audit -- --strict > /dev/null && npm run narrative-audit && npm run persona-audit > /dev/null && npm run portrait-audit > /dev/null && echo \"all checks passed\"",
     "ornament-sheet": "esbuild src/components/portraitLab/devtools/ornamentSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/ornamentSheet.mjs --log-level=error && node node_modules/.cache/ornamentSheet.mjs"
   },
   "keywords": [

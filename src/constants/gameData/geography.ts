@@ -115,11 +115,24 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             "Thessalian Plain": { name: "Thessalian Plain", climate: ClimateType.MEDITERRANEAN, archetype: MapArchetype.ALL_LAND, hasLakes: false }
         },
 
+        /**
+         * `minYear` is when continuous human settlement begins. Only New
+         * Zealand declared one, so personas were being born on Iceland in 600
+         * and in the Azores and Cape Verde centuries before anyone had seen
+         * them — the language resolver reported it as "an Indo-European
+         * language of the region", which was the only honest thing it could
+         * say about an empty island.
+         *
+         * Dates are the conventional archaeological consensus for first
+         * settlement, not for discovery. Greenland is dated from the Norse
+         * arrival because this area sits in the European zone; Arctic peoples
+         * had been there for millennia before that.
+         */
         "Atlantic Islands": {
-            "Iceland": { name: "Iceland", climate: ClimateType.COLD, archetype: MapArchetype.ISLAND, economicActivityLevel: 1, isVolcanic: true },
-            "Greenland Coast": { name: "Greenland Coast", climate: ClimateType.POLAR, archetype: MapArchetype.BAY, economicActivityLevel: 0 },
-            "Azores": { name: "Azores", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ISLAND },
-            "Cape Verde": { name: "Cape Verde", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND }
+            "Iceland": { name: "Iceland", climate: ClimateType.COLD, archetype: MapArchetype.ISLAND, economicActivityLevel: 1, isVolcanic: true, minYear: 870 },
+            "Greenland Coast": { name: "Greenland Coast", climate: ClimateType.POLAR, archetype: MapArchetype.BAY, economicActivityLevel: 0, minYear: 985 },
+            "Azores": { name: "Azores", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ISLAND, minYear: 1439 },
+            "Cape Verde": { name: "Cape Verde", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: 1462 }
         },
     },
     "North America": {
@@ -245,11 +258,11 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             
         },
         "The Caribbean": {
-            "Greater Antilles": { name: "Greater Antilles", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "Cuba": { name: "Cuba", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, economicActivityLevel: 4 },
-            "Hispaniola": { name: "Hispaniola", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, economicActivityLevel: 3 },
-            "Jamaica": { name: "Jamaica", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, economicActivityLevel: 3 },
-            "Lesser Antilles": { name: "Lesser Antilles", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
+            "Greater Antilles": { name: "Greater Antilles", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: -5000 },
+            "Cuba": { name: "Cuba", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, economicActivityLevel: 4, minYear: -5000 },
+            "Hispaniola": { name: "Hispaniola", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, economicActivityLevel: 3, minYear: -5000 },
+            "Jamaica": { name: "Jamaica", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, economicActivityLevel: 3, minYear: 600 },
+            "Lesser Antilles": { name: "Lesser Antilles", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: -2000 },
              "Gulf of Mexico": { name: "Gulf of Mexico", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.OPEN_OCEAN },
             "Caribbean Sea": { name: "Caribbean Sea", climate: ClimateType.TROPICAL, archetype: MapArchetype.OPEN_OCEAN },
         },
@@ -517,12 +530,12 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             "Ogun River Basin": { name: "Ogun River Basin", climate: ClimateType.TROPICAL, archetype: MapArchetype.RIVER_PORT }
         },
         "Madagascar and Islands": {
-            "Highlands of Madagascar": { name: "Highlands of Madagascar", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false },
-            "Antananarivo Region": { name: "Antananarivo Region", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.ALL_LAND, hasLakes: false },
+            "Highlands of Madagascar": { name: "Highlands of Madagascar", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false, minYear: 500 },
+            "Antananarivo Region": { name: "Antananarivo Region", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.ALL_LAND, hasLakes: false, minYear: 500 },
             "Mozambique Channel Coast": { name: "Mozambique Channel Coast", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.BAY },
-            "Comoros Archipelago": { name: "Comoros Archipelago", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "Mascarene Islands": { name: "Mascarene Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "Mahafaly Plateau": { name: "Mahafaly Plateau", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false }
+            "Comoros Archipelago": { name: "Comoros Archipelago", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: 600 },
+            "Mascarene Islands": { name: "Mascarene Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: 1638 },
+            "Mahafaly Plateau": { name: "Mahafaly Plateau", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false, minYear: 500 }
         }
     },
     "South Asia": {
@@ -770,28 +783,28 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             "Kokoda Plateau": { name: "Kokoda Plateau", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false }
         },
         "Polynesia": {
-            "Society Islands": { name: "Society Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "Marquesas": { name: "Marquesas", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "Tuamotu Atolls": { name: "Tuamotu Atolls", climate: ClimateType.TROPICAL, archetype: MapArchetype.ATOLL },
-            "Samoa Archipelago": { name: "Samoa Archipelago", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "Tonga Ridge": { name: "Tonga Ridge", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "Rapa Nui": { name: "Rapa Nui", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.ISLAND }
+            "Society Islands": { name: "Society Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: 1000 },
+            "Marquesas": { name: "Marquesas", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: 900 },
+            "Tuamotu Atolls": { name: "Tuamotu Atolls", climate: ClimateType.TROPICAL, archetype: MapArchetype.ATOLL, minYear: 1000 },
+            "Samoa Archipelago": { name: "Samoa Archipelago", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: -800 },
+            "Tonga Ridge": { name: "Tonga Ridge", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: -900 },
+            "Rapa Nui": { name: "Rapa Nui", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.ISLAND, minYear: 1200 }
         },
         "Micronesia": {
-            "Caroline Islands": { name: "Caroline Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "Marshall Islands": { name: "Marshall Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ATOLL },
-            "Northern Mariana Chain": { name: "Northern Mariana Chain", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "Palau": { name: "Palau", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "Yap Plateau": { name: "Yap Plateau", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "Guam and Surroundings": { name: "Guam and Surroundings", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND }
+            "Caroline Islands": { name: "Caroline Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: -500 },
+            "Marshall Islands": { name: "Marshall Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ATOLL, minYear: -500 },
+            "Northern Mariana Chain": { name: "Northern Mariana Chain", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: -1500 },
+            "Palau": { name: "Palau", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: -1500 },
+            "Yap Plateau": { name: "Yap Plateau", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: -500 },
+            "Guam and Surroundings": { name: "Guam and Surroundings", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: -1500 }
         },
         "Hawaii and Central Pacific": {
-            "Big Island Highlands": { name: "Big Island Highlands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false, isVolcanic: true },
-            "Maui Slopes": { name: "Maui Slopes", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND, hasLakes: false },
-            "Oahu Basin": { name: "Oahu Basin", climate: ClimateType.TROPICAL, archetype: MapArchetype.BAY, isVolcanic: true },
-            "Volcanoes National Park": { name: "Volcanoes National Park", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false, isVolcanic: true },
-            "Kauai Valleys": { name: "Kauai Valleys", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND, hasLakes: false },
-            "Molokai Channel": { name: "Molokai Channel", climate: ClimateType.TROPICAL, archetype: MapArchetype.STRAITS }
+            "Big Island Highlands": { name: "Big Island Highlands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false, isVolcanic: true, minYear: 1000 },
+            "Maui Slopes": { name: "Maui Slopes", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND, hasLakes: false, minYear: 1000 },
+            "Oahu Basin": { name: "Oahu Basin", climate: ClimateType.TROPICAL, archetype: MapArchetype.BAY, isVolcanic: true, minYear: 1000 },
+            "Volcanoes National Park": { name: "Volcanoes National Park", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false, isVolcanic: true, minYear: 1000 },
+            "Kauai Valleys": { name: "Kauai Valleys", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND, hasLakes: false, minYear: 1000 },
+            "Molokai Channel": { name: "Molokai Channel", climate: ClimateType.TROPICAL, archetype: MapArchetype.STRAITS, minYear: 1000 }
         },
      
      
@@ -802,11 +815,11 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
            
             "Sulawesi": { name: "Sulawesi", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
             "Andaman Islands": { name: "Andaman Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "Laccadive Islands": { name: "Laccadive Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-             "Vanuatu": { name: "Vanuatu", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "New Caledonia": { name: "New Caledonia", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
-            "Chatham Islands": { name: "Chatham Islands", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ISLAND },
-            "Gilbert Islands": { name: "Gilbert Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ATOLL },
+            "Laccadive Islands": { name: "Laccadive Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: 500 },
+             "Vanuatu": { name: "Vanuatu", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: -1100 },
+            "New Caledonia": { name: "New Caledonia", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: -1100 },
+            "Chatham Islands": { name: "Chatham Islands", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ISLAND, minYear: 1500 },
+            "Gilbert Islands": { name: "Gilbert Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ATOLL, minYear: -200 },
         },
 
         // Antarctica removed - no human settlement before modern era
