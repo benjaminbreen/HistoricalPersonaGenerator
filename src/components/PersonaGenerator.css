@@ -1996,14 +1996,6 @@ body.dark-mode .disclaimer-box {
   border-radius: 999px;
 }
 
-.region-pill {
-  background: color-mix(in srgb, var(--color-accent-secondary) 88%, var(--color-surface));
-}
-
-.area-pill {
-  background: color-mix(in srgb, var(--color-accent-tertiary) 87%, var(--color-surface));
-}
-
 .season-narrative {
   max-width: 34rem;
   font-size: 1.08rem;
@@ -2462,6 +2454,15 @@ body.dark-mode .card-header {
   gap: var(--sp-md);
   overflow: visible;
   border-radius: 8px 8px 0 0;
+  /* Positioning context for the map, which is a layer rather than a column. */
+  position: relative;
+}
+
+/* The text and the date sit above the map. */
+.header-left,
+.header-right {
+  position: relative;
+  z-index: 1;
 }
 
 .header-left {
@@ -2472,12 +2473,41 @@ body.dark-mode .card-header {
   justify-content: center;
 }
 
+/* The map used to be the middle column of a three-column flex row, which left a
+   dead gap of bare gradient on either side of it. It is now a layer pinned to
+   the right edge of the card, bleeding past the header's padding and running
+   under the year. The mask dissolves it into the banner on the left and drops
+   it to a fifth of its strength on the right, so the year reads against calm
+   ground while the map still reaches the edge. */
 .header-center {
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
+  position: absolute;
+  /* The left edge tracks the text column rather than a fraction of the card.
+     The header's longest line is the name plus its pills, which runs to about
+     42rem and does not grow with the viewport — so a plain percentage left a
+     widening strip of bare gradient between the text and the map on large
+     screens. Clamped, the map starts just past the text at every width and
+     takes the rest. */
+  inset: 0 0 0 clamp(20rem, 34%, 46rem);
+  margin: 0;
   padding: 0;
-  margin-right: -1.5rem;
+  z-index: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.22) 18%,
+    rgba(0, 0, 0, 0.8) 34%,
+    rgba(0, 0, 0, 1) 48%,
+    rgba(0, 0, 0, 0.95) 68%,
+    rgba(0, 0, 0, 0.34) 86%,
+    rgba(0, 0, 0, 0.24) 100%);
+  mask-image: linear-gradient(to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.22) 18%,
+    rgba(0, 0, 0, 0.8) 34%,
+    rgba(0, 0, 0, 1) 48%,
+    rgba(0, 0, 0, 0.95) 68%,
+    rgba(0, 0, 0, 0.34) 86%,
+    rgba(0, 0, 0, 0.24) 100%);
 }
 
 .map-pill {
@@ -2487,7 +2517,7 @@ body.dark-mode .card-header {
   padding: 0;
   overflow: hidden;
   box-shadow: none;
-  width: 400px;
+  width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
@@ -2565,15 +2595,6 @@ body.dark-mode .card-header {
 
 .location-label {
   opacity: 0.85;
-}
-
-.header-center {
-  flex: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 var(--sp-lg);
-  margin-top: var(--sp-md);
 }
 
 .regional-history {
@@ -2661,15 +2682,26 @@ body.dark-mode .card-header {
   white-space: nowrap;
 }
 
+/* --zone-accent is set inline per persona from constants/gameData/zonePalette.
+   The two pills are one colour at two weights: the zone solid, and a place
+   inside it as a tint. The old fixed green/tan pair failed contrast on the tan
+   (2.67:1 with white text); the tint carries dark text and clears AA. */
+.location-pills {
+  --zone-accent: var(--color-accent-secondary);
+  --zone-tint-bg: color-mix(in oklab, var(--zone-accent) 18%, var(--color-surface));
+  --zone-tint-fg: color-mix(in oklab, var(--zone-accent) 75%, var(--color-text-primary));
+}
+
 .region-pill {
-  background: var(--color-accent-secondary);
+  background: var(--zone-accent);
   color: white;
   text-transform: uppercase;
 }
 
 .area-pill {
-  background: var(--color-accent-tertiary);
-  color: white;
+  background: var(--zone-tint-bg);
+  color: var(--zone-tint-fg);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--zone-accent) 30%, transparent);
   text-transform: capitalize;
 }
 
@@ -2692,14 +2724,22 @@ body.dark-mode .card-header {
   background: linear-gradient(to right, rgba(50, 48, 42, 0.6) 0%, var(--color-accent-tertiary) 60%, var(--color-accent-primary) 100%);
 }
 
+/* Dark mode keeps the same solid — white on it reads better against a dark
+   header than a brightened pill would — and flips the tint so the area pill
+   stays light-on-dark. */
+body.dark-mode .location-pills {
+  --zone-tint-bg: color-mix(in oklab, var(--zone-accent) 28%, var(--color-surface));
+  --zone-tint-fg: color-mix(in oklab, var(--zone-accent) 30%, var(--color-text-primary));
+}
+
 body.dark-mode .region-pill {
-  background: var(--color-accent-secondary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3),
+              inset 0 0 0 1px color-mix(in oklab, var(--zone-accent) 60%, white);
 }
 
 body.dark-mode .area-pill {
-  background: var(--color-accent-tertiary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3),
+              inset 0 0 0 1px color-mix(in oklab, var(--zone-accent) 45%, transparent);
 }
 
 .card-body {
@@ -2877,12 +2917,23 @@ body.dark-mode .area-pill {
   font-family: var(--font-sans);
 }
 
+/*
+ * These values are authored prose, not single words: language attributions read
+ * "Dravidian language of the region" and "Italian, Yiddish or Polish
+ * (attested)". `text-transform: capitalize` uppercases *every* word, so the
+ * card was showing "Dravidian Language Of The Region". Capitalising only the
+ * first letter still tidies a lowercase value like "mustache" without
+ * rewriting a sentence.
+ */
 .info-item .value {
   color: var(--color-text-primary);
   font-weight: 600;
-  text-transform: capitalize;
   font-size: 1.125rem;
   font-family: var(--font-sans);
+}
+
+.info-item .value::first-letter {
+  text-transform: uppercase;
 }
 
 /* Backstory */
@@ -3658,10 +3709,8 @@ body.dark-mode .area-pill {
     font-size: 2rem;
   }
 
-  .map-pill {
-    width: 320px;
-    height: 120px;
-  }
+  /* The map is a layer that fills .header-center now, so it takes its size
+     from there rather than from a fixed box at each breakpoint. */
 }
 
 @media (max-width: 768px) {
@@ -4518,7 +4567,11 @@ body.dark-mode .timeline-content:hover {
   font-size: 0.875rem;
   color: var(--color-text-primary);
   text-align: right;
-  text-transform: capitalize;
+}
+
+/* First letter only; see the note on `.info-item .value`. */
+.appearance-item .value::first-letter {
+  text-transform: uppercase;
 }
 
 .secrets-section {
@@ -6116,5 +6169,87 @@ body.dark-mode .sampling-mode {
     font-size: 0.75rem;
     padding: var(--sp-sm) var(--sp-md);
     letter-spacing: 0.03em;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Card header on small screens
+
+   The stacked header was 296px on a 375x812 phone — 36% of the screen — and
+   about 120px of that was bare gradient between the odds line and the date,
+   because the date was its own full-width row centred in the leftover space.
+   The map was switched off entirely at this width, so the header was tall and
+   empty at the same time.
+
+   The date moves up beside the name, which removes the empty row, and the map
+   comes back as a layer bleeding off the right edge behind it — the same
+   treatment as the desktop card, just carrying more of the header because
+   there is less width to give it.
+   ---------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--sp-xs) var(--sp-md);
+    padding: var(--sp-lg);
+    /* The map bleeds past the padding; the card's own radius clips the rest. */
+    overflow: hidden;
+  }
+
+  .header-left {
+    flex: 1 1 12rem;
+    min-width: 0;
+    padding: 0;
+    justify-content: flex-start;
+  }
+
+  /* Was centred in a full-width row of its own, which is where the dead space
+     came from. Top-aligned beside the name it costs no extra height at all. */
+  .header-right {
+    flex: 0 0 auto;
+    padding: 0;
+    align-items: flex-end;
+    justify-content: flex-start;
+  }
+
+  .header-center {
+    display: block;
+    /* Starts at the middle rather than past the text column — at 375px there
+       is no room for the desktop clamp, and the right third of the header is
+       otherwise empty under the date. */
+    inset: 0 0 0 42%;
+    -webkit-mask-image: linear-gradient(to right,
+      transparent 0%,
+      rgba(0, 0, 0, 0.35) 30%,
+      rgba(0, 0, 0, 0.85) 62%,
+      rgba(0, 0, 0, 0.5) 100%);
+    mask-image: linear-gradient(to right,
+      transparent 0%,
+      rgba(0, 0, 0, 0.35) 30%,
+      rgba(0, 0, 0, 0.85) 62%,
+      rgba(0, 0, 0, 0.5) 100%);
+  }
+
+  /* The date now sits over the map instead of over flat gradient. */
+  .header-date {
+    font-size: 1.75rem;
+    text-shadow: 0 1px 6px rgba(26, 22, 18, 0.45);
+  }
+
+  .exact-date {
+    color: var(--color-text-primary);
+    text-shadow: 0 1px 5px rgba(26, 22, 18, 0.4);
+  }
+
+  /* Name over pills was a column with a large gap; the pills read as part of
+     the name line, so they only need a hair of space. */
+  .name-with-pills {
+    gap: var(--sp-xs);
+    margin-bottom: 0;
+  }
+
+  .season-narrative {
+    margin-top: var(--sp-xs);
   }
 }

@@ -3,6 +3,7 @@
  */
 import { CulturalZone } from '../../types/characterData';
 import { random as seededRandom } from '../../utils/seededRandom';
+import { generateDeepTimeAmericanName } from './deepTimeAmericanNames';
 
 export interface NameList {
     male: string[];
@@ -98,11 +99,38 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         female: ['Ama', 'Yaa', 'Nana', 'Makena', 'Asha', 'Amara', 'Nia', 'Imani', 'Kesia'],
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
+    /**
+     * The deep-time Americas.
+     *
+     * The main generator does not read this list: it builds names as phrases,
+     * by region, in `deepTimeAmericanNames.ts`, and this is only the backstop
+     * for the few paths that still take a flat pool. It used to hold bare
+     * English nature nouns — 'Raven', 'Dove', 'Star' — together with 'Chief',
+     * 'Shaman' and 'Warrior', which are English words for offices and not names
+     * anyone bore. The entries here are kept in the phrase shape the generator
+     * produces so that both paths describe the same naming world.
+     */
     PREHISTORIC_AMERICAN: {
-        male: ['Sky', 'River', 'Stone', 'Bear', 'Wolf', 'Eagle', 'Hawk', 'Thunder', 'Wind', 'Fire', 'Mountain', 'Forest', 'Hunter', 'Warrior', 'Chief', 'Shaman', 'Arrow', 'Spear', 'Shield', 'Drum'],
-        female: ['Moon', 'Star', 'Dawn', 'Rain', 'Snow', 'Flower', 'Willow', 'Rose', 'Sky', 'River', 'Spring', 'Summer', 'Autumn', 'Winter', 'Dove', 'Deer', 'Butterfly', 'Raven', 'Swan', 'Lily'],
+        male: ['Sitting Bear', 'Grey Wolf of the Ridge', 'Standing Elk', 'Watching Hawk', 'Two Rivers', 'Walks the Ice', 'Broken Antler', 'Crossing at the Ford', 'Lone Heron', 'Born in Snow', 'Carries the Fire', 'Old Otter', 'Swims the Flood', 'Half Moon on Water', 'Turning Crane', 'Spotted Coyote', 'Came Back Late', 'Deep Wood Badger'],
+        female: ['Quiet Water', 'Falling Leaf at the Bend', 'Many Cranes', 'Gathering Reeds', 'Small Otter', 'Born at Dawn', 'Watching Doe', 'Bright Marsh Light', 'Two Willows', 'Walks the Shallows', 'Rising Snow', 'Listening Wren', 'Old Turtle', 'Found at the Ford', 'Circling Swallow', 'Grey Rain', 'Held the Fire', 'White Shell of the Narrows'],
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
+    /**
+     * Island Southeast Asia before any attested naming tradition.
+     *
+     * The zone's deep-time fallback used to be `PREHISTORIC_SOUTH_ASIAN`,
+     * whose entries are reconstructed Proto-Dravidian forms — which is how a
+     * Bronze Age islander on the Sulu Sea came to be called *Vil. These are
+     * reconstructed Proto-Austronesian and Proto-Malayo-Polynesian lexical
+     * forms used as name-shaped placeholders, marked with the asterisk this
+     * file uses for reconstructions. No personal name survives from here.
+     */
+    PREHISTORIC_AUSTRONESIAN: {
+        male: ['*Bahi', '*Lakay', '*Anak', '*Bulan', '*Layag', '*Batu', '*QaluR', '*Kahiw', '*Sakay', '*Bunuq', '*Panaw', '*Timu', '*Baqbaq', '*Suluh', '*Rusuk', '*Kilat'],
+        female: ['*Bai', '*Ina', '*Dayang', '*Bunga', '*Wahay', '*Lumay', '*Tanaq', '*Sinag', '*Ambun', '*Rimba', '*Talun', '*Nipa', '*Uray', '*Bituqen'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
+    },
+
     PREHISTORIC_OCEANIC: {
         male: ['Maui', 'Tane', 'Rangi', 'Papa', 'Tangaroa', 'Rongo', 'Tu', 'Tawhiri', 'Haumia', 'Ruaumoko', 'Kupe', 'Tiki', 'Paikea', 'Tinirau', 'Turi', 'Whatonga', 'Hoturapa', 'Pourangahua', 'Tama', 'Rua'],
         female: ['Hina', 'Pele', 'Namaka', 'Poliahu', 'Lilinoe', 'Waiau', 'Kahoupokane', 'Laka', 'Kapo', 'Hiiaka', 'Sina', 'Taranga', 'Murirangawhenua', 'Rongomaiwahine', 'Wairaka', 'Hinemoa', 'Mahuika', 'Muriranga', 'Para', 'Kui'],
@@ -434,6 +462,21 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         female: ['Maria', 'Leonor', 'Beatriz', 'Catarina', 'Inês', 'Isabel', 'Teresa', 'Joana', 'Ana', 'Sofia', 'Carolina', 'Patrícia', 'Cláudia', 'Cristina', 'Sandra', 'Paula', 'Carla', 'Sónia', 'Helena', 'Marta', 'Susana', 'Fernanda', 'Manuela', 'Conceição', 'Graça', 'Fátima', 'Rosa', 'Alice', 'Margarida', 'Esperança'],
         surname: ['Silva', 'Santos', 'Ferreira', 'Pereira', 'Oliveira', 'Costa', 'Rodrigues', 'Martins', 'Jesus', 'Sousa', 'Fernandes', 'Gonçalves', 'Gomes', 'Lopes', 'Marques', 'Alves', 'Almeida', 'Ribeiro', 'Pinto', 'Carvalho', 'Teixeira', 'Moreira', 'Correia', 'Mendes', 'Nunes', 'Soares', 'Vieira', 'Monteiro', 'Cardoso', 'Rocha']
     },
+    /**
+     * The enslaved and free Black population of Brazil, who were baptised on
+     * arrival and so bore Portuguese given names — often saints' names, and
+     * often a devotional surname (dos Santos, da Conceição, de Jesus) rather
+     * than a master's family name. West and West-Central African day-names and
+     * ethnonym-bynames survived alongside them, which is why Quitéria, Benguela
+     * and Mina are here. This exists because the generator was reaching for the
+     * United States `AFRICAN_AMERICAN` list instead.
+     */
+    AFRO_BRAZILIAN: {
+        male: ['João', 'Antônio', 'Francisco', 'Manuel', 'José', 'Domingos', 'Miguel', 'Pedro', 'Salvador', 'Benedito', 'Bento', 'Gaspar', 'Baltazar', 'Sebastião', 'Inácio', 'Feliciano', 'Ventura', 'Custódio', 'Anastácio', 'Cosme', 'Damião', 'Quirino', 'Zumbi', 'Ganga'],
+        female: ['Maria', 'Ana', 'Francisca', 'Antônia', 'Josefa', 'Quitéria', 'Rosa', 'Luzia', 'Esperança', 'Vitória', 'Damiana', 'Feliciana', 'Inácia', 'Custódia', 'Benedita', 'Aparecida', 'Joana', 'Teresa', 'Escolástica', 'Úrsula', 'Dandara', 'Tereza'],
+        surname: ['dos Santos', 'da Conceição', 'de Jesus', 'do Espírito Santo', 'da Silva', 'do Rosário', 'de Nazaré', 'da Cruz', 'Angola', 'Benguela', 'Mina', 'Congo', 'Nagô', 'Crioulo', 'Cabinda', '(No Surname)', '(No Surname)']
+    },
+
     PORTUGUESE_BRAZIL: {
         male: ['Miguel', 'Arthur', 'Heitor', 'Bernardo', 'Davi', 'Gabriel', 'Pedro', 'Lucas', 'Matheus', 'Enzo', 'Guilherme', 'Samuel', 'Felipe', 'Gustavo', 'Rafael', 'João', 'Daniel', 'Vitor', 'Leonardo', 'Henrique'],
         female: ['Alice', 'Sophia', 'Helena', 'Valentina', 'Laura', 'Isabella', 'Manuela', 'Júlia', 'Heloísa', 'Luiza', 'Maria', 'Lívia', 'Giovanna', 'Beatriz', 'Mariana', 'Yasmin', 'Gabriela', 'Rafaela', 'Larissa', 'Beatriz'],
@@ -864,6 +907,26 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         male: ['John', 'William', 'Thomas', 'Robert', 'James', 'Richard', 'Edward', 'Henry', 'Walter', 'Samuel', 'Benjamin', 'Nathaniel', 'Jonathan', 'Daniel', 'David', 'Isaac', 'Jacob', 'Joshua', 'Ezekiel', 'Jeremiah', 'Ebenezer', 'Cornelius', 'Barnabas', 'Gideon', 'Caleb', 'Elijah', 'Josiah', 'Zechariah', 'Obadiah', 'Hezekiah'],
         female: ['Mary', 'Elizabeth', 'Sarah', 'Hannah', 'Rebecca', 'Ruth', 'Esther', 'Rachel', 'Deborah', 'Abigail', 'Martha', 'Lydia', 'Priscilla', 'Susanna', 'Charity', 'Faith', 'Hope', 'Patience', 'Temperance', 'Prudence', 'Mercy', 'Comfort', 'Submit', 'Silence', 'Experience', 'Thankful', 'Deliverance', 'Bathsheba', 'Mehitable', 'Keturah'],
         surname: ['Smith', 'Brown', 'Johnson', 'Williams', 'Jones', 'Miller', 'Davis', 'Wilson', 'Moore', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White', 'Harris', 'Martin', 'Thompson', 'Garcia', 'Martinez', 'Robinson', 'Clark', 'Rodriguez', 'Lewis', 'Lee', 'Walker', 'Hall', 'Allen', 'Young', 'Hernandez', 'King']
+    },
+
+    /**
+     * North America after the colonial naming world.
+     *
+     * NORTH_AMERICAN_COLONIAL is a seventeenth- and eighteenth-century set —
+     * Ebenezer, Hezekiah, Thankful, Experience, Submit — and it was serving as
+     * the fallback for the whole zone right up to the present, so a student
+     * generating 1920s California met a Puritan. It now stops at 1840 and this
+     * takes over. The given names are the ones the US census and Social
+     * Security records actually show as common between the mid-nineteenth
+     * century and the mid-twentieth; the surnames keep the mix of Anglo,
+     * Irish, German, Italian, Jewish, Mexican and African American names that
+     * a US city of that period would hold, because the previous list was Anglo
+     * with three Spanish surnames appended.
+     */
+    NORTH_AMERICAN_MODERN: {
+        male: ['John', 'William', 'James', 'Charles', 'George', 'Robert', 'Joseph', 'Frank', 'Edward', 'Thomas', 'Henry', 'Walter', 'Harry', 'Arthur', 'Albert', 'Fred', 'Raymond', 'Clarence', 'Howard', 'Ernest', 'Leo', 'Roy', 'Earl', 'Chester', 'Floyd', 'Vernon', 'Clyde', 'Melvin', 'Stanley', 'Herman', 'Lloyd', 'Willie', 'Eugene', 'Norman', 'Russell'],
+        female: ['Mary', 'Helen', 'Margaret', 'Anna', 'Ruth', 'Elizabeth', 'Dorothy', 'Marie', 'Florence', 'Mildred', 'Alice', 'Ethel', 'Lillian', 'Gladys', 'Edna', 'Frances', 'Rose', 'Louise', 'Grace', 'Bertha', 'Evelyn', 'Pearl', 'Clara', 'Hazel', 'Irene', 'Marion', 'Beatrice', 'Thelma', 'Doris', 'Viola', 'Agnes', 'Josephine', 'Bernice', 'Lucille', 'Wilma'],
+        surname: ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Miller', 'Davis', 'Wilson', 'Anderson', 'Taylor', 'Thomas', 'Moore', 'Martin', 'Thompson', 'White', 'Harris', 'Clark', 'Lewis', 'Walker', 'Hall', 'Young', 'King', 'Wright', 'Scott', 'Green', 'Baker', 'Adams', 'Nelson', 'Carter', 'Mitchell', 'Murphy', 'Kelly', 'Sullivan', "O'Brien", 'Ryan', 'Schmidt', 'Mueller', 'Schneider', 'Hoffman', 'Weber', 'Rossi', 'Russo', 'Esposito', 'Marino', 'Ricci', 'Cohen', 'Levy', 'Goldberg', 'Katz', 'Garcia', 'Martinez', 'Rodriguez', 'Hernandez', 'Lopez', 'Gonzalez', 'Ramirez', 'Flores', 'Washington', 'Jefferson', 'Freeman', 'Jackson', 'Robinson', 'Nowak', 'Kowalski', 'Novak', 'Larsen', 'Olson', 'Hansen']
     },
 
     // === MADAGASCAR & INDIAN OCEAN ===
@@ -1614,10 +1677,27 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1536, before: 1816, keys: ['SPANISH_CASTILIAN', 'GUARANI', 'MAPUCHE'] },
             { after: 1816, keys: ['SPANISH_LATIN_AMERICAN', 'ITALIAN', 'GERMAN', 'GUARANI'] }
         ],
+        // Brazil, not Virginia. `AFRICAN_AMERICAN` is a set of United States
+        // names — its given names are twentieth-century US census names, Shirley
+        // and Patricia among them — and it was standing in for the enslaved and
+        // free Black population of colonial Brazil, who were baptised into
+        // Portuguese names. That is how a persona on the São Paulo Plateau in
+        // 1681 came out as "John Allen". `AFRO_BRAZILIAN` replaces it.
+        //
+        // Dutch Brazil was real but narrow: Pernambuco and Bahia, 1630 to 1654,
+        // and never São Paulo. It is bounded below rather than spread across
+        // three centuries of the whole coast.
         "Atlantic Coast": [
             { before: 1500, keys: ['TUPI', 'GUARANI'] },
-            { after: 1500, before: 1822, keys: ['PORTUGUESE', 'AFRICAN_AMERICAN', 'TUPI', 'GUARANI', 'DUTCH'] },
-            { after: 1822, keys: ['PORTUGUESE_BRAZIL', 'AFRICAN_AMERICAN', 'ITALIAN', 'GERMAN', 'JAPANESE'] }
+            { after: 1500, before: 1822, keys: ['PORTUGUESE', 'AFRO_BRAZILIAN', 'TUPI', 'GUARANI'] },
+            { after: 1822, keys: ['PORTUGUESE_BRAZIL', 'AFRO_BRAZILIAN', 'ITALIAN', 'GERMAN', 'JAPANESE'] }
+        ],
+        "Pernambuco Highlands": [
+            { before: 1500, keys: ['TUPI'] },
+            { after: 1500, before: 1630, keys: ['PORTUGUESE', 'AFRO_BRAZILIAN', 'TUPI'] },
+            { after: 1630, before: 1654, keys: ['PORTUGUESE', 'AFRO_BRAZILIAN', 'DUTCH', 'TUPI'] },
+            { after: 1654, before: 1822, keys: ['PORTUGUESE', 'AFRO_BRAZILIAN', 'TUPI'] },
+            { after: 1822, keys: ['PORTUGUESE_BRAZIL', 'AFRO_BRAZILIAN'] }
         ],
         "Guiana Shield": [
             { before: 1600, keys: ['CARIB', 'TUPI', 'GUARANI'] },
@@ -1760,6 +1840,38 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1897, keys: ['MALAGASY_MERINA', 'FRENCH'] }
         ]
     },
+    /**
+     * Southeast Asia, which now has its own cultural zone. These four regions
+     * were entries under `SOUTH_ASIAN`, so the lookup only reached them when
+     * the zone happened to be South Asian — which it always was, because the
+     * geography filed the Philippines under the South Asian continent.
+     */
+    "SOUTHEAST_ASIAN": {
+        "Mainland Southeast Asia": [
+            { before: 1000, keys: ['KHMER', 'BURMESE'] },
+            { after: 1000, before: 1887, keys: ['KHMER', 'VIETNAMESE', 'THAI', 'BURMESE', 'MALAY'] },
+            { after: 1887, keys: ['VIETNAMESE', 'THAI', 'KHMER', 'FRENCH', 'ENGLISH'] }
+        ],
+        "Indochina Interior": [
+            { before: 1893, keys: ['THAI', 'KHMER', 'VIETNAMESE'] },
+            { after: 1893, keys: ['THAI', 'FRENCH', 'VIETNAMESE'] }
+        ],
+        "Maritime Southeast Asia": [
+           { before: 800, keys: ['INDONESIAN', 'VIETNAMESE'] },
+            { before: 1300, keys: ['MALAY', 'INDONESIAN', 'DRAVIDIAN', 'VIETNAMESE'] },
+            // Ordinary-person generation defaults to local naming. Colonial and
+            // merchant-diaspora identities need a coordinated explicit track;
+            // selecting a European name here by itself also changed appearance
+            // while leaving religion and household context local.
+            { after: 1300, before: 1945, keys: ['MALAY_ISLAMIC_HISTORICAL', 'MALAY', 'INDONESIAN', 'JAVANESE'] },
+            { after: 1945, keys: ['MALAY', 'INDONESIAN', 'CHINESE_CANTONESE'] }
+        ],
+        "Philippines": [
+            { before: 1565, keys: ['MELANESIAN'] },
+            { after: 1565, before: 1898, keys: ['FILIPINO', 'SPANISH_CASTILIAN'] },
+            { after: 1898, keys: ['FILIPINO', 'ENGLISH', 'SPANISH_LATIN_AMERICAN', 'JAPANESE'] }
+        ],
+    },
     "SOUTH_ASIAN": {
         "Indus Valley": [
             { before: 1206, keys: ['SANSKRIT_CLASSICAL', 'PUNJABI'] },
@@ -1791,30 +1903,6 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1948, keys: ['TAMIL', 'DRAVIDIAN', 'ENGLISH'] }
         ],
         // Southeast Asia
-        "Mainland Southeast Asia": [
-            { before: 1000, keys: ['KHMER', 'BURMESE'] },
-            { after: 1000, before: 1887, keys: ['KHMER', 'VIETNAMESE', 'THAI', 'BURMESE', 'MALAY'] },
-            { after: 1887, keys: ['VIETNAMESE', 'THAI', 'KHMER', 'FRENCH', 'ENGLISH'] }
-        ],
-        "Indochina Interior": [
-            { before: 1893, keys: ['THAI', 'KHMER', 'VIETNAMESE'] },
-            { after: 1893, keys: ['THAI', 'FRENCH', 'VIETNAMESE'] }
-        ],
-        "Maritime Southeast Asia": [
-           { before: 800, keys: ['INDONESIAN', 'VIETNAMESE'] },
-            { before: 1300, keys: ['MALAY', 'INDONESIAN', 'DRAVIDIAN', 'VIETNAMESE'] },
-            // Ordinary-person generation defaults to local naming. Colonial and
-            // merchant-diaspora identities need a coordinated explicit track;
-            // selecting a European name here by itself also changed appearance
-            // while leaving religion and household context local.
-            { after: 1300, before: 1945, keys: ['MALAY_ISLAMIC_HISTORICAL', 'MALAY', 'INDONESIAN', 'JAVANESE'] },
-            { after: 1945, keys: ['MALAY', 'INDONESIAN', 'CHINESE_CANTONESE'] }
-        ],
-        "Philippines": [
-            { before: 1565, keys: ['MELANESIAN'] },
-            { after: 1565, before: 1898, keys: ['FILIPINO', 'SPANISH_CASTILIAN'] },
-            { after: 1898, keys: ['FILIPINO', 'ENGLISH', 'SPANISH_LATIN_AMERICAN', 'JAPANESE'] }
-        ],
         "Taiwan and East China Sea": [
             { before: 1624, keys: ['CHINESE_CANTONESE', 'POLYNESIAN'] },
             { after: 1624, before: 1895, keys: ['CHINESE_CANTONESE', 'DUTCH'] },
@@ -2088,36 +2176,6 @@ export function getCulturalGroupsByPeriod(
  * Compound name parts for indigenous North American names (pre-1600)
  * Pattern: Adjective/Verb + Animal/Nature element
  */
-const NORTH_AMERICAN_COMPOUND_PARTS = {
-    prefixes: {
-        // Movement/Action
-        movement: ['Running', 'Walking', 'Flying', 'Swimming', 'Leaping', 'Dancing', 'Stalking', 'Climbing', 'Diving', 'Soaring'],
-        // State/Quality
-        state: ['Sleeping', 'Sitting', 'Standing', 'Resting', 'Watching', 'Waiting', 'Listening', 'Dreaming'],
-        // Speed/Manner
-        speed: ['Swift', 'Quick', 'Slow', 'Silent', 'Quiet', 'Still', 'Gentle', 'Strong', 'Proud', 'Brave'],
-        // Color
-        color: ['White', 'Black', 'Red', 'Yellow', 'Gray', 'Brown', 'Spotted', 'Striped'],
-        // Size/Age
-        size: ['Little', 'Big', 'Tall', 'Small', 'Young', 'Old', 'Great'],
-        // Time/Season
-        time: ['Morning', 'Evening', 'Night', 'Dawn', 'Dusk', 'Winter', 'Summer', 'Spring', 'Autumn'],
-        // Direction/Location
-        direction: ['North', 'South', 'East', 'West', 'Mountain', 'River', 'Sky', 'Earth']
-    },
-    suffixes: {
-        // Land animals
-        landAnimals: ['Bear', 'Wolf', 'Deer', 'Elk', 'Fox', 'Coyote', 'Rabbit', 'Beaver', 'Otter', 'Badger', 'Lynx', 'Cougar', 'Moose', 'Buffalo', 'Antelope', 'Raccoon', 'Squirrel', 'Mink'],
-        // Birds
-        birds: ['Eagle', 'Hawk', 'Owl', 'Raven', 'Crow', 'Falcon', 'Heron', 'Crane', 'Duck', 'Goose', 'Swan', 'Jay', 'Sparrow', 'Dove', 'Turkey', 'Quail', 'Woodpecker'],
-        // Fish/Water creatures
-        water: ['Salmon', 'Trout', 'Turtle', 'Frog', 'Fish', 'Sturgeon', 'Pike'],
-        // Reptiles/Insects
-        other: ['Snake', 'Lizard', 'Spider', 'Butterfly', 'Dragonfly', 'Cricket', 'Bee'],
-        // Nature elements
-        nature: ['Cloud', 'Thunder', 'Lightning', 'Rain', 'Snow', 'Wind', 'Stone', 'Tree', 'Flower', 'Leaf', 'River', 'Lake', 'Fire', 'Star', 'Moon', 'Sun', 'Shadow', 'Feather', 'Arrow', 'Bow']
-    }
-};
 
 /**
  * Proto-Semitic style name components for ancient MENA (before 1000 BCE)
@@ -2134,20 +2192,19 @@ const PROTO_SEMITIC_PARTS = {
 /**
  * Generates a compound Native American style name
  */
-function generateCompoundNativeAmericanName(gender: 'male' | 'female'): string {
-    const prefixCategories = Object.keys(NORTH_AMERICAN_COMPOUND_PARTS.prefixes) as (keyof typeof NORTH_AMERICAN_COMPOUND_PARTS.prefixes)[];
-    const suffixCategories = Object.keys(NORTH_AMERICAN_COMPOUND_PARTS.suffixes) as (keyof typeof NORTH_AMERICAN_COMPOUND_PARTS.suffixes)[];
-
-    const prefixCat = prefixCategories[Math.floor(seededRandom() * prefixCategories.length)];
-    const suffixCat = suffixCategories[Math.floor(seededRandom() * suffixCategories.length)];
-
-    const prefixes = NORTH_AMERICAN_COMPOUND_PARTS.prefixes[prefixCat];
-    const suffixes = NORTH_AMERICAN_COMPOUND_PARTS.suffixes[suffixCat];
-
-    const prefix = prefixes[Math.floor(seededRandom() * prefixes.length)];
-    const suffix = suffixes[Math.floor(seededRandom() * suffixes.length)];
-
-    return `${prefix} ${suffix}`;
+/**
+ * Delegates to the regional generator. The parts table this used to draw on was
+ * one continent-wide list, so a family on the Baffin coast in 1400 came out as
+ * Flying Turkey, Sitting Raccoon and Summer Bee — none of which live within two
+ * thousand miles of there. `deepTimeAmericanNames.ts` keeps a lexicon per
+ * region, so an Arctic name is built from seals and ptarmigan.
+ */
+function generateCompoundNativeAmericanName(
+    _gender: 'male' | 'female',
+    region = '',
+    year = 0,
+): string {
+    return generateDeepTimeAmericanName({ region, location: region, year, random: seededRandom });
 }
 
 /**
@@ -2173,7 +2230,8 @@ function generateProtoSemiticName(gender: 'male' | 'female'): string {
  */
 export interface FallbackConfig {
     groups?: string[];
-    generator?: (gender: 'male' | 'female') => string;
+    /** `region` and `year` matter to the American generator; others ignore them. */
+    generator?: (gender: 'male' | 'female', region?: string, year?: number) => string;
 }
 
 export function getEraSpecificFallback(zone: CulturalZone, year: number): FallbackConfig {
@@ -2238,6 +2296,15 @@ export function getEraSpecificFallback(zone: CulturalZone, year: number): Fallba
                 return { groups: ['CHINESE_MANDARIN', 'JAPANESE', 'KOREAN', 'VIETNAMESE'] };
             }
 
+        case 'SOUTHEAST_ASIAN':
+            // Austronesian on the islands, Austroasiatic and Tai on the
+            // mainland. Sanskrit-derived court names arrive with Indic religion
+            // but never displace the local stock.
+            if (year < -500) return { groups: ['PREHISTORIC_AUSTRONESIAN'] };
+            if (year < 800) return { groups: ['PREHISTORIC_AUSTRONESIAN', 'MALAY', 'KHMER', 'VIETNAMESE'] };
+            if (year < 1500) return { groups: ['MALAY', 'JAVANESE', 'KHMER', 'THAI', 'BURMESE', 'VIETNAMESE'] };
+            return { groups: ['MALAY', 'INDONESIAN', 'JAVANESE', 'FILIPINO', 'THAI', 'KHMER', 'VIETNAMESE', 'BURMESE'] };
+
         case 'SOUTH_ASIAN':
             // Sanskrit-derived names work broadly
             if (year < 500) {
@@ -2285,7 +2352,7 @@ export function generateRandomName(
         if (fallback.generator) {
             // Use custom generator for compound names
             return {
-                firstName: fallback.generator(gender),
+                firstName: fallback.generator(gender, undefined, year),
                 surname: '',
                 culturalGroup: `${culturalZone}_GENERATED`
             };
@@ -2404,7 +2471,7 @@ export function getCulturalGroupsByZone(zone: CulturalZone): string[] {
             );
         case 'EAST_ASIAN':
             return groups.filter(g => 
-                ['JAPANESE', 'CHINESE_MANDARIN', 'CHINESE_CANTONESE', 'KOREAN', 'KOREAN_ANCIENT', 'VIETNAMESE', 'THAI', 'BURMESE', 'KHMER', 'MALAY', 'INDONESIAN', 'MONGOLIAN_TRADITIONAL', 'KAZAKH', 'UZBEK', 'KYRGYZ', 'TURKMEN', 'EAST_ASIAN'].includes(g)
+                ['JAPANESE', 'CHINESE_MANDARIN', 'CHINESE_CANTONESE', 'KOREAN', 'KOREAN_ANCIENT', 'MONGOLIAN_TRADITIONAL', 'KAZAKH', 'UZBEK', 'KYRGYZ', 'TURKMEN', 'EAST_ASIAN'].includes(g)
             );
         case 'MENA':
             return groups.filter(g => 
@@ -2413,6 +2480,11 @@ export function getCulturalGroupsByZone(zone: CulturalZone): string[] {
         case 'SOUTH_ASIAN':
             return groups.filter(g => 
                 ['HINDI', 'BENGALI', 'TAMIL', 'PUNJABI', 'SOUTH_ASIAN'].includes(g)
+            );
+        case 'SOUTHEAST_ASIAN':
+            return groups.filter(g =>
+                ['MALAY', 'INDONESIAN', 'JAVANESE', 'FILIPINO', 'THAI', 'KHMER', 'VIETNAMESE',
+                 'BURMESE', 'LAO', 'CHAM', 'PREHISTORIC_AUSTRONESIAN'].includes(g)
             );
         case 'SUB_SAHARAN_AFRICAN':
             return groups.filter(g => 

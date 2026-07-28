@@ -449,6 +449,46 @@ export const ATTRIBUTION_WINDOWS: AttributionWindow[] = [
         'Along the western lowlands and the Nile approaches.'),
     ],
   },
+  // The western bulge is not Bantu and never was. The Bantu expansion left the
+  // Cameroon grassfields going south and east, so the Guinea forest, the Volta
+  // basin and the western Sahel kept Kwa, Mande, Gur and Atlantic languages
+  // throughout. Without this rule the zone-wide window gave a persona in the
+  // eighth-century Ivory Coast a fifty per cent chance of speaking Bantu, which
+  // is a language family that never reached them.
+  {
+    id: 'ssa-west-forest',
+    yearRange: [-3000, 1600],
+    zones: ['SUB_SAHARAN_AFRICAN'],
+    places: /\b(ivory coast|west african forest|lower guinea|upper guinea|gold coast|guinea|volta|niger delta|benin|dahomey|yoruba|igbo|akan|asante|ashanti|liberia|sierra leone|senegambia|casamance|gambia)\b/,
+    hypotheses: [
+      h('Kwa (reconstructed)', 'Niger-Congo', 0.4, 'reconstructed', ['blench2006'],
+        'The forest belt from the Bandama to the Niger: the ancestors of Akan, Ewe, Yoruba and Igbo.'),
+      h('Mande (reconstructed)', 'Niger-Congo', 0.28, 'reconstructed', ['blench2006'],
+        'The upper Niger and the woodland north of the forest; an early and divergent branch.'),
+      h('Atlantic (reconstructed)', 'Niger-Congo', 0.17, 'reconstructed', ['blench2006'],
+        'The coast from the Senegal to Sierra Leone.'),
+      h('Gur (reconstructed)', 'Niger-Congo', 0.15, 'reconstructed', ['blench2006'],
+        'The Volta basin and the savanna behind the forest.'),
+    ],
+  },
+  {
+    id: 'ssa-west-sahel',
+    yearRange: [-3000, 1600],
+    zones: ['SUB_SAHARAN_AFRICAN'],
+    places: /\b(sahel|western sudan|niger bend|timbuktu|gao|jenne|djenne|wagadu|ghana empire|mali|songhai|hausa|kanem|bornu|chad basin|sokoto|air massif)\b/,
+    hypotheses: [
+      h('Mande (reconstructed)', 'Niger-Congo', 0.34, 'reconstructed', ['blench2006'],
+        'Soninke, Malinke and their relatives along the upper Niger.'),
+      h('Songhay (reconstructed)', 'Nilo-Saharan', 0.22, 'conjectural', ['ehret2001'],
+        'The Niger bend; its wider affiliation is unsettled.'),
+      h('Chadic (reconstructed)', 'Afro-Asiatic', 0.2, 'reconstructed', ['ehret1995'],
+        'Around Lake Chad and westward: the ancestors of Hausa.'),
+      h('Atlantic (reconstructed)', 'Niger-Congo', 0.13, 'reconstructed', ['blench2006'],
+        'Fulfulde and its relatives, spreading east with cattle.'),
+      h('Berber (attested)', 'Afro-Asiatic', 0.11, 'attested', ['glottolog'],
+        'The Saharan trade routes and their southern termini.'),
+    ],
+  },
   {
     id: 'ssa-early',
     yearRange: [-10000, -3000],
@@ -897,18 +937,107 @@ export const ATTRIBUTION_WINDOWS: AttributionWindow[] = [
   // =========================================================================
   // NORTH AMERICA AFTER CONTACT
   // =========================================================================
+  // One window used to cover 1500 to 2100 with a single set of proportions, so
+  // Los Angeles in 1925 was twenty per cent Algonquian-speaking and fifteen per
+  // cent French. The linguistic history of post-contact North America is mostly
+  // the story of those proportions collapsing, which is exactly what a window
+  // with fixed weights cannot show. Three bands instead.
   {
-    id: 'nac-colonial',
-    yearRange: [1500, 2100],
+    id: 'nac-early-colonial',
+    yearRange: [1500, 1700],
     zones: ['NORTH_AMERICAN_COLONIAL'],
     hypotheses: [
-      h('English (attested)', 'Indo-European', 0.45, 'attested', ['glottolog']),
-      h('Algonquian (reconstructed)', 'Algic', 0.2, 'reconstructed', ['goddard1996'],
+      h('Algonquian (reconstructed)', 'Algic', 0.42, 'reconstructed', ['goddard1996'],
         'Still the majority speech of the eastern seaboard through the seventeenth century.'),
-      h('French (attested)', 'Indo-European', 0.15, 'attested', ['glottolog'],
+      h('Iroquoian (reconstructed)', 'Iroquoian', 0.18, 'reconstructed', ['goddard1996']),
+      h('English (attested)', 'Indo-European', 0.18, 'attested', ['glottolog'],
+        'Confined to a narrow coastal strip before 1700.'),
+      h('Spanish (attested)', 'Indo-European', 0.12, 'attested', ['glottolog'],
+        'Florida, New Mexico and the Californian missions.'),
+      h('French (attested)', 'Indo-European', 0.1, 'attested', ['glottolog'],
         'The St Lawrence, the Great Lakes and the Mississippi.'),
-      h('Spanish (attested)', 'Indo-European', 0.1, 'attested', ['glottolog']),
-      h('Iroquoian (reconstructed)', 'Iroquoian', 0.1, 'reconstructed', ['goddard1996']),
+    ],
+  },
+  {
+    id: 'nac-late-colonial',
+    yearRange: [1700, 1850],
+    zones: ['NORTH_AMERICAN_COLONIAL'],
+    hypotheses: [
+      h('English (attested)', 'Indo-European', 0.52, 'attested', ['glottolog']),
+      h('Algonquian (reconstructed)', 'Algic', 0.14, 'reconstructed', ['goddard1996']),
+      h('Spanish (attested)', 'Indo-European', 0.12, 'attested', ['glottolog']),
+      h('French (attested)', 'Indo-European', 0.1, 'attested', ['glottolog']),
+      h('West African languages of the enslaved (inferred)', 'Niger-Congo', 0.07, 'inferred', ['glottolog'],
+        'A fifth of the population of the mainland colonies in 1770 was African-born or one generation from it.'),
+      h('Iroquoian (reconstructed)', 'Iroquoian', 0.05, 'reconstructed', ['goddard1996']),
+    ],
+  },
+  {
+    id: 'nac-modern',
+    yearRange: [1850, 2100],
+    zones: ['NORTH_AMERICAN_COLONIAL'],
+    hypotheses: [
+      h('English (attested)', 'Indo-European', 0.74, 'attested', ['glottolog']),
+      h('Spanish (attested)', 'Indo-European', 0.12, 'attested', ['glottolog'],
+        'The Southwest, and everywhere after the mid-twentieth century.'),
+      h('German (attested)', 'Indo-European', 0.04, 'attested', ['glottolog'],
+        'The second language of the United States until the First World War.'),
+      h('French (attested)', 'Indo-European', 0.04, 'attested', ['glottolog'],
+        'Quebec, Acadia and the Louisiana parishes.'),
+      h('Italian, Yiddish or Polish (attested)', 'Indo-European', 0.04, 'attested', ['glottolog'],
+        'The languages of the 1880-1920 migration, spoken at home for a generation or two.'),
+      h('Indigenous language of the region (inferred)', 'unclassified', 0.02, 'inferred', ['goddard1996'],
+        'Under a per cent of the continental population by 1900, and falling under active suppression.'),
+    ],
+  },
+
+  // =========================================================================
+  // SOUTHEAST ASIA
+  //
+  // These regions used to be filed under South Asia, so the resolver reached
+  // for the Indo-Aryan and Dravidian backstop and a persona on the Sulu Sea in
+  // 1926 BCE was given Proto-Indo-Iranian. The Austronesian expansion out of
+  // Taiwan is one of the best-attested language dispersals there is, and it has
+  // nothing to do with the Indian subcontinent.
+  // =========================================================================
+  {
+    id: 'sea-island-early',
+    yearRange: [-10000, -2500],
+    zones: ['SOUTHEAST_ASIAN'],
+    places: /\b(philippin|luzon|visayan|mindanao|palawan|sulu|borneo|java|sumatra|celebes|sulawesi|moluc|bali|timor|maritime southeast|malay archipelago)\b/,
+    hypotheses: [
+      h('Pre-Austronesian language of the islands (hypothetical)', 'unclassified', 0.75, 'conjectural', ['blust2013'],
+        'The islands were peopled tens of thousands of years before the Austronesian expansion; nothing of what those people spoke survives.'),
+      h('Papuan-related language (hypothetical)', 'unclassified', 0.25, 'conjectural', ['glottolog'],
+        'Eastern Indonesia keeps non-Austronesian languages to this day.'),
+    ],
+  },
+  {
+    id: 'sea-island-austronesian',
+    yearRange: [-2500, 2100],
+    zones: ['SOUTHEAST_ASIAN'],
+    places: /\b(philippin|luzon|visayan|mindanao|palawan|sulu|borneo|java|sumatra|celebes|sulawesi|moluc|bali|timor|maritime southeast|malay archipelago|malaya|malacca|sunda)\b/,
+    hypotheses: [
+      h('Malayo-Polynesian language of the region', 'Austronesian', 0.7, 'reconstructed', ['blust2013', 'glottolog'],
+        'Out of Taiwan by about 2500 BCE, through the Philippines and into island Southeast Asia.'),
+      h('Pre-Austronesian survival (hypothetical)', 'unclassified', 0.18, 'conjectural', ['blust2013'],
+        'Older languages persisted in the interiors and in the east long after the coasts had shifted.'),
+      h('Papuan-related language (hypothetical)', 'unclassified', 0.12, 'conjectural', ['glottolog']),
+    ],
+  },
+  {
+    id: 'sea-mainland',
+    yearRange: [-10000, 2100],
+    zones: ['SOUTHEAST_ASIAN'],
+    places: /\b(indochina|mainland southeast|mekong|annam|tonkin|siam|thai|burma|irrawaddy|salween|khmer|angkor|champa|laos|malay peninsula|isthmus of kra)\b/,
+    hypotheses: [
+      h('Austroasiatic language of the region', 'Austroasiatic', 0.55, 'reconstructed', ['sidwell2015', 'glottolog'],
+        'Mon-Khmer: the oldest widely spread family on the mainland.'),
+      h('Tai-Kadai language of the region', 'Tai-Kadai', 0.2, 'inferred', ['glottolog'],
+        'A later arrival from the north, dominant in the Chao Phraya only in the last millennium.'),
+      h('Tibeto-Burman language of the region', 'Sino-Tibetan', 0.15, 'inferred', ['glottolog']),
+      h('Austronesian language of the coast', 'Austronesian', 0.1, 'inferred', ['blust2013'],
+        'Cham and its relatives held the central Vietnamese coast.'),
     ],
   },
 
@@ -943,6 +1072,21 @@ export const ATTRIBUTION_WINDOWS: AttributionWindow[] = [
       h('Indo-Aryan language of the region', 'Indo-European', 0.5, 'inferred', ['southworth2005', 'glottolog']),
       h('Dravidian language of the region', 'Dravidian', 0.35, 'inferred', ['southworth2005']),
       h('Munda language of the region', 'Austroasiatic', 0.15, 'inferred', ['southworth2005']),
+    ],
+  },
+  {
+    id: 'backstop-southeast-asian',
+    yearRange: [-10000, 2100],
+    zones: ['SOUTHEAST_ASIAN'],
+    hypotheses: [
+      h('Austronesian language of the region', 'Austronesian', 0.45, 'inferred', ['blust2013', 'glottolog'],
+        'The islands, from Luzon to Timor, and the Malay peninsula.'),
+      h('Austroasiatic language of the region', 'Austroasiatic', 0.3, 'inferred', ['sidwell2015', 'glottolog'],
+        'The mainland: the ancestors of Mon, Khmer and Vietnamese.'),
+      h('Tai-Kadai language of the region', 'Tai-Kadai', 0.15, 'inferred', ['glottolog'],
+        'Spreading south out of what is now Guangxi and Guizhou.'),
+      h('Tibeto-Burman language of the region', 'Sino-Tibetan', 0.1, 'inferred', ['glottolog'],
+        'The Irrawaddy and the hills behind it.'),
     ],
   },
   {

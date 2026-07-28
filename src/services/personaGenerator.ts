@@ -67,8 +67,8 @@ function generateLifeEventBackstorySentence(
 
 export interface GenerationParams {
   /**
-   * Explore (default) keeps the whole world reachable; true-frequency samples
-   * eras and regions in proportion to how many people actually lived in them.
+   * True-frequency (default) samples eras and regions in proportion to how many
+   * people actually lived in them; explore keeps the whole world reachable.
    * See docs/DEMOGRAPHY.md §4.
    */
   samplingMode?: SamplingMode;
@@ -129,6 +129,7 @@ const culturalZoneToGeographyKey: Record<CulturalZone, string> = {
   'EUROPEAN': 'Europe',
   'EAST_ASIAN': 'East Asia',
   'SOUTH_ASIAN': 'South Asia',
+  'SOUTHEAST_ASIAN': 'Southeast Asia',
   'MENA': 'MENA',
   'SUB_SAHARAN_AFRICAN': 'Sub Saharan Africa',
   'OCEANIA': 'Oceania',
@@ -188,7 +189,7 @@ function getEraFromYear(year: number): HistoricalEra {
   if (year < 1450) return 'MEDIEVAL' as HistoricalEra;
   if (year < 1750) return 'RENAISSANCE_EARLY_MODERN' as HistoricalEra;
   if (year < 1900) return 'INDUSTRIAL_ERA' as HistoricalEra;
-  if (year < 2000) return 'MODERN_ERA' as HistoricalEra;
+  if (year < 2030) return 'MODERN_ERA' as HistoricalEra;
   return 'FUTURE_ERA' as HistoricalEra;
 }
 
@@ -365,6 +366,7 @@ function generatePersonaWithSeed(
     location,
     characterName: character.name,
     profession: character.profession,
+    religion: character.religion,
     seed: params.seed ?? 0,
   });
   const languageData = attributionToLanguageData(languageAttribution, culturalZone, year);

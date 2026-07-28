@@ -25,8 +25,21 @@ export interface BirthplaceContext {
 /**
  * Cities worth naming, with the year from which the name applies. A persona
  * born near one gets the city rather than the map region.
+ *
+ * `zones` exists because the map has one region name in two hemispheres:
+ * "Atlantic Coast" is a region of both North and South America in
+ * `geography.ts`. The place patterns here are matched against the region
+ * string alone, so a persona on the São Paulo Plateau in 1681 matched
+ * /atlantic coast/ and was born in Jamestown, Virginia. Any pattern that could
+ * describe two continents must say which one it means.
  */
-const NAMED_SETTLEMENTS: Array<{ match: RegExp; from: number; until?: number; name: string }> = [
+const NAMED_SETTLEMENTS: Array<{
+  match: RegExp;
+  from: number;
+  until?: number;
+  name: string;
+  zones?: CulturalZone[];
+}> = [
   { match: /moscow/i, from: 1147, name: 'Moscow' },
   { match: /london|thames/i, from: 50, name: 'London' },
   { match: /latium|roman campagna|tiber/i, from: -753, name: 'Rome' },
@@ -62,8 +75,24 @@ const NAMED_SETTLEMENTS: Array<{ match: RegExp; from: number; until?: number; na
   { match: /ethiopian highlands|abyssin/i, from: -100, until: 900, name: 'Aksum' },
   { match: /hausa|kano/i, from: 999, name: 'Kano' },
   { match: /lower guinea|benin/i, from: 1200, name: 'Benin City' },
-  { match: /atlantic coast|chesapeake|tidewater/i, from: 1607, name: 'Jamestown' },
-  { match: /northeast woodlands|hudson/i, from: 1625, name: 'New York' },
+  { match: /atlantic coast|chesapeake|tidewater/i, from: 1607, name: 'Jamestown',
+    zones: ['NORTH_AMERICAN_COLONIAL', 'NORTH_AMERICAN_PRE_COLUMBIAN'] },
+  { match: /northeast woodlands|hudson/i, from: 1625, name: 'New York',
+    zones: ['NORTH_AMERICAN_COLONIAL', 'NORTH_AMERICAN_PRE_COLUMBIAN'] },
+  // More specific than the coast-wide rule above, and listed after it because
+  // the last match wins.
+  { match: /boston|massachusetts bay|cape cod/i, from: 1630, name: 'Boston',
+    zones: ['NORTH_AMERICAN_COLONIAL'] },
+  { match: /delaware|pine barrens|philadelphia/i, from: 1682, name: 'Philadelphia',
+    zones: ['NORTH_AMERICAN_COLONIAL'] },
+  { match: /carolina|low ?country|charleston/i, from: 1670, name: 'Charleston',
+    zones: ['NORTH_AMERICAN_COLONIAL'] },
+  // The other Atlantic coast.
+  { match: /são paulo|sao paulo|piratininga/i, from: 1554, name: 'São Paulo', zones: ['SOUTH_AMERICAN'] },
+  { match: /rio de janeiro|guanabara/i, from: 1565, name: 'Rio de Janeiro', zones: ['SOUTH_AMERICAN'] },
+  { match: /bahia|recôncavo|reconcavo/i, from: 1549, name: 'Salvador', zones: ['SOUTH_AMERICAN'] },
+  { match: /pernambuco/i, from: 1537, name: 'Recife', zones: ['SOUTH_AMERICAN'] },
+  { match: /paraná delta|parana delta|rio de la plata|plata/i, from: 1580, name: 'Buenos Aires', zones: ['SOUTH_AMERICAN'] },
   { match: /iberian|castile|guadalquivir/i, from: 1248, name: 'Seville' },
   { match: /low countries|scheldt/i, from: 1200, name: 'Antwerp' },
   { match: /venet|adriatic|lagoon/i, from: 800, name: 'Venice' },
@@ -75,7 +104,8 @@ function namedSettlement(ctx: BirthplaceContext): string | undefined {
   const matches = NAMED_SETTLEMENTS.filter(entry =>
     entry.match.test(place)
     && ctx.year >= entry.from
-    && (entry.until === undefined || ctx.year < entry.until));
+    && (entry.until === undefined || ctx.year < entry.until)
+    && (!entry.zones || !ctx.culturalZone || entry.zones.includes(ctx.culturalZone)));
   return matches.length > 0 ? matches[matches.length - 1].name : undefined;
 }
 
@@ -160,5 +190,38 @@ export function describeBirthplace(
     // is the more useful of the two.
     return `${place} in ${city}`;
   }
-  return `${place} in ${regionLabel}`;
+  return `${place} ${regionPhrase(regionLabel)}`;
+}
+
+/**
+ * "in Sulu Sea" and "in Ryukyu Islands" are both wrong, in different ways.
+ *
+ * Many map regions are named for water — the Sulu Sea, the Philippine Sea, the
+ * Taiwan Strait — and nobody is born in a sea. Others are plural landforms that
+ * need a definite article in English. The region label is written into the
+ * birth sentence verbatim, so it is repaired here rather than in the map data,
+ * which uses these names correctly for their own purposes.
+ */
+export function regionPhrase(regionLabel: string): string {
+  const label = regionLabel.trim();
+  if (!label) return 'in a small settlement';
+  const lower = label.toLowerCase();
+
+  // Open water. The persona lived on its edge, not in it.
+  if (/\b(sea|ocean|strait|straits|channel|gulf|sound|bight|passage)\b/.test(lower)
+    && !/\b(coast|shore|island|isles|basin|valley|delta)\b/.test(lower)) {
+    return /^the\b/i.test(label) ? `on the shore of ${label}` : `on the shore of the ${label}`;
+  }
+
+  // Landforms, which take a definite article in English whether they are
+  // plural ("the Ryukyu Islands") or singular ("the Great Basin", "the Nile
+  // Valley"). A settlement name does not — "in Jamestown", not "in the
+  // Jamestown" — which is why this matches the landform noun rather than
+  // applying an article to everything.
+  if (!/^the\b/i.test(label)
+    && /\b(islands|isles|archipelago|highlands|lowlands|plains|hills|mountains|steppes|badlands|marshes|shoals|narrows|rockies|andes|alps|philippines|netherlands|basin|coast|plateau|valley|delta|steppe|desert|plain|peninsula|cordillera|massif|escarpment|savanna|tundra|taiga|rift|sahel|levant|caucasus|balkans|maghreb|outback|interior)\b/.test(lower)) {
+    return `in the ${label}`;
+  }
+
+  return `in ${label}`;
 }

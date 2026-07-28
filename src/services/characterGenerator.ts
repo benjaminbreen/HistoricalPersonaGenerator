@@ -1196,7 +1196,9 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         culture: culturalZone,
         era: generationContext.era,
         privilege,
-        year: dateInfo.year
+        year: dateInfo.year,
+        region: context.region,
+        location: context.location,
     });
     
     // Generate appearance with palette
@@ -1410,7 +1412,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             baseProfile.wealthLevel,
             spec?.age || baseProfile.age,
             i === 0 ? 'daily' : (noise.random() < 0.5 ? 'ceremony' : 'daily'),
-            `${context.region ?? ''} ${context.location ?? ''}`
+            `${context.region ?? ''} ${context.location ?? ''}`,
+            baseProfile.religion
         ).filter(m => !usedTypes.has(m.type)); // Don't repeat marking types
         
         // devLog(`[CharGen Spec] Found ${availableMarkings.length} available markings for slot ${i+1}`);
@@ -1511,6 +1514,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             ?? (partialCharacter.gender === 'Female' ? 'Female'
               : partialCharacter.gender === 'Male' ? 'Male' : undefined),
           hairColor: (partialCharacter.appearance as any)?.hairColor,
+          culturalZone: context.culturalZone,
+          year: dateInfo.year,
         },
         () => noise.random(),
       );

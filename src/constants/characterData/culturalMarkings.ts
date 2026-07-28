@@ -39,6 +39,14 @@ export interface CulturalMarking {
    * practice belonging to one of them says so here.
    */
   places?: RegExp;
+  /**
+   * The faiths a devotional marking belongs to. A tilaka is a statement about
+   * which god you serve, so it has no business on a Muslim, a Christian or a
+   * Jain: the card showed a Shaiva Tripundra above a religion field reading
+   * "Sunni Islam". Markings that are ethnic or occupational rather than
+   * devotional leave this unset and are unaffected.
+   */
+  religions?: RegExp;
   culturalSignificance: string;
 }
 
@@ -327,6 +335,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
         size: 'medium'
       }
     ],
+    // A tilaka names the god you serve. See `religions` on the interface.
+    religions: /hindu|vaishnav|shaiv|shakt|brahman|vedic/i,
     isPermanent: false,
     duration: 12,
     gender: 'any',
@@ -1174,7 +1184,8 @@ export function getMarkingsForCharacter(
   socialClass: string = 'modest',
   age: number = 30,
   occasion: string = 'daily',
-  place?: string
+  place?: string,
+  religion?: string
 ): CulturalMarking[] {
   
   // Determine age group
@@ -1190,6 +1201,9 @@ export function getMarkingsForCharacter(
 
     // Check sub-zone place scoping
     if (marking.places && !marking.places.test(placeLower)) return false;
+
+    // A devotional mark requires the devotion.
+    if (marking.religions && !marking.religions.test(religion ?? '')) return false;
     
     // Check era if specified
     if (marking.eras && era && !marking.eras.includes(era)) return false;

@@ -576,6 +576,18 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             "Trincomalee Harbor": { name: "Trincomalee Harbor", climate: ClimateType.TROPICAL, archetype: MapArchetype.BAY },
             "Maldives": { name: "Maldives", climate: ClimateType.TROPICAL, archetype: MapArchetype.ATOLL, economicActivityLevel: 2 }
         },
+    },
+    /**
+     * Southeast Asia.
+     *
+     * These regions used to sit under "South Asia", whose comment said it
+     * "now includes Southeast Asia". The consequence was not cosmetic: the
+     * continent decides the cultural zone, so a persona on the Sulu Sea was
+     * given reconstructed Proto-Dravidian names, Proto-Indo-Iranian as a
+     * native language, a lungi and a Vaishnava forehead mark. The Austronesian
+     * world is not a subdivision of the Indian one.
+     */
+    "Southeast Asia": {
         "Mainland Southeast Asia": {
             "Irrawaddy Valley": { name: "Irrawaddy Valley", climate: ClimateType.TROPICAL, archetype: MapArchetype.RIVER_PORT },
             "Mekong Delta": { name: "Mekong Delta", climate: ClimateType.TROPICAL, archetype: MapArchetype.SWAMP },
@@ -615,13 +627,12 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             "Palawan": { name: "Palawan", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
             "Sulu Sea": { name: "Sulu Sea", climate: ClimateType.TROPICAL, archetype: MapArchetype.SHOALS }
         },
-        "Taiwan and East China Sea": {
-            "Taiwan Strait": { name: "Taiwan Strait", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.STRAITS },
-            "Ryukyu Islands": { name: "Ryukyu Islands", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.ISLAND },
-            "East China Sea": { name: "East China Sea", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.OPEN_OCEAN }
-        }
     },
     "East Asia": {
+        "Taiwan and East China Sea": {
+            "Taiwan Strait": { name: "Taiwan Strait", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.STRAITS },
+            "East China Sea": { name: "East China Sea", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.OPEN_OCEAN }
+        },
         "Siberia": {
             "Western Siberia": { name: "Western Siberia", climate: ClimateType.COLD, archetype: MapArchetype.ALL_LAND, hasLakes: false },
             "Central Siberia": { name: "Central Siberia", climate: ClimateType.COLD, archetype: MapArchetype.ALL_LAND, economicActivityLevel: 1, hasLakes: false },

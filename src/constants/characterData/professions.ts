@@ -1627,6 +1627,90 @@ const SHARED_FUTURE_PROFESSIONS = {
     }
 };
 
+/**
+ * The general subsistence pool for North America outside Mesoamerica.
+ *
+ * Shared by antiquity and the medieval era. The era blocks are otherwise
+ * divided by culture area — Woodlands, Plains, Southwest, Northwest — and
+ * regions none of those describe (the Arctic, the Great Basin, the Northern
+ * Rockies, California) had no pool at all once the culture-area blocks were
+ * confined to their own ground.
+ */
+const NORTH_AMERICAN_FORAGERS = {
+
+            'Hunter': {
+                statRequirements: { minPerception: 6, minStamina: 6 },
+                keywords: 'game tracking',
+                emoji: '🏹'
+            },
+            'Fisher': {
+                statRequirements: { minPerception: 5, minDexterity: 5 },
+                keywords: 'river weir netting',
+                emoji: '🐟'
+            },
+            'Forager': {
+                statRequirements: { minPerception: 5, minStamina: 5 },
+                keywords: 'roots seeds berries',
+                emoji: '🌾'
+            },
+            'Seed Gatherer': {
+                statRequirements: { minPerception: 5, minStamina: 5 },
+                keywords: 'grass seed harvest',
+                emoji: '🌱'
+            },
+            'Acorn Processor': {
+                statRequirements: { minDexterity: 5, minStamina: 5 },
+                keywords: 'leaching mortar meal',
+                emoji: '🌰'
+            },
+            'Basket Maker': {
+                statRequirements: { minDexterity: 7, minCraftiness: 5 },
+                keywords: 'coiled twined weaving',
+                emoji: '🧺'
+            },
+            'Hide Worker': {
+                statRequirements: { minDexterity: 6, minStamina: 5 },
+                keywords: 'tanning scraping',
+                emoji: '🦬'
+            },
+            'Flintknapper': {
+                statRequirements: { minDexterity: 7, minCraftiness: 6 },
+                keywords: 'stone blades points',
+                emoji: '🪨'
+            },
+            'Canoe Builder': {
+                statRequirements: { minDexterity: 6, minStrength: 5 },
+                keywords: 'bark dugout',
+                emoji: '🛶'
+            },
+            'Fish Weir Builder': {
+                statRequirements: { minStrength: 5, minCraftiness: 5 },
+                keywords: 'tidal trap stakes',
+                emoji: '🪵'
+            },
+            'Shellfish Gatherer': {
+                statRequirements: { minPerception: 4, minStamina: 5 },
+                keywords: 'clam midden tideflat',
+                emoji: '🦪'
+            },
+            'Trapper': {
+                statRequirements: { minPerception: 6, minCraftiness: 5 },
+                keywords: 'snares small game',
+                emoji: '🦫'
+            },
+            'Medicine Person': {
+                statRequirements: { minIntelligence: 6, minPerception: 6 },
+                socialRequirements: { minReligiosity: 0.4 },
+                keywords: 'healing dreaming',
+                emoji: '🌿'
+            },
+            'Storyteller': {
+                statRequirements: { minIntelligence: 5, minPersuasion: 6 },
+                keywords: 'winter count oral history',
+                emoji: '📖'
+            }
+};
+
 export const PROFESSIONS: ProfessionData = {
     /* =================================================================== */
     /*                              EUROPE                                 */
@@ -3429,6 +3513,119 @@ export const PROFESSIONS: ProfessionData = {
     /* =================================================================== */
     /*                             SOUTH ASIA                              */
     /* =================================================================== */
+    /**
+     * Southeast Asia.
+     *
+     * Previously served by the South Asian table, which gave a fisher on the
+     * Sulu Sea a caste position and a dhoti. The economies here are wet rice,
+     * maritime trade, forest produce and — from the sixteenth century —
+     * plantation export, and the social vocabulary is the sultanate, the
+     * sangha, the datu and the kongsi rather than the varna.
+     */
+    SOUTHEAST_ASIAN: {
+        [HistoricalEra.PREHISTORY]: {
+            Foragers: {
+                'Forager': { statRequirements: { minPerception: 5 }, keywords: 'roots fruit forest', emoji: '🌿' },
+                'Fisher': { statRequirements: { minPerception: 5, minDexterity: 5 }, keywords: 'reef lagoon net', emoji: '🐟' },
+                'Shellfish Gatherer': { statRequirements: { minPerception: 4 }, keywords: 'midden reef flat', emoji: '🦪' },
+                'Hunter': { statRequirements: { minPerception: 6, minStamina: 5 }, keywords: 'blowpipe forest game', emoji: '🏹' },
+                'Toolmaker': { statRequirements: { minDexterity: 6, minCraftiness: 5 }, keywords: 'stone shell adze', emoji: '🪨' },
+                'Canoe Builder': { statRequirements: { minDexterity: 6, minStrength: 5 }, keywords: 'outrigger dugout', emoji: '🛶' },
+                'Bark Cloth Beater': { statRequirements: { minDexterity: 6 }, keywords: 'tapa barkcloth', emoji: '🧵' },
+                'Taro Planter': { statRequirements: { minStamina: 5 }, keywords: 'swidden tuber garden', emoji: '🌱' },
+            }
+        },
+        [HistoricalEra.ANTIQUITY]: {
+            Commoner: {
+                'Rice Farmer': { statRequirements: { minStamina: 6, minConstitution: 5 }, keywords: 'wet rice paddy terrace', emoji: '🌾' },
+                'Fisher': { statRequirements: { minPerception: 5, minDexterity: 5 }, keywords: 'reef lagoon net', emoji: '🐟' },
+                'Taro Planter': { statRequirements: { minStamina: 5 }, keywords: 'swidden tuber garden', emoji: '🌱' },
+                'Sago Gatherer': { statRequirements: { minStamina: 6 }, keywords: 'palm starch swamp', emoji: '🌴' },
+                'Boat Builder': { statRequirements: { minDexterity: 7, minStrength: 5 }, keywords: 'outrigger plank lashed', emoji: '🛶' },
+                'Salt Boiler': { statRequirements: { minStamina: 6 }, keywords: 'coastal pans', emoji: '🧂' },
+                'Potter': { statRequirements: { minDexterity: 6 }, keywords: 'earthenware kiln', emoji: '🏺' },
+                'Bronze Caster': { statRequirements: { minDexterity: 7, minCraftiness: 6 }, keywords: 'drum ritual bronze', emoji: '🥁' },
+                'Spice Gatherer': { statRequirements: { minPerception: 5 }, keywords: 'clove nutmeg forest', emoji: '🌰' },
+                'Sea Trader': { statRequirements: { minPersuasion: 6, minPerception: 6 }, socialRequirements: { minWanderlust: 0.5 }, keywords: 'monsoon prau coastal', emoji: '⛵' },
+            }
+        },
+        [HistoricalEra.MEDIEVAL]: {
+            Commoner: {
+                'Rice Farmer': { statRequirements: { minStamina: 6, minConstitution: 5 }, keywords: 'wet rice paddy terrace', emoji: '🌾' },
+                'Fisher': { statRequirements: { minPerception: 5, minDexterity: 5 }, keywords: 'reef lagoon net', emoji: '🐟' },
+                'Spice Grower': { statRequirements: { minStamina: 5 }, keywords: 'clove nutmeg pepper', emoji: '🌰' },
+                'Boat Builder': { statRequirements: { minDexterity: 7, minStrength: 5 }, keywords: 'prau jong shipwright', emoji: '🛶' },
+                'Batik Maker': { statRequirements: { minDexterity: 7, minCraftiness: 6 }, keywords: 'wax resist dye cloth', emoji: '🧵' },
+                'Gong Smith': { statRequirements: { minDexterity: 7, minStrength: 6 }, keywords: 'gamelan bronze', emoji: '🔔' },
+                'Kris Smith': { statRequirements: { minDexterity: 8, minCraftiness: 7 }, keywords: 'pattern-welded blade', emoji: '🗡️' },
+                'Temple Builder': { statRequirements: { minStrength: 6, minDexterity: 6 }, keywords: 'candi stonework relief', emoji: '🛕' },
+                'Buffalo Herder': { statRequirements: { minStamina: 5 }, keywords: 'water buffalo paddy', emoji: '🐃' },
+                'Porter': { statRequirements: { minStrength: 6, minStamina: 6 }, socialRequirements: { maxPrivilege: 0.3 }, keywords: 'carrying pole', emoji: '🎒' },
+            },
+            Merchant: {
+                'Sea Trader': { statRequirements: { minPersuasion: 6, minPerception: 6 }, keywords: 'monsoon spice entrepot', emoji: '⛵' },
+                'Harbour Master': { statRequirements: { minIntelligence: 6, minPersuasion: 6 }, socialRequirements: { minPrivilege: 0.5 }, keywords: 'syahbandar port dues', emoji: '⚓' },
+                'Spice Broker': { statRequirements: { minPersuasion: 7, minCraftiness: 6 }, socialRequirements: { minPrivilege: 0.4 }, keywords: 'clove nutmeg factor', emoji: '💰' },
+            },
+            Nobility: {
+                'Datu': { statRequirements: { minPersuasion: 7, minStrength: 5 }, socialRequirements: { minPrivilege: 0.7 }, keywords: 'chief barangay', emoji: '👑' },
+                'Court Brahmin': { statRequirements: { minIntelligence: 8 }, socialRequirements: { minPrivilege: 0.7, minReligiosity: 0.6 }, keywords: 'sanskrit ritual court', emoji: '📜' },
+                'Buddhist Monk': { statRequirements: { minIntelligence: 7 }, socialRequirements: { minReligiosity: 0.7 }, genderBias: 'Male', keywords: 'sangha alms vihara', emoji: '🧘' },
+                'Palace Dancer': { statRequirements: { minDexterity: 8 }, socialRequirements: { minPrivilege: 0.5 }, keywords: 'court gamelan ritual', emoji: '💃' },
+            }
+        },
+        [HistoricalEra.RENAISSANCE_EARLY_MODERN]: {
+            Commoner: {
+                'Rice Farmer': { statRequirements: { minStamina: 6 }, keywords: 'wet rice paddy', emoji: '🌾' },
+                'Fisher': { statRequirements: { minPerception: 5 }, keywords: 'reef lagoon net', emoji: '🐟' },
+                'Spice Grower': { statRequirements: { minStamina: 5 }, keywords: 'clove nutmeg pepper', emoji: '🌰' },
+                'Pearl Diver': { statRequirements: { minStamina: 7, minConstitution: 7 }, keywords: 'sulu pearl banks', emoji: '🦪' },
+                'Batik Maker': { statRequirements: { minDexterity: 7 }, keywords: 'wax resist dye', emoji: '🧵' },
+                'Boat Builder': { statRequirements: { minDexterity: 7 }, keywords: 'prau shipwright', emoji: '🛶' },
+                'Tin Miner': { statRequirements: { minStrength: 6, minStamina: 7 }, keywords: 'alluvial tin', emoji: '⛏️' },
+            },
+            Merchant: {
+                'Sea Trader': { statRequirements: { minPersuasion: 6 }, keywords: 'monsoon spice entrepot', emoji: '⛵' },
+                'Company Clerk': { statRequirements: { minIntelligence: 6 }, socialRequirements: { minPrivilege: 0.4 }, keywords: 'voc factory ledger', emoji: '📒' },
+            },
+            OUTLAWS_AND_REVOLUTIONARIES: {
+                'Sea Raider': { statRequirements: { minStrength: 6, minPerception: 6 }, socialRequirements: { maxPrivilege: 0.5 }, keywords: 'iranun raid slaving', emoji: '🏴‍☠️' },
+            }
+        },
+        [HistoricalEra.INDUSTRIAL_ERA]: {
+            WORKING_CLASS: {
+                'Rice Farmer': { statRequirements: { minStamina: 6 }, keywords: 'wet rice paddy', emoji: '🌾' },
+                'Rubber Tapper': { statRequirements: { minStamina: 6, minDexterity: 5 }, keywords: 'latex estate', emoji: '🌳' },
+                'Tin Miner': { statRequirements: { minStrength: 6, minStamina: 7 }, keywords: 'dredge alluvial tin', emoji: '⛏️' },
+                'Abaca Stripper': { statRequirements: { minStrength: 5, minStamina: 6 }, keywords: 'manila hemp fibre', emoji: '🪢' },
+                'Sugar Worker': { statRequirements: { minStamina: 7 }, keywords: 'hacienda cane mill', emoji: '🍬' },
+                'Fisher': { statRequirements: { minPerception: 5 }, keywords: 'reef lagoon net', emoji: '🐟' },
+                'Dock Worker': { statRequirements: { minStrength: 7 }, genderBias: 'Male', keywords: 'godown port cargo', emoji: '⚓' },
+            },
+            MIDDLE_CLASS: {
+                'Schoolteacher': { statRequirements: { minIntelligence: 6, minPersuasion: 5 }, keywords: 'mission school', emoji: '👩‍🏫' },
+                'Clerk': { statRequirements: { minIntelligence: 6 }, keywords: 'colonial office ledger', emoji: '📒' },
+                'Trader': { statRequirements: { minPersuasion: 6 }, keywords: 'shophouse kongsi', emoji: '🏪' },
+            }
+        },
+        [HistoricalEra.MODERN_ERA]: {
+            WORKING_CLASS: {
+                'Rice Farmer': { statRequirements: { minStamina: 6 }, keywords: 'wet rice paddy', emoji: '🌾' },
+                'Rubber Tapper': { statRequirements: { minStamina: 6 }, keywords: 'latex estate', emoji: '🌳' },
+                'Fisher': { statRequirements: { minPerception: 5 }, keywords: 'outrigger net', emoji: '🐟' },
+                'Factory Worker': { statRequirements: { minStamina: 6 }, keywords: 'garment electronics assembly', emoji: '🏭', decadeRange: [1960, 2019] as [number, number] },
+                'Jeepney Driver': { statRequirements: { minPerception: 6 }, keywords: 'manila transport', emoji: '🚌', decadeRange: [1950, 2019] as [number, number] },
+                'Domestic Worker': { statRequirements: { minStamina: 6 }, keywords: 'overseas remittance', emoji: '🧹', decadeRange: [1970, 2019] as [number, number] },
+            },
+            MIDDLE_CLASS: {
+                'Schoolteacher': { statRequirements: { minIntelligence: 6 }, keywords: 'school', emoji: '👩‍🏫' },
+                'Nurse': { statRequirements: { minStamina: 6, minDexterity: 6 }, keywords: 'hospital overseas', emoji: '💉' },
+                'Shopkeeper': { statRequirements: { minPersuasion: 5 }, keywords: 'sari-sari warung', emoji: '🏪' },
+                'Civil Servant': { statRequirements: { minIntelligence: 6 }, keywords: 'ministry office', emoji: '📋' },
+            }
+        }
+    },
+
     SOUTH_ASIAN: {
         [HistoricalEra.PREHISTORY]: {
             HARAPPAN: {
@@ -4570,10 +4767,27 @@ export const PROFESSIONS: ProfessionData = {
                     keywords: 'medicinal plants',
                     emoji: '🌿'
                 }
-            }
+            },
+            /**
+             * Everywhere north of Mesoamerica.
+             *
+             * The `Commoner` block above is entirely Mesoamerican — ball courts,
+             * chinampas, jade, cacao, tribute — and it was the only antiquity
+             * pool for the whole continent, so a persona in the Glacier
+             * Foothills in 285 CE came back as a Jade Carver or a Ball Court
+             * Player. The medieval era already splits by culture area with its
+             * `Woodlands` and `Plains` classes; this does the same for antiquity.
+             *
+             * `isProfessionValidForRegion` and the place rules in
+             * professionAvailabilityService keep each set where it belongs.
+             */
+            Foragers: NORTH_AMERICAN_FORAGERS
         },
 
         [HistoricalEra.MEDIEVAL]: {
+            // Everywhere the four culture-area blocks below do not describe:
+            // the Arctic, the Great Basin, the Northern Rockies, California.
+            Foragers: NORTH_AMERICAN_FORAGERS,
             Woodlands: {
                 'Basket Maker': {
                     statRequirements: { minDexterity: 6 },

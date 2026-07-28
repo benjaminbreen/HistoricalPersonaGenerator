@@ -72,6 +72,13 @@ interface EventTemplate {
   maxYear?: number;
   requiredGender?: 'male' | 'female';
   requiresLiteracy?: boolean; // Event requires character to be educated/literate
+  /**
+   * A capability the society must actually have. Ploughing needs draft animals,
+   * which the Americas, Australia and Oceania did not have before contact — so
+   * an Arnhem Land persona in 1200 was "experimenting with a new plowing
+   * method". See constants/societyCapabilities.ts.
+   */
+  requiresCapability?: SocietyCapability;
   excludedClasses?: string[]; // Social classes that cannot have this event
   maxOccurrences?: number; // How many times this event type can occur (default 1)
   weight: number;
@@ -105,6 +112,7 @@ const HISTORICAL_CAUSES_OF_DEATH: Record<HistoricalEra, Record<CulturalZone, str
     MENA: ['dysentery', 'dehydration', 'snakebite', 'scorpion sting', 'starvation', 'sandstorm burial', 'tribal conflict', 'infected wounds'],
     EAST_ASIAN: ['typhoid fever', 'malaria', 'flooding accidents', 'starvation during famine', 'wild animal attack', 'tribal warfare', 'childbirth complications'],
     SOUTH_ASIAN: ['malaria', 'dysentery', 'tiger attack', 'venomous snakebite', 'monsoon flooding', 'starvation', 'infected wounds', 'childbirth complications'],
+    SOUTHEAST_ASIAN: ['malaria', 'dengue fever', 'dysentery', 'crocodile attack', 'venomous snakebite', 'drowning in flood', 'infected wounds', 'childbirth complications'],
     SUB_SAHARAN_AFRICAN: ['sleeping sickness', 'malaria', 'dysentery', 'crocodile attack', 'lion attack', 'starvation', 'infected wounds', 'childbirth complications'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['pneumonia', 'infected wounds', 'starvation during harsh winter', 'bear attack', 'drowning', 'tribal warfare', 'childbirth complications'],
     NORTH_AMERICAN_COLONIAL: ['pneumonia', 'infected wounds', 'starvation', 'exposure', 'drowning'],
@@ -116,6 +124,7 @@ const HISTORICAL_CAUSES_OF_DEATH: Record<HistoricalEra, Record<CulturalZone, str
     MENA: ['plague', 'dysentery', 'typhoid fever', 'murdered by thieves', 'died in desert', 'starvation during drought', 'killed in battle', 'childbirth complications'],
     EAST_ASIAN: ['plague', 'typhoid fever', 'dysentery', 'killed in warfare', 'drowned in flood', 'murdered during banditry', 'starvation during famine', 'childbirth complications'],
     SOUTH_ASIAN: ['plague', 'malaria', 'dysentery', 'typhoid fever', 'tiger attack', 'murdered by bandits', 'starvation during famine', 'childbirth complications'],
+    SOUTHEAST_ASIAN: ['malaria', 'dengue fever', 'cholera', 'dysentery', 'drowning at sea', 'killed in a raid', 'starvation after crop failure', 'childbirth complications'],
     SUB_SAHARAN_AFRICAN: ['sleeping sickness', 'malaria', 'dysentery', 'killed in tribal warfare', 'crocodile attack', 'starvation', 'childbirth complications'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['pneumonia', 'dysentery', 'killed in warfare', 'starvation', 'infected wounds', 'childbirth complications'],
     NORTH_AMERICAN_COLONIAL: ['pneumonia', 'dysentery', 'starvation', 'killed in conflict'],
@@ -127,6 +136,7 @@ const HISTORICAL_CAUSES_OF_DEATH: Record<HistoricalEra, Record<CulturalZone, str
     MENA: ['plague', 'cholera', 'dysentery', 'typhoid fever', 'murdered', 'killed in Crusades', 'died during pilgrimage', 'starvation during siege', 'childbirth complications'],
     EAST_ASIAN: ['plague', 'smallpox', 'dysentery', 'killed by Mongol invaders', 'murdered by bandits', 'starvation during famine', 'drowned in flood', 'childbirth complications'],
     SOUTH_ASIAN: ['plague', 'malaria', 'cholera', 'dysentery', 'murdered', 'killed in warfare', 'starvation during drought', 'childbirth complications'],
+    SOUTHEAST_ASIAN: ['malaria', 'cholera', 'dysentery', 'smallpox', 'killed in warfare', 'drowned in a typhoon', 'starvation after crop failure', 'childbirth complications'],
     SUB_SAHARAN_AFRICAN: ['sleeping sickness', 'malaria', 'dysentery', 'killed in warfare', 'murdered', 'starvation', 'childbirth complications'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['pneumonia', 'dysentery', 'killed in tribal warfare', 'ritual sacrifice', 'starvation', 'infected wounds', 'childbirth complications'],
     NORTH_AMERICAN_COLONIAL: ['smallpox', 'measles', 'pneumonia', 'killed in conflict', 'starvation'],
@@ -138,6 +148,7 @@ const HISTORICAL_CAUSES_OF_DEATH: Record<HistoricalEra, Record<CulturalZone, str
     MENA: ['plague', 'cholera', 'smallpox', 'murdered', 'killed in Ottoman wars', 'died during hajj', 'starvation during drought', 'childbirth complications'],
     EAST_ASIAN: ['plague', 'smallpox', 'typhoid fever', 'murdered by bandits', 'killed in warfare', 'drowned in flood', 'starvation during famine', 'childbirth complications'],
     SOUTH_ASIAN: ['plague', 'malaria', 'cholera', 'smallpox', 'murdered', 'killed in Mughal wars', 'starvation during famine', 'tiger attack', 'childbirth complications'],
+    SOUTHEAST_ASIAN: ['cholera', 'malaria', 'smallpox', 'dysentery', 'killed in warfare', 'drowned in a typhoon', 'murdered', 'starvation after crop failure', 'childbirth complications'],
     SUB_SAHARAN_AFRICAN: ['yellow fever', 'malaria', 'dysentery', 'enslaved and died in Middle Passage', 'killed in slave raids', 'murdered', 'starvation', 'childbirth complications'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['smallpox epidemic', 'measles', 'typhus', 'murdered by colonists', 'starvation', 'killed in warfare'],
     NORTH_AMERICAN_COLONIAL: ['yellow fever', 'smallpox', 'typhoid fever', 'killed in colonial wars', 'shipwreck', 'murdered', 'starvation', 'childbirth complications'],
@@ -149,6 +160,7 @@ const HISTORICAL_CAUSES_OF_DEATH: Record<HistoricalEra, Record<CulturalZone, str
     MENA: ['cholera', 'typhoid fever', 'tuberculosis', 'dysentery', 'malaria', 'murdered', 'killed in warfare', 'starvation during drought', 'childbirth complications'],
     EAST_ASIAN: ['cholera', 'tuberculosis', 'typhoid fever', 'dysentery', 'plague', 'drowned in flood', 'murdered', 'killed in warfare', 'opium overdose', 'starvation during famine', 'childbirth complications'],
     SOUTH_ASIAN: ['cholera', 'malaria', 'tuberculosis', 'typhoid fever', 'dysentery', 'starvation during famine', 'murdered', 'railway accident', 'childbirth complications'],
+    SOUTHEAST_ASIAN: ['cholera', 'malaria', 'beriberi', 'tuberculosis', 'dysentery', 'plantation accident', 'starvation during famine', 'drowned in a typhoon', 'childbirth complications'],
     SUB_SAHARAN_AFRICAN: ['sleeping sickness', 'malaria', 'tuberculosis', 'dysentery', 'typhoid fever', 'murdered', 'killed in colonial wars', 'worked to death in mines', 'starvation', 'childbirth complications'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['tuberculosis', 'influenza', 'smallpox', 'measles', 'murdered by settlers', 'starvation during relocation', 'killed in wars'],
     NORTH_AMERICAN_COLONIAL: ['cholera', 'tuberculosis', 'typhoid fever', 'influenza', 'pneumonia', 'factory accident', 'mining accident', 'railway accident', 'murdered', 'killed in Civil War', 'suicide', 'childbirth complications'],
@@ -160,6 +172,7 @@ const HISTORICAL_CAUSES_OF_DEATH: Record<HistoricalEra, Record<CulturalZone, str
     MENA: ['tuberculosis', 'typhoid fever', 'cholera', 'malaria', 'dysentery', 'murdered', 'killed in warfare', 'automobile accident', 'suicide', 'childbirth complications'],
     EAST_ASIAN: ['tuberculosis', 'pneumonia', 'cholera', 'typhoid fever', 'influenza', 'killed in warfare', 'murdered', 'suicide', 'starvation during famine', 'drowned in flood', 'childbirth complications'],
     SOUTH_ASIAN: ['tuberculosis', 'malaria', 'cholera', 'typhoid fever', 'dysentery', 'murdered', 'killed in Partition violence', 'starvation during famine', 'railway accident', 'childbirth complications'],
+    SOUTHEAST_ASIAN: ['tuberculosis', 'malaria', 'cholera', 'beriberi', 'killed in the Japanese occupation', 'killed in the war of independence', 'drowned in a typhoon', 'starvation during famine', 'childbirth complications'],
     SUB_SAHARAN_AFRICAN: ['malaria', 'tuberculosis', 'cholera', 'typhoid fever', 'sleeping sickness', 'murdered', 'killed in colonial wars', 'killed in civil conflict', 'starvation', 'childbirth complications'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['tuberculosis', 'influenza', 'pneumonia', 'diabetes complications', 'automobile accident', 'murdered'],
     NORTH_AMERICAN_COLONIAL: ['polio', 'tuberculosis', 'influenza', 'pneumonia', 'heart disease', 'cancer', 'killed in World War I', 'killed in World War II', 'automobile accident', 'murdered', 'suicide', 'childbirth complications'],
@@ -171,6 +184,7 @@ const HISTORICAL_CAUSES_OF_DEATH: Record<HistoricalEra, Record<CulturalZone, str
     MENA: ['solar syndrome', 'water wars fever', 'sand lung 2.0'],
     EAST_ASIAN: ['cyber psychosis', 'pollution syndrome X', 'overcrowding fever'],
     SOUTH_ASIAN: ['monsoon plague 2.0', 'heat death syndrome', 'flood fever'],
+    SOUTHEAST_ASIAN: ['monsoon plague 2.0', 'reef collapse fever', 'heat death syndrome'],
     SUB_SAHARAN_AFRICAN: ['climate plague', 'resource curse syndrome', 'tech divide fever'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['cultural revival syndrome', 'land reclamation fever'],
     NORTH_AMERICAN_COLONIAL: ['collapse syndrome', 'bunker fever', 'militia madness'],
@@ -216,6 +230,15 @@ const TRADE_GOODS: Record<CulturalZone, Record<HistoricalEra, string[]>> = {
     [HistoricalEra.INDUSTRIAL_ERA]: ['jute', 'tea', 'cotton', 'indigo', 'opium'],
     [HistoricalEra.MODERN_ERA]: ['textiles', 'IT services', 'pharmaceuticals', 'gems'],
     [HistoricalEra.FUTURE_ERA]: ['biotech', 'neural networks', 'monsoon energy', 'gene therapy']
+  },
+  SOUTHEAST_ASIAN: {
+    [HistoricalEra.PREHISTORY]: ['shell ornaments', 'jade', 'obsidian', 'bark cloth'],
+    [HistoricalEra.ANTIQUITY]: ['cloves', 'nutmeg', 'sandalwood', 'gold', 'tortoiseshell'],
+    [HistoricalEra.MEDIEVAL]: ['cloves', 'nutmeg', 'mace', 'camphor', 'benzoin', 'porcelain'],
+    [HistoricalEra.RENAISSANCE_EARLY_MODERN]: ['nutmeg', 'cloves', 'pepper', 'tin', 'birds of paradise'],
+    [HistoricalEra.INDUSTRIAL_ERA]: ['rubber', 'tin', 'sugar', 'coffee', 'abaca', 'teak'],
+    [HistoricalEra.MODERN_ERA]: ['rubber', 'palm oil', 'tin', 'electronics', 'rice'],
+    [HistoricalEra.FUTURE_ERA]: ['tidal power', 'reef biotech', 'archipelago logistics', 'monsoon forecasting']
   },
   SUB_SAHARAN_AFRICAN: {
     [HistoricalEra.PREHISTORY]: ['ivory', 'gold', 'salt', 'iron'],
@@ -430,13 +453,27 @@ const FARMER_EVENTS: EventTemplate[] = [
     titles: ['Abundant Harvest', 'Agricultural Success'],
     templates: [
       'The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit',
-      'Experimenting with a new plowing method led to a marked increase in field productivity',
       'After years of careful selection, successfully bred a hardier variety of [CROP]',
       'Became the first in the village to successfully grow [NEW_CROP], earning respect from neighbors'
     ],
     minAge: 16,
     weight: 1.0,
-    professionKeywords: ['farmer', 'peasant', 'planter', 'rancher', 'shepherd']
+    // Herders and ranchers are not croppers; they have their own events below.
+    professionKeywords: ['farmer', 'peasant', 'planter', 'cultivator', 'grower']
+  },
+  {
+    // A plough needs an ox or a horse to pull it.
+    kind: 'agricultural',
+    importance: EventImportance.OPPORTUNITY,
+    titles: ['A Better Furrow', 'Agricultural Success'],
+    templates: [
+      'Experimenting with a new plowing method led to a marked increase in field productivity',
+      'Broke ground on land nobody had ploughed before, and it paid',
+    ],
+    minAge: 16,
+    weight: 0.8,
+    requiresCapability: 'draft_animals',
+    professionKeywords: ['farmer', 'peasant', 'planter', 'cultivator', 'ploughman', 'plowman']
   },
   {
     kind: 'agricultural',
@@ -519,6 +556,49 @@ const CULTURAL_EVENT_MODIFIERS: Record<CulturalZone, Partial<EventTemplate>[]> =
         [HistoricalEra.MEDIEVAL]: 1.5,
         [HistoricalEra.RENAISSANCE_EARLY_MODERN]: 0.8
       }
+    }
+  ],
+  SOUTHEAST_ASIAN: [
+    {
+      kind: 'religious',
+      importance: EventImportance.MUNDANE,
+      titles: ['Temple Merit', 'Spirit House'],
+      templates: [
+        'Earned merit by feeding the monks at dawn',
+        'Set offerings at the spirit house before the planting',
+        'Served a season as a novice in the monastery'
+      ],
+      weight: 1.0,
+      minAge: 12,
+      // Theravada monasticism reaches the mainland with the Mon and Khmer
+      // kingdoms; before that the offerings are to local spirits, which the
+      // second template covers on its own.
+      minYear: 200
+    },
+    {
+      kind: 'trade',
+      importance: EventImportance.OPPORTUNITY,
+      titles: ['Monsoon Passage', 'Spice Landfall'],
+      templates: [
+        'Sailed with the monsoon and came back with cloth and iron',
+        'Sold a season of cloves to a Gujarati factor',
+        'Took a share in a prau working the strait'
+      ],
+      weight: 0.9,
+      minAge: 16,
+      minYear: -200
+    },
+    {
+      kind: 'agricultural',
+      importance: EventImportance.MUNDANE,
+      titles: ['Wet Rice', 'The Flood Year'],
+      templates: [
+        'Worked the terraces through the transplanting season',
+        'Lost the crop to a typhoon and lived on fish and roots',
+        'Helped raise a longhouse for a brother\'s marriage'
+      ],
+      weight: 1.1,
+      minAge: 10
     }
   ],
   MENA: [
@@ -1208,15 +1288,53 @@ function generateEarlyLifeEvent(
     };
   }
 
+  // Herding, which is not farming. Sharing one list of variants with the
+  // croppers gave a shepherd in Arnhem Land a childhood spent learning crop
+  // rotation and reading harvest yields.
+  const herdProfessions = ['shepherd', 'herder', 'goat herder', 'cattle herder',
+    'cowherd', 'swineherd', 'drover', 'pastoralist', 'stockman'];
+
+  if (herdProfessions.some(p => profLower.includes(p))) {
+    const variants = [
+      `Trusted to take the animals out alone for the first time`,
+      `Learned the marks and the ailments of every beast in the family's care`,
+      `Spent a first season away with the herd and came back taller`,
+      `Learned to read weather signs and where the water would still be running`
+    ];
+    return {
+      kind: 'agricultural',
+      title: 'Coming of Age',
+      text: variants[Math.floor(seededRandom() * variants.length)]
+    };
+  }
+
+  // Foraging, fishing and hunting economies, which have no fields at all.
+  const foragingProfessions = ['forager', 'gatherer', 'hunter', 'fisher', 'trapper',
+    'fowler', 'whaler', 'sealer', 'acorn processor'];
+
+  if (foragingProfessions.some(p => profLower.includes(p))) {
+    const variants = [
+      `Went out with the adults for the first time and came back carrying a share`,
+      `Learned which ground gave what, and in which month`,
+      `Trusted alone with the traps for a season`,
+      `Learned to read the weather and the water from a parent`
+    ];
+    return {
+      kind: 'agricultural',
+      title: 'Coming of Age',
+      text: variants[Math.floor(seededRandom() * variants.length)]
+    };
+  }
+
   // Farming & Agricultural - No apprenticeship, learned from family
-  const farmProfessions = ['farmer', 'peasant', 'shepherd', 'herder', 'goat herder',
-    'cattle herder', 'rice farmer', 'wheat farmer', 'vegetable farmer', 'tenant farmer'];
+  const farmProfessions = ['farmer', 'peasant', 'rice farmer', 'wheat farmer',
+    'vegetable farmer', 'tenant farmer', 'field hand', 'cultivator', 'planter'];
 
   if (farmProfessions.some(p => profLower.includes(p))) {
     const variants = [
-      `Began working family fields, learning crop rotation from elders`,
+      `Began working family fields, learning the rotation from elders`,
       `Helped with the harvest for the first season and proved capable despite a young age`,
-      `Trusted to tend livestock alone for the first time`,
+      `Trusted to tend the family's animals alone for the first time`,
       `Learned to read weather signs and predict harvest yields from a parent`
     ];
     return {
@@ -1531,6 +1649,17 @@ export function generateLifeHistory(
       // Check if this exact template was already used
       const templateId = `${template.kind}-${template.titles[0]}`;
       if (usedEventTemplates.has(templateId)) return false;
+
+      // Check that the society could do this at all
+      if (template.requiresCapability) {
+        const templateBirthYear = (character as { birthYear?: number }).birthYear ?? birthYear;
+        const place = ((character as { hometown?: string }).hometown ?? '').toLowerCase();
+        if (!hasCapability(template.requiresCapability, {
+          year: templateBirthYear + eventAge,
+          culturalZone,
+          placeLower: place,
+        })) return false;
+      }
 
       // Check literacy requirement
       if (template.requiresLiteracy) {
@@ -1939,6 +2068,7 @@ function getLocationName(zone: CulturalZone, era: HistoricalEra): string {
     MENA: ['Damascus', 'Cairo', 'Baghdad', 'Jerusalem', 'Mecca', 'Isfahan', 'Tunis', 'Cordoba'],
     EAST_ASIAN: ['Beijing', 'Nanjing', 'Kyoto', 'Seoul', 'Hangzhou', 'Canton', 'Edo', 'Samarkand'],
     SOUTH_ASIAN: ['Delhi', 'Agra', 'Varanasi', 'Colombo', 'Lahore', 'Dhaka', 'Mumbai', 'Chennai'],
+    SOUTHEAST_ASIAN: ['Ayutthaya', 'Angkor', 'Pagan', 'Malacca', 'Manila', 'Palembang', 'Hoi An', 'Surabaya'],
     SUB_SAHARAN_AFRICAN: ['Timbuktu', 'Great Zimbabwe', 'Kilwa', 'Benin City', 'Axum', 'Mombasa'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['Cahokia', 'Mesa Verde', 'Chaco Canyon', 'the Great Lakes'],
     NORTH_AMERICAN_COLONIAL: ['Boston', 'Philadelphia', 'Charleston', 'Montreal', 'St. Louis'],
@@ -1956,6 +2086,7 @@ function getHolySite(zone: CulturalZone, era: HistoricalEra): string {
     MENA: ['Mecca', 'Medina', 'Jerusalem', 'Karbala', 'Najaf'],
     EAST_ASIAN: ['Mount Tai', 'Mount Fuji', 'Wutai Mountain', 'Ise Shrine'],
     SOUTH_ASIAN: ['Varanasi', 'Bodh Gaya', 'Tirupati', 'Golden Temple'],
+    SOUTHEAST_ASIAN: ['Borobudur', 'Angkor Wat', 'the Shwedagon Pagoda', 'Mount Kinabalu'],
     SUB_SAHARAN_AFRICAN: ['Lalibela', 'Ife', 'Great Zimbabwe', 'Axum'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['Serpent Mound', 'Chaco Canyon', 'Cahokia'],
     NORTH_AMERICAN_COLONIAL: ['Plymouth Rock', 'Independence Hall'],
@@ -1974,6 +2105,7 @@ function getInstitution(zone: CulturalZone, era: HistoricalEra): string {
       MENA: ['Al-Azhar', 'House of Wisdom', 'Nizamiyya', 'the madrasa'],
       EAST_ASIAN: ['Imperial Academy', 'Guozijian', 'Seonggyungwan'],
       SOUTH_ASIAN: ['Nalanda', 'Takshashila', 'Vikramashila'],
+      SOUTHEAST_ASIAN: ['the palace monastery', 'the Buddhist sangha school', 'the harbour madrasa'],
       SUB_SAHARAN_AFRICAN: ['Sankore Mosque', 'the royal court'],
       NORTH_AMERICAN_PRE_COLUMBIAN: ['the council lodge', 'the temple complex'],
       NORTH_AMERICAN_COLONIAL: ['Harvard College', 'the assembly'],
@@ -2027,6 +2159,7 @@ function getSocialGroup(
     MENA: ['merchant caravan', 'tribal confederation', 'Sufi order', 'military elite'],
     EAST_ASIAN: ['literati family', 'merchant consortium', 'Buddhist monastery', 'samurai clan'],
     SOUTH_ASIAN: ['Brahmin family', 'merchant caste', 'warrior clan', 'artisan guild'],
+    SOUTHEAST_ASIAN: ['trading kongsi', 'village council', 'royal household', 'boat-dwelling clan'],
     SUB_SAHARAN_AFRICAN: ['royal lineage', 'age-grade society', 'trading family', 'craft guild'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['clan elders', 'warrior society', 'medicine society'],
     NORTH_AMERICAN_COLONIAL: ['merchant family', 'political party', 'religious congregation'],
@@ -2059,6 +2192,7 @@ function getEnemyGroup(
     MENA: ['Crusaders', 'Mongols', 'Bedouin raiders', 'rival emirate'],
     EAST_ASIAN: ['Mongol invaders', 'Japanese pirates', 'northern barbarians', 'rebels'],
     SOUTH_ASIAN: ['Afghan raiders', 'Maratha cavalry', 'Mughal forces', 'Company soldiers'],
+    SOUTHEAST_ASIAN: ['Cham raiders', 'Siamese armies', 'Sulu sea raiders', 'Dutch Company soldiers'],
     SUB_SAHARAN_AFRICAN: ['slave raiders', 'rival kingdom', 'Arab traders', 'colonial forces'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['enemy tribe', 'raiders', 'rival confederation'],
     NORTH_AMERICAN_COLONIAL: ['Native raiders', 'British forces', 'Confederate army', 'bandits'],
@@ -2132,6 +2266,7 @@ function getNewCrop(zone: CulturalZone, era: HistoricalEra): string {
     MENA: ['cotton', 'coffee', 'sugarcane', 'citrus'],
     EAST_ASIAN: ['sweet potatoes', 'maize', 'peanuts', 'tobacco'],
     SOUTH_ASIAN: ['tea', 'indigo', 'opium poppies', 'jute'],
+    SOUTHEAST_ASIAN: ['coffee', 'sugar cane', 'abaca', 'rubber'],
     SUB_SAHARAN_AFRICAN: ['cassava', 'maize', 'groundnuts', 'cocoa'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['beans', 'squash', 'sunflowers'],
     NORTH_AMERICAN_COLONIAL: ['wheat', 'apples', 'tobacco', 'cotton'],
@@ -2149,6 +2284,7 @@ function getCrop(zone: CulturalZone, era: HistoricalEra): string {
     MENA: ['wheat', 'dates', 'olives', 'barley'],
     EAST_ASIAN: ['rice', 'millet', 'soybeans', 'wheat'],
     SOUTH_ASIAN: ['rice', 'wheat', 'lentils', 'cotton'],
+    SOUTHEAST_ASIAN: ['rice', 'taro', 'yams', 'coconuts'],
     SUB_SAHARAN_AFRICAN: ['millet', 'sorghum', 'yams', 'plantains'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['maize', 'beans', 'squash'],
     NORTH_AMERICAN_COLONIAL: ['wheat', 'corn', 'tobacco'],
@@ -2186,6 +2322,7 @@ function getHonor(zone: CulturalZone, era: HistoricalEra): string {
     MENA: ['title of Sheikh', 'Hajji status', 'military decoration', 'scholarly ijaza'],
     EAST_ASIAN: ['imperial recognition', 'clan honor', 'scholarly degree', 'military rank'],
     SOUTH_ASIAN: ['royal title', 'temple honor', 'military decoration', 'caste elevation'],
+    SOUTHEAST_ASIAN: ['a royal appointment', 'a temple donation recorded in stone', 'a title from the sultan', 'the right to wear gold'],
     SUB_SAHARAN_AFRICAN: ['chieftaincy', 'age-grade leadership', 'praise name', 'royal favor'],
     NORTH_AMERICAN_PRE_COLUMBIAN: ['eagle feather', 'war honors', 'vision recognition'],
     NORTH_AMERICAN_COLONIAL: ['military commission', 'civic award', 'land grant'],
@@ -2230,6 +2367,7 @@ function getCulturalContext(eventKind: EventKind, zone: CulturalZone, era: Histo
       MENA: ['during Ramadan', 'after Friday prayers', 'during the hajj season'],
       EAST_ASIAN: ['during New Year festival', 'at autumn moon festival', 'during ancestor veneration'],
       SOUTH_ASIAN: ['during Diwali', 'at Holi festival', 'during monsoon ceremonies'],
+      SOUTHEAST_ASIAN: ['at the water festival', 'during the rice harvest rites', 'on the sultan\'s feast day'],
       SUB_SAHARAN_AFRICAN: ['during harvest festival', 'at rainmaking ceremony', 'during initiation season'],
       NORTH_AMERICAN_PRE_COLUMBIAN: ['during green corn ceremony', 'at winter solstice', 'during vision quest season'],
       NORTH_AMERICAN_COLONIAL: ['at Thanksgiving', 'during revival meeting', 'at camp meeting'],
@@ -2247,6 +2385,7 @@ function getCulturalContext(eventKind: EventKind, zone: CulturalZone, era: Histo
       MENA: ['with mahr agreement', 'blessed by the imam', 'celebrated with week-long festivities'],
       EAST_ASIAN: ['arranged by matchmaker', 'with elaborate gift exchange', 'after consulting fortune tellers'],
       SOUTH_ASIAN: ['with astrologer\'s approval', 'after matching horoscopes', 'with traditional seven vows'],
+      SOUTHEAST_ASIAN: ['after the bride-price was agreed', 'with the village elders as witnesses', 'blessed at the spirit house'],
       SUB_SAHARAN_AFRICAN: ['with bride price paid', 'joining two lineages', 'blessed by elders'],
       NORTH_AMERICAN_PRE_COLUMBIAN: ['uniting clans', 'with gift exchange', 'blessed by spirits'],
       NORTH_AMERICAN_COLONIAL: ['at the courthouse', 'in the church', 'witnessed by community'],

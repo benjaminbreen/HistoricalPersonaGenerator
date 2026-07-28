@@ -1,4 +1,6 @@
 import type { HistoricalContext } from '../types/historicalContext';
+import type { CulturalZone } from '../types/characterData';
+import { hasCapability } from '../constants/societyCapabilities';
 
 interface ProfessionAvailabilityRule {
   pattern: RegExp;
@@ -6,6 +8,14 @@ interface ProfessionAvailabilityRule {
   endYear?: number;
   requiredTechnology?: string;
   requiredInstitution?: string;
+  /** Only where the place matches. A trade tied to a crop or an animal. */
+  places?: RegExp;
+  /** Absent where the place matches, until `excludedUntil` if given. */
+  excludePlaces?: RegExp;
+  /** The year the trade reaches the excluded places. Omit for never. */
+  excludedUntil?: number;
+  /** Restrict the rule to these zones. */
+  zones?: string[];
 }
 
 const PROFESSION_AVAILABILITY_RULES: ProfessionAvailabilityRule[] = [
@@ -27,6 +37,101 @@ const PROFESSION_AVAILABILITY_RULES: ProfessionAvailabilityRule[] = [
   { pattern: /\b(?:soldier|guard|mercenary|officer|knight)\b/i, startYear: -5000 },
   { pattern: /\b(?:servant|maid|butler|steward|houseboy)\b/i, startYear: -8000 },
 
+  // Trades tied to a plant or an animal that has to be there.
+  //
+  // Removing farming from the forager regions exposed what was underneath it:
+  // a persona in the Glacier Foothills in 285 CE came back as a Chinampero, a
+  // Cacao Grower and a Tribute Collector — Aztec occupations, in Montana,
+  // twelve hundred years early — and the commonest jobs on the Baffin coast
+  // were Shepherd and Herder in a hemisphere with no herd animals to speak of.
+  {
+    // Herding livestock needs livestock. The Americas had domestic camelids in
+    // the Andes and nothing else; cattle, sheep, goats and pigs arrived with
+    // the Spanish. Hunting, fishing and foraging are untouched by this.
+    pattern: /\b(?:shepherd|goatherd|cowherd|swineherd|drover|dairy\w*|stockman|cattle\w*)\b/i,
+    excludePlaces: /\b(?:arctic|subarctic|baffin|greenland|inuit|thule|aleut|great basin|northern rockies|columbia plateau|pacific coast|northwest|puget|salish|california|central valley|great plains|prairie|woodland|great lakes|mississippi|northeast|southeast|chesapeake|new england|amazon|orinoco|guiana|chaco|patagonia|tierra del fuego|southwest|puebloan|colorado plateau|rio grande|sonora|arizona|new mexico|mexico|maya|yucatan|oaxaca)\b/i,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'SOUTH_AMERICAN'],
+    excludedUntil: 1600,
+  },
+  {
+    // A generic "herder" is fine in the Andes, where llamas and alpacas were
+    // herded from the fourth millennium BCE.
+    pattern: /\bherder\b/i,
+    excludePlaces: /\b(?:arctic|subarctic|baffin|greenland|great basin|northern rockies|columbia plateau|pacific coast|northwest|puget|california|central valley|woodland|great lakes|mississippi|northeast|chesapeake|new england|amazon|orinoco|guiana)\b/i,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'SOUTH_AMERICAN'],
+    excludedUntil: 1600,
+  },
+  {
+    // Australia had no domestic animal but the dingo, and no herding of any
+    // kind before the First Fleet. A shepherd in Arnhem Land in 1200 was as
+    // wrong as the Baffin Island one.
+    pattern: /\b(?:shepherd|goatherd|cowherd|swineherd|drover|dairy\w*|stockman|cattle\w*|herder|jackaroo|jillaroo|station\b)\b/i,
+    excludePlaces: /\b(?:australia|arnhem|outback|kimberley|tasmania|nullarbor|queensland|murray|carpentaria|aboriginal|desert)\b/i,
+    zones: ['OCEANIA'],
+    excludedUntil: 1788,
+  },
+  {
+    // The Pacific islands had pigs, dogs and chickens carried in the canoes —
+    // and no grazing stock at all, so there was nothing to shepherd or drove.
+    // Pig keeping is a real Melanesian and Polynesian occupation and is not
+    // matched here.
+    pattern: /\b(?:shepherd|goatherd|cowherd|drover|dairy\w*|stockman|cattle\w*|herder)\b/i,
+    excludePlaces: /\b(?:polynesi|melanesi|micronesi|hawai|tahiti|samoa|tonga|fiji|aotearoa|new zealand|rapa nui|easter island|marquesas|vanuatu|solomon|papua|new guinea|island|atoll|lagoon)\b/i,
+    zones: ['OCEANIA'],
+    excludedUntil: 1800,
+  },
+  {
+    // Mesoamerican institutions and crops. Chinampas are the raised fields of
+    // the Valley of Mexico; cacao is a lowland tropical tree.
+    pattern: /\b(?:chinampero|chinampa|cacao|cocoa|tribute collector|pochteca|calpixqui|nahual|curandero|codex painter|obsidian knapper|featherworker|jade carver|ball court player|ticitl|herbatero|sobador)\b/i,
+    places: /\b(?:mexico|maya|yucatan|oaxaca|guatemala|chiapas|belize|honduras|central highlands|mesoameric|tenochtitlan|teotihuacan|veracruz|isthmus|central america|caribbean|antill)\b/i,
+  },
+  // North American culture areas. Now that the `Woodlands` and `Plains` blocks
+  // are reachable at all, they need pinning to the ground they describe, or the
+  // Baffin coast fills up with buffalo hunters and wampum makers.
+  {
+    pattern: /\b(?:buffalo|bison|pemmican|tipi|travois|horse trainer)\b/i,
+    places: /\b(?:great plains|plains|prairie|dakota|nebraska|llano|missouri|platte|comanche|blackfoot|great basin|rockies|texas)\b/i,
+  },
+  {
+    // Wampum is Atlantic quahog and whelk shell; maple sugar needs sugar maples;
+    // birchbark canoes need paper birch. All three are eastern woodland.
+    pattern: /\b(?:wampum|maple (?:sugar|syrup)|birchbark|birch bark|longhouse|clan mother)\b/i,
+    places: /\b(?:woodland|northeast|great lakes|mississippi|ohio|atlantic coast|new england|chesapeake|southeast|appalach|hudson|st lawrence|saint lawrence|iroquo|algonqu|canada|ontario|quebec)\b/i,
+  },
+  {
+    // Turquoise is a Southwestern stone.
+    pattern: /\bturquoise\b/i,
+    places: /\b(?:southwest|puebloan|colorado plateau|rio grande|sonora|arizona|new mexico|mexico|cerrillos|chaco canyon)\b/i,
+  },
+  {
+    // Arctic and subarctic work.
+    pattern: /\b(?:umiak|kayak|harpoon|sealer|whaler|dog ?sled|igloo|caribou)\b/i,
+    places: /\b(?:arctic|subarctic|baffin|greenland|labrador|alaska|yukon|inuit|thule|aleut|yupik|bering|hudson bay|tundra)\b/i,
+  },
+  {
+    // Acorn meal is the Californian and Great Basin staple; shellfish middens
+    // and tidal weirs belong on a coast.
+    pattern: /\bacorn\w*\b/i,
+    places: /\b(?:california|central valley|sierra nevada|great basin|nevada|utah|mojave|pacific coast|oregon|mediterran|iberia)\b/i,
+  },
+  {
+    // Fishing needs water. The dry interior plateaus and deserts had some, but
+    // not enough to make fisher the commonest occupation, which it became once
+    // farming was removed from the regions that never had it.
+    pattern: /\b(?:fisher|fisherman|salmon fisher|whaler|sealer)\b/i,
+    excludePlaces: /\b(?:colorado plateau|mojave|sonora|llano|high desert|painted desert|canyonlands|absaroka|yellowstone basin|gobi|taklamakan|rub al khali|empty quarter|kalahari|namib|atacama)\b/i,
+  },
+  {
+    pattern: /\b(?:shellfish gatherer|fish weir builder)\b/i,
+    places: /\b(?:coast|sound|bay|harbor|harbour|estuary|delta|island|shore|sea|puget|salish|fraser|chesapeake|atlantic|pacific|arctic|baffin|labrador|gulf|lagoon|strait|inlet|fjord|river)\b/i,
+  },
+  {
+    // Andean institutions.
+    pattern: /\b(?:quipu|khipu|chasqui|mit'?a|ayllu|coca (?:grower|picker)|llama\w*|alpaca\w*|vicu[ñn]a\w*)\b/i,
+    places: /\b(?:andes|peru|bolivia|cusco|cuzco|altiplano|titicaca|quito|ecuador|potosi|atacama|sierra|highland|chile)\b/i,
+  },
+
   { pattern: /\bfactory worker\b/i, startYear: 1760, requiredTechnology: 'mechanized_production' },
   { pattern: /\bindustrialist\b/i, startYear: 1760, requiredTechnology: 'mechanized_production' },
   { pattern: /\brail(?:road|way)|station master\b/i, startYear: 1830, requiredTechnology: 'railway' },
@@ -45,12 +150,130 @@ const PROFESSION_AVAILABILITY_RULES: ProfessionAvailabilityRule[] = [
   { pattern: /\bchartist\b/i, startYear: 1838, endYear: 1857 },
   { pattern: /\bresurrectionist\b/i, startYear: 1790, endYear: 1832 },
   { pattern: /\bfenian\b/i, startYear: 1858, endYear: 1924 },
+
+  // The late twentieth century and after.
+  //
+  // The modern profession tables were written as one "1900-2019" block and only
+  // some entries carry a `decadeRange`, so everything without one was available
+  // from 1900. That is how a student generating 1920s California met a content
+  // creator. Occupations that depend on a technology, an industry or a legal
+  // regime that did not exist yet are dated here instead, which covers every
+  // cultural zone at once rather than one table entry at a time.
+  { pattern: /\b(?:content creator|influencer|streamer|youtuber|podcaster|social media \w+)\b/i, startYear: 2005 },
+  { pattern: /\b(?:web|app|software) (?:developer|designer|engineer)\b/i, startYear: 1995 },
+  { pattern: /\bsoftware (?:developer|engineer)\b/i, startYear: 1975 },
+  { pattern: /\b(?:cybercriminal|hacker|phisher)\b/i, startYear: 1985 },
+  { pattern: /\b(?:crypto|cryptocurrency|bitcoin|nft)\b/i, startYear: 2009 },
+  { pattern: /\btech (?:ceo|entrepreneur|founder)\b/i, startYear: 1975 },
+  { pattern: /\b(?:call center|customer service rep)\b/i, startYear: 1970 },
+  { pattern: /\bbarista\b/i, startYear: 1985 },
+  { pattern: /\bfast food worker\b/i, startYear: 1950 },
+  { pattern: /\b(?:uber|rideshare) driver\b/i, startYear: 2010 },
+  { pattern: /\bdelivery driver\b/i, startYear: 1930 },
+  { pattern: /\bpersonal trainer\b/i, startYear: 1970 },
+  { pattern: /\b(?:physical therapist|dental hygienist)\b/i, startYear: 1920 },
+  { pattern: /\bmarketing manager\b/i, startYear: 1950 },
+  { pattern: /\bclimate activist\b/i, startYear: 1990 },
+  { pattern: /\bfentanyl dealer\b/i, startYear: 1995 },
+  { pattern: /\bhuman trafficker\b/i, startYear: 1900 },
+  { pattern: /\bsurf instructor\b/i, startYear: 1960 },
+  { pattern: /\belectronics factory worker\b/i, startYear: 1960 },
+  { pattern: /\binvestment banker\b/i, startYear: 1930 },
+  { pattern: /\breal estate agent\b/i, startYear: 1900 },
+  { pattern: /\bfilm director\b/i, startYear: 1910 },
+  { pattern: /\bhollywood producer\b/i, startYear: 1915 },
+  { pattern: /\bbollywood producer\b/i, startYear: 1935 },
+  { pattern: /\bjazz musician\b/i, startYear: 1917 },
+  { pattern: /\bcivil rights organizer\b/i, startYear: 1940 },
+  { pattern: /\b(?:oil field worker|oil minister)\b/i, startYear: 1900 },
+  { pattern: /\buranium miner\b/i, startYear: 1942 },
+  { pattern: /\bsalaryman|office lady\b/i, startYear: 1950 },
+  { pattern: /\bchaebol chairman\b/i, startYear: 1960 },
+  { pattern: /\bcasino owner\b/i, startYear: 1930 },
+  { pattern: /\bfirefighter\b/i, startYear: 1850 },
+
+  // Colonial institutions in the Americas, which have dates.
+  { pattern: /\bencomendero\b/i, startYear: 1503, endYear: 1720 },
+  { pattern: /\b(?:conquistador)\b/i, startYear: 1492, endYear: 1600 },
+  { pattern: /\b(?:spanish viceroy|viceroy)\b/i, startYear: 1535 },
+  { pattern: /\b(?:hacienda owner|hacendado)\b/i, startYear: 1550 },
+  { pattern: /\b(?:mission|missionary|mission school teacher)\b/i, startYear: 1520 },
+  { pattern: /\b(?:sharecropper)\b/i, startYear: 1865 },
+  { pattern: /\bcolonial administrator\b/i, startYear: 1500 },
+  { pattern: /\bbureau of indian affairs agent\b/i, startYear: 1824 },
+  { pattern: /\breservation rancher\b/i, startYear: 1870 },
+
+  // Bounded events. These read as professions in the tables but are moments.
+  { pattern: /\bprohibition gangster\b/i, startYear: 1920, endYear: 1933 },
+  { pattern: /\bair raid warden\b/i, startYear: 1938, endYear: 1946 },
+  { pattern: /\b(?:trench soldier|munitions worker)\b/i, startYear: 1914, endYear: 1945 },
+  { pattern: /\bbletchley codebreaker\b/i, startYear: 1939, endYear: 1946 },
+  { pattern: /\b(?:kamikaze pilot|navajo code talker|comfort woman|imperial japanese soldier)\b/i, startYear: 1937, endYear: 1945 },
+  { pattern: /\bred guard\b/i, startYear: 1966, endYear: 1976 },
+  { pattern: /\btiananmen protester\b/i, startYear: 1989, endYear: 1990 },
+  { pattern: /\bmau mau fighter\b/i, startYear: 1952, endYear: 1960 },
+  { pattern: /\bsandinista\b/i, startYear: 1961, endYear: 1990 },
+  { pattern: /\bzapatista\b/i, startYear: 1994 },
+  { pattern: /\bfarc guerrilla\b/i, startYear: 1964, endYear: 2017 },
+  { pattern: /\btamil tiger\b/i, startYear: 1976, endYear: 2009 },
+  { pattern: /\biranian revolutionary\b/i, startYear: 1977, endYear: 1981 },
+  { pattern: /\bplo fighter\b/i, startYear: 1964 },
+  { pattern: /\bira member\b/i, startYear: 1919 },
+  { pattern: /\bred brigade\b/i, startYear: 1970, endYear: 1988 },
+  { pattern: /\bblack panther\b/i, startYear: 1966, endYear: 1982 },
+  { pattern: /\baim activist\b/i, startYear: 1968 },
+  { pattern: /\banc activist\b/i, startYear: 1912 },
+  { pattern: /\bstanding rock protector\b/i, startYear: 2016 },
+  { pattern: /\bnaxalite\b/i, startYear: 1967 },
+  { pattern: /\byoung turk\b/i, startYear: 1889, endYear: 1922 },
+  { pattern: /\bpla soldier\b/i, startYear: 1927 },
+  { pattern: /\bweatherman\b/i, startYear: 1969, endYear: 1977 },
+  { pattern: /\bmoonshiner\b/i, startYear: 1790 },
+  { pattern: /\bpullman porter\b/i, startYear: 1867, endYear: 1969 },
+  { pattern: /\bblood diamond smuggler\b/i, startYear: 1990 },
+  { pattern: /\bbarefoot doctor\b/i, startYear: 1965, endYear: 1985 },
+  { pattern: /\bcommune worker\b/i, startYear: 1958, endYear: 1983 },
 ];
+
+/**
+ * Work that only exists where crops are sown and reaped. Herding, fishing,
+ * foraging and hunting are deliberately not here: those are how most of the
+ * places below actually fed themselves, and they must stay available.
+ */
+const NEEDS_AGRICULTURE =
+  /\b(?:farmer|farmhand|farm worker|field hand|agricultural\w*|peasant|cultivator|planter|harvester|ploughman|plowman|sharecropper|orchardist|vintner|rice farmer|cotton farmer|cash crop farmer|granary keeper|miller|thresher)\b/i;
+
+/**
+ * Foraging as the household's living. Hunting, fishing and trapping are
+ * deliberately absent: those persisted alongside farming everywhere.
+ */
+const FORAGING_LIVELIHOOD = /\b(?:forager|seed gatherer|acorn processor|root digger|wild plant gatherer)\b/i;
 
 export function isProfessionHistoricallyAvailable(
   profession: string,
   context: HistoricalContext,
 ): boolean {
+  // A farmer needs somewhere that farms. The capability model already knows
+  // where and when that was true and `birthplaceService` already asks it; this
+  // was the one caller that did not, which is why a persona in the Glacier
+  // Foothills in 285 CE was a Farmer learning crop rotation from his elders in
+  // a region that had no agriculture until settlers brought it.
+  const farmingPlace = `${context.location ?? ''} ${context.region ?? ''}`.toLowerCase();
+  const farms = hasCapability('settled_agriculture', {
+    year: context.year,
+    culturalZone: context.culturalZone as CulturalZone,
+    placeLower: farmingPlace,
+  });
+
+  if (NEEDS_AGRICULTURE.test(profession) && !farms) return false;
+
+  // And the reverse. Foraging for a living is a livelihood where there is no
+  // farming and a supplement where there is: people in farming societies still
+  // hunted and fished, but nobody's occupation was "gatherer" on the Colorado
+  // Plateau, where the Ancestral Puebloans grew maize. Without this the general
+  // subsistence pool swamped the Southwestern farming block.
+  if (FORAGING_LIVELIHOOD.test(profession) && farms) return false;
+
   if (
     context.localeType === 'city' &&
     /\b(?:farmer|farmhand|shepherd|herder|cowherd|goatherd|field hand|agricultural laborer|nomad)\b/i.test(profession)
@@ -63,9 +286,20 @@ export function isProfessionHistoricallyAvailable(
   ) {
     return false;
   }
+  const place = `${context.location ?? ''} ${context.region ?? ''}`;
   return PROFESSION_AVAILABILITY_RULES
     .filter(rule => rule.pattern.test(profession))
+    .filter(rule => !rule.zones || rule.zones.includes(context.culturalZone as string))
     .every(rule => {
+      // A place rule that excludes this place bars the trade outright; one that
+      // names other places only bars it until the date, if there is one.
+      // An exclusion is scoped to its own places and its own date, so a rule
+      // that removes shepherds from the Baffin coast does not also remove
+      // llama herders from the Andes.
+      if (rule.excludePlaces?.test(place)) {
+        return rule.excludedUntil !== undefined && context.year >= rule.excludedUntil;
+      }
+      if (rule.places && !rule.places.test(place)) return false;
       if (rule.startYear !== undefined && context.year < rule.startYear) return false;
       if (rule.endYear !== undefined && context.year > rule.endYear) return false;
       if (rule.requiredTechnology && !context.technologies.includes(rule.requiredTechnology)) return false;
@@ -131,13 +365,21 @@ export function getProfessionSelectionWeight(
 ): number {
   let weight = 1;
 
-  if (/\b(?:maharaja|nawab|emperor|empress|king|queen|duke|duchess|prince|princess|oil baron|bank president)\b/i.test(profession)) {
+  // Offices only one person held at a time. The pattern used to name a dozen
+  // royal titles and stop, so "Spanish Viceroy" — of which colonial Peru had
+  // one — carried the same weight as "Shepherd", of which it had tens of
+  // thousands, and a golden-baseline shepherd was promoted to viceroy.
+  if (/\b(?:maharaja|nawab|emperor|empress|king|queen|duke|duchess|prince|princess|oil baron|bank president|viceroy|governor.general|sultan|caliph|shah|tsar|czar|pharaoh|doge|khan|pope|patriarch|grand vizier|shogun|caudillo|paramount chief|chaebol chairman|tech ceo)\b/i.test(profession)) {
     weight = 0.02;
   } else if (/\b(?:industrialist|factory owner|railway investor|ceo)\b/i.test(profession)) {
     weight = 0.2;
   } else if (/\b(?:fenian|chartist|luddite|anarchist|revolutionary|resurrectionist|beggar|cutpurse|footpad|peaky blinder|gang member|executioner)\b/i.test(profession)) {
     weight = 0.04;
-  } else if (/\b(?:farmer|farm worker|laborer|servant|worker|weaver|fisher|herder|carrier|porter|caretaker|mother|child watcher)\b/i.test(profession)) {
+  } else if (/\b(?:farmer|farm worker|laborer|servant|worker|weaver|fisher|herder|carrier|porter|caretaker|mother|child watcher|hunter|forager|gatherer|trapper|fowler)\b/i.test(profession)) {
+    // Hunting, foraging and trapping belong in the same bracket as fishing and
+    // farming — they are how the household eats. Leaving them out of it left
+    // "Fisher" three times likelier than "Hunter" in every foraging economy in
+    // the app, so seventy per cent of the Palaeolithic Great Basin fished.
     weight = 3;
   } else if (/\b(?:merchant|artisan|baker|carpenter|smith|potter|teacher|clerk|shopkeeper|innkeeper)\b/i.test(profession)) {
     weight = 1.5;

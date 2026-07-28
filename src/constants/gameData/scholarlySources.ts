@@ -332,6 +332,16 @@ export const SCHOLARLY_SOURCES: Record<string, ScholarlySource> = {
     topic: 'historical-linguistics',
     supports: 'Austronesian origins in Taiwan, the primary subgrouping, and the sequence of the Pacific dispersal.',
   },
+  sidwell2015: {
+    id: 'sidwell2015',
+    authors: 'Paul Sidwell and Roger Blench',
+    year: 2015,
+    title: 'The Austroasiatic Urheimat: the Southeastern Riverine Hypothesis',
+    venue: 'in N. J. Enfield and B. Comrie (eds.), Languages of Mainland Southeast Asia',
+    kind: 'chapter',
+    topic: 'historical-linguistics',
+    supports: 'Austroasiatic as the oldest widely distributed family of mainland Southeast Asia, and its dispersal along the Mekong.',
+  },
   robbeets2021: {
     id: 'robbeets2021',
     authors: 'Martine Robbeets et al.',

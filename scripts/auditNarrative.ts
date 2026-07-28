@@ -35,7 +35,7 @@ const [
   { generateHistoricalPersona },
   { generateNarrativeBiography },
   { findNarrativeFailureModes },
-  { earnedEpithets },
+  { earnedEpithets, trailingEpithet, epithetRequiresEvidence },
   { AttributeBadgeService },
   { getAllAttributes },
   { hasCapability },
@@ -127,11 +127,14 @@ const biographies: string[] = quiet(() =>
 
 // --- 3. Bynames are earned -------------------------------------------------
 {
-  const UNEARNED = ['the Elder', 'the Younger', 'the Dark', 'the Fair', 'the Quiet'];
+  // Only the evidence-bearing bynames are checked. The neutral registers —
+  // birth order, temper, the direction someone came from — need no evidence by
+  // definition, and matching a trailing "the <Word>" by regex also caught the
+  // place in generated names like "Mussel of the Marsh".
   const bad: string[] = [];
   personas.forEach(p => {
-    const match = / (the [A-Z][A-Za-z-]+)$/.exec(p.character.name || '');
-    if (!match || UNEARNED.includes(match[1])) return;
+    const epithet = trailingEpithet(p.character.name || '');
+    if (!epithet || !epithetRequiresEvidence(epithet)) return;
     const earned = earnedEpithets({
       attributeIds: (p.character.attributes ?? []).map((a: any) => a.id),
       age: p.character.age,
@@ -139,7 +142,7 @@ const biographies: string[] = quiet(() =>
       birthSex: p.character.birthSex,
       hairColor: p.character.appearance?.hairColor,
     });
-    if (!earned.includes(match[1])) bad.push(`${p.character.name}`);
+    if (!earned.includes(epithet)) bad.push(`${p.character.name}`);
   });
   add({
     name: 'earned-bynames',

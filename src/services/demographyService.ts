@@ -37,7 +37,7 @@ export type BirthSex = 'Male' | 'Female';
  */
 export type SamplingMode = 'explore' | 'true-frequency';
 
-export const DEFAULT_SAMPLING_MODE: SamplingMode = 'explore';
+export const DEFAULT_SAMPLING_MODE: SamplingMode = 'true-frequency';
 
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
@@ -77,6 +77,13 @@ const POPULATION_BENCHMARKS: Array<{ year: number; population: number; birthRate
   { year: 1900, population: 1_656_000_000, birthRate: 38 },
   { year: 1950, population: 2_499_000_000, birthRate: 31 },
   { year: 2000, population: 6_149_000_000, birthRate: 22 },
+  // Past the end of PRB's table, continued from UN World Population Prospects.
+  // Births per year have been roughly flat at ~130-140 million since the 1980s:
+  // the population keeps climbing but the birth rate falls almost exactly fast
+  // enough to cancel it, so the 21st century adds lives at a steady rate rather
+  // than an accelerating one.
+  { year: 2015, population: 7_380_000_000, birthRate: 19 },
+  { year: 2030, population: 8_550_000_000, birthRate: 16 },
 ];
 
 function benchmarkIndex(year: number): number {
@@ -136,8 +143,14 @@ export const ERA_BOUNDS: Record<HistoricalEra, { min: number; max: number }> = {
   [HistoricalEra.MEDIEVAL]: { min: 500, max: 1450 },
   [HistoricalEra.RENAISSANCE_EARLY_MODERN]: { min: 1450, max: 1750 },
   [HistoricalEra.INDUSTRIAL_ERA]: { min: 1750, max: 1900 },
-  [HistoricalEra.MODERN_ERA]: { min: 1900, max: 2000 },
-  [HistoricalEra.FUTURE_ERA]: { min: 2000, max: 2100 },
+  // The modern era runs to 2030 rather than 2000 because the present is part of
+  // the record, not the future: roughly four billion people have been born since
+  // 2000, which is more human lives than the whole of the industrial era. The
+  // ceiling is a content decision — FUTURE_ERA is the speculative bucket, and
+  // handing it years that have already happened would put quantum processors and
+  // fusion cells into 2011.
+  [HistoricalEra.MODERN_ERA]: { min: 1900, max: 2030 },
+  [HistoricalEra.FUTURE_ERA]: { min: 2030, max: 2100 },
 };
 
 const SELECTABLE_ERAS: HistoricalEra[] = [

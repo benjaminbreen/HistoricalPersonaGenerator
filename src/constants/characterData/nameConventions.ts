@@ -123,41 +123,217 @@ const PLAIN_TEKNONYM = (child: string, gender: 'Male' | 'Female') =>
  * neighbour calls you, which is what a byname was before it was a surname.
  *
  * A byname is a claim about the person, so each one has to be earned: the
- * epithet is drawn only from what the persona actually is. Before this, the
- * pool was decorative and a woman called "the One-Eyed" had two good eyes.
- * `earnedEpithets` maps a persona to the bynames their neighbours could
- * plausibly have given them.
+ * evidence-bearing epithets are drawn only from what the persona actually is.
+ * Before this, the pool was decorative and a woman called "the One-Eyed" had
+ * two good eyes. `earnedEpithets` maps a persona to the bynames their
+ * neighbours could plausibly have given them.
+ *
+ * The second problem is range. A byname is the commonest way of telling two
+ * people with the same given name apart, so a naming world needs as many of
+ * them as it has reasons to distinguish anyone: bynames come from the body, the
+ * temper, the trade, the birth order, where you came from, what happened to you
+ * once, and what animal you were held to resemble. The pool used to hold
+ * twenty-two, five of which needed no evidence and therefore carried almost all
+ * the traffic — in a sample of two hundred Bronze Age Europeans, "the Dark",
+ * "the Fair", "the Quiet", "the Elder" and "the Younger" accounted for
+ * fifty-five of the seventy-seven bynames handed out. That reads as a village
+ * of five nicknames rather than as the past.
+ *
+ * It was also one pool for all of humanity, in English glosses drawn from the
+ * Norse and English saga registers. A Han farmer, a Wolof smith and an Andean
+ * herder do not share a byname vocabulary, so the neutral pools below are keyed
+ * by cultural zone. The evidence-bearing ones stay common across cultures —
+ * a limp is a limp everywhere — but the plain descriptive stock differs.
  */
-const EPITHETS = [
-  'the Tall', 'the Short', 'the Elder', 'the Younger', 'the Red', 'the Dark',
-  'the Fair', 'the Grey', 'the Swift', 'the Quiet', 'the Lame', 'the One-Eyed',
-  'the Left-Handed', 'the Bold', 'the Patient', 'the Scarred', 'the Silent',
-  'the Stout', 'the Lean', 'the Restless', 'the Watchful', 'the Wanderer',
-];
 
-/** Bynames that require no evidence beyond ordinary variation. */
-const UNEARNED_EPITHETS = ['the Elder', 'the Younger', 'the Dark', 'the Fair', 'the Quiet'];
+/** Bynames that report something about the body or the life, and must be earned. */
+const EARNABLE_EPITHETS = [
+  'the Tall', 'the Short', 'the Red', 'the Grey', 'the Swift', 'the Lame',
+  'the One-Eyed', 'the Left-Handed', 'the Bold', 'the Patient', 'the Scarred',
+  'the Silent', 'the Stout', 'the Lean', 'the Restless', 'the Watchful',
+  'the Wanderer', 'the Bald', 'the Deaf', 'the Stammerer', 'the Squinting',
+  'the Crooked', 'the Broad', 'the Freckled', 'the Toothless', 'the Marked',
+  'the Sleepless', 'the Barren', 'the Twice-Widowed', 'the Returned',
+  'the Captive', 'the Fatherless', 'the Fortunate', 'the Unlucky',
+];
 
 /** Attribute ids that entitle a persona to a given byname. */
 const EPITHET_EVIDENCE: Record<string, string[]> = {
   'the Tall': ['towering'],
   'the Short': ['diminutive', 'bound_feet'],
   'the Lame': ['lame', 'clubfoot', 'bowed_legs', 'hunchback'],
+  'the Crooked': ['hunchback', 'bowed_legs', 'scoliosis'],
   'the One-Eyed': ['blind', 'disfigured', 'trachoma'],
+  'the Squinting': ['nearsighted', 'trachoma', 'cataracts'],
+  'the Deaf': ['deaf', 'hard_of_hearing'],
+  'the Stammerer': ['stammer', 'stutter'],
   'the Scarred': ['scarred', 'burn_scarred', 'pox_scarred', 'disfigured', 'scarified'],
+  'the Marked': ['birthmark', 'scarified', 'tattooed', 'branded'],
+  'the Toothless': ['missing_teeth', 'rotten_teeth', 'scurvy'],
+  'the Bald': ['balding', 'alopecia'],
+  'the Freckled': ['freckled'],
   'the Red': ['red_haired'],
   'the Grey': ['prematurely_gray'],
   'the Left-Handed': ['left_handed'],
   'the Swift': ['athletic'],
+  'the Broad': ['broad_shouldered', 'strong'],
   'the Bold': ['brave', 'reckless'],
   'the Patient': ['patient'],
   'the Silent': ['taciturn', 'mute'],
   'the Stout': ['corpulent', 'strong'],
   'the Lean': ['gaunt', 'frail'],
   'the Restless': ['wanderer', 'insomniac', 'reckless'],
+  'the Sleepless': ['insomniac'],
   'the Watchful': ['keen_eyed', 'cautious'],
   'the Wanderer': ['wanderer', 'exile', 'foreigner'],
+  'the Captive': ['enslaved', 'captive', 'prisoner'],
+  'the Returned': ['exile', 'pilgrim', 'veteran'],
+  'the Fatherless': ['orphan', 'foundling'],
+  'the Barren': ['infertile'],
+  'the Twice-Widowed': ['widowed'],
+  'the Fortunate': ['lucky'],
+  'the Unlucky': ['unlucky', 'cursed'],
 };
+
+/**
+ * Bynames that need no evidence beyond ordinary variation: birth order, temper,
+ * complexion, the direction you came from, the animal you are held to resemble.
+ * These carry the bulk of the traffic, so the pools are deliberately long.
+ */
+const NEUTRAL_EPITHETS: Record<string, string[]> = {
+  /** The Norse, Gaelic and English saga register these glosses came from. */
+  EUROPEAN: [
+    'the Elder', 'the Younger', 'the Dark', 'the Fair', 'the Quiet', 'the Black',
+    'the White', 'the Ruddy', 'the Merry', 'the Sour', 'the Mild', 'the Stern',
+    'the Proud', 'the Wise', 'the Simple', 'the Hasty', 'the Careful',
+    'the Godly', 'the Wealthy', 'the Poor', 'the Younger Brother', 'the Widow',
+    'the Newcomer', 'the Hillman', 'the Marshman', 'the Northerner',
+    'the Southerner', 'the Islander', 'the Forester', 'the Fowler',
+    'the Bee-Keeper', 'the Ale-Wife', 'the Early-Riser', 'the Long-Sleeper',
+    'the Crow', 'the Hare', 'the Badger', 'the Wren', 'the Sparrow',
+    'the Goat', 'the Ox', 'the Bear-Cub',
+  ],
+  /** Bynames in the Arabic register, which had the richest byname culture of all. */
+  MENA: [
+    'the Elder', 'the Younger', 'the Dark', 'the Fair', 'the Quiet',
+    'the Generous', 'the Truthful', 'the Trusted', 'the Learned', 'the Pious',
+    'the Patient One', 'the Sharp-Tongued', 'the Slow-Spoken', 'the Grave',
+    'the Open-Handed', 'the Close-Fisted', 'the Early-Waking',
+    'the Sweet-Voiced', 'the Desert-Born', 'the Town-Born', 'the Highlander',
+    'the Coast-Dweller', 'the Well-Digger', 'the Guest-Feeder',
+    'the Camel-Eyed', 'the Falcon', 'the Lion-Hearted', 'the Gazelle',
+    'the Hawk', 'the Blue-Eyed', 'the Green-Grocer', 'the Silent at Council',
+  ],
+  SOUTH_ASIAN: [
+    'the Elder', 'the Younger', 'the Dark', 'the Fair', 'the Quiet',
+    'the Steady', 'the Golden', 'the Gentle', 'the Bright', 'the Devoted',
+    'the River-Born', 'the Hill-Born', 'the Grove-Keeper', 'the Well-Spoken',
+    'the Early-Married', 'the Late-Born', 'the Only Son', 'the Only Daughter',
+    'the Elephant', 'the Peacock', 'the Heron', 'the Buffalo', 'the Cuckoo',
+    'the Lotus-Eyed', 'the Long-Armed', 'the Soft-Footed', 'the Loud-Laughing',
+  ],
+  EAST_ASIAN: [
+    'the Elder', 'the Younger', 'the Dark', 'the Fair', 'the Quiet',
+    'the Upright', 'the Diligent', 'the Frugal', 'the Learned', 'the Filial',
+    'the Third Son', 'the Fourth Son', 'the Second Daughter', 'the Late-Born',
+    'the River-Side', 'the East Village', 'the West Village', 'the Upper Hamlet',
+    'the Iron-Handed', 'the Crane', 'the Carp', 'the Ox', 'the Magpie',
+    'the Bamboo', 'the Pine', 'the Sparrow-Voiced', 'the Slow-Walking',
+  ],
+  SUB_SAHARAN_AFRICAN: [
+    'the Elder', 'the Younger', 'the Dark', 'the Fair', 'the Quiet',
+    'the Firstborn', 'the Lastborn', 'the Twin', 'the Born-on-the-Road',
+    'the Born-in-Rain', 'the Born-in-Famine', 'the Long-Awaited',
+    'the Market-Woman', 'the Drummer', 'the Well-Named', 'the Laughing One',
+    'the Slow to Anger', 'the One Who Returns', 'the Leopard', 'the Antelope',
+    'the Guinea-Fowl', 'the Bull-Calf', 'the Hornbill', 'the Termite',
+    'the Iron-Worker', 'the Palm-Climber', 'the Far-Traveller',
+  ],
+  OCEANIA: [
+    'the Elder', 'the Younger', 'the Dark', 'the Fair', 'the Quiet',
+    'the Firstborn', 'the Lastborn', 'the Seaward', 'the Landward',
+    'the Windward', 'the Leeward', 'the Reef-Walker', 'the Deep-Diver',
+    'the Canoe-Builder', 'the Net-Mender', 'the Star-Reader', 'the Far-Sailed',
+    'the Shark', 'the Frigatebird', 'the Turtle', 'the Eel', 'the Coconut Crab',
+    'the Loud-Singing', 'the Slow-Speaking', 'the Storm-Born',
+  ],
+  NORTH_AMERICAN_PRE_COLUMBIAN: [
+    'the Elder', 'the Younger', 'the Quiet', 'the Firstborn', 'the Lastborn',
+    'the Twin', 'the Left-Behind', 'the Slow-Speaking', 'the Loud-Laughing',
+    'the Far-Walker', 'the Early-Riser', 'the Dream-Teller', 'the Good Host',
+    'the Careful Hunter', 'the Basket-Maker', 'the Fire-Tender',
+    'the North-Camp', 'the South-Camp', 'the River-Side', 'the Upland',
+    'the Winter-Born', 'the Summer-Born', 'the One Who Came Back',
+  ],
+  SOUTH_AMERICAN: [
+    'the Elder', 'the Younger', 'the Quiet', 'the Firstborn', 'the Lastborn',
+    'the Highland-Born', 'the Valley-Born', 'the Coast-Born', 'the Forest-Born',
+    'the Llama-Herder', 'the Weaver', 'the Salt-Carrier', 'the Cloud-Walker',
+    'the Sure-Footed', 'the Long-Breathed', 'the Slow-Speaking',
+    'the Condor', 'the Fox', 'the Hummingbird', 'the Toad', 'the Puma-Cub',
+    'the Winter-Born', 'the Planting-Born',
+  ],
+};
+
+/** Zones without their own list fall back to the European register. */
+const DEFAULT_NEUTRAL = NEUTRAL_EPITHETS.EUROPEAN;
+
+/**
+ * Bynames drawn from Christian, Islamic or Buddhist devotional vocabulary make
+ * no sense before those religions reach a place, and "the Godly" on a
+ * Palaeolithic forager is the same category of error as a surname on one.
+ */
+const DEVOTIONAL = new Set(['the Godly', 'the Pious', 'the Devoted', 'the Filial']);
+
+/** Bynames that name a role only one sex held. */
+const MALE_ONLY = /Son|Brother|Bull-Calf|Ox\b/;
+const FEMALE_ONLY = /Daughter|Widow|Wife|Woman|Market-Woman|Barren|Married/;
+
+function neutralPool(
+  culturalZone: string,
+  year: number,
+  birthSex?: 'Male' | 'Female',
+): string[] {
+  let pool = NEUTRAL_EPITHETS[culturalZone] ?? DEFAULT_NEUTRAL;
+  if (birthSex === 'Male') pool = pool.filter(e => !FEMALE_ONLY.test(e));
+  if (birthSex === 'Female') pool = pool.filter(e => !MALE_ONLY.test(e));
+  if (year >= -3000) return pool;
+  // Deep prehistory: no trades, no villages to be named for, no scripture.
+  return pool.filter(epithet =>
+    !DEVOTIONAL.has(epithet)
+    && !/-Maker|-Keeper|-Worker|-Builder|-Mender|-Digger|-Grocer|-Carrier|-Climber|Merchant|Market|Wife|Village|Hamlet|Wealthy|Widow|Married/.test(epithet));
+}
+
+/**
+ * Every byname the generator knows, for detecting one on the end of a name.
+ *
+ * Each must begin with "the ", because detection is a suffix match and a
+ * one-word byname collides with ordinary names: a bare 'Badger' in the pool
+ * turned the generated name "Two Badger" into "Two the Upland".
+ */
+const ALL_EPITHETS = Array.from(new Set([
+  ...EARNABLE_EPITHETS,
+  ...Object.values(NEUTRAL_EPITHETS).flat(),
+]))
+  .filter(epithet => epithet.startsWith('the '))
+  // Longest first, so "the Younger Brother" is not mistaken for "the Younger".
+  .sort((a, b) => b.length - a.length);
+
+/**
+ * The byname on the end of this name, if there is one.
+ *
+ * Exported so the audit harness stops matching a trailing "the <Word>" by
+ * regex: that read "the Marsh" out of the generated name "Mussel of the Marsh"
+ * and reported it as an unearned physical byname.
+ */
+export function trailingEpithet(name: string): string | undefined {
+  return ALL_EPITHETS.find(epithet => name.endsWith(` ${epithet}`));
+}
+
+/** Whether a byname is a claim about the body or the life that must be earned. */
+export function epithetRequiresEvidence(epithet: string): boolean {
+  return EARNABLE_EPITHETS.includes(epithet);
+}
 
 export interface EpithetEvidence {
   attributeIds?: string[];
@@ -165,13 +341,15 @@ export interface EpithetEvidence {
   heightCm?: number;
   birthSex?: 'Male' | 'Female';
   hairColor?: string;
+  /** Which byname register to fall back on. Defaults to the European one. */
+  culturalZone?: string;
+  year?: number;
 }
 
 /** Every byname this persona could actually have earned. */
 export function earnedEpithets(evidence: EpithetEvidence): string[] {
   const ids = new Set(evidence.attributeIds ?? []);
-  const earned = EPITHETS.filter(epithet => {
-    if (UNEARNED_EPITHETS.includes(epithet)) return false;
+  const earned = EARNABLE_EPITHETS.filter(epithet => {
     const required = EPITHET_EVIDENCE[epithet];
     return !!required && required.some(id => ids.has(id));
   });
@@ -189,21 +367,32 @@ export function earnedEpithets(evidence: EpithetEvidence): string[] {
 /**
  * Replace a byname the persona has not earned. Called once the attributes and
  * appearance exist, which is after the name is first formed.
+ *
+ * The replacement is drawn from the neutral pool most of the time even when the
+ * persona has earned something, because most bynames in most places were not
+ * reports of an injury: keeping the earned one whenever it exists made every
+ * scarred or limping persona in the sample carry it, which is its own
+ * distortion.
  */
 export function reconcileEpithet(
   name: string,
   evidence: EpithetEvidence,
   random: () => number = Math.random,
 ): string {
-  const match = EPITHETS.find(epithet => name.endsWith(` ${epithet}`));
+  const match = ALL_EPITHETS.find(epithet => name.endsWith(` ${epithet}`));
   if (!match) return name;
-  if (UNEARNED_EPITHETS.includes(match)) return name;
+
+  const neutral = neutralPool(
+    evidence.culturalZone ?? 'EUROPEAN', evidence.year ?? 0, evidence.birthSex);
+  if (neutral.includes(match)) return name;
 
   const stem = name.slice(0, name.length - match.length - 1);
   const earned = earnedEpithets(evidence);
   if (earned.includes(match)) return name;
-  if (earned.length > 0) return `${stem} ${earned[Math.floor(random() * earned.length)]}`;
-  return `${stem} ${UNEARNED_EPITHETS[Math.floor(random() * UNEARNED_EPITHETS.length)]}`;
+  if (earned.length > 0 && random() < 0.5) {
+    return `${stem} ${earned[Math.floor(random() * earned.length)]}`;
+  }
+  return `${stem} ${neutral[Math.floor(random() * neutral.length)]}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -425,6 +614,10 @@ function resolveConventionProfile(
       return { weights: { personal: 0.5, epithet: 0.3, clan: 0.2 } };
 
     case 'NORTH_AMERICAN_COLONIAL':
+      // Once a state registers births almost everyone has a surname on paper,
+      // whatever they are called at home — the same correction Oceania needed.
+      // One in eight Californians going by a single name in 1925 was wrong.
+      if (year >= CIVIL_REGISTRATION) return { weights: { inherited: 0.98, personal: 0.02 } };
       return { weights: { inherited: 0.88, personal: 0.12 } };
 
     case 'SOUTH_AMERICAN': {
@@ -505,8 +698,15 @@ export function formatPersonalName(input: FormatNameInput): FormattedName {
       const leads = /^(Abu|Umm)\b/.test(formed);
       return { full: leads ? `${formed} (${given})` : `${given}, ${formed}`, given, convention };
     }
-    case 'epithet':
-      return { full: `${given} ${pick(EPITHETS)}`, given, convention };
+    case 'epithet': {
+      // Mostly from the neutral register of this culture, because most bynames
+      // were not reports of an injury. The quarter drawn from the evidence-
+      // bearing pool is checked against the persona's actual body and history
+      // by `reconcileEpithet` once those exist, and replaced if unwarranted.
+      const neutral = neutralPool(culturalZone, year, gender);
+      const pool = random() < 0.75 ? neutral : EARNABLE_EPITHETS;
+      return { full: `${given} ${pick(pool) ?? pick(neutral)}`, given, convention };
+    }
     case 'occupational':
       return {
         full: occupation ? `${given} the ${occupation}` : `${given} ${pick(usableSurnames) ?? ''}`.trim(),

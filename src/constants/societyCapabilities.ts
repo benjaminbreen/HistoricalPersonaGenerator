@@ -48,6 +48,7 @@ const EARLIEST: Record<SocietyCapability, Partial<Record<CulturalZone, number>>>
     MENA: -3200,
     EAST_ASIAN: -1200,
     SOUTH_ASIAN: -300,        // Brahmi; the Indus script did not carry forward
+    SOUTHEAST_ASIAN: 400,      // Pallava-derived scripts, with the Indic religions
     EUROPEAN: -700,           // Greek and Etruscan, then outward
     SUB_SAHARAN_AFRICAN: 1000, // Arabic script with Islam; see place overrides
     SOUTH_AMERICAN: 1532,      // khipu recorded, but it is not letters
@@ -58,6 +59,7 @@ const EARLIEST: Record<SocietyCapability, Partial<Record<CulturalZone, number>>>
   metallurgy: {
     MENA: -3300,
     SOUTH_ASIAN: -2800,
+    SOUTHEAST_ASIAN: -2000,    // Dong Son bronze; iron follows within a millennium
     EUROPEAN: -2500,
     EAST_ASIAN: -2000,
     SUB_SAHARAN_AFRICAN: -900,
@@ -69,6 +71,7 @@ const EARLIEST: Record<SocietyCapability, Partial<Record<CulturalZone, number>>>
   settled_agriculture: {
     MENA: -9000,
     SOUTH_ASIAN: -7000,
+    SOUTHEAST_ASIAN: -4000,    // Rice on the mainland; the islands within two millennia
     EAST_ASIAN: -7000,
     EUROPEAN: -6000,
     SOUTH_AMERICAN: -3500,
@@ -81,6 +84,7 @@ const EARLIEST: Record<SocietyCapability, Partial<Record<CulturalZone, number>>>
     // Inheritance of land as a social fact lags farming itself.
     MENA: -6000,
     SOUTH_ASIAN: -4500,
+    SOUTHEAST_ASIAN: -1000,
     EAST_ASIAN: -4500,
     EUROPEAN: -3500,
     SOUTH_AMERICAN: -1500,
@@ -92,6 +96,7 @@ const EARLIEST: Record<SocietyCapability, Partial<Record<CulturalZone, number>>>
   draft_animals: {
     MENA: -4000,
     SOUTH_ASIAN: -3500,
+    SOUTHEAST_ASIAN: -2000,    // Water buffalo, and elephants on the mainland
     EUROPEAN: -3500,
     EAST_ASIAN: -3000,
     SUB_SAHARAN_AFRICAN: -1000,
@@ -107,6 +112,7 @@ const EARLIEST: Record<SocietyCapability, Partial<Record<CulturalZone, number>>>
     MENA: 900,
     EAST_ASIAN: 900,
     SOUTH_ASIAN: 500,
+    SOUTHEAST_ASIAN: 900,      // Craft and trade corporations in the port polities
     SUB_SAHARAN_AFRICAN: NEVER,
     SOUTH_AMERICAN: NEVER,
     NORTH_AMERICAN_PRE_COLUMBIAN: NEVER,
@@ -117,6 +123,7 @@ const EARLIEST: Record<SocietyCapability, Partial<Record<CulturalZone, number>>>
     MENA: -600,
     EUROPEAN: -600,
     SOUTH_ASIAN: -600,
+    SOUTHEAST_ASIAN: 700,      // Srivijayan and Javanese coinage; Chinese cash circulates earlier
     EAST_ASIAN: -500,
     SUB_SAHARAN_AFRICAN: 800,
     NORTH_AMERICAN_COLONIAL: 1600,
@@ -134,6 +141,7 @@ const EARLIEST: Record<SocietyCapability, Partial<Record<CulturalZone, number>>>
     EUROPEAN: -10000,
     MENA: -10000,
     SOUTH_ASIAN: 1498,
+    SOUTHEAST_ASIAN: 1511,     // Malacca falls to the Portuguese
     EAST_ASIAN: 1543,
     SUB_SAHARAN_AFRICAN: 1880,   // coasts far earlier; see place overrides
     SOUTH_AMERICAN: 1532,        // Andes and Atlantic coast; interiors later
@@ -144,6 +152,7 @@ const EARLIEST: Record<SocietyCapability, Partial<Record<CulturalZone, number>>>
   urban_settlement: {
     MENA: -3500,
     SOUTH_ASIAN: -2600,
+    SOUTHEAST_ASIAN: -500,     // Moated settlements, then the Angkorian and Javanese capitals
     EAST_ASIAN: -2000,
     EUROPEAN: -1600,
     SOUTH_AMERICAN: -1500,
@@ -250,6 +259,48 @@ const PLACE_OVERRIDES: PlaceOverride[] = [
     // Interior Australia: foraging economies into the modern period.
     match: /\b(australia|arnhem|outback|aboriginal|tasmania)\b/,
     capabilities: { settled_agriculture: 1800, heritable_land: 1800, urban_settlement: 1800 },
+  },
+  {
+    // Western North America outside the farming Southwest. The zone-level date
+    // of 2000 BCE is the Southwest's, where maize arrives early; applying it to
+    // the whole zone made a Farmer with crop rotation in the Glacier Foothills
+    // in 285 CE. The Plateau, the Great Basin and the Northern Rockies had no
+    // agriculture before settlers brought it — these were root, seed, salmon
+    // and game economies.
+    // "Plateau" here is the Columbia Plateau culture area, not the Colorado
+    // Plateau, which is Puebloan farming country and matched by the Southwest
+    // rule above. Naming it bare took maize away from the Ancestral Puebloans.
+    match: /\b(great basin|northern rockies|columbia plateau|snake river|yellowstone|nevada|utah|glacier|absaroka|salmon river|bitterroot|cascade)\b/,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'NORTH_AMERICAN_COLONIAL'],
+    capabilities: { settled_agriculture: 1860, heritable_land: 1860, urban_settlement: 1860 },
+  },
+  {
+    // The Northwest Coast: dense, sedentary, ranked societies with plank houses
+    // and stored surplus — and no agriculture. Salmon, not seed corn.
+    match: /\b(pacific coast|northwest|puget|salish|fraser|haida|olympic|vancouver|cascad)\b/,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'NORTH_AMERICAN_COLONIAL'],
+    capabilities: { settled_agriculture: 1850, heritable_land: 1850 },
+  },
+  {
+    // California: acorn economies, likewise sedentary and likewise not farming.
+    match: /\b(california|central valley|sierra nevada|mojave)\b/,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'NORTH_AMERICAN_COLONIAL'],
+    capabilities: { settled_agriculture: 1769, heritable_land: 1769 },
+  },
+  {
+    // The Plains. Riverine horticulture on the Missouri from about 900 CE — the
+    // Mandan and Hidatsa villages — but the open grassland was bison country.
+    match: /\b(great plains|plains|prairie|dakota|nebraska|llano|comanche|blackfoot)\b/,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'NORTH_AMERICAN_COLONIAL'],
+    capabilities: { settled_agriculture: 900 },
+  },
+  {
+    // Eastern North America. Local seed crops from about 1800 BCE, but maize
+    // agriculture — the thing the word "farmer" implies here — only from
+    // roughly 900 CE.
+    match: /\b(woodland|northeast|great lakes|mississippi|ohio|atlantic coast|new england|chesapeake|southeast|appalach)\b/,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN'],
+    capabilities: { settled_agriculture: 900 },
   },
 ];
 

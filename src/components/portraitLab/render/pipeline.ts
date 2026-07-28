@@ -91,7 +91,7 @@ export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
     book: ramps.book,
     paints: skinPaints,
     shape: spec.noseShape,
-    centerX: anatomy.centerX,
+    centerX: anatomy.centerX + anatomy.asymmetry.noseLean,
     baseY: anatomy.noseBaseY,
     ageLines: spec.ageLines,
   });
@@ -229,7 +229,8 @@ export function renderFrame(
       shape: spec.browShape,
       thickness: spec.browThickness,
       centerX: anatomy.centerX + side * anatomy.eyeDX,
-      baseY: anatomy.browY + Math.round(pose.browLift - asymmetric),
+      baseY: anatomy.browY + anatomy.asymmetry.browY[side === -1 ? 0 : 1]
+        + Math.round(pose.browLift - asymmetric),
       side,
       length: Math.round(anatomy.eyeDX * 1.18),
       seed: spec.seed ^ (side === -1 ? 0x11 : 0x22),
@@ -251,7 +252,7 @@ export function renderFrame(
       shape: spec.eyeShape,
       state: eyeState,
       centerX: anatomy.centerX + side * anatomy.eyeDX,
-      centerY: anatomy.eyeY,
+      centerY: anatomy.eyeY + anatomy.asymmetry.eyeY[side === -1 ? 0 : 1],
       side,
       gazeX: state.gazeX,
       gazeY: state.gazeY,
@@ -268,7 +269,7 @@ export function renderFrame(
     paints: mouthPaints,
     expression: state.expression,
     lipShape: spec.lipShape,
-    centerX: anatomy.centerX,
+    centerX: anatomy.centerX + anatomy.asymmetry.mouthLean,
     y: anatomy.mouthY,
     ageThinning: spec.ageLines,
   });

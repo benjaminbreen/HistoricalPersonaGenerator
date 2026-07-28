@@ -48,6 +48,27 @@ export interface Anatomy {
   shoulderHalf: number;
   /** Where a collar or neckline crosses the chest. */
   collarY: number;
+
+  /**
+   * The small ways a real face fails to be its own mirror image.
+   *
+   * Perfect bilateral symmetry is the loudest tell that a face was generated
+   * rather than drawn, and it is loud precisely because it never occurs: no
+   * human has brows at the same height or a nose on the midline. A pixel here
+   * or there is enough — these are deliberately sub-feature offsets, not
+   * deformations, and at 96px one pixel of brow is a visible difference in
+   * expression.
+   *
+   * Indexed by side: `[0]` is the viewer's left (side −1), `[1]` the right.
+   */
+  asymmetry: {
+    browY: [number, number];
+    eyeY: [number, number];
+    /** Sideways offset of the nose, in pixels. */
+    noseLean: number;
+    /** Sideways offset of the mouth, in pixels. */
+    mouthLean: number;
+  };
 }
 
 const BASE_PROFILE: ProfileKeys = [
@@ -67,6 +88,83 @@ function scaleKeys(keys: ProfileKeys, fn: (t: number, half: number) => number): 
   return keys.map(([t, half]) => [t, Math.max(2, fn(t, half))]);
 }
 
+const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
+
+/**
+ * A width multiplier that varies smoothly down the skull.
+ *
+ * The face shapes used to be written as step functions — `t < 0.3 ? 0.82 :
+ * t < 0.62 ? 1.11 : 0.76` for a diamond, and similar for the rest. That is
+ * fine while the steps are small, and catastrophic once they are not: the
+ * profile's control points sit at t = 0.26 and t = 0.40, so that particular
+ * ternary asked two *adjacent* points to differ by 35%, about seven pixels.
+ * `sampleProfile` runs Catmull-Rom through them, Catmull-Rom overshoots a step
+ * it cannot fit, and the result was a hard angular flare at the temples and a
+ * pinched cranium above it. Amplifying the axes did not create that bug; it
+ * only made an existing discontinuity big enough to see.
+ *
+ * Interpolating between anchors with a smoothstep removes the class of problem
+ * rather than the instance: there is no way to express a step here, so no
+ * future edit to these numbers can reintroduce a corner.
+ */
+function shapeCurve(anchors: Array<[number, number]>): (t: number) => number {
+  return (t: number) => {
+    if (t <= anchors[0][0]) return anchors[0][1];
+    const last = anchors[anchors.length - 1];
+    if (t >= last[0]) return last[1];
+    let i = 0;
+    while (i < anchors.length - 2 && anchors[i + 1][0] < t) i += 1;
+    const [t0, v0] = anchors[i];
+    const [t1, v1] = anchors[i + 1];
+    const u = (t - t0) / (t1 - t0 || 1);
+    return v0 + (v1 - v0) * (u * u * (3 - 2 * u));
+  };
+}
+
+/**
+ * The width profiles, as multipliers on the base skull.
+ *
+ * Read down each list: crown, temple, cheek, jaw, chin. No two neighbouring
+ * anchors differ by more than about a tenth, which is the working limit for
+ * staying clear of spline overshoot — `limitDeviation` enforces it afterwards
+ * regardless, but keeping the authored numbers inside it means the shape you
+ * write is the shape you get.
+ */
+const FACE_SHAPE_CURVES: Record<string, Array<[number, number]>> = {
+  // Full through the jaw and a touch narrower at the crown.
+  round: [[0, 0.98], [0.5, 1.02], [1, 1.08]],
+  // Straight sides carried down to a broad, flat jaw.
+  square: [[0, 1.0], [0.5, 1.01], [0.8, 1.09], [1, 1.13]],
+  // Tall already, from `headHeight`; the outline's job is to narrow downward.
+  long: [[0, 1.0], [0.5, 0.99], [1, 0.90]],
+  // Broad at the temples, tapering to a small chin.
+  heart: [[0, 1.05], [0.3, 1.04], [0.65, 0.95], [1, 0.82]],
+  // Narrow above and below, widest across the cheekbones.
+  diamond: [[0, 0.90], [0.28, 0.96], [0.5, 1.06], [0.75, 0.95], [1, 0.85]],
+};
+
+/**
+ * Stop the accumulated modifiers from varying faster than the spline can draw.
+ *
+ * Face shape, jawline and cheekbones each multiply the same profile, so they
+ * compound: a diamond face with high cheekbones and a sharp jaw applied three
+ * separate narrowings and a widening to overlapping stretches of the same
+ * skull. Clamping how much the *combined* multiplier may change between
+ * neighbouring control points bounds the compounding without capping any one
+ * axis, so each stays as expressive as it is on its own and only their
+ * pile-up is limited.
+ */
+function limitDeviation(base: ProfileKeys, shaped: ProfileKeys, maxStep: number): ProfileKeys {
+  const ratio = shaped.map(([, half], i) => half / Math.max(0.001, base[i][1]));
+  for (let i = 1; i < ratio.length; i += 1) {
+    ratio[i] = clamp(ratio[i], ratio[i - 1] - maxStep, ratio[i - 1] + maxStep);
+  }
+  for (let i = ratio.length - 2; i >= 0; i -= 1) {
+    ratio[i] = clamp(ratio[i], ratio[i + 1] - maxStep, ratio[i + 1] + maxStep);
+  }
+  return base.map(([t, half], i) => [t, Math.max(2, half * ratio[i])]);
+}
+
 const SHOULDER_HALF: Record<string, number> = {
   slight: 29,
   short: 31,
@@ -82,55 +180,63 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
   const centerX = CANVAS / 2;
   const female = spec.gender === 'Female';
 
-  // Long faces get a taller skull and a slightly narrower one; round faces the
-  // reverse. Children keep a larger cranium relative to the jaw.
+  // Long faces get a taller skull and a narrower one; round faces the reverse.
+  // Children keep a larger cranium relative to the jaw.
+  //
+  // These numbers used to be roughly half what they are. A contact sheet of the
+  // twelve feature fixtures — twelve portraits differing only in face shape,
+  // jaw, cheekbone, nose and eyes — came back indistinguishable at six times
+  // magnification, and the arithmetic says why: a 4% width change on a
+  // 46-pixel-wide head is under a pixel, so it rounds away entirely. An axis
+  // that cannot move a whole pixel is not an axis. Anything meant to be visible
+  // here has to be worth at least two.
   let headHeight = 58;
   let widthScale = 1;
   switch (spec.faceShape) {
-    case 'long': headHeight += 5; widthScale = 0.925; break;
-    case 'round': headHeight -= 4; widthScale = 1.055; break;
-    case 'square': headHeight -= 1; widthScale = 1.02; break;
-    case 'heart': headHeight += 1; break;
-    case 'diamond': headHeight += 2; break;
+    case 'long': headHeight += 8; widthScale = 0.90; break;
+    case 'round': headHeight -= 6; widthScale = 1.08; break;
+    case 'square': headHeight -= 2; widthScale = 1.04; break;
+    case 'heart': headHeight += 2; widthScale = 1.02; break;
+    case 'diamond': headHeight += 3; widthScale = 1.0; break;
     default: break;
   }
-  if (female) widthScale *= 0.965;
-  if (spec.build === 'imposing' || spec.build === 'heavy') widthScale *= 1.04;
-  if (spec.build === 'slight') widthScale *= 0.97;
+  if (female) widthScale *= 0.955;
+  if (spec.build === 'imposing' || spec.build === 'heavy') widthScale *= 1.06;
+  if (spec.build === 'slight') widthScale *= 0.95;
   if (spec.age < 14) { headHeight -= 4; widthScale *= 1.03; }
 
-  let keys = scaleKeys(BASE_PROFILE, (_t, half) => half * widthScale);
+  const scaled = scaleKeys(BASE_PROFILE, (_t, half) => half * widthScale);
+  let keys = scaled;
 
   // Face shape reshapes the outline rather than just scaling it.
-  switch (spec.faceShape) {
-    case 'heart':
-      keys = scaleKeys(keys, (t, half) =>
-        t < 0.35 ? half * 1.04 : t > 0.82 ? half * (0.82 - (t - 0.82) * 0.6) : half);
-      break;
-    case 'diamond':
-      keys = scaleKeys(keys, (t, half) =>
-        t < 0.3 ? half * 0.9 : t < 0.62 ? half * 1.05 : half * 0.86);
-      break;
-    case 'square':
-      keys = scaleKeys(keys, (t, half) => (t > 0.7 ? half * (1 + (t - 0.7) * 0.72) : half));
-      break;
-    case 'round':
-      keys = scaleKeys(keys, (t, half) => (t > 0.72 ? half * (1 + (t - 0.72) * 0.38) : half));
-      break;
-    default:
-      break;
+  const shape = FACE_SHAPE_CURVES[spec.faceShape];
+  if (shape) {
+    const curve = shapeCurve(shape);
+    keys = scaleKeys(keys, (t, half) => half * curve(t));
   }
 
-  // Jaw and cheekbone are separate knobs from the overall shape.
+  // Jaw and cheekbone are separate knobs from the overall shape. Both blend in
+  // with a smoothstep rather than a linear ramp — a linear ramp leaves a corner
+  // in the derivative where it starts, and at this size a kink in the outline
+  // is as visible as a step in it.
   const jawFactor: Record<string, number> = {
-    sharp: 0.86, soft: 1.0, square: 1.16, round: 1.08, oval: 0.96,
+    sharp: 0.80, soft: 1.0, square: 1.20, round: 1.12, oval: 0.92,
   };
   const jaw = jawFactor[spec.jawline] ?? 1;
-  keys = scaleKeys(keys, (t, half) => (t > 0.66 ? half * (1 + (jaw - 1) * ((t - 0.66) / 0.34)) : half));
+  keys = scaleKeys(keys, (t, half) => {
+    const u = clamp((t - 0.56) / 0.44, 0, 1);
+    return half * (1 + (jaw - 1) * u * u * (3 - 2 * u));
+  });
 
-  const cheekFactor = spec.cheekbones === 'high' ? 1.06 : spec.cheekbones === 'low' ? 0.95 : 1;
-  keys = scaleKeys(keys, (t, half) =>
-    t > 0.4 && t < 0.68 ? half * (1 + (cheekFactor - 1) * (1 - Math.abs(t - 0.54) / 0.14)) : half);
+  // Cheekbones are a bump, not a plateau: a Gaussian centred on the zygomatic
+  // arch falls off to nothing in both directions on its own.
+  const cheekFactor = spec.cheekbones === 'high' ? 1.09 : spec.cheekbones === 'low' ? 0.93 : 1;
+  if (cheekFactor !== 1) {
+    keys = scaleKeys(keys, (t, half) =>
+      half * (1 + (cheekFactor - 1) * Math.exp(-Math.pow((t - 0.5) / 0.19, 2))));
+  }
+
+  keys = limitDeviation(scaled, keys, 0.075);
 
   const headTop = Math.round(9 - (headHeight - 58) * 0.35);
   const chinY = headTop + headHeight;
@@ -141,6 +247,18 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
   // A touch of seeded asymmetry in the feature placement keeps a grid of
   // portraits from looking stamped out of one mould.
   const jitter = (unit(spec.seed, 'feature-jitter') - 0.5) * 1.2;
+
+  // Which way this face is off-true, and by how much. Rounded to whole pixels
+  // because a fractional offset is a no-op once the feature is stamped, and
+  // biased so that most faces get one asymmetry rather than four — a face that
+  // is off-true everywhere at once stops reading as a face and starts reading
+  // as a mistake.
+  const asymPick = (label: string, magnitude: number) => {
+    const u = unit(spec.seed, label);
+    return Math.round((u - 0.5) * 2 * magnitude);
+  };
+  const browSkew = asymPick('brow-skew', 1.4);
+  const eyeSkew = asymPick('eye-skew', 0.9);
 
   const eyeY = Math.round(at(0.515) + jitter * 0.4);
   // Classical proportion puts one eye-width between the eyes; on a 48px head
@@ -160,9 +278,17 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
     headHalfWidth,
     headProfile: keys,
 
-    // Far enough above the lash line that brow and eye stay two forms
-    // rather than merging into one dark slab.
-    browY: Math.round(at(0.405)),
+    // Far enough above the lash line that brow and eye stay two forms rather
+    // than merging into one dark slab.
+    //
+    // A fraction of the skull height alone does not guarantee that: a round
+    // face is six pixels shorter than an oval one, which takes a proportional
+    // gap of 6.4px down to 5.6. So the gap is proportional where there is room
+    // and six pixels where there is not. It is deliberately only a floor — a
+    // heavy brow sitting close over a small skull is a face, not a fault, and
+    // the audit's occlusion check flags a few of those. Widening this to
+    // silence them would be flattening real variation to please a threshold.
+    browY: Math.min(Math.round(at(0.405)), eyeY - 6),
     eyeY,
     eyeDX,
     eyeHalfWidth: 4,
@@ -186,5 +312,12 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
     shoulderTop: chinY + 8,
     shoulderHalf,
     collarY: chinY + 12,
+
+    asymmetry: {
+      browY: [Math.max(0, -browSkew), Math.max(0, browSkew)],
+      eyeY: [Math.max(0, -eyeSkew), Math.max(0, eyeSkew)],
+      noseLean: asymPick('nose-lean', 0.8),
+      mouthLean: asymPick('mouth-lean', 0.8),
+    },
   };
 }

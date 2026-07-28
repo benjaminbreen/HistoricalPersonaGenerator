@@ -22,6 +22,8 @@ import {
   Expression,
   GarmentKind,
   GarmentSpec,
+  HairLength,
+  HairSilhouette,
   HeadwearKind,
   HeadwearSpec,
   JewelrySpec,
@@ -119,6 +121,70 @@ const HEADWEAR_KEYWORDS: Array<[RegExp, HeadwearKind]> = [
   // spelling never matched and those hats fell through to the `cap` fallback.
   [/(brim|tricorn|bicorne|sombrero|straw|petasos|boater|bowler|fedora|homburg|visor|top hat|wide[- ]?hat|conical|dou ?li|bamboo|sedge|sugegasa|kasa|salakot|non la|cheese-cutter|hat)/i, 'brimmed_hat'],
 ];
+
+/**
+ * Hairstyle names, mapped onto silhouettes the renderer can draw.
+ *
+ * The app has been generating these all along — `getHairstyle` in
+ * `npcUtils.ts` picks from era- and gender-specific lists, so a medieval man
+ * gets a `bowl_cut` or a `shaved_crown` and an antique woman gets a
+ * `braided_crown` or a `gathered_bun` — and the renderer simply never read the
+ * field. Every persona was drawn with hair falling free. Wiring this up costs
+ * nothing at generation time and buys back an axis of variation that is
+ * already period-correct, because the era gating happened upstream.
+ *
+ * Order matters: the first match wins, so the specific forms have to precede
+ * the generic words they contain. `braided_buns` must be tested before
+ * `braided`, or every plait in the app resolves to a loose braid.
+ */
+const HAIRSTYLE_KEYWORDS: Array<[RegExp, HairSilhouette]> = [
+  // Shaved and part-shaved forms first — `shaved_crown` contains no other
+  // keyword, but `thin_shaved_crown` would otherwise match `thin`.
+  [/(tonsure|shaved[_ ]?crown|monk|friar)/i, 'tonsure'],
+  [/(mohawk|shaved[_ ]?sides|fade|undercut|sidecut)/i, 'shaved_sides'],
+
+  // Bound and gathered forms.
+  [/(twin[_ ]?buns|braided[_ ]?buns|pigtails|bunches|odango)/i, 'twin_buns'],
+  [/(top[_ ]?knot|topknot|warrior[_ ]?knot|man[_ ]?bun|elder[_ ]?crown|elder[_ ]?knots)/i, 'top_knot'],
+  [/(updo|piled[_ ]?high|high[_ ]?pinned|elaborate[_ ]?bun|pearl[_ ]?net|rolled[_ ]?and[_ ]?set|courtly)/i, 'updo'],
+  [/(bun|chignon|gathered|knot|waved[_ ]?and[_ ]?pinned|veiled[_ ]?and[_ ]?bound)/i, 'bun'],
+  [/(ponytail|tail|queue)/i, 'ponytail'],
+  [/(tied[_ ]?back|swept[_ ]?back|slick(ed)?[_ ]?back|pulled[_ ]?back|high[_ ]?forehead|pompadour)/i, 'tied_back'],
+
+  // Braided forms, most specific first.
+  [/(braided[_ ]?crown|crown[_ ]?braid|braided[_ ]?halo)/i, 'braid_crown'],
+  [/(cornrow|canerow)/i, 'cornrows'],
+  [/(dreadlock|dreads|locs|locks[_ ]?rope|twists)/i, 'locs'],
+  [/(plaits|twin[_ ]?braid|maiden[_ ]?braids|tribal[_ ]?braids|shaman[_ ]?braids|side[_ ]?braids)/i, 'braid_twin'],
+  [/(braid|plait|elaborate[_ ]?braids)/i, 'braid_single'],
+
+  // Cut forms.
+  [/(bowl[_ ]?cut|short[_ ]?bowl|page[_ ]?cut|pageboy)/i, 'bowl'],
+  [/(bob[_ ]?cut|shingled|blunt|cropped[_ ]?at[_ ]?the[_ ]?jaw|jaw[_ ]?length)/i, 'bob'],
+  [/(bangs|fringe|combed[_ ]?forward|youth[_ ]?locks)/i, 'bangs'],
+  [/(afro|halo)/i, 'afro'],
+  [/(side[_ ]?part|center[_ ]?part|centre[_ ]?part|parted|side[_ ]?curls|side[_ ]?waves|rolled[_ ]?at[_ ]?the[_ ]?temples|oiled|back[_ ]?and[_ ]?sides)/i, 'swept'],
+
+  // Hair kept under a cloth is bound underneath it, and the sliver that shows
+  // at the temples should be flat rather than falling free.
+  [/(covered|veiled|wrapped)/i, 'tied_back'],
+
+  // Names that legitimately mean loose hair, listed so they count as *matched*.
+  // Without this the audit reports a third of the corpus as an unrecognised
+  // style, and a report that cries wolf on its commonest case is a report the
+  // next person to read it will skip. A genuine gap should be rare and loud.
+  [
+    /(loose|wild|messy|tousled|flowing|waves?|curled|curls|locks|shoulder[_ ]?length|waist[_ ]?length|cropped|short[_ ]?styled|short[_ ]?modern|professional|contemporary|youth|maiden|novice|young[_ ]?lady|matron|elder|balding|thin[_ ]?long|thin[_ ]?sides|receding|full[_ ]?beard)/i,
+    'loose',
+  ],
+];
+
+export function classifyHairstyleName(name: string): { silhouette: HairSilhouette; matched: boolean } {
+  for (const [pattern, silhouette] of HAIRSTYLE_KEYWORDS) {
+    if (pattern.test(name)) return { silhouette, matched: true };
+  }
+  return { silhouette: 'loose', matched: false };
+}
 
 function classify<T>(name: string, table: Array<[RegExp, T]>, fallback: T): T {
   for (const [pattern, value] of table) {
@@ -445,6 +511,45 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
       ? clamp01(((age - 30) / 45) * (0.4 + unit(seed, 'recede') * 0.9))
       : 0;
 
+  // --- hair arrangement -----------------------------------------------------
+  // The style name and the length are generated independently upstream, so they
+  // can contradict each other: `getHairstyle` will happily hand a bun to a
+  // persona whose `hairLength` is `very_short`. Rather than drop the style —
+  // which is the more specific and more interesting of the two facts — let the
+  // arrangement pull the length up to whatever it needs to exist.
+  const rawHairLength: HairLength = appearance.hairLength || 'short';
+  const rawStyle = String(appearance.hairstyle || '');
+  const classified = classifyHairstyleName(rawStyle);
+
+  const LENGTH_ORDER: HairLength[] = ['bald', 'very_short', 'short', 'medium', 'long', 'very_long'];
+  /** The shortest length at which an arrangement is physically possible. */
+  const MINIMUM_LENGTH: Partial<Record<HairSilhouette, HairLength>> = {
+    bun: 'medium', top_knot: 'medium', twin_buns: 'medium', updo: 'medium',
+    ponytail: 'medium', braid_single: 'long', braid_twin: 'long',
+    braid_crown: 'medium', locs: 'medium', tied_back: 'medium',
+    bob: 'medium', bowl: 'short', cornrows: 'very_short',
+  };
+
+  let hairSilhouette: HairSilhouette = classified.silhouette;
+  let hairLength = rawHairLength;
+
+  if (rawHairLength === 'bald') {
+    // Nothing to arrange. A tonsure is the one exception: it *is* a bald crown,
+    // and it is the reading a shaved-crown style is after.
+    hairSilhouette = hairSilhouette === 'tonsure' ? 'tonsure' : 'loose';
+  } else {
+    const needed = MINIMUM_LENGTH[hairSilhouette];
+    if (needed && LENGTH_ORDER.indexOf(rawHairLength) < LENGTH_ORDER.indexOf(needed)) {
+      hairLength = needed;
+    }
+  }
+
+  // A heavily receded hairline cannot support anything that gathers at the
+  // front or frames the face; it can still carry a knot at the back.
+  if (recession > 0.55 && (hairSilhouette === 'bangs' || hairSilhouette === 'bowl' || hairSilhouette === 'braid_twin')) {
+    hairSilhouette = 'loose';
+  }
+
   // --- garment --------------------------------------------------------------
   const garmentPiece: Piece =
     (overrides?.garment as Piece) ||
@@ -530,9 +635,10 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     browThickness: appearance.eyebrowThickness || 'medium',
     eyelashes: appearance.eyelashes || 'medium',
 
-    hairLength: appearance.hairLength || 'short',
+    hairLength: hairLength,
     hairTexture: appearance.hairTexture || 'straight',
     hairstyle: appearance.hairstyle || 'short',
+    hairSilhouette,
     grayAmount,
     recession,
 

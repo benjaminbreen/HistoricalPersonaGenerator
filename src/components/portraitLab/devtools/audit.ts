@@ -38,7 +38,7 @@ import { ERA_BOUNDS } from '../../../services/demographyService';
 import { HistoricalEra } from '../../../types/enums';
 import { MAT, Raster } from '../core/raster';
 import {
-  buildPortraitSpec, classifyGarmentName, classifyHeadwearName, restingExpression,
+  buildPortraitSpec, classifyGarmentName, classifyHairstyleName, classifyHeadwearName, restingExpression,
 } from '../spec/buildSpec';
 import { PortraitSpec } from '../spec/types';
 import { compilePortrait, renderFrame } from '../render/pipeline';
@@ -161,6 +161,8 @@ const headwearKinds: Counted = {};
 const contextPacks: Counted = {};
 const hairLengths: Counted = {};
 const hairTextures: Counted = {};
+const hairSilhouettes: Counted = {};
+const unmatchedHairstyles: Counted = {};
 const eras: Counted = {};
 const zones: Counted = {};
 const markingPatterns: Counted = {};
@@ -195,7 +197,17 @@ const restoreConsole = () => {
 for (let i = 0; i < count; i += 1) {
   let personaName = `#${i}`;
   try {
-    const persona = generateHistoricalPersona();
+    // An explicit per-persona seed, derived from the run seed and the index.
+    //
+    // Seeding `Math.random` is not sufficient on its own, which the audit had
+    // been assuming since it was written. `generateHistoricalPersona` derives
+    // its own seed as `Date.now() ^ Math.random()` when none is supplied, and
+    // the clock half of that survives any amount of RNG stubbing — so the same
+    // command produced a different three hundred people every time it ran.
+    // Three consecutive runs at `300 11` reported 0, 1 and 0 structural
+    // findings, which makes the headline counts noise rather than the
+    // regression test the README says they are.
+    const persona = generateHistoricalPersona({ seed: (seed * 0x9e3779b1 + i) >>> 0 });
     const spec = buildPortraitSpec(persona.character as any);
     // Label findings with what the persona was *wearing*, not just who they
     // were — a report saying "17 garments barely drawn" is useless without it.
@@ -210,6 +222,7 @@ for (let i = 0; i < count; i += 1) {
     bump(contextPacks, spec.contextPackId || '(no pack)');
     bump(hairLengths, spec.hairLength);
     bump(hairTextures, spec.hairTexture);
+    bump(hairSilhouettes, spec.hairSilhouette);
     bump(eras, String(spec.era));
     bump(zones, String(spec.culturalZone));
     const band = spec.age < 20 ? '00-19' : spec.age < 35 ? '20-34' : spec.age < 50 ? '35-49'
@@ -221,6 +234,10 @@ for (let i = 0; i < count; i += 1) {
     // Where did the adapter have to guess?
     const g = classifyGarmentName(`${spec.garment.name} ${spec.garment.material}`);
     if (!g.matched) bump(unmatchedGarments, spec.garment.name);
+    // A style the keyword table does not know falls through to loose hair,
+    // which is exactly the failure the silhouette axis was added to fix — so
+    // it has to be visible here rather than silently reverting.
+    if (!classifyHairstyleName(spec.hairstyle).matched) bump(unmatchedHairstyles, spec.hairstyle);
     if (spec.headwear) {
       const h = classifyHeadwearName(`${spec.headwear.name} ${spec.headwear.material}`);
       if (!h.matched) bump(unmatchedHeadwear, spec.headwear.name);
@@ -343,6 +360,8 @@ rule('Hair length');
 table(hairLengths, rendered);
 rule('Hair texture');
 table(hairTextures, rendered);
+rule('Hair arrangement');
+table(hairSilhouettes, rendered);
 rule('Age');
 table(ageBands, rendered);
 rule('Greying');
@@ -360,6 +379,8 @@ rule('UNRECOGNISED garment names (fell back to "tunic")');
 table(unmatchedGarments, rendered);
 rule('UNRECOGNISED headwear names (fell back to "cap")');
 table(unmatchedHeadwear, rendered);
+rule('UNRECOGNISED hairstyle names (fell back to loose hair)');
+table(unmatchedHairstyles, rendered);
 rule('UNHANDLED marking patterns (drew a generic stroke)');
 table(unknownPatterns, rendered);
 rule('Deliberately not drawn');

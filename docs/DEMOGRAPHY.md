@@ -58,12 +58,22 @@ guessed. Total: ~117 billion humans ever born.
 | 1450–1750 | ~7.7% |
 | 1750–1900 | ~5.9% |
 | 1900–2000 | ~8.1% |
+| 2000–2030 | ~3.4% |
 
 The counterintuitive result, and the one worth internalising: **antiquity is
 about 40% of all human lives.** A long window, populations already in the tens
 to hundreds of millions, and birth rates at their historical maximum. The early
 modern period *feels* like the centre of gravity because that is where the
 archives are — it is under 8%.
+
+The other one is at the near end. The thirty years since 2000 hold about four
+billion births — more human lives than the whole industrial era, and roughly
+seven times Oceania's entire share of the species. Births per year have been
+flat at 130–140 million since the 1980s, because the falling birth rate and the
+rising population cancel almost exactly. So the present is not a thin sliver on
+the end of the timeline; it is one draw in twenty-three, and the app now runs to
+2030 rather than stopping at 2000. Beyond 2030 is `FUTURE_ERA`, which is
+speculative content and deliberately not sampled.
 
 Caveat: PRB assumes a crude birth rate of 80/1000 before 1 CE, which is high.
 Lower assumptions compress antiquity's share somewhat but do not change the
@@ -106,10 +116,10 @@ unreachable.
 
 So the project deliberately runs two sampling modes:
 
-- **Explore** (default) — flattened across regions and eras so the whole world
-  is reachable in a reasonable number of spins. Deliberately not representative.
-- **True frequency** — weighted by person-years. What "pick a random human life"
-  actually means.
+- **True frequency** (default) — weighted by person-years. What "pick a random
+  human life" actually means.
+- **Explore** — flattened across regions and eras so the whole world is
+  reachable in a reasonable number of spins. Deliberately not representative.
 
 **The rule: never let the flattening be silent.** In both modes the app states
 the real odds of the combination it drew — "roughly 1 in 250 human lives" —

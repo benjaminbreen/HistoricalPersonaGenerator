@@ -2,7 +2,7 @@
  * components/charts/MiniLocationMap.tsx
  * World map showing player spawn location with react-simple-maps
  */
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import {
   ComposableMap,
@@ -337,18 +337,61 @@ const MiniLocationMap: React.FC<MiniLocationMapProps> = ({ continent, region }) 
     return unsubscribe;
   }, [animatedZoom]);
 
+  /**
+   * The map is no longer a fixed box — it is a layer that fills whatever the
+   * card header gives it, which is a wide short strip on a desktop card and a
+   * nearly square one on a phone. A fixed viewBox meant one of those two got
+   * cropped to a sliver, so the drawing surface is measured instead. The
+   * projection scale is in projection units rather than pixels, so a wider
+   * surface shows more longitude at the same zoom rather than shrinking the
+   * map.
+   */
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const [surface, setSurface] = useState({ width: 680, height: 150 });
+
+  useLayoutEffect(() => {
+    const node = surfaceRef.current;
+    if (!node) return;
+
+    const measure = () => {
+      const { width, height } = node.getBoundingClientRect();
+      if (width < 1 || height < 1) return;
+      setSurface((prev) =>
+        Math.abs(prev.width - width) < 1 && Math.abs(prev.height - height) < 1
+          ? prev
+          : { width: Math.round(width), height: Math.round(height) }
+      );
+    };
+
+    // Measured directly rather than only from a ResizeObserver: the observer
+    // does not deliver in a throttled or hidden tab, and a map that silently
+    // kept the fallback box would be cropped to a sliver on a phone with no
+    // sign that anything was wrong.
+    measure();
+
+    const observer =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    observer?.observe(node);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, delay: 0.4 }}
-      style={{ width: '400px', height: '100%', display: 'flex' }}
+      style={{ width: '100%', height: '100%', display: 'flex' }}
     >
-      <div className="relative bg-slate-900/50" style={{ padding: 0, margin: 0, overflow: 'hidden', height: '100%', width: '100%' }}>
+      <div ref={surfaceRef} className="relative bg-slate-900/50" style={{ padding: 0, margin: 0, overflow: 'hidden', height: '100%', width: '100%' }}>
         <ComposableMap
           projection="geoMercator"
-          width={400}
-          height={140}
+          width={surface.width}
+          height={surface.height}
+          preserveAspectRatio="xMidYMid slice"
           projectionConfig={{
             center: playerCoords,
             scale: 60 * currentZoom

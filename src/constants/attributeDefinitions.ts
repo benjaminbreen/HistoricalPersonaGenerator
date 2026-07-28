@@ -35,6 +35,21 @@ const OLD_WORLD: CulturalZone[] = [
 const inZone = (ctx: Ctx, ...zones: CulturalZone[]): boolean =>
   !!ctx.culturalZone && zones.includes(ctx.culturalZone);
 
+/**
+ * How likely a persona is to be reckoned in the four humours.
+ *
+ * Greek humoral theory belongs to the Mediterranean and, through Galen and Ibn
+ * Sina, to the Islamic world. It reached South Asia as Unani medicine with the
+ * Delhi Sultanate, so a Tamil farmer in 500 BCE was not "burdened with black
+ * bile, as the physicians say" — that phrasing needs physicians who held the
+ * doctrine. Ayurveda's tridosha is a different scheme and is not this.
+ */
+const humoralWeight = (ctx: Ctx): number => {
+  if (inZone(ctx, 'EUROPEAN', 'MENA')) return ramp(ctx.year, -400, -200, 1750, 1870);
+  if (inZone(ctx, 'SOUTH_ASIAN')) return ramp(ctx.year, 1200, 1350, 1750, 1870);
+  return 0;
+};
+
 /** Substring match against location + region + birthplace, all lowercased. */
 const place = (ctx: Ctx, ...needles: string[]): boolean =>
   needles.some(n => ctx.placeLower.includes(n));
@@ -2543,7 +2558,7 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     rarity: 'common',
     category: 'cultural',
     baseWeight: 45,
-    weight: (ctx) => (inZone(ctx, 'EUROPEAN', 'MENA', 'SOUTH_ASIAN') ? ramp(ctx.year, -400, -200, 1750, 1870) : 0),
+    weight: humoralWeight,
     exclusiveGroup: 'humor',
     description: 'Reckoned sanguine by complexion: hot, moist, hopeful, and quick to love',
     phrase: 'of a sanguine complexion',
@@ -2556,7 +2571,7 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     rarity: 'common',
     category: 'cultural',
     baseWeight: 40,
-    weight: (ctx) => (inZone(ctx, 'EUROPEAN', 'MENA', 'SOUTH_ASIAN') ? ramp(ctx.year, -400, -200, 1750, 1870) : 0),
+    weight: humoralWeight,
     exclusiveGroup: 'humor',
     description: 'Reckoned choleric: hot, dry, and governed by an excess of yellow bile',
     phrase: 'of a choleric humor',
@@ -2569,7 +2584,7 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     rarity: 'common',
     category: 'cultural',
     baseWeight: 40,
-    weight: (ctx) => (inZone(ctx, 'EUROPEAN', 'MENA', 'SOUTH_ASIAN') ? ramp(ctx.year, -400, -200, 1750, 1870) : 0),
+    weight: humoralWeight,
     exclusiveGroup: 'humor',
     description: 'Reckoned phlegmatic: cold, moist, slow to anger and slower to act',
     phrase: 'of a phlegmatic humor',
@@ -2582,7 +2597,7 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     rarity: 'common',
     category: 'cultural',
     baseWeight: 40,
-    weight: (ctx) => (inZone(ctx, 'EUROPEAN', 'MENA', 'SOUTH_ASIAN') ? ramp(ctx.year, -400, -200, 1750, 1870) : 0),
+    weight: humoralWeight,
     exclusiveGroup: 'humor',
     excludes: ['melancholic', 'cheerful'],
     description: 'Reckoned melancholic: cold, dry, and burdened with black bile — studious and sad',

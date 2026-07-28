@@ -23,6 +23,8 @@ import { getProfessionSelectionWeight, isProfessionHistoricallyAvailable } from 
 import { isMaterialAvailable } from '../../services/demographyService';
 import { filterNameKeys, resolveNameKey } from '../../constants/characterData/nameSetEras';
 import { FormattedName, formatPersonalName } from '../../constants/characterData/nameConventions';
+import { generateDeepTimeAmericanName } from '../../constants/characterData/deepTimeAmericanNames';
+import { genderAccessWeight } from '../../services/genderedLaborService';
 import { COLD_WEATHER_FALLBACK, ThermalNeed, thermalScore } from '../../services/climateService';
 import { getZoneReligionFallback, isReligionHistoricallyAvailable } from '../../services/religionFallbackService';
 import { filterByCulture, resolveCulture } from '../../services/cultureResolution';
@@ -358,6 +360,24 @@ export function generateNpcNameDetailed(
 
         const normalizedGender = gender === 'Male' ? 'Male' : 'Female';
 
+        // Deep-time American names are built as phrases rather than drawn from
+        // a list. See deepTimeAmericanNames.ts: the flat pool this replaces was
+        // English nature nouns, so the same eighty names came back over and over
+        // and the naming looked nothing like any attested Indigenous system.
+        // The phrase already distinguishes the bearer, so no byname is added.
+        if (nameKeyToUse === 'PREHISTORIC_AMERICAN') {
+            const generated = generateDeepTimeAmericanName({
+                region: region || '',
+                location: region || '',
+                year,
+                random: noise.random,
+            });
+            // The whole phrase is the given name. Taking the first word — the
+            // way `plain` does — leaves relatives called "Two" and "Calling",
+            // because the family generator builds from `given`.
+            return { full: generated, given: generated, convention: 'personal', nameKey: nameKeyToUse };
+        }
+
         // 3. Get the name list with era-specific fallback (not generic English)
         let names = CHARACTER_NAMES[nameKeyToUse];
 
@@ -368,7 +388,7 @@ export function generateNpcNameDetailed(
             // If fallback has a generator (e.g., compound Native American names), use it directly
             if (fallback.generator) {
                 const genderLower = normalizedGender === 'Male' ? 'male' : 'female';
-                const generatedName = fallback.generator(genderLower as 'male' | 'female');
+                const generatedName = fallback.generator(genderLower as 'male' | 'female', region || '', year);
                 devLog(`[NameGen] Used era-specific generator for ${culturalZone}/${year}: ${generatedName}`);
                 return plain(generatedName);
             }
@@ -428,7 +448,7 @@ export function generateNpcNameDetailed(
             // Try era-specific generator as fallback
             const emergencyFallback = getEraSpecificFallback(culturalZone, year);
             if (emergencyFallback.generator) {
-                return plain(emergencyFallback.generator(normalizedGender === 'Male' ? 'male' : 'female'));
+                return plain(emergencyFallback.generator(normalizedGender === 'Male' ? 'male' : 'female', region || '', year));
             }
             // Use era-appropriate names from fallback groups
             const emergencyNames = emergencyFallback.groups?.[0] ? CHARACTER_NAMES[emergencyFallback.groups[0]] : null;
@@ -465,7 +485,7 @@ export function generateNpcNameDetailed(
         try {
             const emergencyFallback = getEraSpecificFallback(culturalZone, year);
             if (emergencyFallback.generator) {
-                return plain(emergencyFallback.generator(gender === 'Male' ? 'male' : 'female'));
+                return plain(emergencyFallback.generator(gender === 'Male' ? 'male' : 'female', region || '', year));
             }
             const emergencyNames = emergencyFallback.groups?.[0] ? CHARACTER_NAMES[emergencyFallback.groups[0]] : null;
             if (emergencyNames) {
@@ -1317,7 +1337,9 @@ export function generateBaseProfile(
                 gender.toLowerCase() as 'male' | 'female',
                 constrainedWealthLevel,
                 age,
-                'daily'
+                'daily',
+                `${context.region ?? ''} ${context.localArea ?? ''}`,
+                religion
             );
             
             const selectedMarking = selectRandomMarking(availableMarkings, noise.random());
@@ -1593,6 +1615,34 @@ function isSocialClassValidForRegion(socialClass: string, region: string | undef
         }
     }
 
+    /**
+     * North American culture areas.
+     *
+     * The medieval table is already divided into `Woodlands`, `Plains`,
+     * `SOUTHWEST` and `Northwest`, but nothing kept each block over its own
+     * ground, so the Baffin coast drew wampum makers and maple-sugar makers and
+     * the Colorado Plateau drew canoe builders. `Foragers` is deliberately not
+     * listed: it is the general subsistence pool and belongs everywhere.
+     */
+    if (culturalZone === 'NORTH_AMERICAN_PRE_COLUMBIAN' || culturalZone === 'NORTH_AMERICAN_COLONIAL') {
+        const CULTURE_AREAS: Record<string, RegExp> = {
+            WOODLANDS: /woodland|northeast|great lakes|mississippi|ohio|atlantic coast|new england|chesapeake|southeast|appalach|hudson|lawrence|canada|ontario|quebec|florida|caribbean/,
+            PLAINS: /plains|prairie|dakota|nebraska|llano|missouri|platte|texas|comanche|blackfoot/,
+            SOUTHWEST: /southwest|puebloan|colorado plateau|rio grande|sonora|arizona|new mexico|mexico|maya|yucatan|oaxaca|guatemala|central highlands/,
+            NORTHWEST: /pacific coast|northwest|columbia|puget|salish|fraser|haida|olympic|cascad|vancouver|oregon|alaska/,
+        };
+        const area = CULTURE_AREAS[socialClass.toUpperCase()];
+        if (area) return area.test(regionLower);
+        // `Foragers` is the residual pool, not an extra one. Where a culture
+        // area already describes the region it must stand down, or its fourteen
+        // roles drown the block that belongs there: the Ancestral Puebloans of
+        // the Colorado Plateau came out as trappers and hunters rather than the
+        // maize farmers they were.
+        if (socialClass.toUpperCase() === 'FORAGERS') {
+            return !Object.values(CULTURE_AREAS).some(pattern => pattern.test(regionLower));
+        }
+    }
+
     return true;
 }
 
@@ -1754,6 +1804,16 @@ export function determineSocialRole(
             isProfessionValidForYear(roleDef) &&
             isProfessionHistoricallyAvailable(roleName, historicalContext);
 
+        // Who could hold this work in this year. The table's `genderBias` flag
+        // is a permanent switch; this turns it into a curve and covers the many
+        // roles that never carried the flag at all. See genderedLaborService.
+        const genderOptions = (roleDef: ProfessionDefinition) => ({
+            declaredBias: roleDef.genderBias,
+            region: context.region,
+        });
+        const genderWeightFor = (roleName: string, roleDef: ProfessionDefinition): number =>
+            genderAccessWeight(roleName, profile.gender, currentYear ?? 0, genderOptions(roleDef));
+
         if (!eraRoles) return getFallbackRole(profile.wealthLevel, profile.gender, historicalContext);
 
         // Get the appropriate profession context based on location
@@ -1789,7 +1849,7 @@ export function determineSocialRole(
                     if (!isClergyRoleCompatible(preferredRole, profile.religion, socialClass)) {
                         continue;
                     }
-                    if (roleDef.genderBias && profile.gender !== 'Non-binary' && roleDef.genderBias !== profile.gender) {
+                    if (genderWeightFor(preferredRole, roleDef) === 0) {
                         continue;
                     }
                     // Check if profession is valid for the current year (decade filtering)
@@ -1804,12 +1864,27 @@ export function determineSocialRole(
         const possibleRoles: { socialClass: string, role: string, roleDef: ProfessionDefinition, selectionWeight: number }[] = [];
 
         const normalizedPreferredClass = context.preferredSocialClass?.toUpperCase().replace(/[\s-]+/g, '_');
+        /**
+         * Which table classes a requested social class may draw from.
+         *
+         * Culture-area classes have to be listed here or they are dead data:
+         * the North American table has had `Woodlands` and `Plains` blocks all
+         * along, and because neither name appeared below, every peasant in
+         * medieval North America was filtered out of them and fell through to
+         * the generic fallback — which is why the Baffin coast, Puget Sound and
+         * the Central Valley all returned the identical distribution, 88% of it
+         * "Fisher". `Foragers` is the antiquity-era equivalent.
+         */
+        const SUBSISTENCE_CLASSES = [
+            'FORAGERS', 'WOODLANDS', 'PLAINS', 'SOUTHWEST', 'NORTHWEST',
+            'PALEOLITHIC', 'AGRICULTURAL',
+        ];
         const allowedClassGroups: Record<string, string[]> = {
-            PEASANT: ['COMMONER', 'PEASANT', 'PEASANTS', 'LABORER', 'LABORERS', 'AGRICULTURAL', 'WORKING_CLASS'],
-            COMMONER: ['COMMONER', 'ARTISAN', 'CRAFT', 'MIDDLE_CLASS'],
+            PEASANT: ['COMMONER', 'PEASANT', 'PEASANTS', 'LABORER', 'LABORERS', 'AGRICULTURAL', 'WORKING_CLASS', ...SUBSISTENCE_CLASSES],
+            COMMONER: ['COMMONER', 'ARTISAN', 'CRAFT', 'MIDDLE_CLASS', ...SUBSISTENCE_CLASSES],
             MERCHANT: ['MERCHANT', 'MERCHANTS', 'TRADER', 'TRADERS', 'UPPER_CLASS'],
             NOBLE: ['NOBILITY', 'NOBLE', 'ELITE', 'UPPER_CLASS'],
-            WORKING_CLASS: ['COMMONER', 'LABORER', 'LABORERS', 'WORKING_CLASS'],
+            WORKING_CLASS: ['COMMONER', 'LABORER', 'LABORERS', 'WORKING_CLASS', ...SUBSISTENCE_CLASSES],
             MIDDLE_CLASS: ['COMMONER', 'ARTISAN', 'PROFESSIONAL', 'MIDDLE_CLASS'],
             UPPER_CLASS: ['MERCHANT', 'MERCHANTS', 'PROFESSIONAL', 'NOBILITY', 'UPPER_CLASS'],
         };
@@ -1853,7 +1928,8 @@ export function determineSocialRole(
                     continue;
                 }
 
-                if (roleDef.genderBias && profile.gender !== 'Non-binary' && roleDef.genderBias !== profile.gender) {
+                const genderWeight = genderWeightFor(roleName, roleDef);
+                if (genderWeight === 0) {
                     continue;
                 }
 
@@ -1904,7 +1980,7 @@ export function determineSocialRole(
                          socialClass,
                          role: roleName,
                          roleDef,
-                         selectionWeight: getProfessionSelectionWeight(roleName, historicalContext) * fitMultiplier,
+                         selectionWeight: getProfessionSelectionWeight(roleName, historicalContext) * fitMultiplier * genderWeight,
                      });
                 }
             }
@@ -1934,7 +2010,7 @@ export function determineSocialRole(
         // choose a valid role from the requested class rather than silently
         // returning a shepherd, laborer, or merchant from another class.
         if (allowedClasses) {
-            const classFallbackRoles: { socialClass: string, role: string, roleDef: ProfessionDefinition }[] = [];
+            const classFallbackRoles: { socialClass: string, role: string, roleDef: ProfessionDefinition, selectionWeight: number }[] = [];
             for (const socialClass of Object.keys(eraRoles)) {
                 if (!allowedClasses.includes(socialClass.toUpperCase())) continue;
                 if (!isSocialClassValidForRegion(socialClass, context.region, context.culturalZone)) continue;
@@ -1943,8 +2019,10 @@ export function determineSocialRole(
                     if (!isClergyRoleCompatible(roleName, profile.religion, socialClass)) continue;
                     if (!isProfessionValidForRegion(roleName, context.region, context.culturalZone)) continue;
                     if (!isProfessionAvailable(roleName, roleDef)) continue;
-                    if (roleDef.genderBias && profile.gender !== 'Non-binary' && roleDef.genderBias !== profile.gender) continue;
-                    classFallbackRoles.push({ socialClass, role: roleName, roleDef });
+                    const genderWeight = genderWeightFor(roleName, roleDef);
+                    if (genderWeight === 0) continue;
+                    classFallbackRoles.push({ socialClass, role: roleName, roleDef, selectionWeight:
+                        getProfessionSelectionWeight(roleName, historicalContext) * genderWeight });
                 }
             }
 

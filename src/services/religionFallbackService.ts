@@ -82,6 +82,37 @@ export function getZoneReligionFallback(
       if (year < -500) return [entry('Vedic Religion', 60), entry('Local Beliefs', 25), entry('Ancestor Worship', 15)];
       if (year < 700) return [entry('Hinduism', 55), entry('Buddhism', 25), entry('Jainism', 10), entry('Local Beliefs', 10)];
       return [entry('Hinduism', 55), entry('Sunni Islam', 18), entry('Buddhism', 12), entry('Jainism', 8), entry('Local Beliefs', 7)];
+    case 'SOUTHEAST_ASIAN': {
+      // Three religious histories, not one. The mainland takes Hindu-Buddhist
+      // court religion from about the second century and turns decisively
+      // Theravada from the eleventh; the islands take the same Indic religions,
+      // then Islam along the trade routes from the thirteenth century; and the
+      // Philippines north of Mindanao is Catholic from the Spanish conquest,
+      // while the Sulu sultanate stays Muslim. Under the old South Asian
+      // fallback all of it came out Hindu.
+      const mainland = /\b(?:indochina|mainland southeast|mekong|annam|tonkin|siam|thai|burma|irrawaddy|salween|khmer|angkor|champa|laos|malay peninsula|kra)\b/i.test(place);
+      const philippines = /\b(?:philippin|luzon|visayan|mindanao|palawan|sulu)\b/i.test(place);
+      const muslimSouth = /\b(?:sulu|mindanao|palawan)\b/i.test(place);
+
+      if (year < 100) return [entry('Local Beliefs', 70), entry('Ancestor Worship', 30)];
+
+      if (mainland) {
+        if (year < 1100) return [entry('Hinduism', 35), entry('Buddhism', 30), entry('Local Beliefs', 25), entry('Ancestor Worship', 10)];
+        return [entry('Buddhism', 70), entry('Local Beliefs', 15), entry('Ancestor Worship', 10), entry('Hinduism', 5)];
+      }
+
+      if (philippines) {
+        if (year < 1400) return [entry('Local Beliefs', 75), entry('Ancestor Worship', 25)];
+        if (year < 1565) return [entry('Local Beliefs', 55), entry('Sunni Islam', 30), entry('Ancestor Worship', 15)];
+        if (muslimSouth) return [entry('Sunni Islam', 70), entry('Local Beliefs', 20), entry('Christianity', 10)];
+        return [entry('Roman Catholicism', 75), entry('Local Beliefs', 15), entry('Ancestor Worship', 10)];
+      }
+
+      // The rest of the islands: Java, Sumatra, Borneo, Sulawesi, the Moluccas.
+      if (year < 1300) return [entry('Local Beliefs', 45), entry('Hinduism', 25), entry('Buddhism', 20), entry('Ancestor Worship', 10)];
+      if (year < 1600) return [entry('Sunni Islam', 45), entry('Local Beliefs', 25), entry('Hinduism', 20), entry('Buddhism', 10)];
+      return [entry('Sunni Islam', 70), entry('Local Beliefs', 15), entry('Hinduism', 10), entry('Christianity', 5)];
+    }
     case 'SUB_SAHARAN_AFRICAN':
       if (year < 700) return [entry('Local Beliefs', 85), entry('Ancestor Worship', 15)];
       if (year < 1500) return [entry('Local Beliefs', 70), entry('Ancestor Worship', 15), entry('Sunni Islam', 15)];

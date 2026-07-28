@@ -361,7 +361,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Italiano',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1200, 2025],
+    period: [1200, 2030],
     regions: ['Italy', 'San Marino', 'Vatican', 'Switzerland', 'Istria'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['VULGAR_LATIN'],
@@ -404,7 +404,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Español',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1500, 2025],
+    period: [1500, 2030],
     regions: ['Spain', 'Latin America', 'Mexico', 'Colombia', 'Argentina', 'Venezuela', 'Guiana Shield', 'Orinoco', 'Amazon', 'Andes', 'Global'],
     culturalZones: ['EUROPEAN' as CulturalZone, 'SOUTH_AMERICAN' as CulturalZone],
     predecessors: ['OLD_SPANISH'],
@@ -447,7 +447,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Português',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1350, 2025],
+    period: [1350, 2030],
     regions: ['Portugal', 'Brazil', 'Angola', 'Mozambique', 'Goa', 'Macau', 'Global'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['GALICIAN_PORTUGUESE'],
@@ -468,7 +468,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Română',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [800, 2025],
+    period: [800, 2030],
     regions: ['Romania', 'Moldova', 'Dacia', 'Balkans'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['VULGAR_LATIN'],
@@ -578,7 +578,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'ࡌࡀࡍࡃࡀࡉࡉࡀ',
     family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
     script: 'Mandaic',
-    period: [200, 2025],
+    period: [200, 2030],
     regions: ['Southern Mesopotamia', 'Iraq', 'Iran', 'Khuzestan'],
     culturalZones: ['MENA' as CulturalZone],
     predecessors: ['ARAMAIC'],
@@ -683,7 +683,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'संस्कृतम्',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Devanagari',
-    period: [-1500, 2025], // Extends to present as liturgical language
+    period: [-1500, 2030], // Extends to present as liturgical language
     regions: ['India', 'Ganges Valley', 'Indus Valley', 'Southeast Asia', 'Tibet'],
     culturalZones: ['SOUTH_ASIAN' as CulturalZone],
     predecessors: ['PROTO_INDO_IRANIAN'],
@@ -728,7 +728,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'සිංහල',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Sinhala',
-    period: [300, 2025],
+    period: [300, 2030],
     regions: ['Sri Lanka', 'Anuradhapura', 'Kandy', 'Galle Coast', 'Ceylon'],
     culturalZones: ['SOUTH_ASIAN' as CulturalZone],
     predecessors: ['PRAKRITS'],
@@ -749,7 +749,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'தமிழ்',
     family: LANGUAGE_FAMILIES.DRAVIDIAN,
     script: 'Tamil',
-    period: [-300, 2025],
+    period: [-300, 2030],
     regions: ['Tamilakam', 'Tamil Nadu', 'Sri Lanka', 'Jaffna', 'Coromandel Coast'],
     culturalZones: ['SOUTH_ASIAN' as CulturalZone],
     predecessors: ['PROTO_DRAVIDIAN'],
@@ -770,7 +770,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'हिन्दी',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Devanagari',
-    period: [1100, 2025],
+    period: [1100, 2030],
     regions: ['North India', 'Delhi', 'Uttar Pradesh', 'Madhya Pradesh', 'Rajasthan', 'Bihar', 'Jharkhand'],
     culturalZones: ['SOUTH_ASIAN' as CulturalZone],
     predecessors: ['PRAKRITS'],
@@ -791,7 +791,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'বাংলা',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Bengali script',
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Bengal', 'Bangladesh', 'West Bengal', 'Assam', 'Tripura'],
     culturalZones: ['SOUTH_ASIAN' as CulturalZone],
     predecessors: ['PRAKRITS'],
@@ -812,7 +812,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'मराठी',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Devanagari',
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Maharashtra', 'Goa', 'Western India', 'Deccan'],
     culturalZones: ['SOUTH_ASIAN' as CulturalZone],
     predecessors: ['PRAKRITS'],
@@ -1245,7 +1245,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     regions: ['Taiwan', 'Southeast Asia', 'Pacific Islands'],
     // 'OCEANIAN' is not a zone in the enum, and Proto-Austronesian was never
     // spoken in South Asia; the mislisting sent it to the Indus Valley.
-    culturalZones: ['OCEANIA' as CulturalZone, 'EAST_ASIAN' as CulturalZone],
+    culturalZones: ['OCEANIA' as CulturalZone, 'EAST_ASIAN' as CulturalZone, 'SOUTHEAST_ASIAN' as CulturalZone],
     successors: ['PROTO_POLYNESIAN', 'OLD_MALAY', 'OLD_TAGALOG', 'OLD_JAVANESE'],
     description: 'Reconstructed ancestor of all Austronesian languages from Madagascar to Hawaii.',
     llmPrompt: 'Reconstruct Proto-Austronesian with focus on maritime vocabulary. Use reduplication for plurals and intensification. Verb-initial word order. Include terms for outrigger canoes, navigation, fishing, and tropical agriculture.',
@@ -1384,7 +1384,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Français',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1600, 2025],
+    period: [1600, 2030],
     regions: ['France', 'Quebec', 'Belgium', 'Switzerland', 'West Africa', 'Global'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['MIDDLE_FRENCH'],
@@ -1680,7 +1680,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'العربية الفصحى',
     family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
     script: 'Arabic',
-    period: [600, 2025], // Liturgical language remains in use
+    period: [600, 2030], // Liturgical language remains in use
     regions: ['Arabia', 'Middle East', 'North Africa', 'Andalusia', 'Persia', 'Central Asia', 'South Asia', 'Southeast Asia'],
     culturalZones: ['MENA' as CulturalZone, 'SOUTH_ASIAN' as CulturalZone, 'SUB_SAHARAN_AFRICAN' as CulturalZone],
     predecessors: ['OLD_ARABIC'],
@@ -1762,7 +1762,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: '現代日本語',
     family: LANGUAGE_FAMILIES.ISOLATE,
     script: ['Hiragana', 'Katakana', 'Kanji'],
-    period: [1600, 2025],
+    period: [1600, 2030],
     regions: ['Japan', 'Tokyo', 'Osaka', 'Kyoto', 'Fukuoka', 'Hokkaido', 'Okinawa'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     predecessors: ['MIDDLE_JAPANESE'],
@@ -1804,7 +1804,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Русский',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Cyrillic',
-    period: [1400, 2025],
+    period: [1400, 2030],
     regions: ['Russia', 'Ukraine', 'Belarus', 'Kazakhstan', 'Central Asia', 'Ural Mountains', 'Ural', 'Siberia', 'Arctic'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['OLD_SLAVONIC'],
@@ -1826,7 +1826,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Čeština',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [800, 2025],
+    period: [800, 2030],
     regions: ['Bohemia', 'Moravia', 'Silesia', 'Central Europe'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['OLD_SLAVONIC'],
@@ -1847,7 +1847,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Polski',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [800, 2025],
+    period: [800, 2030],
     regions: ['Poland', 'Lithuania', 'Ukraine', 'Belarus'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['OLD_SLAVONIC'],
@@ -1868,7 +1868,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Magyar',
     family: LANGUAGE_FAMILIES.URALIC,
     script: 'Latin',
-    period: [896, 2025],
+    period: [896, 2030],
     regions: ['Hungary', 'Transylvania', 'Slovakia', 'Vojvodina'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     greetings: {
@@ -1888,7 +1888,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Slovenčina',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Slovakia', 'Northern Hungary', 'Moravia'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['OLD_SLAVONIC'],
@@ -1910,7 +1910,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Svenska',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1225, 2025],
+    period: [1225, 2030],
     regions: ['Sweden', 'Finland', 'Estonia', 'Baltic'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['OLD_NORSE'],
@@ -1931,7 +1931,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Dansk',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1100, 2025],
+    period: [1100, 2030],
     regions: ['Denmark', 'Southern Sweden', 'Schleswig', 'Norway', 'Iceland', 'Faroe Islands'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['OLD_NORSE'],
@@ -1952,7 +1952,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Norsk',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1350, 2025],
+    period: [1350, 2030],
     regions: ['Norway', 'Svalbard', 'Jan Mayen'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['OLD_NORSE'],
@@ -1973,7 +1973,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Íslenska',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [870, 2025],
+    period: [870, 2030],
     regions: ['Iceland', 'Greenland settlements'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['OLD_NORSE'],
@@ -1994,7 +1994,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Davvisámegiella',
     family: LANGUAGE_FAMILIES.URALIC,
     script: 'Latin',
-    period: [-1000, 2025],
+    period: [-1000, 2030],
     regions: ['Lapland', 'Northern Scandinavia', 'Kola Peninsula'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     greetings: {
@@ -2015,7 +2015,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Українська',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Cyrillic',
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Ukraine', 'Eastern Poland', 'Belarus', 'Russia', 'Moldova'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['OLD_SLAVONIC'],
@@ -2036,7 +2036,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Беларуская',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Cyrillic',
-    period: [1200, 2025],
+    period: [1200, 2030],
     regions: ['Belarus', 'Eastern Poland', 'Lithuania', 'Latvia'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['OLD_SLAVONIC'],
@@ -2078,7 +2078,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Татар',
     family: LANGUAGE_FAMILIES.TURKIC,
     script: 'Cyrillic/Arabic',
-    period: [1240, 2025],
+    period: [1240, 2030],
     regions: ['Tatarstan', 'Crimea', 'Siberia', 'Central Asia'],
     culturalZones: ['EUROPEAN' as CulturalZone, 'EAST_ASIAN' as CulturalZone],
     predecessors: ['PROTO_TURKIC'],
@@ -2099,7 +2099,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Vèneto',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1200, 2025],
+    period: [1200, 2030],
     regions: ['Venice', 'Veneto', 'Istria', 'Dalmatia', 'Greek Islands'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['LATIN'],
@@ -2142,7 +2142,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Mohawk',
     nativeName: 'Kanienʼkéha',
     family: LANGUAGE_FAMILIES.IROQUOIAN,
-    period: [1000, 2024],
+    period: [1000, 2030],
     regions: ['Mohawk Valley', 'St. Lawrence River', 'New York'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     predecessors: ['PROTO_IROQUOIAN'],
@@ -2162,7 +2162,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Lakota',
     nativeName: 'Lakȟótiyapi',
     family: LANGUAGE_FAMILIES.SIOUAN_CATAWBAN,
-    period: [1000, 2024],
+    period: [1000, 2030],
     regions: ['Great Plains', 'Black Hills', 'Dakota'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     predecessors: ['PROTO_SIOUAN'],
@@ -2182,7 +2182,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Ojibwe',
     nativeName: 'Ojibwemowin',
     family: LANGUAGE_FAMILIES.ALGONQUIAN,
-    period: [1000, 2024],
+    period: [1000, 2030],
     regions: ['Great Lakes', 'Ontario', 'Minnesota', 'Wisconsin'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     predecessors: ['PROTO_ALGONQUIAN'],
@@ -2203,7 +2203,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Salishan (Coast Salish)',
     nativeName: 'Lushootseed',
     family: LANGUAGE_FAMILIES.SALISHAN,
-    period: [-2000, 2025],
+    period: [-2000, 2030],
     regions: ['Pacific Northwest', 'Puget Sound', 'British Columbia Coast'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     greetings: {
@@ -2242,7 +2242,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Miwok',
     nativeName: 'Miwuk',
     family: LANGUAGE_FAMILIES.PENUTIAN,
-    period: [-3000, 2025],
+    period: [-3000, 2030],
     regions: ['Central California', 'Sierra Nevada', 'Central Valley'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     greetings: {
@@ -2261,7 +2261,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Yokuts',
     nativeName: 'Yokoch',
     family: LANGUAGE_FAMILIES.PENUTIAN,
-    period: [-3000, 2025],
+    period: [-3000, 2030],
     regions: ['San Joaquin Valley', 'Central Valley', 'Tulare Basin'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     greetings: {
@@ -2357,7 +2357,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Cheyenne',
     nativeName: 'Tsėhésenėstsestȯtse',
     family: LANGUAGE_FAMILIES.ALGONQUIAN,
-    period: [1700, 2025],
+    period: [1700, 2030],
     regions: ['Great Plains', 'Montana', 'Oklahoma'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     predecessors: ['PROTO_ALGONQUIAN'],
@@ -2377,7 +2377,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Crow',
     nativeName: 'Apsáalooke',
     family: LANGUAGE_FAMILIES.SIOUAN,
-    period: [1600, 2025],
+    period: [1600, 2030],
     regions: ['Montana', 'Wyoming', 'Northern Plains'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     predecessors: ['PROTO_SIOUAN'],
@@ -2397,7 +2397,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Pawnee',
     nativeName: 'Pāri',
     family: LANGUAGE_FAMILIES.CADDOAN,
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Nebraska', 'Kansas', 'Central Plains'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     greetings: {
@@ -2437,7 +2437,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Cherokee',
     nativeName: 'ᏣᎳᎩ',
     family: LANGUAGE_FAMILIES.IROQUOIAN,
-    period: [-1000, 2025],
+    period: [-1000, 2030],
     regions: ['Southern Appalachians', 'Georgia', 'Carolinas', 'Tennessee', 'Oklahoma'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     predecessors: ['PROTO_IROQUOIAN'],
@@ -2457,7 +2457,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Creek (Muscogee)',
     nativeName: 'Mvskoke',
     family: LANGUAGE_FAMILIES.MUSKOGEAN,
-    period: [-1000, 2025],
+    period: [-1000, 2030],
     regions: ['Alabama', 'Georgia', 'Florida', 'Oklahoma'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     greetings: {
@@ -2476,7 +2476,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Choctaw',
     nativeName: 'Chahta',
     family: LANGUAGE_FAMILIES.MUSKOGEAN,
-    period: [-1000, 2025],
+    period: [-1000, 2030],
     regions: ['Mississippi', 'Alabama', 'Louisiana', 'Oklahoma'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     greetings: {
@@ -2496,7 +2496,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Blackfoot',
     nativeName: 'Siksiká',
     family: LANGUAGE_FAMILIES.ALGONQUIAN,
-    period: [-1000, 2025],
+    period: [-1000, 2030],
     regions: ['Montana', 'Alberta', 'Saskatchewan'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     predecessors: ['PROTO_ALGONQUIAN'],
@@ -2516,7 +2516,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Cree',
     nativeName: 'Nēhiyawēwin',
     family: LANGUAGE_FAMILIES.ALGONQUIAN,
-    period: [-2000, 2025],
+    period: [-2000, 2030],
     regions: ['Canada', 'Montana', 'North Dakota', 'Subarctic', 'Plains'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     predecessors: ['PROTO_ALGONQUIAN'],
@@ -2536,7 +2536,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Mi\'kmaq',
     nativeName: 'Mi\'kmawi\'simk',
     family: LANGUAGE_FAMILIES.ALGONQUIAN,
-    period: [-3000, 2025],
+    period: [-3000, 2030],
     regions: ['Maritime Provinces', 'Newfoundland', 'Maine', 'Atlantic Coast'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     predecessors: ['PROTO_ALGONQUIAN'],
@@ -2580,7 +2580,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'English',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1700, 2025],
+    period: [1700, 2030],
     regions: ['England', 'United States', 'Canada', 'Australia', 'India', 'Global'],
     culturalZones: ['EUROPEAN' as CulturalZone, 'NORTH_AMERICAN_COLONIAL' as CulturalZone],
     predecessors: ['EARLY_MODERN_ENGLISH'],
@@ -2711,7 +2711,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'ⵜⴰⵎⴰⵣⵉⵖⵜ',
     family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
     script: ['Tifinagh', 'Arabic script', 'Latin script'],
-    period: [-3000, 2025],
+    period: [-3000, 2030],
     regions: ['North Africa', 'Sahara', 'Atlas Mountains', 'Maghreb'],
     culturalZones: ['MENA' as CulturalZone],
     description: 'Indigenous languages of North Africa',
@@ -2797,7 +2797,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'ქართული',
     family: 'Kartvelian',
     script: 'Georgian script',
-    period: [-500, 2025],
+    period: [-500, 2030],
     regions: ['Georgia', 'Caucasus', 'Tbilisi', 'Colchis', 'Iberia'],
     culturalZones: ['MENA' as CulturalZone, 'EUROPEAN' as CulturalZone],
     description: 'Ancient language of the Caucasus',
@@ -2818,7 +2818,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Հայերեն',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Armenian alphabet',
-    period: [405, 2025],
+    period: [405, 2030],
     regions: ['Armenia', 'Caucasus', 'Anatolia', 'Cilicia'],
     culturalZones: ['MENA' as CulturalZone, 'EUROPEAN' as CulturalZone],
     description: 'Ancient Indo-European language of Armenia',
@@ -2839,7 +2839,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'ግዕዝ',
     family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
     script: 'Ethiopic script',
-    period: [-1000, 2025],
+    period: [-1000, 2030],
     regions: ['Ethiopia', 'Eritrea', 'Axum', 'Horn of Africa'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     predecessors: ['ANCIENT_SOUTH_ARABIAN'],
@@ -2862,7 +2862,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Bidhaawyeet',
     family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
     script: ['Arabic script', 'Latin script'],
-    period: [-2000, 2025],
+    period: [-2000, 2030],
     regions: ['Eastern Desert', 'Red Sea Hills', 'Sudan', 'Eritrea', 'Egypt'],
     culturalZones: ['MENA' as CulturalZone, 'SUB_SAHARAN_AFRICAN' as CulturalZone],
     predecessors: ['PROTO_CUSHITIC'],
@@ -2947,7 +2947,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Қазақ тілі',
     family: LANGUAGE_FAMILIES.TURKIC,
     script: ['Cyrillic', 'Arabic script', 'Latin'],
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Kazakh Steppes', 'Altai Mountains', 'Aral Sea Basin', 'Tian Shan Range'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     predecessors: ['PROTO_TURKIC'],
@@ -2969,7 +2969,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Oʻzbek tili',
     family: LANGUAGE_FAMILIES.TURKIC,
     script: ['Arabic script', 'Cyrillic', 'Latin'],
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Samarkand Region', 'Ferghana Valley', 'Transoxiana', 'Khorasan'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     predecessors: ['PROTO_TURKIC', 'SOGDIAN'],
@@ -2991,7 +2991,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Türkmençe',
     family: LANGUAGE_FAMILIES.TURKIC,
     script: ['Arabic script', 'Cyrillic', 'Latin'],
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Kyzylkum Desert', 'Karakum Desert', 'Kopet Dag', 'Merv'],
     culturalZones: ['EAST_ASIAN' as CulturalZone, 'MENA' as CulturalZone],
     predecessors: ['PROTO_TURKIC'],
@@ -3013,7 +3013,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Саха тыла',
     family: LANGUAGE_FAMILIES.TURKIC,
     script: ['Cyrillic'],
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Eastern Siberia', 'Arctic Siberia', 'Sakha'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     predecessors: ['PROTO_TURKIC'],
@@ -3035,7 +3035,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Эвэнки',
     family: 'Tungusic',
     script: ['Cyrillic'],
-    period: [-2000, 2025],
+    period: [-2000, 2030],
     regions: ['Western Siberia', 'Central Siberia', 'Eastern Siberia', 'Manchurian Plain'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     description: 'Language of Siberian reindeer herders',
@@ -3058,7 +3058,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Türkçe',
     family: LANGUAGE_FAMILIES.TURKIC,
     script: 'Latin',
-    period: [1928, 2025],
+    period: [1928, 2030],
     regions: ['Turkey', 'Cyprus', 'Balkans'],
     culturalZones: ['MENA' as CulturalZone, 'EUROPEAN' as CulturalZone],
     predecessors: ['OTTOMAN_TURKISH'],
@@ -3079,7 +3079,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'فارسی',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Arabic script',
-    period: [1500, 2025],
+    period: [1500, 2030],
     regions: ['Iran', 'Afghanistan', 'Tajikistan'],
     culturalZones: ['MENA' as CulturalZone],
     predecessors: ['CLASSICAL_PERSIAN'],
@@ -3100,7 +3100,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Νέα Ελληνικά',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Greek alphabet',
-    period: [1453, 2025],
+    period: [1453, 2030],
     regions: ['Greece', 'Cyprus', 'Greek diaspora'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['BYZANTINE_GREEK'],
@@ -3121,7 +3121,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'עברית חדשה',
     family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
     script: 'Hebrew alphabet',
-    period: [1880, 2025],
+    period: [1880, 2030],
     regions: ['Israel', 'Palestine'],
     culturalZones: ['MENA' as CulturalZone],
     predecessors: ['ANCIENT_HEBREW'],
@@ -3142,7 +3142,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'العربية الفصحى الحديثة',
     family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
     script: 'Arabic',
-    period: [1800, 2025],
+    period: [1800, 2030],
     regions: ['Arab League countries', 'Middle East', 'North Africa'],
     culturalZones: ['MENA' as CulturalZone],
     predecessors: ['CLASSICAL_ARABIC'],
@@ -3181,7 +3181,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Халх Монгол',
     family: LANGUAGE_FAMILIES.MONGOLIC,
     script: ['Cyrillic', 'Traditional Mongolian script'],
-    period: [1700, 2025],
+    period: [1700, 2030],
     regions: ['Mongolia', 'Inner Mongolia'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     predecessors: ['MIDDLE_MONGOLIAN'],
@@ -3263,7 +3263,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: '閩語',
     family: LANGUAGE_FAMILIES.SINO_TIBETAN,
     script: 'Chinese characters',
-    period: [800, 2025],
+    period: [800, 2030],
     regions: ['Fujian', 'Taiwan'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     predecessors: ['MIDDLE_CHINESE'],
@@ -3284,7 +3284,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: '吳語',
     family: LANGUAGE_FAMILIES.SINO_TIBETAN,
     script: 'Chinese characters',
-    period: [800, 2025],
+    period: [800, 2030],
     regions: ['Shanghai', 'Jiangsu', 'Zhejiang'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     predecessors: ['MIDDLE_CHINESE'],
@@ -3305,7 +3305,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: '臺灣話',
     family: LANGUAGE_FAMILIES.SINO_TIBETAN,
     script: ['Chinese characters', 'Pe̍h-ōe-jī romanization'],
-    period: [1600, 2025],
+    period: [1600, 2030],
     regions: ['Taiwan', 'Fujian'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     predecessors: ['MIN'],
@@ -3328,7 +3328,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'བོད་སྐད',
     family: LANGUAGE_FAMILIES.SINO_TIBETAN,
     script: 'Tibetan script',
-    period: [600, 2025],
+    period: [600, 2030],
     regions: ['Tibet', 'Himalayas', 'Ladakh', 'Bhutan'],
     culturalZones: ['SOUTH_ASIAN' as CulturalZone, 'EAST_ASIAN' as CulturalZone],
     predecessors: ['PROTO_TIBETO_BURMAN'],
@@ -3350,7 +3350,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'नेपाली',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Devanagari',
-    period: [1200, 2025],
+    period: [1200, 2030],
     regions: ['Nepal', 'Sikkim', 'Darjeeling', 'Bhutan'],
     culturalZones: ['SOUTH_ASIAN' as CulturalZone],
     predecessors: ['SANSKRIT'],
@@ -3388,7 +3388,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'アイヌ・イタㇰ',
     family: LANGUAGE_FAMILIES.ISOLATE,
     script: ['Katakana', 'Latin'],
-    period: [-2000, 2025],
+    period: [-2000, 2030],
     regions: ['Hokkaido', 'Sakhalin', 'Kurils'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     description: 'Indigenous language of northern Japan',
@@ -3409,7 +3409,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: '琉球語',
     family: 'Japonic',
     script: ['Japanese scripts', 'Chinese characters'],
-    period: [500, 2025],
+    period: [500, 2030],
     regions: ['Okinawa', 'Ryukyu Islands'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     description: 'Languages of the Ryukyu Kingdom',
@@ -3432,7 +3432,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'ꆈꌠꉙ',
     family: LANGUAGE_FAMILIES.SINO_TIBETAN,
     script: 'Yi syllabary',
-    period: [500, 2025],
+    period: [500, 2030],
     regions: ['Yunnan', 'Sichuan', 'Guizhou'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     description: 'Language of Yi people in Southwest China',
@@ -3453,7 +3453,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: '白语',
     family: LANGUAGE_FAMILIES.SINO_TIBETAN,
     script: ['Chinese characters', 'Latin'],
-    period: [500, 2025],
+    period: [500, 2030],
     regions: ['Dali', 'Yunnan'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     description: 'Language of Bai people in Yunnan',
@@ -3490,7 +3490,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'فارسی',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Arabic',
-    period: [900, 2024],
+    period: [900, 2030],
     regions: ['Persia', 'Iran', 'Afghanistan', 'Central Asia'],
     culturalZones: ['MENA' as CulturalZone],
     predecessors: ['MIDDLE_PERSIAN'],
@@ -3578,7 +3578,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Malagasy',
     family: LANGUAGE_FAMILIES.AUSTRONESIAN,
     script: 'Latin',
-    period: [500, 2025],
+    period: [500, 2030],
     regions: ['Madagascar'],
     // Austronesian by descent but African by geography. Listing OCEANIA here
     // sent Malagasy to Rapa Nui and the rest of Polynesia.
@@ -3601,7 +3601,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Kiswahili',
     family: LANGUAGE_FAMILIES.NIGER_CONGO,
     script: ['Arabic', 'Latin'],
-    period: [1000, 2024],
+    period: [1000, 2030],
     regions: ['East Africa', 'Zanzibar', 'Kilwa', 'Mombasa'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3621,7 +3621,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Èdè Yorùbá',
     family: LANGUAGE_FAMILIES.NIGER_CONGO,
     script: 'Latin',
-    period: [1000, 2024],
+    period: [1000, 2030],
     regions: ['West Africa', 'Nigeria', 'Benin', 'Yorubaland', 'Lagos', 'Ibadan', 'Oyo'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3641,7 +3641,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Harshen Hausa',
     family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
     script: ['Ajami (Arabic)', 'Latin (Boko)'],
-    period: [700, 2025],
+    period: [700, 2030],
     regions: ['Sokoto', 'Kano', 'Katsina', 'Zaria', 'Northern Nigeria', 'Niger', 'Sahel', 'Lake Chad', 'Hausaland'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3661,7 +3661,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Asụsụ Igbo',
     family: LANGUAGE_FAMILIES.NIGER_CONGO,
     script: ['Latin', 'Nsibidi (traditional)'],
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Igboland', 'Eastern Nigeria', 'Niger Delta', 'Enugu', 'Onitsha', 'Aba', 'Calabar'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3681,7 +3681,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Akan / Twi',
     family: LANGUAGE_FAMILIES.NIGER_CONGO,
     script: 'Latin',
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Gold Coast', 'Ashanti', 'Ghana', 'Kumasi', 'Accra', 'Ivory Coast'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3701,7 +3701,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Wolof',
     family: LANGUAGE_FAMILIES.NIGER_CONGO,
     script: ['Arabic (Wolofal)', 'Latin'],
-    period: [1200, 2025],
+    period: [1200, 2030],
     regions: ['Senegal', 'Gambia', 'Mauritania', 'Senegambia', 'Dakar', 'Saint-Louis'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3721,7 +3721,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Fulfulde',
     family: LANGUAGE_FAMILIES.NIGER_CONGO,
     script: ['Ajami (Arabic)', 'Latin', 'ADLaM'],
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Sahel', 'Fouta Djallon', 'Macina', 'Sokoto', 'Adamawa', 'Senegal River', 'West Africa', 'Central Africa'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3741,7 +3741,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'አማርኛ',
     family: LANGUAGE_FAMILIES.AFRO_ASIATIC,
     script: 'Ge\'ez',
-    period: [1200, 2024],
+    period: [1200, 2030],
     regions: ['Ethiopia', 'Abyssinia', 'Horn of Africa'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3760,7 +3760,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Manding',
     family: LANGUAGE_FAMILIES.NIGER_CONGO,
     script: ['Latin', 'Arabic (Ajami)', 'N\'Ko'],
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Mali Empire', 'Gambia', 'Guinea', 'Senegal', 'Upper Niger', 'Mande'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3780,7 +3780,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Bamanankan',
     family: LANGUAGE_FAMILIES.NIGER_CONGO,
     script: ['Latin', 'N\'Ko'],
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Mali', 'Bamako', 'Upper Niger', 'Segou'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3800,7 +3800,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Soŋay',
     family: LANGUAGE_FAMILIES.NILO_SAHARAN,
     script: ['Latin', 'Arabic (Ajami)'],
-    period: [700, 2025],
+    period: [700, 2030],
     regions: ['Songhai Empire', 'Gao', 'Timbuktu', 'Niger River', 'Mali'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3820,7 +3820,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Sooninkanxanne',
     family: LANGUAGE_FAMILIES.NIGER_CONGO,
     script: ['Latin', 'Arabic (Ajami)'],
-    period: [300, 2025],
+    period: [300, 2030],
     regions: ['Ghana Empire', 'Wagadou', 'Senegal River', 'Mali', 'Mauritania', 'Gambia'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3840,7 +3840,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Ẹ̀dó',
     family: LANGUAGE_FAMILIES.NIGER_CONGO,
     script: 'Latin',
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Benin Kingdom', 'Edo State', 'Southern Nigeria', 'Benin City'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3860,7 +3860,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Kanuri',
     family: LANGUAGE_FAMILIES.NILO_SAHARAN,
     script: ['Latin', 'Arabic (Ajami)'],
-    period: [800, 2025],
+    period: [800, 2030],
     regions: ['Kanem-Bornu Empire', 'Lake Chad', 'Northern Nigeria', 'Niger', 'Chad'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -3879,7 +3879,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     id: 'WARLPIRI',
     name: 'Warlpiri',
     family: LANGUAGE_FAMILIES.PAMA_NYUNGAN,
-    period: [1000, 2024],
+    period: [1000, 2030],
     regions: ['Central Australia', 'Northern Territory'],
     culturalZones: ['OCEANIAN' as CulturalZone],
     predecessors: ['PROTO_PAMA_NYUNGAN'],
@@ -3897,7 +3897,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     id: 'YOLNGU_MATHA',
     name: 'Yolngu Matha',
     family: LANGUAGE_FAMILIES.AUSTRALIAN_NON_PAMA_NYUNGAN,
-    period: [1000, 2024],
+    period: [1000, 2030],
     regions: ['Arnhem Land', 'Northern Australia'],
     culturalZones: ['OCEANIAN' as CulturalZone],
     greetings: {
@@ -3919,7 +3919,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     script: 'Baybayin',
     period: [900, 1600],
     regions: ['Luzon', 'Philippines', 'Luzon Highlands', 'Philippine Sea'],
-    culturalZones: ['SOUTH_ASIAN' as CulturalZone], // Philippines is under South Asia in geography
+    culturalZones: ['SOUTHEAST_ASIAN' as CulturalZone],
     predecessors: ['PROTO_AUSTRONESIAN'],
     successors: ['MODERN_TAGALOG'],
     greetings: {
@@ -3960,7 +3960,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     script: 'Pallava/Kawi',
     period: [600, 1500],
     regions: ['Mindanao', 'Sulu Sea', 'Palawan', 'Borneo', 'Sumatra', 'Java', 'Sulawesi', 'Spice Islands', 'Makassar', 'Malacca'],
-    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    culturalZones: ['SOUTHEAST_ASIAN' as CulturalZone],
     predecessors: ['PROTO_AUSTRONESIAN'],
     successors: ['CLASSICAL_MALAY'],
     greetings: {
@@ -3981,7 +3981,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'ʻŌlelo Hawaiʻi',
     family: LANGUAGE_FAMILIES.AUSTRONESIAN,
     script: 'Latin',
-    period: [500, 2024],
+    period: [500, 2030],
     regions: ['Hawaii', 'Hawaiian Islands'],
     culturalZones: ['OCEANIAN' as CulturalZone],
     predecessors: ['PROTO_POLYNESIAN'],
@@ -4001,7 +4001,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Te Reo Māori',
     family: LANGUAGE_FAMILIES.AUSTRONESIAN,
     script: 'Latin',
-    period: [1200, 2024],
+    period: [1200, 2030],
     regions: ['New Zealand', 'Aotearoa'],
     culturalZones: ['OCEANIAN' as CulturalZone],
     predecessors: ['PROTO_POLYNESIAN'],
@@ -4020,7 +4020,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Gagana Samoa',
     family: LANGUAGE_FAMILIES.AUSTRONESIAN,
     script: 'Latin',
-    period: [500, 2024],
+    period: [500, 2030],
     regions: ['Samoa', 'American Samoa', 'Samoa Archipelago'],
     culturalZones: ['OCEANIAN' as CulturalZone],
     predecessors: ['PROTO_POLYNESIAN'],
@@ -4039,7 +4039,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Reo Tahiti',
     family: LANGUAGE_FAMILIES.AUSTRONESIAN,
     script: 'Latin',
-    period: [500, 2024],
+    period: [500, 2030],
     regions: ['Tahiti', 'Society Islands', 'French Polynesia'],
     culturalZones: ['OCEANIAN' as CulturalZone],
     predecessors: ['PROTO_POLYNESIAN'],
@@ -4058,7 +4058,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Lea faka-Tonga',
     family: LANGUAGE_FAMILIES.AUSTRONESIAN,
     script: 'Latin',
-    period: [500, 2024],
+    period: [500, 2030],
     regions: ['Tonga', 'Tonga Ridge', 'Tongatapu'],
     culturalZones: ['OCEANIAN' as CulturalZone],
     predecessors: ['PROTO_POLYNESIAN'],
@@ -4077,7 +4077,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Vosa Vakaviti',
     family: LANGUAGE_FAMILIES.AUSTRONESIAN,
     script: 'Latin',
-    period: [500, 2024],
+    period: [500, 2030],
     regions: ['Fiji', 'Viti Levu', 'Vanua Levu'],
     culturalZones: ['OCEANIAN' as CulturalZone],
     predecessors: ['PROTO_POLYNESIAN'],
@@ -4100,7 +4100,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     script: 'Kawi',
     period: [800, 1500],
     regions: ['Java', 'Central Java', 'Java Sea', 'Bali'],
-    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    culturalZones: ['SOUTHEAST_ASIAN' as CulturalZone],
     predecessors: ['PROTO_AUSTRONESIAN'],
     successors: ['MIDDLE_JAVANESE'],
     greetings: {
@@ -4119,9 +4119,9 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Akhar Cam',
     family: LANGUAGE_FAMILIES.AUSTRONESIAN,
     script: 'Cham',
-    period: [200, 2024],
+    period: [200, 2030],
     regions: ['Annam', 'Mekong', 'Indochina', 'Annam Highlands'],
-    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    culturalZones: ['SOUTHEAST_ASIAN' as CulturalZone],
     greetings: {
       hello: 'Bani səlamat',
       goodbye: 'Lơ̆w həi',
@@ -4167,7 +4167,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     name: 'Melanesian Pidgin',
     nativeName: 'Tok Pisin / Bislama / Pijin',
     family: LANGUAGE_FAMILIES.PIDGIN,
-    period: [1800, 2024],
+    period: [1800, 2030],
     regions: ['Papua New Guinea', 'Solomon Islands', 'Vanuatu', 'New Caledonia'],
     culturalZones: ['OCEANIAN' as CulturalZone],
     description: 'English-based pidgin of Melanesia, now creolized',
@@ -4190,7 +4190,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Nederlands',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1500, 2025],
+    period: [1500, 2030],
     regions: ['Netherlands', 'Holland', 'Flanders', 'Low Countries', 'Scheldt', 'Brabant', 'Amsterdam', 'Rotterdam', 'Utrecht', 'Suriname', 'Batavia'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['OLD_DUTCH'],
@@ -4210,7 +4210,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Deutsch',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Germany', 'Austria', 'Switzerland', 'Bavaria', 'Prussia', 'Saxony', 'Rhineland', 'Swabia', 'Brandenburg', 'Hanseatic', 'Alsace', 'Namibia'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['OLD_HIGH_GERMAN'],
@@ -4231,7 +4231,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'ייִדיש',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Hebrew',
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Eastern Europe', 'Poland', 'Lithuania', 'Ukraine', 'Romania', 'Hungary', 'New York', 'Brooklyn'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     greetings: {
@@ -4250,7 +4250,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Scots',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1100, 2025],
+    period: [1100, 2030],
     regions: ['Scotland', 'Scottish Lowlands', 'Edinburgh', 'Glasgow', 'Ulster'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     predecessors: ['OLD_ENGLISH'],
@@ -4270,7 +4270,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Gaeilge',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [500, 2025],
+    period: [500, 2030],
     regions: ['Ireland', 'Connacht', 'Munster', 'Ulster', 'Leinster', 'Gaeltacht'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     greetings: {
@@ -4289,7 +4289,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Cymraeg',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [500, 2025],
+    period: [500, 2030],
     regions: ['Wales', 'Cymru', 'Gwynedd', 'Powys', 'Dyfed', 'Glamorgan'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     greetings: {
@@ -4308,7 +4308,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Català',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [900, 2025],
+    period: [900, 2030],
     regions: ['Catalonia', 'Valencia', 'Balearic Islands', 'Barcelona', 'Andorra', 'Roussillon'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     greetings: {
@@ -4327,7 +4327,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Euskara',
     family: LANGUAGE_FAMILIES.ISOLATE,
     script: 'Latin',
-    period: [-2000, 2025],
+    period: [-2000, 2030],
     regions: ['Basque Country', 'Euskadi', 'Navarre', 'Gipuzkoa', 'Bizkaia', 'Araba'],
     culturalZones: ['EUROPEAN' as CulturalZone],
     greetings: {
@@ -4347,7 +4347,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Afrikaans',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1700, 2025],
+    period: [1700, 2030],
     regions: ['South Africa', 'Cape Colony', 'Transvaal', 'Orange Free State', 'Namibia', 'Cape Town', 'Pretoria', 'Johannesburg'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     predecessors: ['DUTCH'],
@@ -4367,7 +4367,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'isiZulu',
     family: LANGUAGE_FAMILIES.NIGER_CONGO,
     script: 'Latin',
-    period: [1500, 2025],
+    period: [1500, 2030],
     regions: ['KwaZulu-Natal', 'Zululand', 'Natal', 'Durban'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -4386,7 +4386,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'isiXhosa',
     family: LANGUAGE_FAMILIES.NIGER_CONGO,
     script: 'Latin',
-    period: [1500, 2025],
+    period: [1500, 2030],
     regions: ['Eastern Cape', 'Cape Colony', 'Transkei', 'Ciskei'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -4405,7 +4405,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Khoekhoegowab',
     family: LANGUAGE_FAMILIES.ISOLATE,
     script: 'Latin',
-    period: [-2000, 2025],
+    period: [-2000, 2030],
     regions: ['Namibia', 'Namaland', 'Kalahari', 'Great Namaqualand'],
     culturalZones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
     greetings: {
@@ -4425,7 +4425,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Français québécois',
     family: LANGUAGE_FAMILIES.INDO_EUROPEAN,
     script: 'Latin',
-    period: [1600, 2025],
+    period: [1600, 2030],
     regions: ['Quebec', 'St. Lawrence River', 'Montreal', 'Quebec City', 'Trois-Rivières', 'New France', 'Acadia'],
     culturalZones: ['NORTH_AMERICAN_COLONIAL' as CulturalZone],
     predecessors: ['OLD_FRENCH'],
@@ -4445,7 +4445,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Kréyòl La Lwizyàn',
     family: LANGUAGE_FAMILIES.PIDGIN,
     script: 'Latin',
-    period: [1700, 2025],
+    period: [1700, 2030],
     regions: ['Louisiana', 'New Orleans', 'Mississippi Delta', 'Acadiana', 'Cajun Country'],
     culturalZones: ['NORTH_AMERICAN_COLONIAL' as CulturalZone],
     greetings: {
@@ -4464,7 +4464,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Kreyòl ayisyen',
     family: LANGUAGE_FAMILIES.PIDGIN,
     script: 'Latin',
-    period: [1700, 2025],
+    period: [1700, 2030],
     regions: ['Haiti', 'Saint-Domingue', 'Port-au-Prince'],
     culturalZones: ['MESOAMERICAN' as CulturalZone],
     greetings: {
@@ -4484,7 +4484,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Patwa',
     family: LANGUAGE_FAMILIES.PIDGIN,
     script: 'Latin',
-    period: [1700, 2025],
+    period: [1700, 2030],
     regions: ['Jamaica'],
     culturalZones: ['NORTH_AMERICAN_COLONIAL' as CulturalZone],
     description: 'English-based creole with West African influences',
@@ -4505,7 +4505,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Bajan',
     family: LANGUAGE_FAMILIES.PIDGIN,
     script: 'Latin',
-    period: [1700, 2025],
+    period: [1700, 2030],
     regions: ['Barbados'],
     culturalZones: ['NORTH_AMERICAN_COLONIAL' as CulturalZone],
     description: 'English-based creole of Barbados',
@@ -4518,7 +4518,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Kwéyòl',
     family: LANGUAGE_FAMILIES.PIDGIN,
     script: 'Latin',
-    period: [1700, 2025],
+    period: [1700, 2030],
     regions: ['Martinique', 'Guadeloupe', 'Dominica', 'St. Lucia'],
     culturalZones: ['NORTH_AMERICAN_COLONIAL' as CulturalZone],
     description: 'French-based creole of the Lesser Antilles',
@@ -4531,7 +4531,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Papiamentu',
     family: LANGUAGE_FAMILIES.PIDGIN,
     script: 'Latin',
-    period: [1700, 2025],
+    period: [1700, 2030],
     regions: ['Aruba', 'Curaçao', 'Bonaire'],
     culturalZones: ['SOUTH_AMERICAN' as CulturalZone],
     description: 'Creole with Portuguese, Spanish, Dutch, and African elements',
@@ -4545,7 +4545,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: '廣東話',
     family: LANGUAGE_FAMILIES.SINO_TIBETAN,
     script: 'Chinese characters',
-    period: [1200, 2025],
+    period: [1200, 2030],
     regions: ['Guangdong', 'Canton', 'Hong Kong', 'Macau', 'Guangzhou'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     predecessors: ['MIDDLE_CHINESE'],
@@ -4601,7 +4601,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: '한국어',
     family: LANGUAGE_FAMILIES.ISOLATE,
     script: 'Hangul',
-    period: [1600, 2025],
+    period: [1600, 2030],
     regions: ['Korea', 'Seoul', 'Pyongyang', 'Joseon', 'Busan', 'Gyeongju'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     predecessors: ['MIDDLE_KOREAN'],
@@ -4621,7 +4621,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: '한국어',
     family: LANGUAGE_FAMILIES.ISOLATE,
     script: 'Hangul',
-    period: [500, 2025],
+    period: [500, 2030],
     regions: ['Korea', 'Seoul', 'Pyongyang', 'Joseon', 'Goryeo', 'Busan', 'Gyeongju'],
     culturalZones: ['EAST_ASIAN' as CulturalZone],
     greetings: {
@@ -4640,9 +4640,9 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Tiếng Việt',
     family: LANGUAGE_FAMILIES.AUSTRONESIAN,
     script: 'Latin',
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Vietnam', 'Annam', 'Tonkin', 'Cochinchina', 'Saigon', 'Hanoi', 'Mekong Delta'],
-    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    culturalZones: ['SOUTHEAST_ASIAN' as CulturalZone],
     greetings: {
       hello: 'Xin chào',
       goodbye: 'Tạm biệt',
@@ -4660,9 +4660,9 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'ภาษาไทย',
     family: LANGUAGE_FAMILIES.SINO_TIBETAN,
     script: 'Thai',
-    period: [1200, 2025],
+    period: [1200, 2030],
     regions: ['Thailand', 'Siam', 'Bangkok', 'Ayutthaya', 'Chiang Mai'],
-    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    culturalZones: ['SOUTHEAST_ASIAN' as CulturalZone],
     greetings: {
       hello: 'สวัสดี',
       goodbye: 'ลาก่อน',
@@ -4680,9 +4680,9 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'ភាសាខ្មែរ',
     family: LANGUAGE_FAMILIES.AUSTRONESIAN,
     script: 'Khmer',
-    period: [600, 2025],
+    period: [600, 2030],
     regions: ['Cambodia', 'Khmer Empire', 'Angkor', 'Tonle Sap', 'Mekong Delta'],
-    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    culturalZones: ['SOUTHEAST_ASIAN' as CulturalZone],
     greetings: {
       hello: 'សួស្តី',
       goodbye: 'លាហើយ',
@@ -4700,9 +4700,9 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'ဘာသာမန်',
     family: LANGUAGE_FAMILIES.AUSTRONESIAN,
     script: 'Mon',
-    period: [500, 2025],
+    period: [500, 2030],
     regions: ['Lower Burma', 'Mon kingdoms', 'Pegu', 'Thaton', 'Thailand'],
-    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    culturalZones: ['SOUTHEAST_ASIAN' as CulturalZone],
     greetings: {
       hello: 'မင်္ဂလာပါ',
       goodbye: 'ထွက်ခွာပါ',
@@ -4720,9 +4720,9 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'မြန်မာဘာသာ',
     family: LANGUAGE_FAMILIES.SINO_TIBETAN,
     script: 'Burmese',
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Burma', 'Myanmar', 'Pagan Kingdom', 'Irrawaddy Valley', 'Mandalay', 'Rangoon'],
-    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    culturalZones: ['SOUTHEAST_ASIAN' as CulturalZone],
     predecessors: ['PROTO_TIBETO_BURMAN'],
     greetings: {
       hello: 'မင်္ဂလာပါ',
@@ -4741,9 +4741,9 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Tagalog',
     family: LANGUAGE_FAMILIES.AUSTRONESIAN,
     script: 'Latin',
-    period: [1500, 2025],
+    period: [1500, 2030],
     regions: ['Philippines', 'Luzon', 'Manila', 'Batangas', 'Quezon'],
-    culturalZones: ['SOUTH_ASIAN' as CulturalZone],
+    culturalZones: ['SOUTHEAST_ASIAN' as CulturalZone],
     predecessors: ['OLD_TAGALOG'],
     greetings: {
       hello: 'Kumusta',
@@ -4762,7 +4762,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'ᐃᓄᒃᑎᑐᑦ',
     family: LANGUAGE_FAMILIES.ISOLATE,
     script: 'Canadian Aboriginal syllabics',
-    period: [-2000, 2025],
+    period: [-2000, 2030],
     regions: ['Arctic', 'Nunavut', 'Greenland', 'Hudson Bay', 'Baffin Island', 'Canadian North'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     greetings: {
@@ -4781,7 +4781,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: 'Diné bizaad',
     family: LANGUAGE_FAMILIES.ISOLATE,
     script: 'Latin',
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Southwest', 'Arizona', 'New Mexico', 'Four Corners', 'Navajo Nation'],
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN' as CulturalZone],
     greetings: {
@@ -4837,7 +4837,7 @@ export const LANGUAGES: Record<string, LanguageData> = {
     nativeName: "Avañe'ẽ",
     family: LANGUAGE_FAMILIES.ISOLATE,
     script: 'Latin',
-    period: [1000, 2025],
+    period: [1000, 2030],
     regions: ['Paraguay', 'Misiones', 'Chaco', 'Parana River'],
     culturalZones: ['SOUTH_AMERICAN' as CulturalZone],
     predecessors: ['PROTO_TUPI'],
@@ -4929,7 +4929,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['hamburg coast', 'lower elbe', 'saxon uplands', 'lower saxony', 'northern germany'],
     languages: [
       { id: 'OLD_SAXON', period: [500, 1150], weight: 95 },
-      { id: 'GERMAN', period: [1150, 2025], weight: 90 },
+      { id: 'GERMAN', period: [1150, 2030], weight: 90 },
     ],
     namePatterns: [
       { pattern: /Widukind|Wichmann|Thankmar|Ekbert|Hathugaut|Liudolf|Hathumod|Thiadsvind/i, language: 'OLD_SAXON', weight: 98 },
@@ -4940,17 +4940,17 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'FRANKISH', period: [400, 900], weight: 45 },
       { id: 'OLD_HIGH_GERMAN', period: [700, 1050], weight: 55 },
-      { id: 'GERMAN', period: [1050, 2025], weight: 90 },
+      { id: 'GERMAN', period: [1050, 2030], weight: 90 },
     ],
   },
   // Low Countries
   {
     patterns: ['low countries', 'scheldt', 'flanders', 'brabant', 'antwerp', 'bruges', 'ghent'],
     languages: [
-      { id: 'DUTCH', period: [1500, 2025], weight: 60 },
+      { id: 'DUTCH', period: [1500, 2030], weight: 60 },
       { id: 'OLD_FRENCH', period: [1500, 1700], weight: 30 },
       { id: 'FRENCH_MEDIEVAL', period: [1100, 1500], weight: 30 },
-      { id: 'GERMAN', period: [1500, 2025], weight: 5 },
+      { id: 'GERMAN', period: [1500, 2030], weight: 5 },
       { id: 'EARLY_SPANISH', period: [1550, 1700], weight: 5 },
     ],
     namePatterns: [
@@ -4963,8 +4963,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['netherlands', 'holland', 'amsterdam', 'rotterdam', 'utrecht', 'hague'],
     languages: [
-      { id: 'DUTCH', period: [1500, 2025], weight: 95 },
-      { id: 'GERMAN', period: [1500, 2025], weight: 3 },
+      { id: 'DUTCH', period: [1500, 2030], weight: 95 },
+      { id: 'GERMAN', period: [1500, 2030], weight: 3 },
       { id: 'OLD_FRENCH', period: [1700, 1800], weight: 2 },
     ],
     namePatterns: [
@@ -4975,8 +4975,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['ireland', 'dublin', 'cork', 'galway', 'limerick', 'connacht', 'munster', 'leinster', 'ulster'],
     languages: [
-      { id: 'IRISH_GAELIC', period: [500, 2025], weight: 60 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1200, 2025], weight: 40 },
+      { id: 'IRISH_GAELIC', period: [500, 2030], weight: 60 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1200, 2030], weight: 40 },
     ],
     namePatterns: [
       { pattern: /O'|Mc|Mac|Ó|Ni /i, language: 'IRISH_GAELIC', weight: 75 },
@@ -4987,9 +4987,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['scotland', 'scottish', 'edinburgh', 'glasgow', 'aberdeen', 'highlands', 'lowlands'],
     languages: [
-      { id: 'SCOTS', period: [1100, 2025], weight: 40 },
-      { id: 'SCOTS_GAELIC', period: [500, 2025], weight: 30 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1500, 2025], weight: 30 },
+      { id: 'SCOTS', period: [1100, 2030], weight: 40 },
+      { id: 'SCOTS_GAELIC', period: [500, 2030], weight: 30 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1500, 2030], weight: 30 },
     ],
     namePatterns: [
       { pattern: /Mac|Mc|Campbell|Stewart|Murray|Ross/i, language: 'SCOTS_GAELIC', weight: 70 },
@@ -5000,8 +5000,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['wales', 'cymru', 'cardiff', 'swansea', 'gwynedd', 'powys'],
     languages: [
-      { id: 'WELSH', period: [500, 2025], weight: 60 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1500, 2025], weight: 40 },
+      { id: 'WELSH', period: [500, 2030], weight: 60 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1500, 2030], weight: 40 },
     ],
     namePatterns: [
       { pattern: /Llewellyn|Gwynn|Rhys|ap |ab /i, language: 'WELSH', weight: 85 },
@@ -5011,8 +5011,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['catalonia', 'barcelona', 'valencia', 'balearic', 'mallorca'],
     languages: [
-      { id: 'CATALAN', period: [900, 2025], weight: 70 },
-      { id: 'EARLY_SPANISH', period: [1500, 2025], weight: 30 },
+      { id: 'CATALAN', period: [900, 2030], weight: 70 },
+      { id: 'EARLY_SPANISH', period: [1500, 2030], weight: 30 },
     ],
     namePatterns: [
       { pattern: /Puig|Ferrer|Serra|Soler|Mas/i, language: 'CATALAN', weight: 80 },
@@ -5022,8 +5022,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['basque', 'euskadi', 'bilbao', 'san sebastian', 'vitoria', 'navarre'],
     languages: [
-      { id: 'BASQUE', period: [-2000, 2025], weight: 50 },
-      { id: 'EARLY_SPANISH', period: [1500, 2025], weight: 35 },
+      { id: 'BASQUE', period: [-2000, 2030], weight: 50 },
+      { id: 'EARLY_SPANISH', period: [1500, 2030], weight: 35 },
       { id: 'OLD_FRENCH', period: [1500, 1800], weight: 15 },
     ],
     namePatterns: [
@@ -5036,11 +5036,11 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['central europe', 'danube bend', 'bohemian plateau', 'carpathian foothills', 'vienna basin', 'moravian gate', 'tatra mountains'],
     languages: [
       { id: 'LATIN', period: [500, 1500], weight: 20 }, // Church and administration
-      { id: 'GERMAN', period: [800, 2025], weight: 35 }, // Holy Roman Empire influence
-      { id: 'CZECH', period: [800, 2025], weight: 25 },
-      { id: 'POLISH', period: [800, 2025], weight: 20 },
-      { id: 'HUNGARIAN', period: [896, 2025], weight: 25 },
-      { id: 'SLOVAK', period: [1000, 2025], weight: 15 },
+      { id: 'GERMAN', period: [800, 2030], weight: 35 }, // Holy Roman Empire influence
+      { id: 'CZECH', period: [800, 2030], weight: 25 },
+      { id: 'POLISH', period: [800, 2030], weight: 20 },
+      { id: 'HUNGARIAN', period: [896, 2030], weight: 25 },
+      { id: 'SLOVAK', period: [1000, 2030], weight: 15 },
       { id: 'YIDDISH', period: [1000, 1945], weight: 10 }, // Jewish communities
     ],
     namePatterns: [
@@ -5057,11 +5057,11 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['scandinavia', 'stockholm archipelago', 'norwegian fjords', 'jutland peninsula', 'lapland', 'gotland', 'øresund strait'],
     languages: [
       { id: 'OLD_NORSE', period: [700, 1350], weight: 60 },
-      { id: 'SWEDISH', period: [1225, 2025], weight: 35 },
-      { id: 'DANISH', period: [1100, 2025], weight: 30 },
-      { id: 'NORWEGIAN', period: [1350, 2025], weight: 30 },
-      { id: 'ICELANDIC', period: [870, 2025], weight: 10 },
-      { id: 'SAMI', period: [-1000, 2025], weight: 15 }, // Lapland
+      { id: 'SWEDISH', period: [1225, 2030], weight: 35 },
+      { id: 'DANISH', period: [1100, 2030], weight: 30 },
+      { id: 'NORWEGIAN', period: [1350, 2030], weight: 30 },
+      { id: 'ICELANDIC', period: [870, 2030], weight: 10 },
+      { id: 'SAMI', period: [-1000, 2030], weight: 15 }, // Lapland
       { id: 'GERMAN', period: [1300, 1600], weight: 10 }, // Hanseatic League
     ],
     namePatterns: [
@@ -5079,7 +5079,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'ANCIENT_GREEK', period: [-800, 600], weight: 70 },
       { id: 'BYZANTINE_GREEK', period: [330, 1453], weight: 60 },
-      { id: 'MODERN_GREEK', period: [1453, 2025], weight: 80 },
+      { id: 'MODERN_GREEK', period: [1453, 2030], weight: 80 },
       { id: 'LATIN', period: [-146, 330], weight: 20 }, // Roman period
       { id: 'OTTOMAN_TURKISH', period: [1453, 1821], weight: 15 }, // Ottoman rule
       { id: 'VENETIAN', period: [1200, 1700], weight: 10 }, // Venetian islands
@@ -5097,10 +5097,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['eastern europe', 'moscow basin', 'dnieper river', 'volga bend', 'carpathian ridge', 'steppe borderlands', 'novgorod woods'],
     languages: [
       { id: 'OLD_CHURCH_SLAVONIC', period: [860, 1200], weight: 20 },
-      { id: 'RUSSIAN', period: [1100, 2025], weight: 60 },
-      { id: 'UKRAINIAN', period: [1000, 2025], weight: 30 },
-      { id: 'BELARUSIAN', period: [1200, 2025], weight: 15 },
-      { id: 'POLISH', period: [1000, 2025], weight: 10 }, // Polish-Lithuanian influence
+      { id: 'RUSSIAN', period: [1100, 2030], weight: 60 },
+      { id: 'UKRAINIAN', period: [1000, 2030], weight: 30 },
+      { id: 'BELARUSIAN', period: [1200, 2030], weight: 15 },
+      { id: 'POLISH', period: [1000, 2030], weight: 10 }, // Polish-Lithuanian influence
       { id: 'TATAR', period: [1240, 1700], weight: 10 }, // Golden Horde
       { id: 'YIDDISH', period: [1000, 1945], weight: 15 }, // Pale of Settlement
     ],
@@ -5121,9 +5121,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'CLASSICAL_ARABIC', period: [711, 1492], weight: 40 },  // Al-Andalus influence
       { id: 'LATIN', period: [0, 1200], weight: 30 },  // Church and educated class
       { id: 'FRENCH_MEDIEVAL', period: [900, 1300], weight: 20 },  // Occitan/Provencal influence in north
-      { id: 'BASQUE', period: [-2000, 2025], weight: 5 },  // Basque substrate
-      { id: 'EARLY_SPANISH', period: [1500, 2025], weight: 60 },  // Later period
-      { id: 'EARLY_PORTUGUESE', period: [1500, 2025], weight: 20 },  // Portuguese areas
+      { id: 'BASQUE', period: [-2000, 2030], weight: 5 },  // Basque substrate
+      { id: 'EARLY_SPANISH', period: [1500, 2030], weight: 60 },  // Later period
+      { id: 'EARLY_PORTUGUESE', period: [1500, 2030], weight: 20 },  // Portuguese areas
     ],
     namePatterns: [
       { pattern: /Ibn |Abu |Al-/i, language: 'CLASSICAL_ARABIC', weight: 80 },
@@ -5134,10 +5134,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['switzerland', 'swiss', 'zurich', 'geneva', 'bern', 'basel', 'lucerne'],
     languages: [
-      { id: 'GERMAN', period: [1000, 2025], weight: 65 },
-      { id: 'OLD_FRENCH', period: [1000, 2025], weight: 25 },
-      { id: 'ITALIAN', period: [1000, 2025], weight: 8 },
-      { id: 'ROMANSH', period: [500, 2025], weight: 2 },
+      { id: 'GERMAN', period: [1000, 2030], weight: 65 },
+      { id: 'OLD_FRENCH', period: [1000, 2030], weight: 25 },
+      { id: 'ITALIAN', period: [1000, 2030], weight: 8 },
+      { id: 'ROMANSH', period: [500, 2030], weight: 2 },
     ],
   },
 
@@ -5148,8 +5148,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'OLD_MALAY', period: [600, 1500], weight: 70 },
       { id: 'OLD_JAVANESE', period: [800, 1500], weight: 20 },
-      { id: 'CLASSICAL_MALAY', period: [1500, 2025], weight: 80 },
-      { id: 'CLASSICAL_ARABIC', period: [1200, 2025], weight: 10 }, // Islamic influence
+      { id: 'CLASSICAL_MALAY', period: [1500, 2030], weight: 80 },
+      { id: 'CLASSICAL_ARABIC', period: [1200, 2030], weight: 10 }, // Islamic influence
     ],
     namePatterns: [
       { pattern: /Abdul|Ahmad|Ali|Hassan|Hussein|Ibrahim|Muhammad|Omar|Siti|Fatima/i, language: 'CLASSICAL_ARABIC', weight: 85 },
@@ -5160,10 +5160,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['philippines', 'luzon', 'visayan', 'mindanao', 'palawan', 'sulu', 'philippine sea'],
     languages: [
-      { id: 'TAGALOG', period: [900, 2025], weight: 60 },
+      { id: 'TAGALOG', period: [900, 2030], weight: 60 },
       { id: 'OLD_MALAY', period: [900, 1500], weight: 20 },
-      { id: 'EARLY_SPANISH', period: [1521, 2025], weight: 30 },
-      { id: 'CLASSICAL_ARABIC', period: [1300, 2025], weight: 10 }, // Mindanao/Sulu
+      { id: 'EARLY_SPANISH', period: [1521, 2030], weight: 30 },
+      { id: 'CLASSICAL_ARABIC', period: [1300, 2030], weight: 10 }, // Mindanao/Sulu
     ],
     namePatterns: [
       { pattern: /dela Cruz|Santos|Garcia|Reyes|Mendoza/i, language: 'EARLY_SPANISH', weight: 85 },
@@ -5174,12 +5174,12 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['irrawaddy', 'mekong', 'red river', 'chao phraya', 'tonle sap', 'shan', 'annam', 'tenasserim', 'mainland southeast'],
     languages: [
-      { id: 'MON', period: [500, 2025], weight: 35 },
-      { id: 'KHMER', period: [600, 2025], weight: 40 },
-      { id: 'BURMESE', period: [1000, 2025], weight: 40 },
-      { id: 'THAI', period: [1200, 2025], weight: 50 },
+      { id: 'MON', period: [500, 2030], weight: 35 },
+      { id: 'KHMER', period: [600, 2030], weight: 40 },
+      { id: 'BURMESE', period: [1000, 2030], weight: 40 },
+      { id: 'THAI', period: [1200, 2030], weight: 50 },
       { id: 'SANSKRIT', period: [500, 1500], weight: 20 }, // Buddhist texts
-      { id: 'CHAM', period: [200, 2025], weight: 30 },
+      { id: 'CHAM', period: [200, 2030], weight: 30 },
     ],
     namePatterns: [
       { pattern: /Thaksin|Chakri|Narai|Rama|Mongkut/i, language: 'THAI', weight: 80 },
@@ -5191,10 +5191,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['khmer empire', 'angkor', 'angkor wat', 'angkor thom', 'tonle sap lake', 'cambodia', 'kampuchea', 'kamboja'],
     languages: [
-      { id: 'KHMER', period: [600, 2025], weight: 95 },
+      { id: 'KHMER', period: [600, 2030], weight: 95 },
       { id: 'SANSKRIT', period: [600, 1500], weight: 50 }, // Court and religious language
       { id: 'CHAM', period: [800, 1471], weight: 20 }, // Rival kingdom
-      { id: 'THAI', period: [1431, 2025], weight: 25 }, // After Angkor's decline
+      { id: 'THAI', period: [1431, 2030], weight: 25 }, // After Angkor's decline
     ],
     namePatterns: [
       { pattern: /Jayavarman|Suryavarman|Preah|Norodom|Sihanouk|Sisowath/i, language: 'KHMER', weight: 95 },
@@ -5205,9 +5205,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['mon kingdoms', 'dvaravati', 'thaton', 'pegu', 'bago', 'hanthawaddy', 'lower burma', 'martaban'],
     languages: [
-      { id: 'MON', period: [500, 2025], weight: 95 },
+      { id: 'MON', period: [500, 2030], weight: 95 },
       { id: 'SANSKRIT', period: [500, 1500], weight: 40 }, // Buddhist texts
-      { id: 'BURMESE', period: [1000, 2025], weight: 30 }, // After Burmese conquest
+      { id: 'BURMESE', period: [1000, 2030], weight: 30 }, // After Burmese conquest
     ],
     namePatterns: [
       { pattern: /Siridhamma|Dhammazedi|Nara|Samala|Razadarit/i, language: 'MON', weight: 90 },
@@ -5218,7 +5218,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['pagan kingdom', 'bagan', 'pagan', 'burma empire', 'irrawaddy valley', 'irrawaddy delta', 'myanmar', 'ava kingdom', 'mandalay', 'rangoon', 'yangon'],
     languages: [
-      { id: 'BURMESE', period: [1000, 2025], weight: 90 },
+      { id: 'BURMESE', period: [1000, 2030], weight: 90 },
       { id: 'MON', period: [500, 1757], weight: 50 }, // Mon influence
       { id: 'SANSKRIT', period: [1000, 1500], weight: 35 }, // Buddhist texts
       { id: 'PROTO_TIBETO_BURMAN', period: [500, 1000], weight: 25 },
@@ -5232,7 +5232,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['ayutthaya', 'siam', 'thailand', 'sukhothai', 'lanna', 'chiang mai', 'bangkok', 'krung thep'],
     languages: [
-      { id: 'THAI', period: [1200, 2025], weight: 90 },
+      { id: 'THAI', period: [1200, 2030], weight: 90 },
       { id: 'KHMER', period: [600, 1431], weight: 40 }, // Strong Khmer influence
       { id: 'MON', period: [500, 1767], weight: 30 },
       { id: 'SANSKRIT', period: [1200, 1800], weight: 30 }, // Religious language
@@ -5246,9 +5246,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['vietnam', 'annam', 'tonkin', 'cochin', 'saigon', 'hanoi', 'hue', 'red river delta'],
     languages: [
-      { id: 'VIETNAMESE', period: [1000, 2025], weight: 70 },
+      { id: 'VIETNAMESE', period: [1000, 2030], weight: 70 },
       { id: 'CLASSICAL_CHINESE', period: [-200, 1900], weight: 20 }, // Administrative language
-      { id: 'CHAM', period: [200, 2025], weight: 10 },
+      { id: 'CHAM', period: [200, 2030], weight: 10 },
     ],
     namePatterns: [
       { pattern: /Nguyen|Tran|Le|Pham|Hoang|Phan|Vu|Vo/i, language: 'VIETNAMESE', weight: 90 },
@@ -5259,10 +5259,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['malay peninsula', 'singapore', 'johor', 'kelantan', 'terengganu', 'pahang'],
     languages: [
       { id: 'OLD_MALAY', period: [600, 1500], weight: 60 },
-      { id: 'CLASSICAL_MALAY', period: [1500, 2025], weight: 70 },
-      { id: 'CLASSICAL_ARABIC', period: [1300, 2025], weight: 10 },
-      { id: 'TAMIL', period: [1000, 2025], weight: 10 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1819, 2025], weight: 20 }, // Colonial
+      { id: 'CLASSICAL_MALAY', period: [1500, 2030], weight: 70 },
+      { id: 'CLASSICAL_ARABIC', period: [1300, 2030], weight: 10 },
+      { id: 'TAMIL', period: [1000, 2030], weight: 10 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1819, 2030], weight: 20 }, // Colonial
     ],
     namePatterns: [
       { pattern: /bin|binti|Raja|Sultan|Iskandar|Mahmud/i, language: 'OLD_MALAY', weight: 85 },
@@ -5273,7 +5273,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['indochina', 'annamite', 'shan plateau', 'laos', 'cambodia'],
     languages: [
       { id: 'SANSKRIT', period: [600, 1500], weight: 60 },
-      { id: 'CHAM', period: [200, 2025], weight: 40 },
+      { id: 'CHAM', period: [200, 2030], weight: 40 },
     ],
   },
   // Taiwan
@@ -5290,9 +5290,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['st. lawrence', 'saint lawrence', 'quebec', 'montreal', 'trois-rivieres', 'new france'],
     languages: [
-      { id: 'QUEBECOIS_FRENCH', period: [1600, 2025], weight: 85 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1760, 2025], weight: 10 },
-      { id: 'MOHAWK', period: [1000, 2025], weight: 5 },
+      { id: 'QUEBECOIS_FRENCH', period: [1600, 2030], weight: 85 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1760, 2030], weight: 10 },
+      { id: 'MOHAWK', period: [1000, 2030], weight: 5 },
     ],
     namePatterns: [
       { pattern: /Tremblay|Gagnon|Roy|Côté|Bouchard|Gauthier/i, language: 'QUEBECOIS_FRENCH', weight: 95 },
@@ -5303,8 +5303,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['canadian north', 'hudson bay', 'nunavut', 'baffin', 'arctic canada', 'northwest territories'],
     languages: [
-      { id: 'INUKTITUT', period: [-2000, 2025], weight: 70 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1700, 2025], weight: 25 },
+      { id: 'INUKTITUT', period: [-2000, 2030], weight: 70 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1700, 2030], weight: 25 },
       { id: 'OLD_FRENCH', period: [1600, 1800], weight: 5 },
     ],
   },
@@ -5312,10 +5312,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['louisiana', 'new orleans', 'mississippi delta', 'baton rouge', 'cajun'],
     languages: [
-      { id: 'LOUISIANA_CREOLE', period: [1700, 2025], weight: 30 },
+      { id: 'LOUISIANA_CREOLE', period: [1700, 2030], weight: 30 },
       { id: 'OLD_FRENCH', period: [1700, 1803], weight: 40 },
       { id: 'EARLY_SPANISH', period: [1762, 1803], weight: 20 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1803, 2025], weight: 40 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1803, 2030], weight: 40 },
     ],
     namePatterns: [
       { pattern: /Thibodaux|Boudreaux|Fontenot|Hebert|Landry/i, language: 'LOUISIANA_CREOLE', weight: 85 },
@@ -5325,7 +5325,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['haiti', 'saint-domingue', 'port-au-prince', 'cap-haitien', 'hispaniola'],
     languages: [
-      { id: 'HAITIAN_CREOLE', period: [1700, 2025], weight: 85 },
+      { id: 'HAITIAN_CREOLE', period: [1700, 2030], weight: 85 },
       { id: 'OLD_FRENCH', period: [1600, 1800], weight: 15 },
     ],
   },
@@ -5333,9 +5333,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['new mexico', 'santa fe', 'albuquerque', 'ancestral puebloan'],
     languages: [
-      { id: 'NAVAJO', period: [1000, 2025], weight: 30 },
-      { id: 'EARLY_SPANISH', period: [1540, 2025], weight: 40 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1846, 2025], weight: 30 },
+      { id: 'NAVAJO', period: [1000, 2030], weight: 30 },
+      { id: 'EARLY_SPANISH', period: [1540, 2030], weight: 40 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1846, 2030], weight: 30 },
     ],
     namePatterns: [
       { pattern: /Begay|Yazzie|Benally|Tsosie/i, language: 'NAVAJO', weight: 95 },
@@ -5348,9 +5348,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['pacific coast', 'columbia river', 'puget sound', 'olympic peninsula', 'redwood coast', 'shasta', 'cascade range'],
     languages: [
       { id: 'CHINOOK_JARGON', period: [1600, 1920], weight: 30 }, // Trade language
-      { id: 'SALISHAN', period: [-2000, 2025], weight: 35 },
+      { id: 'SALISHAN', period: [-2000, 2030], weight: 35 },
       { id: 'CHINOOKAN', period: [-2000, 1950], weight: 25 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1810, 2025], weight: 40 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1810, 2030], weight: 40 },
       { id: 'RUSSIAN', period: [1741, 1867], weight: 10 }, // Russian America
     ],
     namePatterns: [
@@ -5363,10 +5363,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['northern california', 'san francisco bay', 'marin', 'sacramento valley', 'sierra nevada foothills', 'napa valley'],
     languages: [
-      { id: 'MIWOK', period: [-3000, 2025], weight: 25 },
-      { id: 'YOKUTS', period: [-3000, 2025], weight: 20 },
+      { id: 'MIWOK', period: [-3000, 2030], weight: 25 },
+      { id: 'YOKUTS', period: [-3000, 2030], weight: 20 },
       { id: 'EARLY_SPANISH', period: [1769, 1846], weight: 35 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1846, 2025], weight: 50 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1846, 2030], weight: 50 },
       { id: 'CLASSICAL_CHINESE', period: [1850, 1950], weight: 15 }, // Gold Rush immigration
     ],
     namePatterns: [
@@ -5382,7 +5382,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'OHLONE', period: [-3500, 1900], weight: 20 },
       { id: 'SALINAN', period: [-3000, 1900], weight: 15 },
       { id: 'EARLY_SPANISH', period: [1769, 1846], weight: 40 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1846, 2025], weight: 45 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1846, 2030], weight: 45 },
     ],
     namePatterns: [
       { pattern: /Ascension|Onesimo|Venancio/i, language: 'OHLONE', weight: 80 },
@@ -5397,8 +5397,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'CHUMASH', period: [-3500, 1900], weight: 15 },
       { id: 'TONGVA', period: [-3500, 1900], weight: 15 },
       { id: 'EARLY_SPANISH', period: [1769, 1846], weight: 35 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1846, 2025], weight: 50 },
-      { id: 'MODERN_SPANISH', period: [1900, 2025], weight: 20 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1846, 2030], weight: 50 },
+      { id: 'MODERN_SPANISH', period: [1900, 2030], weight: 20 },
     ],
     namePatterns: [
       { pattern: /Toypurina|Nicolás José/i, language: 'TONGVA', weight: 85 },
@@ -5410,11 +5410,11 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['great plains', 'black hills', 'platte river', 'flint hills', 'badlands', 'tallgrass prairie', 'missouri breaks', 'llano estacado'],
     languages: [
-      { id: 'LAKOTA', period: [1700, 2025], weight: 35 },
-      { id: 'CHEYENNE', period: [1700, 2025], weight: 25 },
-      { id: 'CROW', period: [1600, 2025], weight: 15 },
-      { id: 'PAWNEE', period: [1000, 2025], weight: 15 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1803, 2025], weight: 40 },
+      { id: 'LAKOTA', period: [1700, 2030], weight: 35 },
+      { id: 'CHEYENNE', period: [1700, 2030], weight: 25 },
+      { id: 'CROW', period: [1600, 2030], weight: 15 },
+      { id: 'PAWNEE', period: [1000, 2030], weight: 15 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1803, 2030], weight: 40 },
     ],
     namePatterns: [
       { pattern: /Sitting Bull|Crazy Horse|Red Cloud|Black Elk/i, language: 'LAKOTA', weight: 95 },
@@ -5427,11 +5427,11 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['northeastern seaboard', 'hudson river', 'great lakes shoreline', 'adirondacks', 'delaware valley', 'long island', 'cape cod'],
     languages: [
-      { id: 'MOHAWK', period: [-1000, 2025], weight: 20 },
+      { id: 'MOHAWK', period: [-1000, 2030], weight: 20 },
       { id: 'LENAPE', period: [-1000, 1900], weight: 15 },
       { id: 'DUTCH', period: [1614, 1664], weight: 10 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1620, 2025], weight: 70 },
-      { id: 'GERMAN', period: [1683, 2025], weight: 15 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1620, 2030], weight: 70 },
+      { id: 'GERMAN', period: [1683, 2030], weight: 15 },
     ],
     namePatterns: [
       { pattern: /Hendrick|Theyanoguin|Kateri/i, language: 'MOHAWK', weight: 85 },
@@ -5444,10 +5444,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['southeast', 'lower south', 'appalachian', 'carolina piedmont', 'gulf coast florida', 'bayou country', 'ozark'],
     languages: [
-      { id: 'CHEROKEE', period: [-1000, 2025], weight: 20 },
-      { id: 'CREEK', period: [-1000, 2025], weight: 15 },
-      { id: 'CHOCTAW', period: [-1000, 2025], weight: 15 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1607, 2025], weight: 60 },
+      { id: 'CHEROKEE', period: [-1000, 2030], weight: 20 },
+      { id: 'CREEK', period: [-1000, 2030], weight: 15 },
+      { id: 'CHOCTAW', period: [-1000, 2030], weight: 15 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1607, 2030], weight: 60 },
       { id: 'OLD_FRENCH', period: [1700, 1803], weight: 10 },
       { id: 'EARLY_SPANISH', period: [1513, 1821], weight: 10 },
     ],
@@ -5462,10 +5462,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['northern rockies', 'alberta plains', 'british columbia coast', 'peace river', 'fraser valley', 'vancouver island'],
     languages: [
-      { id: 'BLACKFOOT', period: [-1000, 2025], weight: 25 },
-      { id: 'CREE', period: [-2000, 2025], weight: 30 },
-      { id: 'SALISHAN', period: [-2000, 2025], weight: 20 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1778, 2025], weight: 40 },
+      { id: 'BLACKFOOT', period: [-1000, 2030], weight: 25 },
+      { id: 'CREE', period: [-2000, 2030], weight: 30 },
+      { id: 'SALISHAN', period: [-2000, 2030], weight: 20 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1778, 2030], weight: 40 },
       { id: 'OLD_FRENCH', period: [1731, 1900], weight: 15 },
     ],
     namePatterns: [
@@ -5478,11 +5478,11 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['ontario great lakes', 'st. lawrence valley', 'maritimes', 'hudson bay lowlands', 'newfoundland', 'nova scotia', 'new brunswick'],
     languages: [
-      { id: 'OJIBWE', period: [-1000, 2025], weight: 20 },
-      { id: 'MOHAWK', period: [-1000, 2025], weight: 15 },
-      { id: 'OLD_FRENCH', period: [1534, 2025], weight: 40 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1610, 2025], weight: 50 },
-      { id: 'MIKMAQ', period: [-3000, 2025], weight: 10 },
+      { id: 'OJIBWE', period: [-1000, 2030], weight: 20 },
+      { id: 'MOHAWK', period: [-1000, 2030], weight: 15 },
+      { id: 'OLD_FRENCH', period: [1534, 2030], weight: 40 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1610, 2030], weight: 50 },
+      { id: 'MIKMAQ', period: [-3000, 2030], weight: 10 },
     ],
     namePatterns: [
       { pattern: /Tecumseh|Pontiac|Shingwaukonse/i, language: 'OJIBWE', weight: 90 },
@@ -5498,9 +5498,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'PROTO_NIGER_CONGO', period: [-5000, -1000], weight: 40 },
       { id: 'PROTO_BANTU', period: [-3000, 500], weight: 60 },
-      { id: 'SWAHILI_CLASSICAL', period: [1000, 2025], weight: 60 },
-      { id: 'LINGALA', period: [1500, 2025], weight: 30 },
-      { id: 'KIKONGO', period: [1000, 2025], weight: 10 },
+      { id: 'SWAHILI_CLASSICAL', period: [1000, 2030], weight: 60 },
+      { id: 'LINGALA', period: [1500, 2030], weight: 30 },
+      { id: 'KIKONGO', period: [1000, 2030], weight: 10 },
     ],
     namePatterns: [
       { pattern: /Mwana|Binti|Juma|Fatuma|Hamisi/i, language: 'SWAHILI_CLASSICAL', weight: 80 },
@@ -5510,9 +5510,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['madagascar', 'antananarivo', 'toamasina', 'fianarantsoa', 'mahajanga', 'toliara', 'lemur', 'baobab', 'highlands of madagascar'],
     languages: [
-      { id: 'MALAGASY', period: [500, 2025], weight: 85 },
-      { id: 'FRENCH', period: [1895, 2025], weight: 10 },
-      { id: 'SWAHILI_CLASSICAL', period: [1000, 2025], weight: 5 },
+      { id: 'MALAGASY', period: [500, 2030], weight: 85 },
+      { id: 'FRENCH', period: [1895, 2030], weight: 10 },
+      { id: 'SWAHILI_CLASSICAL', period: [1000, 2030], weight: 5 },
     ],
   },
 
@@ -5524,9 +5524,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'PROTO_AFROASIATIC', period: [-10000, -5000], weight: 40 },
       { id: 'PROTO_CUSHITIC', period: [-5000, -500], weight: 70 },
       { id: 'GEEZ', period: [-500, 1000], weight: 50 },
-      { id: 'AMHARIC', period: [1000, 2025], weight: 60 },
-      { id: 'CLASSICAL_ARABIC', period: [700, 2025], weight: 30 },
-      { id: 'SWAHILI_CLASSICAL', period: [1200, 2025], weight: 20 },
+      { id: 'AMHARIC', period: [1000, 2030], weight: 60 },
+      { id: 'CLASSICAL_ARABIC', period: [700, 2030], weight: 30 },
+      { id: 'SWAHILI_CLASSICAL', period: [1200, 2030], weight: 20 },
     ],
   },
   {
@@ -5535,19 +5535,19 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'PROTO_CUSHITIC', period: [-5000, -2000], weight: 50 },
       { id: 'PROTO_BANTU', period: [-3000, 500], weight: 60 },
       { id: 'PROTO_NIGER_CONGO', period: [-5000, -1000], weight: 40 },
-      { id: 'SWAHILI_CLASSICAL', period: [1000, 2025], weight: 70 },
-      { id: 'CLASSICAL_ARABIC', period: [1200, 2025], weight: 20 },
-      { id: 'AMHARIC', period: [1000, 2025], weight: 10 },
+      { id: 'SWAHILI_CLASSICAL', period: [1000, 2030], weight: 70 },
+      { id: 'CLASSICAL_ARABIC', period: [1200, 2030], weight: 20 },
+      { id: 'AMHARIC', period: [1000, 2030], weight: 10 },
     ],
   },
   // South Africa
   {
     patterns: ['cape colony', 'cape town', 'transvaal', 'johannesburg', 'pretoria', 'orange free state'],
     languages: [
-      { id: 'AFRIKAANS', period: [1700, 2025], weight: 35 },
-      { id: 'ZULU', period: [1500, 2025], weight: 20 },
-      { id: 'XHOSA', period: [1500, 2025], weight: 20 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1800, 2025], weight: 20 },
+      { id: 'AFRIKAANS', period: [1700, 2030], weight: 35 },
+      { id: 'ZULU', period: [1500, 2030], weight: 20 },
+      { id: 'XHOSA', period: [1500, 2030], weight: 20 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1800, 2030], weight: 20 },
       { id: 'DUTCH', period: [1652, 1800], weight: 5 },
     ],
     namePatterns: [
@@ -5560,11 +5560,11 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['namibia', 'windhoek', 'kalahari', 'namib', 'walvis bay'],
     languages: [
-      { id: 'NAMA', period: [-2000, 2025], weight: 25 },
-      { id: 'HERERO', period: [1500, 2025], weight: 20 },
-      { id: 'AFRIKAANS', period: [1800, 2025], weight: 25 },
-      { id: 'GERMAN', period: [1884, 2025], weight: 10 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1920, 2025], weight: 20 },
+      { id: 'NAMA', period: [-2000, 2030], weight: 25 },
+      { id: 'HERERO', period: [1500, 2030], weight: 20 },
+      { id: 'AFRIKAANS', period: [1800, 2030], weight: 25 },
+      { id: 'GERMAN', period: [1884, 2030], weight: 10 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1920, 2030], weight: 20 },
     ],
     namePatterns: [
       { pattern: /ǃ|ǀ|ǁ|ǂ|!|\\|/i, language: 'NAMA', weight: 100 },
@@ -5579,8 +5579,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['hong kong', 'victoria', 'kowloon'],
     languages: [
-      { id: 'CANTONESE', period: [1200, 2025], weight: 85 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1842, 2025], weight: 15 },
+      { id: 'CANTONESE', period: [1200, 2030], weight: 85 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1842, 2030], weight: 15 },
     ],
     namePatterns: [
       { pattern: /Wong|Chan|Lee|Cheung|Ho|Lau/i, language: 'CANTONESE', weight: 95 },
@@ -5595,14 +5595,14 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'CLASSICAL_CHINESE', period: [-221, 600], weight: 90 },
       { id: 'MIDDLE_CHINESE', period: [600, 1400], weight: 90 },
       { id: 'EARLY_MANDARIN', period: [1400, 1900], weight: 85 },
-      { id: 'MANDARIN', period: [1900, 2025], weight: 95 },
+      { id: 'MANDARIN', period: [1900, 2030], weight: 95 },
     ],
     namePatterns: [
       { pattern: /Wang|Li|Zhang|Liu|Chen|Yang|Zhao|Huang|Zhou|Wu|Xu|Sun|Zhu|Ma|Hu|Guo|Lin|He|Gao|Luo/i, language: 'OLD_CHINESE', period: [-1250, -221], weight: 98 },
       { pattern: /Wang|Li|Zhang|Liu|Chen|Yang|Zhao|Huang|Zhou|Wu|Xu|Sun|Zhu|Ma|Hu|Guo|Lin|He|Gao|Luo/i, language: 'CLASSICAL_CHINESE', period: [-221, 600], weight: 98 },
       { pattern: /Wang|Li|Zhang|Liu|Chen|Yang|Zhao|Huang|Zhou|Wu|Xu|Sun|Zhu|Ma|Hu|Guo|Lin|He|Gao|Luo/i, language: 'MIDDLE_CHINESE', period: [600, 1400], weight: 98 },
       { pattern: /Wang|Li|Zhang|Liu|Chen|Yang|Zhao|Huang|Zhou|Wu|Xu|Sun|Zhu|Ma|Hu|Guo|Lin|He|Gao|Luo/i, language: 'EARLY_MANDARIN', period: [1400, 1900], weight: 98 },
-      { pattern: /Wang|Li|Zhang|Liu|Chen|Yang|Zhao|Huang|Zhou|Wu|Xu|Sun|Zhu|Ma|Hu|Guo|Lin|He|Gao|Luo/i, language: 'MANDARIN', period: [1900, 2025], weight: 98 },
+      { pattern: /Wang|Li|Zhang|Liu|Chen|Yang|Zhao|Huang|Zhou|Wu|Xu|Sun|Zhu|Ma|Hu|Guo|Lin|He|Gao|Luo/i, language: 'MANDARIN', period: [1900, 2030], weight: 98 },
     ],
   },
 
@@ -5612,14 +5612,14 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'OLD_KOREAN', period: [-2000, 900], weight: 95 },
       { id: 'MIDDLE_KOREAN', period: [900, 1600], weight: 95 },
-      { id: 'MODERN_KOREAN', period: [1600, 2025], weight: 95 },
+      { id: 'MODERN_KOREAN', period: [1600, 2030], weight: 95 },
       { id: 'OLD_CHINESE', period: [-1000, 0], weight: 15 },
       { id: 'CLASSICAL_CHINESE', period: [0, 1900], weight: 10 },
     ],
     namePatterns: [
       { pattern: /Kim|Lee|Park|Choi|Jung|Kang|Yi|Yun|Song|Jang/i, language: 'OLD_KOREAN', period: [-2000, 900], weight: 98 },
       { pattern: /Kim|Lee|Park|Choi|Jung|Kang|Yi|Yun|Song|Jang/i, language: 'MIDDLE_KOREAN', period: [900, 1600], weight: 98 },
-      { pattern: /Kim|Lee|Park|Choi|Jung|Kang|Yi|Yun|Song|Jang/i, language: 'MODERN_KOREAN', period: [1600, 2025], weight: 98 },
+      { pattern: /Kim|Lee|Park|Choi|Jung|Kang|Yi|Yun|Song|Jang/i, language: 'MODERN_KOREAN', period: [1600, 2030], weight: 98 },
     ],
   },
 
@@ -5630,25 +5630,25 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'VEDIC_SANSKRIT', period: [-1500, -500], weight: 90 },
       { id: 'CLASSICAL_SANSKRIT', period: [-500, 1400], weight: 85 },
       { id: 'PRAKRIT', period: [-300, 1000], weight: 60 },
-      { id: 'HINDI', period: [1000, 2025], weight: 80 },
+      { id: 'HINDI', period: [1000, 2030], weight: 80 },
       { id: 'PERSIAN', period: [1200, 1800], weight: 25 },
       { id: 'MODERN_ENGLISH', period: [1800, 1947], weight: 15 },
     ],
     namePatterns: [
       { pattern: /Singh|Sharma|Gupta|Agarwal|Mishra|Yadav|Verma|Srivastava|Rai|Jha/i, language: 'VEDIC_SANSKRIT', period: [-1500, -500], weight: 95 },
       { pattern: /Singh|Sharma|Gupta|Agarwal|Mishra|Yadav|Verma|Srivastava|Rai|Jha/i, language: 'CLASSICAL_SANSKRIT', period: [-500, 1000], weight: 95 },
-      { pattern: /Singh|Sharma|Gupta|Agarwal|Mishra|Yadav|Verma|Srivastava|Rai|Jha/i, language: 'HINDI', period: [1000, 2025], weight: 95 },
+      { pattern: /Singh|Sharma|Gupta|Agarwal|Mishra|Yadav|Verma|Srivastava|Rai|Jha/i, language: 'HINDI', period: [1000, 2030], weight: 95 },
     ],
   },
   // Sri Lanka/Ceylon - keep coastal and island contexts from falling back to North Indian defaults
   {
     patterns: ['sri lanka', 'ceylon', 'galle', 'kandy', 'jaffna', 'anuradhapura', 'trincomalee', 'galle coast', 'kotte'],
     languages: [
-      { id: 'SINHALA', period: [300, 2025], weight: 60 },
-      { id: 'TAMIL', period: [-300, 2025], weight: 35 },
+      { id: 'SINHALA', period: [300, 2030], weight: 60 },
+      { id: 'TAMIL', period: [-300, 2030], weight: 35 },
       { id: 'EARLY_PORTUGUESE', period: [1505, 1658], weight: 12 },
       { id: 'DUTCH', period: [1658, 1796], weight: 12 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1796, 2025], weight: 10 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1796, 2030], weight: 10 },
     ],
     namePatterns: [
       { pattern: /Perera|Fernando|Silva|De Silva|Dias|Fonseka|Mendis/i, language: 'SINHALA', weight: 85 },
@@ -5659,7 +5659,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['vietnam', 'annam', 'tonkin', 'cochinchina', 'saigon', 'hanoi', 'mekong'],
     languages: [
-      { id: 'VIETNAMESE', period: [1000, 2025], weight: 85 },
+      { id: 'VIETNAMESE', period: [1000, 2030], weight: 85 },
       { id: 'OLD_FRENCH', period: [1850, 1954], weight: 10 },
       { id: 'CLASSICAL_CHINESE', period: [100, 1900], weight: 5 },
     ],
@@ -5671,10 +5671,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['philippines', 'luzon', 'manila', 'cebu', 'mindanao', 'visayas'],
     languages: [
-      { id: 'TAGALOG', period: [1500, 2025], weight: 30 },
-      { id: 'OLD_CEBUANO', period: [900, 2025], weight: 20 },
+      { id: 'TAGALOG', period: [1500, 2030], weight: 30 },
+      { id: 'OLD_CEBUANO', period: [900, 2030], weight: 20 },
       { id: 'EARLY_SPANISH', period: [1565, 1898], weight: 25 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1898, 2025], weight: 25 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1898, 2030], weight: 25 },
     ],
     namePatterns: [
       { pattern: /dela Cruz|Santos|Reyes|Garcia|Mendoza/i, language: 'EARLY_SPANISH', weight: 70 },
@@ -5687,8 +5687,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['new zealand', 'aotearoa', 'north island', 'south island', 'wellington', 'auckland'],
     languages: [
-      { id: 'MAORI', period: [1200, 2025], weight: 40 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1840, 2025], weight: 60 },
+      { id: 'MAORI', period: [1200, 2030], weight: 40 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1840, 2030], weight: 60 },
     ],
     namePatterns: [
       { pattern: /Te |Ngā|Wh/i, language: 'MAORI', weight: 90 },
@@ -5698,8 +5698,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['hawaii', 'hawaiian islands', 'oahu', 'maui', 'big island'],
     languages: [
-      { id: 'HAWAIIAN', period: [300, 2025], weight: 50 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1893, 2025], weight: 50 },
+      { id: 'HAWAIIAN', period: [300, 2030], weight: 50 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1893, 2030], weight: 50 },
     ],
     namePatterns: [
       { pattern: /Kamehameha|Kalani|Keoni|Leilani/i, language: 'HAWAIIAN', weight: 95 },
@@ -5713,7 +5713,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'PROTO_PAMA_NYUNGAN', period: [-5000, 1000], weight: 80 },
       { id: 'WARLPIRI', period: [1000, 1788], weight: 60 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1788, 2025], weight: 80 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1788, 2030], weight: 80 },
     ],
   },
   // Australia – Outback and Center
@@ -5721,8 +5721,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['australia – outback', 'outback', 'alice springs', 'macdonnell', 'lake eyre', 'simpson desert', 'uluru', 'barkly', 'central desert', 'central australia'],
     languages: [
       { id: 'PROTO_PAMA_NYUNGAN', period: [-5000, 1000], weight: 90 },
-      { id: 'WARLPIRI', period: [1000, 2025], weight: 90 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1900, 2025], weight: 20 },
+      { id: 'WARLPIRI', period: [1000, 2030], weight: 90 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1900, 2030], weight: 20 },
     ],
   },
   // Australia – North and Queensland
@@ -5730,9 +5730,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['australia – north', 'queensland', 'cape york', 'great barrier reef', 'daintree', 'carpentaria', 'arnhem', 'torres strait', 'northern territory'],
     languages: [
       { id: 'PROTO_PAMA_NYUNGAN', period: [-5000, 1000], weight: 80 },
-      { id: 'YOLNGU_MATHA', period: [1000, 2025], weight: 85 },
-      { id: 'WARLPIRI', period: [1000, 2025], weight: 30 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1788, 2025], weight: 40 },
+      { id: 'YOLNGU_MATHA', period: [1000, 2030], weight: 85 },
+      { id: 'WARLPIRI', period: [1000, 2030], weight: 30 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1788, 2030], weight: 40 },
     ],
   },
   // Australia – West and Desert
@@ -5740,8 +5740,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['australia – west', 'pilbara', 'kimberley', 'great sandy desert', 'perth', 'western australia'],
     languages: [
       { id: 'PROTO_PAMA_NYUNGAN', period: [-5000, 1000], weight: 85 },
-      { id: 'WARLPIRI', period: [1000, 2025], weight: 70 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1829, 2025], weight: 50 },
+      { id: 'WARLPIRI', period: [1000, 2030], weight: 70 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1829, 2030], weight: 50 },
     ],
   },
 
@@ -5750,8 +5750,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['jamaica', 'kingston', 'montego bay', 'port royal', 'spanish town'],
     languages: [
-      { id: 'JAMAICAN_PATOIS', period: [1700, 2025], weight: 70 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1655, 2025], weight: 25 },
+      { id: 'JAMAICAN_PATOIS', period: [1700, 2030], weight: 70 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1655, 2030], weight: 25 },
       { id: 'EARLY_SPANISH', period: [1494, 1655], weight: 5 },
     ],
     namePatterns: [
@@ -5762,7 +5762,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['cuba', 'havana', 'santiago de cuba', 'cienfuegos', 'camaguey', 'matanzas'],
     languages: [
-      { id: 'EARLY_SPANISH', period: [1511, 2025], weight: 90 },
+      { id: 'EARLY_SPANISH', period: [1511, 2030], weight: 90 },
       { id: 'YORUBA', period: [1600, 1900], weight: 5 },
       { id: 'EARLY_MODERN_ENGLISH', period: [1898, 1902], weight: 5 },
     ],
@@ -5774,8 +5774,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['barbados', 'bridgetown', 'trinidad', 'tobago', 'grenada', 'st lucia', 'st vincent', 'antigua', 'dominica'],
     languages: [
-      { id: 'EARLY_MODERN_ENGLISH', period: [1627, 2025], weight: 60 },
-      { id: 'BAJAN_CREOLE', period: [1700, 2025], weight: 30 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1627, 2030], weight: 60 },
+      { id: 'BAJAN_CREOLE', period: [1700, 2030], weight: 30 },
       { id: 'OLD_FRENCH', period: [1635, 1800], weight: 10 },
     ],
   },
@@ -5783,18 +5783,18 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['martinique', 'guadeloupe', 'saint martin', 'saint barthelemy', 'fort-de-france', 'basse-terre'],
     languages: [
-      { id: 'OLD_FRENCH', period: [1635, 2025], weight: 60 },
-      { id: 'ANTILLEAN_CREOLE', period: [1700, 2025], weight: 40 },
+      { id: 'OLD_FRENCH', period: [1635, 2030], weight: 60 },
+      { id: 'ANTILLEAN_CREOLE', period: [1700, 2030], weight: 40 },
     ],
   },
   // Dutch Caribbean
   {
     patterns: ['curacao', 'aruba', 'bonaire', 'sint maarten', 'willemstad', 'oranjestad'],
     languages: [
-      { id: 'DUTCH', period: [1634, 2025], weight: 40 },
-      { id: 'PAPIAMENTO', period: [1700, 2025], weight: 40 },
+      { id: 'DUTCH', period: [1634, 2030], weight: 40 },
+      { id: 'PAPIAMENTO', period: [1700, 2030], weight: 40 },
       { id: 'EARLY_SPANISH', period: [1500, 1634], weight: 10 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1800, 2025], weight: 10 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1800, 2030], weight: 10 },
     ],
   },
 
@@ -5806,7 +5806,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'PROTO_ARAWAKAN', period: [-3000, 1500], weight: 70 },
       { id: 'TAINO', period: [-500, 1600], weight: 85 },
       { id: 'EARLY_SPANISH', period: [1492, 1700], weight: 80 },
-      { id: 'MODERN_SPANISH', period: [1700, 2025], weight: 80 },
+      { id: 'MODERN_SPANISH', period: [1700, 2030], weight: 80 },
     ],
     namePatterns: [
       { pattern: /Cacique|Guacanagari|Anacaona|Caonabo|Hatuey|Agüeybaná/i, language: 'TAINO', weight: 95 },
@@ -5817,30 +5817,30 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'PROTO_CARIBAN', period: [-2000, 1500], weight: 60 },
       { id: 'PROTO_ARAWAKAN', period: [-3000, 1500], weight: 40 },
-      { id: 'ANTILLEAN_CREOLE', period: [1700, 2025], weight: 60 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1600, 2025], weight: 20 },
-      { id: 'OLD_FRENCH', period: [1600, 2025], weight: 20 },
+      { id: 'ANTILLEAN_CREOLE', period: [1700, 2030], weight: 60 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1600, 2030], weight: 20 },
+      { id: 'OLD_FRENCH', period: [1600, 2030], weight: 20 },
     ],
   },
   // Pacific from geography.ts
   {
     patterns: ['Samoa Archipelago'],
     languages: [
-      { id: 'SAMOAN', period: [-1000, 2025], weight: 95 },
+      { id: 'SAMOAN', period: [-1000, 2030], weight: 95 },
       { id: 'PROTO_POLYNESIAN', period: [-2000, -1000], weight: 5 },
     ],
   },
   {
     patterns: ['Society Islands'],
     languages: [
-      { id: 'TAHITIAN', period: [-500, 2025], weight: 95 },
+      { id: 'TAHITIAN', period: [-500, 2030], weight: 95 },
       { id: 'PROTO_POLYNESIAN', period: [-2000, -500], weight: 5 },
     ],
   },
   {
     patterns: ['Tonga Ridge'],
     languages: [
-      { id: 'TONGAN', period: [-1000, 2025], weight: 95 },
+      { id: 'TONGAN', period: [-1000, 2030], weight: 95 },
       { id: 'PROTO_POLYNESIAN', period: [-2000, -1000], weight: 5 },
     ],
   },
@@ -5850,9 +5850,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['western siberia', 'central siberia'],
     languages: [
-      { id: 'EVENKI', period: [-1000, 2025], weight: 60 },
+      { id: 'EVENKI', period: [-1000, 2030], weight: 60 },
       { id: 'PROTO_TURKIC', period: [-2000, 1000], weight: 20 },
-      { id: 'RUSSIAN', period: [1500, 2025], weight: 20 },
+      { id: 'RUSSIAN', period: [1500, 2030], weight: 20 },
     ],
     namePatterns: [
       { pattern: /Tungus|Evenk|Solon/i, language: 'EVENKI', weight: 90 },
@@ -5861,9 +5861,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['eastern siberia', 'arctic siberia', 'kamchatka peninsula', 'sakhalin island'],
     languages: [
-      { id: 'YAKUT', period: [1000, 2025], weight: 70 },
-      { id: 'EVENKI', period: [-1000, 2025], weight: 20 },
-      { id: 'RUSSIAN', period: [1700, 2025], weight: 10 },
+      { id: 'YAKUT', period: [1000, 2030], weight: 70 },
+      { id: 'EVENKI', period: [-1000, 2030], weight: 20 },
+      { id: 'RUSSIAN', period: [1700, 2030], weight: 10 },
     ],
     namePatterns: [
       { pattern: /Sakha|Yakut/i, language: 'YAKUT', weight: 90 },
@@ -5872,7 +5872,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['Greenland Coast'],
     languages: [
-      { id: 'GREENLANDIC', period: [-2000, 2025], weight: 90 },
+      { id: 'GREENLANDIC', period: [-2000, 2030], weight: 90 },
       { id: 'OLD_NORSE', period: [985, 1500], weight: 10 },
     ],
   },
@@ -5880,12 +5880,12 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['kazakh steppes', 'altai mountains', 'aral sea basin', 'tian shan range', 'dzungarian basin'],
     languages: [
-      { id: 'KAZAKH', period: [1000, 2025], weight: 60 },
+      { id: 'KAZAKH', period: [1000, 2030], weight: 60 },
       { id: 'PROTO_TURKIC', period: [-1000, 1000], weight: 25 },
       { id: 'MIDDLE_MONGOLIAN', period: [1200, 1700], weight: 10 },
       { id: 'RUSSIAN', period: [1730, 1916], weight: 20 },
       { id: 'RUSSIAN', period: [1917, 1991], weight: 65 },
-      { id: 'RUSSIAN', period: [1992, 2025], weight: 35 },
+      { id: 'RUSSIAN', period: [1992, 2030], weight: 35 },
     ],
     namePatterns: [
       { pattern: /^(Abai|Almas|Arman|Askhat|Baurzhan|Beibit|Damir|Dias|Dinmukhamed|Erlan|Galymzhan|Kanat|Marat|Nurasyl|Olzhas|Rustem|Samat|Serik|Talgat|Timur|Askar|Bakhytzhan|Darkhan|Eldos|Farabi|Kairat|Maksut|Nurlan|Yerzhan|Aida|Aigerim|Aizhan|Akmaral|Assel|Bakhyt|Daniya|Gulnara|Indira|Kamila|Karlygash|Kundyz|Madina|Nazgul|Raushan|Saule|Symbat|Togzhan|Ulbala|Zhansaya|Ainur|Balzhan|Dinara|Elmira|Fariza|Gaukhar|Kamshat|Meruyert|Perizat|Saltanat)\b|bek$|bay$|khan$/i, language: 'KAZAKH', weight: 95 },
@@ -5897,7 +5897,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'SOGDIAN', period: [-500, 1000], weight: 35 },
       { id: 'CLASSICAL_PERSIAN', period: [700, 1500], weight: 35 },
-      { id: 'UZBEK', period: [1000, 2025], weight: 30 },
+      { id: 'UZBEK', period: [1000, 2030], weight: 30 },
     ],
   },
 
@@ -5907,7 +5907,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'SOGDIAN', period: [-500, 1000], weight: 40 },
       { id: 'CLASSICAL_PERSIAN', period: [500, 1500], weight: 30 },
-      { id: 'UZBEK', period: [1000, 2025], weight: 30 },
+      { id: 'UZBEK', period: [1000, 2030], weight: 30 },
     ],
     namePatterns: [
       { pattern: /Timur|Babur|Ulugh/i, language: 'UZBEK', weight: 90 },
@@ -5936,7 +5936,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'PROTO_MONGOLIC', period: [-500, 1200], weight: 40 },
       { id: 'MIDDLE_MONGOLIAN', period: [1200, 1700], weight: 50 },
-      { id: 'KHALKHA_MONGOLIAN', period: [1700, 2025], weight: 10 },
+      { id: 'KHALKHA_MONGOLIAN', period: [1700, 2030], weight: 10 },
     ],
     namePatterns: [
       { pattern: /Temujin|Borjigin|Kublai/i, language: 'MIDDLE_MONGOLIAN', weight: 95 },
@@ -5948,15 +5948,15 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'MANCHU', period: [1200, 1900], weight: 40 },
       { id: 'CLASSICAL_CHINESE', period: [200, 1900], weight: 30 },
       { id: 'KHITAN', period: [900, 1200], weight: 20 },
-      { id: 'EVENKI', period: [-1000, 2025], weight: 10 },
+      { id: 'EVENKI', period: [-1000, 2030], weight: 10 },
     ],
   },
   // Sahara from geography.ts
   {
     patterns: ['Central Sahara'],
     languages: [
-      { id: 'TUAREG', period: [-1000, 2025], weight: 70 },
-      { id: 'CLASSICAL_ARABIC', period: [700, 2025], weight: 30 },
+      { id: 'TUAREG', period: [-1000, 2030], weight: 70 },
+      { id: 'CLASSICAL_ARABIC', period: [700, 2030], weight: 30 },
     ],
   },
   // Amazon from geography.ts
@@ -5965,7 +5965,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'PROTO_ARAWAKAN', period: [-2000, 1500], weight: 50 },
       { id: 'PROTO_TUPI', period: [-2000, 1500], weight: 40 },
-      { id: 'PORTUGUESE', period: [1500, 2025], weight: 10 },
+      { id: 'PORTUGUESE', period: [1500, 2030], weight: 10 },
     ],
   },
 
@@ -5975,9 +5975,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['fiji', 'viti levu', 'vanua levu', 'suva', 'nadi', 'lautoka'],
     languages: [
       { id: 'PROTO_POLYNESIAN', period: [-1500, 1800], weight: 70 },
-      { id: 'FIJIAN', period: [1800, 2025], weight: 20 },
-      { id: 'HINDI', period: [1879, 2025], weight: 5 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1874, 2025], weight: 5 },
+      { id: 'FIJIAN', period: [1800, 2030], weight: 20 },
+      { id: 'HINDI', period: [1879, 2030], weight: 5 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1874, 2030], weight: 5 },
     ],
   },
   // Samoa
@@ -5985,8 +5985,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['samoa', 'savaii', 'upolu', 'apia', 'american samoa', 'pago pago', 'tutuila'],
     languages: [
       { id: 'PROTO_POLYNESIAN', period: [-1000, 1800], weight: 80 },
-      { id: 'SAMOAN', period: [1800, 2025], weight: 15 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1850, 2025], weight: 5 },
+      { id: 'SAMOAN', period: [1800, 2030], weight: 15 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1850, 2030], weight: 5 },
     ],
   },
   // Tahiti & French Polynesia
@@ -5994,8 +5994,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['tahiti', 'french polynesia', 'papeete', 'bora bora', 'moorea', 'marquesas', 'society islands'],
     languages: [
       { id: 'PROTO_POLYNESIAN', period: [-1000, 1800], weight: 70 },
-      { id: 'TAHITIAN', period: [1800, 2025], weight: 20 },
-      { id: 'OLD_FRENCH', period: [1842, 2025], weight: 10 },
+      { id: 'TAHITIAN', period: [1800, 2030], weight: 20 },
+      { id: 'OLD_FRENCH', period: [1842, 2030], weight: 10 },
     ],
   },
   // Tonga
@@ -6003,8 +6003,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['tonga', 'tongatapu', 'nukualofa', 'vavau', 'haapai', 'eua'],
     languages: [
       { id: 'PROTO_POLYNESIAN', period: [-1000, 1800], weight: 85 },
-      { id: 'TONGAN', period: [1800, 2025], weight: 10 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1900, 2025], weight: 5 },
+      { id: 'TONGAN', period: [1800, 2030], weight: 10 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1900, 2030], weight: 5 },
     ],
   },
   // Solomon Islands & Melanesia
@@ -6012,9 +6012,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['solomon islands', 'guadalcanal', 'malaita', 'honiara', 'vanuatu', 'port vila', 'new caledonia', 'noumea'],
     languages: [
       { id: 'PROTO_AUSTRONESIAN', period: [-3000, 1800], weight: 70 },
-      { id: 'MELANESIAN_PIDGIN', period: [1800, 2025], weight: 20 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1850, 2025], weight: 5 },
-      { id: 'OLD_FRENCH', period: [1850, 2025], weight: 5 },
+      { id: 'MELANESIAN_PIDGIN', period: [1800, 2030], weight: 20 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1850, 2030], weight: 5 },
+      { id: 'OLD_FRENCH', period: [1850, 2030], weight: 5 },
     ],
   },
   // Micronesia
@@ -6022,9 +6022,9 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['micronesia', 'guam', 'palau', 'marshall islands', 'kiribati', 'nauru', 'majuro', 'koror'],
     languages: [
       { id: 'PROTO_AUSTRONESIAN', period: [-3000, 1800], weight: 70 },
-      { id: 'CHAMORRO', period: [1800, 2025], weight: 10 },
+      { id: 'CHAMORRO', period: [1800, 2030], weight: 10 },
       { id: 'EARLY_SPANISH', period: [1565, 1898], weight: 10 },
-      { id: 'EARLY_MODERN_ENGLISH', period: [1898, 2025], weight: 5 },
+      { id: 'EARLY_MODERN_ENGLISH', period: [1898, 2030], weight: 5 },
       { id: 'JAPANESE', period: [1914, 1945], weight: 5 },
     ],
   },
@@ -6036,19 +6036,19 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'PROTO_TURKIC', period: [-500, 1500], weight: 25 },
       { id: 'MIDDLE_MONGOLIAN', period: [1200, 1700], weight: 15 },
-      { id: 'EVENKI', period: [-2000, 2025], weight: 20 },
-      { id: 'YAKUT', period: [1000, 2025], weight: 20 },
-      { id: 'RUSSIAN', period: [1580, 2025], weight: 20 },
+      { id: 'EVENKI', period: [-2000, 2030], weight: 20 },
+      { id: 'YAKUT', period: [1000, 2030], weight: 20 },
+      { id: 'RUSSIAN', period: [1580, 2030], weight: 20 },
     ],
   },
   // Arctic (non-Canadian)
   {
     patterns: ['arctic ocean', 'greenland', 'svalbard', 'north pole', 'barents sea', 'nuuk', 'ilulissat'],
     languages: [
-      { id: 'INUKTITUT', period: [-2000, 2025], weight: 50 },
-      { id: 'GREENLANDIC', period: [1000, 2025], weight: 20 },
+      { id: 'INUKTITUT', period: [-2000, 2030], weight: 50 },
+      { id: 'GREENLANDIC', period: [1000, 2030], weight: 20 },
       { id: 'OLD_NORSE', period: [985, 1500], weight: 15 },
-      { id: 'DANISH', period: [1721, 2025], weight: 15 },
+      { id: 'DANISH', period: [1721, 2030], weight: 15 },
     ],
   },
 
@@ -6057,18 +6057,18 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['sahara', 'agadez', 'tamanrasset', 'hoggar', 'tibesti', 'air mountains', 'tenere'],
     languages: [
-      { id: 'CLASSICAL_ARABIC', period: [700, 2025], weight: 30 },
+      { id: 'CLASSICAL_ARABIC', period: [700, 2030], weight: 30 },
       { id: 'PROTO_BERBER', period: [-2000, 700], weight: 30 },
-      { id: 'TUAREG', period: [700, 2025], weight: 25 },
-      { id: 'HAUSA', period: [1000, 2025], weight: 10 },
-      { id: 'SONGHAI', period: [800, 2025], weight: 5 },
+      { id: 'TUAREG', period: [700, 2030], weight: 25 },
+      { id: 'HAUSA', period: [1000, 2030], weight: 10 },
+      { id: 'SONGHAI', period: [800, 2030], weight: 5 },
     ],
   },
   // Arabian Desert
   {
     patterns: ['arabian desert', 'rub al khali', 'empty quarter', 'najd', 'bedouin'],
     languages: [
-      { id: 'CLASSICAL_ARABIC', period: [500, 2025], weight: 90 },
+      { id: 'CLASSICAL_ARABIC', period: [500, 2030], weight: 90 },
       { id: 'OLD_ARABIC', period: [-500, 500], weight: 10 },
     ],
   },
@@ -6207,10 +6207,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'PROTO_NIGER_CONGO', period: [-5000, -1000], weight: 35 },
       { id: 'PROTO_BANTU', period: [-3000, 500], weight: 50 },
-      { id: 'LINGALA', period: [1500, 2025], weight: 25 },
-      { id: 'KIKONGO', period: [1000, 2025], weight: 20 },
-      { id: 'OLD_FRENCH', period: [1880, 2025], weight: 10 },
-      { id: 'SWAHILI_CLASSICAL', period: [1800, 2025], weight: 5 },
+      { id: 'LINGALA', period: [1500, 2030], weight: 25 },
+      { id: 'KIKONGO', period: [1000, 2030], weight: 20 },
+      { id: 'OLD_FRENCH', period: [1880, 2030], weight: 10 },
+      { id: 'SWAHILI_CLASSICAL', period: [1800, 2030], weight: 5 },
     ],
   },
 
@@ -6219,12 +6219,12 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['sahel', 'lake chad', 'timbuktu basin', 'gao region', 'niger bend', 'sahelian scrublands', 'dogon plateau', 'hausaland', 'sokoto', 'kano', 'katsina', 'zaria', 'northern nigeria', 'kanem', 'bornu'],
     languages: [
-      { id: 'SONINKE', period: [300, 2025], weight: 30 },
-      { id: 'HAUSA', period: [700, 2025], weight: 90 },
-      { id: 'FULA', period: [1000, 2025], weight: 50 },
-      { id: 'KANURI', period: [800, 2025], weight: 60 },
-      { id: 'SONGHAI', period: [700, 2025], weight: 50 },
-      { id: 'CLASSICAL_ARABIC', period: [800, 2025], weight: 40 },
+      { id: 'SONINKE', period: [300, 2030], weight: 30 },
+      { id: 'HAUSA', period: [700, 2030], weight: 90 },
+      { id: 'FULA', period: [1000, 2030], weight: 50 },
+      { id: 'KANURI', period: [800, 2030], weight: 60 },
+      { id: 'SONGHAI', period: [700, 2030], weight: 50 },
+      { id: 'CLASSICAL_ARABIC', period: [800, 2030], weight: 40 },
     ],
     namePatterns: [
       { pattern: /Usman|Muhammadu|Ahmadu|Aliyu|Aisha|Fatima|Bello/i, language: 'HAUSA', weight: 90 },
@@ -6250,11 +6250,11 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['mali empire', 'mande', 'manding', 'niani', 'kangaba', 'djenne', 'segou', 'upper niger'],
     languages: [
-      { id: 'MANDINKA', period: [1000, 2025], weight: 85 },
-      { id: 'BAMBARA', period: [1000, 2025], weight: 70 },
-      { id: 'SONINKE', period: [300, 2025], weight: 40 },
-      { id: 'FULA', period: [1000, 2025], weight: 35 },
-      { id: 'CLASSICAL_ARABIC', period: [1230, 2025], weight: 45 },
+      { id: 'MANDINKA', period: [1000, 2030], weight: 85 },
+      { id: 'BAMBARA', period: [1000, 2030], weight: 70 },
+      { id: 'SONINKE', period: [300, 2030], weight: 40 },
+      { id: 'FULA', period: [1000, 2030], weight: 35 },
+      { id: 'CLASSICAL_ARABIC', period: [1230, 2030], weight: 45 },
     ],
     namePatterns: [
       { pattern: /Mansa|Sundiata|Keita|Kouyate|Diabate|Kante|Ture|Toure/i, language: 'MANDINKA', weight: 95 },
@@ -6266,10 +6266,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['songhai empire', 'songhay', 'gao empire', 'askia', 'timbuktu', 'djenne', 'niger river bend'],
     languages: [
-      { id: 'SONGHAI', period: [700, 2025], weight: 95 },
+      { id: 'SONGHAI', period: [700, 2030], weight: 95 },
       { id: 'MANDINKA', period: [1000, 1591], weight: 30 },
-      { id: 'CLASSICAL_ARABIC', period: [1460, 2025], weight: 50 },
-      { id: 'TUAREG', period: [1000, 2025], weight: 25 },
+      { id: 'CLASSICAL_ARABIC', period: [1460, 2030], weight: 50 },
+      { id: 'TUAREG', period: [1000, 2030], weight: 25 },
     ],
     namePatterns: [
       { pattern: /Askia|Sonni|Muhammad|Ture|Issihak|Daud/i, language: 'SONGHAI', weight: 95 },
@@ -6280,8 +6280,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['oyo hinterland', 'ogun river basin', 'yorubaland', 'oyo', 'ife', 'lagos', 'ibadan', 'abeokuta', 'lagos coastal belt'],
     languages: [
-      { id: 'YORUBA', period: [1000, 2025], weight: 95 },
-      { id: 'PORTUGUESE', period: [1472, 2025], weight: 15 },
+      { id: 'YORUBA', period: [1000, 2030], weight: 95 },
+      { id: 'PORTUGUESE', period: [1472, 2030], weight: 15 },
     ],
     namePatterns: [
       { pattern: /Olu|Oba|Ogun|Shango|Yemoja|Adeola|Oluwole|Babatunde|Adebayo/i, language: 'YORUBA', weight: 95 },
@@ -6292,7 +6292,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['benin lowlands', 'benin kingdom', 'benin city', 'edo state'],
     languages: [
-      { id: 'EDO', period: [1000, 2025], weight: 95 },
+      { id: 'EDO', period: [1000, 2030], weight: 95 },
       { id: 'PORTUGUESE', period: [1472, 1900], weight: 20 },
     ],
     namePatterns: [
@@ -6304,7 +6304,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['ibo plateau', 'niger delta', 'cross river delta', 'igboland', 'eastern nigeria', 'calabar', 'enugu', 'onitsha', 'aba', 'owerri', 'umuahia', 'jos plateau'],
     languages: [
-      { id: 'IGBO', period: [1000, 2025], weight: 95 },
+      { id: 'IGBO', period: [1000, 2030], weight: 95 },
     ],
     namePatterns: [
       { pattern: /Nwankwo|Okafor|Eze|Chukwu|Nnamdi|Chioma|Ngozi|Ikenna|Obiora/i, language: 'IGBO', weight: 95 },
@@ -6315,7 +6315,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['gold coast savanna', 'ashanti forest', 'ivory coast', 'gold coast', 'ashanti', 'ghana', 'kumasi', 'accra', 'cape coast', 'elmina', 'asante'],
     languages: [
-      { id: 'AKAN', period: [1000, 2025], weight: 90 },
+      { id: 'AKAN', period: [1000, 2030], weight: 90 },
       { id: 'PORTUGUESE', period: [1471, 1900], weight: 20 },
     ],
     namePatterns: [
@@ -6327,11 +6327,11 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['gambia river basin', 'fouta djallon highlands', 'sierra leone coast', 'bissagos islands', 'senegambia', 'senegal', 'gambia', 'dakar', 'saint-louis', 'casamance'],
     languages: [
-      { id: 'WOLOF', period: [1200, 2025], weight: 85 },
-      { id: 'FULA', period: [1000, 2025], weight: 60 },
-      { id: 'MANDINKA', period: [1000, 2025], weight: 50 },
-      { id: 'FRENCH', period: [1659, 2025], weight: 30 },
-      { id: 'CLASSICAL_ARABIC', period: [1000, 2025], weight: 25 },
+      { id: 'WOLOF', period: [1200, 2030], weight: 85 },
+      { id: 'FULA', period: [1000, 2030], weight: 60 },
+      { id: 'MANDINKA', period: [1000, 2030], weight: 50 },
+      { id: 'FRENCH', period: [1659, 2030], weight: 30 },
+      { id: 'CLASSICAL_ARABIC', period: [1000, 2030], weight: 25 },
     ],
     namePatterns: [
       { pattern: /Fall|Diop|Ndiaye|Sow|Ba|Sy|Gueye|Wade/i, language: 'WOLOF', weight: 90 },
@@ -6345,10 +6345,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['kazakhstan', 'astana', 'almaty', 'steppe', 'kazakh steppe', 'syr darya', 'aral sea'],
     languages: [
       { id: 'PROTO_TURKIC', period: [-500, 1000], weight: 30 },
-      { id: 'KAZAKH', period: [1000, 2025], weight: 35 },
+      { id: 'KAZAKH', period: [1000, 2030], weight: 35 },
       { id: 'MIDDLE_MONGOLIAN', period: [1200, 1700], weight: 10 },
       { id: 'PERSIAN', period: [500, 1800], weight: 10 },
-      { id: 'RUSSIAN', period: [1730, 2025], weight: 15 },
+      { id: 'RUSSIAN', period: [1730, 2030], weight: 15 },
     ],
   },
   // Turkmenistan & Southern Steppes
@@ -6356,10 +6356,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['turkmenistan', 'ashgabat', 'merv', 'mary', 'turkmenbashi', 'karakum desert'],
     languages: [
       { id: 'PROTO_TURKIC', period: [-500, 1000], weight: 25 },
-      { id: 'TURKMEN', period: [1000, 2025], weight: 40 },
-      { id: 'PERSIAN', period: [500, 2025], weight: 20 },
+      { id: 'TURKMEN', period: [1000, 2030], weight: 40 },
+      { id: 'PERSIAN', period: [500, 2030], weight: 20 },
       { id: 'CLASSICAL_ARABIC', period: [700, 1800], weight: 10 },
-      { id: 'RUSSIAN', period: [1880, 2025], weight: 5 },
+      { id: 'RUSSIAN', period: [1880, 2030], weight: 5 },
     ],
   },
   // Uzbekistan & Transoxiana
@@ -6367,10 +6367,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['uzbekistan', 'tashkent', 'samarkand', 'bukhara', 'khiva', 'ferghana', 'transoxiana', 'sogdiana'],
     languages: [
       { id: 'SOGDIAN', period: [-500, 1000], weight: 25 },
-      { id: 'PERSIAN', period: [500, 2025], weight: 25 },
+      { id: 'PERSIAN', period: [500, 2030], weight: 25 },
       { id: 'PROTO_TURKIC', period: [500, 1000], weight: 15 },
-      { id: 'UZBEK', period: [1000, 2025], weight: 25 },
-      { id: 'RUSSIAN', period: [1865, 2025], weight: 10 },
+      { id: 'UZBEK', period: [1000, 2030], weight: 25 },
+      { id: 'RUSSIAN', period: [1865, 2030], weight: 10 },
     ],
   },
   // Mongolia
@@ -6379,7 +6379,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'PROTO_MONGOLIC', period: [-500, 1200], weight: 30 },
       { id: 'MIDDLE_MONGOLIAN', period: [1200, 1700], weight: 40 },
-      { id: 'KHALKHA_MONGOLIAN', period: [1700, 2025], weight: 25 },
+      { id: 'KHALKHA_MONGOLIAN', period: [1700, 2030], weight: 25 },
       { id: 'CLASSICAL_CHINESE', period: [1636, 1911], weight: 5 },
     ],
   },
@@ -6388,10 +6388,10 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['silk road', 'kashgar', 'khotan', 'dunhuang', 'turpan', 'balkh', 'ctesiphon'],
     languages: [
       { id: 'SOGDIAN', period: [-500, 1000], weight: 30 },
-      { id: 'PERSIAN', period: [200, 2025], weight: 20 },
+      { id: 'PERSIAN', period: [200, 2030], weight: 20 },
       { id: 'PROTO_TURKIC', period: [500, 1500], weight: 15 },
       { id: 'CLASSICAL_CHINESE', period: [-200, 1900], weight: 15 },
-      { id: 'CLASSICAL_ARABIC', period: [700, 2025], weight: 10 },
+      { id: 'CLASSICAL_ARABIC', period: [700, 2030], weight: 10 },
       { id: 'SANSKRIT', period: [-500, 1000], weight: 10 },
     ],
   },
@@ -6406,7 +6406,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'AKKADIAN', period: [-2500, -100], weight: 90 },
       { id: 'ARAMAIC', period: [-1000, 700], weight: 70 },
       { id: 'MIDDLE_PERSIAN', period: [224, 651], weight: 30 },
-      { id: 'CLASSICAL_ARABIC', period: [637, 2025], weight: 85 },
+      { id: 'CLASSICAL_ARABIC', period: [637, 2030], weight: 85 },
       { id: 'OTTOMAN_TURKISH', period: [1534, 1918], weight: 35 },
     ],
     namePatterns: [
@@ -6426,7 +6426,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'ARAMAIC', period: [-800, 700], weight: 75 },
       { id: 'ANCIENT_GREEK', period: [-332, 637], weight: 35 },
       { id: 'BYZANTINE_GREEK', period: [330, 637], weight: 40 },
-      { id: 'CLASSICAL_ARABIC', period: [637, 2025], weight: 80 },
+      { id: 'CLASSICAL_ARABIC', period: [637, 2030], weight: 80 },
       { id: 'OTTOMAN_TURKISH', period: [1516, 1918], weight: 30 },
     ],
     namePatterns: [
@@ -6469,7 +6469,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       // The mapping used to stop at the Ottoman collapse, leaving republican
       // Turkey with no language at all and sending modern Anatolians off to
       // whichever lower-scoring mapping answered first.
-      { id: 'MODERN_TURKISH', period: [1923, 2025], weight: 90 },
+      { id: 'MODERN_TURKISH', period: [1923, 2030], weight: 90 },
       { id: 'ARMENIAN', period: [405, 1915], weight: 25 },
       { id: 'CLASSICAL_ARABIC', period: [700, 1500], weight: 20 },
     ],
@@ -6489,7 +6489,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'COPTIC', period: [100, 1700], weight: 70 },
       { id: 'ANCIENT_GREEK', period: [-332, 641], weight: 40 },
       { id: 'BYZANTINE_GREEK', period: [330, 641], weight: 35 },
-      { id: 'CLASSICAL_ARABIC', period: [641, 2025], weight: 85 },
+      { id: 'CLASSICAL_ARABIC', period: [641, 2030], weight: 85 },
     ],
     namePatterns: [
       { pattern: /Ramesses|Amenhotep|Thutmose|Hatshepsut|Nefertiti|Akhenaten/i, language: 'ANCIENT_EGYPTIAN', weight: 95 },
@@ -6504,7 +6504,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     patterns: ['arabian peninsula', 'hejaz', 'empty quarter', 'hadhramaut', 'dhofar', 'najd plateau', 'red sea coast', 'yemen', 'mecca', 'medina'],
     languages: [
       { id: 'ANCIENT_SOUTH_ARABIAN', period: [-1000, 600], weight: 80 },
-      { id: 'CLASSICAL_ARABIC', period: [400, 2025], weight: 95 },
+      { id: 'CLASSICAL_ARABIC', period: [400, 2030], weight: 95 },
       { id: 'ETHIOPIC', period: [100, 1000], weight: 15 }, // Trade influence
     ],
     namePatterns: [
@@ -6519,8 +6519,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'PHOENICIAN', period: [-814, -146], weight: 40 }, // Carthage
       { id: 'LATIN', period: [-146, 429], weight: 35 },
-      { id: 'BERBER', period: [-3000, 2025], weight: 50 },
-      { id: 'CLASSICAL_ARABIC', period: [647, 2025], weight: 85 },
+      { id: 'BERBER', period: [-3000, 2030], weight: 50 },
+      { id: 'CLASSICAL_ARABIC', period: [647, 2030], weight: 85 },
       { id: 'ANDALUSI_ARABIC', period: [711, 1609], weight: 30 },
     ],
     namePatterns: [
@@ -6538,7 +6538,7 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
       { id: 'MEROITIC', period: [-300, 400], weight: 70 },
       { id: 'OLD_NUBIAN', period: [400, 1500], weight: 60 },
       { id: 'COPTIC', period: [400, 1200], weight: 30 },
-      { id: 'CLASSICAL_ARABIC', period: [1200, 2025], weight: 75 },
+      { id: 'CLASSICAL_ARABIC', period: [1200, 2030], weight: 75 },
     ],
     namePatterns: [
       { pattern: /Piye|Taharqa|Amanirenas|Kandake/i, language: 'MEROITIC', weight: 90 },
@@ -6550,8 +6550,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
   {
     patterns: ['caucasus', 'tbilisi valley', 'mount ararat', 'kura river', 'chechen highlands', 'black sea foothills', 'caspian depression'],
     languages: [
-      { id: 'GEORGIAN', period: [-500, 2025], weight: 45 },
-      { id: 'ARMENIAN', period: [-500, 2025], weight: 40 },
+      { id: 'GEORGIAN', period: [-500, 2030], weight: 45 },
+      { id: 'ARMENIAN', period: [-500, 2030], weight: 40 },
       { id: 'OLD_PERSIAN', period: [-550, -330], weight: 20 },
       { id: 'MIDDLE_PERSIAN', period: [224, 651], weight: 25 },
       { id: 'CLASSICAL_ARABIC', period: [654, 1200], weight: 30 },
@@ -6569,8 +6569,8 @@ const REGIONAL_LANGUAGE_MAPPINGS: RegionLanguageMapping[] = [
     languages: [
       { id: 'ANCIENT_EGYPTIAN', period: [-3100, -700], weight: 40 },
       { id: 'ANCIENT_SOUTH_ARABIAN', period: [-1000, 600], weight: 30 },
-      { id: 'CLASSICAL_ARABIC', period: [641, 2025], weight: 80 },
-      { id: 'BEJA', period: [-2000, 2025], weight: 35 },
+      { id: 'CLASSICAL_ARABIC', period: [641, 2030], weight: 80 },
+      { id: 'BEJA', period: [-2000, 2030], weight: 35 },
     ],
     namePatterns: [
       { pattern: /Kharamadoye|Bishari|Hadendoa/i, language: 'BEJA', weight: 85 },
@@ -6964,7 +6964,7 @@ export function getLanguageForCharacter(
   const period = year < 500 ? 'ancient' :
                  year < 1500 ? 'medieval' :
                  year < 1800 ? 'earlyModern' :
-                 year < 2000 ? 'modern' :
+                 year < 2030 ? 'modern' :
                  'future';
 
   const fallbackLangId = fallbackLanguages[culturalZone]?.[period];

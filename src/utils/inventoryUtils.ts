@@ -21,6 +21,7 @@ import { generateCulturalAccessory, generateAccessorySet } from '../services/cul
 
 // Use UUID for better performance and uniqueness instead of counter
 import { v4 as uuidv4 } from 'uuid';
+import { localiseCrops, flailIsUseful } from '../constants/gameData/crops';
 import { random as seededRandom } from './seededRandom';
 import { devLog } from './devLog';
 
@@ -624,6 +625,9 @@ export function assembleStartingPackage(
          * villager and happily issues both a bronze torc.
          */
         year?: number;
+        /** Where. What a farmer stores depends on it. See gameData/crops.ts. */
+        region?: string;
+        location?: string;
     }
 ): { inventory: Item[], equippedItems: PlayerCharacter['equippedItems'] } {
     // Try to get the defined package, or generate a contextual one
@@ -720,8 +724,18 @@ export function assembleStartingPackage(
     // profession will happily list a coin or a bronze pot; the year decides.
     // Repeats in the table mean quantity, not separate lines — a slinger carries
     // three sling stones, not "Sling Stone, Sling Stone, Sling Stone".
+    // A crop the place cannot grow is replaced by one it can. The packages name
+    // barley and wheat for every farmer on earth, which put Fertile Crescent
+    // grasses in pre-Columbian Montana and the Bronze Age Philippines. See
+    // gameData/crops.ts. The threshing flail goes with them unless the staple
+    // is a dry cereal you actually beat the grain out of.
+    const cropCtx = { region: colorOptions?.region, location: colorOptions?.location, year: year ?? 0 };
+    const storedGoods = localiseCrops(pkg.inventory as string[], cropCtx);
+    const keepsFlail = flailIsUseful(storedGoods);
+
     const inventory: Item[] = [];
-    for (const baseId of pkg.inventory) {
+    for (const baseId of storedGoods) {
+        if (baseId === 'GRAIN_FLAIL' && !keepsFlail) continue;
         const item = makeItem(baseId);
         if (!possible(item)) continue;
         const existing = inventory.find(other => other.name === item!.name);
@@ -840,20 +854,27 @@ export function assembleStartingPackage(
     
     // Handle starting companion animals
     if (playerCharacter && pkg.companions) {
-        // Old World domesticated animals that should NOT appear in Pre-Columbian Americas
-        const OLD_WORLD_ANIMALS = ['SHEEP', 'COW', 'HORSE', 'GOAT'];
-        const PRE_COLUMBIAN_ZONES = ['NORTH_AMERICAN_PRE_COLUMBIAN', 'SOUTH_AMERICAN'];
-
-        // Get cultural zone from either character property or color options
+        // Cattle, sheep, goats and horses are Old World animals. They reached
+        // the Americas with the Spanish and Australia with the First Fleet, so
+        // the gate is a date and a place rather than a cultural zone: the zone
+        // check alone barred a cow from a Peruvian dairy farmer in 1935, and
+        // let one loose in Arnhem Land in 1500.
+        const OLD_WORLD_ANIMALS = ['SHEEP', 'COW', 'HORSE', 'GOAT', 'OX', 'DONKEY', 'PIG'];
         const culturalZone = playerCharacter.culturalZone || colorOptions?.culture;
+        const place = `${colorOptions?.location ?? ''} ${colorOptions?.region ?? ''}`;
+        const zoneIsAmerican = culturalZone
+            ? ['NORTH_AMERICAN_PRE_COLUMBIAN', 'NORTH_AMERICAN_COLONIAL', 'SOUTH_AMERICAN'].includes(culturalZone)
+            : false;
+        const arrivalYear =
+            zoneIsAmerican ? 1520
+            : /australia|arnhem|outback|tasmania|aboriginal|new zealand|aotearoa|polynesi|melanesi|micronesi|hawai|papua|new guinea/i.test(place) ? 1790
+            : -Infinity;
 
         pkg.companions.forEach(animalBaseId => {
-            // Skip Old World animals for Pre-Columbian American characters
-            if (culturalZone &&
-                PRE_COLUMBIAN_ZONES.includes(culturalZone) &&
-                OLD_WORLD_ANIMALS.includes(animalBaseId)) {
-                devLog(`[StartingPackage] Skipping ${animalBaseId} for ${culturalZone} character (Old World animal)`);
-                return; // Skip this companion
+            if (OLD_WORLD_ANIMALS.includes(animalBaseId)
+                && (colorOptions?.year ?? 0) < arrivalYear) {
+                devLog(`[StartingPackage] Skipping ${animalBaseId}: not in ${place || culturalZone} before ${arrivalYear}`);
+                return;
             }
 
             createStartingCompanion(animalBaseId, playerCharacter);

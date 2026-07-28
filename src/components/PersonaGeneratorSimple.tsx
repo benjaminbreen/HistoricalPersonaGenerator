@@ -152,7 +152,7 @@ import {
   GiRelationshipBounds
 } from 'react-icons/gi';
 import { generateHistoricalPersona, GenerationParams, HistoricalPersona } from '../services/personaGenerator';
-import type { SamplingMode } from '../services/demographyService';
+import { DEFAULT_SAMPLING_MODE, type SamplingMode } from '../services/demographyService';
 import { getAreaClimate, hemisphereFor, seasonFor } from '../services/climateService';
 import { ClimateType } from '../types/enums';
 import { HistoricalEra, CulturalZone, Gender } from '../types';
@@ -197,6 +197,7 @@ import {
 } from '../services/narrativeTextService';
 import { generateNarrativeBiography } from '../services/narrativeBiographyService';
 import { historicalPlaceLabel } from '../constants/gameData/placeLabels';
+import { zoneAccent } from '../constants/gameData/zonePalette';
 import { devLog } from '../utils/devLog';
 import {
   copyTextToClipboard,
@@ -223,7 +224,7 @@ const ERAS: { value: HistoricalEra; label: string }[] = [
   { value: 'MEDIEVAL' as HistoricalEra, label: 'Medieval (500 - 1450)' },
   { value: 'RENAISSANCE_EARLY_MODERN' as HistoricalEra, label: 'Renaissance & Early Modern (1450 - 1750)' },
   { value: 'INDUSTRIAL_ERA' as HistoricalEra, label: 'Industrial Era (1750 - 1900)' },
-  { value: 'MODERN_ERA' as HistoricalEra, label: 'Modern Era (1900 - 2000)' },
+  { value: 'MODERN_ERA' as HistoricalEra, label: 'Modern Era (1900 - 2030)' },
 ];
 
 const CULTURAL_ZONES: { value: CulturalZone; label: string }[] = [
@@ -999,7 +1000,7 @@ const lockProceduralSeedRecord = (
 export default function PersonaGenerator() {
   const [persona, setPersona] = useState<HistoricalPersona | null>(null);
   const [params, setParams] = useState<Partial<GenerationParams>>({});
-  const [samplingMode, setSamplingMode] = useState<SamplingMode>('explore');
+  const [samplingMode, setSamplingMode] = useState<SamplingMode>(DEFAULT_SAMPLING_MODE);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [darkMode, setDarkMode] = useState(false); // Light mode by default
   const [showAbout, setShowAbout] = useState(false);
@@ -1247,7 +1248,7 @@ export default function PersonaGenerator() {
     setWikipediaArticle(null);
     setDeathRevealState('prompt');
     setDeathInfo(null);
-    setSamplingMode(snapshot.samplingMode || 'explore');
+    setSamplingMode(snapshot.samplingMode || DEFAULT_SAMPLING_MODE);
     setSharedPersonaId(stored.id);
     setSharedPersonaError(null);
   };
@@ -3273,6 +3274,25 @@ export default function PersonaGenerator() {
       .join(' ');
   };
 
+  /**
+   * What to call the row a garment sits in.
+   *
+   * The clothing tables have one `garments` list per culture and era, and it is
+   * written into the `torso` slot whatever the garment is — so a Plains persona
+   * whose garment was "Hide Leggings" got a row reading "TORSO: Hide Leggings",
+   * and breechcloths and skirts landed there too. The schema has no leg slot to
+   * move them to, so the label follows the garment instead of the slot key.
+   */
+  const slotLabelFor = (slot: string, itemName: string): string => {
+    if (slot !== 'torso') return formatItemName(slot);
+    const name = itemName.toLowerCase();
+    if (/legging|trouser|breeches|pants|chaps/.test(name)) return 'Legs';
+    if (/breechcloth|breechclout|loincloth|apron string|malo|sarong|lungi|dhoti|sash skirt/.test(name)) return 'Waist';
+    if (/skirt|kilt|wrapper|pareo|lavalava/.test(name)) return 'Waist';
+    if (/cloak|mantle|cape|robe over/.test(name)) return 'Cloak';
+    return 'Torso';
+  };
+
   const getSeasonInfo = (
     month: number,
     day: number,
@@ -4640,7 +4660,7 @@ export default function PersonaGenerator() {
                 value={params.year || ''}
                 onChange={(e) => setParams({ ...params, year: parseInt(e.target.value) || undefined })}
                 min="-10000"
-                max="2000"
+                max="2030"
               />
             </div>
 
@@ -4718,7 +4738,12 @@ export default function PersonaGenerator() {
               <div className="header-left">
                 <div className="name-with-pills">
                   <h2>{renderName(persona.character.name)}</h2>
-                  <div className="location-pills">
+                  {/* Both pills key off one colour so they read as a pair —
+                      the zone, and a place inside it. */}
+                  <div
+                    className="location-pills"
+                    style={{ '--zone-accent': zoneAccent(persona.culturalZone) } as React.CSSProperties}
+                  >
                     <span
                       className="location-pill region-pill wiki-link"
                       onClick={() => setWikipediaArticle(getWikipediaArticle(persona.region))}
@@ -5571,7 +5596,7 @@ export default function PersonaGenerator() {
                         if (!item || item.name.toLowerCase() === 'none') return null;
                         return (
                           <div key={slot} className="equipment-item">
-                            <span className="equipment-slot">{formatItemName(slot)}</span>
+                            <span className="equipment-slot">{slotLabelFor(slot, item.name)}</span>
                             <span className="equipment-name">{formatItemName(item.name)}</span>
                           </div>
                         );

@@ -25,6 +25,7 @@ import {
   type LanguageHypothesis,
 } from '../constants/gameData/languageDeepTime';
 import { getSources, type ScholarlySource } from '../constants/gameData/scholarlySources';
+import { languageIsPlausible } from './languagePlausibilityService';
 
 export interface LanguageAttributionInput {
   culturalZone: CulturalZone;
@@ -33,6 +34,13 @@ export interface LanguageAttributionInput {
   location?: string;
   characterName?: string;
   profession?: string;
+  /**
+   * Needed because several entries in the table are languages of scripture
+   * rather than of the home. See languagePlausibilityService: without this a
+   * non-Muslim woman in the eighth-century Ivory Coast was a Classical Arabic
+   * speaker.
+   */
+  religion?: string;
   seed?: number;
 }
 
@@ -134,13 +142,11 @@ export function regionAffinity(lang: LanguageData, region?: string, location?: s
 
 /** The best same-zone, in-period entry whose declared regions include this place. */
 function findAttestedByRegion(
-  zone: CulturalZone,
-  year: number,
-  region?: string,
-  location?: string,
+  input: LanguageAttributionInput,
 ): LanguageData | undefined {
+  const { culturalZone: zone, year, region, location } = input;
   const candidates = Object.values(LANGUAGES).filter(lang =>
-    attestedEntryIsValid(lang, zone, year) && regionAffinity(lang, region, location));
+    attestedEntryIsValid(lang, zone, year, input) && regionAffinity(lang, region, location));
   if (candidates.length === 0) return undefined;
   // Prefer a language actually spoken rather than a reconstruction, then the
   // one whose attested window is tightest around this year.
@@ -156,11 +162,19 @@ export function attestedEntryIsValid(
   lang: LanguageData,
   zone: CulturalZone,
   year: number,
+  /**
+   * Place, faith and trade. Optional so existing callers still compile, but the
+   * resolver always passes it: a zone-and-period check alone let Hausa cover
+   * the whole of eighth-century Africa and Classical Arabic reach a persona who
+   * had no way to learn it.
+   */
+  context?: Pick<LanguageAttributionInput, 'region' | 'location' | 'religion' | 'profession'>,
 ): boolean {
   if (!lang) return false;
   if (Array.isArray(lang.period) && (year < lang.period[0] || year > lang.period[1])) return false;
   if (Array.isArray(lang.culturalZones) && lang.culturalZones.length > 0
     && !lang.culturalZones.includes(zone)) return false;
+  if (context && !languageIsPlausible(lang.id, { year, ...context })) return false;
   return true;
 }
 
@@ -255,12 +269,12 @@ export function attributeLanguage(input: LanguageAttributionInput): LanguageAttr
     input.profession,
   );
 
-  if (attested && attestedEntryIsValid(attested, input.culturalZone, input.year)) {
+  if (attested && attestedEntryIsValid(attested, input.culturalZone, input.year, input)) {
     // Zone and period are satisfied, but the selector is only zone-accurate.
     // Prefer an entry whose declared regions actually cover this place.
     const better = regionAffinity(attested, input.region, input.location)
       ? attested
-      : (findAttestedByRegion(input.culturalZone, input.year, input.region, input.location) ?? attested);
+      : (findAttestedByRegion(input) ?? attested);
     return asAttestedAttribution(better);
   }
 
@@ -269,8 +283,7 @@ export function attributeLanguage(input: LanguageAttributionInput): LanguageAttr
   //     answer — it is evidence the selector missed. Ask the table directly
   //     before falling through to deep time, or a 1952 Anatolian ends up with
   //     a label built for the Neolithic.
-  const byRegion = findAttestedByRegion(
-    input.culturalZone, input.year, input.region, input.location);
+  const byRegion = findAttestedByRegion(input);
   if (byRegion) return asAttestedAttribution(byRegion);
 
   // 3. and 4. Zone window, then the backstop. Every zone has a backstop across

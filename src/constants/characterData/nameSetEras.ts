@@ -116,6 +116,10 @@ const NAME_SET_EARLIEST: Record<string, number> = {
   VIETNAMESE: -200,
   JAVANESE: 400,
   MALAY: 600,
+  PREHISTORIC_AUSTRONESIAN: -3000,
+  TAGALOG_CLASSICAL: 900,
+  JAVANESE_CLASSICAL: 700,
+  CHAM: -200,
   FILIPINO: 1565,
   INDONESIAN: 1945,
   JAPANESE: 300,
@@ -151,12 +155,105 @@ const NAME_SET_EARLIEST: Record<string, number> = {
   RUSSIAN: 900,
   JEWISH_ASHKENAZI: 900,
   AFRICAN_AMERICAN: 1619,
+  AFRO_BRAZILIAN: 1540,
   PUERTO_RICAN: 1500,
   PORTUGUESE_BRAZIL: 1500,
   SPANISH_LATIN_AMERICAN: 1500,
   TEXAS_ANGLO: 1820,
   TEXAS_SPANISH_COLONIAL: 1690,
   NORTH_AMERICAN_COLONIAL: 1607,
+  NORTH_AMERICAN_MODERN: 1840,
+};
+
+/**
+ * When a naming tradition stops describing how people in a place are actually
+ * named. The floor above stops a tradition reaching backwards; this stops one
+ * reaching forwards, which turned out to be just as visible to a reader.
+ *
+ * A student generating 1920s Los Angeles was met by Thankful Moore, Ebenezer
+ * Garcia, Mehitable Jackson and a woman simply called Experience. Those are
+ * seventeenth-century New England Puritan virtue-names, and they arrived
+ * because `NORTH_AMERICAN_COLONIAL` is the zone's own name and therefore the
+ * fallback for every year from 1607 to the present. Colonial-era sets, ancient
+ * sets and the deep-time reconstructions all have this problem: nothing said
+ * when to stop using them.
+ *
+ * Only sets that genuinely lapse are listed. A living tradition — Japanese,
+ * Yoruba, Icelandic — has no ceiling and needs none.
+ */
+const NAME_SET_LATEST: Record<string, number> = {
+  // Reconstructed and deep-time sets. Superseded once the attested traditions
+  // of their regions exist.
+  PREHISTORIC_PROTO_INDO_EUROPEAN: -1500,
+  PREHISTORIC_PROTO_CELTIC: -100,
+  PREHISTORIC_PROTO_GERMANIC: 400,
+  PREHISTORIC_MENA: -2500,
+  PREHISTORIC_SOUTH_ASIAN: -1300,
+  PREHISTORIC_ASIAN: -1200,
+  PREHISTORIC_INNER_ASIAN: 500,
+  PREHISTORIC_AFRICAN: 500,
+  PREHISTORIC_AMERICAN: 500,
+  PREHISTORIC_OCEANIC: -800,
+
+  // Ancient traditions, ending roughly where the naming world changes.
+  MESOPOTAMIAN_ANCIENT: 100,
+  ANCIENT_GREEK: 400,
+  ANCIENT_ROMAN: 600,
+  CELTIC_ANCIENT: 700,
+  PERSIAN_ANCIENT: 650,
+  SANSKRIT_CLASSICAL: 1200,
+  ANCIENT_SOUTH_ARABIAN: 600,
+  ARABIAN_HEJAZ: 700,
+  KOREAN_ANCIENT: 950,
+  EGYPTIAN_COPTIC: 1400,
+  NUBIAN: 1400,
+  SOGDIAN: 1000,
+
+  // Medieval and early-modern European sets.
+  FRANKISH_MEROVINGIAN: 800,
+  FRANKISH_CAROLINGIAN: 1000,
+  SAXON_EARLY_MEDIEVAL: 1100,
+  ENGLISH_ANGLO_SAXON: 1150,
+  NORMAN_FRENCH: 1350,
+  ENGLISH_MEDIEVAL: 1550,
+  FRENCH_MEDIEVAL: 1550,
+  SLAVIC_MEDIEVAL: 1500,
+  BYZANTINE: 1500,
+  MOORISH_ANDALUS: 1500,
+  MAMLUK_EGYPT: 1520,
+  OTTOMAN_TURKISH: 1923,
+
+  // The Americas. The colonial sets describe a settler naming world that had
+  // largely gone by the middle of the nineteenth century.
+  NORTH_AMERICAN_COLONIAL: 1840,
+  TEXAS_SPANISH_COLONIAL: 1850,
+  AZTEC: 1600,
+  INCA: 1580,
+  MAYA: 1600,
+  MIXTEC: 1600,
+  ZAPOTEC: 1600,
+  MUISCA: 1600,
+  MISSISSIPPIAN: 1600,
+  TAINO: 1600,
+  CARIB: 1700,
+};
+
+/**
+ * The set to use once a tradition has lapsed. Chosen per zone and period rather
+ * than per set, because what replaces a lapsed tradition is a question about
+ * the place, not about the tradition.
+ */
+const SUCCESSOR_BY_ZONE: Record<string, Array<{ from: number; key: string }>> = {
+  NORTH_AMERICAN_COLONIAL: [{ from: 1840, key: 'NORTH_AMERICAN_MODERN' }],
+  NORTH_AMERICAN_PRE_COLUMBIAN: [{ from: 1840, key: 'NORTH_AMERICAN_MODERN' }],
+  EUROPEAN: [{ from: 1500, key: 'ENGLISH' }],
+  MENA: [{ from: 700, key: 'ARABIC_TRADITIONAL' }],
+  EAST_ASIAN: [{ from: 900, key: 'CHINESE_MANDARIN' }],
+  SOUTH_ASIAN: [{ from: 1200, key: 'HINDI' }],
+  SOUTHEAST_ASIAN: [{ from: 600, key: 'MALAY' }],
+  SUB_SAHARAN_AFRICAN: [{ from: 800, key: 'YORUBA' }],
+  OCEANIA: [{ from: -800, key: 'POLYNESIAN' }],
+  SOUTH_AMERICAN: [{ from: 1580, key: 'SPANISH_LATIN_AMERICAN' }],
 };
 
 /** Patterns applied when a set has no explicit entry. */
@@ -184,8 +281,25 @@ export function nameSetEarliestYear(key: string): number {
   return DEFAULT_EARLIEST;
 }
 
+/** The last year this tradition still describes how people here are named. */
+export function nameSetLatestYear(key: string): number {
+  return key in NAME_SET_LATEST ? NAME_SET_LATEST[key] : Number.POSITIVE_INFINITY;
+}
+
 export function isNameSetPlausible(key: string, year: number): boolean {
-  return year >= nameSetEarliestYear(key);
+  return year >= nameSetEarliestYear(key) && year <= nameSetLatestYear(key);
+}
+
+/** The set to use when a tradition has lapsed rather than not yet begun. */
+function successorNameKeyFor(culturalZone: string, year: number): string | undefined {
+  const rules = SUCCESSOR_BY_ZONE[culturalZone];
+  if (!rules) return undefined;
+  // The latest rule whose start year this persona is past.
+  let chosen: string | undefined;
+  for (const rule of rules) {
+    if (year >= rule.from) chosen = rule.key;
+  }
+  return chosen;
 }
 
 /** Keep only the traditions that could exist in this year. */
@@ -202,6 +316,7 @@ const PREHISTORIC_BY_ZONE: Record<string, string> = {
   EUROPEAN: 'PREHISTORIC_PROTO_INDO_EUROPEAN',
   EAST_ASIAN: 'PREHISTORIC_ASIAN',
   SOUTH_ASIAN: 'PREHISTORIC_SOUTH_ASIAN',
+  SOUTHEAST_ASIAN: 'PREHISTORIC_AUSTRONESIAN',
   MENA: 'PREHISTORIC_MENA',
   SUB_SAHARAN_AFRICAN: 'PREHISTORIC_AFRICAN',
   OCEANIA: 'PREHISTORIC_OCEANIC',
@@ -245,6 +360,14 @@ export function resolveNameKey(
   region = ''
 ): string {
   if (key && isNameSetPlausible(key, year)) return key;
+  // A tradition can fail the gate from either end, and the two need different
+  // answers: a set that does not exist yet falls back to the reconstructed
+  // forms, but one that has lapsed must fall *forward*, or 1925 Los Angeles is
+  // repopulated with Palaeolithic foragers instead of Puritans.
+  if (key && year > nameSetLatestYear(key)) {
+    const successor = successorNameKeyFor(culturalZone, year);
+    if (successor && successor !== key && isNameSetPlausible(successor, year)) return successor;
+  }
   return prehistoricNameKeyFor(culturalZone, year, region);
 }
 

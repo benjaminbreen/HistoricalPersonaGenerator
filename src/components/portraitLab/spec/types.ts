@@ -21,6 +21,42 @@ export type BrowShape = 'straight' | 'arched' | 'rounded' | 'angular';
 export type BrowThickness = 'thin' | 'medium' | 'thick' | 'bushy';
 export type HairLength = 'bald' | 'very_short' | 'short' | 'medium' | 'long' | 'very_long';
 export type HairTexture = 'straight' | 'wavy' | 'curly' | 'coily' | 'kinky';
+
+/**
+ * How the hair is *arranged*, as distinct from how long it is and what it does
+ * on its own. Length and texture were the only two axes for a long time, and a
+ * contact sheet of forty-two personas made the cost obvious: every one of them
+ * wore the same bowl cut at a slightly different length. Silhouette is the
+ * loudest signal at 96px — louder than any amount of interior shading — and
+ * arrangement is also the part of hair that carries culture and period, which
+ * is exactly what this project is trying to show.
+ *
+ * The vocabulary is small on purpose. Each entry has to be distinguishable from
+ * every other entry *in outline alone*, at thumbnail size, on a head that may
+ * also be wearing a hat. A `chignon` and a `gathered_bun` are different things
+ * to a historian of dress and the same seven pixels to this renderer, so they
+ * share `bun` and the difference lives in the prose instead.
+ */
+export type HairSilhouette =
+  | 'loose'         // falls free; the old behaviour, and still the commonest
+  | 'bangs'         // blunt fringe cut straight across the forehead
+  | 'bowl'          // fringe plus a blunt horizontal edge at the jaw
+  | 'bob'           // blunt jaw-length, no fringe, ears exposed
+  | 'swept'         // parted off-centre and swept across
+  | 'tied_back'     // pulled back off the face, gathered low
+  | 'ponytail'      // gathered high, tail falling behind one shoulder
+  | 'bun'           // gathered into a knot high at the back of the crown
+  | 'top_knot'      // knot standing on top of the crown, bound at the base
+  | 'twin_buns'     // two knots, one above each temple
+  | 'updo'          // piled above the crown, wider than the skull
+  | 'braid_single'  // one plait falling forward over a shoulder
+  | 'braid_twin'    // two plaits framing the face
+  | 'braid_crown'   // plaits wound around the head above the hairline
+  | 'locs'          // hanging ropes, separated to the ends
+  | 'cornrows'      // rows braided flat against the scalp
+  | 'afro'          // a halo standing out evenly all round
+  | 'tonsure'       // shaved crown inside a ring of hair
+  | 'shaved_sides'; // shaved at the temples, mass kept along the midline
 export type Build =
   | 'slight' | 'average' | 'stocky' | 'heavy' | 'athletic' | 'tall' | 'short' | 'imposing';
 
@@ -43,8 +79,19 @@ export type HeadwearKind =
  * not, so a sedge sunhat was routed correctly and then drawn as a bowler.
  * Matched against "<name> <material>" — the fibre is often the better signal.
  */
+/**
+ * Hats that are actually cone-shaped.
+ *
+ * `straw` used to be in this list, which made every straw hat on earth render
+ * as an East Asian conical one — the same pointed silhouette turned up on a
+ * Brazilian farmer, a Ryukyu farmer and a Filipino farmer, and read as a bug
+ * even where it happened to be plausible. Straw is a material, not a shape: a
+ * Mediterranean sun hat and a nón lá are both straw and look nothing alike.
+ * The genuinely conical forms are named in the clothing tables (Douli,
+ * Sugegasa, Bamboo Hat), so matching those names is enough.
+ */
 export const CONICAL_HAT_PATTERN =
-  /conical|dou ?li|douli|straw|coolie|sedge|kasa|sugegasa|salakot|non la|nón lá|bamboo|rattan|palm leaf|pandanus|rice hat/;
+  /conical|dou ?li|douli|coolie|sedge|kasa|sugegasa|salakot|non la|nón lá|bamboo|rattan|palm leaf|pandanus|rice hat/;
 
 export type FacialHairStyle =
   | 'full_beard' | 'goatee' | 'mustache' | 'stubble' | 'van_dyke' | 'soul_patch'
@@ -153,7 +200,10 @@ export interface PortraitSpec {
 
   hairLength: HairLength;
   hairTexture: HairTexture;
+  /** The app's raw style name, kept for debugging and for the audit report. */
   hairstyle: string;
+  /** `hairstyle` resolved to something the renderer can actually draw. */
+  hairSilhouette: HairSilhouette;
   /** 0..1, blended into the hair colour before ramping. */
   grayAmount: number;
   /** 0..1, receded hairline for older men. */
