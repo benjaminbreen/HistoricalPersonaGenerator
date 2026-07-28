@@ -14,7 +14,7 @@
 
 import { hashString, unit } from '../core/rng';
 import { hexToRgb, hslToRgb, luminance, mixRgb, rgbToHex, rgbToHsl } from '../core/color';
-import { hasIntrinsicColor } from '../../../constants/gameData/colorNames';
+import { hasIntrinsicColor, hexForName } from '../../../constants/gameData/colorNames';
 import {
   BackgroundSpec,
   Build,
@@ -501,6 +501,60 @@ function intrinsicColorFor(material: string | undefined): string | null {
   return colorForMaterial(material);
 }
 
+/**
+ * A colour off an item, which may be a hex — or may be the name of a dye.
+ *
+ * `applyColorToItem` in `characterGenerator.ts` names an item for its colour
+ * and then stores that *word* in `item.color`, because the word is what the
+ * equipment panel prints. The renderer wanted a hex, and nothing translated
+ * between them, so every dyed garment and every dyed hat in the app has been
+ * arriving here as an unparseable string.
+ *
+ * What it did with one is the interesting part. `hexToRgb` strips a `#`, and
+ * for anything six characters or longer runs `parseInt(…, 16)` over the
+ * result — so "Rust" fell to the grey fallback and came out drab, while
+ * "Russet", "Indigo" and "Madder" parsed to *NaN channels*: `r: null, g: null,
+ * b: 14`. That is why the wall of head coverings was cream. It was not a
+ * palette decision at all; it was arithmetic on the word.
+ *
+ * `hexForName` has existed all along for exactly this, and its own comment
+ * says to prefer it wherever the colour was chosen, because name → hex is
+ * lossless and hex → name is not. It was simply never called from here.
+ */
+function resolveColor(value: string | undefined | null): string | null {
+  if (!value) return null;
+  const trimmed = String(value).trim();
+  if (!trimmed) return null;
+  if (/^#?(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(trimmed)) {
+    return trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
+  }
+  if (trimmed.startsWith('rgb')) return trimmed;
+  return hexForName(trimmed) || null;
+}
+
+/**
+ * The dye an item is named for.
+ *
+ * For most equipped items the colour is *only* in the name — "Rust Cotton
+ * Cap", "Woad Head Wrap", "Green Linen Veil" all arrive with no `color` field
+ * at all, because the generator built the name by prefixing a dye word and
+ * then, for these paths, never wrote the word anywhere else. So the name is
+ * not a label for the colour; it is the sole record of it, and reading it is
+ * the only way the portrait can agree with the equipment panel beside it.
+ *
+ * First word wins. Dye words lead in every name this table produces, and
+ * scanning further finds the material — "Green Linen Veil" in *White* Linen is
+ * a real entry, and the right answer for the cloth is green.
+ */
+function colorFromName(name: string | undefined): string | null {
+  if (!name) return null;
+  for (const word of name.toLowerCase().split(/[\s,\-]+/)) {
+    const hex = hexForName(word);
+    if (hex) return hex;
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Backgrounds
 // ---------------------------------------------------------------------------
@@ -919,9 +973,10 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
       // old precedence let a generated palette entry paint a sedge sunhat
       // lilac and a bark-cloth wrap sky blue.
       primary: intrinsicColorFor(garmentPiece.material)
-        || garmentPiece.color || palette.primary || '#7c6a54',
-      secondary: palette.secondary || '#9a8768',
-      accent: palette.accent || '#a8834f',
+        || resolveColor(garmentPiece.color) || colorFromName(garmentPiece.name)
+        || resolveColor(palette.primary) || '#7c6a54',
+      secondary: resolveColor(palette.secondary) || '#9a8768',
+      accent: resolveColor(palette.accent) || '#a8834f',
     },
     ornament: ornamentBase,
     surfaces: garmentSurfacesFor(
@@ -947,8 +1002,10 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
       name,
       material: (headPiece?.material || 'cloth').toLowerCase(),
       color: intrinsicColorFor(headPiece?.material)
-        || headPiece?.color || colorForMaterial(headPiece?.material) || palette.secondary || '#5c5347',
-      accent: palette.accent || '#a8834f',
+        || resolveColor(headPiece?.color) || colorFromName(name)
+        || colorForMaterial(headPiece?.material)
+        || resolveColor(palette.secondary) || '#5c5347',
+      accent: resolveColor(palette.accent) || '#a8834f',
       ornament: ornamentBase,
       ornaments: ornamentsFor(name, headPiece?.material || '', ornamentBase).ornaments,
     };

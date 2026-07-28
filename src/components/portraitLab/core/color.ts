@@ -56,6 +56,16 @@ export function hexToRgb(hex: string): RGB {
     }
   }
   const cleaned = value.replace('#', '');
+  // Only actual hex digits. Without this guard the length checks below happily
+  // ran `parseInt` over words: "Rust" fell through to the grey fallback and
+  // came out drab, while "Russet", "Indigo" and "Madder" are six characters or
+  // more and parsed to `{ r: null, g: null, b: 14 }` — NaN channels that then
+  // propagated silently through the whole ramp. Every dyed item in the app was
+  // arriving here as its dye's *name*, so this was not an edge case; it was
+  // most of the wardrobe. `buildSpec.resolveColor` now translates names before
+  // they get here, and this makes the failure impossible rather than merely
+  // unlikely.
+  if (!/^[0-9a-f]+$/i.test(cleaned)) return { r: 128, g: 128, b: 128 };
   if (cleaned.length === 3) {
     return {
       r: parseInt(cleaned[0] + cleaned[0], 16),
