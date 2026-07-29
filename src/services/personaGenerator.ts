@@ -4,6 +4,8 @@
 import { PlayerCharacter, HistoricalEra, CulturalZone, Gender, WealthLevel } from '../types';
 import { generateCharacterWithSpec } from './characterGenerator';
 import { GEOGRAPHICAL_DATA } from '../constants/gameData/geography';
+import { CITIES_DATA } from '../constants/gameData/cities';
+import { areaPopulationWeight, regionPopulationWeight } from '../constants/gameData/regionPopulation';
 import { generateLifeHistory, EnhancedLifeEvent, EventImportance } from '../constants/characterData/lifeHistoryService';
 import { attributeLanguage, attributionToLanguageData, type LanguageAttribution } from './languageAttributionService';
 import { getLanguageForCharacter, LanguageData } from '../constants/gameData/languages';
@@ -25,6 +27,8 @@ import {
 } from './demographyService';
 import { polityFormFor, sampleSocialStatus } from './socialStatusService';
 import { sampleStratum, type SampledStratum } from './populationStrataService';
+import { sampleElite, type SampledElite } from './eliteStrataService';
+import { describePersonaRarity, type PersonaRarity } from './personaRarityService';
 import { disruptionRole } from './disruptionResolution';
 import { describeLifeEventSecondPerson } from './narrativeTextService';
 import { createHistoricalContext } from './historicalContextService';
@@ -119,6 +123,20 @@ export interface HistoricalPersona {
    * transportation, diaspora — where there was one. Most personas have none,
    * and that is the correct answer for most personas.
    */
+  /** How unusual this persona is, in the same "1 in N" voice as `odds`. */
+  rarity?: PersonaRarity;
+  /**
+   * Standing in a privileged order, where the society had one and this person
+   * was born into it. Carries the society's own word for it — hidalgo, samurai,
+   * szlachcic, kuraka — never a translated rank.
+   */
+  distinction?: {
+    stratumId: string;
+    label: string;
+    /** Share of the local population in this order, for the tooltip. */
+    share: number;
+    clause: string;
+  };
   socialCondition?: {
     stratumId: string;
     label: string;
@@ -150,8 +168,31 @@ const culturalZoneToGeographyKey: Record<CulturalZone, string> = {
   'SOUTH_AMERICAN': 'South America',
 };
 
+/**
+ * Draw one of a list in proportion to its weight.
+ *
+ * Used for both halves of the location draw below, which were previously
+ * uniform — see `regionPopulation.ts` for what that cost.
+ */
+function weightedPick<T>(items: T[], weightOf: (item: T) => number, random: () => number): T {
+  const total = items.reduce((sum, item) => sum + Math.max(0, weightOf(item)), 0);
+  if (total <= 0) return items[Math.floor(random() * items.length)];
+
+  let roll = random() * total;
+  for (const item of items) {
+    roll -= Math.max(0, weightOf(item));
+    if (roll <= 0) return item;
+  }
+  return items[items.length - 1];
+}
+
 // Get a random location from a cultural zone, returns both region and specific area
 // Filters out locations that have minYear constraints not met by the given year
+//
+// Both draws are weighted by how many people lived there. Uniform draws turned
+// the map's boxes into a claim about population: East Asia's five emptiest
+// regions took 42% of its personas, and the Northeastern Seaboard took one
+// sixteenth of North America in 1900. See `regionPopulation.ts`.
 function getRandomLocation(culturalZone: CulturalZone, year?: number, random: () => number = Math.random): { area: string; region: string } {
   const geographyKey = culturalZoneToGeographyKey[culturalZone];
   if (!geographyKey) return { area: 'Unknown', region: 'Unknown' };
@@ -174,7 +215,12 @@ function getRandomLocation(culturalZone: CulturalZone, year?: number, random: ()
 
   if (regionNames.length === 0) return { area: 'Unknown', region: 'Unknown' };
 
-  const randomRegion = randomElement(regionNames, random);
+  const populationYear = year ?? 0;
+  const randomRegion = weightedPick(
+    regionNames,
+    name => regionPopulationWeight(geographyKey, name, populationYear),
+    random,
+  );
   const areas = regions[randomRegion];
   if (!areas || typeof areas !== 'object') return { area: randomRegion, region: randomRegion };
 
@@ -186,7 +232,13 @@ function getRandomLocation(culturalZone: CulturalZone, year?: number, random: ()
 
   if (areaNames.length === 0) return { area: randomRegion, region: randomRegion };
 
-  const randomAreaKey = randomElement(areaNames, random);
+  // Inside the region, weight by the cities standing there in this year, so
+  // that urbanisation is something the draw can actually see.
+  const randomAreaKey = weightedPick(
+    areaNames,
+    key => areaPopulationWeight(areas[key]?.name || key, populationYear, CITIES_DATA),
+    random,
+  );
   const randomArea = areas[randomAreaKey];
   return {
     area: randomArea?.name || randomRegion,
@@ -251,10 +303,17 @@ function generatePersonaWithSeed(
     culturalZone = params.culturalZone;
   } else {
     // Build list of valid cultural zones based on era
+    // Southeast Asia was carved out of the South Asian zone and wired up end
+    // to end — regions, population weights, name tables, a three-way religion
+    // fallback, regional history — but never added here, so in every draw the
+    // app has ever made nobody was born in Java, Vietnam, Siam, Burma or the
+    // Philippines. Somewhere between a twentieth and a twelfth of everyone,
+    // depending on the century.
     const validZones: CulturalZone[] = [
       'EUROPEAN',
       'EAST_ASIAN',
       'SOUTH_ASIAN',
+      'SOUTHEAST_ASIAN',
       'MENA',
       'SUB_SAHARAN_AFRICAN',
       'OCEANIA',
@@ -317,9 +376,21 @@ function generatePersonaWithSeed(
     ? null
     : disruptionRole(culturalZone, year, region, location, birthSex, random);
 
-  // Determine wealth level
+  // And the other end of the same question: was this person born into one of
+  // the privileged orders? Only asked when no unfree condition applied — a
+  // person cannot be both owned and of the ruling lineage, and of the two the
+  // bondage is the claim the app must never drop.
+  const elite: SampledElite | null = stratum
+    ? null
+    : sampleElite(culturalZone, year, region, location, birthSex, random);
+
+  // Determine wealth level. The elite table carries its own distribution rather
+  // than a level, because the penniless hidalgo and the Edo retainer living on
+  // a rice stipend that has not risen in a century are the modal cases of their
+  // estates, not the exceptions to them.
   const wealthLevel = params.wealthLevel
     || stratum?.stratum.wealthLevel
+    || elite?.wealthLevel
     || sampleWealthLevel(era, random);
 
   // Generate random month and day
@@ -336,7 +407,10 @@ function generatePersonaWithSeed(
   });
   // Status and wealth are related but distinct. Locale type changes their
   // distribution without making unusual combinations impossible.
-  const socialClass = params.socialClass || sampleSocialStatus(
+  // Standing in a privileged order *is* the answer to the status question; it
+  // does not need to be sampled a second time from a wealth table that knows
+  // nothing about the fuero or the banner registers.
+  const socialClass = params.socialClass || (elite ? 'noble' : null) || sampleSocialStatus(
     era,
     wealthLevel,
     random,
@@ -361,11 +435,14 @@ function generatePersonaWithSeed(
       age,
       socialClass: socialClass,
       wealthLevel,
+      // Only a caller-supplied wealth level is exempt from being bounded by the
+      // trade; a sampled one is exactly what needs bounding.
+      wealthLocked: params.wealthLevel !== undefined,
       religion: params.religion, // Use provided religion if available
       // The stratum's trade, where there is one. It is drawn from a list of
       // real occupations — cooper, midwife, boatman — never from the status
       // itself, because the status is carried on its own axis below.
-      profession: params.profession ?? stratum?.role ?? catastropheRole ?? undefined,
+      profession: params.profession ?? stratum?.role ?? elite?.role ?? catastropheRole ?? undefined,
       birthYear: params.birthYear, // Use provided birth year if available
       ethnicity: culturalZone, // Pass cultural zone as ethnicity to ensure proper character generation
       // Naming, appearance and language resolve off this rather than off the
@@ -394,6 +471,18 @@ function generatePersonaWithSeed(
     character.legalStatusLabel = stratum.stratum.statusLabel;
     if (stratum.ancestry) character.ancestry = stratum.ancestry;
   }
+
+  // The portrait reads these two off the character, because the portrait spec
+  // is built from a character and not from a persona. They touch the backdrop
+  // only — see `backgroundFor` — and nothing about the face.
+  const rarity = describePersonaRarity(character as any);
+  (character as any).rarityTier = rarity.tier;
+  (character as any).hasDistinction = Boolean(elite);
+  // The share as well as the fact, because the corner mark is keyed to how rare
+  // the standing was rather than to holding one at all: the hidalguía of
+  // Castile was a tenth of the population, and a badge on that is a badge on
+  // the ordinary case. See art/distinctionMark.ts.
+  (character as any).distinctionShare = elite?.stratum.share;
 
   // Generate enhanced life events using the new service
   const enhancedLifeEvents = generateLifeHistory(
@@ -447,6 +536,17 @@ function generatePersonaWithSeed(
     languageAttribution,
     historicalContext,
     odds: describeOdds(era, culturalZone, year),
+    // How unusual this person is on the axes that are drawn rather than
+    // inherited — see personaRarityService for why standing is not one of them.
+    rarity,
+    distinction: elite
+      ? {
+        stratumId: elite.stratum.id,
+        label: elite.stratum.statusLabel,
+        share: elite.stratum.share,
+        clause: elite.stratum.clause,
+      }
+      : undefined,
     samplingMode,
     socialCondition: stratum
       ? {

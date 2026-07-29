@@ -90,8 +90,24 @@ export type HeadwearKind =
  * The genuinely conical forms are named in the clothing tables (Douli,
  * Sugegasa, Bamboo Hat), so matching those names is enough.
  */
+/**
+ * Hats whose *name* says they are cones. These are cones wherever they turn up.
+ */
 export const CONICAL_HAT_PATTERN =
-  /conical|dou ?li|douli|coolie|sedge|kasa|sugegasa|salakot|non la|nón lá|bamboo|rattan|palm leaf|pandanus|rice hat/;
+  /conical|dou ?li|douli|coolie|sedge|kasa|sugegasa|salakot|non la|nón lá|rice hat/;
+
+/**
+ * Hats whose name says only what they are woven from.
+ *
+ * `bamboo`, `straw` and `palm` used to live in the pattern above, which quietly
+ * asserted that every plant-fibre hat on earth is an East Asian cone. "Straw
+ * Hat" is the single commonest head item in the app — one persona in seven
+ * wears one — so that assertion was doing real damage: Provençal farmhands and
+ * Andean herders were all issued the same douli. What a woven hat is shaped
+ * like is a question about *where*, and the renderer answers it by zone.
+ */
+export const WOVEN_HAT_PATTERN =
+  /straw|bamboo|rattan|reed|sedge|grass|palm|raffia|pandanus|cane|fibre|fiber|wicker/;
 
 export type FacialHairStyle =
   | 'full_beard' | 'goatee' | 'mustache' | 'stubble' | 'van_dyke' | 'soul_patch'
@@ -357,7 +373,27 @@ export interface BackgroundSpec {
   base: string;
   accent: string;
   vignette: boolean;
-  texture: 'none' | 'subtle' | 'grain';
+  /**
+   * How much the ground is *modelled* — the depth of the halo behind the head
+   * and of the fall from top to bottom. Flat is not a lesser version of deep:
+   * a tempera panel and a studio wall are both flat on purpose, and an oil
+   * ground is deep on purpose.
+   */
+  depth?: number;
+  /** Pushes the whole ground lighter (negative) or darker (positive). */
+  lift?: number;
+  /**
+   * How hard the vignette closes in, as a multiplier. A century that painted in
+   * oil by a single window darkens its corners a great deal more than one that
+   * photographed against a lit studio wall.
+   */
+  vignetteStrength?: number;
+  /**
+   * The surface the portrait imagines itself made on: the tooth of fresco
+   * plaster, the weave of a primed canvas, the silver grain of an albumen
+   * print, or nothing at all.
+   */
+  texture: 'none' | 'subtle' | 'grain' | 'plaster' | 'weave';
 }
 
 export interface PortraitSpec {

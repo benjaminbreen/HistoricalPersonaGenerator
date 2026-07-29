@@ -5806,6 +5806,79 @@ body.dark-mode .death-stat {
   font-weight: 600;
 }
 
+/* -------------------------------------------------------------------------
+   Standing and rarity
+   Two different claims that both belong near the name: one is about the
+   society this person was born into, the other about the person.
+   ------------------------------------------------------------------------- */
+
+/* The standing pill. Deliberately not the zone colour — it is not a place —
+   and deliberately solid rather than tinted: it sits in a header wash that
+   runs from cream to burnt orange, where the tinted place pill can afford to
+   be quiet and this cannot. */
+.distinction-pill {
+  background: #6d4a63;
+  color: #fdf6ef;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  text-transform: none;
+  letter-spacing: 0.01em;
+  cursor: help;
+}
+
+body.dark-mode .distinction-pill {
+  background: #8a5f7c;
+  color: #fff6ef;
+}
+
+/* The rarity line, directly under the draw odds.
+   Same position as the odds it answers to, and deliberately *not* the same
+   weight: the odds line is scene-setting and can sit back at 0.72 opacity,
+   while this one is the single fact on the card that is about the person
+   rather than their world. It was previously inheriting the odds line's
+   italic 0.76rem at 72% over a cream-to-orange wash, and was illegible. */
+.persona-rarity {
+  margin-top: 0.3rem;
+  font-size: 0.88rem;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  opacity: 1;
+  cursor: help;
+  display: flex;
+  align-items: baseline;
+  gap: 0.4em;
+}
+
+.persona-rarity strong {
+  font-weight: 700;
+  color: var(--rarity-ink, inherit);
+}
+
+/* One glyph, three weights. It carries the tier so the sentence never has to
+   say "legendary" out loud, which would put the card in the register of a game
+   rather than of a record. */
+.rarity-mark {
+  font-size: 1.02em;
+  color: var(--rarity-ink, inherit);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.rarity-notable { --rarity-ink: #3f6b57; }
+.rarity-rare { --rarity-ink: #1f5fae; }
+.rarity-legendary { --rarity-ink: #8a5c05; }
+
+body.dark-mode .rarity-notable { --rarity-ink: #7fc0a4; }
+body.dark-mode .rarity-rare { --rarity-ink: #7db4ff; }
+body.dark-mode .rarity-legendary { --rarity-ink: #e6b542; }
+
+.attribute-rarity {
+  margin-left: 0.5em;
+  font-size: 0.68rem;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
 .draw-odds-mode {
   font-variant: small-caps;
   letter-spacing: 0.04em;

@@ -916,6 +916,76 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         surname: ['Abdi', 'Ahmed', 'Ali', 'Farah', 'Hassan', 'Mohamed', 'Omar', 'Yusuf', 'Abdullahi', 'Hersi', 'Ismail', 'Jama', 'Mahdi', 'Osman', 'Saeed', 'Abdirahman', 'Abdulkadir', 'Dahir', 'Duale', 'Guled', 'Hashi', 'Hussein', 'Ibrahim', 'Issa', 'Mohamud', 'Musa', 'Nur', 'Rashid', 'Sharif', 'Bile']
     },
 
+    /**
+     * The Bantu-speaking centre and south of Africa, which had no naming
+     * traditions of its own here at all.
+     *
+     * `SUB_SAHARAN_AFRICAN` was standing in for the Congo basin, Angola and
+     * everything south of the Zambezi, and its contents are West African —
+     * Kwame, Chinedu, Babatunde, surnames Ogundimu and Oluwaseun. So a woman
+     * in the Kingdom of Kongo in 1400 came out named as a Yoruba fifteen
+     * hundred kilometres away, and pre-colonial Southern Africa was Zulu or
+     * Yoruba on a 10:6 draw with nothing else available. These six sets are
+     * the traditions those regions actually used.
+     *
+     * IGBO is here for the same reason on the other side of the continent:
+     * "West African Forests" contains a locale called Ibo Plateau and the rule
+     * offered only Yoruba and Akan.
+     */
+    IGBO: {
+        male: ['Chinedu', 'Emeka', 'Obinna', 'Ikenna', 'Chukwuma', 'Nnamdi', 'Uche', 'Chidi', 'Ifeanyi', 'Kelechi', 'Chibueze', 'Ekene', 'Arinze', 'Obiora', 'Nwachukwu', 'Chigozie', 'Ndubuisi', 'Onyeka', 'Amaechi', 'Chukwuemeka', 'Ebuka', 'Obiajulu', 'Udoka', 'Somtochukwu', 'Ozoemena', 'Chinonso', 'Ikechukwu', 'Nnaemeka', 'Okwudili', 'Tochukwu'],
+        female: ['Adaeze', 'Chinwe', 'Ngozi', 'Amaka', 'Chiamaka', 'Ifeoma', 'Nneka', 'Obiageli', 'Uzoma', 'Chidinma', 'Ada', 'Nkiru', 'Oluchi', 'Ezinne', 'Ogechi', 'Nwakaego', 'Adaobi', 'Ijeoma', 'Chinyere', 'Uchechi', 'Nkechi', 'Onyinye', 'Chioma', 'Ugochi', 'Akachi', 'Ebele', 'Ihuoma', 'Munachi', 'Ndidi', 'Adanna'],
+        surname: ['Okafor', 'Okonkwo', 'Nwosu', 'Eze', 'Okeke', 'Obi', 'Nwankwo', 'Anyanwu', 'Madu', 'Nnaji', 'Okoye', 'Onwuka', 'Udeh', 'Ugwu', 'Agu', 'Ezeani', 'Ibe', 'Iheanacho', 'Mbah', 'Ndukwe', 'Nwachukwu', 'Ogbonna', 'Ojukwu', 'Onuoha', 'Uba', 'Ugochukwu', 'Chukwu', 'Ike', 'Okoro', 'Anozie']
+    },
+    /**
+     * Kikongo, of the lower Congo and northern Angola. The four Kongo market
+     * days — Nsona, Nkenge, Konzo, Nkandu — are personal names in their own
+     * right, as are the twin names Nsimba and Nzuzi. The surnames are clan and
+     * province names of the kingdom.
+     */
+    KONGO: {
+        male: ['Nsimba', 'Nzuzi', 'Lukeni', 'Mvemba', 'Nkanga', 'Mpanzu', 'Ntinu', 'Mbemba', 'Nsaku', 'Makaya', 'Ndombe', 'Mavungu', 'Nkosi', 'Lemba', 'Kudia', 'Nsona', 'Konzo', 'Nkandu', 'Bakala', 'Muanda', 'Tembo', 'Nzau', 'Mbuta', 'Luzolo', 'Kanga', 'Ngoma', 'Nlaza', 'Mpemba', 'Diakanua', 'Zola'],
+        female: ['Nsimba', 'Nzuzi', 'Kimpa', 'Nkenge', 'Mafuta', 'Kiese', 'Vuvu', 'Nzinga', 'Lunga', 'Mbila', 'Nkento', 'Luzolo', 'Ndona', 'Mpemba', 'Bunga', 'Nsona', 'Nlandu', 'Kudia', 'Zola', 'Makaya', 'Nsangu', 'Mbombo', 'Kiala', 'Ntima', 'Nzola', 'Mavinga', 'Nkumu', 'Lukombo', 'Matondo', 'Kimbembe'],
+        surname: ['Nsundi', 'Mbata', 'Soyo', 'Mpangu', 'Nkanga', 'Lemba', 'Mavungu', 'Ndongala', 'Nzita', 'Malonga', 'Matondo', 'Nkodia', 'Bakala', 'Loko', 'Kiala', 'Mbemba', 'Diakanua', 'Makaba', 'Kimbanda', 'Nzuzi', 'Mpanzu', 'Luzolo', 'Nkosi', 'Mbanza', 'Nsaku', 'Vuzi', 'Nlandu', 'Kimbembe', 'Mbungu', 'Nzambi']
+    },
+    /**
+     * The southern savanna and the Congo interior — Luba, Lunda, Songye, Teke
+     * and the Lualaba headwaters where the Luba states formed.
+     */
+    LUBA: {
+        male: ['Kalala', 'Ilunga', 'Kasongo', 'Mutombo', 'Kabongo', 'Ngoy', 'Mwamba', 'Kabila', 'Tshibangu', 'Kayembe', 'Banza', 'Mukendi', 'Ngongo', 'Kalonji', 'Mbuyi', 'Kanyinda', 'Muteba', 'Nkulu', 'Kazadi', 'Tshimanga', 'Mulumba', 'Kabemba', 'Lukusa', 'Musumba', 'Kapenda', 'Ntambwe', 'Mwepu', 'Kilolo', 'Bwana', 'Kongolo'],
+        female: ['Mbombo', 'Ngalula', 'Kapinga', 'Tshiala', 'Mujinga', 'Bilonda', 'Kabedi', 'Nsona', 'Mwadi', 'Kanku', 'Ntumba', 'Banza', 'Lubaki', 'Mpiana', 'Kasongo', 'Bijoux', 'Tshiabu', 'Kalombo', 'Mande', 'Nkashama', 'Mbuyi', 'Kazadi', 'Lusamba', 'Ngoyi', 'Mwenze', 'Kabuya', 'Tshibola', 'Musenge', 'Kalunga', 'Mputu'],
+        surname: ['Ilunga', 'Kalala', 'Mutombo', 'Kabongo', 'Tshibangu', 'Kayembe', 'Mukendi', 'Kalonji', 'Mbuyi', 'Kanyinda', 'Kazadi', 'Tshimanga', 'Mulumba', 'Lukusa', 'Ntambwe', 'Kongolo', 'Ngoy', 'Mwamba', 'Banza', 'Muteba', 'Nkulu', 'Kabemba', 'Kapenda', 'Mwepu', 'Ngongo', 'Kasongo', 'Kabila', 'Musumba', 'Numbi', 'Wetshi']
+    },
+    /**
+     * Shona, of the Zimbabwe plateau between the Limpopo and the Zambezi. The
+     * surnames are mostly mutupo — clan totems, an animal or a body part —
+     * which is how Shona people identify a family.
+     */
+    SHONA: {
+        male: ['Tendai', 'Tafadzwa', 'Farai', 'Takudzwa', 'Munashe', 'Tinashe', 'Simba', 'Kudakwashe', 'Panashe', 'Anesu', 'Tapiwa', 'Chenjerai', 'Garikai', 'Tonderai', 'Shingirai', 'Batsirai', 'Mufaro', 'Tatenda', 'Ngonidzashe', 'Munyaradzi', 'Tichaona', 'Zvikomborero', 'Kudzai', 'Nyasha', 'Tavonga', 'Rugare', 'Taonga', 'Chiedza', 'Mudiwa', 'Simbarashe'],
+        female: ['Rudo', 'Chipo', 'Tsitsi', 'Nyasha', 'Vimbai', 'Rutendo', 'Ropafadzo', 'Anesu', 'Fadzai', 'Chiedza', 'Tariro', 'Shamiso', 'Nyaradzo', 'Rumbidzai', 'Tendai', 'Kudzai', 'Mazvita', 'Netsai', 'Sekai', 'Tambudzai', 'Yeukai', 'Chenai', 'Danai', 'Farirai', 'Gamuchirai', 'Kundai', 'Tapiwa', 'Nhamo', 'Ratidzo', 'Muchaneta'],
+        surname: ['Moyo', 'Ncube', 'Sibanda', 'Dube', 'Shumba', 'Gumbo', 'Nyoni', 'Mpofu', 'Mhlanga', 'Zhou', 'Mutasa', 'Chirwa', 'Makoni', 'Rusike', 'Madziva', 'Chikwanha', 'Mavhunga', 'Nyathi', 'Bhebhe', 'Muzenda', 'Zvobgo', 'Chigumba', 'Marufu', 'Mangwiro', 'Nyandoro', 'Chihuri', 'Mutumbuka', 'Gwenzi', 'Mureyi', 'Tsvangirai']
+    },
+    /**
+     * Xhosa, of the Eastern Cape. The surnames are isiduko — clan names —
+     * which precede and outrank the personal name in introduction.
+     */
+    XHOSA: {
+        male: ['Sipho', 'Thembekile', 'Vuyani', 'Zolani', 'Lungile', 'Bulelani', 'Sandile', 'Luthando', 'Siyabonga', 'Mzwandile', 'Nkosinathi', 'Anele', 'Khaya', 'Lwandle', 'Mthetho', 'Odwa', 'Sive', 'Thando', 'Unathi', 'Vuyo', 'Xolani', 'Yanga', 'Zwelethu', 'Athi', 'Loyiso', 'Masixole', 'Sibusiso', 'Mandla', 'Ayanda', 'Mzukisi'],
+        female: ['Nomsa', 'Nomvula', 'Thandiwe', 'Nobuhle', 'Zanele', 'Nolitha', 'Nosipho', 'Bulelwa', 'Asanda', 'Lindiwe', 'Nokwanda', 'Phumla', 'Sindiswa', 'Zodwa', 'Babalwa', 'Nomalanga', 'Nozipho', 'Khanyisa', 'Lulama', 'Nandipha', 'Nokuthula', 'Nomonde', 'Ntombizanele', 'Sisipho', 'Thandeka', 'Vuyokazi', 'Xoliswa', 'Zintle', 'Noluthando', 'Nobantu'],
+        surname: ['Mandela', 'Sisulu', 'Tutu', 'Mbeki', 'Sobukwe', 'Matanzima', 'Mqhayi', 'Jabavu', 'Rubusana', 'Soga', 'Bhele', 'Dlomo', 'Gcaleka', 'Hlubi', 'Jola', 'Khawuta', 'Mpondo', 'Ndlambe', 'Ngqika', 'Rharhabe', 'Thembu', 'Zizi', 'Ngcuka', 'Makhanda', 'Mnyanda', 'Nkosiyane', 'Qwathi', 'Tshawe', 'Mfengu', 'Sukwini']
+    },
+    /**
+     * Sotho-Tswana, of the highveld, Lesotho and the Kalahari margin. The
+     * surnames are chiefly and clan lines — Moshoeshoe, Khama, Sechele.
+     */
+    SOTHO_TSWANA: {
+        male: ['Thabo', 'Lehlohonolo', 'Katlego', 'Tumelo', 'Kagiso', 'Neo', 'Tshepo', 'Mpho', 'Karabo', 'Bokang', 'Kabelo', 'Lesego', 'Ofentse', 'Boitumelo', 'Tebogo', 'Itumeleng', 'Motheo', 'Realeboga', 'Sechaba', 'Teboho', 'Mothusi', 'Kgosi', 'Oarabile', 'Tshiamo', 'Refiloe', 'Reabetswe', 'Molefi', 'Lebohang', 'Onkgopotse', 'Ditiro'],
+        female: ['Palesa', 'Lerato', 'Dikeledi', 'Nthabiseng', 'Mmabatho', 'Kelebogile', 'Boitumelo', 'Tshegofatso', 'Refilwe', 'Keneilwe', 'Mamello', 'Mosa', 'Naledi', 'Puleng', 'Realeboga', 'Tebogo', 'Bontle', 'Gomolemo', 'Kagiso', 'Lebohang', 'Masego', 'Mpho', 'Neo', 'Onalenna', 'Reitumetse', 'Kgomotso', 'Matshidiso', 'Sethunya', 'Mmapula', 'Ntsoaki'],
+        surname: ['Molefe', 'Moloi', 'Mokoena', 'Sekhukhune', 'Modise', 'Motaung', 'Mokgatle', 'Letsie', 'Mofokeng', 'Tsotetsi', 'Mabaso', 'Phiri', 'Selepe', 'Tau', 'Mothibi', 'Khama', 'Sechele', 'Moshoeshoe', 'Seretse', 'Pilane', 'Rakoma', 'Kgosana', 'Setshwane', 'Nkoane', 'Mmusi', 'Motlanthe', 'Ramotswe', 'Lekota', 'Masire', 'Ntsu']
+    },
+
     // === OCEANIA SUB-GROUPS ===
     POLYNESIAN: {
         male: ['Manaia', 'Hemi', 'Tane', 'Rangi', 'Kai', 'Aroha', 'Wiremu', 'Te Koha', 'Mahina', 'Teiva', 'Koa', 'Keoni', 'Nalani', 'Kawika', 'Ikaika', 'Akamu', 'Keanu', 'Makoa', 'Anaru', 'Rawiri', 'Tamati', 'Hoani', 'Pita', 'Rewi', 'Tawhiri', 'Rongo', 'Tama', 'Koru', 'Whai', 'Turi'],
@@ -2076,16 +2146,47 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
                 weights: { YORUBA_MODERN: 10, YORUBA_TRADITIONAL: 6, WEST_AFRICAN_SAHEL: 8 },
             }
         ],
+        // Cross River Delta, Bantu Uplands, Kinshasa Hinterland, Ituri, the
+        // Congo bend and the Kongo coast. Not one Yoruba locality among them,
+        // and Yoruba plus the West African house set were the only options.
+        // `SUB_SAHARAN_AFRICAN` is deliberately gone from this region and the
+        // two below: its contents are West African, so as a stand-in for the
+        // Congo it was not a generic answer but a wrong one. Kikongo and Luba
+        // stand in for the peoples still without sets — Mongo, Teke, Fang —
+        // which at least keeps the family and the continent's half right.
+        // Cross River is Igbo and Efik country, a thousand kilometres from the
+        // Kongo coast at the other end of the same map region.
+        "Cross River Delta": [
+            { before: 500, keys: ['PREHISTORIC_AFRICAN'] },
+            { after: 500, keys: ['IGBO'] }
+        ],
+        "Kongo Coast": [
+            { before: 500, keys: ['PREHISTORIC_AFRICAN'] },
+            { after: 500, before: 1480, keys: ['KONGO'] },
+            { after: 1480, keys: ['KONGO', 'PORTUGUESE'], weights: { KONGO: 30, PORTUGUESE: 1 } }
+        ],
+        "Kinshasa Hinterland": [
+            { before: 500, keys: ['PREHISTORIC_AFRICAN'] },
+            { after: 500, keys: ['KONGO', 'LUBA'], weights: { KONGO: 12, LUBA: 5 } }
+        ],
+        "Lualaba Headwaters": [
+            { before: 500, keys: ['PREHISTORIC_AFRICAN'] },
+            { after: 500, keys: ['LUBA'] }
+        ],
         "Lower Guinea and Congo Basin": [
-            { before: 1480, keys: ['YORUBA_TRADITIONAL', 'SUB_SAHARAN_AFRICAN'] },
+            { before: 500, keys: ['PREHISTORIC_AFRICAN'] },
             {
-                after: 1480, before: 1960,
-                keys: ['YORUBA_TRADITIONAL', 'YORUBA_MODERN', 'SUB_SAHARAN_AFRICAN', 'PORTUGUESE', 'FRENCH', 'DUTCH'],
-                weights: { YORUBA_TRADITIONAL: 10, YORUBA_MODERN: 5, SUB_SAHARAN_AFRICAN: 8, PORTUGUESE: 1, FRENCH: 1, DUTCH: 1 },
+                after: 500, before: 1480, keys: ['KONGO', 'LUBA', 'IGBO'],
+                weights: { KONGO: 14, LUBA: 10, IGBO: 8 },
             },
             {
-                after: 1960, keys: ['YORUBA_MODERN', 'SUB_SAHARAN_AFRICAN', 'FRENCH'],
-                weights: { YORUBA_MODERN: 10, SUB_SAHARAN_AFRICAN: 8, FRENCH: 1 },
+                after: 1480, before: 1960,
+                keys: ['KONGO', 'LUBA', 'IGBO', 'PORTUGUESE', 'FRENCH', 'DUTCH'],
+                weights: { KONGO: 14, LUBA: 10, IGBO: 8, PORTUGUESE: 1, FRENCH: 1, DUTCH: 1 },
+            },
+            {
+                after: 1960, keys: ['KONGO', 'LUBA', 'IGBO', 'FRENCH'],
+                weights: { KONGO: 14, LUBA: 10, IGBO: 8, FRENCH: 1 },
             }
         ],
         "Horn of Africa": [
@@ -2135,42 +2236,96 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             },
             { after: 1960, keys: ['SWAHILI_COASTAL'] }
         ],
+        // The Cape and Karoo are Xhosa, the highveld and Kalahari margin are
+        // Sotho-Tswana, the Limpopo and Zambezi are Shona, and only the
+        // Drakensberg side is Zulu — and Zulu as a naming tradition dates from
+        // the kingdom, so the era gate keeps it out of the earlier window on
+        // its own. Khoisan naming is still missing and nothing here stands in
+        // for it honestly; the Cape before the Bantu arrival is the gap.
         "Southern Africa": [
-            { before: 1652, keys: ['ZULU', 'SUB_SAHARAN_AFRICAN'] },
+            { before: 300, keys: ['PREHISTORIC_AFRICAN'] },
+            {
+                after: 300, before: 1652, keys: ['SOTHO_TSWANA', 'XHOSA', 'SHONA', 'ZULU'],
+                weights: { SOTHO_TSWANA: 13, XHOSA: 9, SHONA: 14, ZULU: 12 },
+            },
             {
                 // The one region where a settler pool genuinely deserves real
                 // weight: by 1900 whites were about a fifth of the population
                 // of what became South Africa. Still not half, which is what a
-                // uniform draw over four keys was giving them.
-                after: 1652, before: 1994, keys: ['ZULU', 'SUB_SAHARAN_AFRICAN', 'DUTCH', 'ENGLISH'],
-                weights: { ZULU: 10, SUB_SAHARAN_AFRICAN: 6, DUTCH: 2, ENGLISH: 2 },
+                // uniform draw over four keys was giving them — and this region
+                // reaches well past South Africa, into Zimbabwe and the
+                // Zambezi, where they were a few percent at most.
+                after: 1652, before: 1994, keys: ['ZULU', 'XHOSA', 'SOTHO_TSWANA', 'SHONA', 'DUTCH', 'ENGLISH'],
+                weights: { ZULU: 12, XHOSA: 9, SOTHO_TSWANA: 13, SHONA: 14, DUTCH: 3, ENGLISH: 3 },
             },
             {
-                after: 1994, keys: ['ZULU', 'SUB_SAHARAN_AFRICAN', 'ENGLISH', 'DUTCH'],
-                weights: { ZULU: 10, SUB_SAHARAN_AFRICAN: 6, ENGLISH: 2, DUTCH: 1 },
+                after: 1994, keys: ['ZULU', 'XHOSA', 'SOTHO_TSWANA', 'SHONA', 'ENGLISH', 'DUTCH'],
+                weights: { ZULU: 12, XHOSA: 9, SOTHO_TSWANA: 13, SHONA: 14, ENGLISH: 2, DUTCH: 2 },
             }
         ],
+        // Ubangi, the equatorial forest, Lake Tanganyika, the Bateke plateau
+        // and the Lualaba headwaters, which is where the Luba states formed.
         "Central Africa": [
-            { before: 1870, keys: ['SUB_SAHARAN_AFRICAN', 'RWANDA_BURUNDI'] },
+            { before: 500, keys: ['PREHISTORIC_AFRICAN'] },
+            {
+                after: 500, before: 1870, keys: ['LUBA', 'RWANDA_BURUNDI', 'KONGO'],
+                weights: { LUBA: 14, RWANDA_BURUNDI: 10, KONGO: 7 },
+            },
             {
                 // Belgian and French Central Africa had among the smallest
                 // settler populations on the continent. The old rule listed
                 // no African set at all for this window, so every persona in
                 // the Congo basin after 1870 came out French or Portuguese.
-                after: 1870, keys: ['SUB_SAHARAN_AFRICAN', 'RWANDA_BURUNDI', 'FRENCH', 'PORTUGUESE'],
-                weights: { SUB_SAHARAN_AFRICAN: 16, RWANDA_BURUNDI: 10, FRENCH: 1, PORTUGUESE: 1 },
+                after: 1870, keys: ['LUBA', 'RWANDA_BURUNDI', 'KONGO', 'FRENCH', 'PORTUGUESE'],
+                weights: { LUBA: 14, RWANDA_BURUNDI: 10, KONGO: 7, FRENCH: 1, PORTUGUESE: 1 },
             }
         ],
+        // The Niger is the line: Yoruba and Edo to the west of it, Igbo to the
+        // east, and the region-level rule below cannot tell them apart — it put
+        // Igbo names in the Oyo hinterland, which is the Yoruba heartland, as
+        // readily as on the Ibo plateau. The locale rules do the dividing.
+        "Oyo Hinterland": [
+            { before: 1960, keys: ['YORUBA_TRADITIONAL'] },
+            { after: 1960, keys: ['YORUBA_MODERN', 'YORUBA_TRADITIONAL'], weights: { YORUBA_MODERN: 10, YORUBA_TRADITIONAL: 4 } }
+        ],
+        "Ogun River Basin": [
+            { before: 1960, keys: ['YORUBA_TRADITIONAL'] },
+            { after: 1960, keys: ['YORUBA_MODERN', 'YORUBA_TRADITIONAL'], weights: { YORUBA_MODERN: 10, YORUBA_TRADITIONAL: 4 } }
+        ],
+        // Benin is Edo, which has no set of its own; Yoruba is the neighbouring
+        // tradition and the closer of the two by a long way.
+        "Benin Lowlands": [
+            { before: 1960, keys: ['YORUBA_TRADITIONAL'] },
+            { after: 1960, keys: ['YORUBA_MODERN', 'YORUBA_TRADITIONAL'], weights: { YORUBA_MODERN: 10, YORUBA_TRADITIONAL: 4 } }
+        ],
+        "Ibo Plateau": [
+            { keys: ['IGBO'] }
+        ],
+        // Ijaw, Itsekiri and Efik have no sets; Igbo is the delta's largest
+        // tradition and its immediate neighbour.
+        "Niger Delta": [
+            { keys: ['IGBO'] }
+        ],
+        // The Middle Belt is neither: Hausa and the Sahel reach down into it.
+        "Jos Plateau": [
+            {
+                keys: ['HAUSA', 'WEST_AFRICAN_SAHEL', 'IGBO'],
+                weights: { HAUSA: 10, WEST_AFRICAN_SAHEL: 8, IGBO: 4 },
+            }
+        ],
+        // One of this region's six locales is called Ibo Plateau and another is
+        // the Niger Delta, and the rule offered Yoruba or Akan. Igbo speakers
+        // are about as numerous as Yoruba and were being named as Yoruba.
         "West African Forests": [
-            { before: 1600, keys: ['YORUBA_TRADITIONAL', 'AKAN'] },
+            { before: 1600, keys: ['YORUBA_TRADITIONAL', 'IGBO', 'AKAN'], weights: { YORUBA_TRADITIONAL: 14, IGBO: 14, AKAN: 7 } },
             {
                 after: 1600, before: 1960,
-                keys: ['YORUBA_TRADITIONAL', 'YORUBA_MODERN', 'AKAN', 'ENGLISH'],
-                weights: { YORUBA_TRADITIONAL: 10, YORUBA_MODERN: 5, AKAN: 10, ENGLISH: 1 },
+                keys: ['YORUBA_TRADITIONAL', 'YORUBA_MODERN', 'IGBO', 'AKAN', 'ENGLISH'],
+                weights: { YORUBA_TRADITIONAL: 10, YORUBA_MODERN: 4, IGBO: 14, AKAN: 7, ENGLISH: 1 },
             },
             {
-                after: 1960, keys: ['YORUBA_MODERN', 'YORUBA_TRADITIONAL', 'AKAN'],
-                weights: { YORUBA_MODERN: 10, YORUBA_TRADITIONAL: 5, AKAN: 10 },
+                after: 1960, keys: ['YORUBA_MODERN', 'YORUBA_TRADITIONAL', 'IGBO', 'AKAN'],
+                weights: { YORUBA_MODERN: 10, YORUBA_TRADITIONAL: 4, IGBO: 14, AKAN: 7 },
             }
         ],
         "Madagascar and Islands": [
@@ -2190,14 +2345,25 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
      * geography filed the Philippines under the South Asian continent.
      */
     "SOUTHEAST_ASIAN": {
+        // Maritime Southeast Asia below had its colonial keys removed outright;
+        // these three rules kept theirs on a uniform draw, which put French
+        // settlers at two in five on the mainland and one in three in Siam —
+        // a country that was never colonised at all. French Indochina held
+        // perhaps forty thousand Europeans against twenty million Vietnamese.
         "Mainland Southeast Asia": [
             { before: 1000, keys: ['KHMER', 'BURMESE'] },
             { after: 1000, before: 1887, keys: ['KHMER', 'VIETNAMESE', 'THAI', 'BURMESE', 'MALAY'] },
-            { after: 1887, keys: ['VIETNAMESE', 'THAI', 'KHMER', 'FRENCH', 'ENGLISH'] }
+            {
+                after: 1887, keys: ['VIETNAMESE', 'THAI', 'KHMER', 'FRENCH', 'ENGLISH'],
+                weights: { VIETNAMESE: 16, THAI: 12, KHMER: 10, FRENCH: 1, ENGLISH: 1 },
+            }
         ],
         "Indochina Interior": [
             { before: 1893, keys: ['THAI', 'KHMER', 'VIETNAMESE'] },
-            { after: 1893, keys: ['THAI', 'FRENCH', 'VIETNAMESE'] }
+            {
+                after: 1893, keys: ['THAI', 'FRENCH', 'VIETNAMESE'],
+                weights: { THAI: 24, VIETNAMESE: 15, FRENCH: 1 },
+            }
         ],
         "Maritime Southeast Asia": [
            { before: 800, keys: ['INDONESIAN', 'VIETNAMESE'] },
@@ -2209,27 +2375,55 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1300, before: 1945, keys: ['MALAY_ISLAMIC_HISTORICAL', 'MALAY', 'INDONESIAN', 'JAVANESE'] },
             { after: 1945, keys: ['MALAY', 'INDONESIAN', 'CHINESE_CANTONESE'] }
         ],
+        // The FILIPINO set already carries the hispanised surnames the Clavería
+        // decree of 1849 made near-universal — dela Cruz, Santos, Reyes, Garcia
+        // — so listing a Spanish set beside it does not add Spanish naming, it
+        // adds actual Spaniards, who were well under one percent. Same for the
+        // American and Japanese periods, neither of which displaced local names.
         "Philippines": [
             { before: 1565, keys: ['MELANESIAN'] },
-            { after: 1565, before: 1898, keys: ['FILIPINO', 'SPANISH_CASTILIAN'] },
-            { after: 1898, keys: ['FILIPINO', 'ENGLISH', 'SPANISH_LATIN_AMERICAN', 'JAPANESE'] }
+            {
+                after: 1565, before: 1898, keys: ['FILIPINO', 'SPANISH_CASTILIAN'],
+                weights: { FILIPINO: 39, SPANISH_CASTILIAN: 1 },
+            },
+            {
+                after: 1898, keys: ['FILIPINO', 'ENGLISH', 'SPANISH_LATIN_AMERICAN', 'JAPANESE'],
+                weights: { FILIPINO: 37, ENGLISH: 1, SPANISH_LATIN_AMERICAN: 1, JAPANESE: 1 },
+            }
         ],
     },
+    /**
+     * The Raj-era rules named `ENGLISH` beside the region's own traditions and
+     * left the draw uniform, so a quarter to a third of everyone born in India
+     * after 1857 came out called Florence Green. Anglo-Indians and resident
+     * Britons together never reached half a percent of the population; the
+     * weights below put them at roughly one in forty, which is still generous
+     * and leaves the set reachable for the households where it belongs.
+     */
     "SOUTH_ASIAN": {
         "Indus Valley": [
             { before: 1206, keys: ['SANSKRIT_CLASSICAL', 'PUNJABI'] },
             { after: 1206, before: 1857, keys: ['PUNJABI', 'PERSIAN_FARSI', 'HINDI'] },
-            { after: 1857, keys: ['PUNJABI', 'HINDI', 'ENGLISH'] }
+            {
+                after: 1857, keys: ['PUNJABI', 'HINDI', 'ENGLISH'],
+                weights: { PUNJABI: 22, HINDI: 17, ENGLISH: 1 },
+            }
         ],
         "Gangetic Plain": [
             { before: 1206, keys: ['SANSKRIT_CLASSICAL', 'HINDI'] },
             { after: 1206, before: 1857, keys: ['HINDI', 'PERSIAN_FARSI', 'RAJPUT'] },
-            { after: 1857, keys: ['HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'ENGLISH'] }
+            {
+                after: 1857, keys: ['HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'ENGLISH'],
+                weights: { HINDI: 21, BENGALI_TRADITIONAL: 9, BENGALI_MODERN: 9, ENGLISH: 1 },
+            }
         ],
         "Deccan Plateau": [
             { before: 1347, keys: ['DRAVIDIAN', 'TAMIL'] },
             { after: 1347, before: 1857, keys: ['TAMIL', 'DRAVIDIAN', 'HINDI', 'PERSIAN_FARSI'] },
-            { after: 1857, keys: ['TAMIL', 'DRAVIDIAN', 'HINDI', 'ENGLISH'] }
+            {
+                after: 1857, keys: ['TAMIL', 'DRAVIDIAN', 'HINDI', 'ENGLISH'],
+                weights: { TAMIL: 15, DRAVIDIAN: 13, HINDI: 11, ENGLISH: 1 },
+            }
         ],
         "Himalayas and Northeast": [
             { keys: ['SANSKRIT_CLASSICAL', 'HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'CHINESE_MANDARIN'] }
@@ -2238,12 +2432,30 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { before: 1200, keys: ['SANSKRIT_CLASSICAL', 'DRAVIDIAN'] },
             { after: 1200, keys: ['HINDI', 'RAJPUT', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN'] }
         ],
+        // Four colonial windows stacked here, each drawn from uniformly, so
+        // half of British-period Ceylon was coming out European. The Burghers
+        // were about half a percent. Portuguese weighs higher than the others
+        // from the Dutch period on: coastal Catholic converts kept Portuguese
+        // given names and surnames long after the Portuguese left, which is a
+        // local naming tradition rather than a settler one.
         "Sri Lanka": [
             { before: 1505, keys: ['DRAVIDIAN', 'TAMIL', 'SANSKRIT_CLASSICAL'] },
-            { after: 1505, before: 1658, keys: ['TAMIL', 'DRAVIDIAN', 'PORTUGUESE'] },
-            { after: 1658, before: 1796, keys: ['TAMIL', 'DRAVIDIAN', 'DUTCH', 'PORTUGUESE'] },
-            { after: 1796, before: 1948, keys: ['TAMIL', 'DRAVIDIAN', 'ENGLISH', 'DUTCH'] },
-            { after: 1948, keys: ['TAMIL', 'DRAVIDIAN', 'ENGLISH'] }
+            {
+                after: 1505, before: 1658, keys: ['TAMIL', 'DRAVIDIAN', 'PORTUGUESE'],
+                weights: { TAMIL: 20, DRAVIDIAN: 19, PORTUGUESE: 1 },
+            },
+            {
+                after: 1658, before: 1796, keys: ['TAMIL', 'DRAVIDIAN', 'DUTCH', 'PORTUGUESE'],
+                weights: { TAMIL: 20, DRAVIDIAN: 16, PORTUGUESE: 3, DUTCH: 1 },
+            },
+            {
+                after: 1796, before: 1948, keys: ['TAMIL', 'DRAVIDIAN', 'ENGLISH', 'DUTCH'],
+                weights: { TAMIL: 22, DRAVIDIAN: 16, ENGLISH: 1, DUTCH: 1 },
+            },
+            {
+                after: 1948, keys: ['TAMIL', 'DRAVIDIAN', 'ENGLISH'],
+                weights: { TAMIL: 24, DRAVIDIAN: 15, ENGLISH: 1 },
+            }
         ],
         // Southeast Asia
         "Taiwan and East China Sea": [
@@ -2295,8 +2507,39 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { before: 1900, keys: ['CHINESE_CANTONESE', 'VIETNAMESE'] },
             { after: 1900, keys: ['CHINESE_CANTONESE', 'ENGLISH', 'PORTUGUESE'] }
         ],
+        /**
+         * One undated rule of `['CHINESE_MANDARIN', 'PREHISTORIC_ASIAN']` for
+         * the whole of history, so every persona from Lhasa to Kailash in every
+         * century came out with a Han name — while a fully authored `TIBETAN`
+         * set sat in CHARACTER_NAMES unreachable from any rule.
+         *
+         * The three Tibetan-plateau locales are split out because the region
+         * bundles them with the Sichuan basin, and its locales draw close to
+         * evenly: a single rule here is wrong for half the region whichever way
+         * it leans. Written Tibetan dates from the imperial period in the
+         * seventh century; before that the plateau takes the reconstructed set.
+         */
+        "Tibetan Plateau": [
+            { before: 600, keys: ['PREHISTORIC_ASIAN'] },
+            { after: 600, keys: ['TIBETAN', 'CHINESE_MANDARIN'], weights: { TIBETAN: 24, CHINESE_MANDARIN: 1 } }
+        ],
+        "Kailash Region": [
+            { before: 600, keys: ['PREHISTORIC_ASIAN'] },
+            { after: 600, keys: ['TIBETAN'] }
+        ],
+        "Himalayan Slopes": [
+            { before: 600, keys: ['PREHISTORIC_ASIAN'] },
+            { after: 600, keys: ['TIBETAN', 'BENGALI_TRADITIONAL'], weights: { TIBETAN: 14, BENGALI_TRADITIONAL: 3 } }
+        ],
+        // Kham and Amdo: genuinely mixed, and the Sichuan basin behind them is
+        // Han and has been since the Qin.
+        "Eastern Plateau Slopes": [
+            { before: 600, keys: ['PREHISTORIC_ASIAN'] },
+            { after: 600, keys: ['TIBETAN', 'CHINESE_MANDARIN'], weights: { TIBETAN: 10, CHINESE_MANDARIN: 7 } }
+        ],
         "West China and Tibet": [
-            { keys: ['CHINESE_MANDARIN', 'PREHISTORIC_ASIAN'] }
+            { before: -1500, keys: ['PREHISTORIC_ASIAN'] },
+            { after: -1500, keys: ['CHINESE_MANDARIN', 'TIBETAN'], weights: { CHINESE_MANDARIN: 12, TIBETAN: 5 } }
         ],
         "Japan": [
             { keys: ['JAPANESE'] } // Relatively isolated
@@ -2307,12 +2550,29 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1910, before: 1945, keys: ['KOREAN', 'JAPANESE'] },
             { after: 1945, keys: ['KOREAN'] }
         ],
+        /**
+         * The region named after the Uyghurs never drew a Uyghur name: the set
+         * exists in CHARACTER_NAMES and no rule reached it, so the Tarim basin
+         * was populated with Uzbeks and Kazakhs instead. The Uyghurs move into
+         * the Tarim after the Khaganate falls in 840 and the oasis towns are
+         * Uyghur-speaking and Muslim from the tenth century on; today they are
+         * about 45% of Xinjiang against 42% Han.
+         */
         "Xinjiang": [
             { before: -200, keys: ['PREHISTORIC_ASIAN', 'SOGDIAN', 'PERSIAN_ANCIENT'] }, // Tocharian/Indo-European period
             { after: -200, before: 750, keys: ['SOGDIAN', 'CHINESE_MANDARIN', 'PERSIAN_KHORASAN'] }, // Silk Road period
-            { after: 750, before: 1000, keys: ['SOGDIAN', 'TURKIC_STEPPE', 'CHINESE_MANDARIN'] }, // Uyghur Kingdom period
-            { after: 1000, before: 1759, keys: ['UZBEK', 'TURKIC_STEPPE', 'MONGOLIAN_TRADITIONAL'] }, // Islamic Turkic period
-            { after: 1759, keys: ['UZBEK', 'KAZAKH', 'CHINESE_MANDARIN'] } // Qing and modern period
+            {
+                after: 750, before: 1000, keys: ['UYGHUR', 'SOGDIAN', 'TURKIC_STEPPE', 'CHINESE_MANDARIN'],
+                weights: { UYGHUR: 8, SOGDIAN: 6, TURKIC_STEPPE: 5, CHINESE_MANDARIN: 2 },
+            }, // Uyghur Khaganate collapses in 840; the Tarim becomes Uyghur
+            {
+                after: 1000, before: 1759, keys: ['UYGHUR', 'TURKIC_STEPPE', 'UZBEK', 'MONGOLIAN_TRADITIONAL'],
+                weights: { UYGHUR: 16, TURKIC_STEPPE: 5, UZBEK: 3, MONGOLIAN_TRADITIONAL: 3 },
+            },
+            {
+                after: 1759, keys: ['UYGHUR', 'CHINESE_MANDARIN', 'KAZAKH', 'UZBEK'],
+                weights: { UYGHUR: 16, CHINESE_MANDARIN: 10, KAZAKH: 3, UZBEK: 1 },
+            } // Qing and modern period
         ],
         "Taiwan and Ryukyu": [
             { before: 1600, keys: ['CHINESE_CANTONESE', 'POLYNESIAN', 'PREHISTORIC_ASIAN'] }, // Indigenous Austronesian + early Chinese contact
@@ -2684,9 +2944,10 @@ export function getEraSpecificFallback(zone: CulturalZone, year: number): Fallba
             }
             return {
                 groups: [
-                    'YORUBA_TRADITIONAL', 'AKAN', 'HAUSA', 'WEST_AFRICAN_SAHEL',
+                    'YORUBA_TRADITIONAL', 'IGBO', 'AKAN', 'HAUSA', 'WEST_AFRICAN_SAHEL',
                     'SWAHILI_COASTAL', 'SWAHILI_INTERIOR', 'AMHARIC', 'SOMALI',
-                    'ZULU', 'RWANDA_BURUNDI', 'SUB_SAHARAN_AFRICAN',
+                    'ZULU', 'XHOSA', 'SOTHO_TSWANA', 'SHONA', 'KONGO', 'LUBA',
+                    'RWANDA_BURUNDI', 'SUB_SAHARAN_AFRICAN',
                 ],
             };
 
@@ -2844,7 +3105,7 @@ export function getCulturalGroupsByZone(zone: CulturalZone): string[] {
             );
         case 'EAST_ASIAN':
             return groups.filter(g => 
-                ['JAPANESE', 'CHINESE_MANDARIN', 'CHINESE_CANTONESE', 'KOREAN', 'KOREAN_ANCIENT', 'MONGOLIAN_TRADITIONAL', 'KAZAKH', 'UZBEK', 'KYRGYZ', 'TURKMEN', 'EAST_ASIAN'].includes(g)
+                ['JAPANESE', 'CHINESE_MANDARIN', 'CHINESE_CANTONESE', 'KOREAN', 'KOREAN_ANCIENT', 'MONGOLIAN_TRADITIONAL', 'KAZAKH', 'UZBEK', 'KYRGYZ', 'TURKMEN', 'TIBETAN', 'UYGHUR', 'MANCHU', 'EAST_ASIAN'].includes(g)
             );
         case 'MENA':
             return groups.filter(g => 
@@ -2861,7 +3122,7 @@ export function getCulturalGroupsByZone(zone: CulturalZone): string[] {
             );
         case 'SUB_SAHARAN_AFRICAN':
             return groups.filter(g => 
-                ['YORUBA_TRADITIONAL', 'YORUBA_MODERN', 'SWAHILI_COASTAL', 'SWAHILI_INTERIOR', 'AKAN', 'HAUSA', 'SOMALI', 'WEST_AFRICAN_SAHEL', 'RWANDA_BURUNDI', 'AMHARIC', 'ZULU', 'MALAGASY_MERINA', 'MALAGASY_BETSILEO', 'MALAGASY_SAKALAVA', 'SUB_SAHARAN_AFRICAN'].includes(g)
+                ['YORUBA_TRADITIONAL', 'YORUBA_MODERN', 'SWAHILI_COASTAL', 'SWAHILI_INTERIOR', 'AKAN', 'HAUSA', 'SOMALI', 'WEST_AFRICAN_SAHEL', 'RWANDA_BURUNDI', 'AMHARIC', 'ZULU', 'IGBO', 'KONGO', 'LUBA', 'SHONA', 'XHOSA', 'SOTHO_TSWANA', 'MALAGASY_MERINA', 'MALAGASY_BETSILEO', 'MALAGASY_SAKALAVA', 'SUB_SAHARAN_AFRICAN'].includes(g)
             );
         case 'OCEANIA':
             return groups.filter(g => 

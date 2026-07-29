@@ -16,6 +16,7 @@ import React, {
   forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState,
 } from 'react';
 import { Raster } from './core/raster';
+import { distinctionTierFor, drawDistinctionMark } from './art/distinctionMark';
 import { buildPortraitSpec, normalizeExpression, PortraitSource, restingExpression } from './spec/buildSpec';
 import { Expression } from './spec/types';
 import { compilePortrait, renderFrame, FrameState } from './render/pipeline';
@@ -63,6 +64,11 @@ function portraitSignature(character: PortraitSource): string {
     character.portraitVisualOverrides,
     character.diseaseHealth,
     character.personality,
+    // Both touch the backdrop, so a persona that gains a standing must
+    // recompile — otherwise the ground stays whatever the last one had.
+    character.rarityTier,
+    character.hasDistinction,
+    character.distinctionShare,
   ]);
 }
 
@@ -100,6 +106,12 @@ const PixelPortrait = forwardRef<PixelPortraitHandle, PixelPortraitProps>(functi
   const spec = useMemo(() => buildPortraitSpec(character), [signature]);
   const compiled = useMemo(() => compilePortrait(spec), [spec]);
   const resting = useMemo(() => restingExpression(spec.mood, spec.condition), [spec]);
+  // Only the rarest standings are marked, and the threshold is the share of the
+  // population that held them rather than the fact of holding one.
+  const distinction = distinctionTierFor(
+    (character as { distinctionShare?: number }).distinctionShare,
+    (character as { profession?: string }).profession,
+  );
 
   const [override, setOverride] = useState<Expression | null>(null);
 
@@ -150,7 +162,12 @@ const PixelPortrait = forwardRef<PixelPortraitHandle, PixelPortraitProps>(functi
       const destRow = breath > 0 ? 0 : n - 1;
       ctx.drawImage(off, 0, srcRow, n, 1, 0, destRow, n, 1);
     }
-  }, [compiled]);
+
+    // Painted last and over the finished bust, so it does not ride the breath
+    // shift above. A badge that bobbed with the chest would read as part of the
+    // drawing rather than as a note about it.
+    drawDistinctionMark(ctx, n, distinction, performance.now());
+  }, [compiled, distinction]);
 
   // Static render whenever the portrait, expression, or animation flag changes.
   useEffect(() => {

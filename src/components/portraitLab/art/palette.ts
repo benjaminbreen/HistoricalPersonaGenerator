@@ -28,6 +28,8 @@ export interface PortraitRamps {
   clothB: Ramp;
   clothC: Ramp;
   headwear: Ramp;
+  headwearAccent: Ramp;
+  foliage: Ramp;
   metal: Ramp;
   gem: Ramp;
   leather: Ramp;
@@ -84,6 +86,27 @@ function conditionSkin(hex: string, pallor: number, fever: number): string {
   });
   if (fever <= 0) return rgbToHex(sick);
   return rgbToHex(mixRgb(sick, { r: 196, g: 96, b: 82 }, fever * 0.14));
+}
+
+/**
+ * The second colour a covering is allowed to be patterned in.
+ *
+ * A pattern at this size is not a hue difference, it is a *value* difference: a
+ * madder check on a madder ground is not a check, it is a slightly noisy field.
+ * So the persona's own accent is kept whenever it already stands apart, and
+ * pushed apart when it does not — rather than being dropped for a neutral,
+ * which would throw away the one piece of period-correct colour information
+ * the clothing tables actually supply.
+ */
+function contrastingAccent(base: string, accent: string): string {
+  const baseLum = luminance(hexToRgb(base));
+  const accentRgb = hexToRgb(accent);
+  if (Math.abs(luminance(accentRgb) - baseLum) >= 0.16) return accent;
+  const hsl = rgbToHsl(accentRgb);
+  // Dark grounds take a light pattern and light grounds a dark one, which is
+  // also how dyers actually worked: the cheap contrast is the undyed yarn.
+  const away = baseLum > 0.5 ? -0.32 : 0.32;
+  return rgbToHex(hslToRgb({ ...hsl, l: Math.max(0.08, Math.min(0.94, hsl.l + away)) }));
 }
 
 export function buildPortraitRamps(spec: PortraitSpec): PortraitRamps {
@@ -174,6 +197,19 @@ export function buildPortraitRamps(spec: PortraitSpec): PortraitRamps {
   const headwear = spec.headwear
     ? buildRamp(spec.headwear.color, materialOptions(spec.headwear.material))
     : buildRamp(spec.garment.colors.secondary, { contrast: 1 });
+  const headwearAccent = spec.headwear
+    ? buildRamp(
+        contrastingAccent(spec.headwear.color, spec.headwear.accent),
+        materialOptions(spec.headwear.material)
+      )
+    : headwear;
+
+  // Leaves are the one thing on a head whose colour is not a dye choice, so it
+  // does not come from the palette: laurel, jasmine greenery and a palm-frond
+  // band are all roughly this, and the ramp's own shift carries them into
+  // shadow. A little blue-shifted, because foliage read warm at this size looks
+  // like straw.
+  const foliage = buildRamp('#4d7a3e', { contrast: 1.2, shift: 0.26, saturation: 1.12 });
 
   const metalKey = spec.jewelry.find(item => METAL_BASE[item.material])?.material || 'bronze';
   const metal = buildRamp(METAL_BASE[metalKey] || '#a8763f', {
@@ -201,6 +237,8 @@ export function buildPortraitRamps(spec: PortraitSpec): PortraitRamps {
   book[MAT.CLOTH_B] = clothB;
   book[MAT.CLOTH_C] = clothC;
   book[MAT.HEADWEAR] = headwear;
+  book[MAT.HEADWEAR_ACCENT] = headwearAccent;
+  book[MAT.FOLIAGE] = foliage;
   book[MAT.METAL] = metal;
   book[MAT.GEM] = gem;
   book[MAT.LEATHER] = leather;
@@ -223,6 +261,8 @@ export function buildPortraitRamps(spec: PortraitSpec): PortraitRamps {
     clothB,
     clothC,
     headwear,
+    headwearAccent,
+    foliage,
     metal,
     gem,
     leather,

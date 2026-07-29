@@ -26,7 +26,9 @@
     "face-sheet": "esbuild src/components/portraitLab/devtools/faceSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/faceSheet.mjs --log-level=error && node node_modules/.cache/faceSheet.mjs",
     "garment-sheet": "esbuild src/components/portraitLab/devtools/garmentSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/garmentSheet.mjs --log-level=error && node node_modules/.cache/garmentSheet.mjs",
     "verify": "npm run typecheck:ratchet && npm run golden:verify && npm run culture-audit -- --strict > /dev/null && npm run narrative-audit && npm run disruption-audit -- --fast > /dev/null && npm run persona-audit > /dev/null && npm run portrait-audit > /dev/null && echo \"all checks passed\"",
-    "ornament-sheet": "esbuild src/components/portraitLab/devtools/ornamentSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/ornamentSheet.mjs --log-level=error && node node_modules/.cache/ornamentSheet.mjs"
+    "distinction-sheet": "esbuild src/components/portraitLab/devtools/distinctionSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/distinctionSheet.mjs --log-level=error && node node_modules/.cache/distinctionSheet.mjs",
+    "ornament-sheet": "esbuild src/components/portraitLab/devtools/ornamentSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/ornamentSheet.mjs --log-level=error && node node_modules/.cache/ornamentSheet.mjs",
+    "backdrop-sheet": "esbuild src/components/portraitLab/devtools/backdropSheet.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/backdropSheet.mjs --log-level=error && node node_modules/.cache/backdropSheet.mjs"
   },
   "keywords": [
     "history",

@@ -39,6 +39,22 @@ const PROFESSION_AVAILABILITY_RULES: ProfessionAvailabilityRule[] = [
   { pattern: /\b(?:servant|maid|butler|steward|houseboy)\b/i, startYear: -8000 },
 
   // Trades tied to a plant or an animal that has to be there.
+  {
+    // Hive beekeeping needs Apis mellifera, which reached the Americas in 1622
+    // and Australia in 1822. Mesoamerica is the exception and is not matched
+    // here: stingless Melipona bees were kept in Yucatán for centuries before
+    // contact, which is a different animal and a genuinely local practice.
+    pattern: /\b(?:beekeeper|apiarist|bee keeper)\b/i,
+    excludePlaces: /\b(?:arctic|subarctic|baffin|greenland|inuit|aleut|great basin|northern rockies|columbia plateau|pacific coast|northwest|puget|salish|california|great plains|prairie|woodland|great lakes|mississippi|northeast|southeast|chesapeake|new england|amazon|orinoco|guiana|chaco|patagonia|andes|southwest|puebloan|colorado plateau|rio grande)\b/i,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'SOUTH_AMERICAN'],
+    excludedUntil: 1622,
+  },
+  {
+    pattern: /\b(?:beekeeper|apiarist|bee keeper)\b/i,
+    excludePlaces: /\b(?:australia|arnhem|outback|kimberley|tasmania|queensland|murray|carpentaria|aboriginal|polynesi|melanesi|micronesi|hawai|new zealand|aotearoa)\b/i,
+    zones: ['OCEANIA'],
+    excludedUntil: 1822,
+  },
   //
   // Removing farming from the forager regions exposed what was underneath it:
   // a persona in the Glacier Foothills in 285 CE came back as a Chinampero, a
@@ -359,7 +375,20 @@ export function isProfessionHistoricallyAvailable(
 
 /** Work that directly produces food: farming, herding, fishing, foraging. */
 const FOOD_PRODUCING =
-  /\b(?:farmer|farmhand|farm worker|field hand|agricultur\w*|peasant|cultivator|planter|harvester|ploughman|plowman|orchardist|vintner|gardener|herder|shepherd|cowherd|goatherd|swineherd|pastoralist|drover|reindeer\w*|yak\w*|cattle\w*|fisher\w*|whaler|sealer|forager|gatherer|hunter|trapper|beekeeper|rice farmer|cash crop farmer)\b/i;
+  /\b(?:farmer|farmhand|farm worker|farm hand|farm labourer|farm laborer|field hand|field labourer|field laborer|agricultur\w*|peasant|cultivator|planter|harvester|ploughman|plowman|orchardist|vintner|vine dresser|gardener|herder|shepherd|cowherd|goatherd|swineherd|pastoralist|drover|reindeer\w*|yak\w*|cattle\w*|fisher\w*|whaler|sealer|forager|gatherer|hunter|trapper|fowler|beekeeper|rice farmer|cash crop farmer|thresher|reaper|crofter|cottager|sharecropper|tenant farmer|tenant cultivator|dairymaid|milkmaid|dairy farmer|ranch hand|stockman|homesteader|market gardener|fellah|mitayo|grower|picker|cane cutter|tapper|root digger|shellfish gatherer)\b/i;
+
+/**
+ * Work that is not food production but is done by as many people.
+ *
+ * Kept beside `FOOD_PRODUCING` because the two used to be one hand-written list
+ * per call site, and the lists drifted: `cultivator` was in this file's
+ * subsistence pattern but in neither of the two weighting patterns below, while
+ * `herder` was in all three. That is a nine-fold advantage to herding over
+ * cultivation, and it is why the Gangetic plain — some of the most intensively
+ * farmed land on earth — came back one persona in four a herder.
+ */
+const COMMON_LABOUR =
+  /\b(?:laborer|labourer|servant|maid|worker|weaver|spinner|carrier|porter|caretaker|mother|child watcher|child minder|washerwoman|laundress|water carrier|wood gatherer)\b/i;
 
 /**
  * How much of the workforce produced food, by year.
@@ -397,6 +426,63 @@ function subsistenceBoost(year: number): number {
 }
 
 /**
+ * Salaried work that presupposes an office, a payroll and a qualification.
+ *
+ * Kept separate from the "offices only one person held" list above: there was
+ * exactly one viceroy, but there were plenty of accountants — just far fewer,
+ * far later and far more urban than the modern-era profession tables imply.
+ */
+const PROFESSIONAL_CLERICAL = /\b(?:accountant|book-?keeper|clerk|cashier|secretary|typist|stenographer|receptionist|office|manager|executive|administrator|civil servant|bureaucrat|banker|broker|insurance|real estate|realtor|estate agent|salesman|sales representative|advertis|journalist|editor|architect|engineer|surveyor|lawyer|solicitor|barrister|attorney|judge|magistrate|notary|professor|lecturer|teacher|schoolteacher|librarian|physician|surgeon|doctor|dentist|pharmacist|optician|veterinar|chemist|scientist|statistician|postal|telegraph operator|telephone operator|photographer|designer|consultant)\b/i;
+
+/**
+ * The share of the workforce in professional, clerical and managerial work.
+ *
+ * The mirror of `subsistenceShare`, and needed for the same reason. The
+ * modern-era profession tables are lists of salaried occupations offered
+ * zone-wide with only a decade filter, so the Sonoran Desert in 1909 was
+ * returning accountants, real estate agents, salesmen and postal workers at
+ * something near half of all draws. The United States census of 1910 puts
+ * professional service at about 4 per cent of gainful workers and clerical at
+ * about 5, against 31 per cent in agriculture — and those are national figures
+ * carried overwhelmingly by the cities.
+ *
+ * Before the nineteenth century the category barely exists: a scribe, a
+ * notary, a handful of physicians and the clergy, in a world where almost
+ * everyone works the land or a trade.
+ */
+function professionalShare(year: number): number {
+  if (year < 1500) return 0.005;
+  if (year < 1800) return 0.015;
+  if (year < 1900) return 0.05;
+  if (year < 1950) return 0.12;
+  if (year < 1980) return 0.22;
+  return 0.35;
+}
+
+/**
+ * How much to damp salaried work so its share matches the record.
+ *
+ * Expressed the same way as `subsistenceBoost` — as an odds ratio against the
+ * roughly one-in-three the unweighted tables produce unaided — and applied
+ * multiplicatively, so it composes with the locale adjustment below rather
+ * than overriding it.
+ */
+function professionalDamping(year: number, locale: HistoricalContext['localeType']): number {
+  const share = professionalShare(year);
+  const targetOdds = share / (1 - share);
+  const baselineOdds = 0.33 / 0.67;
+  let damping = Math.min(1, targetOdds / baselineOdds);
+
+  // These are city occupations before they are anything else. A county seat
+  // had a lawyer and a doctor; a farming district in the same year had
+  // neither, and the app draws far more rural personas than urban ones.
+  if (locale === 'rural') damping *= 0.35;
+  else if (locale === 'city') damping *= 2.2;
+
+  return Math.min(1.5, damping);
+}
+
+/**
  * Before industrialisation the overwhelming majority of people lived rurally,
  * so an unclassified locale in a pre-industrial year should be treated as
  * countryside rather than as "no information". Half of all generated personas
@@ -420,11 +506,31 @@ export function getProfessionSelectionWeight(
   // thousands, and a golden-baseline shepherd was promoted to viceroy.
   if (/\b(?:maharaja|nawab|emperor|empress|king|queen|duke|duchess|prince|princess|oil baron|bank president|viceroy|governor.general|sultan|caliph|shah|tsar|czar|pharaoh|doge|khan|pope|patriarch|grand vizier|shogun|caudillo|paramount chief|chaebol chairman|tech ceo)\b/i.test(profession)) {
     weight = 0.02;
+  } else if (/\b(?:robber baron|tycoon|magnate|mogul|film star|movie star|hollywood star|television presenter|news anchor|rock star|pop star|recording artist|professional athlete|olympian|prizefighter|astronaut|test pilot|explorer|spy|secret agent|cartel|mob boss|crime boss|bootlegger)\b/i.test(profession)) {
+    // The conspicuous occupations — the ones a period is remembered by, and
+    // which a table of "what is interesting about this time and place" fills up
+    // with. There were perhaps a few dozen robber barons; the generator was
+    // returning them as six per cent of North America in 1900, which made them
+    // commoner than sharecroppers. Rarity here is the whole point of the role:
+    // it should be a thrilling draw, not the expected one.
+    weight = 0.015;
   } else if (/\b(?:industrialist|factory owner|railway investor|ceo)\b/i.test(profession)) {
     weight = 0.2;
-  } else if (/\b(?:fenian|chartist|luddite|anarchist|revolutionary|resurrectionist|beggar|cutpurse|footpad|peaky blinder|gang member|executioner)\b/i.test(profession)) {
+  } else if (/\b(?:jazz musician|musician|composer|actor|actress|novelist|poet|playwright|painter|sculptor|philosopher|inventor|aviator|fashion designer|celebrity chef|architect of note|impresario|circus)\b/i.test(profession)) {
+    // Practised by many, made a living at by few. A parish had one fiddler and
+    // a great many people who farmed and also played.
+    weight = 0.07;
+  } else if (/\b(?:beekeeper|salt worker|lime burner|charcoal burner|thatcher|net maker|cordage maker|rope maker|firekeeper|root digger|shellfish gatherer|fowler|trapper|oil presser|sexton|night soil collector|chimney sweep|errand boy|match worker|peat cutter|glazier|soap boiler|candle maker|wool comber|ostler|flintknapper)\b/i.test(profession)) {
+    // Real trades that employed very few people. A village had fifty households
+    // working the land and one man who kept bees, and the draw has no way to
+    // know that from the table alone — worse, these roles tend to carry light
+    // stat requirements, which the fit score rewards, so they were beating the
+    // occupations that actually fed the place. Beekeeper was eleven per cent of
+    // the Palaeolithic Plains.
+    weight = 0.15;
+  } else if (/\b(?:fenian|chartist|luddite|anarchist|revolutionary|resurrectionist|beggar|cutpurse|footpad|peaky blinder|gang member|executioner|witch|alchemist|plague doctor)\b/i.test(profession)) {
     weight = 0.04;
-  } else if (/\b(?:farmer|farm worker|laborer|servant|worker|weaver|fisher|herder|carrier|porter|caretaker|mother|child watcher|hunter|forager|gatherer|trapper|fowler)\b/i.test(profession)) {
+  } else if (FOOD_PRODUCING.test(profession) || COMMON_LABOUR.test(profession)) {
     // Hunting, foraging and trapping belong in the same bracket as fishing and
     // farming — they are how the household eats. Leaving them out of it left
     // "Fisher" three times likelier than "Hunter" in every foraging economy in
@@ -448,7 +554,8 @@ export function getProfessionSelectionWeight(
   // livelihood distribution should still be dominated by agriculture, craft,
   // transport, and household labor.
   if (locale === 'rural') {
-    if (/\b(?:farm|farmer|farmhand|field hand|agricultural|herder|shepherd|cowherd|goatherd|fisher|weaver|potter|smith|carpenter|artisan|washer|dhobi|carrier|porter)\b/i.test(profession)) {
+    if (FOOD_PRODUCING.test(profession)
+      || /\b(?:weaver|potter|smith|carpenter|artisan|washer|dhobi|carrier|porter|thatcher|miller|blacksmith)\b/i.test(profession)) {
       weight *= 3;
     } else if (/\b(?:airline pilot|civil engineer|judge|surgeon|librarian|journalist|secretary|accountant|politician|professor|bank president)\b/i.test(profession)) {
       weight *= 0.2;
@@ -457,6 +564,30 @@ export function getProfessionSelectionWeight(
     if (/\b(?:factory|dock|porter|servant|clerk|shop|street|construction|railway|telegraph|teacher)\b/i.test(profession)) {
       weight *= 1.4;
     }
+  }
+
+  // Fishing feeds a coast, not a country. It sits in the same food-producing
+  // bracket as farming, which on an inland region made one medieval European in
+  // five a fisherman. Damped by default and restored where there is water to
+  // fish — the region and locale names are the only signal available here, and
+  // they carry it well enough.
+  if (context && /\b(?:fisher\w*|whaler|sealer|pearl diver)\b/i.test(profession)) {
+    const wet = /\b(?:coast|bay|sea|ocean|island|isle|gulf|delta|estuary|harbou?r|port|lake|river|shore|fjord|sound|strait|marsh|swamp|lagoon|atoll|archipelago|maritime|nile|ganges|yangtze|mekong|danube|rhine|volga|amazon)\b/i
+      .test(`${context.region} ${context.location}`);
+    weight *= wet ? 0.9 : 0.25;
+  }
+
+  // Cash and luxury crops are grown by a specialised minority even where they
+  // dominate the export figures. Cacao was sixteen per cent of Mesoamerica.
+  if (/\b(?:cacao|cocoa|coca|indigo|silk farmer|sericultur\w*|tea grower|saffron|spice|pepper|vanilla|opium|tobacco grower)\b/i.test(profession)) {
+    weight *= 0.25;
+  }
+
+  // Salaried work is a small and late share of any workforce, and the modern
+  // tables are made almost entirely of it. Applied after the locale block so
+  // the two compose.
+  if (context && PROFESSIONAL_CLERICAL.test(profession)) {
+    weight *= professionalDamping(context.year, locale);
   }
 
   // What was actually happening here. Everything above this line describes an

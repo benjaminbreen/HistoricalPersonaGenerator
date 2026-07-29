@@ -51,6 +51,18 @@ const humoralWeight = (ctx: Ctx): number => {
 };
 
 /** Substring match against location + region + birthplace, all lowercased. */
+/**
+ * Perihelion years of Halley's comet, which is the one celestial event that
+ * recurs inside human memory and was recorded by every society that kept
+ * records at all. Used so that "born under the comet" is a fact about a birth
+ * year rather than a sprinkle of flavour.
+ */
+const HALLEY_RETURNS = [
+  -615, -540, -466, -391, -315, -239, -163, -86, -11,
+  66, 141, 218, 295, 374, 451, 530, 607, 684, 760, 837, 912, 989,
+  1066, 1145, 1222, 1301, 1378, 1456, 1531, 1607, 1682, 1758, 1835, 1910, 1986,
+];
+
 const place = (ctx: Ctx, ...needles: string[]): boolean =>
   needles.some(n => ctx.placeLower.includes(n));
 
@@ -165,7 +177,7 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     rarity: 'uncommon',
     category: 'mental',
     baseWeight: 25,
-    weight: (ctx, char) => ((char as any).stats?.perception > 13 ? 2.5 : 0.7)
+    weight: (ctx, char) => ((char as any).stats?.perception >= 8 ? 2.5 : 0.7)
       * (job(ctx, 'hunt', 'archer', 'scout', 'sailor', 'watch') ? 2 : 1),
     exclusiveGroup: 'sight',
     description: 'Notices details others miss; exceptional observational skills',
@@ -469,7 +481,7 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     rarity: 'common',
     category: 'physical',
     baseWeight: 45,
-    weight: (ctx, char) => ((char as any).stats?.strength > 14 ? 3 : 0.5)
+    weight: (ctx, char) => ((char as any).stats?.strength >= 8 ? 3 : 0.5)
       * (job(ctx, 'smith', 'farm', 'labor', 'porter', 'mason', 'wood', 'quarry', 'dock') ? 2 : 1),
     excludes: ['frail', 'gaunt'],
     description: 'Possesses exceptional physical strength; muscles hardened by labor',
@@ -496,7 +508,7 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     rarity: 'uncommon',
     category: 'physical',
     baseWeight: 25,
-    weight: (ctx, char) => ((char as any).stats?.dexterity > 13 ? 2.5 : 0.6)
+    weight: (ctx, char) => ((char as any).stats?.dexterity >= 8 ? 2.5 : 0.6)
       * (ctx.age < 40 ? 1.5 : 0.4),
     description: 'Natural grace and agility; moves with practiced ease',
     phrase: 'naturally athletic',
@@ -576,7 +588,7 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     rarity: 'uncommon',
     category: 'physical',
     baseWeight: 22,
-    weight: (ctx, char) => ((char as any).stats?.charisma > 14 ? 2.5 : 0.6)
+    weight: (ctx, char) => ((char as any).stats?.charisma >= 8 ? 2.5 : 0.6)
       * (ctx.age < 45 ? 1.4 : 0.4),
     description: 'Striking physical beauty that draws attention and admiration',
     phrase: 'strikingly attractive',
@@ -1061,6 +1073,15 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
   // =========================================================================
   // MIND
   // =========================================================================
+  //
+  // Stat gates below are on the 1-10 scale the generator actually rolls (see
+  // STAT_MIN/STAT_MAX in personaRarityService). They were originally written
+  // against a 1-20 scale, which broke every one of them in the same two ways:
+  // `intelligence > 15` can never be true, so Brilliant Mind never got its
+  // bonus, and `intelligence < 9` is true of about seven people in eight, so
+  // Slow-Witted was effectively unconditional. The visible result was a persona
+  // in the top twelve per cent for intelligence wearing a Slow-Witted badge.
+  // 8 is roughly the top eighth; 3 is roughly the bottom eighth.
   {
     id: 'genius',
     name: 'Brilliant Mind',
@@ -1068,7 +1089,7 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     rarity: 'epic',
     category: 'mental',
     baseWeight: 2,
-    weight: (_ctx, char) => ((char as any).stats?.intelligence > 15 ? 4 : 0.4),
+    weight: (_ctx, char) => ((char as any).stats?.intelligence >= 8 ? 4 : 0.4),
     excludes: ['slow_witted'],
     description: 'Exceptional intellect; grasps complex ideas with ease',
     phrase: 'brilliant',
@@ -1081,7 +1102,7 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     rarity: 'common',
     category: 'mental',
     baseWeight: 25,
-    weight: (_ctx, char) => ((char as any).stats?.intelligence < 9 ? 3 : 0.5),
+    weight: (_ctx, char) => ((char as any).stats?.intelligence <= 3 ? 3 : 0.5),
     description: 'Takes time to understand new concepts; prefers simple explanations',
     phrase: 'slow-witted',
     dialogueHint: 'Struggles with complex ideas',
@@ -1485,7 +1506,7 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     rarity: 'uncommon',
     category: 'social',
     baseWeight: 25,
-    weight: (_ctx, char) => ((char as any).stats?.charisma > 14 ? 2.5 : 0.6),
+    weight: (_ctx, char) => ((char as any).stats?.charisma >= 8 ? 2.5 : 0.6),
     exclusiveGroup: 'sociability',
     description: 'Natural charisma and grace in social situations',
     phrase: 'naturally charming',
@@ -1498,7 +1519,7 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     rarity: 'common',
     category: 'social',
     baseWeight: 30,
-    weight: (_ctx, char) => ((char as any).stats?.charisma < 10 ? 2.5 : 0.7),
+    weight: (_ctx, char) => ((char as any).stats?.charisma <= 3 ? 2.5 : 0.7),
     exclusiveGroup: 'sociability',
     description: 'Uncomfortable in crowds; prefers solitude or small gatherings',
     phrase: 'painfully shy',
@@ -2540,6 +2561,252 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     description: 'Can make a feast out of very little, and is asked to at every gathering',
     phrase: 'a fine cook',
     dialogueHint: 'Discusses ingredients with precision',
+  },
+
+  // =========================================================================
+  // THE GREAT RARITIES
+  // =========================================================================
+  //
+  // Conditions rare enough that a person carrying one was remarked on, and in
+  // several cases remarked on in ways the period had a specific word for. Two
+  // rules held throughout:
+  //
+  // The prevalence sets the tier, not the drama. Synaesthesia is startling and
+  // affects perhaps four people in a hundred, so it is epic; congenital
+  // analgesia is barely describable and affects fewer than one in a million, so
+  // it is the rarest thing in the file. Getting this backwards would make the
+  // rarity badge lie, and the badge is the one number on the card that is doing
+  // arithmetic rather than description.
+  //
+  // Where a condition clusters somewhere real, it clusters here too — the same
+  // principle already applied to albinism among the Kuna. Achromatopsia is one
+  // in thirty thousand almost everywhere and roughly one in twelve on Pingelap,
+  // and absolute pitch is many times commoner among speakers of tone languages.
+  // Those are not decorations; they are the whole reason a place-aware
+  // generator is worth having.
+
+  {
+    id: 'born_with_caul',
+    name: 'Born with a Caul',
+    icon: 'GiBabyFace',
+    rarity: 'legendary',
+    category: 'spiritual',
+    baseWeight: 1.0,
+    // Under one birth in a thousand, and almost every European tradition read
+    // it as proof against drowning. Midwives dried the membrane and sold it;
+    // sailors paid well. Commoner as a *known* fact where that market existed.
+    weight: (ctx) => (ctx.year < 1900 ? (place(ctx, 'coast', 'port', 'harbor', 'harbour', 'sea', 'island') ? 2.5 : 1) : 0.3),
+    description: 'Born with the birth-caul over the face, which midwives dried and kept as proof against drowning',
+    phrase: 'born with the caul still over their face',
+    foundational: true,
+    dialogueHint: 'Mentions the caul when the talk turns to water',
+  },
+  {
+    id: 'witch_teat',
+    name: 'Supernumerary Nipple',
+    icon: 'IoWarning',
+    rarity: 'rare',
+    category: 'physical',
+    baseWeight: 7,
+    // Common enough to be unremarkable in most of history and lethal in one
+    // particular window: searchers stripped and examined the accused for
+    // exactly this, and finding it was held to be evidence.
+    weight: (ctx) => ((ctx.year > 1480 && ctx.year < 1740
+      && inZone(ctx, 'EUROPEAN', 'NORTH_AMERICAN_COLONIAL')) ? 1.6 : 1),
+    description: 'A small extra nipple below the breast — unremarkable in most centuries, and evidence in a few',
+    phrase: 'marked with a small extra nipple',
+    foundational: true,
+    dialogueHint: 'Is careful who sees them undressed',
+  },
+  {
+    id: 'never_took_pox',
+    name: 'Never Took the Pox',
+    icon: 'GiVirus',
+    rarity: 'rare',
+    category: 'condition',
+    baseWeight: 5,
+    excludes: ['pox_scarred'],
+    minAge: 25,
+    // Only remarkable while smallpox is universal: nursing the sick through
+    // repeated visitations and never taking it made a person quietly valuable,
+    // and they were often the one sent in.
+    weight: (ctx) => ((ctx.year > 900 && ctx.year < 1900) ? 1 : 0.15),
+    description: 'Nursed the sick through visitation after visitation and never once took the smallpox',
+    phrase: 'never once touched by the smallpox',
+    dialogueHint: 'Is the one sent into infected houses',
+  },
+  {
+    id: 'born_under_comet',
+    name: 'Born Under the Comet',
+    icon: 'IoStar',
+    rarity: 'epic',
+    category: 'spiritual',
+    baseWeight: 40,
+    // Dated against the real returns of Halley's comet rather than sprinkled at
+    // random, so this is either true of a persona's birth year or it is not.
+    // Every society that kept records noticed these and most of them wrote down
+    // what they thought it meant.
+    weight: (ctx) => {
+      const birth = ctx.year - ctx.age;
+      return HALLEY_RETURNS.some(r => Math.abs(birth - r) <= 1) ? 1 : 0;
+    },
+    description: 'Born in the year the hairy star hung over the district, and never allowed to forget it',
+    phrase: 'born in the year the comet came',
+    foundational: true,
+    dialogueHint: 'Was told from childhood what their birth year portended',
+  },
+  {
+    id: 'tetrachromat',
+    name: 'Sees Colors Others Cannot',
+    icon: 'IoEye',
+    rarity: 'legendary',
+    category: 'physical',
+    baseWeight: 1.2,
+    excludes: ['blind', 'color_blind'],
+    // Carried on the X chromosome, so functionally never in men. Only legible
+    // as a trait in work where colour is judged for a living — a dyer who can
+    // see a difference the master swears is not there.
+    weight: (ctx) => (ctx.sex !== 'Female' ? 0
+      : job(ctx, 'dyer', 'weaver', 'painter', 'silk', 'illuminator', 'embroider') ? 4 : 1),
+    description: 'Distinguishes shades in cloth and dye that other people insist are the same color',
+    phrase: 'able to see colors other people swear are identical',
+    dialogueHint: 'Argues about shades nobody else can see',
+  },
+  {
+    id: 'no_pain',
+    name: 'Feels No Pain',
+    icon: 'GiHandBandage',
+    rarity: 'legendary',
+    category: 'condition',
+    baseWeight: 0.15,
+    // The rarest entry in the file, and it should be: fewer than one in a
+    // million. Historically it shortens a life rather than protecting one —
+    // untreated injuries, joints destroyed young, burns not noticed.
+    description: 'Has never felt pain; the injuries are found later, by looking',
+    phrase: 'unable to feel pain at all',
+    foundational: true,
+    dialogueHint: 'Checks their own body for damage by eye',
+  },
+  {
+    id: 'absolute_pitch',
+    name: 'Perfect Pitch',
+    icon: 'IoMusicalNotes',
+    rarity: 'legendary',
+    category: 'skill',
+    baseWeight: 1.4,
+    excludes: ['deaf'],
+    // Roughly one in ten thousand where speech is not tonal, and many times
+    // that where it is — the association with tone languages and with training
+    // begun very young is one of the better-attested findings about it.
+    weight: (ctx) => {
+      const tonal = inZone(ctx, 'EAST_ASIAN', 'SOUTHEAST_ASIAN') ? 8 : 1;
+      return tonal * (job(ctx, 'musician', 'singer', 'bell', 'cantor', 'piper', 'chorister') ? 5 : 1);
+    },
+    description: 'Names any note struck, with nothing to compare it against',
+    phrase: 'able to name any note struck cold',
+    dialogueHint: 'Names the pitch of ordinary sounds',
+  },
+  {
+    id: 'synaesthete',
+    name: 'Tastes Sound, Sees Number',
+    icon: 'GiThirdEye',
+    rarity: 'epic',
+    category: 'mental',
+    baseWeight: 12,
+    // Around four in a hundred, so not legendary however strange it sounds.
+    // Before there was a word for it, the usual explanations available were
+    // visionary or diabolical, which is why the spiritual attributes lean this
+    // way in some periods and not others.
+    description: 'Sounds arrive with colors attached, and the days of the week have places in the air',
+    phrase: 'hearing colors in sounds and seeing the days of the week arranged in the air',
+    dialogueHint: 'Describes sounds by their color without noticing',
+  },
+  {
+    id: 'never_forgets_a_day',
+    name: 'Forgets Nothing',
+    icon: 'GiBrain',
+    rarity: 'legendary',
+    category: 'mental',
+    baseWeight: 0.5,
+    excludes: ['forgetful', 'slow_witted'],
+    minAge: 16,
+    description: 'Can give the weather, the meal and the talk of any day put to them',
+    phrase: 'able to recount any day of their life on request',
+    dialogueHint: 'Recalls exact dates nobody else remembers',
+  },
+  {
+    id: 'mirrored_within',
+    name: 'Mirrored Within',
+    icon: 'GiLungs',
+    rarity: 'legendary',
+    category: 'condition',
+    baseWeight: 0.6,
+    // One in ten thousand, and — the detail that makes it worth having — almost
+    // nobody in history knew it about themselves. It is discovered by a
+    // surgeon, a battlefield wound or an autopsy, so it mostly matters at the
+    // end of a life rather than during it.
+    description: 'Heart on the right, and the rest of the organs likewise reversed; almost certainly nobody knows',
+    phrase: 'built with the heart on the wrong side, undiscovered',
+    foundational: true,
+    dialogueHint: 'Has been told by one confused physician that their heart is on the wrong side',
+  },
+  {
+    id: 'achromatopsia',
+    name: 'Sees No Color At All',
+    icon: 'IoGlasses',
+    rarity: 'legendary',
+    category: 'physical',
+    baseWeight: 0.5,
+    excludes: ['keen_eyed', 'tetrachromat'],
+    // One in thirty thousand almost everywhere, and about one in twelve on
+    // Pingelap after the typhoon of 1775 cut the island down to a handful of
+    // survivors. The same founder-effect logic the albinism entry already uses.
+    weight: (ctx) => (place(ctx, 'pingelap', 'pohnpei', 'ponape') ? 400
+      : inZone(ctx, 'OCEANIA') && place(ctx, 'micronesi', 'caroline') ? 25 : 1),
+    description: 'Sees the world only in light and shade, and cannot bear the noon sun',
+    phrase: 'seeing the world wholly without color',
+    foundational: true,
+    dialogueHint: 'Works at dawn and dusk and shelters at midday',
+  },
+  {
+    id: 'face_blind',
+    name: 'Cannot Hold a Face',
+    icon: 'FaEyeSlash',
+    rarity: 'epic',
+    category: 'mental',
+    baseWeight: 8,
+    excludes: ['keen_eyed'],
+    description: 'Knows people by voice, gait and dress, because the face never stays',
+    phrase: 'unable to hold a face in mind from one meeting to the next',
+    dialogueHint: 'Greets people by their clothes and their walk',
+  },
+  {
+    id: 'no_minds_eye',
+    name: 'No Picture in the Mind',
+    icon: 'FaBrain',
+    rarity: 'epic',
+    category: 'mental',
+    baseWeight: 10,
+    excludes: ['dreamer', 'visionary'],
+    description: 'Cannot call up an image behind the eyes, and assumed until lately that nobody could',
+    phrase: 'unable to picture anything behind the eyes',
+    dialogueHint: 'Is baffled by instructions to imagine something',
+  },
+  {
+    id: 'mother_tongue_alone',
+    name: 'Last Speaker Here',
+    icon: 'GiTalk',
+    rarity: 'epic',
+    category: 'cultural',
+    baseWeight: 6,
+    excludes: ['polyglot'],
+    // Overwhelmingly the condition of somebody carried here rather than born
+    // here, so the ancestry axis drives it — but not exclusively, because
+    // captives, stranded sailors and married-in strangers existed everywhere.
+    weight: (_ctx, char) => ((char as { ancestry?: { generation: number } }).ancestry?.generation === 0 ? 25 : 1),
+    description: 'Speaks a language that nobody within a hundred miles can answer in',
+    phrase: 'the only speaker of their language for a hundred miles',
+    dialogueHint: 'Falls silent in their own language when tired',
   },
 ];
 

@@ -112,6 +112,15 @@ const GAELIC_PATRONYMIC = (parent: string, gender: 'Male' | 'Female') =>
 const SLAVIC_PATRONYMIC = (parent: string, gender: 'Male' | 'Female') =>
   `${parent}${gender === 'Male' ? 'ovich' : 'ovna'}`;
 
+/**
+ * Malay and Indonesian bin/binti. Deliberately not `PLAIN_PATRONYMIC`, because
+ * `settleDescriptiveForms` folds the plain form into an inherited surname once
+ * civil registration arrives — right for a byname, wrong here. Bin and binti
+ * are what is on the identity card in Malaysia and Brunei today.
+ */
+const MALAY_PATRONYMIC = (parent: string, gender: 'Male' | 'Female') =>
+  `${gender === 'Male' ? 'bin' : 'binti'} ${parent}`;
+
 const ARABIC_TEKNONYM = (child: string, gender: 'Male' | 'Female') =>
   `${gender === 'Male' ? 'Abu' : 'Umm'} ${child}`;
 
@@ -575,6 +584,59 @@ function resolveConventionProfile(
         weights: { personal: 0.32, patronymic: 0.3, clan: 0.28, toponymic: 0.1 },
         patronymic: PLAIN_PATRONYMIC,
       };
+    }
+
+    /**
+     * Southeast Asia had no case at all and fell to the `default` below, which
+     * is one profile for all of history and hands out a single name half the
+     * time. That is wrong in both directions at once: Vietnam has had Chinese-
+     * style hereditary surnames for two thousand years, and Burma has never had
+     * surnames at all and still does not.
+     *
+     * So this branches on the naming tradition rather than the year, the way
+     * the East Asian case branches on place. The dates are the specific ones
+     * that changed the practice: Siam's Surname Act of 1913, and the Clavería
+     * decree of 1849 that assigned Spanish surnames across the Philippines from
+     * a printed catalogue.
+     */
+    case 'SOUTHEAST_ASIAN': {
+      if (nameKey === 'VIETNAMESE') {
+        return { weights: { inherited: 0.92, personal: 0.08 } };
+      }
+      if (nameKey === 'BURMESE') {
+        // No surnames, then or now. U, Daw and Maung are honorifics, not
+        // family names, and a Burmese person's name does not descend.
+        if (year >= 1900) return { weights: { personal: 0.86, teknonym: 0.14 }, teknonym: PLAIN_TEKNONYM };
+        return { weights: { personal: 0.78, teknonym: 0.12, epithet: 0.1 }, teknonym: PLAIN_TEKNONYM };
+      }
+      if (nameKey === 'FILIPINO') {
+        if (year >= 1849) return { weights: { inherited: 0.95, personal: 0.05 } };
+        return { weights: { personal: 0.5, patronymic: 0.3, epithet: 0.2 }, patronymic: PLAIN_PATRONYMIC };
+      }
+      if (nameKey === 'THAI' || nameKey === 'LAO') {
+        if (year >= 1913) return { weights: { inherited: 0.93, personal: 0.07 } };
+        return { weights: { personal: 0.62, patronymic: 0.2, epithet: 0.18 }, patronymic: PLAIN_PATRONYMIC };
+      }
+      if (nameKey === 'KHMER') {
+        // French registration fixed the father's given name as a family name;
+        // before that a single name was ordinary.
+        if (year >= 1900) return { weights: { inherited: 0.8, personal: 0.2 } };
+        return { weights: { personal: 0.6, patronymic: 0.25, epithet: 0.15 }, patronymic: PLAIN_PATRONYMIC };
+      }
+      if (nameKey === 'MALAY' || nameKey === 'MALAY_ISLAMIC_HISTORICAL') {
+        return { weights: { patronymic: 0.72, personal: 0.2, teknonym: 0.08 }, patronymic: MALAY_PATRONYMIC, teknonym: PLAIN_TEKNONYM };
+      }
+      if (nameKey === 'JAVANESE' || nameKey === 'INDONESIAN') {
+        // Indonesia never imposed a surname system, and mononymy stayed
+        // respectable at every level of society — Sukarno and Suharto both.
+        if (year >= 1900) return { weights: { personal: 0.45, inherited: 0.35, patronymic: 0.2 }, patronymic: MALAY_PATRONYMIC };
+        return { weights: { personal: 0.62, patronymic: 0.24, teknonym: 0.14 }, patronymic: MALAY_PATRONYMIC, teknonym: PLAIN_TEKNONYM };
+      }
+      // Everything else in the zone — Cham, the highland peoples, the Chinese
+      // diaspora sets — under a state that registers births.
+      if (year >= CIVIL_REGISTRATION) return { weights: { inherited: 0.7, personal: 0.3 } };
+      if (year < -1000) return { weights: { personal: 0.72, epithet: 0.28 } };
+      return { weights: { personal: 0.55, patronymic: 0.27, epithet: 0.18 }, patronymic: PLAIN_PATRONYMIC };
     }
 
     case 'SUB_SAHARAN_AFRICAN': {

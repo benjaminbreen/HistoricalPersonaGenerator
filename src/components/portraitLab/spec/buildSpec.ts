@@ -72,6 +72,21 @@ export interface PortraitSource {
   /** Accepted from callers and ignored — nothing here is drawn from stats. */
   stats?: object;
   /**
+   * How unusual this persona is, and whether they were born into a privileged
+   * order. Both reach the portrait only as a light touch on the backdrop — see
+   * `backgroundFor`. Nothing about the figure itself changes: a rare persona is
+   * not drawn better-looking, which would be a different and much worse claim.
+   */
+  rarityTier?: 'ordinary' | 'notable' | 'rare' | 'legendary';
+  hasDistinction?: boolean;
+  /**
+   * The share of the local population that held this persona's standing, where
+   * they had one. Smaller is rarer. Read only by the corner mark in
+   * `art/distinctionMark.ts`, which is drawn over the finished bust rather than
+   * compiled into it, so it does not enter the spec.
+   */
+  distinctionShare?: number;
+  /**
    * The app's trait list. Only the handful that are about a face are read;
    * `left_handed` and `can_swim` are not going to show at 96px.
    */
@@ -122,9 +137,19 @@ const GARMENT_KEYWORDS: Array<[RegExp, GarmentKind]> = [
 const HEADWEAR_KEYWORDS: Array<[RegExp, HeadwearKind]> = [
   // Eyewear filed under the head slot is not a head covering at all.
   [/(sunglasses|spectacles|eyeglasses)/i, 'none'],
-  [/(veil|wimple|mantilla|dupatta|niqab|chador|hijab|barbette)/i, 'veil'],
+  // `odhani`, `orna` and `chunni` are the same object as the dupatta under
+  // other regional names, and matched nothing at all: they fell past every
+  // rule here to the `cap` fallback, so a length of draped cloth came out as a
+  // felt skullcap. `khimar` and `shayla` were doing the same.
+  // `orna` needs its word boundaries or it eats every "Gold Ornament" in the
+  // table and turns a decorated turban into a veil.
+  [/(veil|wimple|mantilla|dupatta|odhani|\borna\b|chunni|chunari|niqab|chador|hijab|khimar|shayla|barbette)/i, 'veil'],
   [/(hood|cowl|capuche|zukin|chaperon)/i, 'hood'],
   [/(helmet|helm|casque|morion|sallet|kabuto)/i, 'helmet'],
+  // A war bonnet is a feathered headdress and nothing like a linen bonnet, so
+  // it has to be caught before the `bonnet` in the cap rule takes it — which
+  // is what used to happen, drawing an eagle-feather headdress as a coif.
+  [/(war bonnet|warbonnet)/i, 'coronet'],
   [/(crown|diadem|coronet|tiara|headdress|headpiece|sacred feather)/i, 'coronet'],
   // `ornament` used to live in this rule and had to come out: it is a word
   // that attaches to other nouns. "Turban with Gold Ornament" matched here,
@@ -132,11 +157,17 @@ const HEADWEAR_KEYWORDS: Array<[RegExp, HeadwearKind]> = [
   // their turban to keep a hairpin. The late ornament rule at the bottom picks
   // up the genuinely ornament-only names once every covering has had its turn.
   [/(circlet|band|fillet|wreath|garland|passa|jadai|chaplet|hairpin|hair pin|comb|hair flower|laurel|tikka|patti|rakhdi|fascinator|hairpiece|bindi)/i, 'band'],
-  [/(turban|headcloth|head cloth|headwrap|head wrap|head tie|gele|keffiyeh|shemagh|pagri|scarf|kerchief|tignon|wrap|duku|gele)/i, 'wrapped_cloth'],
+  // `safa`, `peta` and `dastar` are turbans that never say so: the Rajasthani
+  // safa and the Mysore peta were matching nothing at all and taking the `cap`
+  // fallback, so nine metres of tied silk came out as a plain skullcap.
+  [/(turban|headcloth|head cloth|headwrap|head wrap|head tie|gele|keffiyeh|shemagh|ghutra|pagri|safa|peta|dastar|scarf|kerchief|tignon|wrap|duku)/i, 'wrapped_cloth'],
   // Fur headgear is soft and brimless. This has to precede the generic `hat`
   // rule below, or a "Fur Hat" picks up a stiff felt brim.
   [/(fur|pelt|shearling|astrakhan|ushanka|papakha|sheepskin|fox tail)/i, 'cap'],
-  [/(cap|coif|bonnet|kufi|taqiyah|biretta|skullcap|futou|beret|toque|fez|tarboosh|hennin|topi|snapback|beanie|biggins|kofia|mitre|songkok)/i, 'cap'],
+  // Knitwear is brimless and soft. `chullo` in particular used to fall through
+  // to the `hat` at the end of the brimmed rule below and come back a felt
+  // bowler, which is a long way from an Andean ear-flapped cap.
+  [/(cap|coif|bonnet|kufi|taqiyah|biretta|skullcap|futou|beret|toque|fez|tarboosh|hennin|topi|snapback|beanie|biggins|kofia|mitre|songkok|chullo|toboggan|stocking cap|watch cap|knit)/i, 'cap'],
   // `dou li` is written with a space in the item data, so the old `douli`
   // spelling never matched and those hats fell through to the `cap` fallback.
   [/(brim|tricorn|bicorne|sombrero|straw|petasos|boater|bowler|fedora|homburg|visor|top hat|wide[- ]?hat|conical|dou ?li|bamboo|sedge|sugegasa|kasa|salakot|non la|cheese-cutter|hat)/i, 'brimmed_hat'],
@@ -650,7 +681,8 @@ function separateFromFigure(
   hex: string,
   skinHex: string,
   garmentHex: string | undefined,
-  range: [number, number]
+  range: [number, number],
+  chromaCap = 0.2
 ): string {
   const bg = rgbToHsl(hexToRgb(hex));
   const skin = rgbToHsl(hexToRgb(skinHex));
@@ -685,7 +717,7 @@ function separateFromFigure(
 
   // A backdrop is scenery. Chroma here reads as "painted flat", and it steals
   // saturation contrast from the one saturated thing that matters, the figure.
-  const sat = Math.min(bg.s, 0.2);
+  const sat = Math.min(bg.s, chromaCap);
 
   // Dark complexions want a backdrop lighter than they are, pale ones a darker
   // backdrop; either way the gap has to be real.
@@ -699,6 +731,66 @@ function separateFromFigure(
   return rgbToHex(hslToRgb({ h: hue, s: sat, l }));
 }
 
+/**
+ * What the *century* does to a backdrop, as distinct from what the place does.
+ *
+ * The zone table above answers "where", and it was the only question being
+ * asked: nine hundred years of European portraits came out of the same slate
+ * blue with the same soft vignette, so a Frankish ploughman and a Victorian
+ * clerk sat against identical walls. But a portrait is not only of a person in
+ * a place, it is an artefact of a period, and the period is legible in the
+ * ground long before you reach the sitter — the chalky tooth of fresco, the
+ * deep panel of tempera, the raking single-window dark of oil, the silver flat
+ * grey of an albumen print, the evenly lit studio wall of a modern photograph.
+ *
+ * So era carries value, chroma, surface and how hard the corners close, and
+ * place keeps the hue. Both survive: a Ming backdrop and a Renaissance European
+ * one are still different colours, and a prehistoric and a modern East Asian
+ * one are now different pictures.
+ */
+const ERA_BACKDROPS: Record<string, {
+  /** The value band the ground is allowed to occupy, before the figure has its say. */
+  band: [number, number];
+  /** Hard chroma cap. A backdrop is scenery; some centuries painted flatter scenery. */
+  chroma: number;
+  /** How strongly the ground is modelled — halo depth and top-to-bottom fall. */
+  depth: number;
+  /** Pushes the whole ground darker (positive) or lighter (negative). */
+  lift: number;
+  texture: BackgroundSpec['texture'];
+  vignette: number;
+}> = {
+  // Open air and firelight; nothing here was made to be looked at indoors.
+  PREHISTORY: {
+    band: [0.13, 0.34], chroma: 0.13, depth: 1.0, lift: 0.5, texture: 'grain', vignette: 1.15,
+  },
+  // Lime plaster taking pigment while wet: pale, dry, faintly chalky, and lit
+  // from everywhere at once the way a wall in a courtyard is.
+  ANTIQUITY: {
+    band: [0.32, 0.54], chroma: 0.17, depth: 0.6, lift: -0.9, texture: 'plaster', vignette: 0.7,
+  },
+  // Egg tempera on a gessoed panel — saturated, and deliberately flat.
+  MEDIEVAL: {
+    band: [0.20, 0.42], chroma: 0.26, depth: 0.55, lift: -0.3, texture: 'subtle', vignette: 0.95,
+  },
+  // Oil on canvas by one high window. The darkest ground of the six, and the
+  // only one where the corners are doing real work.
+  RENAISSANCE_EARLY_MODERN: {
+    band: [0.08, 0.24], chroma: 0.15, depth: 1.4, lift: 0.7, texture: 'weave', vignette: 1.5,
+  },
+  // Albumen and collodion: chroma all but gone, silver grain everywhere.
+  INDUSTRIAL_ERA: {
+    band: [0.24, 0.46], chroma: 0.05, depth: 1.05, lift: 0.0, texture: 'grain', vignette: 1.3,
+  },
+  // A lit studio wall — flat, even, and slightly cool.
+  MODERN_ERA: {
+    band: [0.36, 0.60], chroma: 0.10, depth: 0.35, lift: -1.2, texture: 'none', vignette: 0.4,
+  },
+  FUTURE_ERA: {
+    band: [0.32, 0.56], chroma: 0.12, depth: 0.3, lift: -1.1, texture: 'none', vignette: 0.35,
+  },
+};
+
 function backgroundFor(
   source: PortraitSource,
   overrides: Record<string, any> | undefined,
@@ -708,15 +800,53 @@ function backgroundFor(
   const provided = overrides?.background;
   const zone = source.culturalZone || 'EUROPEAN';
   const [base, accent] = ZONE_BACKGROUNDS[zone] || ZONE_BACKGROUNDS.EUROPEAN;
+  const era = ERA_BACKDROPS[source.era ? String(source.era) : ''];
+
+  // The era moves the *band*, not the colour. Pre-shifting the hex and then
+  // handing it to the separator was the obvious way round and it did nothing:
+  // the separator clamps value into a fixed window and caps chroma, so every
+  // century's adjustment was thrown away a line later and six eras came out as
+  // one. The window is the thing to move.
+  const band: [number, number] = era ? era.band : [0.17, 0.44];
+  // The accent only ever appears as a rake of light across the upper corner, so
+  // it lives a band above the base rather than competing with it.
+  const accentBand: [number, number] = [
+    Math.min(0.82, band[0] + 0.25), Math.min(0.9, band[1] + 0.18),
+  ];
+  /**
+   * The two social facts the ground is allowed to know about.
+   *
+   * A portrait of somebody who mattered locally was a different object from a
+   * portrait of somebody who did not — better ground, more of the painter's
+   * time — so a sitter of standing gets a slightly richer, slightly deeper
+   * backdrop, and an exceptional persona a touch more of the same. Both effects
+   * are deliberately small. The era and the place still have to be legible
+   * through them, and the moment a viewer can read wealth off the wall faster
+   * than they can read the century, this has gone too far.
+   */
+  const lift = (era?.lift ?? 0)
+    + (source.hasDistinction ? -0.25 : 0)
+    + (source.rarityTier === 'legendary' ? -0.3 : source.rarityTier === 'rare' ? -0.15 : 0);
+  const chroma = (era ? era.chroma : 0.2)
+    * (source.hasDistinction ? 1.3 : 1)
+    * (source.rarityTier === 'legendary' ? 1.25 : source.rarityTier === 'rare' ? 1.12 : 1);
+  const depth = (era?.depth ?? 1)
+    * (source.hasDistinction ? 1.12 : 1)
+    * (source.rarityTier === 'legendary' ? 1.15 : 1);
+
+  // A context pack has already chosen for both place and period out of real
+  // sources, so era treatment only fills in what the pack left unsaid.
   return {
     // An explicitly supplied backdrop is still held to the contrast rule — the
     // authenticity service picks for place, not for legibility.
-    base: separateFromFigure(provided?.base || base, skinHex, garmentHex, [0.17, 0.44]),
-    // The accent only ever appears as a rake of light across the upper corner,
-    // so it lives a band above the base rather than competing with it.
-    accent: separateFromFigure(provided?.accent || accent, skinHex, garmentHex, [0.42, 0.62]),
+    base: separateFromFigure(provided?.base || base, skinHex, garmentHex, band, chroma),
+    accent: separateFromFigure(
+      provided?.accent || accent, skinHex, garmentHex, accentBand, chroma + 0.06),
     vignette: provided?.vignette ?? true,
-    texture: provided?.texture || 'subtle',
+    vignetteStrength: era?.vignette ?? 1,
+    depth,
+    lift,
+    texture: provided?.texture || era?.texture || 'subtle',
   };
 }
 

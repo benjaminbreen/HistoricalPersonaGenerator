@@ -126,6 +126,16 @@ const NAME_SET_EARLIEST: Record<string, number> = {
   ZULU: 1600,
   RWANDA_BURUNDI: 1400,
   WEST_AFRICAN_SAHEL: 300,
+  // Bantu-speaking central and southern Africa. The dates are the arrival of
+  // Bantu speakers in each area rather than the founding of any state: the
+  // lower Congo by the middle of the first millennium BCE, the Zimbabwe
+  // plateau and the eastern Cape by the middle of the first millennium CE.
+  IGBO: -500,
+  KONGO: -200,
+  LUBA: 300,
+  SHONA: 400,
+  XHOSA: 700,
+  SOTHO_TSWANA: 700,
   TURKIC_STEPPE: 500,
   MONGOLIAN_TRADITIONAL: 1100,
   UYGHUR: 700,

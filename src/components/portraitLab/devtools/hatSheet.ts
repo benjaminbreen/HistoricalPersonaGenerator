@@ -22,29 +22,92 @@ interface HatCase {
   name: string;
   material: string;
   color?: string;
+  gender?: 'Male' | 'Female';
+  hairstyle?: string;
+  /** A woven hat's shape is a question about place, so these two are inputs. */
+  zone?: string;
+  era?: string;
+  seedOffset?: number;
 }
 
 const HATS: HatCase[] = [
-  { label: 'bamboo-hat', name: 'Bamboo Hat', material: 'Woven Bamboo' },
-  { label: 'douli', name: 'Douli', material: 'Bamboo Strips' },
-  { label: 'bamboo-douli', name: 'Bamboo Dou Li', material: 'Split Bamboo' },
-  { label: 'straw-hat', name: 'Straw Hat', material: 'Straw' },
+  // The same three words — "Straw Hat", woven from straw — in five places and
+  // two centuries. One item is 15% of everything the app puts on a head, so
+  // this row is the one that decides how repetitive the whole set looks.
+  { label: 'straw-east-asian', name: 'Straw Hat', material: 'Straw', zone: 'EAST_ASIAN', era: 'MEDIEVAL' },
+  { label: 'straw-south-asian', name: 'Straw Hat', material: 'Straw', zone: 'SOUTH_ASIAN', era: 'MEDIEVAL' },
+  { label: 'straw-european', name: 'Straw Hat', material: 'Straw', zone: 'EUROPEAN', era: 'MEDIEVAL' },
+  { label: 'straw-south-american', name: 'Straw Hat', material: 'Straw', zone: 'SOUTH_AMERICAN', era: 'INDUSTRIAL_ERA' },
+  { label: 'straw-african', name: 'Straw Hat', material: 'Straw', zone: 'SUB_SAHARAN_AFRICAN', era: 'ANTIQUITY' },
+  // Four European field hats on four seeds: the axis that used to not exist.
+  { label: 'straw-seed-a', name: 'Straw Hat', material: 'Straw', zone: 'EUROPEAN', era: 'MEDIEVAL', seedOffset: 7 },
+  { label: 'straw-seed-b', name: 'Straw Hat', material: 'Straw', zone: 'EUROPEAN', era: 'MEDIEVAL', seedOffset: 991 },
+  { label: 'straw-seed-c', name: 'Sun Hat', material: 'Plaited Reed', zone: 'MENA', era: 'ANTIQUITY', seedOffset: 55 },
+  { label: 'straw-seed-d', name: 'Palm Hat', material: 'Palm Leaf', zone: 'OCEANIA', era: 'PREHISTORY', seedOffset: 3111 },
+
+  { label: 'bamboo-hat', name: 'Bamboo Hat', material: 'Woven Bamboo', zone: 'EAST_ASIAN' },
+  { label: 'douli', name: 'Douli', material: 'Bamboo Strips', zone: 'EAST_ASIAN' },
+  { label: 'bamboo-douli', name: 'Bamboo Dou Li', material: 'Split Bamboo', zone: 'EAST_ASIAN' },
+  { label: 'salakot', name: 'Salakot', material: 'Rattan and Fibre', zone: 'SOUTH_ASIAN' },
   { label: 'fur-cap', name: 'Fur Cap', material: 'Fur' },
   { label: 'fur-hat', name: 'Fur Hat', material: 'Sable Fur' },
   { label: 'wolf-pelt', name: 'Wolf Pelt', material: 'Wolf Fur' },
   { label: 'felt-cap', name: 'Felt Cap', material: 'Felt' },
   { label: 'wide-brim', name: 'Wide Brimmed Hat', material: 'Felt' },
   { label: 'coif', name: 'Linen Coif', material: 'Linen' },
+
+  // Knitwear. Every one of these used to come out of the same smooth felt
+  // dome as the cap above, which is the whole reason for the knit branch.
+  { label: 'knit-cap', name: 'Knit Cap', material: 'Llama Wool', color: '#8c3b2e' },
+  { label: 'wool-cap', name: 'Wool Cap', material: 'Knitted Wool', color: '#3f5c6b' },
+  { label: 'chullo', name: 'Chullo Hat', material: 'Knitted Wool', color: '#7a3f6b' },
+  { label: 'beanie', name: 'Beanie', material: 'Knitted Cotton', color: '#4b6b3f' },
+
+  // Wrapped cloth, which is the single commonest covering in the app and used
+  // to have exactly one shape for all of it.
+  { gender: 'Female', label: 'kerchief', name: 'Kerchief', material: 'Linen', color: '#b8443a' },
+  { gender: 'Female', label: 'head-scarf', name: 'Head Scarf', material: 'Cotton', color: '#4a6f8a' },
+  { gender: 'Female', label: 'printed-wrap', name: 'Head Wrap', material: 'Printed Cotton', color: '#8a5ea8' },
+  { label: 'keffiyeh', name: 'Keffiyeh', material: 'Cotton', color: '#e2ddd0' },
+  { gender: 'Female', label: 'gele', name: 'Gele', material: 'Aso Oke', color: '#c08a2c' },
+  { label: 'head-cloth', name: 'Head Cloth', material: 'Cotton', color: '#cfc7b4' },
+  { label: 'turban', name: 'Turban', material: 'Muslin', color: '#e0dbcc' },
+  { label: 'safa', name: 'Rajasthani Safa', material: 'Silk with Kalgi', color: '#c4472e' },
+
+  // Veils. One drawing was serving all of these, which is how a dupatta — a
+  // scarf laid loosely over the back of the head with the hairline showing —
+  // came out as a wimple.
+  { gender: 'Female', label: 'veil-dupatta', name: 'Dupatta', material: 'Chiffon with Border', color: '#a8493a', zone: 'SOUTH_ASIAN' },
+  { gender: 'Female', label: 'veil-odhani', name: 'Odhani', material: 'Cotton', color: '#c47a2c', zone: 'SOUTH_ASIAN' },
+  { gender: 'Female', label: 'veil-hijab', name: 'Hijab', material: 'Cotton', color: '#3f5c6b', zone: 'MENA' },
+  { gender: 'Female', label: 'veil-mantilla', name: 'Lace Mantilla', material: 'Black Lace', color: '#2a2430', zone: 'EUROPEAN' },
+  { gender: 'Female', label: 'veil-wimple', name: 'Wimple and Veil', material: 'Linen', color: '#ded6c4', zone: 'EUROPEAN', era: 'MEDIEVAL' },
+  { gender: 'Female', label: 'veil-chador', name: 'Chador', material: 'Wool', color: '#3a3038', zone: 'MENA' },
+
+  // Things worn in the hair rather than over it.
+  { gender: 'Female', label: 'flower-garland', name: 'Flower Garland', material: 'Fresh Flowers', color: '#c2456b' },
+  { gender: 'Female', label: 'jasmine', name: 'Flower Garland', material: 'Fresh Jasmine', color: '#f0ead8' },
+  { label: 'laurel', name: 'Laurel Wreath', material: 'Bronze Leaves' },
+  { label: 'leaf-band', name: 'Leaf Band', material: 'Woven Leaves' },
+  { gender: 'Female', label: 'flower-crown', name: 'Flower Crown', material: 'Fresh Flowers', color: '#d8b23a' },
+  { gender: 'Female', label: 'beaded-band', name: 'Beaded Headband', material: 'Turquoise Beads' },
 ];
 
 function renderOne(hat: HatCase): Raster {
   const character: any = {
     name: `Test ${hat.label}`,
     age: 40,
-    gender: 'Male',
+    gender: hat.gender || 'Male',
     profession: 'Farmer',
-    portraitSeed: 12345,
-    appearance: { skinColor: '#c98d63', hairColor: '#3b2a1d' },
+    portraitSeed: hat.seedOffset ?? 12345,
+    culturalZone: hat.zone,
+    era: hat.era,
+    appearance: {
+      skinColor: '#c98d63',
+      hairColor: '#3b2a1d',
+      hairstyle: hat.hairstyle,
+      hairLength: hat.gender === 'Female' ? 'long' : undefined,
+    },
     equippedItems: {
       head: { name: hat.name, material: hat.material, color: hat.color },
       torso: { name: 'Simple Robe', material: 'Wool' },

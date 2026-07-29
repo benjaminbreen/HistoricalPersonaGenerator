@@ -839,6 +839,37 @@ const sourceFromProceduralPersona = (generatedPersona: HistoricalPersona): Retur
   };
 };
 
+/**
+ * The sampled social status, where it names a privileged order.
+ *
+ * `socialStatusService` already renders status in the vocabulary of the society
+ * that held it — Gentry in a commercial economy, Chiefly Lineage in a chiefdom,
+ * Lineage Head in a tribal one — so this only has to decide which of those
+ * words describe standing above the common run. Merchant deliberately does not:
+ * a merchant is a trade, and a card that badges every shopkeeper has stopped
+ * saying anything.
+ */
+const ELITE_STATUS_LABELS = new Set([
+  'Noble', 'Gentry', 'Upper Class', 'Chiefly Lineage', 'Lineage Head', 'Patrician',
+]);
+
+const eliteStatusStanding = (socialClass?: string): { label: string; note: string } | null => {
+  const label = (socialClass || '').trim();
+  if (!ELITE_STATUS_LABELS.has(label)) return null;
+  return {
+    label,
+    note: 'Born into the order that held land, office or rank in this society — the local word for it, not a translated title.',
+  };
+};
+
+/** "1 in 10" for a share, in the same voice as the draw odds above the card. */
+const formatShareAsOdds = (share: number): string => {
+  if (share <= 0) return 'almost nobody';
+  if (share >= 0.4) return `${Math.round(share * 100)}%`;
+  const oneIn = Math.round(1 / share);
+  return `1 in ${oneIn}`;
+};
+
 const splitFullName = (fullName: string): { givenName?: string; familyName?: string } => {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return {};
@@ -1401,6 +1432,24 @@ export default function PersonaGenerator() {
     return () => window.clearTimeout(timer);
   }, [shareStatus]);
 
+  /**
+   * A newly generated persona is the root of a new family lineage, so the
+   * navigation stack has to start over with them.
+   *
+   * Leaving the old stack in place was the cause of a nasty class of bug: the
+   * family tab renders `persona`, but `handleViewFamilyMember` read the origin
+   * out of `personaStack[currentPersonaIndex]`. Once the two diverged, clicking
+   * a parent took the *name and birth year* from the person on screen and the
+   * *birth year, place and cultural zone* from whoever was last on the stack —
+   * so every parent came back from the same stale location, at a year drawn
+   * from a different life, often with a negative age.
+   */
+  const beginPersonaLineage = (rootPersona: HistoricalPersona) => {
+    setPersonaStack([rootPersona]);
+    setCurrentPersonaIndex(0);
+    setBreadcrumbPath([{ name: rootPersona.character.name, index: 0 }]);
+  };
+
   const generateRandom = () => {
     resetSharedPersonaState();
     const newPersona = generateHistoricalPersona(params);
@@ -1418,6 +1467,7 @@ export default function PersonaGenerator() {
       diseases: newPersona.character.diseaseHealth?.currentDiseases,
     });
     setPersona(newPersona);
+    beginPersonaLineage(newPersona);
     setAnnotationRecord(null);
     setSourcePortraitUrl(null);
     setSourcePortraitAttribution(null);
@@ -2178,11 +2228,17 @@ export default function PersonaGenerator() {
     try {
       setIsGeneratingFamilyMember(true);
 
-      const currentPersona = personaStack[currentPersonaIndex];
+      // The origin is whoever is on screen. The stack is only a history of how
+      // we got here, and if it has fallen out of step with the rendered persona
+      // it must not be the thing the parent's year and place are derived from.
+      const stackPersona = personaStack[currentPersonaIndex];
+      const currentPersona = persona && stackPersona !== persona ? persona : stackPersona;
+      if (!currentPersona) return;
+      const stackIsStale = currentPersona !== stackPersona;
 
       // Calculate generation depth (how many generations back from root)
       // If moving to parent, increment depth; for others (spouse, children, siblings), keep same depth
-      const currentDepth = breadcrumbPath[currentPersonaIndex]?.generationDepth || 0;
+      const currentDepth = stackIsStale ? 0 : (breadcrumbPath[currentPersonaIndex]?.generationDepth || 0);
       const isMovingToParent = familyMember.relation === 'father' || familyMember.relation === 'mother';
       const newGenerationDepth = isMovingToParent ? currentDepth + 1 : currentDepth;
 
@@ -2194,13 +2250,19 @@ export default function PersonaGenerator() {
       );
       resetSharedPersonaState();
 
-      // Add to stack (remove any personas after current if we navigated back)
-      const newStack = personaStack.slice(0, currentPersonaIndex + 1);
+      // Add to stack (remove any personas after current if we navigated back).
+      // A stale stack is discarded rather than appended to, so the breadcrumbs
+      // describe the lineage actually on screen.
+      const newStack = stackIsStale
+        ? [currentPersona]
+        : personaStack.slice(0, currentPersonaIndex + 1);
       newStack.push(newPersona);
 
       // Update breadcrumb with generation depth
       const relationLabel = getRelationLabel(familyMember.relation, currentPersona.character.name);
-      const newPath = breadcrumbPath.slice(0, currentPersonaIndex + 1);
+      const newPath = stackIsStale
+        ? [{ name: currentPersona.character.name, index: 0 }]
+        : breadcrumbPath.slice(0, currentPersonaIndex + 1);
       newPath.push({
         name: familyMember.name,
         relation: relationLabel,
@@ -2308,6 +2370,7 @@ export default function PersonaGenerator() {
       diseases: newPersona.character.diseaseHealth?.currentDiseases,
     });
     setPersona(newPersona);
+    beginPersonaLineage(newPersona);
     setAnnotationRecord(null);
     setSourcePortraitUrl(null);
     setSourcePortraitAttribution(null);
@@ -4584,6 +4647,32 @@ export default function PersonaGenerator() {
                     >
                       {persona.region}
                     </span>
+                    {/* Standing, in the society's own word. It sits with the
+                        place pills rather than with the stats because that is
+                        what it was: a fact about where you were born, not an
+                        achievement.
+
+                        Two sources feed it. The elite-strata table is the
+                        precise one — it knows what an hidalgo was and how many
+                        there were — and the social-status sampler is the
+                        fallback, which covers the societies and centuries the
+                        table has not reached yet. Without the fallback the
+                        badge appeared on one persona in forty-four, which is
+                        not "rare", it is "absent". */}
+                    {(() => {
+                      const standing = persona.distinction
+                        ? {
+                          label: persona.distinction.label,
+                          note: `${persona.distinction.clause} Roughly ${formatShareAsOdds(persona.distinction.share)} of people here held this standing.`,
+                        }
+                        : eliteStatusStanding(persona.character.socialClass);
+                      if (!standing) return null;
+                      return (
+                        <span className="location-pill distinction-pill" title={standing.note}>
+                          {standing.label}
+                        </span>
+                      );
+                    })()}
                     {persona.location !== persona.region && (() => {
                       const placeLabel = historicalPlaceLabel(persona.location, persona.year);
                       return (
@@ -4622,6 +4711,23 @@ export default function PersonaGenerator() {
                     {persona.samplingMode === 'explore' && <span className="draw-odds-mode"> · explore mode</span>}
                   </div>
                 )}
+                {/* How unusual the person is, as against how unusual their world
+                    is. It belongs directly under the draw odds because it is the
+                    same kind of claim — a share of a population — but it is
+                    about this individual, so it is the one line here that is
+                    allowed full contrast. */}
+                {persona.rarity && persona.rarity.tier !== 'ordinary' && (
+                  <div
+                    className={`persona-rarity rarity-${persona.rarity.tier}`}
+                    title={persona.rarity.reasons.join('\n')}
+                  >
+                    <span className="rarity-mark" aria-hidden="true">
+                      {persona.rarity.tier === 'legendary' ? '◆' : persona.rarity.tier === 'rare' ? '◈' : '◇'}
+                    </span>
+                    About <strong>1 in {persona.rarity.oneIn.toLocaleString()}</strong> people are this unusual
+                  </div>
+                )}
+
                 {annotationRecord && (
                   <div className="schema-evidence-strip">
                     <div>
@@ -5662,7 +5768,19 @@ export default function PersonaGenerator() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.45 + idx * 0.08 }}
                           >
-                            <div className="attribute-icon-wrapper">
+                            {/* RARITY_COLORS has been imported and unused since
+                                the rarity ladder was built. A prevalence the
+                                generator computes and the card discards may as
+                                well not have been computed. */}
+                            <div
+                              className="attribute-icon-wrapper"
+                              style={attr.rarity && attr.rarity !== 'common'
+                                ? {
+                                  color: RARITY_COLORS[attr.rarity],
+                                  background: `color-mix(in srgb, ${RARITY_COLORS[attr.rarity]} 16%, var(--color-surface))`,
+                                }
+                                : undefined}
+                            >
                               {IconComponent ? (
                                 <IconComponent className="attribute-icon" />
                               ) : (
@@ -5670,7 +5788,18 @@ export default function PersonaGenerator() {
                               )}
                             </div>
                             <div className="attribute-text">
-                              <div className="attribute-name">{attr.name}</div>
+                              <div className="attribute-name">
+                                {attr.name}
+                                {attr.rarity && attr.rarity !== 'common' && attr.rarity !== 'uncommon' && (
+                                  <span
+                                    className="attribute-rarity"
+                                    style={{ color: RARITY_COLORS[attr.rarity] }}
+                                    title={`${attr.rarity} — how many people of this age, sex, trade and place carried it`}
+                                  >
+                                    {attr.rarity}
+                                  </span>
+                                )}
+                              </div>
                               <div className="attribute-description">{attr.description}</div>
                             </div>
                           </motion.div>

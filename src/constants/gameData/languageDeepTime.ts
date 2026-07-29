@@ -1017,8 +1017,16 @@ export const ATTRIBUTION_WINDOWS: AttributionWindow[] = [
     ],
   },
   {
+    // Closes at 600 rather than running to the present. A place-scoped window
+    // beats the attested table outright (see `attributeLanguage`), so these two
+    // windows ending at 2100 meant every Southeast Asian persona in every
+    // century got a family label: "Austroasiatic language of the region" for a
+    // man in 1920 Rangoon whose language the table knows is Burmese. Every
+    // comparable window elsewhere closes where the record opens — ea-taiwan at
+    // 1600, na-california at 1769 — and here that is the seventh century, when
+    // Old Malay appears at Srivijaya and Mon and Khmer inscriptions begin.
     id: 'sea-island-austronesian',
-    yearRange: [-2500, 2100],
+    yearRange: [-2500, 600],
     zones: ['SOUTHEAST_ASIAN'],
     places: /\b(philippin|luzon|visayan|mindanao|palawan|sulu|borneo|java|sumatra|celebes|sulawesi|moluc|bali|timor|maritime southeast|malay archipelago|malaya|malacca|sunda)\b/,
     hypotheses: [
@@ -1031,7 +1039,7 @@ export const ATTRIBUTION_WINDOWS: AttributionWindow[] = [
   },
   {
     id: 'sea-mainland',
-    yearRange: [-10000, 2100],
+    yearRange: [-10000, 600],
     zones: ['SOUTHEAST_ASIAN'],
     places: /\b(indochina|mainland southeast|mekong|annam|tonkin|siam|thai|burma|irrawaddy|salween|khmer|angkor|champa|laos|malay peninsula|isthmus of kra)\b/,
     hypotheses: [

@@ -35,6 +35,17 @@ export const MAT = {
   PAINT: 17,
   GLASS: 18,
   TEETH: 19,
+  /**
+   * The second colour a head covering is patterned in — the contrasting yarn
+   * in knitwork, the check in a keffiyeh, the print on a wrapper. It needs a
+   * material of its own rather than borrowing HEADWEAR's, because every later
+   * pass shades a pixel along the ramp its material names, and a stripe shaded
+   * against the ground colour stops being a stripe the moment anything casts a
+   * shadow across it.
+   */
+  HEADWEAR_ACCENT: 20,
+  /** Living plant matter: the leaves of a wreath, the greens of a garland. */
+  FOLIAGE: 21,
 } as const;
 
 export const MAT_COUNT = 24;
@@ -46,7 +57,8 @@ export type RampBook = Array<Ramp | null>;
 /** Materials that participate in the silhouette outline. */
 export const BODY_MATS = new Set<number>([
   MAT.SKIN, MAT.HAIR, MAT.BEARD, MAT.CLOTH_A, MAT.CLOTH_B, MAT.CLOTH_C,
-  MAT.HEADWEAR, MAT.METAL, MAT.LEATHER, MAT.WOOD, MAT.GEM, MAT.PAINT, MAT.GLASS,
+  MAT.HEADWEAR, MAT.HEADWEAR_ACCENT, MAT.FOLIAGE, MAT.METAL, MAT.LEATHER,
+  MAT.WOOD, MAT.GEM, MAT.PAINT, MAT.GLASS,
 ]);
 
 export type Mask = Uint8Array;

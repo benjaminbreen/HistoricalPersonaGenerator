@@ -162,9 +162,23 @@ export function genderAccessWeight(
       weight = Math.min(weight, closed);
       return;
     }
-    // Linear climb from the closed weight to parity across the opening span.
+    // The climb to parity is convex, not linear.
+    //
+    // A straight line from the opening year is wrong at both ends, and wrong in
+    // the direction that matters most. Surgery opens in 1900 across ninety
+    // years, so the linear form gave a woman in 1909 eleven per cent of a
+    // man's access to the trade — a rural Arizona surgeon who is a
+    // sixty-year-old woman, which is roughly what the app was producing.
+    // Women were about five per cent of American physicians in 1910 and a far
+    // smaller fraction of surgeons; the first decade after a profession admits
+    // women is not a tenth of the way to parity, it is a token.
+    //
+    // The real shape is a long flat tail followed by a fast rise once training
+    // and licensing actually open, which an exponent of 2.5 approximates well:
+    // a tenth of the way through a span is 0.3% of parity, half way is 18%,
+    // four fifths is 57%.
     const progress = Math.min(1, (year - opensIn) / span);
-    weight = Math.min(weight, closed + (1 - closed) * progress);
+    weight = Math.min(weight, closed + (1 - closed) * Math.pow(progress, 2.5));
   };
 
   for (const rule of RULES) {

@@ -13,6 +13,7 @@ import { hexToColorName } from '../utils/colorUtils';
 import { COLOR_WORDS, hasIntrinsicColor, nameForHex } from '../constants/gameData/colorNames';
 import { CharacterSpecification } from './worldWeaverService';
 import { ancestryNameKeys } from './populationStrataService';
+import { coherentWealth } from './wealthCoherenceService';
 import type { Ancestry } from '../types/socialCondition';
 import DiseaseService from './diseaseService';
 import { AttributeBadgeService } from './attributeBadgeService';
@@ -613,7 +614,9 @@ function generateProceduralFamily(
      * with somewhere to go. A condition of this kind is inherited, so the
      * household is inside it too.
      */
-    householdTrades?: Array<{ role: string; gender?: 'Male' | 'Female' }>
+    householdTrades?: Array<{ role: string; gender?: 'Male' | 'Female' }>,
+    /** The map area, so relatives are named by the same locale rule the persona was. */
+    location?: string
 ): void {
     const age = character.age;
 
@@ -661,9 +664,9 @@ function generateProceduralFamily(
         return given.length > 0 && given === selfGiven;
     };
 
-    let fatherGenerated = generateNpcNameDetailed('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey);
+    let fatherGenerated = generateNpcNameDetailed('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey, { location });
     for (let attempt = 0; attempt < 4 && collides(fatherGenerated.given); attempt += 1) {
-        fatherGenerated = generateNpcNameDetailed('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey);
+        fatherGenerated = generateNpcNameDetailed('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey, { location });
     }
     // If the character is "Wulf son of Ket", the father is Ket. His own name is
     // still built by his own culture's convention on top of that given name.
@@ -672,9 +675,9 @@ function generateProceduralFamily(
         : fathersGivenName
             ? fatherGenerated.full.replace(fatherGenerated.given, fathersGivenName)
             : fatherGenerated.full;
-    let motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise, familyNameKey);
+    let motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise, familyNameKey, { location });
     for (let attempt = 0; attempt < 4 && collides(motherName); attempt += 1) {
-        motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise, familyNameKey);
+        motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise, familyNameKey, { location });
     }
 
     // Generate father's profession
@@ -737,9 +740,9 @@ function generateProceduralFamily(
 
     for (const birth of siblings) {
         const siblingGender = birth.sex;
-        let siblingGenerated = generateNpcNameDetailed(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, birth.birthYear, noise, familyNameKey);
+        let siblingGenerated = generateNpcNameDetailed(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, birth.birthYear, noise, familyNameKey, { location });
         for (let attempt = 0; attempt < 5 && takenGivenNames.has(givenOf(siblingGenerated.given)); attempt += 1) {
-            siblingGenerated = generateNpcNameDetailed(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, birth.birthYear, noise, familyNameKey);
+            siblingGenerated = generateNpcNameDetailed(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, birth.birthYear, noise, familyNameKey, { location });
         }
         takenGivenNames.add(givenOf(siblingGenerated.given));
         // Siblings share a hereditary name, and share a father in a patronymic.
@@ -763,7 +766,7 @@ function generateProceduralFamily(
         const twinGender = noise.random() > 0.5
             ? normalizedGender
             : (normalizedGender === 'male' ? 'female' : 'male');
-        const twinName = generateNpcName(twinGender === 'male' ? 'Male' : 'Female', culturalZone, region, birthYear, noise, familyNameKey);
+        const twinName = generateNpcName(twinGender === 'male' ? 'Male' : 'Female', culturalZone, region, birthYear, noise, familyNameKey, { location });
         character.family.push({
             name: dedupeEpithet(twinName),
             relation: 'twin',
@@ -781,7 +784,7 @@ function generateProceduralFamily(
         const spouseAge = age + spouseAgeGap;
         const spouseBirthYear = currentYear - spouseAge;
         const spouseGender = normalizedGender === 'male' ? 'female' : 'male';
-        const spouseName = generateNpcName(spouseGender === 'male' ? 'Male' : 'Female', culturalZone, region, spouseBirthYear, noise, familyNameKey);
+        const spouseName = generateNpcName(spouseGender === 'male' ? 'Male' : 'Female', culturalZone, region, spouseBirthYear, noise, familyNameKey, { location });
         const spouseProfession = spouseGender === 'male'
             ? generateParentProfession('male', culturalZone, era, noise, currentYear, region)
             : generateMotherProfession(culturalZone, era, noise);
@@ -813,7 +816,7 @@ function generateProceduralFamily(
         for (const birth of births) {
             const childName = generateNpcName(
                 birth.sex === 'male' ? 'Male' : 'Female',
-                culturalZone, region, birth.birthYear, noise, familyNameKey);
+                culturalZone, region, birth.birthYear, noise, familyNameKey, { location });
 
             // Children worked. A twelve-year-old with no trade listed is modern
             // childhood projected backwards onto societies that had no such thing.
@@ -1147,6 +1150,20 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     const areaClimate = getAreaClimate(culturalZone, context.region, context.location);
     const outfitSeason = seasonFor(outfitMonth, hemisphereFor(culturalZone, context.region), areaClimate);
 
+    // Wealth was rolled before the trade was known, and the wardrobe reads
+    // wealth alone — which is how a dairymaid ended up in a black opera gown.
+    // Bound it by the work now that the work is settled, and leave any trade
+    // the service has no opinion about exactly where the roll put it.
+    //
+    // `wealthLocked` rather than "was a wealth level supplied": the persona
+    // generator always supplies one, because it samples it, so testing for its
+    // presence disabled this entirely. Only a wealth level the *caller* asked
+    // for is exempt. See wealthCoherenceService.
+    const wealthLocked = (spec as CharacterSpecification & { wealthLocked?: boolean }).wealthLocked;
+    if (!wealthLocked) {
+        baseProfile.wealthLevel = coherentWealth(baseProfile.wealthLevel, role);
+    }
+
     const coherentOutfit = generateCompleteOutfit(
         culturalZone,
         generationContext.era,
@@ -1202,7 +1219,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         dateInfo.year,
         noise,
         contextualNameKey,
-        { ancestral: ancestralNameKeys.length > 0 },
+        { ancestral: ancestralNameKeys.length > 0, location: context.location },
     );
     const name = spec.name || generatedName.full;
     const fathersGivenName = spec.name ? undefined : generatedName.patronymicFrom;
@@ -1684,7 +1701,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         resolvedNameKey,
         fathersGivenName,
         inheritedFamilyName,
-        householdTrades
+        householdTrades,
+        context.location
     );
 
     // Initialize disease health with potential disease based on stats and setting

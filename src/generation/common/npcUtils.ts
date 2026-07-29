@@ -3,6 +3,7 @@
  */
 import { NpcEntity, NpcStats, NpcPersonality, NpcSocialContext, HistoricalEra, CharacterStats, CharacterPersonality, CharacterSocialContext, WealthLevel, Gender, TerrainStructure, PlayerCharacter, Ideology, Appearance, ClothingPiece, ClothingPalette, MapAreaDefinition, FactionData, TerrainStructureType, PersonalGoal } from '../../types';
 import { PROFESSIONS, CulturalZone, SocialClassMap, ProfessionDefinition, CHARACTER_NAMES, REGION_NAME_MAPPING, RELIGION_DATA, RELIGION_YEAR_TRANSITIONS, ReligionDistributionEntry, IDEOLOGIES, PERSONAL_BELIEFS, getEraSpecificFallback } from '../../constants/index';
+import { professionsFor } from '../../constants/characterData/commonProfessions';
 // Heavy data files - import directly to avoid loading on app startup
 import { GEOGRAPHICAL_DATA } from '../../constants/gameData/geography';
 import { ADJACENCIES } from '../../constants/gameData/adjacencies';
@@ -218,9 +219,10 @@ export function generateNpcName(
     region: string | undefined,
     year: number,
     noise: ValueNoise,
-    professionNameKey?: string
+    professionNameKey?: string,
+    options: { ancestral?: boolean; location?: string } = {}
 ): string {
-    return generateNpcNameDetailed(gender, culturalZone, region, year, noise, professionNameKey).full;
+    return generateNpcNameDetailed(gender, culturalZone, region, year, noise, professionNameKey, options).full;
 }
 
 /**
@@ -243,7 +245,18 @@ export function generateNpcNameDetailed(
      * discarded — the reset exists to stop a stale Muisca profession key from
      * naming a modern Colombian, and it cannot tell the two cases apart.
      */
-    options: { ancestral?: boolean } = {}
+    /**
+     * `location` is the map area inside the region — "Tibetan Plateau" within
+     * "West China and Tibet". A rule keyed on it wins over the region's, which
+     * is the only way a region spanning two peoples can name either correctly:
+     * that region's locales draw close to evenly and are half Tibetan and half
+     * Han, so any single region-level rule is wrong for half of them.
+     *
+     * REGION_NAME_MAPPING already carried about forty locale-keyed entries —
+     * Valley of Mexico, Greater Antilles, Swahili Coast, Galicia — written as
+     * though this lookup existed. It did not, so they were dead data.
+     */
+    options: { ancestral?: boolean; location?: string } = {}
 ): FormattedName {
     // Fallback paths hand back a bare name; wrap them so every exit has the
     // same shape.
@@ -318,7 +331,9 @@ export function generateNpcNameDetailed(
             // If not found in colonial mappings or not applicable, check the original cultural zone
             if (!nameKeyToUse && REGION_NAME_MAPPING[culturalZone as keyof typeof REGION_NAME_MAPPING]) {
                 devLog(`[NameGen] Checking REGION_NAME_MAPPING["${culturalZone}"]["${region}"]`);
-                const regionRules = REGION_NAME_MAPPING[culturalZone as keyof typeof REGION_NAME_MAPPING][region];
+                const zoneRules = REGION_NAME_MAPPING[culturalZone as keyof typeof REGION_NAME_MAPPING];
+                // The locale first, then the region it sits in.
+                const regionRules = (options.location ? zoneRules[options.location] : undefined) ?? zoneRules[region];
                 if (regionRules) {
                     devLog(`[NameGen] Found regional rules:`, regionRules);
                     for (const rule of regionRules) {
@@ -1233,7 +1248,29 @@ export function generateBaseProfile(
             noise = { random: () => seededRandom() } as ValueNoise;
         }
         
-        const generateStat = (base: number = 5, variance: number = 5) => Math.max(1, Math.min(10, base + Math.floor((noise.random() - 0.5) * variance)));
+        /**
+         * One ability score, 1–10.
+         *
+         * The previous form was `5 + floor((rand - 0.5) * 5)`, which is uniform
+         * over {2,3,4,5,6,7} — the clamp to 1..10 never once bound. Across two
+         * thousand audited personas, twenty-two thousand rolls, there was not a
+         * single 8, 9, 10 or 1, and two personas in three had a best score of
+         * exactly 7. So the generator could not produce an exceptional person at
+         * all, and no amount of flagging downstream would have found one.
+         *
+         * Averaging three draws gives a bell instead of a slab: most people sit
+         * in the middle, the ends are reachable, and the tail thins fast — about
+         * one score in 220 comes out a 10 and about one in 30 a 9. That is the
+         * right shape for a population, and it is the shape the rarity service
+         * assumes when it works out how unusual a persona is.
+         */
+        const generateStat = (base: number = 5.5, variance: number = 10) => {
+            const bell = (noise.random() + noise.random() + noise.random()) / 3;
+            // Centred on `base`, spanning `variance` — expressed this way so a
+            // caller can still shift or narrow a distribution deliberately.
+            const value = base + (bell - 0.5) * variance;
+            return Math.max(1, Math.min(10, Math.round(value)));
+        };
         
         const stats: CharacterStats = {
             strength: generateStat(), dexterity: generateStat(), stamina: generateStat(), constitution: generateStat(),
@@ -1822,7 +1859,25 @@ export function determineSocialRole(
             eraForProfessions = context.era as HistoricalEra;
         }
 
-        const eraRoles: SocialClassMap | undefined = PROFESSIONS[context.culturalZone]?.[eraForProfessions];
+        // The tables plus the food-producing work eighteen of them omit. See
+        // agrarianProfessions.ts: no amount of weighting could conjure a farmer
+        // for 1650 Europe, because the table had none to offer.
+        // The tables, plus the ordinary work most of them omit. See
+        // commonProfessions.ts: petty commerce was missing from forty-six of
+        // the sixty-four tables, domestic service from forty-five. The
+        // substrate is capability-filtered for this actual society, so one
+        // authored list serves every zone and era without putting a smith in a
+        // world with no smelting.
+        const eraRoles: SocialClassMap | undefined = professionsFor(
+            PROFESSIONS[context.culturalZone]?.[eraForProfessions],
+            context.culturalZone,
+            eraForProfessions,
+            {
+                year: currentYear ?? 0,
+                culturalZone: context.culturalZone,
+                placeLower: `${context.localArea ?? ''} ${context.region ?? ''}`.toLowerCase(),
+            },
+        );
         const historicalContext = context.historicalContext || createHistoricalContext({
             year: currentYear ?? 0,
             era: eraForProfessions,

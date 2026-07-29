@@ -621,13 +621,20 @@ export function isMaterialAvailable(description: string, year: number): boolean 
  * Guinea — the whole region is single-digit millions against a world of half a
  * billion. Roughly one human life in two hundred. Sampling cultural zones
  * uniformly, as this app did, over-represented it by a factor of about twenty.
+ *
+ * `EAST_ASIAN` and `SOUTH_ASIAN` here have always meant East and South Asia
+ * proper — China, Japan and Korea; India, Pakistan and Bengal — so Southeast
+ * Asia was not folded into them, it was simply absent, and the shares summed
+ * short by about its size. Its own row is added rather than subtracted from
+ * theirs. Java alone carried more people through most of this table than
+ * Britain did.
  */
 const ZONE_SHARES: Array<{ year: number; shares: Partial<Record<CulturalZone, number>> }> = [
   {
     year: -3000,
     shares: {
       MENA: 0.25, SOUTH_ASIAN: 0.20, EAST_ASIAN: 0.20, EUROPEAN: 0.10,
-      SUB_SAHARAN_AFRICAN: 0.15, SOUTH_AMERICAN: 0.05,
+      SUB_SAHARAN_AFRICAN: 0.15, SOUTHEAST_ASIAN: 0.03, SOUTH_AMERICAN: 0.05,
       NORTH_AMERICAN_PRE_COLUMBIAN: 0.04, OCEANIA: 0.01,
     },
   },
@@ -635,7 +642,7 @@ const ZONE_SHARES: Array<{ year: number; shares: Partial<Record<CulturalZone, nu
     year: 1,
     shares: {
       EAST_ASIAN: 0.22, SOUTH_ASIAN: 0.22, EUROPEAN: 0.15, MENA: 0.13,
-      SUB_SAHARAN_AFRICAN: 0.10, SOUTH_AMERICAN: 0.04,
+      SUB_SAHARAN_AFRICAN: 0.10, SOUTHEAST_ASIAN: 0.025, SOUTH_AMERICAN: 0.04,
       NORTH_AMERICAN_PRE_COLUMBIAN: 0.02, OCEANIA: 0.004,
     },
   },
@@ -643,7 +650,7 @@ const ZONE_SHARES: Array<{ year: number; shares: Partial<Record<CulturalZone, nu
     year: 1000,
     shares: {
       EAST_ASIAN: 0.27, SOUTH_ASIAN: 0.28, EUROPEAN: 0.19, MENA: 0.10,
-      SUB_SAHARAN_AFRICAN: 0.10, SOUTH_AMERICAN: 0.03,
+      SUB_SAHARAN_AFRICAN: 0.10, SOUTHEAST_ASIAN: 0.03, SOUTH_AMERICAN: 0.03,
       NORTH_AMERICAN_PRE_COLUMBIAN: 0.02, OCEANIA: 0.003,
     },
   },
@@ -651,7 +658,7 @@ const ZONE_SHARES: Array<{ year: number; shares: Partial<Record<CulturalZone, nu
     year: 1500,
     shares: {
       EAST_ASIAN: 0.27, SOUTH_ASIAN: 0.24, EUROPEAN: 0.18, MENA: 0.06,
-      SUB_SAHARAN_AFRICAN: 0.11, SOUTH_AMERICAN: 0.07,
+      SUB_SAHARAN_AFRICAN: 0.11, SOUTHEAST_ASIAN: 0.04, SOUTH_AMERICAN: 0.07,
       NORTH_AMERICAN_PRE_COLUMBIAN: 0.04, OCEANIA: 0.004,
     },
   },
@@ -659,7 +666,7 @@ const ZONE_SHARES: Array<{ year: number; shares: Partial<Record<CulturalZone, nu
     year: 1800,
     shares: {
       EAST_ASIAN: 0.37, SOUTH_ASIAN: 0.20, EUROPEAN: 0.20, MENA: 0.03,
-      SUB_SAHARAN_AFRICAN: 0.08, SOUTH_AMERICAN: 0.02,
+      SUB_SAHARAN_AFRICAN: 0.08, SOUTHEAST_ASIAN: 0.035, SOUTH_AMERICAN: 0.02,
       NORTH_AMERICAN_COLONIAL: 0.01, OCEANIA: 0.002,
     },
   },
@@ -667,7 +674,7 @@ const ZONE_SHARES: Array<{ year: number; shares: Partial<Record<CulturalZone, nu
     year: 1900,
     shares: {
       EAST_ASIAN: 0.30, SOUTH_ASIAN: 0.20, EUROPEAN: 0.25, MENA: 0.03,
-      SUB_SAHARAN_AFRICAN: 0.07, SOUTH_AMERICAN: 0.04,
+      SUB_SAHARAN_AFRICAN: 0.07, SOUTHEAST_ASIAN: 0.05, SOUTH_AMERICAN: 0.04,
       NORTH_AMERICAN_COLONIAL: 0.05, OCEANIA: 0.004,
     },
   },
@@ -675,7 +682,7 @@ const ZONE_SHARES: Array<{ year: number; shares: Partial<Record<CulturalZone, nu
     year: 2000,
     shares: {
       EAST_ASIAN: 0.25, SOUTH_ASIAN: 0.22, EUROPEAN: 0.12, MENA: 0.06,
-      SUB_SAHARAN_AFRICAN: 0.11, SOUTH_AMERICAN: 0.09,
+      SUB_SAHARAN_AFRICAN: 0.11, SOUTHEAST_ASIAN: 0.085, SOUTH_AMERICAN: 0.09,
       NORTH_AMERICAN_COLONIAL: 0.05, OCEANIA: 0.005,
     },
   },
@@ -745,6 +752,7 @@ const ZONE_PHRASE: Record<string, string> = {
   EUROPEAN: 'Europe',
   MENA: 'the Middle East and North Africa',
   SOUTH_ASIAN: 'South Asia',
+  SOUTHEAST_ASIAN: 'Southeast Asia',
   EAST_ASIAN: 'East Asia',
   SUB_SAHARAN_AFRICAN: 'sub-Saharan Africa',
   OCEANIA: 'Oceania',
