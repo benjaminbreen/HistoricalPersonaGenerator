@@ -79,6 +79,34 @@ const ORNAMENT_MATERIALS: Record<OrnamentMaterial, OrnamentMaterialDef> = {
   amber: { base: '#d08a1e', contrast: 1.4, sheen: '#ffd977', sheenAmount: 0.48, specular: true, saturation: 1.3 },
   ruby: { base: '#a51f3c', contrast: 1.55, sheen: '#ff6d84', sheenAmount: 0.46, specular: true, saturation: 1.35 },
   emerald: { base: '#1f8a56', contrast: 1.5, sheen: '#69e8a4', sheenAmount: 0.46, specular: true, saturation: 1.35 },
+  // Carnelian is the most-worn stone in the ancient world and was missing
+  // entirely: banded, warm, translucent at the edges, and a full step oranger
+  // than the garnet it kept being filed under.
+  carnelian: { base: '#b8552a', contrast: 1.3, sheen: '#ffab6b', sheenAmount: 0.4, saturation: 1.28 },
+  /**
+   * Trade beads, and the one material here whose *colour* is not the point.
+   *
+   * Glass is defined by what it does to light rather than by a hue — it is the
+   * only substance in this table with a hard specular on a body that is barely
+   * saturated at all, which is exactly why a strand of them catches across a
+   * room. The hue arrives from the piece it belongs to.
+   */
+  glass: { base: '#7f93a8', contrast: 1.7, sheen: '#eaf6ff', sheenAmount: 0.55, specular: true, saturation: 0.9 },
+  /**
+   * Egyptian faience — ground quartz, glazed and fired to a blue-green no
+   * mineral in the ground is.
+   *
+   * The most-produced ornamental material of the ancient world and the reason
+   * a broad collar reads at fifty paces. It is deliberately the brightest entry
+   * in this table: the whole technology exists to make something *look* like
+   * turquoise and lapis without being either, and a faience bead that reads as
+   * a duller turquoise has failed at the one thing it was invented to do.
+   */
+  faience: { base: '#3fb8c4', contrast: 1.35, sheen: '#b6fbff', sheenAmount: 0.46, specular: true, saturation: 1.4 },
+  // Jet is fossil wood polished to a mirror: near-black with a hard cold hit,
+  // and nothing like the matte black of a dyed bead. Whitby jet in Bronze Age
+  // Britain, and again on every Victorian widow.
+  jet: { base: '#2b2a30', contrast: 1.9, sheen: '#b9c2d6', sheenAmount: 0.5, specular: true, saturation: 0.7 },
 
   // Pearl is the one everybody draws as chrome. It is not: the body is warm
   // and pale, the shadow is warmer still, and there is exactly one small hit.
@@ -145,8 +173,33 @@ function hexRgb(hex: string): RGB {
   return { r: (v >> 16) & 255, g: (v >> 8) & 255, b: v & 255 };
 }
 
-function isSpecular(material: OrnamentMaterial): boolean {
+/**
+ * Whether this substance answers light with a hard point or a soft bloom.
+ *
+ * Exported because the jewellery draws from this table now, and because the
+ * per-frame glint is only honest on the materials that have a specular to move
+ * in the first place: jade and pearl and bone stay where they are put, and gold
+ * and amber and glass are the ones that catch.
+ */
+export function isSpecular(material: OrnamentMaterial): boolean {
   return Boolean(ORNAMENT_MATERIALS[material]?.specular);
+}
+
+/**
+ * The colour a highlight on this material reaches at its brightest.
+ *
+ * Not white. A blown highlight on gold is warm, on silver is cold, and on
+ * kingfisher is cyan — the whole reason the `sheen` field exists is that these
+ * substances *change hue* toward the light rather than merely lightening, and a
+ * glint that resolves to white throws away the one property that distinguishes
+ * them. It is pushed most of the way to the sheen and only a little toward
+ * white, so the peak still says which substance it came from.
+ */
+export function ornamentGlintPeak(material: OrnamentMaterial): RGB {
+  const def = ORNAMENT_MATERIALS[material] || ORNAMENT_MATERIALS.bronze;
+  const top = ornamentRamp(material).steps[0];
+  const toward = def.sheen ? hexRgb(def.sheen) : { r: 255, g: 252, b: 244 };
+  return mixRgb(mixRgb(top, toward, 0.85), { r: 255, g: 255, b: 250 }, 0.3);
 }
 
 // ---------------------------------------------------------------------------

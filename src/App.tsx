@@ -13,7 +13,7 @@ function App() {
   return (
     <div className="app">
       {showPortraitLab ? <PortraitLab /> : <PersonaGenerator />}
-      {/* Contact sheet overlay on ⌘⇧D. Inert in production unless ?devPanel. */}
+      {/* Contact sheet overlay on ⇧`. Inert in production unless ?devPanel. */}
       <PortraitDevPanel />
     </div>
   );

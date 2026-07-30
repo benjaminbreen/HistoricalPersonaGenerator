@@ -1248,7 +1248,7 @@ interface BeardRegions {
   handlebar: boolean;
 }
 
-function beardRegions(style: string): BeardRegions {
+export function beardRegions(style: string): BeardRegions {
   const base: BeardRegions = {
     mustache: false, chin: false, jaw: false, sideburns: false,
     hang: 0, soulPatch: false, forked: false, handlebar: false,

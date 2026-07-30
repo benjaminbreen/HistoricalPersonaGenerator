@@ -451,6 +451,13 @@ function generatePersonaWithSeed(
       // A legal condition is inherited, so the parents are inside it too and
       // must be drawn from the same list of trades.
       householdTrades: stratum?.stratum.roles.map(r => ({ role: r.role, gender: r.gender })),
+      // The privileged order, for the name. `eliteNaming.ts` reads it and adds
+      // whatever that estate's own naming added — "don" and a second surname for
+      // a hidalgo, "Singh" and a clan for a Rajput, a clan seat for a yangban.
+      // Several of these orders were five to ten per cent of their societies, so
+      // this is not decoration for the rarest tail; it is what a large minority
+      // of names in those places actually looked like.
+      standingId: elite?.stratum.id,
     } as any
   );
   const character = applyPortraitAuthenticity(generatedCharacter, {

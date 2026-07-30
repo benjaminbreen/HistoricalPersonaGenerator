@@ -43,7 +43,7 @@ import {
 import { Expression, PortraitSpec } from '../spec/types';
 import { compilePortrait, poseForExpression, renderFrame } from '../render/pipeline';
 import { buildAnatomy, CANVAS, VIEW_HEIGHT } from '../spec/anatomy';
-import { idleFrame } from '../render/animation';
+import { idleFrame, restingGaze } from '../render/animation';
 import { encodePNG, scaleRGBA } from './png';
 
 const CELL = CANVAS;
@@ -239,7 +239,10 @@ const markingPatterns: Counted = {};
 const diseases: Counted = {};
 const ageBands: Counted = {};
 const greyBands: Counted = {};
+const weatherBands: Counted = {};
+const gazeHabits: Counted = {};
 const restingFaces: Counted = {};
+const crownBands: Counted = {};
 const poseReasons: Counted = {};
 const ornamentKinds: Counted = {};
 const garmentSurfaces: Counted = {};
@@ -308,10 +311,33 @@ for (let i = 0; i < count; i += 1) {
       : spec.age < 65 ? '50-64' : '65+';
     bump(ageBands, band);
     bump(greyBands, spec.grayAmount < 0.05 ? 'none' : spec.grayAmount < 0.35 ? 'some' : 'mostly grey');
+    // How domed the vault is. Reported because the whole point of the axis is
+    // that flatness stopped being universal, and a distribution is the only way
+    // to see whether it did — a table that came out 90% flat would mean the
+    // seeded spread had been swallowed somewhere downstream.
+    const crown = buildAnatomy(spec).crown;
+    bump(crownBands, crown < 0.25 ? 'flat' : crown < 0.5 ? 'shallow'
+      : crown < 0.75 ? 'domed' : 'round');
+    // The trade-and-years axis. Worth a table of its own because it is derived
+    // from profession *names* by regex, so the only way to know the tiers are
+    // reaching real output — rather than matching a handful of tidy examples —
+    // is to count what the app actually generates.
+    bump(weatherBands, spec.weathering < 0.12 ? 'indoors'
+      : spec.weathering < 0.34 ? 'a little'
+      : spec.weathering < 0.62 ? 'partly out'
+      : spec.weathering < 0.78 ? 'outdoor work' : 'a life in the weather');
     // Which face the population actually rests on, and how ill it is. Both
     // exist because a threshold was once calibrated against a range the app
     // never produced, and nothing reported the resulting zero.
     bump(restingFaces, restingExpression(spec.mood, spec.condition));
+    // Whether the still frame — a contact sheet, a card at rest, any export —
+    // has this persona meeting the reader's eye. Tracked because the balance is
+    // a *tuned* number rather than a derived one: most people look at the person
+    // in front of them, and a build that quietly drifts back toward a majority
+    // looking away turns a page of these into a room full of suspects.
+    const rest = restingGaze(spec.seed, spec.mood);
+    bump(gazeHabits, rest[0] === 0 && rest[1] === 0 ? 'meets the viewer'
+      : rest[1] > 0 ? 'eyes down' : 'looking away');
     // Which decorative parts the item vocabulary actually produces, and which
     // named head items still come out undecorated. The second list is the one
     // that matters: it is where the next batch of keywords comes from, and it
@@ -467,6 +493,10 @@ rule('Age');
 table(ageBands, rendered);
 rule('Greying');
 table(greyBands, rendered);
+rule('Resting gaze');
+table(gazeHabits, rendered);
+rule('Weathering (profession \u00d7 years)');
+table(weatherBands, rendered);
 rule('Garment surfaces drawn');
 table(garmentSurfaces, rendered);
 rule('Garment wear drawn');
@@ -479,6 +509,8 @@ rule('UNDECORATED head items (no ornament found in the name)');
 table(plainHeadwear, rendered);
 rule('Resting expression');
 table(restingFaces, rendered);
+rule('Crown — how domed the vault is');
+table(crownBands, rendered);
 rule('Pose — what departs from the canonical bust, and why');
 table(poseReasons, rendered);
 rule('Illness severity');

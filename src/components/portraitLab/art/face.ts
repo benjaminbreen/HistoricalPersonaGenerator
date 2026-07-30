@@ -221,7 +221,10 @@ export function drawComplexion(context: RenderContext, head: Mask): void {
 
   const texture = String((spec as any).skinTexture || '');
   const freckled = /freckled/.test(texture) || spec.markings.some(m => m.type === 'freckles');
-  const weathered = /weathered|rough/.test(texture);
+  // Was `/weathered|rough/` against an appearance string that almost nothing in
+  // the app ever set, so this whole branch drew for a handful of personas. The
+  // trade a life was spent in now decides it — see `weatheringFor`.
+  const weathered = spec.weathering > 0.34;
 
   if (freckled) {
     for (let i = 0; i < 34; i += 1) {
@@ -243,6 +246,12 @@ export function drawComplexion(context: RenderContext, head: Mask): void {
     // the tops of the cheekbones. Applied as three soft patches rather than as
     // a scatter over the whole forehead — a scatter reads as dirt, not as a
     // life spent outdoors.
+    //
+    // Coverage scales with the exposure rather than being on or off. A carter
+    // and a deep-sea fisherman both belong here and should not arrive at the
+    // same face, and the tier table is only worth having if the drawing can tell
+    // the tiers apart.
+    const coverage = 0.2 + spec.weathering * 0.3;
     const patches: Array<[number, number, number, number]> = [
       [centerX, anatomy.browY - 5, 13, 3],
       [centerX, anatomy.noseBaseY - 8, 4, 5],
@@ -257,8 +266,14 @@ export function drawComplexion(context: RenderContext, head: Mask): void {
           if (!inHead(x, y)) continue;
           const falloff = 1 - Math.hypot(dx / (rx + 0.5), dy / (ry + 0.5));
           if (falloff <= 0) continue;
-          if (bayer(x, y) > falloff * 0.32) continue;
+          if (bayer(x, y) > falloff * coverage) continue;
           raster.shift(x, y, 1, book);
+          // A second step only at the core of a patch, and only for a life
+          // spent right out in it — this is the difference between a tan and
+          // the deep-set colour of somebody who has never worked indoors.
+          if (spec.weathering > 0.78 && falloff > 0.7 && bayer(x, y) < 0.28) {
+            raster.shift(x, y, 1, book);
+          }
         }
       }
     }
@@ -279,7 +294,15 @@ export function drawComplexion(context: RenderContext, head: Mask): void {
   }
 
   // Fever and cold both put colour in the cheeks; illness drains it elsewhere.
-  const flush = Math.max(spec.condition.fever, spec.mood.valence > 0.5 ? 0.2 : 0);
+  // So does weather: wind and sun break the capillaries across the cheekbones,
+  // and the permanent ruddiness that leaves is as much a mark of outdoor work as
+  // the tan is. Folded in here rather than drawn separately because it is the
+  // same few pixels in the same place, and the flush art is already tested.
+  const flush = Math.max(
+    spec.condition.fever,
+    spec.mood.valence > 0.5 ? 0.2 : 0,
+    spec.weathering * 0.4
+  );
   if (flush > 0.15) {
     const strength = Math.min(0.55, flush * 0.6);
     for (const side of [-1, 1] as const) {
@@ -297,6 +320,90 @@ export function drawComplexion(context: RenderContext, head: Mask): void {
     }
   }
 
+  drawSkinZones(context, head);
+}
+
+/**
+ * The three-zone face.
+ *
+ * The oldest rule in portrait painting: the forehead runs cool and slightly
+ * yellow, the middle of the face — cheeks, nose, ears — runs warm and red
+ * because the blood is close to the surface there, and the jaw and chin run cool
+ * and grey-green, over bone on everybody and over a beard's roots on half of
+ * them. Getting it even roughly right is most of what separates painted flesh
+ * from a tinted shape; ignoring it is why almost every procedural portrait looks
+ * like plastic no matter how well the form is modelled.
+ *
+ * Every complexion in the app was one ramp, and everything drawn on it —
+ * freckles, weathering, age spots, the whole of `drawFacialModelling` — moved
+ * *value* only. So the faces were beautifully modelled and monochrome.
+ *
+ * Three things keep this from becoming a novelty:
+ *
+ * 1. **Hue only.** `skinWarm` and `skinCool` are the skin ramp at identical
+ *    lightness with the hue rotated a dozen degrees. A zone is recoloured by
+ *    re-setting the pixel from the tinted ramp *at the shade step it already
+ *    holds*, so the modelling survives untouched. Nothing here can flatten a
+ *    cheekbone or lose a fold.
+ * 2. **Blended, not dithered.** The first attempt selected pixels through the
+ *    Bayer matrix, the way the rest of this file spreads an effect. That is right
+ *    for a *value* change and wrong here: coverage near a half turns the matrix
+ *    into a checkerboard, and a checkerboard of two hues across a whole cheek is
+ *    a rash. Since both tints hold the source lightness exactly, they can simply
+ *    be blended at low alpha instead — a true hue wash, no pattern at any
+ *    strength. `Raster.blend` also leaves the material and shade planes alone
+ *    below half alpha, which is precisely what is wanted.
+ * 3. **Very little of it.** The amounts below are deliberately at the edge of
+ *    visibility one portrait at a time. This is the kind of effect that should
+ *    be felt across a page and hunted for in a single face. The first pass ran
+ *    at roughly three times these numbers and turned every persona in the app
+ *    into a sunburn.
+ *
+ * Runs last of everything on the skin, and for a specific reason: `raster.shift`
+ * resolves its colour through the *material* plane, so a later relative shift on
+ * a retinted pixel would look the colour up in `book[MAT.SKIN]` and put the
+ * plain ramp back. Tagging the zones as their own materials would fix that
+ * properly and break something worse — `drawBrow`, `drawEye` and `drawMouth` all
+ * gate on `=== MAT.SKIN` to know where the face is, and they gate exactly where
+ * these zones are. So the zones stay `MAT.SKIN` and go on at the end instead.
+ */
+function drawSkinZones(context: RenderContext, head: Mask): void {
+  const { raster, spec, anatomy, ramps } = context;
+  const { size, centerX } = anatomy;
+
+  // A beard's roots darken and cool the jaw even when shaved; without one the
+  // lower face only has bone to go on.
+  const shadowed = spec.facialHair ? 1 : 0.62;
+
+  for (let y = anatomy.headTop; y <= anatomy.chinY + 1; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (x < 0 || y < 0 || y >= size || !head[y * size + x]) continue;
+      if (raster.matAt(x, y) !== MAT.SKIN) continue;
+      const shade = raster.shadeAt(x, y);
+      if (shade > 6) continue;
+
+      const t = (y - anatomy.headTop) / Math.max(1, anatomy.headHeight);
+      const across = Math.abs(x - centerX) / Math.max(1, anatomy.headHalfWidth);
+
+      // Warm across the cheekbones, and a little warmer still out toward the
+      // ears where the skin is thinnest of all. Narrow: a wide bell put warmth
+      // on the forehead and the chin as well, which is all three zones at once
+      // and therefore none of them.
+      const warm = Math.exp(-Math.pow((t - 0.62) / 0.14, 2)) * (0.5 + across * 0.32);
+      // Cool below the mouth and up at the temples — the two places the bone is
+      // nearest the surface.
+      const cool = Math.max(
+        t > 0.85 ? Math.min(1, (t - 0.85) / 0.15) * shadowed : 0,
+        t < 0.27 ? Math.min(1, (0.27 - t) / 0.2) * across * 0.22 : 0
+      );
+
+      const net = warm * 0.34 - cool * 0.3;
+      const ramp = net > 0 ? ramps.skinWarm : ramps.skinCool;
+      const strength = Math.min(0.34, Math.abs(net));
+      if (strength < 0.03) continue;
+      raster.blend(x, y, ramp.steps[shade], strength, MAT.SKIN, shade);
+    }
+  }
 }
 
 /**

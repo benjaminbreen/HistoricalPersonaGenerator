@@ -3,10 +3,14 @@ import react from '@vitejs/plugin-react'
 import fs from 'node:fs'
 import path from 'node:path'
 import personaShareHandler from './api/persona-share.js'
+import aiAccessHandler from './api/ai-access.js'
+import stripeWebhookHandler from './api/stripe-webhook.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
 import { parseJsonObject } from './api/_lib/llmJson.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
 import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './api/_lib/rateLimit.js'
+// @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
+import { consumeAiCredit, ensureVisitorId } from './api/_lib/aiAccess.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
 import {
   ANNOTATION_TEMPERATURE,
@@ -365,12 +369,25 @@ const handleRandomWikidataPersonRoute = async (_req: any, res: any) => {
 }
 
 const geminiPersonaApiPlugin = (env: Record<string, string>) => {
+  // API helpers run in Node and intentionally read server-only process.env.
+  // Mirror Vite's loaded .env values without replacing real shell variables.
+  for (const [key, value] of Object.entries(env)) {
+    if (process.env[key] === undefined) process.env[key] = value
+  }
   const schemaPath = path.resolve(process.cwd(), 'src/schemas/historicalPersonaAnnotation.schema.json')
   const annotationSchema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'))
 
   return {
     name: 'gemini-persona-api',
     configureServer(server: any) {
+      server.middlewares.use('/api/stripe-webhook', async (req: any, res: any) => {
+        await stripeWebhookHandler(req, res)
+      })
+
+      server.middlewares.use('/api/ai-access', async (req: any, res: any) => {
+        await aiAccessHandler(req, res)
+      })
+
       server.middlewares.use('/api/persona-share', async (req: any, res: any) => {
         await personaShareHandler(req, res)
       })
@@ -412,6 +429,21 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
               res.setHeader('Content-Type', 'application/json')
               res.setHeader('Retry-After', String(verdict.retryAfterSeconds))
               res.end(JSON.stringify({ error: rateLimitMessage(verdict.scope), retryAfterSeconds: verdict.retryAfterSeconds }))
+              return
+            }
+            const visitorId = ensureVisitorId(req, res)
+            const accessVerdict = await consumeAiCredit(visitorId, body.action)
+            if (!accessVerdict.allowed) {
+              res.statusCode = 402
+              res.setHeader('Content-Type', 'application/json')
+              res.setHeader('Cache-Control', 'no-store')
+              res.end(JSON.stringify({
+                code: 'AI_SUPPORT_REQUIRED',
+                error: body.action === 'generate_annotation'
+                  ? 'The full schema record costs six supporter credits.'
+                  : 'You have used all five free AI biographies. A donation unlocks 50 credits for 30 days.',
+                access: accessVerdict.access,
+              }))
               return
             }
           }

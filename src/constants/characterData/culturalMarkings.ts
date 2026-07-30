@@ -7,6 +7,23 @@
 import { CulturalZone } from './culturalZones';
 import { HistoricalEra } from '../../types/ambiance';
 import { random as seededRandom } from '../../utils/seededRandom';
+import { livesInTraditionalCommunity } from './traditionalCommunities';
+
+/**
+ * Zones where the zone stopped being an answer.
+ *
+ * "South American" in 1500 names the peoples who painted, pierced and shaped;
+ * in 2015 it names Brazil, Argentina and Peru, whose populations overwhelmingly
+ * do none of that. Every marking below is the inheritance of a particular
+ * community, so from the twentieth century on it belongs to a persona living in
+ * one — see `traditionalCommunities.ts`. The pre-Columbian North American zone
+ * is exempt because that zone *is* the community; Oceania and Africa are
+ * exempt because their markings are scoped by `places` instead.
+ */
+const ZONES_WITHOUT_A_MODERN_CLAIM: CulturalZone[] = ['SOUTH_AMERICAN'];
+
+/** The century in which the zones above stopped standing for the community. */
+const MODERN_MARKING_YEAR = 1900;
 
 export interface MarkingPattern {
   id: string;
@@ -1221,15 +1238,31 @@ export function getMarkingsForCharacter(
   age: number = 30,
   occasion: string = 'daily',
   place?: string,
-  religion?: string
+  religion?: string,
+  /**
+   * The year, where the caller has one. Era is too coarse for this: the whole
+   * of the twentieth and twenty-first centuries is one era, and the question of
+   * whether a marking still has anyone to be read by is answered inside it.
+   */
+  year?: number
 ): CulturalMarking[] {
-  
+
   // Determine age group
-  const ageGroup = age < 16 ? 'child' : 
+  const ageGroup = age < 16 ? 'child' :
                    age < 25 ? 'young' :
                    age < 50 ? 'adult' : 'elder';
-  
+
   const placeLower = (place ?? '').toLowerCase();
+
+  // A modern national population is not the community whose marks these are.
+  if (
+    year !== undefined
+    && year >= MODERN_MARKING_YEAR
+    && ZONES_WITHOUT_A_MODERN_CLAIM.includes(culturalZone)
+    && !livesInTraditionalCommunity(placeLower)
+  ) {
+    return [];
+  }
 
   return CULTURAL_MARKINGS.filter(marking => {
     // Check cultural zone
@@ -1402,7 +1435,10 @@ export function convertToAppearanceMarking(
 export function getMarkingProbability(
   culturalZone: CulturalZone,
   era?: HistoricalEra,
-  profession?: string
+  profession?: string,
+  /** See `getMarkingsForCharacter`: the same modern gate, applied to the roll. */
+  year?: number,
+  place?: string
 ): number {
   // Base probabilities by culture - historically accurate
   // These reflect actual anthropological data on body modification prevalence
@@ -1435,8 +1471,19 @@ export function getMarkingProbability(
     NORTH_AMERICAN_COLONIAL: 0.15
   };
   
+  // Nothing in the tables is available to this persona, so the roll should not
+  // pretend otherwise: the character generator draws a marking count from it.
+  if (
+    year !== undefined
+    && year >= MODERN_MARKING_YEAR
+    && ZONES_WITHOUT_A_MODERN_CLAIM.includes(culturalZone)
+    && !livesInTraditionalCommunity((place ?? '').toLowerCase())
+  ) {
+    return 0;
+  }
+
   let probability = baseProbabilities[culturalZone] || 0.2;
-  
+
   // Era adjustments - more accurate to historical periods
   if (era === 'PREHISTORY') {
     // Almost universal body modification in prehistoric times

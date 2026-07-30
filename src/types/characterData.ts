@@ -128,8 +128,18 @@ export interface Appearance {
     glassesStyle?: 'round' | 'square' | 'oval' | 'half_rim';
     jewelry?: {
         type: 'necklace' | 'earrings' | 'bracelet' | 'ring' | 'circlet' | 'brooch' | 'chain' | 'anklet';
-        material: 'gold' | 'silver' | 'bronze' | 'gems' | 'pearl' | 'bone' | 'wood';
+        material:
+            | 'gold' | 'silver' | 'bronze' | 'copper' | 'gems' | 'pearl' | 'bone' | 'wood'
+            | 'feather' | 'faience' | 'amber' | 'jet' | 'lacquer';
         style: 'simple' | 'ornate' | 'delicate' | 'chunky';
+        /**
+         * How much of the wearer the piece occupies. Distinct from `style`,
+         * which is about workmanship: a plain boar-tusk collar is `simple` and
+         * `large`, a jewelled mourning ring is `ornate` and `small`, and
+         * collapsing the two is what made every persona's adornment read at the
+         * same modest size no matter what it was.
+         */
+        scale?: 'small' | 'medium' | 'large';
         gems?: string[];
     }[];
     markings?: {

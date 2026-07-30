@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseJsonObject } from './_lib/llmJson.js';
 import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './_lib/rateLimit.js';
+import { consumeAiCredit, ensureVisitorId } from './_lib/aiAccess.js';
 import {
   ANNOTATION_TEMPERATURE,
   SKETCH_TEMPERATURE,
@@ -83,6 +84,18 @@ export default async function handler(req, res) {
       if (!verdict.allowed) {
         res.setHeader('Retry-After', String(verdict.retryAfterSeconds));
         res.status(429).json({ error: rateLimitMessage(verdict.scope), retryAfterSeconds: verdict.retryAfterSeconds });
+        return;
+      }
+      const visitorId = ensureVisitorId(req, res);
+      const accessVerdict = await consumeAiCredit(visitorId, body.action);
+      if (!accessVerdict.allowed) {
+        res.status(402).json({
+          code: 'AI_SUPPORT_REQUIRED',
+          error: body.action === 'generate_annotation'
+            ? 'The full schema record costs six supporter credits.'
+            : 'You have used all five free AI biographies. A donation unlocks 50 credits for 30 days.',
+          access: accessVerdict.access,
+        });
         return;
       }
     }

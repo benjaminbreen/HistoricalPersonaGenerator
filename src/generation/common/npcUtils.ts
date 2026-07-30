@@ -17,10 +17,11 @@ import { cleanShavenChance, pickFacialHairStyle, type FacialHairContext } from '
 import { ValueNoise } from '../../utils/noise';
 import { generatePersonalGoal } from '../../services/goalService';
 import { getProfessionContext, getFallbackContext, ProfessionContext } from '../../services/professionContextService';
+import { getPolityAt } from '../../services/polityService';
 import { getMarkingsForCharacter, selectRandomMarking, getRandomPattern, convertToAppearanceMarking, getMarkingProbability } from '../../constants/characterData/culturalMarkings';
 import { isClergyRoleCompatible } from '../../constants/characterData/religionClergyRoles';
 import { createHistoricalContext } from '../../services/historicalContextService';
-import { getProfessionSelectionWeight, isProfessionHistoricallyAvailable } from '../../services/professionAvailabilityService';
+import { getProfessionSelectionWeight, isProfessionHistoricallyAvailable, textureBudget } from '../../services/professionAvailabilityService';
 import { isMaterialAvailable } from '../../services/demographyService';
 import { filterNameKeys, resolveNameKey } from '../../constants/characterData/nameSetEras';
 import { FormattedName, formatPersonalName } from '../../constants/characterData/nameConventions';
@@ -220,7 +221,7 @@ export function generateNpcName(
     year: number,
     noise: ValueNoise,
     professionNameKey?: string,
-    options: { ancestral?: boolean; location?: string } = {}
+    options: { ancestral?: boolean; location?: string; standingId?: string } = {}
 ): string {
     return generateNpcNameDetailed(gender, culturalZone, region, year, noise, professionNameKey, options).full;
 }
@@ -256,7 +257,20 @@ export function generateNpcNameDetailed(
      * Valley of Mexico, Greater Antilles, Swahili Coast, Galicia — written as
      * though this lookup existed. It did not, so they were dead data.
      */
-    options: { ancestral?: boolean; location?: string } = {}
+    options: {
+        ancestral?: boolean;
+        location?: string;
+        /**
+         * The privileged order this person belongs to, as an `eliteStrata.ts`
+         * id. Reaches `formatPersonalName`, which adds whatever that estate's
+         * own naming added — a particle, an honorific, a clan seat, a courtesy
+         * name. Undefined for the great majority. See `eliteNaming.ts`.
+         *
+         * Passed for family members too: standing is hereditary, and a Sayyid
+         * whose father is plain "Ali" has had the claim quietly dropped.
+         */
+        standingId?: string;
+    } = {}
 ): FormattedName {
     // Fallback paths hand back a bare name; wrap them so every exit has the
     // same shape.
@@ -528,6 +542,7 @@ export function generateNpcNameDetailed(
             femalePool: femaleNames,
             occupation: professionNameKey,
             nameKey: nameKeyToUse,
+            standingId: options.standingId,
             random: noise.random,
         });
         return { ...formatted, nameKey: nameKeyToUse };
@@ -740,24 +755,71 @@ export function generateClothingPalette(wealthLevel: WealthLevel, era: Historica
     const specificClothingSet = eraData?.[clothingTier]?.[gender];
     const palette = specificClothingSet?.palette;
     
-    if (!palette || !palette.primary || palette.primary.length === 0) {
-        // Use era-appropriate fallback colors instead of always brown
-        if (era === HistoricalEra.MODERN_ERA || era === HistoricalEra.INDUSTRIAL_ERA) {
-            return { 
-                primary: getRandomFromList(['#000080', '#696969', '#000000'], noise) || '#000080',
-                secondary: getRandomFromList(['#FFFFFF', '#D3D3D3', '#A0522D'], noise) || '#FFFFFF',
-                accent: getRandomFromList(['#DC143C', '#1E90FF', '#32CD32'], noise) || '#1E90FF'
-            };
-        }
-        // Default brown fallback for older eras
-        return { primary: '#8B4513', secondary: '#654321', accent: '#D2691E' };
-    }
+    type PaletteOptions = { primary: string[]; secondary: string[]; accent: string[] };
+    const options: PaletteOptions =
+        palette && palette.primary && palette.primary.length > 0
+            ? palette
+            // Era-appropriate fallback colours instead of always brown.
+            : era === HistoricalEra.MODERN_ERA || era === HistoricalEra.INDUSTRIAL_ERA
+                ? {
+                    primary: ['#000080', '#696969', '#000000'],
+                    secondary: ['#FFFFFF', '#D3D3D3', '#A0522D'],
+                    accent: ['#DC143C', '#1E90FF', '#32CD32'],
+                }
+                : { primary: ['#8B4513'], secondary: ['#654321'], accent: ['#D2691E'] };
+
+    const chosen = {
+        primary: getRandomFromList(options.primary, noise) || '#8B4513',
+        secondary: getRandomFromList(options.secondary, noise) || '#654321',
+        accent: getRandomFromList(options.accent, noise) || '#D2691E',
+    };
+
+    /**
+     * The place's own bright colour, laid over whatever the era table gave.
+     *
+     * The tables are keyed by era and zone but *not* by tier — poor, common and
+     * wealthy in a given place and century all read the same palette constant —
+     * so before this the only thing wealth did to colour was the desaturation
+     * pass in the portrait renderer, and the only thing place did was pick
+     * which set of browns. Both facts pointed the same way, and the result was
+     * a species dressed in mud.
+     *
+     * The accent is offered the dye first and more often, because trim, borders
+     * and a wrapped sash are where a bright colour actually went: a whole
+     * turmeric field costs a season's dyestuff, a turmeric border costs an
+     * afternoon. The field is offered it much more rarely, which is what keeps
+     * a sheet of a hundred from turning into a paint chart.
+     *
+     * On its own stream, and deliberately. `noise` is the persona's single
+     * sequence — the same one that goes on to draw their name, their religion
+     * and their language — so spending a variable number of draws here would
+     * have renamed every persona in the app to add a sash. The dye is seeded
+     * from the choice it is modifying instead, which keeps it deterministic,
+     * keeps it uncorrelated with anything downstream, and confines the change
+     * to the colours it is actually about.
+     */
+    const dyeSeed = hashSeed(
+        `${culturalZone}|${era}|${wealthLevel}|${gender}|${chosen.primary}${chosen.secondary}${chosen.accent}`
+    );
+    const dyeRoll = new ValueNoise(dyeSeed).random;
+    const field = clothingModule.signatureDyeFor(culturalZone, era, wealthLevel, 'field', dyeRoll);
+    const accent = clothingModule.signatureDyeFor(culturalZone, era, wealthLevel, 'accent', dyeRoll);
 
     return {
-        primary: getRandomFromList(palette.primary, noise) || '#8B4513',
-        secondary: getRandomFromList(palette.secondary, noise) || '#654321',
-        accent: getRandomFromList(palette.accent, noise) || '#D2691E'
+        primary: field || chosen.primary,
+        secondary: chosen.secondary,
+        accent: accent || chosen.accent,
     };
+}
+
+/** FNV-1a, for deriving a side stream from a string without touching the main one. */
+export function hashSeed(text: string): number {
+    let hash = 2166136261;
+    for (let i = 0; i < text.length; i++) {
+        hash ^= text.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
 }
 
 
@@ -1401,7 +1463,14 @@ export function generateBaseProfile(
         if (stats.strength > 8 && personality.agreeableness < 0.4) affect = 'intimidating';
 
         // Generate cultural markings based on context
-        const markingProbability = getMarkingProbability(context.culturalZone, context.era, undefined);
+        const markingPlace = `${context.region ?? ''} ${context.localArea ?? ''}`;
+        const markingProbability = getMarkingProbability(
+            context.culturalZone,
+            context.era,
+            undefined,
+            context.year,
+            markingPlace,
+        );
         const markings: any[] = [];
         
         if (noise.random() < markingProbability) {
@@ -1413,8 +1482,9 @@ export function generateBaseProfile(
                 constrainedWealthLevel,
                 age,
                 'daily',
-                `${context.region ?? ''} ${context.localArea ?? ''}`,
-                religion
+                markingPlace,
+                religion,
+                context.year
             );
             
             const selectedMarking = selectRandomMarking(availableMarkings, noise.random());
@@ -1838,6 +1908,45 @@ function getFallbackRole(
     return { socialClass: 'COMMONER', role: 'Householder', emoji: '🏠' };
 }
 
+/**
+ * Give the distinctive work a fixed share of the draw, split among however
+ * much of it this place can support.
+ *
+ * The texture roles arrive carrying only a fit score. This rescales them so
+ * that their weights sum to the budget's share of the whole — a fifth of the
+ * total in a town means texture odds of 1:4 against the substrate — and so the
+ * share holds no matter how many of them there are. Adding forty roles to a
+ * zone changes what you see and not how often you see something unusual, which
+ * is the entire point of the split: authoring becomes free of tuning.
+ *
+ * Rescaling rather than rolling a second die matters here. A separate roll
+ * would consume another number from the seeded stream and shift every
+ * downstream draw — name, appearance, biography — for every persona ever
+ * generated. One weighted pick, as before, keeps the seeds meaning what they
+ * meant.
+ */
+function applyTextureBudget(
+    roles: { roleDef: ProfessionDefinition, selectionWeight: number }[],
+    budget: number,
+): void {
+    let substrateTotal = 0;
+    let textureTotal = 0;
+    for (const entry of roles) {
+        if (entry.roleDef.texture) textureTotal += entry.selectionWeight;
+        else substrateTotal += entry.selectionWeight;
+    }
+    if (textureTotal <= 0) return;
+
+    // With nothing but texture on offer — a tiny table, heavily filtered —
+    // the fit scores already in hand are the right answer.
+    if (substrateTotal <= 0) return;
+
+    const scale = (budget / (1 - budget)) * substrateTotal / textureTotal;
+    for (const entry of roles) {
+        if (entry.roleDef.texture) entry.selectionWeight *= scale;
+    }
+}
+
 export function determineSocialRole(
     profile: Omit<NpcEntity, 'id' | 'name' | 'class' | 'role' | 'descriptions' | 'movement' | 'x' | 'y' | 'emoji' | 'activity' | 'birthplace' | 'workplaceId' | 'workplaceName' | 'ideology' | 'beliefs'>,
     context: { era: HistoricalEra, culturalZone: CulturalZone, factionData?: FactionData, region?: string, localArea?: string, citySize?: number, year?: number, birthYear?: number, preferredSocialClass?: string, historicalContext?: HistoricalContext },
@@ -1892,16 +2001,6 @@ export function determineSocialRole(
         // substrate is capability-filtered for this actual society, so one
         // authored list serves every zone and era without putting a smith in a
         // world with no smelting.
-        const eraRoles: SocialClassMap | undefined = professionsFor(
-            PROFESSIONS[context.culturalZone]?.[eraForProfessions],
-            context.culturalZone,
-            eraForProfessions,
-            {
-                year: currentYear ?? 0,
-                culturalZone: context.culturalZone,
-                placeLower: `${context.localArea ?? ''} ${context.region ?? ''}`.toLowerCase(),
-            },
-        );
         const historicalContext = context.historicalContext || createHistoricalContext({
             year: currentYear ?? 0,
             era: eraForProfessions,
@@ -1910,6 +2009,19 @@ export function determineSocialRole(
             location: context.localArea || context.region || 'Unknown',
         });
         roleHistoricalContext = historicalContext;
+
+        const eraRoles: SocialClassMap | undefined = professionsFor(
+            PROFESSIONS[context.culturalZone]?.[eraForProfessions],
+            context.culturalZone,
+            eraForProfessions,
+            {
+                year: currentYear ?? 0,
+                culturalZone: context.culturalZone,
+                placeLower: `${context.localArea ?? ''} ${context.region ?? ''}`.toLowerCase(),
+                // A ratcatcher needs a city and a fishpond keeper needs a coast.
+                localeType: historicalContext.localeType,
+            },
+        );
 
         // Helper function to check if a profession is valid for the current year based on decadeRange
         const isProfessionValidForYear = (roleDef: ProfessionDefinition): boolean => {
@@ -2093,11 +2205,18 @@ export function determineSocialRole(
 
                 if (score > -100) {
                      const fitMultiplier = Math.max(0.1, Math.min(1.5, score / 100));
+                     // Texture roles are scored for fit and for who could hold
+                     // them, but not for rarity: their share is the budget, and
+                     // it is split among them. Weighting them individually is
+                     // what made them unreachable in the first place.
+                     const fit = fitMultiplier * genderWeight;
                      possibleRoles.push({
                          socialClass,
                          role: roleName,
                          roleDef,
-                         selectionWeight: getProfessionSelectionWeight(roleName, historicalContext) * fitMultiplier * genderWeight,
+                         selectionWeight: roleDef.texture
+                             ? fit
+                             : getProfessionSelectionWeight(roleName, historicalContext) * fit,
                      });
                 }
             }
@@ -2109,6 +2228,7 @@ export function determineSocialRole(
             const outlawClasses = ['OUTLAWS_AND_REVOLUTIONARIES', 'OUTLAWS_AND_ACTIVISTS', 'WAR_ERA'];
             const regularRoles = possibleRoles.filter(r => !outlawClasses.includes(r.socialClass));
             const outlawRoles = possibleRoles.filter(r => outlawClasses.includes(r.socialClass));
+            applyTextureBudget(regularRoles, textureBudget(historicalContext));
 
             // 99% chance to pick from regular roles if available, 1% for outlaws
             let chosen;
@@ -2571,6 +2691,113 @@ const IDEOLOGY_REQUIREMENTS: Record<string, SocietyCapability> = {
     ARTISAN_CRAFTSMAN: 'settled_agriculture',
 };
 
+/**
+ * What the state a person lives in teaches them, and how many of them repeat it
+ * back.
+ *
+ * Worldview was being chosen from personality alone, which is fine for 1200 —
+ * nobody was issued a worldview in 1200 — and badly wrong for the twentieth
+ * century, where a great many people lived under a state that ran the schools,
+ * the press, the union and the youth league, and taught one doctrine through
+ * all four. Scoring a Soviet assembly-line worker on his openness and handing
+ * him Modern Secularism describes a man who could be from anywhere, which is
+ * exactly the flatness this whole app exists to avoid.
+ *
+ * The shares are not majorities on purpose. A party-state's doctrine is the
+ * loudest thing in the room, not the only thing in it: believers, sceptics,
+ * nationalists and people who simply want a quiet life are all still here, and
+ * every one of them remains reachable through the ordinary scoring below.
+ */
+const STATE_IDEOLOGIES: Array<{ polity: RegExp; ideologies: string[]; share: number }> = [
+    {
+        // The European party-states, plus the Asian and Caribbean ones whose
+        // doctrine was the Soviet one rather than a peasant-centred variant.
+        polity: /Soviet Union|Mongolian People's Republic|German Democratic Republic|People's Republic of (Poland|Hungary|Bulgaria|Albania)|Socialist Republic|Yugoslavia|Czechoslovakia|Cuba|Democratic Republic of Vietnam|North Korea|Korean People/i,
+        ideologies: ['MARXISM_LENINISM'],
+        share: 0.5,
+    },
+    {
+        // Where the revolution was made in the countryside, both readings are
+        // live at once and which one a person holds says something about them.
+        polity: /People's Republic of China|Democratic Kampuchea|People's Republic of Kampuchea|Socialist Republic of Vietnam|People's Republic of Laos|Lao People/i,
+        ideologies: ['PEASANT_REVOLUTION', 'MARXISM_LENINISM'],
+        share: 0.5,
+    },
+    {
+        // Under a European flag, after the war that discredited it. This is the
+        // frame of the independence generation, and it long outlives the flag.
+        polity: /British|French|Portuguese|Dutch|Belgian|Spanish|Italian|colony|protectorate|Indochina|Raj|Mandate/i,
+        ideologies: ['ANTICOLONIAL_NATIONALISM'],
+        share: 0.35,
+    },
+];
+
+function stateTaughtIdeology(
+    ctx: { year: number; region?: string; location?: string; culturalZone: CulturalZone },
+    noise: ValueNoise,
+): string | undefined {
+    if (ctx.year < 1917 || ctx.year > 2025) return undefined;
+    const polity = getPolityAt(ctx);
+    if (!polity) return undefined;
+    for (const entry of STATE_IDEOLOGIES) {
+        if (!entry.polity.test(polity.name)) continue;
+        // The colonial rule is the one that needs a second condition: a British
+        // subject in Yorkshire in 1930 is not an anticolonial nationalist.
+        if (entry.ideologies[0] === 'ANTICOLONIAL_NATIONALISM'
+            && (ctx.culturalZone === 'EUROPEAN' || ctx.culturalZone === 'NORTH_AMERICAN_COLONIAL')) continue;
+        if (noise.random() > entry.share) return undefined;
+        return entry.ideologies[Math.floor(noise.random() * entry.ideologies.length)];
+    }
+    return undefined;
+}
+
+/**
+ * Whether a worldview is open to someone of this faith.
+ *
+ * The ideology tables and the religion tables were written apart and do not
+ * spell things the same way. The religion tables produce "Eastern Orthodoxy";
+ * every ideology that would take such a person says "Eastern Orthodox
+ * Christianity". Nothing matched, so *every* Orthodox persona in the app fell
+ * past the whole list to `MODERN_SECULARISM` — which is how a devout Russian
+ * factory hand in 1955 came out as a sceptic of supernatural claims. The same
+ * silent failure hit "Russian Orthodoxy", "Protestant Christianity" and a dozen
+ * regional spellings.
+ *
+ * Matching by family rather than by string is the fix, and it has to stay
+ * coarse: this is asking "could a Catholic hold this?", not "is this the
+ * Catholic worldview". The narrower question is already answered by the era,
+ * zone, year and privilege gates around it.
+ */
+const RELIGION_FAMILIES: Array<[RegExp, string[]]> = [
+    [/orthodox/i, ['Eastern Orthodox Christianity', 'Christianity']],
+    [/catholic/i, ['Roman Catholicism', 'Christianity']],
+    [/protestant|lutheran|calvinis|anglican|methodis|baptis|presbyterian|quaker/i, ['Protestantism', 'Christianity']],
+    [/christian/i, ['Christianity']],
+    [/sunni/i, ['Sunni Islam', 'Islam']],
+    [/shia|shi'a|ismaili|twelver/i, ['Shia Islam', 'Islam']],
+    [/sufi/i, ['Sufism', 'Sunni Islam', 'Islam']],
+    [/islam|muslim/i, ['Islam', 'Sunni Islam']],
+    [/buddh/i, ['Buddhism']],
+    [/hindu/i, ['Hinduism']],
+    [/jew|judais/i, ['Judaism']],
+    [/atheis|secular|irreligio|none/i, ['Atheism']],
+    [/agnostic/i, ['Agnosticism', 'Atheism']],
+    [/confucian/i, ['Confucianism']],
+    [/tao|dao/i, ['Taoism']],
+    [/shinto/i, ['Shinto']],
+    [/animis|shaman|folk|traditional religion|local belief|totem|ancestor/i,
+        ['Local Beliefs', 'Folk Religion', 'Animist', 'Animism']],
+];
+
+function religionAllows(ideology: Ideology, religion: string): boolean {
+    if (!religion) return false;
+    if (ideology.religions.includes(religion)) return true;
+    for (const [pattern, family] of RELIGION_FAMILIES) {
+        if (pattern.test(religion) && family.some(name => ideology.religions.includes(name))) return true;
+    }
+    return false;
+}
+
 function ideologyIsPossible(
     ideologyId: string,
     ctx: { year: number; culturalZone: CulturalZone; placeLower: string },
@@ -2611,7 +2838,7 @@ export function assignBeliefs(
     const suitableIdeologies = IDEOLOGIES.filter(Boolean).filter(ideo =>
         ideo.culturalZones.includes(culturalZone) &&
         ideo.eras.includes(era) &&
-        ideo.religions.includes(religion) &&
+        religionAllows(ideo, religion) &&
         (!ideo.yearRange
             || (capabilityCtx.year >= ideo.yearRange[0] && capabilityCtx.year <= ideo.yearRange[1])) &&
         (ideo.minPrivilege === undefined || privilege === undefined
@@ -2622,7 +2849,21 @@ export function assignBeliefs(
     // 2. Score each ideology by personality/social context fit
     let chosenIdeology: Ideology | undefined;
 
-    if (suitableIdeologies.length > 0 && personality && socialContext) {
+    // Before that: what the state taught, where there was a state that taught
+    // one. It still has to pass every gate above — a doctrine nobody in this
+    // religion, zone or year could hold is not made available by a flag.
+    const taught = stateTaughtIdeology(
+        {
+            year: capabilityCtx.year,
+            culturalZone,
+            region: context?.region ?? (character as any).region,
+            location: context?.location ?? (character as any).location,
+        },
+        noise,
+    );
+    if (taught) chosenIdeology = suitableIdeologies.find(ideo => ideo.id === taught);
+
+    if (!chosenIdeology && suitableIdeologies.length > 0 && personality && socialContext) {
         // Score all ideologies
         const scoredIdeologies = suitableIdeologies.map(ideo => ({
             ideology: ideo,
@@ -2653,7 +2894,7 @@ export function assignBeliefs(
         if (!chosenIdeology) {
             chosenIdeology = scoredIdeologies[0]?.ideology;
         }
-    } else {
+    } else if (!chosenIdeology) {
         // No personality data - random selection (legacy behavior)
         chosenIdeology = suitableIdeologies[Math.floor(noise.random() * suitableIdeologies.length)];
     }

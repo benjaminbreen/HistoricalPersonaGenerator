@@ -477,7 +477,11 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
       `Now ${character.age}, ${pronoun} ${conjugate('make', narrativePronouns)} ${pronounPoss} living as ${professionArticle} ${professionName}`,
       `At ${character.age}, ${pronoun} ${conjugate('work', narrativePronouns)} as ${professionArticle} ${professionName}`,
       `${subjectCap} ${conjugate('earn', narrativePronouns)} ${pronounPoss} bread as ${professionArticle} ${professionName}, and ${conjugate('have', narrativePronouns)} done for years`,
-      `${subjectCap} ${conjugate('follow', narrativePronouns)} the ${professionName}'s trade`
+      // A trade is a thing followed where trades exist. "She follows the
+      // cleaner's trade" is a sentence about 1750 wearing 2015's job title.
+      persona.year >= 1900
+        ? `${subjectCap} ${narrativePronouns.be} ${professionArticle} ${professionName}, and ${conjugate('have', narrativePronouns)} been for a while now`
+        : `${subjectCap} ${conjugate('follow', narrativePronouns)} the ${professionName}'s trade`
     ];
   let professionSentence = pickBiography(professionOpeners);
 
@@ -498,11 +502,15 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
   const trade = describeProfessionWork(bioContext, pickBiography);
   const attitude = describeTradeAttitude(bioContext, pickBiography);
   const fold = (text: string): string => {
-    const stripped = text.replace(/^(?:The work means|That means|It comes down to|The trade is)\s+/, '');
+    const stripped = text.replace(/^(?:The work means|That means|It comes down to|The trade is|The job is)\s+/, '');
     return `${professionSentence} — ${stripped.charAt(0).toLowerCase()}${stripped.slice(1)}`;
   };
 
-  switch (seededIndex(10)) {
+  // `trade` is empty when there is nothing specific to say about the work, in
+  // which case the shapes that fold or append it collapse to the bare opener.
+  // Saying nothing beats the generality it replaced.
+  const professionShape = seededIndex(10);
+  switch (trade ? professionShape : (professionShape < 5 ? 5 : 9)) {
     case 0: case 1: case 2:
       addBeat('profession', fold(trade));
       break;

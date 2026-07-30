@@ -23,6 +23,6 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
-  "exclude": ["src/components/portraitLab/devtools"],
+  "exclude": ["src/components/portraitLab/devtools", "src/encounter/sprite/devtools"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

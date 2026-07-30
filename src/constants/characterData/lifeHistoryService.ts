@@ -409,7 +409,24 @@ const MERCHANT_EVENTS: EventTemplate[] = [
     minAge: 18,
     weight: 0.8,
     requiresCapability: 'market_exchange',
+    // Caravans and brigands. Modern trade fails in other ways, below.
+    maxYear: 1900,
     professionKeywords: ['merchant', 'trader']
+  },
+  {
+    kind: 'trade',
+    importance: EventImportance.TRAGEDY,
+    titles: ['A Bad Year', 'The Business Went Under'],
+    templates: [
+      'A supplier took the money and delivered nothing, and there was no recovering it',
+      'The [COMMODITY] price collapsed while the stock was still sitting in the warehouse',
+      'Borrowed against the stock at an interest rate that ate the business inside two years',
+      'The shop was robbed twice in a month, and the insurance covered neither'
+    ],
+    minAge: 18,
+    weight: 0.8,
+    minYear: 1900,
+    professionKeywords: ['merchant', 'trader', 'vendor', 'salesman', 'shopkeeper']
   },
   {
     kind: 'discovery',
@@ -528,6 +545,24 @@ const SOLDIER_EVENTS: EventTemplate[] = [
     ],
     minAge: 17,
     weight: 1.0,
+    // Arrows, sword cuts and falling horses. A conscript in 1968 was taking an
+    // arrow to the shoulder.
+    maxYear: 1850,
+    professionKeywords: ['soldier', 'guard', 'warrior']
+  },
+  {
+    kind: 'injury',
+    importance: EventImportance.INJURY,
+    titles: ['Wounded', 'Invalided Out'],
+    templates: [
+      'Took shrapnel in the back and spent four months in a military hospital',
+      'Lost most of the hearing in one ear to a shell that landed too close',
+      'Took a bullet through the thigh and walked stiffly afterwards',
+      'Survived a mine that lifted the vehicle off the road, and has never slept properly since'
+    ],
+    minAge: 17,
+    weight: 1.0,
+    minYear: 1850,
     professionKeywords: ['soldier', 'guard', 'warrior']
   },
   {
@@ -1362,6 +1397,28 @@ const FAMILY_EVENTS: EventTemplate[] = [
     // is a transmissible thing a marriage can move. Kin-reckoned societies
     // marry to make alliances too, but not to climb.
     requiresCapability: 'heritable_land',
+    // An alliance, a connection, a position in society: all three assume a
+    // marriage is a transaction between households. Where people marry for
+    // themselves, a sibling's wedding is an occasion and an expense, and this
+    // group was telling a postal worker in 2015 that his brother's marriage
+    // brought valuable new trade connections.
+    maxYear: 1900,
+    weight: 0.8
+  },
+  {
+    kind: 'family',
+    importance: EventImportance.MILESTONE,
+    titles: ['A Sibling Marries', 'The Wedding'],
+    templates: [
+      'A sister married and moved across the city, and the house was quieter for it',
+      'A brother married young, and the wedding cost more than the family had',
+      'A sibling\'s wedding filled a rented hall and emptied a year of savings',
+      'Stood as witness at a sibling\'s wedding, and understood that the household had changed shape'
+    ],
+    requiresKin: { relation: 'sibling', minAge: 18, maxAge: 45 },
+    minAge: 16,
+    maxOccurrences: 2,
+    minYear: 1900,
     weight: 0.8
   },
   {
@@ -1375,10 +1432,30 @@ const FAMILY_EVENTS: EventTemplate[] = [
     ],
     requiresKin: { relation: 'parent', minAge: 45, maxAge: 82 },
     minAge: 18,
+    // The workshop, the tools and the childless uncle are a nineteenth-century
+    // inheritance. Modern households pass on the same thing in other forms,
+    // which the group below says in its own vocabulary.
+    maxYear: 1930,
     // Three separate anachronisms were stacked here: the firm as a heritable
     // going concern, retirement, and purchase as investment. All three need a
     // world that prices things. This is what put "took over the family
     // business" into a bison-hunting band in 157 BCE.
+    requiresCapability: 'market_exchange',
+    weight: 0.7
+  },
+  {
+    kind: 'family',
+    importance: EventImportance.OPPORTUNITY,
+    titles: ['What the Family Had', 'Family Money'],
+    templates: [
+      'Took over the family [BUSINESS] when a parent\'s health gave out',
+      'Took the schooling the family paid for out of everyone else\'s wages',
+      'The family pooled what they had for a deposit on [ASSET]',
+      'Moved into the room a grandparent had left, which settled the question of rent for years'
+    ],
+    requiresKin: { relation: 'parent', minAge: 45, maxAge: 82 },
+    minAge: 18,
+    minYear: 1930,
     requiresCapability: 'market_exchange',
     weight: 0.7
   },
@@ -1419,6 +1496,18 @@ function generateEarlyLifeEvent(
   const trainingYear = birthYear + 13;
   const can = (capability: SocietyCapability): boolean =>
     !capabilities || hasCapability(capability, { ...capabilities, year: trainingYear });
+
+  /**
+   * Whether this person entered work in a world of schools, wages and job
+   * titles rather than of trades, masters and households.
+   *
+   * The branches below were all written in the older vocabulary, so a Rio
+   * kitchen porter born in 1992 "started working alongside father in
+   * backbreaking toil" and a party secretary "began learning the trade of party
+   * secretary from an experienced practitioner". Neither sentence belongs to
+   * anyone alive now.
+   */
+  const wageWork = trainingYear >= 1900;
 
   // Crafts & Trades - Traditional apprenticeship
   const craftProfessions = ['blacksmith', 'carpenter', 'mason', 'weaver', 'potter', 'tanner',
@@ -1509,13 +1598,19 @@ function generateEarlyLifeEvent(
   const merchantProfessions = ['merchant', 'trader', 'peddler', 'shopkeeper', 'vendor'];
 
   if (merchantProfessions.some(p => profLower.includes(p)) && can('market_exchange')) {
-    const variants = [
-      `Sent to apprentice with trading company, learning accounts and negotiation`,
-      `Made a first journey with a merchant caravan, carrying valuable goods`,
-      can('coinage')
-        ? `Began managing family stall at market, handling coins and customers`
-        : `Began keeping the family's stall, and learned what a thing was worth in another thing`,
-    ];
+    const variants = wageWork
+      ? [
+        `Stood behind the counter after school, and learned the stock before the till`,
+        `Minded the shop on Saturdays, and was trusted with the float by sixteen`,
+        `Started selling out of a bag on the street, and worked up from there`,
+      ]
+      : [
+        `Sent to apprentice with trading company, learning accounts and negotiation`,
+        `Made a first journey with a merchant caravan, carrying valuable goods`,
+        can('coinage')
+          ? `Began managing family stall at market, handling coins and customers`
+          : `Began keeping the family's stall, and learned what a thing was worth in another thing`,
+      ];
     return {
       kind: 'trade',
       title: 'Trade Apprenticeship',
@@ -1574,12 +1669,19 @@ function generateEarlyLifeEvent(
 
   if (domesticProfessions.some(p => profLower.includes(p))) {
     if (gender.toLowerCase() === 'female') {
-      const variants = [
-        `Began learning household management and domestic skills from a parent`,
-        `Placed in service at a manor house, training in household duties`,
-        `Began caring for a first child, learning skills that would define daily life afterward`,
-        `Apprenticed to a midwife, witnessing a first birth at a young age`
-      ];
+      const variants = wageWork
+        ? [
+          `Went into service in someone else's house, and learned how little of it was hers`,
+          `Started cleaning other people's homes for cash, one morning a week at first`,
+          `Learned to cook for a household of eight before learning to cook for pay`,
+          `Trained as an auxiliary at the clinic, and was in the delivery room within a month`,
+        ]
+        : [
+          `Began learning household management and domestic skills from a parent`,
+          `Placed in service at a manor house, training in household duties`,
+          `Began caring for a first child, learning skills that would define daily life afterward`,
+          `Apprenticed to a midwife, witnessing a first birth at a young age`
+        ];
       return {
         kind: 'family',
         title: 'Domestic Training',
@@ -1620,16 +1722,30 @@ function generateEarlyLifeEvent(
     'mine worker', 'factory worker', 'mill worker'];
 
   if (laborerProfessions.some(p => profLower.includes(p))) {
-    const variants = [
-      birthYear < -8000
-      ? `Took a share of the heavy work of the camp, carrying and hauling with the rest`
-      : `Experienced hard labor for the first time, joining work crews at dawn`,
-      `Began hauling loads for merchants, building strength`,
-      `Started working alongside father in backbreaking toil`
-    ];
+    const variants = trainingYear >= 2000
+      ? [
+        `Picked up shifts through an app, and never met the person paying for them`,
+        `Started on a contract with no hours guaranteed, and learned to keep the phone on`,
+        `Left school and went straight onto the site, because the household needed the money`,
+        `Took the first job that asked for neither papers nor experience`,
+      ]
+      : wageWork
+      ? [
+        `Left school and went to work, because the household needed the wage`,
+        `Took the first job that asked for neither papers nor experience`,
+        `Started on the early shift, and has kept those hours ever since`,
+        `Went out to work young, and found the day longer than school had been`,
+      ]
+      : [
+        birthYear < -8000
+        ? `Took a share of the heavy work of the camp, carrying and hauling with the rest`
+        : `Experienced hard labor for the first time, joining work crews at dawn`,
+        `Began hauling loads for merchants, building strength`,
+        `Started working alongside father in backbreaking toil`
+      ];
     return {
       kind: 'mundane',
-      title: 'Hard Labor Begins',
+      title: wageWork ? 'First Job' : 'Hard Labor Begins',
       text: variants[Math.floor(seededRandom() * variants.length)]
     };
   }
@@ -1639,11 +1755,18 @@ function generateEarlyLifeEvent(
     'actor', 'singer'];
 
   if (artistProfessions.some(p => profLower.includes(p))) {
-    const variants = [
-      `Natural talent recognized, began training in artistic craft`,
-      `Apprenticed to master artist, learning techniques passed down generations`,
-      `First public performance, discovering gift for entertaining crowds`
-    ];
+    const variants = wageWork
+      ? [
+        `Had lessons the family could not really afford, and took to them`,
+        `Played a first paying gig, badly, and was asked back`,
+        `Joined a group of friends who were serious about it, and got serious about it too`,
+        `Started performing where nobody was listening, which is where everyone starts`,
+      ]
+      : [
+        `Natural talent recognized, began training in artistic craft`,
+        `Apprenticed to master artist, learning techniques passed down generations`,
+        `First public performance, discovering gift for entertaining crowds`
+      ];
     return {
       kind: 'artistic',
       title: 'Artistic Training',
@@ -1682,6 +1805,40 @@ function generateEarlyLifeEvent(
   }
 
   // Default for unmatched professions
+  if (trainingYear >= 2000) {
+    // This century entered work through a job market rather than through a
+    // trade, and remembers the search as much as the work.
+    const variants = [
+      `Found the job through a friend of a friend, and stayed longer than planned`,
+      `Applied for forty jobs and heard back about one`,
+      `Took an internship that quietly turned into the job`,
+      `Started work at a place a schoolfriend was already working`,
+      `Left school into a job market that was not hiring, and took what there was`,
+    ];
+    return {
+      kind: 'apprenticeship',
+      title: 'First Job',
+      text: variants[Math.floor(seededRandom() * variants.length)]
+    };
+  }
+  if (wageWork) {
+    // Naming the job here is what produced "the trade of favela resident": the
+    // profession table is far wider than any of the branches above, and most of
+    // what it holds now is not a trade at all. These say how work started
+    // without claiming to know what the work was.
+    const variants = [
+      `Left school and started work, and learned the job in the first month of doing it`,
+      `Took the job that was going, and stayed in that line of work`,
+      `Learned the work in a morning, and was left to get on with it`,
+      `Started on a trainee's wage, which was most of the training`,
+      `Went to work straight from school, as everyone in the household had`,
+    ];
+    return {
+      kind: 'apprenticeship',
+      title: 'First Job',
+      text: variants[Math.floor(seededRandom() * variants.length)]
+    };
+  }
   return {
     kind: 'apprenticeship',
     title: 'Early Training',
@@ -1797,9 +1954,18 @@ export function generateLifeHistory(
                      (character as NpcEntity).socialClass ||
                      'commoner';
 
-  // Add profession-specific early life event
-  if (character.age >= 12 && profession) {
-    const earlyAge = 12 + Math.floor(seededRandom() * 4);
+  // Add profession-specific early life event.
+  //
+  // Twelve to fifteen is when a child went to work for most of history, and
+  // still is where schooling ends early — but where school runs to sixteen or
+  // eighteen it produced a twelve-year-old who "applied for forty jobs and
+  // heard back about one". Where the event is a first job rather than a first
+  // apprenticeship, start it when school lets go.
+  const schoolLeaving = birthYear + 13 >= 2000 ? 17
+    : birthYear + 13 >= 1950 ? 15
+      : 12;
+  if (character.age >= schoolLeaving && profession) {
+    const earlyAge = schoolLeaving + Math.floor(seededRandom() * 4);
     const earlyYear = birthYear + earlyAge;
 
     // Only add if within character's lifetime
@@ -2652,11 +2818,14 @@ function getCrop(zone: CulturalZone, era: HistoricalEra): string {
 }
 
 function getAsset(era: HistoricalEra): string {
-  const assets = ['a new plow', 'draft animals', 'a storage barn', 'a mill share', 'a market stall'];
-
-  if (era === HistoricalEra.INDUSTRIAL_ERA || era === HistoricalEra.MODERN_ERA) {
-    assets.push('a tractor', 'a delivery truck', 'a shop', 'machinery');
-  }
+  // The pre-industrial assets used to stay in the pool after the industrial
+  // era, so a family in a twenty-first-century city pooled its savings for a
+  // new plow. What a household buys together is one of the plainest markers of
+  // when it is living.
+  const assets = era === HistoricalEra.INDUSTRIAL_ERA || era === HistoricalEra.MODERN_ERA
+    ? ['a delivery van', 'a shop of their own', 'a sewing machine', 'a second-hand truck',
+      'a taxi and the licence to drive it', 'a plot on the edge of town', 'a tractor']
+    : ['a new plow', 'draft animals', 'a storage barn', 'a mill share', 'a market stall'];
 
   return assets[Math.floor(seededRandom() * assets.length)];
 }

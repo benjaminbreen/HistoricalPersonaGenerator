@@ -527,12 +527,26 @@ const GENERIC_TRADE_CLAUSES: Clause[] = [
   { text: 'employment that has to be travelled to, which is most of what distinguishes it from ${possessive} grandparents\' work', minYear: 1950 },
   { text: 'a living made in an economy that no longer has much use for the district it is made in', locale: ['rural'], minYear: 1960 },
 
-  // --- Last resort
-  { text: 'the ordinary work of the place, done in the ordinary way' },
+  // --- After the wage stopped being a wage
+  // The twenty-first century has its own arrangements and its own vocabulary
+  // for them, and the bank above tops out at the salaried mid-century office.
+  { text: 'a job title nobody outside the building could explain', minYear: 2000, band: ['middling', 'elite'] },
+  { text: 'something ${possessive} parents have given up trying to describe to their friends', minYear: 2000, technology: 'internet', band: ['middling', 'elite'] },
+  { text: 'messages about work arriving at hours that used to be the evening', minYear: 2005, technology: 'smartphone', band: ['working', 'middling', 'elite'] },
+  { text: 'work that exists because a platform exists, and would end the week it did', minYear: 2010, technology: 'internet' },
+  { text: 'shifts picked up on an app the week before, at whatever the app is paying', minYear: 2012, technology: 'smartphone', band: ['poor', 'working'] },
+  { text: 'a role that was two roles before someone left and nobody was hired', minYear: 2000, band: ['working', 'middling'] },
 ];
 
 /**
- * A sentence describing what the persona's trade actually consists of.
+ * A sentence describing what the persona's trade actually consists of, or an
+ * empty string where nothing specific can be said.
+ *
+ * There used to be an unconditioned last-resort clause at the foot of the
+ * generic bank — "the ordinary work of the place, done in the ordinary way" —
+ * which is a sentence that says a persona works without saying anything about
+ * the work. Silence is better than that, so callers must handle '' (see
+ * narrativeBiographyService, which drops the beat).
  */
 export function describeProfessionWork(ctx: BiographyContext, pick: Pick): string {
   const professionText = (ctx.profession || '').toLowerCase();
@@ -545,9 +559,8 @@ export function describeProfessionWork(ctx: BiographyContext, pick: Pick): strin
 
   const register = registerFor(ctx);
   const eligibleGeneric = eligibleClauses(GENERIC_TRADE_CLAUSES, clauseContextFor(ctx));
-  const fallback = eligibleGeneric.length > 0
-    ? eligibleGeneric.map(clause => clause.text)
-    : ['the ordinary work of the place, done in the ordinary way'];
+  const fallback = eligibleGeneric.map(clause => clause.text);
+  if (!texture && fallback.length === 0) return '';
 
   // Wages, prices and customers presuppose a market. Outside a settled district
   // prefer the clauses in a trade family that do not assume one.
@@ -559,12 +572,18 @@ export function describeProfessionWork(ctx: BiographyContext, pick: Pick): strin
         ? texture.clauses.filter(c => !COMMERCIAL.test(c))
         : fallback))
     : fallback;
+  if (available.length === 0) return '';
 
   const clause = renderClause(pick(available), ctx.pronouns, clauseExtras(ctx));
 
   // Every opener must govern a bare noun phrase, since that is the shape all
-  // the clauses take.
-  const openers = ['The work means ', 'That means ', 'It comes down to ', 'The trade is '];
+  // the clauses take. "The trade is" needs a world with trades in it; after
+  // 1900 most of these people have a job. Keep this list in step with the
+  // stripping regex in narrativeBiographyService, which folds the clause into
+  // the profession sentence.
+  const openers = ctx.year >= 1900
+    ? ['The work means ', 'That means ', 'It comes down to ', 'The job is ']
+    : ['The work means ', 'That means ', 'It comes down to ', 'The trade is '];
   return `${pick(openers)}${clause}.`;
 }
 
@@ -619,6 +638,24 @@ const TRADE_ATTITUDES: Clause[] = [
   // --- Station
   { text: 'It is less an occupation than a position, and ${subject} ${verb:hold} it because of who ${possessive} father was.', band: ['elite'] },
   { text: 'It keeps the household fed, most years.', band: ['poor', 'working'] },
+
+  // --- This century
+  // Plain and short. The failure mode this bank invites is a bank of little
+  // jokes with the same rhythm — flat statement, ironic turn — which reads as
+  // one voice doing an impression of a generation rather than as people.
+  { text: 'It is a job. ${subjectCap} ${verb:have} had worse.', minYear: 2000 },
+  { text: '${subjectCap} ${verb:do} not think about it much.', minYear: 2000 },
+  { text: '${subjectCap} ${verb:have} been there four years.', minYear: 2000 },
+  { text: '${subjectCap} would leave if something else came up.', minYear: 2000 },
+  { text: '${subjectCap} ${verb:work} nights, which suits ${object}.', minYear: 2000 },
+  { text: '${subjectCap} took it for the money.', minYear: 2000 },
+  { text: '${subjectCap} ${verb:like} the people more than the work.', minYear: 2000 },
+  { text: 'It is not what ${subject} studied for.', minYear: 2000 },
+  { text: '${subjectCap} ${verb:mean} to go back to school at some point.', minYear: 2000 },
+  { text: '${subjectCap} ${verb:do} not talk about work outside work.', minYear: 2000 },
+  { text: 'The commute is the worst part of it.', minYear: 2000, locale: ['city', 'town'] },
+  { text: '${subjectCap} ${verb:tell} friends it is "pretty chill", but secretly ${verb:think} it isn\'t.', minYear: 2000 },
+  { text: '${subjectCap} ${verb:call} it a temporary thing, and ${verb:have} been calling it that for years.', minYear: 2000 },
 ];
 
 export function describeTradeAttitude(ctx: BiographyContext, pick: Pick): string {

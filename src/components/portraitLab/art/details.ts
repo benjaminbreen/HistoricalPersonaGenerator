@@ -17,12 +17,21 @@
  * timid and not pasted on.
  */
 
-import { buildRamp, hexToRgb, Ramp } from '../core/color';
-import { METAL_BASE } from './palette';
+import { buildRamp, hexToRgb, Ramp, RGB } from '../core/color';
+import { isSpecular, ornamentGlintPeak, ornamentRamp } from './ornaments';
 import { MAT, Raster } from '../core/raster';
 import { makeNoise1D, makeRng } from '../core/rng';
 import { RenderContext } from '../render/context';
-import { JewelrySpec, MarkingSpec } from '../spec/types';
+import { JewelrySpec, MarkingSpec, OrnamentMaterial } from '../spec/types';
+
+/**
+ * Which substances are drawn as the body of a piece rather than as a stone in
+ * it. The distinction is not decorative: `MAT.METAL` and `MAT.GEM` shade and
+ * outline differently, and a jade bead outlined as metal reads as painted tin.
+ */
+const METAL_MATERIALS = new Set<OrnamentMaterial>([
+  'gold', 'gilt', 'silver', 'bronze', 'copper',
+]);
 
 const SIZE_SCALE: Record<string, number> = { small: 0.65, medium: 1, large: 1.45 };
 
@@ -131,6 +140,41 @@ export function drawMarkings(context: RenderContext, hairlineY: number): void {
       }
 
       case 'birthmark': {
+        // Vitiligo is a birthmark in the type system and nothing like one on a
+        // face. A birthmark is one mark; this is *loss of pigment*, in several
+        // patches, and the two things it needs are that there be more than one
+        // and that they be paler than whatever complexion they land on.
+        //
+        // So it shifts along the skin's own ramp rather than painting a colour.
+        // A fixed pale hex is right for exactly one skin tone and chalky on
+        // every other, and this face has already been modelled — lightening
+        // what is there keeps the cheekbone under the patch.
+        if (pattern === 'vitiligo') {
+          const patches = 4;
+          for (let p = 0; p < patches; p += 1) {
+            // Spread across the face rather than clustered on one cheek, and
+            // never over the eyes: a pale patch on a lash line reads as the
+            // eye having been erased.
+            const side = p % 2 === 0 ? -1 : 1;
+            const px = anchor.x + side * anchor.halfWidth * (0.28 + rng() * 0.5);
+            const py = anchor.y + Math.round((rng() * 2 - 1) * 9);
+            const prx = (2.6 + rng() * 2.4) * scale;
+            const pry = (2.2 + rng() * 2) * scale;
+            for (let dy = -Math.ceil(pry); dy <= Math.ceil(pry); dy += 1) {
+              for (let dx = -Math.ceil(prx); dx <= Math.ceil(prx); dx += 1) {
+                // The ragged edge is the diagnostic part. A clean ellipse of
+                // pale skin is a highlight; a torn one is depigmentation.
+                const wobble = noise(dx * 1.1 + dy * 1.7 + p * 11) * 0.42;
+                if ((dx / prx) ** 2 + (dy / pry) ** 2 > 1 + wobble) continue;
+                const x = Math.round(px + dx);
+                const y = py + dy;
+                if (raster.matAt(x, y) !== MAT.SKIN) continue;
+                raster.shift(x, y, -2, book);
+              }
+            }
+          }
+          break;
+        }
         const rx = 4 * scale;
         const ry = 3 * scale;
         const side = index % 2 === 0 ? -1 : 1;
@@ -568,30 +612,6 @@ function drawStructural(context: RenderContext, marking: MarkingSpec, scale: num
 }
 
 /**
- * Metal, per material rather than per persona.
- *
- * The ramp book carries a single `metal` built from whichever jewel happened to
- * be first in the list, so a persona wearing a gold chain and silver earrings
- * got gold for both. Cached because a portrait may carry several pieces of the
- * same material and the ramp maths is not free.
- */
-const metalRampCache = new Map<string, Ramp>();
-function metalRampFor(material: string): Ramp {
-  const cached = metalRampCache.get(material);
-  if (cached) return cached;
-  // Pearl and bone are not specular — they are soft and low-contrast, and
-  // giving them a hard metal highlight is what makes bone beads read as chrome.
-  const soft = material === 'pearl' || material === 'bone' || material === 'wood';
-  const ramp = buildRamp(METAL_BASE[material] || METAL_BASE.bronze, {
-    contrast: soft ? 1.2 : 1.85,
-    shift: soft ? 0.3 : 0.18,
-    saturation: 1.05,
-  });
-  metalRampCache.set(material, ramp);
-  return ramp;
-}
-
-/**
  * The single most important pixel in any piece of jewellery is not the
  * highlight — it is the dark one underneath. Metal laid straight onto skin
  * reads as a decal; the same metal with one shifted pixel below it reads as an
@@ -616,14 +636,22 @@ function jewel(
 /**
  * A bead, stud or boss: the smallest thing that still reads as round rather
  * than as a stray pixel. Highlight up and left, core mid, shade down and right.
+ *
+ * `glint` is where the light lands, and it is passed in rather than derived
+ * because whether this bead catches at all is a fact about its substance:
+ * jade and pearl and bone are waxy and hold a soft bloom, gold and amber and
+ * glass throw a hard point. Handing every bead the same white pixel is what
+ * makes bone read as chrome.
  */
 function bead(
   context: RenderContext,
   cx: number, cy: number, size: number,
-  ramp: Ramp, mat: number
+  ramp: Ramp, mat: number,
+  glint?: GlintSink
 ): void {
   if (size <= 1) {
     jewel(context, cx, cy, 2, ramp, mat);
+    glint?.(cx, cy);
     return;
   }
   if (size === 2) {
@@ -631,30 +659,129 @@ function bead(
     jewel(context, cx + 1, cy, 3, ramp, mat, false);
     jewel(context, cx, cy + 1, 3.5, ramp, mat);
     jewel(context, cx + 1, cy + 1, 5, ramp, mat);
+    glint?.(cx, cy);
     return;
   }
-  // 3px: a diamond, which reads rounder than a square at this scale.
-  for (let dy = -1; dy <= 1; dy += 1) {
-    for (let dx = -1; dx <= 1; dx += 1) {
-      if (Math.abs(dx) + Math.abs(dy) > 1 && size < 4) continue;
-      const index = 3 + dx * 1.3 + dy * 1.3;
-      jewel(context, cx + dx, cy + dy, index, ramp, mat, dy === 1);
+  if (size <= 3) {
+    // 3px: a diamond, which reads rounder than a square at this scale.
+    for (let dy = -1; dy <= 1; dy += 1) {
+      for (let dx = -1; dx <= 1; dx += 1) {
+        if (Math.abs(dx) + Math.abs(dy) > 1) continue;
+        const index = 3 + dx * 1.3 + dy * 1.3;
+        jewel(context, cx + dx, cy + dy, index, ramp, mat, dy === 1);
+      }
+    }
+    jewel(context, cx - 1, cy - 1, 0, ramp, mat, false); // specular
+    glint?.(cx - 1, cy - 1);
+    return;
+  }
+
+  /**
+   * A pendant proper: a boss, a gorget, a whale tooth, the drop of a collar.
+   *
+   * Modelled as a sphere rather than shaded as a disc — the value falls with
+   * distance from the light, not with distance from the centre — because at
+   * five or six pixels the difference between the two is the difference
+   * between an object and a coin painted on the chest.
+   */
+  const r = size / 2;
+  for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy += 1) {
+    for (let dx = -Math.ceil(r); dx <= Math.ceil(r); dx += 1) {
+      if (Math.hypot(dx, dy) > r + 0.25) continue;
+      const lit = (-dx - dy) / Math.max(1, r);
+      jewel(context, cx + dx, cy + dy, 3.4 - lit * 2.4, ramp, mat, dy >= r - 1);
     }
   }
-  jewel(context, cx - 1, cy - 1, 0, ramp, mat, false); // specular
+  const hx = cx - Math.round(r * 0.45);
+  const hy = cy - Math.round(r * 0.45);
+  jewel(context, hx, hy, 0, ramp, mat, false);
+  glint?.(hx, hy);
 }
 
-export function drawJewelry(context: RenderContext): void {
-  const { raster, spec, anatomy, ramps } = context;
+/** Records a pixel where a highlight sits, for the per-frame catch of light. */
+type GlintSink = (x: number, y: number) => void;
+
+/**
+ * Where a piece of jewellery catches the light, in the order the light reaches
+ * it.
+ *
+ * A strand of beads does not flash all at once — the catch runs along it as the
+ * wearer shifts, and reproducing that is the entire difference between jewellery
+ * that sparkles and jewellery that blinks. So the order these are recorded in is
+ * load-bearing: the frame step spaces their phases by index, and `drawJewelry`
+ * walks a necklace from one end to the other.
+ */
+export interface GlintSite {
+  x: number;
+  y: number;
+  /** The colour this pixel reaches at the peak of the catch. */
+  peak: RGB;
+  /** Position along its own piece, 0..1, so the catch travels rather than pulses. */
+  along: number;
+}
+
+/**
+ * How much of the wearer a piece takes up.
+ *
+ * The single number that was missing. Everything here used to be drawn at one
+ * size with small variations for style, so a Melanesian boar-tusk breastplate,
+ * an Egyptian broad collar and a Victorian mourning locket were all a one-pixel
+ * line at the collarbone. That is not a rendering shortcut, it is a claim —
+ * that adornment across all of human history was modest and tasteful — and it
+ * is false nearly everywhere. Most people who owned ornament owned *one* piece,
+ * wore it constantly, and meant it to be seen from across a village.
+ *
+ * `bead` is the width of a link, `rows` how many strands deep a collar sits,
+ * `drop` how far an earring hangs, `boss` the size of the centrepiece, and
+ * `spread` how far a collar reaches out toward the shoulders.
+ */
+interface PieceScale {
+  bead: number;
+  rows: number;
+  drop: number;
+  boss: number;
+  spread: number;
+}
+
+const PIECE_SCALE: Record<JewelrySpec['scale'], PieceScale> = {
+  small: { bead: 1, rows: 1, drop: 2, boss: 2, spread: 0.85 },
+  // Two strands. The middle of a three-step gradient has to be visibly the
+  // middle: at one strand it was indistinguishable from `small` and the scale
+  // had two values pretending to be three.
+  medium: { bead: 1, rows: 2, drop: 3, boss: 3, spread: 1 },
+  // Three strands, wider beads and a real pendant. At 120px this is the
+  // difference between "is that person wearing something?" and "that person is
+  // wearing a collar".
+  large: { bead: 2, rows: 3, drop: 5, boss: 5, spread: 1.22 },
+};
+
+export function drawJewelry(context: RenderContext, glints?: GlintSite[]): void {
+  const { raster, spec, anatomy } = context;
   const { centerX } = anatomy;
 
   spec.jewelry.forEach((item: JewelrySpec) => {
     const ornate = item.style === 'ornate' || item.style === 'chunky';
     const chunky = item.style === 'chunky';
     const delicate = item.style === 'delicate';
-    const isGem = item.material === 'gems';
-    const ramp = isGem ? ramps.gem : metalRampFor(item.material);
-    const mat = isGem ? MAT.GEM : MAT.METAL;
+    const size = PIECE_SCALE[item.scale] || PIECE_SCALE.medium;
+    const ramp = ornamentRamp(item.material);
+    // The stone set into the piece, or the piece itself where it is all one
+    // substance. Every `ramps.gem` in this function used to be the same
+    // hardcoded amethyst regardless of what the persona was wearing.
+    const stone = item.stone || item.material;
+    const stoneRamp = ornamentRamp(stone);
+    const mat = METAL_MATERIALS.has(item.material) ? MAT.METAL : MAT.GEM;
+
+    // Collected per piece so `along` can be normalised once the piece is drawn
+    // and the total is known.
+    const sites: Array<{ x: number; y: number; peak: RGB }> = [];
+    const catches = (material: OrnamentMaterial): GlintSink | undefined => {
+      if (!glints || !isSpecular(material)) return undefined;
+      const peak = ornamentGlintPeak(material);
+      return (x, y) => sites.push({ x, y, peak });
+    };
+    const bodyGlint = catches(item.material);
+    const stoneGlint = catches(stone);
 
     switch (item.type) {
       case 'earrings': {
@@ -665,17 +792,44 @@ export function drawJewelry(context: RenderContext): void {
           const x = centerX + side * (anatomy.earX + 1);
           const y = anatomy.earBottomY;
           jewel(context, x, y, 2, ramp, mat);
+          bodyGlint?.(x, y);
 
-          if (chunky || ornate) {
+          if (item.scale === 'large') {
+            /**
+             * A flare, a spool, a jhumka, a Moche ear ornament — the pieces
+             * that stretched a lobe rather than hung from it. These are the
+             * largest thing anybody wears on a face and they were drawn as a
+             * three-pixel hoop.
+             *
+             * Widened outward rather than downward: the space beside the jaw is
+             * empty background, so the piece silhouettes there, while length
+             * alone runs it into the shoulder.
+             */
+            const w = 2;
+            for (let dy = 0; dy <= size.drop; dy += 1) {
+              const t = dy / size.drop;
+              // Widest a third of the way down, tapering to a rounded base.
+              const half = Math.round(w * (1 - Math.abs(t - 0.35) * 0.9));
+              for (let dx = -half; dx <= half; dx += 1) {
+                const lit = dx <= 0;
+                jewel(context, x + side * dx, y + dy, lit ? 1.4 : 4.2, ramp, mat, dy === size.drop);
+              }
+              if (dy % 2 === 0) bodyGlint?.(x - 1, y + dy);
+            }
+            bead(context, x, y + size.drop + 1, size.boss - 1, stoneRamp, MAT.GEM, stoneGlint);
+          } else if (chunky || ornate) {
             // A hoop: two verticals and a rounded bottom.
-            const drop = chunky ? 4 : 3;
+            const drop = size.drop;
             for (let i = 1; i <= drop; i += 1) {
               jewel(context, x, y + i, i < drop ? 1.5 : 3, ramp, mat, false);
               jewel(context, x + side * 2, y + i, i < drop ? 4 : 5, ramp, mat, false);
             }
             jewel(context, x + side, y + drop + 1, 4.5, ramp, mat);
-            if (ornate) bead(context, x + (side < 0 ? -1 : 0), y + drop + 2, 2, ramps.gem, MAT.GEM);
-          } else if (delicate) {
+            if (ornate) {
+              bead(context, x + (side < 0 ? -1 : 0), y + drop + 2, 2,
+                stoneRamp, MAT.GEM, stoneGlint);
+            }
+          } else if (delicate || item.scale === 'small') {
             // Still a drop, just a fine one. A bare stud is a single pixel and
             // vanishes completely at portrait size.
             jewel(context, x, y + 1, 1.5, ramp, mat, false);
@@ -691,32 +845,53 @@ export function drawJewelry(context: RenderContext): void {
       case 'necklace':
       case 'chain': {
         const isChain = item.type === 'chain';
-        const radius = anatomy.neckHalf + (isChain ? 5 : 3);
-        const beadSize = chunky ? 2 : 1;
-        // Discrete links rather than a swept 1px line. A continuous curve reads
-        // as a drawn-on collar; spaced links read as a strung necklace.
-        const step = delicate ? 0.11 : isChain ? 0.15 : 0.2;
+        /**
+         * One strand, or a collar.
+         *
+         * `rows` is what turns a necklace into a broad collar: each strand
+         * hangs a little lower and a little wider than the one above it, which
+         * is how every multi-strand piece in the world is actually built, from
+         * a faience wesekh to a Maasai beadwork disc to a Naga shell collar.
+         * Drawn outermost-first so the inner strands overlap the outer ones the
+         * way they do on a body.
+         */
         let lowest = { x: centerX, y: 0 };
-        for (let a = -1.2; a <= 1.2; a += step) {
-          const x = Math.round(centerX + Math.sin(a) * radius);
-          const y = Math.round(anatomy.collarY - 3 + Math.cos(a) * radius * 0.42);
-          if (raster.alphaAt(x, y) === 0) continue;
-          if (y > lowest.y) lowest = { x, y };
-          // Lit from the upper left, so the left of the curve catches and the
-          // right falls away.
-          const index = 1.4 + Math.sin(a) * 1.9;
-          if (beadSize > 1) bead(context, x, y, 2, ramp, mat);
-          else jewel(context, x, y, index, ramp, mat);
+        for (let row = size.rows - 1; row >= 0; row -= 1) {
+          const radius = (anatomy.neckHalf + (isChain ? 5 : 3) + row * 2.6) * size.spread;
+          // Discrete links rather than a swept 1px line. A continuous curve
+          // reads as a drawn-on collar; spaced links read as a strung necklace.
+          const step = delicate ? 0.11 : isChain ? 0.15 : size.bead > 1 ? 0.17 : 0.2;
+          // The outer strands of a collar reach further round toward the
+          // shoulders; a single strand sits in front of the throat.
+          const arc = 1.2 + row * 0.16;
+          for (let a = -arc; a <= arc; a += step) {
+            const x = Math.round(centerX + Math.sin(a) * radius);
+            const y = Math.round(anatomy.collarY - 3 + Math.cos(a) * radius * 0.42 + row * 1.4);
+            if (raster.alphaAt(x, y) === 0) continue;
+            if (row === 0 && y > lowest.y) lowest = { x, y };
+            // Lit from the upper left, so the left of the curve catches and the
+            // right falls away.
+            const index = 1.4 + Math.sin(a) * 1.9;
+            if (size.bead > 1) bead(context, x, y, 2, ramp, mat, row === 0 ? bodyGlint : undefined);
+            else {
+              jewel(context, x, y, index, ramp, mat);
+              // Only the left half of the arc is turned toward the key light,
+              // so only that half has a highlight for the catch to travel
+              // along. A strand that glints all the way round is a strand lit
+              // from inside.
+              if (a < 0.2 && row === 0) bodyGlint?.(x, y);
+            }
+          }
         }
         // A pendant at the low point. This is the part that actually reads at
         // portrait size, and the old version had none at all.
-        if (lowest.y > 0 && (ornate || !delicate)) {
-          const py = lowest.y + (chunky ? 2 : 1);
+        if (lowest.y > 0 && (ornate || !delicate || item.scale === 'large')) {
+          const py = lowest.y + (size.bead > 1 ? 2 : 1);
           jewel(context, lowest.x, lowest.y + 1, 3, ramp, mat, false);
-          if (ornate) {
-            bead(context, lowest.x, py + 1, 3, ramps.gem, MAT.GEM);
+          if (ornate || item.scale === 'large') {
+            bead(context, lowest.x, py + 1, size.boss, stoneRamp, MAT.GEM, stoneGlint);
           } else {
-            bead(context, lowest.x, py, 2, ramp, mat);
+            bead(context, lowest.x, py, 2, ramp, mat, bodyGlint);
           }
         }
         break;
@@ -724,34 +899,54 @@ export function drawJewelry(context: RenderContext): void {
 
       case 'circlet': {
         if (spec.headwear) break; // a hat wins
-        const half = anatomy.headHalfWidth * 0.82;
+        const half = anatomy.headHalfWidth * 0.82 * (item.scale === 'large' ? 1.05 : 1);
         // Up on the forehead, not down on the brow ridge. At browY − 5 the band
         // landed across the eyebrows and read as a very odd monobrow.
         const baseY = Math.round(anatomy.browY - anatomy.headHeight * 0.17);
         // Two pixels thick and dipping at the centre, so it wraps the brow
-        // instead of lying across it like a drawn line.
+        // instead of lying across it like a drawn line. A large one — a feather
+        // headband, a coral diadem, a kingfisher tiara — is three deep and
+        // rises above the hairline, because those pieces stand up off the head
+        // rather than lying flat against it.
+        const thickness = item.scale === 'large' ? 3 : item.scale === 'small' ? 1 : 2;
+        let step = 0;
         for (let dx = -half; dx <= half; dx += 1) {
           const px = Math.round(centerX + dx);
           const t = dx / half;
           const y = Math.round(baseY + (1 - t * t) * 1.6);
+          step += 1;
           if (raster.matAt(px, y) === MAT.EMPTY) continue;
+          for (let d = 2; d < thickness; d += 1) {
+            // The rise sits proud of the band and tapers toward the temples,
+            // so a large piece is a crown shape rather than a thicker stripe.
+            if (Math.abs(t) > 0.72) continue;
+            jewel(context, px, y - (d - 1), 0.8 + t * 1.4, ramp, mat, false);
+          }
           jewel(context, px, y, 1 + t * 1.6, ramp, mat, false);
-          jewel(context, px, y + 1, 3.4 + t * 1.4, ramp, mat);
+          if (thickness > 1) jewel(context, px, y + 1, 3.4 + t * 1.4, ramp, mat);
+          // A band wrapping a brow is the one piece here that is genuinely
+          // continuous, so the catch runs the whole way round it rather than
+          // hopping between beads. Every third pixel: a solid lit strip reads
+          // as a white line ruled across the forehead. Counted rather than
+          // tested on `dx`, which starts at a fraction of the head's width and
+          // is therefore never a multiple of anything.
+          if (step % 3 === 0) bodyGlint?.(px, y);
         }
-        if (ornate) {
-          bead(context, centerX, baseY, 3, ramps.gem, MAT.GEM);
+        if (ornate || item.scale === 'large') {
+          bead(context, centerX, baseY - (thickness > 2 ? 1 : 0), size.boss, stoneRamp, MAT.GEM, stoneGlint);
         } else if (chunky) {
-          bead(context, centerX - 1, baseY + 1, 2, ramp, mat);
+          bead(context, centerX - 1, baseY + 1, 2, ramp, mat, bodyGlint);
         }
         break;
       }
 
       case 'brooch': {
         // Pinned on the garment, off to one side. Made a proper disc — the old
-        // 2×2 was smaller than a freckle.
+        // 2×2 was smaller than a freckle, and a Berber fibula or a Mississippian
+        // copper plate is a hand's breadth of metal.
         const cx = centerX - Math.round(anatomy.shoulderHalf * 0.42);
         const cy = anatomy.collarY + 4;
-        const r = chunky ? 3 : 2;
+        const r = item.scale === 'large' ? 4 : item.scale === 'small' ? 2 : chunky ? 3 : 2;
         for (let dy = -r; dy <= r; dy += 1) {
           for (let dx = -r; dx <= r; dx += 1) {
             const d = Math.hypot(dx, dy);
@@ -762,12 +957,20 @@ export function drawJewelry(context: RenderContext): void {
           }
         }
         jewel(context, cx - r + 1, cy - r + 1, 0, ramp, mat, false); // specular
-        if (ornate || isGem) bead(context, cx, cy, 2, ramps.gem, MAT.GEM);
+        bodyGlint?.(cx - r + 1, cy - r + 1);
+        if (ornate || item.stone) bead(context, cx, cy, 2, stoneRamp, MAT.GEM, stoneGlint);
         break;
       }
 
       default:
         break;
+    }
+
+    // Spaced along the piece in draw order, so a necklace catches from one end
+    // to the other rather than flashing as a unit.
+    if (glints && sites.length > 0) {
+      const last = Math.max(1, sites.length - 1);
+      sites.forEach((site, i) => glints.push({ ...site, along: i / last }));
     }
   });
 }
@@ -921,7 +1124,8 @@ export function drawAilments(context: RenderContext): void {
  */
 export function drawFaceTraits(context: RenderContext): void {
   const { raster, spec, anatomy, book } = context;
-  const { gaunt, poxScarred } = spec.traits;
+  const { gaunt, poxScarred, goiter } = spec.traits;
+  if (goiter) drawGoiter(context);
   if (!gaunt && !poxScarred) return;
 
   const { centerX } = anatomy;
@@ -988,5 +1192,63 @@ export function drawFaceTraits(context: RenderContext): void {
       raster.shift(x, y, 2, book);
       if (onFace(x - 1, y - 1)) raster.shift(x - 1, y - 1, -1, book);
     }
+  }
+}
+
+/**
+ * Endemic goitre: the thyroid swollen at the base of the throat.
+ *
+ * Drawn as modelling on the neck rather than as a mark on it. The swelling is
+ * *under* the skin, so what you actually see is a lit dome where the throat
+ * should be flat and a crease beneath it where the mass overhangs — the same
+ * grammar as the gaunt hollows above, run the other way. Painting a shape on
+ * the neck instead would read as a bib or a wound.
+ *
+ * It sits low and slightly to one side, which is where a goitre sits, and it
+ * has to be drawn before the garment: the collar rides over it, so on a persona
+ * in a high-necked robe only the top of the swelling shows, which is correct.
+ *
+ * Iodine deficiency in mountain and inland valleys made this ordinary — Alpine,
+ * Andean, Himalayan and Great Lakes populations all carried it in numbers — and
+ * a portrait set that never shows one is quietly asserting it did not happen.
+ */
+function drawGoiter(context: RenderContext): void {
+  const { raster, anatomy, book, spec } = context;
+  const rng = makeRng(spec.seed ^ 0x901e);
+  // Which side it leans, and how far it has grown. Both are seeded: a goitre
+  // is rarely symmetrical and rarely the same size twice.
+  const lean = rng() > 0.5 ? 1 : -1;
+  const size = 0.75 + rng() * 0.5;
+
+  const cx = anatomy.centerX + lean * Math.round(anatomy.neckHalf * 0.28);
+  // Low on the throat, just above where the collar will cross.
+  const cy = anatomy.neckBottom - 2;
+  const rx = anatomy.neckHalf * 0.82 * size;
+  const ry = 5.2 * size;
+
+  const onNeck = (x: number, y: number) => raster.matAt(x, y) === MAT.SKIN;
+
+  for (let dy = -Math.ceil(ry); dy <= Math.ceil(ry); dy += 1) {
+    for (let dx = -Math.ceil(rx); dx <= Math.ceil(rx); dx += 1) {
+      const t = (dx / rx) ** 2 + (dy / ry) ** 2;
+      if (t > 1) continue;
+      const x = Math.round(cx + dx);
+      const y = cy + dy;
+      if (!onNeck(x, y)) continue;
+      // Lit from the upper left like everything else, and lit most where the
+      // dome turns toward the light. The rim on the far side falls away.
+      const facing = -(dx / rx) * 0.6 - (dy / ry) * 0.7;
+      const delta = facing > 0.45 ? -2 : facing > 0.05 ? -1 : facing > -0.5 ? 0 : 1;
+      if (delta !== 0) raster.shift(x, y, delta, book);
+    }
+  }
+
+  // The crease under the overhang. This is the line that makes it read as a
+  // mass rather than as a highlight on a cylinder.
+  for (let dx = -Math.ceil(rx * 0.8); dx <= Math.ceil(rx * 0.8); dx += 1) {
+    const x = Math.round(cx + dx);
+    const y = cy + Math.round(ry * Math.sqrt(Math.max(0, 1 - (dx / (rx * 0.85)) ** 2)));
+    if (!onNeck(x, y)) continue;
+    raster.shift(x, y, 2, book);
   }
 }

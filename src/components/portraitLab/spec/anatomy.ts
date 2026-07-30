@@ -67,6 +67,11 @@ export interface Anatomy {
   headHalfWidth: number;
   headProfile: ProfileKeys;
   /**
+   * How domed the top of the skull is: 0 flat, 1 round. Reported by the audit so
+   * the population's spread along this axis can be seen rather than assumed.
+   */
+  crown: number;
+  /**
    * How far the cranium has been extended above where it would naturally sit,
    * in pixels. Zero for every unbound skull. Read by the hair, which has to
    * know that the vault above the hairline is taller than the face implies.
@@ -151,6 +156,73 @@ const BASE_PROFILE: ProfileKeys = [
 
 function scaleKeys(keys: ProfileKeys, fn: (t: number, half: number) => number): ProfileKeys {
   return keys.map(([t, half]) => [t, Math.max(2, fn(t, half))]);
+}
+
+/**
+ * How domed the top of the skull is. 0 is the flattest, 1 the roundest.
+ *
+ * `BASE_PROFILE` reaches 13.2 of a maximum 24.0 in its very first control point
+ * — the topmost drawn row of every head in the app is 26 pixels wide — and then
+ * gains five more pixels of half-width over the next four rows. Twenty-six
+ * pixels of flat followed by a four-row chamfer is a trapezoid, and since the
+ * hair and the headwear are both built off this same profile, it was a trapezoid
+ * wearing a trapezoid: the reason a page of portraits had a page of flat-topped
+ * caps that read as folded paper rather than as cloth over a head.
+ *
+ * The fix is not to round every skull — some heads really are flat on top, and
+ * the existing shape is a perfectly good one of those. It is to make flatness
+ * one end of an axis instead of a constant. So this narrows the crown keys and
+ * lets the width arrive further down, which the Catmull-Rom then carries as a
+ * dome; at 0 the multipliers are all 1 and the profile is byte-for-byte what it
+ * has always been.
+ *
+ * Only the first three keys move. Below t = 0.14 the skull is the brow ridge and
+ * the temples, and those are not part of the vault — pulling them in would
+ * narrow the face rather than round the head.
+ *
+ * The magnitudes are larger than they look. `sampleProfile` clamps above its
+ * first control point, so whatever half-width sits at t = 0 is drawn as a flat
+ * plateau across the top of the skull — 26 pixels of it at the original 13.2.
+ * Halving that key is what turns the plateau into something short enough for the
+ * spline's shoulder to read as a curve, and anything gentler just produces a
+ * slightly narrower flat top.
+ */
+const CROWN_KEYS: Array<[number, number]> = [
+  [0.00, 0.48],
+  [0.06, 0.22],
+  [0.14, 0.08],
+];
+
+function roundCrown(keys: ProfileKeys, crown: number): ProfileKeys {
+  if (crown <= 0) return keys;
+  return keys.map(([t, half], i) => {
+    const rule = CROWN_KEYS[i];
+    // Matched by index rather than by t, because every earlier pass preserves
+    // the control points' t values and only touches their widths.
+    if (!rule || rule[0] !== t) return [t, half] as [number, number];
+    return [t, half * (1 - rule[1] * crown)] as [number, number];
+  });
+}
+
+/**
+ * Where on that axis this persona sits.
+ *
+ * Mostly seeded, because the shape of a vault is not something the app records
+ * anywhere and inventing a data source for it would be worse than admitting it
+ * is arbitrary. Two things do bear on it and both are cheap:
+ *
+ * A `round` face and a `square` one are already claims about the outline, and a
+ * skull that is round through the cheeks and flat across the top is a
+ * contradiction the viewer can see. And children genuinely are domed — the vault
+ * reaches most of its adult size years before the face does, which is most of
+ * what makes a child's head read as a child's.
+ */
+function crownFor(spec: PortraitSpec): number {
+  let crown = unit(spec.seed, 'crown');
+  if (spec.faceShape === 'round') crown = Math.min(1, crown + 0.3);
+  if (spec.faceShape === 'square') crown = Math.max(0, crown - 0.3);
+  if (spec.age < 14) crown = Math.min(1, crown + 0.35);
+  return crown;
 }
 
 const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
@@ -347,6 +419,17 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
 
   keys = limitDeviation(scaled, keys, 0.075);
 
+  // After the clamp, not before. `limitDeviation` exists to stop face shape,
+  // jaw and cheekbones compounding into a kinked outline, and it does that by
+  // bounding how fast the multiplier may change between neighbouring control
+  // points — which is precisely the quantity a domed crown has to change
+  // quickly. Running the crown through it would flatten the dome back out and
+  // spread its narrowing down into the temples, which is the one place it must
+  // not go. The vault is not one of the three compounding modifiers, so it is
+  // not what that clamp is guarding against.
+  const crown = crownFor(spec);
+  keys = roundCrown(keys, crown);
+
   // Nine pixels of air above the crown, plus the mount. Everything else on the
   // figure is measured off `headTop` or off `chinY`, so offsetting it here is
   // the whole of what setting the bust into the mount takes.
@@ -390,6 +473,7 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
     headHeight,
     headHalfWidth,
     headProfile: keys,
+    crown,
     craniumRise: 0,
     faceX: centerX,
 

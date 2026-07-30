@@ -8,6 +8,7 @@
  * is one pixel.
  */
 
+import { luminance } from '../core/color';
 import { MAT, RampBook, Raster } from '../core/raster';
 import { makeRng } from '../core/rng';
 import { BrowShape, BrowThickness } from '../spec/types';
@@ -79,6 +80,27 @@ export function drawBrow(options: DrawBrowOptions): void {
   const weight = THICKNESS[thickness] * (1 - ageLines * 0.3);
   const half = (length - 1) / 2;
 
+  /**
+   * How far up its own ramp this brow sits.
+   *
+   * The brow ramp is built from the hair colour, so a blonde persona does get a
+   * blonde brow — and then it was drawn at steps 5 and 6, which are the ramp's
+   * two *shadow* steps and are dark whatever the top of the ramp was. Every
+   * brow in the app therefore came out somewhere between dark brown and black,
+   * and a pale-haired head wore brows that belonged to a dark-haired one. It
+   * read as the loudest feature on the face because it was.
+   *
+   * Reading the ramp's own lightness and sitting a step or two higher for the
+   * light ones fixes it in the direction of the truth rather than away from it:
+   * fair brows genuinely are low-contrast against fair skin, which is exactly
+   * why they are the first thing a portraitist lightens and the first thing a
+   * caricaturist darkens. The dark brows are untouched — there is nowhere for
+   * them to go and nothing wrong with them.
+   */
+  const light = luminance(ramps.brow.steps[3]);
+  const paleShift = light > 0.55 ? 2 : light > 0.34 ? 1 : 0;
+  const step = (index: number) => Math.max(0, Math.min(6, index - paleShift));
+
   for (let i = 0; i < length; i += 1) {
     // Walk from the outer (temple) end toward the nose.
     const t = i / (length - 1);
@@ -97,13 +119,13 @@ export function drawBrow(options: DrawBrowOptions): void {
       const y = top + r;
       if (!onSkin(y)) continue;
       // The underside of the brow is its darkest edge; the top catches light.
-      const index = r === 0 ? 3 : r === rows - 1 ? 6 : 5;
+      const index = step(r === 0 ? 3 : r === rows - 1 ? 6 : 5);
       raster.set(px, y, ramps.brow.steps[index], MAT.BROW, index);
     }
 
     // Bushy brows break their own outline with stray hairs.
     if (thickness === 'bushy' && rng() > 0.55 && onSkin(top - 1)) {
-      raster.set(px, top - 1, ramps.brow.steps[4], MAT.BROW, 4);
+      raster.set(px, top - 1, ramps.brow.steps[step(4)], MAT.BROW, step(4));
     }
     // Old brows go patchy, and shed a few long wiry hairs upward.
     if (ageLines > 0.55) {
@@ -111,7 +133,7 @@ export function drawBrow(options: DrawBrowOptions): void {
         raster.shift(px, top + rows - 1, -2, book);
       }
       if (rng() < ageLines * 0.16 && onSkin(top - 2)) {
-        raster.set(px, top - 2, ramps.brow.steps[4], MAT.BROW, 4);
+        raster.set(px, top - 2, ramps.brow.steps[step(4)], MAT.BROW, step(4));
       }
     }
   }

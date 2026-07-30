@@ -85,6 +85,21 @@ const HATS: HatCase[] = [
   { gender: 'Female', label: 'veil-wimple', name: 'Wimple and Veil', material: 'Linen', color: '#ded6c4', zone: 'EUROPEAN', era: 'MEDIEVAL' },
   { gender: 'Female', label: 'veil-chador', name: 'Chador', material: 'Wool', color: '#3a3038', zone: 'MENA' },
 
+  // The twentieth century. Nine tenths of the app's modern personas wear one
+  // of these ten, and until recently five of them shared a single felt bowl.
+  { label: 'modern-newsboy', name: 'Newsboy Cap', material: 'Wool Tweed', color: '#8a7a5c', era: 'MODERN_ERA' },
+  { label: 'modern-newsboy-seed', name: 'Newsboy Cap', material: 'Wool Tweed', color: '#6b6055', era: 'MODERN_ERA', seedOffset: 881 },
+  { label: 'modern-flat-cap', name: 'Flat Cap', material: 'Cotton', color: '#4e5a4a', era: 'MODERN_ERA' },
+  { label: 'modern-baseball-cap', name: 'Baseball Cap', material: 'Cotton Twill', color: '#2f4f7a', era: 'MODERN_ERA' },
+  { label: 'modern-snapback', name: 'Snapback', material: 'Polyester', color: '#3a3a42', era: 'MODERN_ERA' },
+  { label: 'modern-mao-cap', name: 'Mao Cap', material: 'Cotton Drill', color: '#4a5b46', zone: 'EAST_ASIAN', era: 'MODERN_ERA' },
+  { label: 'modern-official-cap', name: 'Official Cap', material: 'Wool Serge', color: '#39404f', era: 'MODERN_ERA' },
+  { label: 'modern-sun-visor', name: 'Sun Visor', material: 'Plastic', color: '#d8c65a', era: 'MODERN_ERA' },
+  { label: 'modern-ushanka', name: 'Ushanka', material: 'Rabbit Fur', color: '#5b4a3a', era: 'MODERN_ERA' },
+  { gender: 'Female', label: 'modern-cloche', name: 'Cloche Hat', material: 'Felt', color: '#7a4a55', era: 'MODERN_ERA' },
+  { label: 'modern-fedora', name: 'Fedora', material: 'Felt', color: '#5a4a3c', era: 'MODERN_ERA' },
+  { label: 'modern-homburg', name: 'Homburg', material: 'Quality Felt', color: '#3b3540', era: 'MODERN_ERA' },
+
   // Things worn in the hair rather than over it.
   { gender: 'Female', label: 'flower-garland', name: 'Flower Garland', material: 'Fresh Flowers', color: '#c2456b' },
   { gender: 'Female', label: 'jasmine', name: 'Flower Garland', material: 'Fresh Jasmine', color: '#f0ead8' },

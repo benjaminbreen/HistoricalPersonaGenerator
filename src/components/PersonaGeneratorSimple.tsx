@@ -173,8 +173,15 @@ import {
   PersonaGenerationTarget,
   validatePersonaAnnotationRecord,
 } from '../services/geminiPersonaMaterialService';
+import {
+  AI_ACCESS_REQUIRED_EVENT,
+  getAiAccessStatus,
+  type AiAccessStatus,
+} from '../services/aiAccessService';
 import { createPastedTextSource, getRandomWikidataPerson, ingestRandomOldBaileySource, ingestUrlSource, OldBaileyRandomFilters } from '../services/sourceIngestionService';
 import PixelPortrait from './portraitLab/PixelPortrait';
+import RosterStrip, { SavePersonaStar } from '../encounter/RosterStrip';
+import { loadRoster } from '../encounter/roster';
 import { generateStatDescription } from '../utils/statToText';
 import MiniLocationMap from './MiniLocationMap';
 import { RARITY_COLORS, RARITY_LABELS, UNLABELLED_RARITIES, normalizeRarity } from '../types/attributeTypes';
@@ -226,6 +233,10 @@ import './PersonaGenerator.css';
  * A band has standing, not social status, and printing "Social Status: Band
  * Member" under a heading that promises a rank order overstates what is there.
  */
+const EncounterMode = React.lazy(() => import('../encounter/EncounterMode'));
+const SpriteTunerPanel = React.lazy(() => import('../encounter/sprite/SpriteTunerPanel'));
+const SpriteFigure = React.lazy(() => import('../encounter/sprite/SpriteCanvas'));
+
 const statusFieldLabel = (persona: HistoricalPersona): string =>
   socialStatusFieldLabel(polityFormFor({
     year: persona.year,
@@ -647,7 +658,14 @@ const SOCIAL_CLASSES = [
 type BiographyTab = 'biography' | 'family' | 'lifeEvents' | 'innerLife';
 
 /** Which AI action the cost confirmation is standing in front of. */
-type AiCostKind = 'schema' | 'repeat_prose';
+type AiCostKind = 'schema';
+type AiDevelopmentMode = 'existing' | 'new';
+type AiGateState = {
+  kind: 'nudge' | 'required';
+  action: 'biography' | 'schema';
+  run?: () => Promise<void>;
+};
+type RandomDonationMilestone = 10 | 20 | 50;
 
 const AI_COST_COPY: Record<AiCostKind, { title: string; lead: string; detail: string; confirm: string }> = {
   schema: {
@@ -656,12 +674,46 @@ const AI_COST_COPY: Record<AiCostKind, { title: string; lead: string; detail: st
     detail: 'It costs about six times as much per persona as the standard AI biography, because the entire schema goes to the model with every request.',
     confirm: 'Build schema record',
   },
-  repeat_prose: {
-    title: 'Generate another AI persona?',
-    lead: 'You have already developed a persona with AI this session.',
-    detail: 'Each run costs a fraction of a cent in API fees. That is small alone and adds up quickly across everyone using the site.',
-    confirm: 'Generate anyway',
+};
+
+const RANDOM_PERSONA_COUNT_KEY = 'hpg_random_persona_clicks_v1';
+const RANDOM_DONATION_COPY: Record<RandomDonationMilestone, {
+  kicker: string;
+  title: string;
+  body: string;
+  donate: string;
+  continue: string;
+}> = {
+  10: {
+    kicker: '10 lives explored',
+    title: 'Enjoying the time machine?',
+    body: 'You’ve explored 10 historical lives. If the journey has sparked your curiosity, a small donation helps keep it free.',
+    donate: 'Donate',
+    continue: 'Keep exploring',
   },
+  20: {
+    kicker: '20 lives explored',
+    title: 'Okay, you’re officially a regular.',
+    body: 'Twenty personas means you’re getting some mileage from this little history machine. Care to help with its upkeep?',
+    donate: 'Chip in',
+    continue: 'Maybe later',
+  },
+  50: {
+    kicker: '50 lives explored',
+    title: 'Okay but seriously, you should donate',
+    body: 'Fifty trips through history is a lot of time travel—and a little real server cost. If this has become your historical rabbit hole, please help fund it.',
+    donate: 'Support the project',
+    continue: 'Continue exploring',
+  },
+};
+
+const storedRandomPersonaCount = (): number => {
+  try {
+    const stored = Number(window.localStorage.getItem(RANDOM_PERSONA_COUNT_KEY));
+    return Number.isSafeInteger(stored) && stored >= 0 ? stored : 0;
+  } catch {
+    return 0;
+  }
 };
 
 /** A stage that fell back to offline generation, and why it did. */
@@ -1098,12 +1150,26 @@ const lockProceduralSeedRecord = (
 
 export default function PersonaGenerator() {
   const [persona, setPersona] = useState<HistoricalPersona | null>(null);
+  const [encounterPair, setEncounterPair] = useState<[HistoricalPersona, HistoricalPersona] | null>(null);
+  const [encounterHint, setEncounterHint] = useState(false);
+  const [showSpriteTuner, setShowSpriteTuner] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.code === 'Digit1' && !/input|textarea|select/i.test((e.target as HTMLElement)?.tagName ?? '')) {
+        e.preventDefault();
+        setShowSpriteTuner((v) => !v);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   const [params, setParams] = useState<Partial<GenerationParams>>({});
   const [samplingMode, setSamplingMode] = useState<SamplingMode>(DEFAULT_SAMPLING_MODE);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [darkMode, setDarkMode] = useState(false); // Light mode by default
   const [showAbout, setShowAbout] = useState(false);
-  const [showDonate, setShowDonate] = useState(false);
+  const [showDonate, setShowDonate] = useState(() => window.location.pathname === '/donate');
   const [showSecrets, setShowSecrets] = useState(false);
   const [hourglassRotation, setHourglassRotation] = useState(0);
   const [sandAnimationKey, setSandAnimationKey] = useState(0); // Key to restart animation on flip
@@ -1135,9 +1201,6 @@ export default function PersonaGenerator() {
   // model. Kept next to the biography so a failed call cannot masquerade as a
   // successful one.
   const [generationFallbacks, setGenerationFallbacks] = useState<GenerationFallback[]>([]);
-  // Every model call costs real money and this tool is free, so repeat use and
-  // the expensive schema path both pause for an explicit confirmation.
-  const [aiProseRuns, setAiProseRuns] = useState(0);
   /**
    * Whether the reader has asked for the AI path at all. The schema record is
    * the expensive, specialist option — roughly six times the cost of the
@@ -1146,7 +1209,15 @@ export default function PersonaGenerator() {
    * before the cheapest one had been tried. It appears once AI is in play.
    */
   const [hasRequestedAi, setHasRequestedAi] = useState(false);
+  const [showAiDevelopmentChoice, setShowAiDevelopmentChoice] = useState(false);
   const [costConfirm, setCostConfirm] = useState<{ kind: AiCostKind; run: () => Promise<void> } | null>(null);
+  const [aiAccess, setAiAccess] = useState<AiAccessStatus | null>(null);
+  const [aiGate, setAiGate] = useState<AiGateState | null>(null);
+  const [randomDonationMilestone, setRandomDonationMilestone] = useState<RandomDonationMilestone | null>(null);
+  const randomPersonaCountRef = useRef<number | null>(null);
+  if (randomPersonaCountRef.current === null) {
+    randomPersonaCountRef.current = storedRandomPersonaCount();
+  }
   const [editableJsonl, setEditableJsonl] = useState('');
   const [fieldEditStatus, setFieldEditStatus] = useState<string | null>(null);
   const [isSourceGenerating, setIsSourceGenerating] = useState(false);
@@ -1448,6 +1519,41 @@ export default function PersonaGenerator() {
     return () => window.clearTimeout(timer);
   }, [shareStatus]);
 
+  useEffect(() => {
+    if (!showAiDevelopmentChoice) return undefined;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setShowAiDevelopmentChoice(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [showAiDevelopmentChoice]);
+
+  useEffect(() => {
+    let active = true;
+    getAiAccessStatus()
+      .then(access => {
+        if (active) setAiAccess(access);
+      })
+      .catch(() => {
+        // The generation endpoint remains authoritative if this advisory read
+        // is unavailable.
+      });
+
+    const handleRequired = (event: Event) => {
+      const access = (event as CustomEvent<AiAccessStatus | null>).detail;
+      if (access) setAiAccess(access);
+      setAiGate({
+        kind: 'required',
+        action: access?.canUseBiography === false ? 'biography' : 'schema',
+      });
+    };
+    window.addEventListener(AI_ACCESS_REQUIRED_EVENT, handleRequired);
+    return () => {
+      active = false;
+      window.removeEventListener(AI_ACCESS_REQUIRED_EVENT, handleRequired);
+    };
+  }, []);
+
   /**
    * A newly generated persona is the root of a new family lineage, so the
    * navigation stack has to start over with them.
@@ -1494,33 +1600,99 @@ export default function PersonaGenerator() {
     setDeathInfo(null);
   };
 
+  const refreshAiAccess = () => {
+    void getAiAccessStatus().then(setAiAccess).catch(() => undefined);
+  };
+
+  const runAiAction = (run: () => Promise<void>) => {
+    void run().finally(refreshAiAccess);
+  };
+
   /**
-   * Gate a model-backed action behind the cost confirmation. The first prose
-   * run of a session goes straight through; the schema path and every repeat
-   * prose run stop for a confirmation that also asks about donating.
+   * Schema filling is the expensive specialist path. It always retains its
+   * explanatory confirmation, and requires six active supporter credits.
    */
-  const requestAiRun = (kind: AiCostKind, run: () => Promise<void>) => {
+  const requestAiRun = async (kind: AiCostKind, run: () => Promise<void>) => {
     if (isSourceGenerating) return;
     if (kind === 'schema' && !useGeminiExtraction) {
       // Nothing is sent to the model with extraction switched off, so there is
       // no cost to warn about.
-      void run();
+      runAiAction(run);
       return;
     }
-    if (kind === 'repeat_prose' && aiProseRuns === 0) {
-      setAiProseRuns(runs => runs + 1);
-      void run();
-      return;
+    try {
+      const access = await getAiAccessStatus();
+      setAiAccess(access);
+      if (!access.canUseSchema) {
+        setAiGate({ kind: 'required', action: 'schema', run });
+        return;
+      }
+    } catch {
+      // The generation route performs the definitive check.
     }
     setCostConfirm({ kind, run });
+  };
+
+  /**
+   * The third free biography gets a deliberate donation appeal. Five remain
+   * genuinely free; the sixth request is stopped until Stripe confirms support.
+   */
+  const requestAiBiographyRun = async (run: () => Promise<void>) => {
+    if (isSourceGenerating) return;
+    if (!useGeminiExtraction) {
+      runAiAction(run);
+      return;
+    }
+    try {
+      const access = await getAiAccessStatus();
+      setAiAccess(access);
+      if (!access.canUseBiography) {
+        setAiGate({ kind: 'required', action: 'biography', run });
+        return;
+      }
+      if (!access.supporterActive && access.freeBiographyRunsUsed === 2) {
+        setAiGate({ kind: 'nudge', action: 'biography', run });
+        return;
+      }
+    } catch {
+      // The generation route performs the definitive check.
+    }
+    runAiAction(run);
   };
 
   const confirmAiRun = () => {
     const pending = costConfirm;
     setCostConfirm(null);
     if (!pending) return;
-    if (pending.kind === 'repeat_prose') setAiProseRuns(runs => runs + 1);
-    void pending.run();
+    runAiAction(pending.run);
+  };
+
+  const continuePastAiNudge = () => {
+    const pending = aiGate;
+    setAiGate(null);
+    if (pending?.run) runAiAction(pending.run);
+  };
+
+  const checkSupporterAccess = async () => {
+    try {
+      const access = await getAiAccessStatus();
+      setAiAccess(access);
+      const unlocked = aiGate?.action === 'schema'
+        ? access.canUseSchema
+        : access.canUseBiography;
+      if (!unlocked) return;
+      const pending = aiGate;
+      setAiGate(null);
+      if (pending?.run) {
+        if (pending.action === 'schema') {
+          setCostConfirm({ kind: 'schema', run: pending.run });
+        } else {
+          runAiAction(pending.run);
+        }
+      }
+    } catch {
+      // Keep the gate open so the user can try again after the webhook lands.
+    }
   };
 
   const noteGenerationFallback = (stage: GenerationFallback['stage'], reason: string) => {
@@ -2454,6 +2626,84 @@ export default function PersonaGenerator() {
     }
   };
 
+  /**
+   * Ask the model to interpret the persona already on screen without rebuilding
+   * their character sheet. Source-backed personas keep their evidence record;
+   * ordinary procedural personas receive a local synthetic record that locks
+   * the displayed identity and historical constraints.
+   */
+  const elaborateExistingPersona = async () => {
+    if (isSourceGenerating || !persona) return;
+    const existingPersona = persona;
+    const existingRecord = annotationRecord
+      ? structuredClone(annotationRecord) as HistoricalPersonaAnnotationRecord
+      : null;
+    const syntheticSource = sourceFromProceduralPersona(existingPersona);
+    const record = existingRecord || lockProceduralSeedRecord(
+      createAnnotationRecordFromSource(syntheticSource),
+      existingPersona
+    );
+
+    resetSharedPersonaState();
+    setIsSourceGenerating(true);
+    setSourcePanelCollapsed(true);
+    setSourceTarget('named_subject');
+    setGenerationFallbacks([]);
+    setAnnotationRecord(record);
+    setEditableJsonl(annotationRecordToJsonl(record));
+    setFieldEditStatus(null);
+    setActiveTab('biography');
+
+    if (!existingRecord) {
+      setSourceTitle(syntheticSource.title);
+      setSourceText(syntheticSource.text);
+      setSourceUrl('');
+      setOldBaileySelectionActive(false);
+    }
+
+    setSourceIngestionStatus(useGeminiExtraction
+      ? `Keeping ${existingPersona.character.name}'s character sheet fixed. Asking the model to elaborate the biography...`
+      : `Keeping ${existingPersona.character.name}'s character sheet fixed. Writing a local elaboration...`);
+
+    try {
+      if (useGeminiExtraction) {
+        setPersonaSketch(`Writing an AI interpretation of ${existingPersona.character.name}...`);
+        const sketch = await generatePersonaSketchWithGemini(record);
+        if (sketch) {
+          setPersonaSketch(sketch);
+          setSourceIngestionStatus(`AI elaborated ${existingPersona.character.name} without replacing the existing persona.`);
+        } else {
+          setPersonaSketch(localPersonaSketch(record));
+          noteGenerationFallback('prose', 'The model returned an empty sketch.');
+          setSourceIngestionStatus(`The model returned no prose. Showing a local elaboration of ${existingPersona.character.name}.`);
+        }
+      } else {
+        setPersonaSketch(localPersonaSketch(record));
+        noteGenerationFallback('prose', 'Model-written prose is switched off.');
+        setSourceIngestionStatus(`Wrote a local elaboration of ${existingPersona.character.name}.`);
+      }
+      window.setTimeout(() => {
+        personaCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 120);
+    } catch (error) {
+      setPersonaSketch(localPersonaSketch(record));
+      noteGenerationFallback('prose', error instanceof Error ? error.message : 'Sketch generation failed.');
+      setSourceIngestionStatus(error instanceof Error
+        ? `${error.message} Showing a local elaboration instead.`
+        : 'AI elaboration failed. Showing a local elaboration instead.');
+    } finally {
+      setIsSourceGenerating(false);
+    }
+  };
+
+  const chooseAiDevelopmentMode = (mode: AiDevelopmentMode) => {
+    setShowAiDevelopmentChoice(false);
+    setHasRequestedAi(true);
+    void requestAiBiographyRun(
+      mode === 'existing' ? elaborateExistingPersona : developPersonaProse
+    );
+  };
+
   /** The opt-in path: pay for a model-filled schema record, then the biography. */
   const generateCompletelyRandom = async () => {
     if (isSourceGenerating) return;
@@ -2490,6 +2740,21 @@ export default function PersonaGenerator() {
   const handleHourglassClick = () => {
     setHourglassRotation(prev => prev + 180);
     setSandAnimationKey(prev => prev + 1); // Restart sand animation
+  };
+
+  const handleRandomPersonaClick = () => {
+    handleHourglassClick();
+    generateProceduralOnly();
+    const next = (randomPersonaCountRef.current || 0) + 1;
+    randomPersonaCountRef.current = next;
+    try {
+      window.localStorage.setItem(RANDOM_PERSONA_COUNT_KEY, String(next));
+    } catch {
+      // The milestone still works for this page view when storage is blocked.
+    }
+    if (next === 10 || next === 20 || next === 50) {
+      setRandomDonationMilestone(next);
+    }
   };
 
   const handleShare = () => {
@@ -4104,7 +4369,7 @@ export default function PersonaGenerator() {
               its own deliberate choice. */}
           <button
             className="btn btn-primary generation-random-button"
-            onClick={generateProceduralOnly}
+            onClick={handleRandomPersonaClick}
             disabled={isSourceGenerating}
             aria-label="Generate a random historical persona"
           >
@@ -4117,13 +4382,10 @@ export default function PersonaGenerator() {
           <div className="generation-mode-row">
           <button
             className="btn btn-secondary generation-ai-button"
-            onClick={() => {
-              setHasRequestedAi(true);
-              requestAiRun('repeat_prose', developPersonaProse);
-            }}
+            onClick={() => setShowAiDevelopmentChoice(true)}
             disabled={isSourceGenerating}
-            title="Generate a persona and have a language model write its biography. One model call; the schema record is built locally."
-            aria-label="Generate a persona and develop it with AI"
+            title="Ask AI to elaborate this persona, or create and develop a new one."
+            aria-label="Choose how AI should develop a persona"
           >
             <IoSparkles aria-hidden="true" />
             {isSourceGenerating ? 'Developing…' : 'Use AI to Develop Persona'}
@@ -4671,6 +4933,7 @@ export default function PersonaGenerator() {
               <div className="header-left">
                 <div className="name-with-pills">
                   <h2>{renderName(persona.character.name)}</h2>
+                  <SavePersonaStar persona={persona} />
                   {/* Both pills key off one colour so they read as a pair —
                       the zone, and a place inside it. */}
                   <div
@@ -6059,15 +6322,51 @@ export default function PersonaGenerator() {
       )}
     </div>
 
+    <RosterStrip onEncounter={(first, second) => setEncounterPair([first, second])} />
+
     <footer className="footer">
       © {new Date().getFullYear()} Benjamin Breen. All rights reserved. |{' '}
       <a href="https://ucsc.edu" target="_blank" rel="noopener noreferrer">UC Santa Cruz</a> |{' '}
-      Created as a free educational resource
+      Created as a free educational resource |{' '}
+      <button
+        type="button"
+        className="encounter-egg"
+        onClick={() => {
+          const entries = loadRoster();
+          if (entries.length >= 2) {
+            setEncounterPair([entries[entries.length - 2].persona, entries[entries.length - 1].persona]);
+          } else {
+            setEncounterHint(true);
+            window.setTimeout(() => setEncounterHint(false), 5000);
+          }
+        }}
+      >
+        ⚔
+      </button>
+      {encounterHint && (
+        <span className="encounter-egg-hint"> Save two personae with the ☆ to stage an encounter…</span>
+      )}
       <span className="footer-mobile-details">
         {' '}| Prototype – may contain errors |{' '}
         <a href="https://github.com/benjaminbreen/HistoricalPersonaGenerator" target="_blank" rel="noopener noreferrer">GitHub</a>
       </span>
     </footer>
+
+    {encounterPair && (
+      <React.Suspense fallback={null}>
+        <EncounterMode
+          a={encounterPair[0]}
+          b={encounterPair[1]}
+          onClose={() => setEncounterPair(null)}
+        />
+      </React.Suspense>
+    )}
+
+    {showSpriteTuner && (
+      <React.Suspense fallback={null}>
+        <SpriteTunerPanel onClose={() => setShowSpriteTuner(false)} />
+      </React.Suspense>
+    )}
 
     <AnimatePresence>
       {shareStatus && (
@@ -6295,6 +6594,240 @@ export default function PersonaGenerator() {
         </motion.div>
       )}
 
+      {showAiDevelopmentChoice && (
+        <motion.div
+          className="modal-overlay ai-choice-overlay"
+          onClick={() => setShowAiDevelopmentChoice(false)}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ai-choice-modal-title"
+          aria-describedby="ai-choice-modal-description"
+        >
+          <motion.div
+            className="modal ai-choice-modal"
+            onClick={(event) => event.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.95, y: 14 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 14 }}
+            transition={{ duration: 0.2, ease: [0.2, 0.75, 0.2, 1] }}
+          >
+            <div className="modal-header">
+              <div>
+                <span className="ai-choice-kicker">AI development</span>
+                <h2 id="ai-choice-modal-title">What should AI work from?</h2>
+              </div>
+              <button
+                className="modal-close ai-choice-close"
+                onClick={() => setShowAiDevelopmentChoice(false)}
+                aria-label="Close dialog"
+              >
+                <IoClose aria-hidden="true" />
+              </button>
+            </div>
+            <div className="modal-body ai-choice-body">
+              <p id="ai-choice-modal-description">
+                Keep exploring the person on screen, or begin with a fresh historical character.
+              </p>
+              <div className="ai-choice-options">
+                <button
+                  type="button"
+                  className="ai-choice-option ai-choice-option-existing"
+                  onClick={() => chooseAiDevelopmentMode('existing')}
+                  disabled={!persona}
+                  autoFocus={Boolean(persona)}
+                >
+                  <span className="ai-choice-icon" aria-hidden="true"><IoSparkles /></span>
+                  <span className="ai-choice-copy">
+                    <strong>Elaborate on existing persona</strong>
+                    <small>
+                      {persona
+                        ? `Keep ${persona.character.name}'s identity, portrait, character sheet, and ${formatYear(persona.year)} setting.`
+                        : 'Generate a persona first to use this option.'}
+                    </small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="ai-choice-option ai-choice-option-new"
+                  onClick={() => chooseAiDevelopmentMode('new')}
+                >
+                  <span className="ai-choice-icon" aria-hidden="true"><IoShuffle /></span>
+                  <span className="ai-choice-copy">
+                    <strong>Create a new persona</strong>
+                    <small>Generate a fresh character, then ask AI to develop their biography.</small>
+                  </span>
+                </button>
+              </div>
+              <p className="ai-choice-donate-note">
+                API and hosting costs are a real thing, and this is being offered for free.{' '}
+                <a
+                  href="/donate"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setShowDonate(true);
+                  }}
+                >
+                  Donate?
+                </a>
+              </p>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {randomDonationMilestone && (
+        <motion.div
+          className="modal-overlay random-support-overlay"
+          onClick={() => setRandomDonationMilestone(null)}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="random-support-modal-title"
+          aria-describedby="random-support-modal-description"
+        >
+          <motion.div
+            className={`modal random-support-modal random-support-modal-${randomDonationMilestone}`}
+            onClick={(event) => event.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.94, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.94, y: 16 }}
+            transition={{ duration: 0.22, ease: [0.2, 0.75, 0.2, 1] }}
+          >
+            <div className="random-support-hero">
+              <button
+                type="button"
+                className="modal-close random-support-close"
+                onClick={() => setRandomDonationMilestone(null)}
+                aria-label="Close donation appeal"
+              >
+                <IoClose aria-hidden="true" />
+              </button>
+              <span className="random-support-icon" aria-hidden="true">
+                <GiSandsOfTime />
+              </span>
+              <span className="random-support-kicker">
+                {RANDOM_DONATION_COPY[randomDonationMilestone].kicker}
+              </span>
+              <h2 id="random-support-modal-title">
+                {RANDOM_DONATION_COPY[randomDonationMilestone].title}
+              </h2>
+            </div>
+            <div className="modal-body random-support-body">
+              <p id="random-support-modal-description">
+                {RANDOM_DONATION_COPY[randomDonationMilestone].body}
+              </p>
+              <div className="random-support-actions">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    setRandomDonationMilestone(null);
+                    setShowDonate(true);
+                  }}
+                  autoFocus
+                >
+                  <IoHeart aria-hidden="true" />
+                  {RANDOM_DONATION_COPY[randomDonationMilestone].donate}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setRandomDonationMilestone(null)}
+                >
+                  {RANDOM_DONATION_COPY[randomDonationMilestone].continue}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {aiGate && (
+        <motion.div
+          className="modal-overlay ai-support-overlay"
+          onClick={() => setAiGate(null)}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ai-support-modal-title"
+          aria-describedby="ai-support-modal-description"
+        >
+          <motion.div
+            className={`modal ai-support-modal ai-support-modal-${aiGate.kind}`}
+            onClick={(event) => event.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.93, y: 18 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.93, y: 18 }}
+            transition={{ duration: 0.22, ease: [0.2, 0.75, 0.2, 1] }}
+          >
+            <div className="ai-support-hero">
+              <span className="ai-support-heart" aria-hidden="true"><IoHeart /></span>
+              <span className="ai-support-kicker">
+                {aiGate.kind === 'nudge' ? 'A small request' : 'Supporter access'}
+              </span>
+              <h2 id="ai-support-modal-title">
+                {aiGate.kind === 'nudge'
+                  ? 'You have reached your third AI biography'
+                  : aiGate.action === 'schema'
+                    ? 'Full schema generation is a supporter feature'
+                    : 'You have used your five free AI biographies'}
+              </h2>
+            </div>
+            <div className="modal-body ai-support-body">
+              <p id="ai-support-modal-description">
+                {aiGate.kind === 'nudge'
+                  ? 'This project has no ads or subscription, but every AI request creates a real API bill. If the tool is useful to you, this is the moment when a donation makes the biggest difference.'
+                  : aiGate.action === 'schema'
+                    ? 'The evidence-aware schema call sends a much larger historical record to the model and costs six credits. A verified donation unlocks enough credit for this and many more biographies.'
+                    : 'Procedural personas remain free and unlimited. To keep model-generated biographies sustainable, additional AI requests unlock after a verified donation.'}
+              </p>
+              <div className="ai-support-credit-card">
+                <strong>Donate once, receive 50 AI credits</strong>
+                <span>Valid for 30 days · biographies use 1 credit · full schema records use 6</span>
+              </div>
+              {aiGate.kind === 'nudge' && (
+                <p className="ai-support-remaining">
+                  You can still continue without donating — 2 free AI biographies remain after this one.
+                </p>
+              )}
+              <div className="ai-support-actions">
+                {aiGate.kind === 'nudge' && (
+                  <button type="button" className="btn btn-secondary" onClick={continuePastAiNudge}>
+                    Continue — 2 free runs remain
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="btn btn-primary ai-support-donate-button"
+                  onClick={() => setShowDonate(true)}
+                  autoFocus
+                >
+                  <IoHeart aria-hidden="true" />
+                  Donate & unlock 50 credits
+                </button>
+              </div>
+              <button
+                type="button"
+                className="ai-support-check"
+                onClick={() => void checkSupporterAccess()}
+              >
+                Already donated? Check supporter access
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
       {costConfirm && (
         <motion.div
           className="modal-overlay"
@@ -6409,10 +6942,11 @@ export default function PersonaGenerator() {
                 <h3>Direct Donation</h3>
                 <p>
                   Make a one-time or recurring donation to directly support the development
-                  of this tool and future educational projects.
+                  of this tool and future educational projects. A verified donation also
+                  unlocks 50 AI credits for 30 days in this browser.
                 </p>
                 <a
-                  href="https://buy.stripe.com/eVqfZhaprgRG7ab1aV4F200"
+                  href={aiAccess?.donateUrl || '/api/ai-access?checkout=1'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-secondary donate-btn"
@@ -6552,26 +7086,36 @@ export default function PersonaGenerator() {
               </button>
             </div>
             <div className="modal-body two-column-layout">
-              {/* Left Column: Portrait and Appearance */}
+              {/* Left Column: Portrait, full figure, and Appearance */}
               <div className="left-column-appearance">
-                <div
-                  className="portrait-section-large clickable-portrait"
-                  onClick={handlePortraitClick}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && handlePortraitClick()}
-                  title="Click to cycle through expressions"
-                >
-                  <PixelPortrait
-                    character={persona.character}
-                    size={400}
-                    temporaryExpression={expressionCycle[portraitExpressionIndex].expression}
-                  />
-                  <div className="expression-label">
-                    <span className="expression-indicator">
-                      {expressionCycle[portraitExpressionIndex].label}
-                    </span>
-                    <span className="expression-hint">Click to change expression</span>
+                <div className="portrait-sprite-row">
+                  <div
+                    className="portrait-section-large clickable-portrait"
+                    onClick={handlePortraitClick}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === 'Enter' && handlePortraitClick()}
+                    title="Click to cycle through expressions"
+                  >
+                    <PixelPortrait
+                      character={persona.character}
+                      size={340}
+                      temporaryExpression={expressionCycle[portraitExpressionIndex].expression}
+                    />
+                    <div className="expression-label">
+                      <span className="expression-indicator">
+                        {expressionCycle[portraitExpressionIndex].label}
+                      </span>
+                      <span className="expression-hint">Click to change expression</span>
+                    </div>
+                  </div>
+                  <div className="sprite-figure-panel" title="Full figure">
+                    <React.Suspense fallback={null}>
+                      <SpriteFigure persona={persona} facing="right" scale={0.8} />
+                    </React.Suspense>
+                    <div className="sprite-figure-caption">
+                      {persona.character.equippedItems?.torso?.name ?? 'Full figure'}
+                    </div>
                   </div>
                 </div>
 

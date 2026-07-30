@@ -400,29 +400,50 @@ const COMMON_LABOUR =
  * past reads as a market town full of artisans and merchants rather than as the
  * countryside almost everyone actually lived in.
  *
+ * The figure is a whole society's, which is not the figure for any particular
+ * place in it. Applied flat it made the city of Rome 19% hunters and 8%
+ * fishers, and 1850 London a fifth crofters, threshers and market gardeners:
+ * the countryside's share imposed on the one kind of place that did not have
+ * it. A pre-industrial city ran on trades, service and carrying, with a thin
+ * fringe of gardeners and drovers at the walls — call it a tenth. A market
+ * town sits between the two, and the countryside carries what the cities do
+ * not.
+ *
  * See docs/DEMOGRAPHY.md §5.
  */
-function subsistenceShare(year: number): number {
-  if (year < 1500) return 0.88;
-  if (year < 1750) return 0.82;
-  if (year < 1850) return 0.68;
-  if (year < 1900) return 0.55;
-  if (year < 1950) return 0.45;
-  return 0.28;
+function subsistenceShare(year: number, locale: HistoricalContext['localeType']): number {
+  const nationwide =
+    year < 1500 ? 0.88
+    : year < 1750 ? 0.82
+    : year < 1850 ? 0.68
+    : year < 1900 ? 0.55
+    : year < 1950 ? 0.45
+    : 0.28;
+
+  if (locale === 'city') return Math.min(nationwide, 0.10);
+  if (locale === 'town') return nationwide * 0.55;
+  // Herders and hunters are food producers, and mobile societies are made of
+  // them almost entirely.
+  if (locale === 'mobile') return Math.min(0.95, nationwide * 1.1);
+  if (locale === 'rural') return Math.min(0.95, nationwide * 1.1);
+  return nationwide;
 }
 
 /**
- * The multiplier needed to pull food-producing work up to its historical share.
+ * The multiplier that pulls food-producing work to its historical share.
  * Derived from the target odds rather than hand-tuned, so adjusting
  * `subsistenceShare` is enough to move the distribution.
+ *
+ * Free to fall below 1: in a city the share is a tenth, and the correction
+ * there has to push down rather than up.
  */
-function subsistenceBoost(year: number): number {
-  const share = subsistenceShare(year);
+function subsistenceBoost(year: number, locale: HistoricalContext['localeType']): number {
+  const share = subsistenceShare(year, locale);
   // Odds of food-producing work relative to everything else, against the
   // roughly one-in-three the unweighted profession tables produce on their own.
   const targetOdds = share / (1 - share);
   const baselineOdds = 0.33 / 0.67;
-  return Math.max(1, targetOdds / baselineOdds);
+  return targetOdds / baselineOdds;
 }
 
 /**
@@ -494,6 +515,30 @@ function effectiveLocale(context?: HistoricalContext): HistoricalContext['locale
   return context.year < 1800 ? 'rural' : 'unknown';
 }
 
+/**
+ * How much of the draw is spent on the distinctive work of a place.
+ *
+ * Every society had a long tail of occupations that were real, specific and
+ * uncommon: the goose tender, the ratcatcher, the priestess of Juno, the man
+ * who dressed corpses. Weighted individually against a ploughman they are
+ * invisible — that is arithmetic, not authoring, and no length of role list
+ * fixes it. So the tail is given a fixed share of the draw instead, divided
+ * among however many of its members this place and year can support. Twenty
+ * texture roles and two hundred produce the same peasant share; the second
+ * just repeats itself far less.
+ *
+ * Cities get the larger budget because that is what a city *is*: the density
+ * that lets someone live by one narrow trade.
+ */
+export function textureBudget(context?: HistoricalContext): number {
+  switch (effectiveLocale(context)) {
+    case 'city': return 0.30;
+    case 'town': return 0.20;
+    case 'mobile': return 0.10;
+    default: return 0.12;
+  }
+}
+
 export function getProfessionSelectionWeight(
   profession: string,
   context?: HistoricalContext,
@@ -540,22 +585,22 @@ export function getProfessionSelectionWeight(
     weight = 1.5;
   }
 
-  // The historical share of food-producing work, applied before the locale
-  // adjustment so that a rural pre-industrial persona is overwhelmingly likely
-  // to be working the land — which is what the sources describe.
-  if (context && FOOD_PRODUCING.test(profession)) {
-    weight *= subsistenceBoost(context.year);
-  }
-
   const locale = effectiveLocale(context);
+
+  // The historical share of food-producing work in this kind of place. The
+  // locale is inside the share now rather than applied as a second multiplier
+  // on top of it: the two compounded to a 134-to-1 advantage over every other
+  // occupation in the rural pre-industrial draw, which is most of the app.
+  if (context && FOOD_PRODUCING.test(profession)) {
+    weight *= subsistenceBoost(context.year, locale);
+  }
 
   // Locale changes likelihood rather than acting as a universal prohibition.
   // A rural person can become a judge or engineer, for example, but the local
   // livelihood distribution should still be dominated by agriculture, craft,
   // transport, and household labor.
   if (locale === 'rural') {
-    if (FOOD_PRODUCING.test(profession)
-      || /\b(?:weaver|potter|smith|carpenter|artisan|washer|dhobi|carrier|porter|thatcher|miller|blacksmith)\b/i.test(profession)) {
+    if (/\b(?:weaver|potter|smith|carpenter|artisan|washer|dhobi|carrier|porter|thatcher|miller|blacksmith)\b/i.test(profession)) {
       weight *= 3;
     } else if (/\b(?:airline pilot|civil engineer|judge|surgeon|librarian|journalist|secretary|accountant|politician|professor|bank president)\b/i.test(profession)) {
       weight *= 0.2;

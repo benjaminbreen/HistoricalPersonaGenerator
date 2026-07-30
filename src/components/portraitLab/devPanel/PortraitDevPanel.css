@@ -26,12 +26,62 @@
 .pdp__bar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: 'title controls' 'blurb controls';
+  grid-template-areas: 'title controls' 'blurb controls' 'filters filters';
   gap: 4px 24px;
   align-items: start;
   padding: 14px 18px 12px;
   border-bottom: 1px solid var(--pdp-line);
   background: #1d1a17;
+}
+
+/* The query row. Its own band across the full width rather than more items in
+ * `__controls`, because these are the *subject* of the sheet and the buttons
+ * beside them are only ways of looking at it. */
+.pdp__filters {
+  grid-area: filters;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--pdp-line);
+}
+
+.pdp__filters label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--pdp-muted);
+}
+
+.pdp__filters select { padding: 4px 6px; max-width: 22ch; }
+
+.pdp__ages input {
+  font: inherit;
+  /* Wide enough for "120" plus the number spinner, which eats about 2ch. */
+  width: 7ch;
+  color: var(--pdp-ink);
+  background: #262220;
+  border: 1px solid var(--pdp-line);
+  border-radius: 4px;
+  padding: 4px 5px;
+}
+
+.pdp button:disabled { opacity: 0.4; cursor: default; }
+
+/* Why the sheet came back short. Sits under the grid, in the accent, because it
+ * is a finding rather than an error. */
+.pdp__short {
+  max-width: 68ch;
+  margin: 22px auto 4px;
+  padding: 10px 13px;
+  border: 1px solid #4a3428;
+  border-left: 3px solid var(--pdp-accent);
+  border-radius: 4px;
+  background: #201b18;
+  color: #cdbba9;
+  line-height: 1.55;
 }
 
 .pdp__title { grid-area: title; display: flex; align-items: baseline; gap: 10px; }
@@ -146,6 +196,6 @@
 }
 
 @media (max-width: 900px) {
-  .pdp__bar { grid-template-columns: 1fr; grid-template-areas: 'title' 'blurb' 'controls'; }
+  .pdp__bar { grid-template-columns: 1fr; grid-template-areas: 'title' 'blurb' 'controls' 'filters'; }
   .pdp__controls { justify-content: flex-start; }
 }

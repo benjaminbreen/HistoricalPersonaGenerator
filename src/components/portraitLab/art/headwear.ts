@@ -253,6 +253,10 @@ function drawCovering(context: RenderContext): Mask | null {
 export function coveringSilhouette(context: RenderContext): Mask | null {
   const kind = context.spec.headwear?.kind;
   if (!kind || !CROWN_COVERINGS.has(kind)) return null;
+  // A sun visor is filed as a cap because it has a peak, but it has no crown:
+  // the hair goes over the top of it and must not be cut back to the strap,
+  // which otherwise shaves the persona bald from the eyebrows up.
+  if (/visor/i.test(context.spec.headwear!.name)) return null;
   const scratch = new Raster(context.raster.width, context.raster.height);
   return drawCovering(withRaster(context, scratch));
 }
@@ -369,56 +373,321 @@ function applyFur(context: RenderContext, mask: Mask): Mask {
  */
 // Gandhi's cap is deliberately absent: it is a brimless boat-shaped khadi cap
 // and giving it a peak turns a piece of political dress into a workman's cap.
-const PEAKED_CAP = /newsboy|flat cap|cheese-cutter|baseball|snapback|mao cap|zhongshan cap|visor|official cap|guan cap/i;
+const PEAKED_CAP = /newsboy|flat cap|cheese-cutter|baker ?boy|baseball|ball cap|snapback|trucker|mao cap|zhongshan cap|visor|official cap|guan cap|service cap|peaked cap|kepi|conductor|engineer cap/i;
 const BERET = /beret|tam|balmoral/i;
 const FEZ = /fez|tarboosh|kufi|taqiyah|kofia|topi|songkok/i;
 const PILLBOX = /pillbox|toque/i;
 
-function drawPeakedCap(context: RenderContext, soft: boolean): Mask {
-  const { anatomy, raster, ramps, spec, book } = context;
+/**
+ * The caps with a peak on the front, which are four different objects and were
+ * being drawn as two.
+ *
+ * They divide on how the crown is made, and that is the whole recognition. A
+ * **newsboy** is eight panels of tweed gathered onto a button, so it balloons
+ * wider than the skull and flops forward over its own peak. A **flat cap** is
+ * one piece of cloth cut to the head, low and sleek, its peak sewn nearly flush
+ * with the front. A **baseball cap** is fitted, seamed front and centre, and
+ * carries a long curved bill that reaches a third of a head past the brow. A
+ * **service cap** — Mao, Zhongshan, conductor's, kepi — is stiffened: a flat
+ * top that flares *wider* than the band beneath it, a dark band at the brow,
+ * and a short flat visor. A **visor** has no crown at all, which is why it used
+ * to be the worst of them: routed through the brimmed hat it came out a bowler.
+ */
+type PeakedForm = 'newsboy' | 'flat' | 'ball' | 'service' | 'visor';
+
+function peakedFormFor(name: string): PeakedForm {
+  if (/visor/i.test(name)) return 'visor';
+  if (/baseball|ball cap|snapback|trucker/i.test(name)) return 'ball';
+  if (/mao|zhongshan|official|guan|service|kepi|conductor|engineer|peaked cap/i.test(name)) return 'service';
+  if (/newsboy|baker ?boy|cheese-cutter|eight.?panel/i.test(name)) return 'newsboy';
+  return 'flat';
+}
+
+/**
+ * The peak itself: a stiff shelf thrown forward over the brow.
+ *
+ * Two rules carry it. The top edge takes the brightest step on the hat, because
+ * a peak is the one surface facing straight up; everything below that edge takes
+ * the darkest, because nothing lights the underside of a brim. Without that
+ * split the peak is a band of the same felt as the crown and disappears — which
+ * is what the old one did, and why every flat cap looked like a beanbag.
+ *
+ * `curve` drops the outer ends, which is what separates a moulded baseball bill
+ * from a flat cardboard-stiffened one.
+ */
+function drawBill(
+  context: RenderContext,
+  mask: Mask,
+  options: { y: number; half: number; reach: number; curve: number },
+): void {
+  const { anatomy, raster, ramps } = context;
   const { size, centerX } = anatomy;
+  const { y: peakY, half: peakHalf, reach, curve } = options;
 
-  // The crown. A newsboy's is slack and sits wide of the skull; a baseball
-  // cap's is fitted. Both are lower at the back than a skullcap would be.
-  const bottom = anatomy.browY - 2;
-  const crown = crownMask(context, soft ? 3.4 : 1.4, soft ? 3 : 2, bottom);
-  fillHeadwear(context, crown, { dither: soft ? 0.55 : 0.35 });
-
-  const mask = crown.slice();
-
-  // The peak: a stiff shelf thrown forward over the brow, dark underneath
-  // because nothing lights the underside of a brim.
-  const peakY = bottom - 1;
-  const peakHalf = anatomy.headHalfWidth * (soft ? 0.86 : 0.94);
-  const reach = soft ? 3 : 5;
-  for (let dy = 0; dy <= reach; dy += 1) {
-    const t = dy / reach;
-    const half = peakHalf * Math.sqrt(Math.max(0, 1 - t * t * 0.82));
-    for (let x = Math.round(centerX - half); x <= Math.round(centerX + half); x += 1) {
-      const y = peakY + dy;
-      if (x < 0 || y < 0 || x >= size || y >= size) continue;
-      const index = dy === 0 ? 1.5 : 4.4 + t * 1.6;
-      raster.set(x, y, ramps.headwear.steps[Math.round(index)], MAT.HEADWEAR, Math.round(index));
+  for (let x = Math.round(centerX - peakHalf); x <= Math.round(centerX + peakHalf); x += 1) {
+    if (x < 0 || x >= size) continue;
+    const dx = (x - centerX) / peakHalf;
+    // Elliptical in plan — the bill is deepest at the centre and dies away at
+    // the corners — and dropped at the ends by however moulded it is.
+    const depth = reach * Math.sqrt(Math.max(0, 1 - dx * dx * 0.86));
+    const drop = Math.round(curve * dx * dx);
+    for (let dy = 0; dy <= depth; dy += 1) {
+      const y = peakY + drop + dy;
+      if (y < 0 || y >= size) continue;
+      // The lit top, then the edge of the stiffener, then the underside. A
+      // deep bill needs the middle step or it is a black slab with a wire on
+      // top of it; a short one is thin enough to do without.
+      const index = dy === 0
+        ? 1.2
+        : dy === 1 && depth >= 4
+          ? 2.8
+          : Math.min(6, 4.2 + (dy / Math.max(1, depth)) * 2);
+      const step = Math.round(index);
+      raster.set(x, y, ramps.headwear.steps[step], MAT.HEADWEAR, step);
       mask[y * size + x] = 1;
     }
   }
+}
 
-  if (soft) {
-    // A newsboy cap is panelled and slouches forward over its own peak. One
-    // seam and one fold is the whole difference from a felt bowl.
-    const noise = makeNoise1D(spec.seed ^ 0x3c19);
-    for (let y = anatomy.headTop - 3; y < peakY; y += 1) {
-      const x = Math.round(centerX + 2 + noise(y * 0.3) * 3);
+/**
+ * Panels, seams and the button — the difference between sewn cloth and a bowl.
+ *
+ * Every pixel of the crown is assigned to a panel by its bearing from the
+ * button, and adjacent panels are pushed one step apart. One step is enough:
+ * these are eight faces of the same cloth at slightly different angles to the
+ * light, not eight colours. The seam between two panels goes two steps down,
+ * with the pixel on its lit side one step up, which is a stitch line pulling the
+ * cloth into a ridge.
+ */
+function panelCrown(
+  context: RenderContext,
+  mask: Mask,
+  buttonX: number,
+  buttonY: number,
+  panels: number,
+): void {
+  const { anatomy, raster, book, ramps } = context;
+  const { size } = anatomy;
+
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
       if (!mask[y * size + x]) continue;
-      raster.shift(x, y, 2, book);
-      raster.shift(x - 1, y, -1, book);
+      const dx = x - buttonX;
+      const dy = (y - buttonY) * 0.7;
+      const radius = Math.hypot(dx, dy);
+      // Panels are gathered at the button and lose themselves in the fullness
+      // of the cloth further down. Run them the whole way and the cap becomes a
+      // beach ball, which is exactly what a full-crown starburst looks like.
+      if (radius < 1 || radius > 17) continue;
+      const fade = radius > 10 ? 0.5 : 1;
+      const bearing = (Math.atan2(dy, dx) + Math.PI) / (Math.PI * 2);
+      const slot = bearing * panels;
+      const panel = Math.floor(slot);
+      const edge = Math.abs(slot - Math.round(slot));
+      if (edge < 0.05) raster.shift(x, y, fade > 0.9 ? 2 : 1, book);
+      else if (edge < 0.1 && fade > 0.9) raster.shift(x, y, -1, book);
+      else if (fade > 0.9) raster.shift(x, y, panel % 2 === 0 ? -1 : 1, book);
     }
-    // The button at the crown, which every one of these has.
-    raster.set(centerX, anatomy.headTop - 3, ramps.headwear.steps[1], MAT.HEADWEAR, 1);
+  }
+
+  // The button the panels are gathered onto. Every one of these has one, and at
+  // this scale it is two pixels: a lit crown and a shadow under it.
+  raster.set(buttonX, buttonY, ramps.headwear.steps[0], MAT.HEADWEAR, 0);
+  raster.set(buttonX, buttonY + 1, ramps.headwear.steps[5], MAT.HEADWEAR, 5);
+}
+
+function drawPeakedCap(context: RenderContext, form: PeakedForm): Mask {
+  const { anatomy, raster, ramps, spec, book } = context;
+  const { size, centerX } = anatomy;
+  const material = spec.headwear!.material.toLowerCase();
+  const rng = makeRng(spec.seed ^ 0x71c3);
+  const noise = makeNoise1D(spec.seed ^ 0x3c19);
+  // A soft cap is pulled on, and nobody pulls one on straight.
+  const lean = form === 'newsboy' || form === 'flat' ? ((spec.seed >> 3) & 1 ? 1 : -1) : 0;
+
+  const browLine = anatomy.browY - 2;
+  const mask = makeMask(size, size);
+
+  if (form === 'visor') {
+    // A band and a bill, and the crown of the head left bare — which is the
+    // entire object. It gets no `fillHeadwear` because there is no dome to
+    // shade: the band is a strap and takes flat value.
+    const bandTop = browLine - 3;
+    for (let y = bandTop; y <= browLine; y += 1) {
+      const half = anatomy.headHalfWidth * 0.99;
+      for (let x = Math.round(centerX - half); x <= Math.round(centerX + half); x += 1) {
+        if (x < 0 || y < 0 || x >= size || y >= size) continue;
+        const step = y === bandTop ? 2 : 3;
+        raster.set(x, y, ramps.headwear.steps[step], MAT.HEADWEAR, step);
+        mask[y * size + x] = 1;
+      }
+    }
+    drawBill(context, mask, { y: browLine, half: anatomy.headHalfWidth * 1.02, reach: 5, curve: 1.4 });
+    applyContactShadow(raster, mask, book, { dx: 0, dy: 1, strength: 2, depth: 3 });
+    return mask;
+  }
+
+  if (form === 'service') {
+    // Stiffened: the top is a flat oval held out by a wire, and it is wider
+    // than the band it sits on. That outward flare, and not the visor, is what
+    // reads as military at twenty pixels.
+    const bandBottom = browLine;
+    const bandTop = bandBottom - 4;
+    const topY = bandTop - 13;
+    for (let y = topY; y <= bandBottom; y += 1) {
+      const t = (y - topY) / Math.max(1, bandBottom - topY);
+      // Widest at the crown, narrowing into the band. The flare is a couple of
+      // pixels: any more and the cap is a flying saucer resting on a head.
+      const half = anatomy.headHalfWidth * (1.06 - t * 0.11);
+      for (let x = Math.round(centerX - half); x <= Math.round(centerX + half); x += 1) {
+        if (x < 0 || y < 0 || x >= size || y >= size) continue;
+        mask[y * size + x] = 1;
+      }
+    }
+    fillHeadwear(context, mask, { dither: 0.2, gain: 4.8 });
+    // The lid takes light square on — but only across the middle of it. Run the
+    // highlight the full width and the flare turns into a strip light.
+    for (let x = Math.round(centerX - anatomy.headHalfWidth * 0.7); x <= centerX + anatomy.headHalfWidth * 0.7; x += 1) {
+      if (x < 0 || x >= size) continue;
+      if (mask[topY * size + x]) raster.set(x, topY, ramps.headwear.steps[1], MAT.HEADWEAR, 1);
+      if (mask[(topY + 1) * size + x]) raster.shift(x, topY + 1, -1, book);
+    }
+    // The band. A uniform cap has one in a contrasting cloth — black mohair on
+    // navy serge — while a Mao or Zhongshan cap is cut from a single bolt and
+    // only has a seam there. Painting the second colour on both is what made
+    // the People's Liberation Army look like bus conductors.
+    const uniform = /official|service|kepi|conductor|peaked cap/i.test(spec.headwear!.name);
+    for (let y = bandTop; y <= bandBottom; y += 1) {
+      for (let x = 0; x < size; x += 1) {
+        if (!mask[y * size + x]) continue;
+        const step = y === bandTop ? 2 : y === bandBottom ? 5 : 4;
+        if (uniform) raster.set(x, y, ramps.clothC.steps[step], MAT.CLOTH_C, step);
+        else raster.shift(x, y, y === bandTop ? -1 : 1, book);
+      }
+    }
+    // A badge over the band, centred. A service cap without one is a chauffeur.
+    if (spec.headwear!.ornament > 0.15) {
+      const badgeY = bandTop + 1;
+      for (let dy = 0; dy <= 2; dy += 1) {
+        const wide = dy === 1 ? 2 : 0;
+        for (let dx = -wide; dx <= wide; dx += 1) {
+          const step = dy === 1 ? 1 : 3;
+          raster.set(centerX + dx, badgeY + dy, ramps.headwearAccent.steps[step], MAT.HEADWEAR_ACCENT, step);
+        }
+      }
+    }
+    drawBill(context, mask, { y: bandBottom + 1, half: anatomy.headHalfWidth * 1.04, reach: 4, curve: 0.8 });
+    applyContactShadow(raster, mask, book, { dx: 0, dy: 1, strength: 2, depth: 4 });
+    for (let y = bandBottom + 2; y < anatomy.eyeY; y += 1) {
+      for (let x = 0; x < size; x += 1) {
+        if (raster.matAt(x, y) === MAT.SKIN) raster.shift(x, y, 1, book);
+      }
+    }
+    return mask;
+  }
+
+  // The three soft caps. All three are a crown plus a bill; they differ in how
+  // much cloth the crown has in it.
+  const slack = form === 'newsboy' ? 1 : form === 'flat' ? 0.5 : 0;
+  const seat = crownMask(
+    context,
+    form === 'ball' ? 1.2 : 1.4 + slack * 1.2,
+    form === 'ball' ? 2 : 2 + Math.round(slack),
+    browLine,
+  );
+  for (let i = 0; i < seat.length; i += 1) if (seat[i]) mask[i] = 1;
+
+  if (slack > 0) {
+    // The gathered cloth: an oval sitting proud of the skull, offset the way
+    // the cap was pulled on. A newsboy's overhangs the peak at the front and
+    // hangs past the ear on one side — it is a bag of cloth, and the silhouette
+    // has to say so before any amount of interior shading will.
+    const cx = centerX + lean * (1 + slack);
+    const cy = anatomy.headTop + 4;
+    const rx = anatomy.headHalfWidth * (1.0 + slack * 0.08);
+    const ry = 7 + slack * 3;
+    for (let y = Math.round(cy - ry); y <= Math.round(cy + ry); y += 1) {
+      for (let x = Math.round(cx - rx); x <= Math.round(cx + rx); x += 1) {
+        if (x < 0 || y < 0 || x >= size || y >= size) continue;
+        // The wobble keeps the edge from being a drawn ellipse. Soft cloth has
+        // no true curve in it.
+        const wobble = noise(x * 0.22 + y * 0.11) * 0.5 * slack;
+        const ndx = (x - cx) / (rx + wobble);
+        const ndy = (y - cy) / ry;
+        if (ndx * ndx + ndy * ndy > 1) continue;
+        mask[y * size + x] = 1;
+      }
+    }
+  }
+
+  fillHeadwear(context, mask, { dither: form === 'ball' ? 0.25 : 0.35, gain: form === 'ball' ? 5.6 : 5.2 });
+
+  if (form === 'newsboy') {
+    panelCrown(context, mask, Math.round(centerX + lean * 2), anatomy.headTop - 3, 8);
+  } else if (form === 'ball') {
+    // Six panels, but only the front seam and the two beside it are visible
+    // head-on, and they run vertically rather than radiating — a ball cap is
+    // seamed up the crown, not gathered onto the top.
+    for (const offset of [0, -0.62, 0.62] as const) {
+      const x0 = Math.round(centerX + offset * anatomy.headHalfWidth);
+      for (let y = anatomy.headTop - 3; y < browLine - 1; y += 1) {
+        if (!mask[y * size + x0]) continue;
+        raster.shift(x0, y, 2, book);
+        raster.shift(x0 - 1, y, -1, book);
+      }
+    }
+    raster.set(centerX, anatomy.headTop - 3, ramps.headwear.steps[0], MAT.HEADWEAR, 0);
+    raster.set(centerX, anatomy.headTop - 2, ramps.headwear.steps[5], MAT.HEADWEAR, 5);
+  } else {
+    // A flat cap is one piece, so it has no panels — only the seam where the
+    // crown is stitched to the peak, and a crease where the cloth is pushed
+    // forward off the crown.
+    for (let x = Math.round(centerX - anatomy.headHalfWidth * 0.8); x <= centerX + anatomy.headHalfWidth * 0.8; x += 1) {
+      const y = Math.round(anatomy.headTop + 4 + noise(x * 0.15) * 1.6);
+      if (x < 0 || x >= size || !mask[y * size + x]) continue;
+      raster.shift(x, y, 2, book);
+      raster.shift(x, y - 1, -1, book);
+    }
+  }
+
+  // Tweed. A fleck of a second yarn every few stitches, which is the whole
+  // look of the cloth these caps are cut from and costs almost nothing.
+  if (/tweed|herringbone|donegal|wool/.test(material)) {
+    for (let y = 0; y < size; y += 1) {
+      for (let x = 0; x < size; x += 1) {
+        if (!mask[y * size + x]) continue;
+        if (rng() > 0.94) raster.shift(x, y, rng() > 0.5 ? -1 : 1, book);
+      }
+    }
+  }
+
+  // The bill last, over the crown, so a slack crown reads as flopping onto it.
+  const billY = form === 'ball' ? browLine - 1 : browLine - 2 + Math.round(slack);
+  drawBill(context, mask, {
+    // A ball cap's bill is wider than the head and drops at the corners, so it
+    // breaks the silhouette on both sides. That break is what reads as a bill
+    // at this scale; value alone reads as a shadow under the crown.
+    y: billY,
+    half: anatomy.headHalfWidth * (form === 'ball' ? 1.1 : 0.9),
+    reach: form === 'ball' ? 6 : 3 + slack,
+    curve: form === 'ball' ? 3 : 1,
+  });
+
+  if (slack > 0) {
+    // Where the cloth overhangs the peak: a lit fold along the front edge of
+    // the crown and a shadow immediately under it, so the two are separate
+    // objects rather than one continuous slab of felt.
+    for (let x = Math.round(centerX - anatomy.headHalfWidth); x <= centerX + anatomy.headHalfWidth; x += 1) {
+      if (x < 0 || x >= size) continue;
+      const y = billY - 1 + Math.round(noise(x * 0.3) * 0.9);
+      if (y < 0 || !mask[y * size + x]) continue;
+      raster.shift(x, y, -2, book);
+      if (mask[(y + 1) * size + x]) raster.shift(x, y + 1, 2, book);
+    }
   }
 
   applyContactShadow(raster, mask, book, { dx: 0, dy: 1, strength: 2, depth: 4 });
-  for (let y = peakY + reach + 1; y < anatomy.eyeY; y += 1) {
+  for (let y = billY + 2; y < anatomy.eyeY; y += 1) {
     for (let x = 0; x < size; x += 1) {
       if (raster.matAt(x, y) === MAT.SKIN) raster.shift(x, y, 1, book);
     }
@@ -708,12 +977,81 @@ function drawPillbox(context: RenderContext): Mask {
   return mask;
 }
 
+/**
+ * A cloche: a felt bell pulled down over the brow, which is the one silhouette
+ * that dates a woman to the 1920s as surely as a ruff dates one to 1590.
+ *
+ * Everything about it is the opposite of the brimmed hat it used to be drawn
+ * as. It does not sit on the head, it swallows it — the crown comes down past
+ * the eyebrows and hides the ears, so the face reads as a narrow oval inside a
+ * bell. The brim is not a shelf but a lip, two pixels of felt turned down, and
+ * it is usually cut away on one side.
+ */
+function drawCloche(context: RenderContext): Mask {
+  const { anatomy, raster, ramps, spec, book } = context;
+  const { size, centerX } = anatomy;
+  const tilt = (spec.seed >> 5) & 1 ? 1 : -1;
+  const mask = makeMask(size, size);
+
+  const top = anatomy.headTop - 2;
+  const bottom = anatomy.eyeY - 3;
+  for (let y = top; y <= bottom; y += 1) {
+    const t = (y - top) / Math.max(1, bottom - top);
+    // A bell: near-vertical sides that swell slightly at the bottom, rounded
+    // hard over the crown. Not a hemisphere, which is where a bowler lives.
+    const half = anatomy.headHalfWidth * (0.74 + Math.sqrt(t) * 0.36)
+      + (y > bottom - 3 ? 1.5 : 0);
+    for (let x = Math.round(centerX - half); x <= Math.round(centerX + half); x += 1) {
+      if (x < 0 || y < 0 || x >= size || y >= size) continue;
+      mask[y * size + x] = 1;
+    }
+  }
+  fillHeadwear(context, mask, { dither: 0.3, gain: 5.6 });
+
+  // The turned-down lip, dropped on one side, which is how these were worn.
+  for (let x = 0; x < size; x += 1) {
+    for (let dy = 0; dy < 2; dy += 1) {
+      const drop = Math.round(((x - centerX) / anatomy.headHalfWidth) * tilt * 1.6);
+      const y = bottom + dy + Math.max(0, drop);
+      if (y < 0 || y >= size || !mask[(bottom - 1) * size + x]) continue;
+      const step = dy === 0 ? 2 : 5;
+      raster.set(x, y, ramps.headwear.steps[step], MAT.HEADWEAR, step);
+      mask[y * size + x] = 1;
+    }
+  }
+
+  // The grosgrain band round the base of the crown, with the flat bow at one
+  // side that every photograph of these has.
+  const bandY = bottom - 9;
+  for (let y = bandY; y < bandY + 3; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (!mask[y * size + x]) continue;
+      const step = y === bandY ? 2 : 4;
+      raster.set(x, y, ramps.headwearAccent.steps[step], MAT.HEADWEAR_ACCENT, step);
+    }
+  }
+  for (let dy = -2; dy <= 2; dy += 1) {
+    const wide = 2 - Math.abs(dy);
+    for (let dx = -wide; dx <= wide; dx += 1) {
+      const x = Math.round(centerX + tilt * anatomy.headHalfWidth * 0.72) + dx;
+      const y = bandY + 1 + dy;
+      if (x < 0 || y < 0 || x >= size || y >= size || !mask[y * size + x]) continue;
+      const step = dx === 0 ? 5 : 3;
+      raster.set(x, y, ramps.headwearAccent.steps[step], MAT.HEADWEAR_ACCENT, step);
+    }
+  }
+
+  applyContactShadow(raster, mask, book, { dx: 0, dy: 1, strength: 2, depth: 3 });
+  castOntoFace(context, mask, 3, 2);
+  return mask;
+}
+
 function drawCap(context: RenderContext): Mask {
   const { spec, anatomy, raster, ramps } = context;
   const name = spec.headwear!.name.toLowerCase();
   const material = spec.headwear!.material.toLowerCase();
 
-  if (PEAKED_CAP.test(name)) return drawPeakedCap(context, /newsboy|flat cap|cheese/i.test(name));
+  if (PEAKED_CAP.test(name)) return drawPeakedCap(context, peakedFormFor(name));
   if (BERET.test(name)) return drawBeret(context);
   if (PILLBOX.test(name)) return drawPillbox(context);
   if (FEZ.test(name)) return drawFez(context, /fez|tarboosh/i.test(name));
@@ -732,7 +1070,51 @@ function drawCap(context: RenderContext): Mask {
   if (isCoif) mask = maskSubtract(mask, faceOpening(context, anatomy.browY - 3));
 
   if (isFur) {
+    // An ushanka is a fur cap plus its flaps, and without them it is a papakha
+    // — which is a different hat from a different half of the continent. They
+    // are added before the fur runs so the flaps grow the same pile as the
+    // crown rather than arriving as two smooth leather tabs.
+    const flapped = /ushanka|trapper|aviator|ear.?flap/.test(`${name} ${material}`);
+    if (flapped) {
+      const { size, centerX } = anatomy;
+      for (const side of [-1, 1] as const) {
+        const x0 = centerX + side * (anatomy.headHalfWidth + 1);
+        for (let y = anatomy.earTopY - 4; y < anatomy.earBottomY + 3; y += 1) {
+          const t = (y - (anatomy.earTopY - 4)) / 16;
+          const half = Math.max(1.5, 5 * (1 - t * t * 0.75));
+          for (let d = -half; d <= half; d += 1) {
+            const x = Math.round(x0 + d);
+            if (x < 0 || y < 0 || x >= size || y >= size) continue;
+            mask[y * size + x] = 1;
+          }
+        }
+      }
+    }
     mask = applyFur(context, mask);
+    if (flapped) {
+      // Fur against fur has no edge in it, so the flaps came out as a bad
+      // haircut. Two marks fix that, and both go on *after* the pile: the
+      // crease where each flap is hinged off the crown, and the turned-up band
+      // of fur across the forehead, which is the part of an ushanka every
+      // photograph of one shows and the part that says hat rather than hair.
+      const { size, centerX } = anatomy;
+      for (const side of [-1, 1] as const) {
+        const x = Math.round(centerX + side * (anatomy.headHalfWidth - 1));
+        for (let y = anatomy.earTopY - 3; y < anatomy.earBottomY + 2; y += 1) {
+          if (!mask[y * size + x]) continue;
+          raster.shift(x, y, 2, context.book);
+          if (mask[y * size + x - side]) raster.shift(x - side, y, -1, context.book);
+        }
+      }
+      const bandBottom = anatomy.browY - 3;
+      for (let y = bandBottom - 5; y <= bandBottom; y += 1) {
+        for (let x = 0; x < size; x += 1) {
+          if (!mask[y * size + x]) continue;
+          if (Math.abs(x - centerX) > anatomy.headHalfWidth + 2) continue;
+          raster.shift(x, y, y === bandBottom - 5 ? 2 : -1, context.book);
+        }
+      }
+    }
     castOntoFace(context, mask, 3, 2);
     return mask;
   }
@@ -1115,6 +1497,7 @@ function drawBrimmedHat(context: RenderContext): Mask {
   // A pillbox is called a hat and has no brim whatever. Routed through the
   // brimmed classifier by its own name, it came out a bowler.
   if (PILLBOX.test(name)) return drawPillbox(context);
+  if (/cloche/i.test(name)) return drawCloche(context);
 
   const brimY = anatomy.browY - 5;
   const crownBottom = brimY + 1;

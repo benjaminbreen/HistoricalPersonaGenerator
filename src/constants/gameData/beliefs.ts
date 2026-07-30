@@ -1273,6 +1273,107 @@ export const IDEOLOGIES: Ideology[] = [
       'COMMERCIAL_ACUMEN': 0.3
     }
   },
+  /**
+   * The twentieth century's largest worldview, and it was missing.
+   *
+   * A third of humanity lived under a party-state that taught this in school,
+   * printed it in the only newspaper, and ran the factory committee — and the
+   * app had nothing to offer them but `MODERN_SECULARISM`, which is a stance
+   * about God and says nothing about history, labour or the state. A Soviet
+   * lathe operator in 1955 is not a sceptic of supernatural claims who happens
+   * to live in Volgograd; he is a man who has been told since infancy that his
+   * class makes history, and who has an opinion about that.
+   *
+   * `SOCIALIST_COLLECTIVIST` next door is the other thing: the labour movement,
+   * the co-operative, the union hall — a stance available in Sheffield in 1890
+   * and in Chicago in 1935. This one is specifically the doctrine of a state
+   * that has already won, which is why it starts in 1917 and why its
+   * `INDIVIDUAL_FREEDOM` is so much lower than the socialist's.
+   *
+   * The religions list is deliberately wide. Official atheism did not empty the
+   * churches; it made people who were baptised, married in a registry office,
+   * and buried with a priest anyway. Gating this on `Atheism` alone would have
+   * excluded most of the population it is meant to describe.
+   */
+  {
+    id: 'MARXISM_LENINISM',
+    name: 'Marxism-Leninism',
+    description: 'Holds that history moves by class struggle and that the party and the plan carry it forward',
+    eras: [HistoricalEra.MODERN_ERA],
+    yearRange: [1917, 2100],
+    culturalZones: ALL_CULTURES,
+    religions: [
+      'Atheism', 'Agnosticism',
+      'Eastern Orthodoxy', 'Eastern Orthodox Christianity', 'Russian Orthodoxy',
+      'Roman Catholicism', 'Protestantism', 'Christianity',
+      'Buddhism', 'Chinese Traditional Religion', 'Confucianism',
+      'Sunni Islam', 'Shia Islam', 'Judaism', 'Local Beliefs',
+    ],
+    associatedBeliefs: {
+      'EGALITARIAN_SPIRIT': 0.9,
+      'SYSTEMS_THINKING': 0.8,
+      'SCIENTIFIC_METHOD': 0.78,
+      'HUMAN_DOMINION': 0.75,
+      'TECHNOLOGICAL_OPTIMISM': 0.72,
+      'SKEPTIC_OF_THE_DIVINE': 0.7,
+      'COLLECTIVE_MEMORY': 0.68,
+      'INDIVIDUAL_FREEDOM': 0.2,
+      'COMMERCIAL_ACUMEN': 0.15,
+      'DIVINE_RIGHT_OF_KINGS': 0.02,
+    }
+  },
+  {
+    // The Chinese, Vietnamese and Cuban variant, where the revolutionary
+    // subject is the peasant rather than the industrial worker and the
+    // countryside surrounds the cities. Worth its own entry rather than a
+    // rename: it makes a different claim about who matters.
+    id: 'PEASANT_REVOLUTION',
+    name: 'Peasant Revolution',
+    description: 'Looks to the countryside rather than the factory for the force that remakes society',
+    eras: [HistoricalEra.MODERN_ERA],
+    yearRange: [1927, 2010],
+    culturalZones: ['EAST_ASIAN', 'SOUTH_ASIAN', 'SOUTH_AMERICAN', 'SUB_SAHARAN_AFRICAN'],
+    religions: [
+      'Atheism', 'Chinese Traditional Religion', 'Confucianism', 'Buddhism',
+      'Taoism', 'Local Beliefs', 'Folk Religion', 'Christianity', 'Hinduism',
+    ],
+    associatedBeliefs: {
+      'EGALITARIAN_SPIRIT': 0.92,
+      'COLLECTIVE_MEMORY': 0.8,
+      'TRIBAL_LOYALTY': 0.7,
+      'NATURE_AS_TEACHER': 0.6,
+      'HUMAN_DOMINION': 0.65,
+      'SYSTEMS_THINKING': 0.6,
+      'INDIVIDUAL_FREEDOM': 0.2,
+      'FEUDAL_OBLIGATION': 0.1,
+    }
+  },
+  {
+    // Independence as a worldview rather than as an event. From the Bandung
+    // generation onward this is the frame an enormous number of people in Asia,
+    // Africa and the Caribbean actually held, and it is not the same thing as
+    // European nationalism, which the app already had.
+    id: 'ANTICOLONIAL_NATIONALISM',
+    name: 'Anticolonial Nationalism',
+    description: 'Reads the world through empire and its undoing, and holds that a people must govern itself',
+    eras: [HistoricalEra.MODERN_ERA],
+    yearRange: [1919, 2010],
+    culturalZones: ['SOUTH_ASIAN', 'SUB_SAHARAN_AFRICAN', 'MENA', 'EAST_ASIAN', 'OCEANIA', 'SOUTH_AMERICAN'],
+    religions: [
+      'Hinduism', 'Sunni Islam', 'Shia Islam', 'Buddhism', 'Christianity',
+      'Roman Catholicism', 'Protestantism', 'Atheism', 'Sikhism',
+      'West African Traditional Religion', 'Local Beliefs',
+    ],
+    associatedBeliefs: {
+      'TRIBAL_LOYALTY': 0.85,
+      'COLLECTIVE_MEMORY': 0.85,
+      'EGALITARIAN_SPIRIT': 0.75,
+      'ORAL_TRADITION': 0.6,
+      'HONOR_CULTURE': 0.6,
+      'SCIENTIFIC_METHOD': 0.55,
+      'FEUDAL_OBLIGATION': 0.15,
+    }
+  },
   {
     id: 'CAPITALIST_ENTREPRENEUR',
     name: 'Capitalist Entrepreneur',

@@ -253,6 +253,7 @@ export type OrnamentKind =
 export type OrnamentMaterial =
   | 'gold' | 'gilt' | 'silver' | 'bronze' | 'copper'
   | 'jade' | 'turquoise' | 'lapis' | 'coral' | 'amber' | 'ruby' | 'emerald'
+  | 'carnelian' | 'glass' | 'faience' | 'jet'
   | 'pearl' | 'kingfisher' | 'shell' | 'bone' | 'wood' | 'lacquer'
   | 'plumeDark' | 'plumeWhite' | 'plumeBright' | 'cloth';
 
@@ -271,10 +272,42 @@ export interface OrnamentSpec {
   paired: boolean;
 }
 
+/**
+ * What a piece is made of, and what is set into it.
+ *
+ * `material` used to be a seven-value union with a slot literally called
+ * `gems`, into which jade, turquoise, lapis, amber, coral, garnet, carnelian,
+ * crystal and glass were all funnelled — and which the renderer then drew in a
+ * single hardcoded amethyst. Meanwhile `ornamentService` knew perfectly well
+ * which stone it was, printed the word on the card, and had nowhere to put it:
+ * `gems: ['#4f9a6a']` reached the spec adapter and was dropped on the floor. So
+ * a card reading "simple jade beads" sat beside a portrait wearing purple, and
+ * the two were reading different records of the same object.
+ *
+ * Both fields now speak `OrnamentMaterial`, the vocabulary the headwear
+ * ornaments have used all along — twenty-odd substances with their own
+ * contrast, sheen hue and specular behaviour. There is one material table in
+ * this renderer now, not two, and the jewellery is drawn from the good one.
+ */
 export interface JewelrySpec {
   type: 'necklace' | 'earrings' | 'bracelet' | 'ring' | 'circlet' | 'brooch' | 'chain' | 'anklet';
-  material: 'gold' | 'silver' | 'bronze' | 'gems' | 'pearl' | 'bone' | 'wood';
+  /** The body of the piece: the metal of a chain, the substance of a bead. */
+  material: OrnamentMaterial;
+  /**
+   * A stone set into it, where the piece has one — the drop on a hoop, the
+   * boss of a brooch, the pendant at the low point of a necklace. Absent means
+   * the piece is all one substance, and those parts are drawn in `material`.
+   */
+  stone?: OrnamentMaterial;
   style: 'simple' | 'ornate' | 'delicate' | 'chunky';
+  /**
+   * How much of the wearer the piece takes up, as distinct from how finely it
+   * is worked. Ornament is the most conspicuous thing most people in history
+   * owned, and with only `style` to go on every piece in the app came out the
+   * same modest size — a boar-tusk breastplate drawn at the scale of a
+   * mourning ring.
+   */
+  scale: 'small' | 'medium' | 'large';
 }
 
 /**
@@ -369,6 +402,23 @@ export interface FaceTraits {
   toothless: boolean;
   /** One or both eyes clouded. */
   blind: boolean;
+  /**
+   * A divergent eye, and which one: -1 for the sitter's right, +1 for the left,
+   * 0 for neither.
+   *
+   * Drawn by pushing that eye's gaze outward while the other holds the viewer.
+   * `drawEye` has taken a per-eye `gazeX` since it was written — both eyes were
+   * simply always handed the same number — so the whole cost of this is
+   * deciding which side and by how much.
+   */
+  wallEye: -1 | 0 | 1;
+  /**
+   * Two differently coloured irises. The value is the second colour, applied to
+   * the sitter's left eye; null when both eyes match.
+   */
+  heterochromia: string | null;
+  /** A swelling at the base of the throat — endemic goitre, and it is large. */
+  goiter: boolean;
 }
 
 export interface ConditionSpec {
@@ -489,6 +539,20 @@ export interface PortraitSpec {
   ageLines: number;
   /** 0..1, how far the upper lid has folded down over the lash line. */
   lidDroop: number;
+  /**
+   * 0..1, how much of this life was spent in the weather.
+   *
+   * Sun-darkened brow ridge, nose bridge and cheekbone tops, broken capillaries
+   * across the cheeks, and the squint that comes of years of looking into glare.
+   *
+   * A number rather than a flag because the difference between a fisherman and a
+   * carter is real but small, and because the appearance tables also have an
+   * opinion here — the two are combined rather than one overriding the other.
+   * This used to be read out of an appearance *string* that almost nothing set,
+   * so the drawing existed and had nearly nothing to draw: `profession` reached
+   * the adapter and its only use in the whole file was salting the seed hash.
+   */
+  weathering: number;
 
   garment: GarmentSpec;
   headwear: HeadwearSpec | null;

@@ -4,6 +4,7 @@
  */
 import { HistoricalEra, CulturalZone, WealthLevel, Gender } from '../../types';
 import { random as seededRandom } from '../../utils/seededRandom';
+import { DyeTier, TIER_RANK, hexForName, tierForHex } from '../gameData/colorNames';
 
 interface ClothingPiece {
     name: string;
@@ -174,6 +175,105 @@ const INDUSTRIAL_MENA_COLORS: ClothingPalette = {
     secondary: ['#f0ece0', '#e6ddc8', '#cfcfcf', '#d8d8d8', '#e5e2da'],
     accent: ['#8f2f2c', '#2b3a5e', '#3d6b3f', '#6e2723', '#4a6b8a']
 };
+
+// ---------------------------------------------------------------------------
+// Signature dyes
+// ---------------------------------------------------------------------------
+
+/**
+ * The one bright colour a place is actually known for.
+ *
+ * The palettes above answer "what did cloth generally look like here", and they
+ * answer it honestly: mostly undyed, mostly single-bath, mostly muted. But an
+ * honest average is not an honest population. Every one of these societies had
+ * a colour it was willing to spend on and be seen in — Andean cochineal reds,
+ * West African indigo and the brilliant strip-woven kente golds, Rajasthani
+ * turmeric and safflower, Ryukyuan bingata, Oceanic turmeric-rubbed tapa — and
+ * averaging that away produced a species that dressed in nothing but mud.
+ *
+ * So this is not "the wealthy get colour". It is the second half of the same
+ * historical claim the muted palettes make: dyeing was expensive *per depth of
+ * shade*, not per brightness, and the cheapest dyes in the world — turmeric,
+ * safflower, marigold, henna, annatto — are also among the most vivid. They
+ * were poor people's colours precisely because they wash out in a season, and
+ * that is a reason to put them on poor people rather than to withhold them.
+ *
+ * Names, not hexes, so the entries are checkable against the dye vocabulary and
+ * so a colour cannot drift out of the tier it was priced into.
+ */
+const ZONE_SIGNATURE_DYES: Record<CulturalZone, string[]> = {
+    // Madder and weld everywhere, kermes on anything that mattered, and the
+    // saturated mineral blues of manuscript and church wall.
+    EUROPEAN: ['Madder', 'Vermilion', 'Scarlet', 'Marigold', 'Saffron', 'Azurite', 'Verdigris', 'Tyrian'],
+    // Safflower and madder against indigo; the saturated silk reds of the Tang
+    // and the persimmon and gold of the merchant cities.
+    EAST_ASIAN: ['Vermilion', 'Scarlet', 'Safflower', 'Turmeric', 'Saffron', 'Malachite', 'Azurite'],
+    // Saffron was worth its weight; henna and turmeric were in every household,
+    // and indigo was the region's export.
+    MENA: ['Saffron', 'Henna', 'Turmeric', 'Vermilion', 'Scarlet', 'Turquoise', 'Azurite'],
+    // Turmeric, lac, safflower and sappanwood — the densest bright-dye
+    // tradition anywhere, and the cheapest.
+    SOUTH_ASIAN: ['Turmeric', 'Marigold', 'Safflower', 'Rose', 'Cochineal', 'Scarlet', 'Malachite', 'Tyrian'],
+    SOUTHEAST_ASIAN: ['Turmeric', 'Annatto', 'Safflower', 'Vermilion', 'Verdigris', 'Malachite'],
+    // Indigo above all, and against it the marigold and camwood reds of
+    // strip-weave, and the brilliant grounds of resist-dyed adire and bogolan.
+    SUB_SAHARAN_AFRICAN: ['Marigold', 'Turmeric', 'Henna', 'Annatto', 'Scarlet', 'Malachite', 'Azurite'],
+    // Turmeric rubbed into bark cloth, and the red of ochre and candlenut.
+    OCEANIA: ['Turmeric', 'Annatto', 'Marigold', 'Henna', 'Vermilion'],
+    // Cochineal on the Andes and in Mesoamerica is the strongest red the
+    // pre-modern world produced, and it was traded in bulk.
+    SOUTH_AMERICAN: ['Cochineal', 'Scarlet', 'Marigold', 'Turmeric', 'Turquoise', 'Azurite', 'Tyrian'],
+    NORTH_AMERICAN_PRE_COLUMBIAN: ['Cochineal', 'Vermilion', 'Marigold', 'Turquoise', 'Malachite', 'Annatto'],
+    NORTH_AMERICAN_COLONIAL: ['Madder', 'Scarlet', 'Marigold', 'Saffron', 'Azurite', 'Verdigris'],
+};
+
+/**
+ * How often a bright colour reaches the cloth, and how far up the price list
+ * the wearer can shop.
+ *
+ * Both axes matter and they are not the same axis. Poverty does not mean grey —
+ * it means *fewer* colours, in the dyes a village pot could produce, on less of
+ * the garment. Wealth does not mean brighter so much as it means faster: a
+ * noble's scarlet is the same hue as a labourer's madder and it is still that
+ * hue after twenty years.
+ */
+const WEALTH_DYE_ACCESS: Record<WealthLevel, { accent: number; field: number; ceiling: 'everyday' | 'costly' | 'precious' }> = {
+    poor: { accent: 0.34, field: 0.10, ceiling: 'everyday' },
+    modest: { accent: 0.44, field: 0.16, ceiling: 'everyday' },
+    comfortable: { accent: 0.54, field: 0.24, ceiling: 'costly' },
+    wealthy: { accent: 0.66, field: 0.36, ceiling: 'costly' },
+    noble: { accent: 0.74, field: 0.46, ceiling: 'precious' },
+};
+
+/**
+ * A bright dye this persona could have owned, or null.
+ *
+ * Prehistory is held to the everyday tier whatever the purse: the insect reds
+ * and the ground minerals are trade goods, and there is no trade to carry them.
+ */
+export function signatureDyeFor(
+    culturalZone: CulturalZone,
+    era: HistoricalEra,
+    wealthLevel: WealthLevel,
+    slot: 'accent' | 'field',
+    roll: () => number,
+): string | null {
+    const access = WEALTH_DYE_ACCESS[wealthLevel] || WEALTH_DYE_ACCESS.comfortable;
+    if (roll() > access[slot]) return null;
+
+    const ceiling = era === HistoricalEra.PREHISTORY ? 'everyday' : access.ceiling;
+    const limit = TIER_RANK[ceiling];
+    const reachable = (ZONE_SIGNATURE_DYES[culturalZone] || ZONE_SIGNATURE_DYES.EUROPEAN)
+        .filter(name => TIER_RANK[tierForName(name)] <= limit);
+    if (reachable.length === 0) return null;
+
+    return hexForName(reachable[Math.floor(roll() * reachable.length)]) || null;
+}
+
+function tierForName(name: string): DyeTier {
+    const hex = hexForName(name);
+    return hex ? tierForHex(hex) : 'everyday';
+}
 
 // COMPREHENSIVE CLOTHING DATABASE
 export const CLOTHING_DATA: ClothingData = {

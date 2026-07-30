@@ -4,6 +4,7 @@ import {
   normalizePersonaAnnotationRecord,
   validatePersonaAnnotationRecord,
 } from './personaMaterialValidationService';
+import { announceAiAccessRequired, type AiAccessStatus } from './aiAccessService';
 
 export type PersonaGenerationTarget = 'named_subject' | 'ordinary_person_from_source_world';
 
@@ -23,6 +24,9 @@ const postGeminiRoute = async <T,>(body: unknown): Promise<T> => {
 
   if (!response.ok) {
     const data = await response.json().catch(() => null);
+    if (response.status === 402 && data?.code === 'AI_SUPPORT_REQUIRED') {
+      announceAiAccessRequired((data?.access || null) as AiAccessStatus | null);
+    }
     throw new Error(data?.error || `Gemini API route returned ${response.status}.`);
   }
 

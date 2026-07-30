@@ -7,7 +7,7 @@ import { CHARACTER_NAMES as NAME_LISTS } from '../constants/characterData/names'
 import { parseDateString } from '../utils/dateUtils';
 import { createItemInstance, addItemToInventory, assembleStartingPackage } from '../utils/inventoryUtils';
 import { ValueNoise } from '../utils/noise';
-import { generateBaseProfile, determineSocialRole, generateNpcName, generateNpcNameDetailed, assignBeliefs, generateClothingPalette, generateCompleteOutfit, generateCulturalAppearance, adjustPersonalityForProfession, validateCharacterCoherence } from '../generation/common/npcUtils';
+import { generateBaseProfile, determineSocialRole, generateNpcName, generateNpcNameDetailed, assignBeliefs, generateClothingPalette, generateCompleteOutfit, generateCulturalAppearance, adjustPersonalityForProfession, validateCharacterCoherence, hashSeed } from '../generation/common/npcUtils';
 import { mapLocationToCulture } from '../utils/mapUtils';
 import { hexToColorName } from '../utils/colorUtils';
 import { COLOR_WORDS, hasIntrinsicColor, nameForHex } from '../constants/gameData/colorNames';
@@ -616,7 +616,16 @@ function generateProceduralFamily(
      */
     householdTrades?: Array<{ role: string; gender?: 'Male' | 'Female' }>,
     /** The map area, so relatives are named by the same locale rule the persona was. */
-    location?: string
+    location?: string,
+    /**
+     * The privileged order, so the household is named inside it.
+     *
+     * Standing of this kind is hereditary. A Sayyid whose father's panel reads
+     * plain "Ali" has had the descent claim dropped in the one place it is a
+     * claim *about* — and the same goes for a szlachcic whose brothers carry no
+     * arms and a Rajput family with one Singh in it.
+     */
+    standingId?: string
 ): void {
     const age = character.age;
 
@@ -664,9 +673,9 @@ function generateProceduralFamily(
         return given.length > 0 && given === selfGiven;
     };
 
-    let fatherGenerated = generateNpcNameDetailed('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey, { location });
+    let fatherGenerated = generateNpcNameDetailed('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey, { location, standingId });
     for (let attempt = 0; attempt < 4 && collides(fatherGenerated.given); attempt += 1) {
-        fatherGenerated = generateNpcNameDetailed('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey, { location });
+        fatherGenerated = generateNpcNameDetailed('Male', culturalZone, region, fatherBirthYear, noise, familyNameKey, { location, standingId });
     }
     // If the character is "Wulf son of Ket", the father is Ket. His own name is
     // still built by his own culture's convention on top of that given name.
@@ -675,9 +684,9 @@ function generateProceduralFamily(
         : fathersGivenName
             ? fatherGenerated.full.replace(fatherGenerated.given, fathersGivenName)
             : fatherGenerated.full;
-    let motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise, familyNameKey, { location });
+    let motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise, familyNameKey, { location, standingId });
     for (let attempt = 0; attempt < 4 && collides(motherName); attempt += 1) {
-        motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise, familyNameKey, { location });
+        motherName = generateNpcName('Female', culturalZone, region, motherBirthYear, noise, familyNameKey, { location, standingId });
     }
 
     // Generate father's profession
@@ -740,9 +749,9 @@ function generateProceduralFamily(
 
     for (const birth of siblings) {
         const siblingGender = birth.sex;
-        let siblingGenerated = generateNpcNameDetailed(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, birth.birthYear, noise, familyNameKey, { location });
+        let siblingGenerated = generateNpcNameDetailed(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, birth.birthYear, noise, familyNameKey, { location, standingId });
         for (let attempt = 0; attempt < 5 && takenGivenNames.has(givenOf(siblingGenerated.given)); attempt += 1) {
-            siblingGenerated = generateNpcNameDetailed(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, birth.birthYear, noise, familyNameKey, { location });
+            siblingGenerated = generateNpcNameDetailed(siblingGender === 'male' ? 'Male' : 'Female', culturalZone, region, birth.birthYear, noise, familyNameKey, { location, standingId });
         }
         takenGivenNames.add(givenOf(siblingGenerated.given));
         // Siblings share a hereditary name, and share a father in a patronymic.
@@ -766,7 +775,7 @@ function generateProceduralFamily(
         const twinGender = noise.random() > 0.5
             ? normalizedGender
             : (normalizedGender === 'male' ? 'female' : 'male');
-        const twinName = generateNpcName(twinGender === 'male' ? 'Male' : 'Female', culturalZone, region, birthYear, noise, familyNameKey, { location });
+        const twinName = generateNpcName(twinGender === 'male' ? 'Male' : 'Female', culturalZone, region, birthYear, noise, familyNameKey, { location, standingId });
         character.family.push({
             name: dedupeEpithet(twinName),
             relation: 'twin',
@@ -784,7 +793,7 @@ function generateProceduralFamily(
         const spouseAge = age + spouseAgeGap;
         const spouseBirthYear = currentYear - spouseAge;
         const spouseGender = normalizedGender === 'male' ? 'female' : 'male';
-        const spouseName = generateNpcName(spouseGender === 'male' ? 'Male' : 'Female', culturalZone, region, spouseBirthYear, noise, familyNameKey, { location });
+        const spouseName = generateNpcName(spouseGender === 'male' ? 'Male' : 'Female', culturalZone, region, spouseBirthYear, noise, familyNameKey, { location, standingId });
         const spouseProfession = spouseGender === 'male'
             ? generateParentProfession('male', culturalZone, era, noise, currentYear, region)
             : generateMotherProfession(culturalZone, era, noise);
@@ -816,7 +825,7 @@ function generateProceduralFamily(
         for (const birth of births) {
             const childName = generateNpcName(
                 birth.sex === 'male' ? 'Male' : 'Female',
-                culturalZone, region, birth.birthYear, noise, familyNameKey, { location });
+                culturalZone, region, birth.birthYear, noise, familyNameKey, { location, standingId });
 
             // Children worked. A twelve-year-old with no trade listed is modern
             // childhood projected backwards onto societies that had no such thing.
@@ -1191,6 +1200,9 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     // everyone else — see services/populationStrataService.ts.
     const ancestry = (spec as CharacterSpecification & { ancestry?: Ancestry }).ancestry;
     const householdTrades = (spec as CharacterSpecification & { householdTrades?: Array<{ role: string; gender?: 'Male' | 'Female' }> }).householdTrades;
+    // The privileged order, if any. Read here so the persona *and* their family
+    // are named inside it — see `eliteNaming.ts`.
+    const standingId = (spec as CharacterSpecification & { standingId?: string }).standingId;
 
     // Generate name - use custom if provided, otherwise prefer a coordinated
     // place/religion track when the broad cultural-zone routing is too coarse.
@@ -1219,7 +1231,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         dateInfo.year,
         noise,
         contextualNameKey,
-        { ancestral: ancestralNameKeys.length > 0, location: context.location },
+        { ancestral: ancestralNameKeys.length > 0, location: context.location, standingId },
     );
     const name = spec.name || generatedName.full;
     const fathersGivenName = spec.name ? undefined : generatedName.patronymicFrom;
@@ -1450,7 +1462,14 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     }
     
     // Generate cultural markings based on culture, profession, and context
-    const markingProbability = getMarkingProbability(culturalZone, generationContext.era, spec?.profession || role);
+    const markingPlace = `${context.region ?? ''} ${context.location ?? ''}`;
+    const markingProbability = getMarkingProbability(
+        culturalZone,
+        generationContext.era,
+        spec?.profession || role,
+        dateInfo.year,
+        markingPlace,
+    );
     const markings: any[] = [];
     
     // devLog(`[CharGen Spec] Marking probability for ${culturalZone}/${generationContext.era}/${spec?.profession || role}: ${markingProbability}`);
@@ -1492,8 +1511,9 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             baseProfile.wealthLevel,
             spec?.age || baseProfile.age,
             i === 0 ? 'daily' : (noise.random() < 0.5 ? 'ceremony' : 'daily'),
-            `${context.region ?? ''} ${context.location ?? ''}`,
-            baseProfile.religion
+            markingPlace,
+            baseProfile.religion,
+            dateInfo.year
         ).filter(m => !usedTypes.has(m.type)); // Don't repeat marking types
         
         // devLog(`[CharGen Spec] Found ${availableMarkings.length} available markings for slot ${i+1}`);
@@ -1625,7 +1645,17 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     // Ornament. `appearance.jewelry` is read by the equipment list, the
     // appearance panel and the portrait renderer, and until now nothing wrote
     // to it, so every persona rendered bare.
+    //
+    // On its own stream. How many draws `generateOrnament` takes depends on how
+    // many traditions its filters leave standing — an empty pool returns before
+    // drawing at all — so any edit to the ornament tables changes the *shape*
+    // of the persona's main sequence and renames everybody downstream. Adding
+    // Southeast Asian jewellery should not rename a New Zealander in 2010, and
+    // before this it did.
     {
+      const ornamentNoise = new ValueNoise(hashSeed(
+        `ornament|${partialCharacter.name ?? ''}|${dateInfo.year}|${culturalZone}|${baseProfile.wealthLevel}`
+      ));
       const ornament = generateOrnament(
         {
           year: dateInfo.year,
@@ -1637,7 +1667,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
           profession: partialCharacter.profession as string,
           attributeIds: attributes.map(a => a.id),
         },
-        () => noise.random(),
+        ornamentNoise.random,
       );
       if (ornament.length > 0) {
         (partialCharacter as any).appearance = {
@@ -1722,7 +1752,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         fathersGivenName,
         inheritedFamilyName,
         householdTrades,
-        context.location
+        context.location,
+        standingId
     );
 
     // Initialize disease health with potential disease based on stats and setting

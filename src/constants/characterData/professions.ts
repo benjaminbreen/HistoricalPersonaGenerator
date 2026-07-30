@@ -39,6 +39,13 @@ export interface ProfessionDefinition {
     emoji: string;
     nameKey?: string;          // culture‑specific name lists (optional)
     decadeRange?: [number, number];  // [startDecade, endDecade] for temporal filtering (e.g., [1940, 2019])
+    /**
+     * The distinctive tail rather than the bulk work. Roles flagged here share
+     * a fixed budget of the draw instead of competing on individual weight,
+     * which is what lets the list grow without moving the peasant share. See
+     * `textureBudget` and textureProfessions.ts.
+     */
+    texture?: boolean;
 }
 
 /**
@@ -365,7 +372,7 @@ const BASE_MODERN_WORKING_CLASS = {
         keywords: 'forestry logging wood',
         emoji: '🪓'
     },
-    'Fisherman': {
+    'Fisher': {
         statRequirements: { minStrength: 5, minConstitution: 6, minPerception: 6 },
         genderBias: 'Male' as const,
         keywords: 'fishing sea food',
@@ -1994,7 +2001,7 @@ export const PROFESSIONS: ProfessionData = {
                     keywords: 'agriculture',
                     emoji: '🧑‍🌾'
                 },
-                'Fisherman': {
+                'Fisher': {
                     statRequirements: { minStrength: 5, minConstitution: 6 },
                     socialRequirements: { maxPrivilege: 0.3 },
                     keywords: 'nets',
@@ -2415,7 +2422,7 @@ export const PROFESSIONS: ProfessionData = {
                     keywords: 'hunting',
                     emoji: '🦅'
                 },
-                'Fisherman': {
+                'Fisher': {
                     statRequirements: { minStrength: 5, minConstitution: 6 },
                     socialRequirements: { maxPrivilege: 0.3 },
                     keywords: 'nets',
@@ -3007,7 +3014,7 @@ export const PROFESSIONS: ProfessionData = {
                     keywords: 'vegetables',
                     emoji: '🥬'
                 },
-                'Fisherman': {
+                'Fisher': {
                     statRequirements: { minStrength: 5, minConstitution: 6 },
                     socialRequirements: { maxPrivilege: 0.3 },
                     keywords: 'nets',
@@ -3238,7 +3245,7 @@ export const PROFESSIONS: ProfessionData = {
                     keywords: 'paddy',
                     emoji: '🌾'
                 },
-                'Fisherman': {
+                'Fisher': {
                     statRequirements: { minStrength: 5, minConstitution: 6 },
                     socialRequirements: { maxPrivilege: 0.3 },
                     keywords: 'nets',
@@ -3920,7 +3927,7 @@ export const PROFESSIONS: ProfessionData = {
                     keywords: 'cotton',
                     emoji: '🪴'
                 },
-                'Fisherman': {
+                'Fisher': {
                     statRequirements: { minStrength: 5, minConstitution: 6 },
                     socialRequirements: { maxPrivilege: 0.3 },
                     keywords: 'nets',
@@ -4408,7 +4415,7 @@ export const PROFESSIONS: ProfessionData = {
                     keywords: 'oasis',
                     emoji: '🌾'
                 },
-                'Fisherman': {
+                'Fisher': {
                     statRequirements: { minStrength: 5, minConstitution: 6 },
                     socialRequirements: { maxPrivilege: 0.3 },
                     keywords: 'nets',
@@ -5135,7 +5142,7 @@ export const PROFESSIONS: ProfessionData = {
                     keywords: 'shipbuilding',
                     emoji: '🚢'
                 },
-                'Fisherman': {
+                'Fisher': {
                     statRequirements: { minStrength: 5, minConstitution: 6 },
                     socialRequirements: { maxPrivilege: 0.3 },
                     genderBias: 'Male',
@@ -5463,7 +5470,7 @@ export const PROFESSIONS: ProfessionData = {
                     keywords: 'barkcloth',
                     emoji: '🪢'
                 },
-                'Fisherman': {
+                'Fisher': {
                     statRequirements: { minStrength: 5, minConstitution: 6 },
                     socialRequirements: { maxPrivilege: 0.3 },
                     keywords: 'reef',
@@ -5544,7 +5551,7 @@ export const PROFESSIONS: ProfessionData = {
                     keywords: 'sacred',
                     emoji: '🎨'
                 },
-                'Fisherman': {
+                'Fisher': {
                     statRequirements: { minStrength: 5, minConstitution: 6 },
                     socialRequirements: { maxPrivilege: 0.3 },
                     keywords: 'nets',
@@ -5744,7 +5751,7 @@ export const PROFESSIONS: ProfessionData = {
                     keywords: 'enforcement',
                     emoji: '👮'
                 },
-                'Fisherman': {
+                'Fisher': {
                     statRequirements: { minStrength: 5, minConstitution: 6 },
                     socialRequirements: { maxPrivilege: 0.3 },
                     keywords: 'subsistence',
@@ -6243,7 +6250,7 @@ export const PROFESSIONS: ProfessionData = {
                     keywords: 'camelids',
                     emoji: '🦙'
                 },
-                'Fisherman': {
+                'Fisher': {
                     statRequirements: { minDexterity: 5, minPerception: 5 },
                     keywords: 'coastal',
                     emoji: '🎣'

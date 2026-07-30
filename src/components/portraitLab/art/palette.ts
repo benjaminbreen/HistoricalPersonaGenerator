@@ -13,11 +13,44 @@ import {
   rgbToHex, rgbToHsl,
 } from '../core/color';
 import { MAT, MAT_COUNT, RampBook } from '../core/raster';
-import { PortraitSpec } from '../spec/types';
+import { ornamentRamp } from './ornaments';
+import { OrnamentMaterial, PortraitSpec } from '../spec/types';
+
+/**
+ * The same ramp with its hue rotated and its saturation scaled, at identical
+ * lightness on every step.
+ *
+ * Deliberately not `tintRamp`, which mixes toward a target colour and therefore
+ * moves value as well as hue — mixing a mid-red into a dark complexion lightens
+ * it, and the whole point of the flesh tints is that they must not disturb the
+ * modelling. Holding L exactly means a zone can be recoloured after the face has
+ * been shaded and the form is untouched.
+ */
+function hueShifted(ramp: Ramp, degrees: number, saturation: number): Ramp {
+  const shift = (c: RGB): RGB => {
+    const hsl = rgbToHsl(c);
+    return hslToRgb({
+      h: (hsl.h + degrees + 360) % 360,
+      s: Math.max(0, Math.min(1, hsl.s * saturation)),
+      l: hsl.l,
+    });
+  };
+  return { steps: ramp.steps.map(shift), outline: shift(ramp.outline), baseHex: ramp.baseHex };
+}
 
 export interface PortraitRamps {
   book: RampBook;
   skin: Ramp;
+  /**
+   * Flesh where the blood is near the surface — cheeks, nose, ears — and flesh
+   * where the bone is, or where a beard sits under the skin: the jaw and chin.
+   * The three-zone face is the oldest rule in portrait painting and the thing
+   * that most separates painted flesh from tinted plastic. Both are the skin
+   * ramp at the same lightness with the hue nudged, so they cost nothing and can
+   * never fight the modelling.
+   */
+  skinWarm: Ramp;
+  skinCool: Ramp;
   hair: Ramp;
   beard: Ramp;
   brow: Ramp;
@@ -63,15 +96,17 @@ function materialOptions(material: string): RampOptions {
   return { contrast: 1, shift: 0.34 };
 }
 
-export const METAL_BASE: Record<string, string> = {
-  gold: '#cfa044',
-  silver: '#b9bcc2',
-  bronze: '#a8763f',
-  gems: '#8c4f7a',
-  pearl: '#e5ddd0',
-  bone: '#ddd2ba',
-  wood: '#7a5a3c',
-};
+/**
+ * Substances that can be the body of a metal fitting.
+ *
+ * What used to live here was a second, poorer copy of the ornament material
+ * table: seven flat hexes with no sheen, no specular and no per-material
+ * contrast, including a slot called `gems` set to a single amethyst that every
+ * stone in the app was painted with. `ORNAMENT_MATERIALS` in `ornaments.ts` had
+ * described all of these properly since the headwear was written, and now the
+ * buckles, clasps, buttons and spectacle frames read from it too.
+ */
+const FITTING_METALS = new Set<OrnamentMaterial>(['gold', 'gilt', 'silver', 'bronze', 'copper']);
 
 /**
  * Illness reads on skin before anywhere else: chroma drains, the value drifts
@@ -116,6 +151,9 @@ export function buildPortraitRamps(spec: PortraitSpec): PortraitRamps {
   // Skin holds a narrower value range than cloth — overshading a face is the
   // fastest way to make it look like plastic.
   const skin = buildRamp(skinHex, { contrast: 0.82, shift: 0.3, saturation: 1.02 });
+  // The two flesh tints. See `hueShifted` and `drawSkinZones`.
+  const skinWarm = hueShifted(skin, -9, 1.1);
+  const skinCool = hueShifted(skin, 11, 0.88);
 
   const hair = buildRamp(spec.hairColor, { contrast: 1.16, shift: 0.4, saturation: 1.05 });
   const beard = buildRamp(
@@ -159,31 +197,50 @@ export function buildPortraitRamps(spec: PortraitSpec): PortraitRamps {
   /**
    * Wealth in the cloth itself, not only in what is sewn onto it.
    *
-   * This is the one place where the historically true thing and the legible
-   * thing are the same thing. Before synthetic dyes, saturation *was* the
-   * expense: kermes, Tyrian purple, good indigo and lac cost what they did
-   * because they held a deep colour through repeated dyeing, while the poor
-   * wore undyed wool, weld, madder cut with clay, or whatever a single bath
-   * would give. So a noble's red is not a peasant's red with braid on it — it
-   * is a different red, and pushing chroma with wealth is not a flourish but
-   * the actual difference.
+   * Before synthetic dyes the expense was in *depth and fastness*, not in
+   * brightness: kermes, Tyrian purple, good indigo and lac cost what they did
+   * because they held a deep colour through repeated dyeing and kept it for
+   * decades. But the cheapest dyes in the world — turmeric, safflower,
+   * marigold, henna — are vivid on the first afternoon and merely fugitive, so
+   * "poor" has never meant "grey".
    *
-   * Contrast rises with it too, because the fibres that took dye best — silk,
-   * fine worsted — are also the ones that reflect most sharply.
+   * This used to run from 0.72 to 1.42, and the low end was doing far more work
+   * than it looks: most personas are poor or modest, the clothing tables hand
+   * every tier in a zone the *same* palette constant, and this multiplied
+   * against the material's own factor below. A poor linen tunic arrived at
+   * 0.68 chroma and 0.79 contrast off a base that was already muted for being
+   * pre-aniline — three separate desaturations of one garment, each defensible
+   * alone. The dye access that now runs in `generateClothingPalette` is where
+   * the wealth claim belongs, because it decides *which* dye rather than
+   * bleaching whichever one was chosen. What is left here is the narrow part
+   * that is really about cloth: a fast dye on fine cloth is a little deeper and
+   * reflects a little more sharply than the same hue on homespun.
    */
   const WEALTH_RICHNESS: Record<string, { saturation: number; contrast: number }> = {
-    poor: { saturation: 0.72, contrast: 0.92 },
-    modest: { saturation: 0.88, contrast: 0.97 },
+    poor: { saturation: 0.9, contrast: 0.95 },
+    modest: { saturation: 0.96, contrast: 0.98 },
     comfortable: { saturation: 1.0, contrast: 1.0 },
-    wealthy: { saturation: 1.22, contrast: 1.12 },
-    noble: { saturation: 1.42, contrast: 1.2 },
+    wealthy: { saturation: 1.15, contrast: 1.1 },
+    noble: { saturation: 1.3, contrast: 1.18 },
   };
   const richness = WEALTH_RICHNESS[spec.wealth] || WEALTH_RICHNESS.comfortable;
   const clothOptions = materialOptions(spec.garment.material);
+  /**
+   * Two reasons a cloth is muted are not twice as many reasons.
+   *
+   * Material and wealth were multiplied, so coarse cloth on a poor back took
+   * both cuts and landed somewhere neither factor intended. They are also not
+   * independent claims — "cheap fibre" and "cheap dye" are largely the same
+   * observation made twice — so the weaker of the two is the honest answer, and
+   * only reductions are pooled this way: a noble's silk should still get both
+   * the silk lift and the wealth lift, because those *are* two facts.
+   */
+  const pool = (material: number, wealth: number): number =>
+    material <= 1 && wealth <= 1 ? Math.min(material, wealth) : material * wealth;
   const richCloth: RampOptions = {
     ...clothOptions,
-    saturation: (clothOptions.saturation ?? 1) * richness.saturation,
-    contrast: (clothOptions.contrast ?? 1) * richness.contrast,
+    saturation: pool(clothOptions.saturation ?? 1, richness.saturation),
+    contrast: pool(clothOptions.contrast ?? 1, richness.contrast),
   };
 
   const clothA = buildRamp(spec.garment.colors.primary, richCloth);
@@ -211,13 +268,23 @@ export function buildPortraitRamps(spec: PortraitSpec): PortraitRamps {
   // like straw.
   const foliage = buildRamp('#4d7a3e', { contrast: 1.2, shift: 0.26, saturation: 1.12 });
 
-  const metalKey = spec.jewelry.find(item => METAL_BASE[item.material])?.material || 'bronze';
-  const metal = buildRamp(METAL_BASE[metalKey] || '#a8763f', {
-    contrast: 1.75,
-    shift: 0.2,
-    saturation: 1.05,
-  });
-  const gem = buildRamp('#7b3f6d', { contrast: 1.5, shift: 0.28, saturation: 1.3 });
+  /**
+   * The metal of this portrait's fittings, and the stone of its settings.
+   *
+   * Both follow what the persona is actually wearing. A woman in silver
+   * earrings gets silver buttons, and — the part that was wrong for as long as
+   * this file has existed — a man in jade beads gets jade at every point the
+   * renderer reaches for `gem`, rather than the one amethyst everybody shared.
+   * Jewellery itself no longer comes through here at all; it resolves per piece
+   * in `drawJewelry`. These two are for the hardware sewn onto cloth.
+   */
+  const metalKey = spec.jewelry.find(item => FITTING_METALS.has(item.material))?.material || 'bronze';
+  const metal = ornamentRamp(metalKey);
+  const stoneKey =
+    spec.jewelry.find(item => item.stone)?.stone
+    || spec.jewelry.find(item => !FITTING_METALS.has(item.material))?.material
+    || 'carnelian';
+  const gem = ornamentRamp(stoneKey);
   const leather = buildRamp('#6b482f', { contrast: 1.2, shift: 0.3 });
   const background = buildRamp(spec.background.base, { contrast: 0.9, shift: 0.3, saturation: 0.9 });
 
@@ -251,6 +318,8 @@ export function buildPortraitRamps(spec: PortraitSpec): PortraitRamps {
   return {
     book,
     skin,
+    skinWarm,
+    skinCool,
     hair,
     beard,
     brow,

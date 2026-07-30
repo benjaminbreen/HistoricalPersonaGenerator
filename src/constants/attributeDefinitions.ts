@@ -20,6 +20,7 @@
 import { AttributeBadge, AttributeContext } from '../types/attributeTypes';
 import { CulturalZone } from '../types/characterData';
 import { hasCapability, SocietyCapability } from './societyCapabilities';
+import { livesInTraditionalCommunity } from './characterData/traditionalCommunities';
 
 // Extended AttributeBadge with foundational flag
 interface EnhancedAttributeBadge extends AttributeBadge {
@@ -3006,9 +3007,18 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     icon: 'GiSpiralShell',
     category: 'cultural',
     baseWeight: 180,
-    weight: (ctx) => (inZone(ctx, 'OCEANIA') ? 1
-      : inZone(ctx, 'NORTH_AMERICAN_PRE_COLUMBIAN', 'SOUTH_AMERICAN') ? 0.5
-      : place(ctx, 'ainu', 'hokkaido', 'thrac', 'pict', 'scyth') ? 0.6 : 0),
+    weight: (ctx) => {
+      const base = inZone(ctx, 'OCEANIA') ? 1
+        : inZone(ctx, 'NORTH_AMERICAN_PRE_COLUMBIAN', 'SOUTH_AMERICAN') ? 0.5
+        : place(ctx, 'ainu', 'hokkaido', 'thrac', 'pict', 'scyth') ? 0.6 : 0;
+      // Marks are only legible where the people who read them still live
+      // together. In the modern Americas the zone mostly names a nation state,
+      // and a Rio de Janeiro plumber in 2015 was being issued the tattoos of
+      // his lineage. See constants/characterData/traditionalCommunities.ts.
+      if (ctx.year >= 1900 && inZone(ctx, 'SOUTH_AMERICAN')
+        && !livesInTraditionalCommunity(ctx.placeLower)) return 0;
+      return base;
+    },
     description: 'Tattooed with the marks of lineage and rank, read fluently by anyone from home',
     phrase: 'tattooed with the marks of your lineage',
     foundational: true,

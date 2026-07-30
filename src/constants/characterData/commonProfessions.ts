@@ -44,7 +44,8 @@
  */
 
 import { HistoricalEra } from '../../types';
-import { hasCapability, type CapabilityContext, type SocietyCapability } from '../societyCapabilities';
+import { hasCapability, type SocietyCapability } from '../societyCapabilities';
+import { textureRolesFor, type TextureContext } from './textureProfessions';
 import type { CulturalZone, ProfessionData, ProfessionDefinition, RoleMap } from './professions';
 
 /** A role plus the conditions under which the society could contain it. */
@@ -55,6 +56,8 @@ interface CommonRole {
   needs?: SocietyCapability[];
   /** At least one of these must hold. For work with more than one basis. */
   needsAny?: SocietyCapability[];
+  /** None of these may hold. For work a later capability puts an end to. */
+  excludes?: SocietyCapability[];
 }
 
 // Shorthand for the stat profiles that recur. A field hand needs a back, not a
@@ -259,9 +262,30 @@ const MODERN_WORK: CommonRole[] = [
  * first-century one are doing the same job — and the capability gates do the
  * discriminating that the era label cannot.
  */
+/**
+ * Foraging as a living, for the antiquity-era societies still doing it.
+ *
+ * The antiquity list used to take the first eight prehistoric roles wholesale
+ * and ungated, and because hunting and foraging count as food production they
+ * collected the full subsistence boost on top. The commonest occupation in the
+ * city of Rome came out **hunter**, at nineteen per cent, with flintknappers
+ * under Hadrian. Antiquity is not one economy: it is imperial Italy and it is
+ * also the Australian interior, and the difference between them is exactly
+ * whether the society farms.
+ *
+ * People in farming societies still hunted, fished and snared — but as a way
+ * to eat, not as the answer to what they did. Where the trade genuinely was
+ * someone's living, it comes back through the texture layer: a lord's
+ * huntsman, a warrener, a fowler on the marsh.
+ */
+const FORAGING_WORK: CommonRole[] = PREHISTORIC_WORK.slice(0, 8).map(entry => ({
+  ...entry,
+  excludes: ['settled_agriculture'],
+}));
+
 const BY_ERA: Partial<Record<HistoricalEra, CommonRole[]>> = {
   [HistoricalEra.PREHISTORY]: PREHISTORIC_WORK,
-  [HistoricalEra.ANTIQUITY]: [...PREHISTORIC_WORK.slice(0, 8), ...VILLAGE_WORK],
+  [HistoricalEra.ANTIQUITY]: [...FORAGING_WORK, ...VILLAGE_WORK],
   [HistoricalEra.MEDIEVAL]: [...VILLAGE_WORK, ...TOWN_WORK],
   [HistoricalEra.RENAISSANCE_EARLY_MODERN]: [...VILLAGE_WORK, ...TOWN_WORK],
   [HistoricalEra.INDUSTRIAL_ERA]: [...VILLAGE_WORK, ...TOWN_WORK, ...INDUSTRIAL_WORK],
@@ -294,7 +318,7 @@ export const AGRARIAN_BACKFILL: ProfessionData = {
         'Vine Dresser': { statRequirements: LIGHT, keywords: 'viticulture', emoji: '🍇' },
         'Dairymaid': { statRequirements: LIGHT, genderBias: 'Female', keywords: 'dairy', emoji: '🥛' },
         'Swineherd': { statRequirements: LIGHT, keywords: 'herding', emoji: '🐖' },
-        'Fisherman': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
+        'Fisher': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
       },
     },
     [HistoricalEra.INDUSTRIAL_ERA]: {
@@ -304,7 +328,7 @@ export const AGRARIAN_BACKFILL: ProfessionData = {
         'Crofter': { statRequirements: LIGHT, socialRequirements: { maxPrivilege: 0.3 }, keywords: 'smallholding', emoji: '🏚️' },
         'Dairymaid': { statRequirements: LIGHT, genderBias: 'Female', keywords: 'dairy', emoji: '🥛' },
         'Market Gardener': { statRequirements: LIGHT, keywords: 'horticulture', emoji: '🥕' },
-        'Fisherman': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
+        'Fisher': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
       },
     },
   },
@@ -317,7 +341,7 @@ export const AGRARIAN_BACKFILL: ProfessionData = {
         'Field Labourer': { statRequirements: LABOURING, socialRequirements: { maxPrivilege: 0.3 }, keywords: 'agriculture', emoji: '🌾' },
         'Tea Grower': { statRequirements: LIGHT, keywords: 'tea', emoji: '🍵' },
         'Silk Farmer': { statRequirements: LIGHT, keywords: 'sericulture', emoji: '🧵' },
-        'Fisherman': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
+        'Fisher': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
         'Herder': { statRequirements: LIGHT, keywords: 'herding', emoji: '🐄' },
       },
     },
@@ -339,7 +363,7 @@ export const AGRARIAN_BACKFILL: ProfessionData = {
         'Field Labourer': { statRequirements: LABOURING, socialRequirements: { maxPrivilege: 0.3 }, keywords: 'agriculture', emoji: '🌾' },
         'Cotton Grower': { statRequirements: LIGHT, keywords: 'cotton', emoji: '🌱' },
         'Herder': { statRequirements: LIGHT, keywords: 'herding', emoji: '🐐' },
-        'Fisherman': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
+        'Fisher': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
         'Milkmaid': { statRequirements: LIGHT, genderBias: 'Female', keywords: 'dairy', emoji: '🥛' },
       },
     },
@@ -351,7 +375,7 @@ export const AGRARIAN_BACKFILL: ProfessionData = {
         'Tea Picker': { statRequirements: LIGHT, genderBias: 'Female', keywords: 'tea', emoji: '🍵' },
         'Jute Grower': { statRequirements: LABOURING, keywords: 'jute', emoji: '🌱' },
         'Herder': { statRequirements: LIGHT, keywords: 'herding', emoji: '🐐' },
-        'Fisherman': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
+        'Fisher': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
       },
     },
   },
@@ -364,7 +388,7 @@ export const AGRARIAN_BACKFILL: ProfessionData = {
         'Date Cultivator': { statRequirements: LIGHT, keywords: 'dates', emoji: '🌴' },
         'Shepherd': { statRequirements: LIGHT, keywords: 'herding', emoji: '🐑' },
         'Goatherd': { statRequirements: LIGHT, keywords: 'herding', emoji: '🐐' },
-        'Fisherman': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
+        'Fisher': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
       },
     },
   },
@@ -391,7 +415,7 @@ export const AGRARIAN_BACKFILL: ProfessionData = {
         'Potato Farmer': { statRequirements: LABOURING, keywords: 'agriculture', emoji: '🥔' },
         'Llama Herder': { statRequirements: LIGHT, keywords: 'herding', emoji: '🦙' },
         'Coca Grower': { statRequirements: LIGHT, keywords: 'coca', emoji: '🌿' },
-        'Fisherman': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
+        'Fisher': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
       },
     },
     [HistoricalEra.INDUSTRIAL_ERA]: {
@@ -401,7 +425,7 @@ export const AGRARIAN_BACKFILL: ProfessionData = {
         'Cattle Hand': { statRequirements: LABOURING, genderBias: 'Male', keywords: 'herding', emoji: '🐄' },
         'Llama Herder': { statRequirements: LIGHT, keywords: 'herding', emoji: '🦙' },
         'Maize Cultivator': { statRequirements: LABOURING, keywords: 'agriculture', emoji: '🌽' },
-        'Fisherman': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
+        'Fisher': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
       },
     },
   },
@@ -415,7 +439,7 @@ export const AGRARIAN_BACKFILL: ProfessionData = {
         'Homesteader': { statRequirements: LABOURING, keywords: 'agriculture', emoji: '🏚️' },
         'Ranch Hand': { statRequirements: LABOURING, genderBias: 'Male', keywords: 'herding', emoji: '🐄' },
         'Dairy Farmer': { statRequirements: LIGHT, keywords: 'dairy', emoji: '🥛' },
-        'Fisherman': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
+        'Fisher': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
       },
     },
   },
@@ -428,7 +452,7 @@ export const AGRARIAN_BACKFILL: ProfessionData = {
         'Yam Grower': { statRequirements: LABOURING, keywords: 'agriculture', emoji: '🍠' },
         'Cattle Herder': { statRequirements: LIGHT, keywords: 'herding', emoji: '🐄' },
         'Goatherd': { statRequirements: LIGHT, keywords: 'herding', emoji: '🐐' },
-        'Fisherman': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
+        'Fisher': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
       },
     },
     [HistoricalEra.INDUSTRIAL_ERA]: {
@@ -438,7 +462,7 @@ export const AGRARIAN_BACKFILL: ProfessionData = {
         'Cattle Herder': { statRequirements: LIGHT, keywords: 'herding', emoji: '🐄' },
         'Groundnut Grower': { statRequirements: LABOURING, keywords: 'agriculture', emoji: '🥜' },
         'Palm Tapper': { statRequirements: LIGHT, genderBias: 'Male', keywords: 'palm', emoji: '🌴' },
-        'Fisherman': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
+        'Fisher': { statRequirements: LABOURING, keywords: 'fishing', emoji: '🐟' },
       },
     },
   },
@@ -466,7 +490,7 @@ export function professionsFor(
   base: Record<string, RoleMap> | undefined,
   zone: CulturalZone,
   era: HistoricalEra,
-  ctx: CapabilityContext,
+  ctx: TextureContext,
 ): Record<string, RoleMap> | undefined {
   const merged: Record<string, RoleMap> = {};
   for (const [socialClass, roles] of Object.entries(base ?? {})) {
@@ -483,6 +507,7 @@ export function professionsFor(
     if (already.has(entry.role.toLowerCase())) continue;
     if (entry.needs && !entry.needs.every(c => hasCapability(c, ctx))) continue;
     if (entry.needsAny && !entry.needsAny.some(c => hasCapability(c, ctx))) continue;
+    if (entry.excludes?.some(c => hasCapability(c, ctx))) continue;
     commoner[entry.role] = entry.def;
   }
 
@@ -493,6 +518,45 @@ export function professionsFor(
 
   if (era === HistoricalEra.FUTURE_ERA) Object.assign(commoner, FUTURE_FARMING);
 
+  // The distinctive tail. Added last and never overriding an authored role, so
+  // a zone table that already names a trade keeps its own definition.
+  for (const [role, def] of Object.entries(textureRolesFor(zone, era, ctx))) {
+    if (already.has(role.toLowerCase())) continue;
+    commoner[role] = def;
+  }
+
   if (Object.keys(commoner).length > 0) merged.COMMONER = commoner;
+  collapseSynonyms(merged);
   return Object.keys(merged).length > 0 ? merged : base;
+}
+
+/**
+ * Pairs of names for one job, and which of the two to keep.
+ *
+ * The substrate lists were written era by era, so a medieval draw offered
+ * Smith from the village list and Blacksmith from the town one. Two entries
+ * for one occupation is two chances to draw it, and the player sees the same
+ * result twice under two names — as with Fisher and Fisherman, which between
+ * them were 11% of Rome until the tables were made to agree on one word.
+ */
+const SYNONYMS: Array<[drop: string, keep: string]> = [
+  ['Smith', 'Blacksmith'],
+  ['Basket Weaver', 'Basket Maker'],
+  ['Washerwoman', 'Laundress'],
+  ['Domestic Servant', 'Servant'],
+  ['Mason', 'Stonemason'],
+  ['Child Minder', 'Childminder'],
+  ['Dock Labourer', 'Dock Worker'],
+  ['Street Hawker', 'Hawker'],
+];
+
+function collapseSynonyms(tables: Record<string, RoleMap>): void {
+  // Across classes, not within them: the zone tables file a fisherman under
+  // WORKING_CLASS while the substrate adds a fisher to COMMONER, and both are
+  // reachable from the same draw.
+  const present = new Set(Object.values(tables).flatMap(roles => Object.keys(roles)));
+  for (const [drop, keep] of SYNONYMS) {
+    if (!present.has(drop) || !present.has(keep)) continue;
+    for (const roles of Object.values(tables)) delete roles[drop];
+  }
 }

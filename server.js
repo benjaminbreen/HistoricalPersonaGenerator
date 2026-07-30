@@ -3,8 +3,11 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import personaShareHandler from './api/persona-share.js';
+import aiAccessHandler from './api/ai-access.js';
+import stripeWebhookHandler from './api/stripe-webhook.js';
 import { parseJsonObject } from './api/_lib/llmJson.js';
 import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './api/_lib/rateLimit.js';
+import { consumeAiCredit, ensureVisitorId } from './api/_lib/aiAccess.js';
 import {
   ANNOTATION_TEMPERATURE,
   SKETCH_TEMPERATURE,
@@ -366,6 +369,18 @@ const handleGeminiRoute = async (req, res) => {
         sendJson(res, 429, { error: rateLimitMessage(verdict.scope), retryAfterSeconds: verdict.retryAfterSeconds });
         return;
       }
+      const visitorId = ensureVisitorId(req, res);
+      const accessVerdict = await consumeAiCredit(visitorId, body.action);
+      if (!accessVerdict.allowed) {
+        sendJson(res, 402, {
+          code: 'AI_SUPPORT_REQUIRED',
+          error: body.action === 'generate_annotation'
+            ? 'The full schema record costs six supporter credits.'
+            : 'You have used all five free AI biographies. A donation unlocks 50 credits for 30 days.',
+          access: accessVerdict.access,
+        });
+        return;
+      }
     }
 
     if (body.action === 'generate_annotation') {
@@ -415,6 +430,16 @@ const serveStatic = (req, res) => {
 };
 
 const server = http.createServer((req, res) => {
+  if ((req.url || '').startsWith('/api/stripe-webhook')) {
+    void stripeWebhookHandler(req, res);
+    return;
+  }
+
+  if ((req.url || '').startsWith('/api/ai-access')) {
+    void aiAccessHandler(req, res);
+    return;
+  }
+
   if ((req.url || '').startsWith('/api/persona-share')) {
     void personaShareHandler(req, res);
     return;

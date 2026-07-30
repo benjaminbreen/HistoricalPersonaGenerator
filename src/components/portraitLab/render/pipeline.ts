@@ -17,6 +17,7 @@
  * mouth refuses to paint over a moustache — no explicit z-ordering required.
  */
 
+import { buildRamp, RampOptions } from '../core/color';
 import { applyOutline, applyRimLight, MAT, Mask, maskDilate, RampBook, Raster } from '../core/raster';
 import { PaintTable, relativePaints } from '../core/stamp';
 import { buildAnatomy, Anatomy, CANVAS } from '../spec/anatomy';
@@ -34,7 +35,7 @@ import {
 } from '../art/hair';
 import { drawGarment } from '../art/garments';
 import { coveringSilhouette, drawHeadwear } from '../art/headwear';
-import { drawAilments, drawFaceTraits, drawGlasses, drawJewelry, drawMarkings } from '../art/details';
+import { drawAilments, drawFaceTraits, drawGlasses, drawJewelry, drawMarkings, GlintSite } from '../art/details';
 import { RenderContext } from './context';
 
 export interface CompiledPortrait {
@@ -45,13 +46,27 @@ export interface CompiledPortrait {
   book: RampBook;
   base: Raster;
   eyePaints: PaintTable;
+  /** A second eye paint table for a mismatched iris. Null when the eyes match. */
+  altEyePaints: PaintTable | null;
   mouthPaints: PaintTable;
   skinPaints: PaintTable;
   hair: HairMasks;
   headMask: Mask;
   /** Set when hair falls past the jaw, enabling the per-frame sway. */
   sway: { top: number; withoutHair: Raster } | null;
+  /**
+   * The highlight pixels of any specular jewellery, in draw order along each
+   * piece. Empty for the majority of personas, who wear nothing that catches.
+   */
+  glints: GlintSite[];
 }
+
+/**
+ * The iris response, kept here as well as in `palette.ts` so a second iris can
+ * be built without the whole ramp book. High contrast and high chroma: an iris
+ * is four pixels across and has to carry a colour in them.
+ */
+const IRIS_RAMP: RampOptions = { contrast: 1.45, shift: 0.32, saturation: 1.22 };
 
 export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
   const anatomy = buildAnatomy(spec);
@@ -137,7 +152,8 @@ export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
   drawHairFront(context, hair);
   drawHeadwear(context, hair.hairlineY);
   drawFacialHair(context, head);
-  drawJewelry(context);
+  const glints: GlintSite[] = [];
+  drawJewelry(context, glints);
   drawGlasses(context);
 
   // Last, so the shear carries everything the head is wearing with it, and
@@ -156,11 +172,15 @@ export function compilePortrait(spec: PortraitSpec): CompiledPortrait {
     book: ramps.book,
     base,
     eyePaints: makeEyePaints(ramps),
+    altEyePaints: spec.traits.heterochromia
+      ? makeEyePaints({ ...ramps, iris: buildRamp(spec.traits.heterochromia, IRIS_RAMP) })
+      : null,
     mouthPaints: makeMouthPaints(ramps),
     skinPaints,
     hair,
     headMask: head,
     sway,
+    glints,
   };
 }
 
@@ -288,6 +308,11 @@ export interface FrameState {
   gazeY: number;
   /** 0..1 horizontal drift of hair falling past the jaw. */
   sway: number;
+  /**
+   * Where the catch of light has reached along a piece of jewellery, or -1 when
+   * nothing is catching — which is most of the time. See `glintSweep`.
+   */
+  glint: number;
 }
 
 export const RESTING_FRAME: FrameState = {
@@ -296,14 +321,56 @@ export const RESTING_FRAME: FrameState = {
   gazeX: 0,
   gazeY: 0,
   sway: 0,
+  glint: -1,
 };
+
+/** How much of the piece the travelling catch covers at any instant. */
+const GLINT_WIDTH = 0.3;
+
+/**
+ * Run the catch of light along whatever the persona is wearing.
+ *
+ * Cheap by construction. The jewellery is drawn once, into the compiled base,
+ * and what survives to here is a handful of coordinates — the pixels that were
+ * already the highlight of a bead. Lighting them is a few writes per frame
+ * against the 9,216 the rest of the loop is already doing, so a portrait with a
+ * necklace costs no more to animate than one without.
+ *
+ * Guarded on the material at the target pixel rather than trusting the
+ * recorded coordinate: hair sways over the collarbone, and a highlight painted
+ * onto hair that has drifted across a necklace is a firefly behind somebody's
+ * shoulder.
+ */
+function applyGlint(compiled: CompiledPortrait, position: number, target: Raster): void {
+  if (position < -GLINT_WIDTH || !compiled.glints.length) return;
+  const { anatomy, spec, size } = compiled;
+
+  for (const site of compiled.glints) {
+    const distance = Math.abs(site.along - position);
+    if (distance >= GLINT_WIDTH) continue;
+    // Smoothstep, so a bead swells and fades rather than switching on. A linear
+    // ramp at this size reads as a flicker.
+    const t = 1 - distance / GLINT_WIDTH;
+    const amount = t * t * (3 - 2 * t) * 0.92;
+
+    const x = site.x + tiltAt(anatomy, spec.pose.tilt, site.y);
+    if (x < 0 || x >= size || site.y < 0 || site.y >= size) continue;
+    const i = site.y * size + x;
+    if (target.mat[i] !== MAT.METAL && target.mat[i] !== MAT.GEM) continue;
+
+    const o = i * 4;
+    target.data[o] += (site.peak.r - target.data[o]) * amount;
+    target.data[o + 1] += (site.peak.g - target.data[o + 1]) * amount;
+    target.data[o + 2] += (site.peak.b - target.data[o + 2]) * amount;
+  }
+}
 
 export function renderFrame(
   compiled: CompiledPortrait,
   state: FrameState,
   target: Raster
 ): void {
-  const { base, anatomy, spec, ramps, book, eyePaints, mouthPaints, skinPaints } = compiled;
+  const { base, anatomy, spec, ramps, book, eyePaints, altEyePaints, mouthPaints, skinPaints } = compiled;
   target.copyFrom(base);
 
   applySway(compiled, state.sway, target);
@@ -336,16 +403,24 @@ export function renderFrame(
     state.blink === 'closed' ? 'closed' : state.blink === 'half' ? 'half' : pose.eyes;
 
   for (const side of [-1, 1] as const) {
+    // A divergent eye turns outward while the other holds the viewer. Two
+    // pixels, which does not sound like much and is in fact the entire
+    // difference — the eyes are four pixels of iris each, so moving one of them
+    // by two is moving it half its own width.
+    const wall = spec.traits.wallEye === side ? side * 2 : 0;
     drawEye({
       raster: target,
       book,
-      paints: eyePaints,
+      // The second iris colour, on the sitter's left. Built alongside the first
+      // at compile time, because a ramp is eight colours resolved from a hex
+      // and doing that per frame would put it in the blink path.
+      paints: side === 1 && altEyePaints ? altEyePaints : eyePaints,
       shape: spec.eyeShape,
       state: eyeState,
       centerX: anatomy.faceX + side * anatomy.eyeDX + tiltAt(anatomy, spec.pose.tilt, anatomy.eyeY),
       centerY: anatomy.eyeY + anatomy.asymmetry.eyeY[side === -1 ? 0 : 1],
       side,
-      gazeX: state.gazeX,
+      gazeX: state.gazeX + wall,
       gazeY: state.gazeY,
       eyelashes: spec.eyelashes,
       clouded: spec.traits.blind,
@@ -375,6 +450,10 @@ export function renderFrame(
     drawDimple(target, book, cx - width, anatomy.mouthY + 1);
     drawDimple(target, book, cx + width, anatomy.mouthY + 1);
   }
+
+  // Last, and after the sway in particular: hair that has drifted across the
+  // collarbone has to be able to cover a bead, not be lit by it.
+  applyGlint(compiled, state.glint, target);
 }
 
 /**

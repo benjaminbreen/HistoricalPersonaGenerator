@@ -21,6 +21,8 @@
  * recognise. This is a gloss, not a transliteration exercise.
  */
 
+import { EliteNameStyle, eliteNameStyleFor } from './eliteNaming';
+
 export type NameConvention =
   /** A single given name and nothing else. The commonest case in human history. */
   | 'personal'
@@ -697,6 +699,23 @@ function resolveConventionProfile(
   }
 }
 
+/**
+ * Multiply the named conventions' weights, leaving the rest alone.
+ *
+ * Multiplicative rather than additive so a culture that genuinely never formed
+ * patronymics does not acquire one because its nobility is biased toward them: a
+ * weight of zero stays zero however hard it is pushed.
+ */
+function applyBias(weights: Weights, bias: Partial<Record<string, number>>): Weights {
+  const out: Weights = { ...weights };
+  for (const [convention, factor] of Object.entries(bias)) {
+    const key = convention as NameConvention;
+    if (out[key] === undefined || factor === undefined) continue;
+    out[key] = out[key]! * factor;
+  }
+  return out;
+}
+
 function pickConvention(weights: Weights, random: () => number): NameConvention {
   const entries = Object.entries(weights) as Array<[NameConvention, number]>;
   const total = entries.reduce((sum, [, w]) => sum + w, 0);
@@ -721,13 +740,32 @@ export interface FormatNameInput {
   occupation?: string;
   /** The naming tradition in use, which sometimes outranks the map region. */
   nameKey?: string;
+  /**
+   * The privileged order this person belongs to, as the `id` of an entry in
+   * `eliteStrata.ts`. Undefined for the great majority.
+   *
+   * Standing rather than money, and standing rather than rarity: see the header
+   * of `eliteNaming.ts`. Several of these orders were five to ten per cent of
+   * their societies, so this is not a decoration for the rarest tail.
+   */
+  standingId?: string;
   random: () => number;
 }
 
 /** Build a full name in whatever way this culture and period actually built one. */
 export function formatPersonalName(input: FormatNameInput): FormattedName {
-  const { given, gender, culturalZone, region, year, surnames, malePool, femalePool, occupation, nameKey, random } = input;
-  const profile = conventionProfileFor(culturalZone, region, year, nameKey);
+  const { given, gender, culturalZone, region, year, surnames, malePool, femalePool, occupation, nameKey, standingId, random } = input;
+  const base = conventionProfileFor(culturalZone, region, year, nameKey);
+  const elite = eliteNameStyleFor(standingId);
+
+  // The estate's own naming raises the odds of the forms it actually used before
+  // a convention is drawn, rather than dressing up whatever came out. In several
+  // of these societies a heritable surname was the estate's privilege and the
+  // people around them had none, so biasing after the fact would leave most
+  // nobles with nothing for a particle to attach to.
+  const profile: ConventionProfile = elite?.conventionBias
+    ? { ...base, weights: applyBias(base.weights, elite.conventionBias) }
+    : base;
 
   const usableSurnames = (surnames || []).filter(s => s && s !== '(No Surname)');
   // One authored pool holds several kinds of name. Split it by shape so a clan
@@ -746,6 +784,11 @@ export function formatPersonalName(input: FormatNameInput): FormattedName {
   if (convention === 'patronymic' && !profile.patronymic) convention = 'personal';
   if (convention === 'teknonym' && !profile.teknonym) convention = 'personal';
 
+  // Built first, then decorated. The estate's markers are applied to a finished
+  // name of the local kind rather than replacing it, because that is what they
+  // are: a hidalgo's name is a Castilian name with additions, not a different
+  // sort of name.
+  const built: FormattedName = (() => {
   switch (convention) {
     case 'patronymic': {
       // The father's given name, drawn from the same pool so it belongs to the
@@ -798,4 +841,213 @@ export function formatPersonalName(input: FormatNameInput): FormattedName {
     default:
       return { full: given, given, convention };
   }
+  })();
+
+  if (!elite) return built;
+  return applyEliteStyle(built, elite, {
+    given, gender, random,
+    surnames: usableSurnames,
+    seats: toponymicLike.length > 0 ? toponymicLike : usableSurnames,
+    malePool, femalePool,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Elite markers
+// ---------------------------------------------------------------------------
+
+interface EliteContext {
+  given: string;
+  gender: 'Male' | 'Female';
+  surnames: string[];
+  seats: string[];
+  malePool: string[];
+  femalePool: string[];
+  random: () => number;
+}
+
+/**
+ * Lay an estate's markers over a finished name.
+ *
+ * Order matters and is not arbitrary. Working outward from the given name:
+ * fused suffixes first (they change the word itself), then the second given
+ * name, then whatever attaches to the surname, then the trailing lineage or
+ * title, then the leading honorific, then the appended descent claim. Applying
+ * the honorific before the surname work would produce "Don de Mendoza".
+ *
+ * Each device is capped independently, and then the whole is capped again: a name
+ * that fired every device it was offered comes out as a parody of itself, and
+ * three markers is about what a reader can take in at the length a card allows.
+ */
+function applyEliteStyle(
+  built: FormattedName,
+  style: EliteNameStyle,
+  context: EliteContext
+): FormattedName {
+  const { given, gender, random } = context;
+  const pick = <T,>(list: T[]): T | undefined =>
+    list.length > 0 ? list[Math.floor(random() * list.length)] : undefined;
+  const fires = (chance: number) => random() < chance;
+  const gendered = (g: { male: string[]; female?: string[] }) =>
+    gender === 'Female' ? (g.female && g.female.length ? g.female : []) : g.male;
+
+  let full = built.full;
+  let familyName = built.familyName;
+  let applied = 0;
+  /** Three markers is the cap. See above. */
+  const room = () => applied < 3;
+  const spend = () => { applied += 1; };
+
+  // Where the name already ends in the father rather than in the bearer, nothing
+  // may be hung off the end of it. "Karna son of Duryodhana Shastri" attaches the
+  // lineage to Duryodhana, which is the opposite of the claim being made.
+  const endsInAnother = built.convention === 'patronymic'
+    || built.convention === 'teknonym'
+    || built.convention === 'occupational';
+
+  // --- fused to the given name ---------------------------------------------
+  if (
+    style.reverentialSuffix && room()
+    && (!style.reverentialSuffix.only || style.reverentialSuffix.only === gender)
+    && fires(style.reverentialSuffix.chance)
+  ) {
+    // Moteuczoma → Moteuczomatzin. Applied to the given name wherever it sits in
+    // the finished string, so a name with a clan behind it keeps its order.
+    const suffixed = `${given}${style.reverentialSuffix.suffix}`;
+    full = full.replace(given, suffixed);
+    spend();
+  }
+
+  // --- a second given name -------------------------------------------------
+  if (style.middleGiven && room() && fires(style.middleGiven.chance)) {
+    const pool = gender === 'Female' ? context.femalePool : context.malePool;
+    const second = pick(pool.filter(n => n !== given));
+    if (second) {
+      const initialOnly = style.middleGiven.initialOnly !== undefined
+        && random() < style.middleGiven.initialOnly;
+      const middle = initialOnly ? `${second.charAt(0)}.` : second;
+      // Inserted after the given name rather than appended, which is where a
+      // baptismal second name and an American middle initial both sit.
+      full = full.replace(given, `${given} ${middle}`);
+      spend();
+    }
+  }
+
+  // --- attached to the surname ---------------------------------------------
+  // Both of these need a surname to work on. When the convention came out
+  // `personal` there is nothing to elevate, and inventing one here would
+  // contradict the convention that was just chosen.
+  const hasSurname = built.convention === 'inherited'
+    || built.convention === 'clan'
+    || built.convention === 'toponymic'
+    || built.convention === 'occupational';
+
+  if (style.doubleSurname && hasSurname && room() && fires(style.doubleSurname.chance)) {
+    const second = pick(context.seats.filter(s => !full.includes(s)));
+    if (second) {
+      const joiner = style.doubleSurname.connector;
+      full = joiner === '-' ? `${full}-${second}` : `${full} ${joiner} ${second}`.replace(/\s+/g, ' ');
+      spend();
+    }
+  }
+
+  if (style.particle && hasSurname && room() && fires(style.particle.chance)) {
+    const form = pick(style.particle.forms);
+    // Only when the surname is not already carrying one. Several authored pools
+    // include "de Vega" and "von Kleist" outright, and "de de Vega" is worse
+    // than no particle at all.
+    if (form && !/\b(?:of|de|de’|di|da|von|van|z|al-|el-)\s/i.test(full)) {
+      const head = full.slice(0, full.lastIndexOf(' '));
+      const tail = full.slice(full.lastIndexOf(' ') + 1);
+      if (head && tail) {
+        full = `${head} ${form} ${tail}`;
+        spend();
+      }
+    }
+  }
+
+  // --- trailing lineage and title ------------------------------------------
+  if (style.lineageSuffix && room() && !endsInAnother && fires(style.lineageSuffix.chance)) {
+    const clan = pick(style.lineageSuffix.names);
+    // Not if the name already carries one of this pool's own names. Several of
+    // these lists overlap with the authored surname pools — the South Asian
+    // surnames genuinely include Dwivedi and Bhatt — and appending a second gave
+    // "Pandit Rajesh Dwivedi Iyer", a man with two lineages.
+    const already = style.lineageSuffix.names.some(name => full.includes(name));
+    if (clan && !already) {
+      full = `${full} ${clan}`;
+      familyName = familyName ?? clan;
+      spend();
+    }
+  }
+
+  if (style.postnominal && room()) {
+    const words = gendered(style.postnominal);
+    if (words.length && fires(style.postnominal.chance)) {
+      const word = pick(words);
+      if (word) {
+        // A fused honorific like "-dono" or "-shi" joins the name; a free-standing
+        // one like "Bey" or "Esq." follows it.
+        full = word.startsWith('-') ? `${full}${word}` : `${full} ${word}`;
+        spend();
+      }
+    }
+  }
+
+  if (style.generational && room() && fires(style.generational.chance)) {
+    const suffix = pick(style.generational.forms);
+    // Only meaningful on an inherited surname — a generational suffix says the
+    // name repeated down a line, so there has to be a line.
+    if (suffix && hasSurname) {
+      full = `${full} ${suffix}`;
+      spend();
+    }
+  }
+
+  // --- leading lineage and honorific ---------------------------------------
+  if (style.lineagePrefix && room() && fires(style.lineagePrefix.chance)) {
+    const lineage = pick(style.lineagePrefix.names);
+    if (lineage && !full.includes(lineage)) {
+      full = style.lineagePrefix.connector
+        ? `${full} ${style.lineagePrefix.connector} ${lineage}`
+        : `${lineage} ${full}`;
+      spend();
+    }
+  }
+
+  if (style.honorific && room()) {
+    const words = gendered(style.honorific);
+    if (words.length && fires(style.honorific.chance)) {
+      const word = pick(words);
+      if (word) {
+        full = `${word} ${full}`;
+        spend();
+      }
+    }
+  }
+
+  // --- a second name, and a descent claim ----------------------------------
+  // Both are appended clauses and both are last, because they are the parts a
+  // reader can skip: the name is complete before either arrives.
+  if (style.courtesyName && room() && fires(style.courtesyName.chance)) {
+    const courtesy = pick(style.courtesyName.pool);
+    if (courtesy) {
+      full = `${full}, ${style.courtesyName.link} ${courtesy}`;
+      spend();
+    }
+  }
+
+  if (style.ancestorLine && room() && fires(style.ancestorLine.chance)) {
+    const ancestor = pick(style.ancestorLine.pool);
+    if (ancestor && !full.includes(ancestor)) {
+      // An empty link means the element is a nisba and attaches directly:
+      // "Muhammad ibn Ali al-Husayni", not "Muhammad ibn Ali of al-Husayni".
+      full = style.ancestorLine.link
+        ? `${full}, ${style.ancestorLine.link} ${ancestor}`
+        : `${full} ${ancestor}`;
+      spend();
+    }
+  }
+
+  return { ...built, full: full.replace(/\s+/g, ' ').trim(), familyName };
 }

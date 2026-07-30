@@ -15,6 +15,7 @@
 import { hashString, unit } from '../core/rng';
 import { hexToRgb, hslToRgb, luminance, mixRgb, rgbToHex, rgbToHsl } from '../core/color';
 import { hasIntrinsicColor, hexForName } from '../../../constants/gameData/colorNames';
+import { stoneMaterialForHex } from '../../../services/ornamentService';
 import {
   BackgroundSpec,
   Build,
@@ -118,6 +119,44 @@ const WEALTH_ORNAMENT: Record<string, number> = {
  * silently falling back to a tunic — skirts, cloaks, loincloths and most of the
  * South Asian vocabulary among them.
  */
+/**
+ * How much weather a trade puts on a face.
+ *
+ * Read off the profession's *name*, the same way garments, hairstyles and
+ * coverings already are. The profession tables run to hundreds of entries keyed
+ * by name and there is no field on them saying whether the work is outdoors, so
+ * matching the words is the only route that does not mean editing every entry —
+ * and the words are consistent, because the tables were written by somebody
+ * describing real occupations.
+ *
+ * Three tiers rather than a flag. A fisherman at sea and a market trader under
+ * an awning have genuinely different faces, and the difference between them is
+ * about as large as the difference between the trader and a clerk.
+ *
+ * Order matters, first match wins, so the exceptions come first: a *miner* works
+ * harder than a farmer and sees less sun than a scribe, and matching him on
+ * "min" against a generic labouring pattern would have given him a fisherman's
+ * tan. The same care is why `gardener` precedes nothing and `guard` is absent —
+ * a household guard stands in a hall.
+ */
+const WEATHERING_KEYWORDS: Array<[RegExp, number]> = [
+  // Underground and indoor trades that are nonetheless heavy labour. Listed
+  // first so the labouring words below cannot claim them.
+  [/miner|collier|pit\b|underground|tunnel|weaver|spinner|dyer|tanner|fuller|brewer|baker|smith|forge|founder|glassblower|potter/i, 0.1],
+  [/scribe|clerk|notary|scholar|monk|nun|priest|abbot|bishop|physician|apothecary|midwife|tailor|seamstress|embroider|cook|servant|maid|butler|steward|banker|usurer|jeweller|goldsmith|illuminator|copyist|librarian|astronomer|teacher|tutor|lawyer|judge|official|magistrate|eunuch|courtier|concubine|weaver/i, 0],
+
+  // Full exposure: the work happens in the open, all day, in all weather.
+  [/fisher|fisherman|sailor|mariner|seaman|whaler|boatman|ferry|pilot\b|navigator/i, 0.9],
+  [/shepherd|herder|herdsman|drover|cowherd|goatherd|swineherd|pastoralist|nomad|camel|caravan|muleteer|carter|waggoner|teamster/i, 0.85],
+  [/farmer|peasant|ploughman|plowman|husbandman|harvest|reaper|field|agricultur|vineyard|vine.?dresser|orchard|olive|rice|paddy|planter|sharecropper|serf|cultivator|gardener|forester|woodcutter|woodsman|logger|charcoal|sawyer|thatcher|roofer|quarr|salt|lime.?burner/i, 0.8],
+  [/hunter|trapper|fowler|forager|gatherer|whaling|scout|ranger|guide/i, 0.8],
+  [/soldier|warrior|archer|cavalry|horseman|legionary|infantry|mercenary|sentry|watchman|sailor|marine|raider|pirate/i, 0.7],
+  [/mason|builder|bricklayer|navvy|labourer|laborer|porter|stevedore|docker|drayman|digger|dyke|canal|road|well.?digger/i, 0.65],
+
+  // Partly out: a stall, a doorway, a yard, a round.
+  [/pedlar|peddler|hawker|costermonger|market|stall|carrier|courier|messenger|postman|crier|beggar|vagrant|itinerant|pilgrim|washerwoman|laundress|water.?carrier|dung|scavenger|rag/i, 0.5],
+];
+
 const GARMENT_KEYWORDS: Array<[RegExp, GarmentKind]> = [
   [/(bare|naked|nude|loincloth|breechcloth|breechclout)/i, 'bare'],
   [/(robe|kaftan|caftan|jama|hanfu|cassock|habit|abaya|thobe|dishdasha|boubou|agbada|achkan|sherwani|toga|houppelande|senator wear)/i, 'robe'],
@@ -168,7 +207,10 @@ const HEADWEAR_KEYWORDS: Array<[RegExp, HeadwearKind]> = [
   // Knitwear is brimless and soft. `chullo` in particular used to fall through
   // to the `hat` at the end of the brimmed rule below and come back a felt
   // bowler, which is a long way from an Andean ear-flapped cap.
-  [/(cap|coif|bonnet|kufi|taqiyah|biretta|skullcap|futou|beret|toque|fez|tarboosh|hennin|topi|snapback|beanie|biggins|kofia|mitre|songkok|chullo|toboggan|stocking cap|watch cap|knit)/i, 'cap'],
+  // `visor` has to be caught here rather than in the brimmed rule below: a sun
+  // visor is a strap and a bill with no crown at all, and sent to the felt hat
+  // it came back a bowler with the brim on backwards.
+  [/(cap|coif|bonnet|kufi|taqiyah|biretta|skullcap|futou|beret|toque|fez|tarboosh|hennin|topi|snapback|beanie|biggins|kofia|mitre|songkok|chullo|toboggan|stocking cap|watch cap|knit|visor)/i, 'cap'],
   // `dou li` is written with a space in the item data, so the old `douli`
   // spelling never matched and those hats fell through to the `cap` fallback.
   [/(brim|tricorn|bicorne|sombrero|straw|petasos|boater|bowler|fedora|homburg|visor|top hat|wide[- ]?hat|conical|dou ?li|bamboo|sedge|sugegasa|kasa|salakot|non la|cheese-cutter|hat)/i, 'brimmed_hat'],
@@ -390,6 +432,198 @@ export function ornamentsFor(
 }
 
 /**
+ * The one thing the persona is *actually wearing*, as opposed to the pieces
+ * their tradition says they would.
+ *
+ * `appearance.jewelry` comes from `ornamentService`, which answers "what does
+ * someone of this place and period wear" — a good question, and the reason
+ * two thirds of personas have something at the throat. `appearance.accessory`
+ * answers a different one: it is the item in the equipped accessory slot, the
+ * object this specific person owns. Every persona has one, and the renderer
+ * had never read the field, so the wooden pendant a Han farmer is carrying and
+ * the copper taweez on an Ottoman weaver both stopped at the equipment list.
+ *
+ * The file's own precedence rule says `equippedItems > appearance`, and this is
+ * the last place it was not being honoured.
+ *
+ * Most accessories are not visible in a bust, and the discipline here is
+ * refusing them: bangles, rings, watches, purses, pouches and pipes are worn
+ * and carried below the crop. Returning null for those is the correct answer,
+ * not a gap — the item is still on the card, where a thing you own but cannot
+ * see belongs.
+ */
+const ACCESSORY_SHAPES: Array<[RegExp, JewelrySpec['type']]> = [
+  // Ear ornaments before the generic strand words: "Ear Plugs" and "Shell
+  // Earrings" both contain a material that would otherwise route them to a
+  // necklace.
+  [/ear.?plug|ear.?spool|earring|ear.?stud|ear.?ring/i, 'earrings'],
+  [/brooch|fibula|clasp|\bpin\b|seal\b|badge/i, 'brooch'],
+  // Hung on a cord: the pendant is the part that reads, so these are drawn as a
+  // chain rather than as a beaded strand.
+  [/pendant|amulet|talisman|charm|taweez|cross|crucifix|medallion|locket|gorget/i, 'chain'],
+  [/necklace|bead|strand|rosary|mala|rudraksha|torc|collar/i, 'necklace'],
+  [/circlet|diadem|fillet|headband|browband/i, 'circlet'],
+];
+
+/**
+ * The few substances the ornament vocabulary does not already name.
+ *
+ * This used to be a table of its own — seven slots, one of them a bucket called
+ * `gems` that swallowed jade, turquoise, lapis, amber, coral, garnet and
+ * carnelian alike. `ORNAMENT_MATERIAL_KEYWORDS` above has named every one of
+ * those separately since the headwear ornaments were written, so what is left
+ * here is only the words that table has no reason to know: the base metals a
+ * lay description reaches for, and the humble stuff — clay, seed, gourd — that
+ * is not a gemstone and not a metal and had to go somewhere.
+ */
+const ACCESSORY_FALLBACK_MATERIALS: Array<[RegExp, OrnamentMaterial]> = [
+  [/pewter|tin\b/i, 'silver'],
+  [/iron|steel|metal|alloy/i, 'bronze'],
+  [/faience|glazed|frit/i, 'faience'],
+  [/jet\b|lignite/i, 'jet'],
+  // The ornament vocabulary files feathers by brightness rather than by bird,
+  // and a feather worn as jewellery is a display feather by definition.
+  [/feather|plume|quill|down/i, 'plumeBright'],
+  [/crystal|glass|obsidian|bead/i, 'glass'],
+  [/tooth|horn|claw|shell/i, 'bone'],
+  [/stone|gem|jewel/i, 'carnelian'],
+  [/seed|clay|terracotta|fired|baked|nut|gourd|cord|fibre|fiber/i, 'wood'],
+];
+
+function accessoryMaterialFor(text: string): OrnamentMaterial {
+  const named = ORNAMENT_MATERIAL_KEYWORDS.find(([pattern]) => pattern.test(text));
+  // A feather is a real answer for a headdress and a wrong one for a pendant,
+  // so the plume bands are declined here and the piece falls through to its
+  // humbler reading.
+  if (named && !String(named[1]).startsWith('plume')) return named[1];
+  const fallback = ACCESSORY_FALLBACK_MATERIALS.find(([pattern]) => pattern.test(text));
+  // Clay and seed are the commonest accessory materials in the app. Wood is the
+  // right default for both: matte, mid-value, and it takes the same modelling.
+  return fallback ? fallback[1] : 'wood';
+}
+
+/**
+ * The stone a set of gem hexes stands for.
+ *
+ * `ornamentService` chose the stone, recorded it as colours, and names it on
+ * the card; `stoneMaterialForHex` is that same identification, so the portrait
+ * and the card cannot disagree. The hue fallback below only runs for colours
+ * that did not come from those sets — a hand-authored fixture, an imported
+ * persona — and is deliberately coarse, because guessing a stone from a colour
+ * is a guess and should not look like anything better.
+ */
+const STONE_HUES: Array<[number, OrnamentMaterial]> = [
+  [18, 'carnelian'], [352, 'ruby'], [140, 'jade'],
+  [174, 'turquoise'], [222, 'lapis'], [8, 'coral'], [42, 'amber'],
+];
+
+function stoneForHexes(hexes: string[] | undefined): OrnamentMaterial | undefined {
+  if (!hexes?.length) return undefined;
+  const known = stoneMaterialForHex(hexes[0]);
+  if (known) return known;
+
+  const hsl = rgbToHsl(hexToRgb(hexes[0]));
+  // A near-neutral bead is shell or glass, not a washed-out ruby: below this
+  // chroma the hue carries no information and matching on it invents a stone.
+  if (hsl.s < 0.14) return hsl.l > 0.62 ? 'shell' : 'glass';
+  return STONE_HUES.reduce((best, entry) =>
+    hueGap(hsl.h, entry[0]) < hueGap(hsl.h, best[0]) ? entry : best)[1];
+}
+
+/**
+ * Jewellery as it arrives from `ornamentService`, in the vocabulary the
+ * renderer draws in.
+ *
+ * The service still speaks the old seven-slot union — it is shared with the
+ * card, the equipment panel and the saved-persona format, and those have no
+ * reason to learn about kingfisher feather. So the translation happens here,
+ * once, at the boundary: `gems` becomes whichever stone the piece actually
+ * carries, and a metal piece keeps its metal and gains the stone set into it.
+ */
+function normalizeJewelry(
+  pieces: Array<{ type?: string; material?: string; style?: string; scale?: string; gems?: string[] }>
+): JewelrySpec[] {
+  return pieces.flatMap(piece => {
+    if (!piece?.type) return [];
+    const stone = stoneForHexes(piece.gems);
+    const raw = String(piece.material || 'bronze');
+    // `gems` was never a material — it was the absence of one. A piece filed
+    // under it *is* its stone, and if the stones went missing on the way here
+    // the safest reading is the commonest bead in the record.
+    const material: OrnamentMaterial =
+      raw === 'gems' ? (stone || 'carnelian') : accessoryMaterialFor(raw);
+    const style = (piece.style || 'simple') as JewelrySpec['style'];
+    return [{
+      type: piece.type as JewelrySpec['type'],
+      material,
+      // A piece drawn *in* its stone does not also have one set into it.
+      stone: stone && stone !== material ? stone : undefined,
+      style,
+      // Older saved personas predate the field. Reading it off the style is the
+      // best available guess and is the relationship the two used to have to
+      // each other implicitly, so nothing that already exists changes size.
+      scale: (piece.scale as JewelrySpec['scale'])
+        || (style === 'chunky' ? 'large' : style === 'delicate' ? 'small' : 'medium'),
+    }];
+  });
+}
+
+export function accessoryJewelryFor(
+  accessory: { name?: string; material?: string } | null | undefined,
+  wealth: number
+): JewelrySpec | null {
+  if (!accessory?.name) return null;
+  const text = `${accessory.name} ${accessory.material || ''}`;
+  if (/^\s*none\s*$/i.test(accessory.name)) return null;
+
+  const shape = ACCESSORY_SHAPES.find(([pattern]) => pattern.test(text));
+  if (!shape) return null;
+
+  const material = accessoryMaterialFor(text);
+
+  return {
+    type: shape[1],
+    material,
+    // A metal amulet on a wealthy neck has something set in it; a clay one does
+    // not, and the stone is only offered where the piece is not already stone.
+    stone: wealth > 0.66 && METALS.has(material) ? 'carnelian' : undefined,
+    // Style is workmanship and wealth buys it: a destitute persona's amulet is
+    // a bead on a cord.
+    style: wealth > 0.66 ? 'ornate' : wealth > 0.3 ? 'simple' : 'delicate',
+    // Scale is *not* wealth, and tying it to wealth would be the same mistake
+    // the clothing palette made. An amulet, a talisman, a charm is a small
+    // object on anybody; a plate, a gorget or a collar is a large one on a
+    // pauper. So it comes from what the thing is.
+    scale: /gorget|collar|plate|torc|breastplate|disc/i.test(text) ? 'large'
+      : /amulet|charm|talisman|token|stud|band/i.test(text) ? 'small'
+      : 'medium',
+  };
+}
+
+/** Substances that behave as the body of a piece rather than as its stone. */
+const METALS = new Set<OrnamentMaterial>(['gold', 'gilt', 'silver', 'bronze', 'copper']);
+
+/**
+ * Add the worn accessory to the traditional pieces, unless it would double up.
+ *
+ * Added rather than substituted: the tradition list and the equipped slot are
+ * two different claims about the same person and both are true. But a persona
+ * whose tradition already gives them a strand and who is also carrying a string
+ * of clay beads should not be drawn wearing two necklaces — at 96px the second
+ * one lands on the first and reads as a thick smear rather than as two objects.
+ * One piece per place on the body.
+ */
+function withAccessory(pieces: JewelrySpec[], accessory: JewelrySpec | null): JewelrySpec[] {
+  if (!accessory) return pieces;
+  // `necklace` and `chain` occupy the same rows of throat, so they collide with
+  // each other as well as with themselves.
+  const atThroat = (type: JewelrySpec['type']) => type === 'necklace' || type === 'chain';
+  const taken = pieces.some(piece =>
+    piece.type === accessory.type || (atThroat(piece.type) && atThroat(accessory.type)));
+  return taken ? pieces : [...pieces, accessory];
+}
+
+/**
  * How a garment is decorated, read out of its name and material.
  *
  * Ordered by how much of the cloth the treatment claims. A robe can be brocade
@@ -403,13 +637,22 @@ const GARMENT_SURFACE_KEYWORDS: Array<{
   group: 'field' | 'edge';
 }> = [
   { pattern: /brocade|damask|figured|jacquard|tissue|cloth of gold|cloth of silver/i, kind: 'brocade', group: 'field' },
-  { pattern: /print|painted|block.?print|batik|resist|stamped/i, kind: 'print', group: 'field' },
+  { pattern: /print|painted|block.?print|batik|resist|stamped|patterned/i, kind: 'print', group: 'field' },
   { pattern: /striped?|check|plaid|tartan|banded|narrow.strip|kente|ikat/i, kind: 'stripe', group: 'field' },
 
-  { pattern: /embroider|needlework|couched|gold thread|silver thread|zari/i, kind: 'embroidery', group: 'edge' },
+  { pattern: /embroider|needlework|couched|gold thread|silver thread|zari|gilded|gilt\b/i, kind: 'embroidery', group: 'edge' },
   { pattern: /lace|openwork|filet/i, kind: 'lace', group: 'edge' },
   { pattern: /\bfur\b|ermine|sable|miniver|shearling/i, kind: 'furTrim', group: 'edge' },
-  { pattern: /bead|spangle|sequin|cowrie|shells?\b/i, kind: 'beading', group: 'edge' },
+  { pattern: /bead|spangle|sequin|cowrie|shells?\b|jewel|gem.?set/i, kind: 'beading', group: 'edge' },
+  // Last, so any word that says *what* the decoration is beats one that only
+  // says there is some. These are the vague ones, and they have to be here
+  // because the data leans on them: `Jeweled` is the single most common
+  // adjective in `clothing.ts` — seventeen uses, more than `Simple` — and
+  // between them these words account for more decorated garments than every
+  // specific term above combined. They matched nothing at all, so the entire
+  // surface layer sat at four per cent of portraits while the tables that feed
+  // it described a much better dressed population than that.
+  { pattern: /ornate|decorated|finely.worked|worked\b/i, kind: 'embroidery', group: 'edge' },
 ];
 
 export function garmentSurfacesFor(
@@ -525,6 +768,36 @@ export function garmentWearFor(
   }
 
   return wear;
+}
+
+/**
+ * How weathered this face is, from the trade and from the years in it.
+ *
+ * Age multiplies rather than adds. Sun damage accumulates — it is the total
+ * exposure that shows, so a lifetime at sea reads on a sixty-year-old and barely
+ * at all on a nineteen-year-old who started last spring. Without the age term a
+ * fishing village came out with weather-beaten children in it.
+ *
+ * The appearance table still gets its say: where it explicitly calls a
+ * complexion weathered, that is taken as a floor rather than being averaged
+ * away, because it is a statement about this individual and the profession is
+ * only a statement about the average person doing that job.
+ */
+function weatheringFor(
+  profession: string | undefined,
+  skinTexture: string | undefined,
+  age: number
+): number {
+  const fromTrade = profession
+    ? classify(profession, WEATHERING_KEYWORDS, 0.25)
+    : 0.25;
+  // Ramped over a working life and levelling off: most of the damage is done by
+  // the forties, and a seventy-year-old is not three times the fifty-year-old.
+  const exposure = clamp01((age - 12) / 34);
+  const stated = /weathered|rough|leathery|sun|tanned|ruddy/i.test(String(skinTexture || ''))
+    ? 0.7
+    : 0;
+  return clamp01(Math.max(fromTrade * exposure, stated));
 }
 
 function classify<T>(name: string, table: Array<[RegExp, T]>, fallback: T): T {
@@ -738,7 +1011,53 @@ const hueGap = (a: number, b: number): number =>
  * make. Only lightness moves, and only when two colours are close enough that
  * one would vanish into the other.
  */
-function separateGarmentColors(primary: string, secondary: string, accent: string): SpecColorSet {
+/**
+ * Trim that is a different colour from the cloth it runs along.
+ *
+ * The lightness-only rule below is right about the *field* colours and wrong
+ * about this one. A border, a facing, a woven band, an embroidered cuff — the
+ * whole reason any of them exist is contrast, and a dyer putting a band on a
+ * madder coat did not reach for a paler madder. Holding hue fixed here was not
+ * declining to make a historical claim; it was making the claim that trim
+ * matched, which is the one thing trim reliably did not do.
+ *
+ * It only fires on a *collision*: an accent already distinct in hue, or already
+ * carrying real chroma, is left exactly where the tables put it. What it
+ * catches is the case the clothing palettes produce constantly — three browns,
+ * where the trim was drawn from the same six-entry list as the coat — and there
+ * the accent contains no information to preserve.
+ *
+ * The rotation lands opposite the cloth rather than anywhere: complementary
+ * trim is what reads at this size, and it is also what the surviving textiles
+ * do. Chroma is floored rather than set, so a dull-but-distinct accent keeps
+ * its own weight.
+ */
+function contrastingTrim(accent: string, primary: string, secondary: string, seed: number): string {
+  const a = rgbToHsl(hexToRgb(accent));
+  const p = rgbToHsl(hexToRgb(primary));
+  if (hueGap(a.h, p.h) >= 32 && a.s >= 0.28) return accent;
+
+  const s = rgbToHsl(hexToRgb(secondary));
+  // Three branches around the complement, so a sheet of a hundred does not come
+  // out with the same trim angle on every garment; the one that also clears the
+  // secondary wins, since a band is usually sewn along a facing.
+  const branches = [150, 180, 205, 130].map(d => (p.h + d) % 360);
+  const best = branches.reduce((chosen, h) =>
+    hueGap(h, s.h) > hueGap(chosen, s.h) ? h : chosen,
+    branches[Math.floor(unit(seed, 'trim-hue') * branches.length)]);
+
+  return rgbToHex(hslToRgb({
+    h: best,
+    s: Math.max(a.s, 0.42),
+    // Value is left alone. `separateGarmentColors` has already put this colour
+    // a legible distance from both grounds, and rotating hue does not undo it.
+    l: a.l,
+  }));
+}
+
+function separateGarmentColors(
+  primary: string, secondary: string, accent: string, seed: number
+): SpecColorSet {
   const GAP = 0.17;
   const shift = (hex: string, from: string): string => {
     const a = rgbToHsl(hexToRgb(hex));
@@ -757,8 +1076,11 @@ function separateGarmentColors(primary: string, secondary: string, accent: strin
     primary,
     secondary: nextSecondary,
     // The accent has to clear both, or a trim can be legible against the cloth
-    // and invisible against the facing it runs along.
-    accent: shift(shift(accent, primary), nextSecondary),
+    // and invisible against the facing it runs along. Value first, then hue:
+    // the rotation preserves lightness, so doing it in this order means the
+    // separation survives it.
+    accent: contrastingTrim(
+      shift(shift(accent, primary), nextSecondary), primary, nextSecondary, seed),
   };
 }
 
@@ -1162,6 +1484,35 @@ const ATTRIBUTE_MARKINGS: Record<string, Omit<MarkingSpec, 'color'> & { color?: 
   scarified: { type: 'scarification', location: 'cheek', size: 'medium', pattern: 'scarification' },
   kin_tattoos: { type: 'tattoo', location: 'cheek', size: 'medium', pattern: 'lines' },
   birthmark_omen: { type: 'birthmark', location: 'temple', size: 'medium', pattern: 'solid' },
+
+  // Depigmentation, drawn as several patches rather than one. A single pale
+  // blob on a cheek is a birthmark whatever you call it; what says vitiligo is
+  // that the patches are scattered and that their edges are ragged. The colour
+  // is left off and filled in from the sitter's own complexion below — a fixed
+  // pale hex is right for one skin tone and wrong for every other.
+  vitiligo: { type: 'birthmark', location: 'cheek', size: 'large', pattern: 'vitiligo' },
+
+  // The word the app uses for a face that was visibly damaged and healed badly.
+  // Deliberately the largest scar in the table and placed across the cheek and
+  // jaw rather than on a temple, because an attribute that says "disfigured"
+  // and a portrait with a neat two-pixel nick beside the ear are the picture
+  // and the card disagreeing again.
+  disfigured: { type: 'scar', location: 'cheek', size: 'large', pattern: 'burn' },
+
+  // Tertiary syphilis and yaws both leave gummatous scarring, and at this size
+  // they leave the same one. Kept away from the nose: collapse of the bridge is
+  // the famous sign and it is a different drawing than a surface mark, so the
+  // honest version of it here is a scar rather than a wrong nose.
+  syphilitic: { type: 'scar', location: 'forehead', size: 'medium', pattern: 'solid' },
+  yaws: { type: 'scar', location: 'cheek', size: 'medium', pattern: 'solid' },
+
+  // Favus. Crusted patches on the scalp with the hair gone over them, which is
+  // why it sits at the hairline rather than on the face.
+  scald_head: { type: 'scar', location: 'forehead', size: 'medium', pattern: 'burn' },
+
+  // The King's Evil: tubercular lymph nodes in the neck, which ulcerate and
+  // scar. It is the one entry here that is not on the face at all.
+  scrofulous: { type: 'scar', location: 'jaw', size: 'medium', pattern: 'solid' },
 };
 
 // ---------------------------------------------------------------------------
@@ -1210,6 +1561,15 @@ const POSE_SIGNALS: PoseSignal[] = [
   { when: 'palsied', family: 'address', pose: { tilt: 2 } },
 
   // Size: how much of the frame this person takes up.
+  //
+  // Four attributes describe stature and only two were read. `giant_boned` and
+  // `little_stature` are the app's own words for the same axis as `towering`
+  // and `diminutive`, and they sat here unmatched — so a persona whose card
+  // said "giant-boned" was drawn at exactly the height of everybody else. Read
+  // before their milder siblings, and pushed a little further, because both are
+  // the more emphatic word of the pair.
+  { when: 'giant_boned', family: 'size', pose: { scale: 1.09, offsetY: -3 } },
+  { when: 'little_stature', family: 'size', pose: { scale: 0.9, offsetY: 3 } },
   { when: 'towering', family: 'size', pose: { scale: 1.07, offsetY: -2 } },
   { when: 'diminutive', family: 'size', pose: { scale: 0.93, offsetY: 2 } },
   { when: 'corpulent', family: 'size', pose: { scale: 1.04 } },
@@ -1289,12 +1649,83 @@ function buildPose(ids: Set<string>, build: Build, wealth: string): PoseSpec {
   return pose;
 }
 
-function buildFaceTraits(ids: Set<string>): FaceTraits {
+function buildFaceTraits(ids: Set<string>, seed: number): FaceTraits {
   return {
     gaunt: ids.has('gaunt') || ids.has('frail'),
     poxScarred: ids.has('pox_scarred'),
     toothless: ids.has('toothless'),
-    blind: ids.has('blind'),
+    // A cataract and a blind eye are the same drawing at this size — a pale
+    // iris with the pupil gone — and the attribute list carries both words.
+    blind: ids.has('blind') || ids.has('clouded_eyes'),
+    // Which eye turns is not recorded anywhere, and it is not a coin flip in
+    // life either; the seed picks one and keeps it.
+    wallEye: ids.has('wall_eyed') ? (unit(seed, 'wall-eye') < 0.5 ? -1 : 1) : 0,
+    heterochromia: ids.has('heterochromia') ? HETEROCHROMIA_IRIS[
+      Math.floor(unit(seed, 'heterochromia') * HETEROCHROMIA_IRIS.length)
+    ] : null,
+    goiter: ids.has('goiter'),
+  };
+}
+
+/**
+ * The second iris, when the two do not match.
+ *
+ * Not drawn from the same table the first eye comes from. Heterochromia that
+ * reads at 96px needs the two eyes far apart in *value*, not merely in hue — a
+ * hazel eye beside a brown one is a real condition and an invisible drawing —
+ * so these are all pale, and the other eye keeps whatever colour the persona
+ * was generated with. Which is also the commoner form in life: one eye lighter.
+ */
+const HETEROCHROMIA_IRIS = ['#6f93a8', '#8aa88f', '#a8a06a', '#9c9fa8'];
+
+/**
+ * Red hair, which is four or five different colours in practice — copper,
+ * auburn, carrot, and the dark red that reads as brown until the light catches
+ * it. Picking one at random per persona keeps a page of redheads from looking
+ * like a single dye lot.
+ */
+const RED_HAIR = ['#8c3b1e', '#a84a22', '#6f2f1c', '#b46230'];
+
+/**
+ * Spectacles, from `hasGlasses` or from the attribute that means the sitter
+ * needs them.
+ *
+ * `drawGlasses` has existed since the details module was written and could only
+ * ever be reached by `appearance.hasGlasses`, a flag almost nothing sets — so a
+ * persona whose card says `nearsighted` was drawn without them every time.
+ *
+ * Two gates, and both are the point rather than caution. Spectacles are a
+ * fourteenth-century object: putting them on a Roman scribe would be the same
+ * class of error the context packs exist to prevent, so anything before the
+ * early modern era gets none no matter what its attributes say. And they were
+ * expensive for most of their history — being short-sighted did not mean owning
+ * glasses, it meant holding things closer — so past that date it is wealth and
+ * a roll, not a certainty. A poor eighteenth-century labourer who cannot see
+ * far is drawn squinting into the middle distance like everyone else, which is
+ * the honest picture.
+ */
+const SPECTACLE_ERAS = new Set(['RENAISSANCE_EARLY_MODERN', 'INDUSTRIAL_ERA', 'MODERN_ERA', 'FUTURE_ERA']);
+
+function spectaclesFor(
+  appearance: Record<string, any>,
+  ids: Set<string>,
+  era: string | undefined,
+  wealth: number,
+  seed: number
+): PortraitSpec['glasses'] {
+  if (appearance.hasGlasses) return { style: appearance.glassesStyle || 'round' };
+  if (!ids.has('nearsighted')) return null;
+  if (!SPECTACLE_ERAS.has(String(era))) return null;
+  // Cheap and universal by the twentieth century; a luxury before it.
+  const chance = era === 'MODERN_ERA' || era === 'FUTURE_ERA' ? 0.85 : 0.2 + wealth * 0.6;
+  if (unit(seed, 'spectacles') > chance) return null;
+  // Round wire was the only shape for four centuries. Square and half-rim are
+  // modern, so they are only reachable once they existed.
+  const modern = era === 'MODERN_ERA' || era === 'FUTURE_ERA';
+  const roll = unit(seed, 'spectacle-style');
+  return {
+    style: !modern ? 'round'
+      : roll < 0.4 ? 'round' : roll < 0.7 ? 'square' : roll < 0.9 ? 'oval' : 'half_rim',
   };
 }
 
@@ -1321,7 +1752,28 @@ export function restingExpression(mood: MoodSpec, condition: ConditionSpec): Exp
   // who is plainly delighted or plainly furious — it is a tie-breaker for the
   // large middle of the population, which is where the dull faces were.
   if (mood.valence > 0.42) return 'content';
-  if (mood.valence < -0.42) return mood.guarded > 0.6 ? 'scowl' : 'sad';
+  if (mood.valence < -0.42) {
+    // Which unhappy face, decided by *energy* rather than by guardedness.
+    //
+    // This branch used to read `guarded > 0.6 ? 'scowl' : 'sad'`, and it made
+    // scowl the single most common resting face in the app at 23.5% — nearly a
+    // quarter of every grid glaring at the viewer. The reason is that the test
+    // was not the conjunction it looked like: `valence` and `guarded` are both
+    // built from agreeableness in `buildMood`, pulling in opposite directions,
+    // so anything that cleared the valence bound had already very nearly
+    // cleared the guarded one. Two collinear conditions filter no more than one
+    // of them does.
+    //
+    // `energy` is the axis that is actually independent here, and it is the
+    // right one on the merits too. A scowl is *outward*: brow driven down, jaw
+    // set, aimed at whoever is looking. That takes vigour as well as ill
+    // temper. Hardship without vigour does not scowl — it goes flat and closed,
+    // which is `guarded`, or it goes down, which is `sad`. Those two are the
+    // faces of a hard life; a scowl is a face aimed at somebody, and it should
+    // be the rare case rather than the default.
+    if (mood.guarded > 0.6 && mood.energy > 0.55) return 'scowl';
+    return mood.guarded > 0.6 ? 'guarded' : 'sad';
+  }
   if (mood.disposition) return mood.disposition;
   if (mood.guarded > 0.68) return 'guarded';
   if (mood.valence > 0.18) return 'content';
@@ -1349,8 +1801,24 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
   const wealth = (source.wealthLevel || 'modest') as PortraitSpec['wealth'];
   const ornamentBase = WEALTH_ORNAMENT[wealth] ?? 0.2;
 
+  // Read here rather than down beside the face traits, because three of these
+  // decide colours and the colours are settled first.
+  const attributeIds = new Set(
+    (source.attributes || [])
+      .map(entry => String(entry?.id || ''))
+      .filter(Boolean)
+  );
+
   // --- hair colour, greyed by age ------------------------------------------
-  const baseHair = appearance.hairColor || '#4b2f21';
+  // `albino` and `red_haired` are pigment, and pigment is not something the
+  // renderer has to learn to draw — it is the input the hair ramp is built
+  // from. Both attributes were sitting in the list unread while the generator
+  // handed the portrait whatever hair colour it had picked at random, so a
+  // persona the card called red-haired came out brown about four times in five.
+  const baseHair =
+    attributeIds.has('albino') ? '#e8e2d4'
+    : attributeIds.has('red_haired') ? RED_HAIR[Math.floor(unit(seed, 'red-hair') * RED_HAIR.length)]
+    : appearance.hairColor || '#4b2f21';
   // Greying is near-universal by the sixties and well underway through the
   // fifties; the old curve left too many fifty-somethings with the hair colour
   // they had at twenty.
@@ -1359,6 +1827,14 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
   else if (age > 54) grayAmount = 0.22 + unit(seed, 'gray-late') * 0.4;
   else if (age > 44) grayAmount = 0.12 + unit(seed, 'gray-mid') * 0.38;
   else if (age > 33) grayAmount = unit(seed, 'gray-early') > 0.62 ? 0.06 + unit(seed, 'gray-amt') * 0.14 : 0;
+  // Grey by thirty at the latest, and the attribute means nothing on someone
+  // the age curve has already greyed — so this is a floor, not an assignment.
+  if (attributeIds.has('prematurely_gray')) {
+    grayAmount = Math.max(grayAmount, 0.45 + unit(seed, 'early-gray') * 0.35);
+  }
+  // White hair on an albino is not grey hair. Greying mixes toward a neutral
+  // and would drag the warmth out of a head that is already pale.
+  if (attributeIds.has('albino')) grayAmount = 0;
   const hairColor = grayAmount > 0.01
     ? rgbToHex(mixRgb(hexToRgb(baseHair), hexToRgb('#b7b2ab'), grayAmount))
     : baseHair;
@@ -1436,7 +1912,8 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
         || resolveColor(garmentPiece.color) || colorFromName(garmentPiece.name)
         || resolveColor(palette.primary) || '#7c6a54',
       resolveColor(palette.secondary) || '#9a8768',
-      resolveColor(palette.accent) || '#a8834f'
+      resolveColor(palette.accent) || '#a8834f',
+      seed
     ),
     ornament: ornamentBase,
     surfaces: garmentSurfacesFor(
@@ -1479,12 +1956,7 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
   const mood = buildMood(source, condition, seed);
 
   // --- attributes that show on a face ---------------------------------------
-  const attributeIds = new Set(
-    (source.attributes || [])
-      .map(entry => String(entry?.id || ''))
-      .filter(Boolean)
-  );
-  const traits = buildFaceTraits(attributeIds);
+  const traits = buildFaceTraits(attributeIds, seed);
   const attributeMarkings: MarkingSpec[] = [];
   for (const [id, marking] of Object.entries(ATTRIBUTE_MARKINGS)) {
     if (!attributeIds.has(id)) continue;
@@ -1498,8 +1970,15 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     } as MarkingSpec);
   }
 
+  // `bearded_woman` is an attribute the app generates and the renderer was
+  // throwing away at this line, because the sex test ran first and nothing
+  // could get past it. It is also the whole reason the attribute exists — a
+  // bearded woman who is drawn clean-shaven is just a woman, and the card
+  // beside her says otherwise.
   const facialHairWanted =
-    gender !== 'Female' && Boolean(appearance.facialHair) && age >= 15;
+    (gender !== 'Female' || attributeIds.has('bearded_woman'))
+    && (Boolean(appearance.facialHair) || attributeIds.has('bearded_woman'))
+    && age >= 15;
 
   const markings = attributeMarkings.length
     ? [...((appearance.markings || []) as MarkingSpec[]), ...attributeMarkings]
@@ -1510,9 +1989,19 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     gender,
     age,
 
-    skinColor: appearance.skinColor || '#c58f68',
+    // Albinism lightens the complexion without erasing it: the generated skin
+    // tone is mixed most of the way toward a pale pink rather than replaced,
+    // so an albino persona still reads as belonging to the population they
+    // were generated into. Replacing it outright would draw every albino in
+    // the app as the same north-European face, which is the opposite of what
+    // the attribute says.
+    skinColor: attributeIds.has('albino')
+      ? rgbToHex(mixRgb(hexToRgb(appearance.skinColor || '#c58f68'), hexToRgb('#f3ddd4'), 0.78))
+      : appearance.skinColor || '#c58f68',
     hairColor,
-    eyeColor: appearance.eyeColor || '#4b3a2a',
+    // The pale iris that goes with it — the pink is the vessels showing through
+    // an iris with no pigment of its own.
+    eyeColor: attributeIds.has('albino') ? '#b07f86' : appearance.eyeColor || '#4b3a2a',
     lipColor: appearance.lipColor,
 
     faceShape: appearance.faceShape || 'oval',
@@ -1534,23 +2023,34 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
 
     facialHair: facialHairWanted
       ? {
-          style: appearance.facialHairStyle || 'stubble',
-          thickness: appearance.facialHairThickness || 'medium',
+          // Stubble is the right default for a man the generator gave no style
+          // to — it is what an unshaven face looks like. It is the wrong one for
+          // `bearded_woman`, which is not a description of neglect: the
+          // attribute exists because the beard was remarked on, and a persona
+          // whose card says so needs a beard you can see.
+          style: appearance.facialHairStyle
+            || (attributeIds.has('bearded_woman') ? 'full_beard' : 'stubble'),
+          thickness: appearance.facialHairThickness
+            || (attributeIds.has('bearded_woman') ? 'thick' : 'medium'),
         }
       : null,
 
     build: (appearance.build || 'average') as Build,
     ageLines: clamp01((age - 26) / 46),
     lidDroop: clamp01((age - 44) / 32),
+    weathering: weatheringFor(source.profession, appearance.skinTexture, age),
 
     garment,
     headwear,
-    jewelry: (appearance.jewelry || []) as JewelrySpec[],
+    jewelry: withAccessory(
+      normalizeJewelry((appearance.jewelry || []) as Parameters<typeof normalizeJewelry>[0]),
+      accessoryJewelryFor(appearance.accessory, ornamentBase)
+    ),
     markings,
     skull: skullShapeFrom(markings),
     dental: dentalWorkFrom(markings),
     pose: buildPose(attributeIds, (appearance.build || 'average') as Build, wealth),
-    glasses: appearance.hasGlasses ? { style: appearance.glassesStyle || 'round' } : null,
+    glasses: spectaclesFor(appearance, attributeIds, source.era, ornamentBase, seed),
 
     condition,
     traits,

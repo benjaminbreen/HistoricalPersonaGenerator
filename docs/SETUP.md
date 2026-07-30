@@ -73,7 +73,52 @@ Two model actions exist, and they are priced very differently per persona:
 | `generate_sketch` | ~1.6k / 0.2k | ~0.07¢ | **Use AI to Develop Persona** (the default) |
 | `generate_annotation` | ~7.5k / 1.6k | ~0.43¢ | **AI Schema Record**, and the Source Studio flows |
 
-The annotation prompt carries the whole JSON schema — about 6,500 tokens of the 7,500 it sends — which is why it dominates. The default AI path therefore builds the schema record locally from the procedural seed and pays only for the biography. Both the schema path and any repeat of the default path ask the user to confirm first, and mention donating.
+The annotation prompt carries the whole JSON schema — about 6,500 tokens of the 7,500 it sends — which is why it dominates. The default AI path therefore builds the schema record locally from the procedural seed and pays only for the biography.
+
+### Free use and supporter credits
+
+Each browser receives five free AI biographies. The third request shows a
+prominent donation appeal but can still continue; the sixth is stopped.
+Procedural personas remain free and unlimited. A verified donation grants 50 AI
+credits for 30 days:
+
+- an AI biography uses 1 credit
+- a full annotation/schema call uses 6 credits
+
+The limit is enforced in `/api/gemini-persona`, not just in the browser. Visitor
+identity is an anonymous, signed, `HttpOnly` cookie; usage and supporter
+entitlements are stored in the project’s private Vercel Blob store. Locally they
+are written to the ignored `.ai-access/` directory.
+
+Add these production environment variables:
+
+```bash
+AI_ACCESS_SECRET=a-long-random-secret
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_DONATION_URL=https://buy.stripe.com/...
+STRIPE_AI_PAYMENT_LINK_ID=plink_...
+```
+
+`STRIPE_DONATION_URL` defaults to the project’s current donation link.
+`STRIPE_AI_PAYMENT_LINK_ID` is optional but strongly recommended so unrelated
+Stripe Payment Links cannot grant app credits. `AI_ACCESS_SECRET` falls back to
+the server-side Gemini key for compatibility, but a separate random secret is
+preferred.
+
+In Stripe:
+
+1. Add a webhook destination at
+   `https://historical-persona-generator.vercel.app/api/stripe-webhook`.
+2. Subscribe it to `checkout.session.completed` and
+   `checkout.session.async_payment_succeeded`.
+3. Copy the destination signing secret into `STRIPE_WEBHOOK_SECRET`.
+4. Copy the Payment Link’s `plink_...` ID into
+   `STRIPE_AI_PAYMENT_LINK_ID`, then redeploy.
+
+The app adds a `client_reference_id` to its payment link. The Stripe webhook
+uses that opaque ID to grant access to the same browser; it never trusts a
+client-side “I donated” flag. Clearing browser cookies creates a new anonymous
+identity, so account-level enforcement would require adding sign-in.
 
 ### Rate limits
 
