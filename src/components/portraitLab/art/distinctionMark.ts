@@ -15,6 +15,17 @@
  *   1 in 100 or rarer     a gold star
  *   1 in 1000 or rarer    a cut diamond, which catches the light
  *
+ * A third mark answers a different question. Standing is about the position a
+ * persona held; `personaRarityService` measures how unusual the person was —
+ * the scores at the edges of the distribution and the rarest badge carried —
+ * and prints "about 1 in 500 people are this unusual" on the card. That
+ * sentence had nothing on the portrait, so an unusual person with no office
+ * looked exactly like everybody else. It gets a blue star.
+ *
+ * One corner, so the marks are ordered rather than stacked: diamond, then gold
+ * star, then blue. A persona rare in both senses shows the rarer claim, which
+ * is the one about their standing.
+ *
  * Drawn onto the visible canvas rather than into the raster, deliberately. The
  * raster is shifted a pixel up and down for the breathing animation, and a
  * badge that bobbed with the persona's chest would read as part of the drawing
@@ -23,8 +34,16 @@
  * is inside the canvas so it survives into `toDataURL` exports and shares.
  */
 
-/** Which mark, if any, a standing earns. */
-export type DistinctionTier = 'star' | 'diamond' | null;
+/**
+ * Which mark, if any, a persona earns.
+ *
+ * The first three are the persona's own rarity and carry the same three
+ * colours the card already prints that figure in — green, then blue, then
+ * gold, as `.rarity-notable`, `.rarity-rare` and `.rarity-legendary` in
+ * PersonaGenerator.css. A reader should never have to be told the badge and
+ * the sentence are about the same thing.
+ */
+export type DistinctionTier = 'notable' | 'rare' | 'legendary' | 'star' | 'diamond' | null;
 
 /**
  * Offices only one person held at a time, or a handful in a generation.
@@ -189,6 +208,26 @@ export function distinctionTierFor(
   return null;
 }
 
+/**
+ * The mark for a whole persona: standing first, then personal rarity.
+ *
+ * `rarityTier` is what `describePersonaRarity` decided and the card prints as
+ * "about 1 in N people are this unusual". Anything but `ordinary` earns the
+ * blue star, so the badge and the sentence always agree — if one appears
+ * without the other, that is a bug and not a design.
+ */
+export function portraitMarkFor(
+  share: number | undefined,
+  profession?: string,
+  rarityTier?: string,
+): DistinctionTier {
+  const standing = distinctionTierFor(share, profession);
+  if (standing) return standing;
+  return rarityTier === 'notable' || rarityTier === 'rare' || rarityTier === 'legendary'
+    ? rarityTier
+    : null;
+}
+
 /* ======================================================================== */
 /*  THE ART                                                                 */
 /* ======================================================================== */
@@ -255,6 +294,35 @@ interface Ramp {
 }
 
 const RAMPS: Record<Exclude<DistinctionTier, null>, Ramp> = {
+  // The three rarity marks share the star's silhouette because they are making
+  // the same kind of claim, and are told apart by hue — the same hues the card
+  // prints the figure in. Each ramp is built around the ink colour the CSS
+  // already uses, one step either side of it.
+  //
+  // Green, for a person a little way off the middle. #3f6b57 in the CSS.
+  notable: {
+    outline: '#0c2018',
+    shades: ['#2f6b4c', '#4fa377', '#93dcb1'],
+    sheen: '#e2f8ec',
+    spark: '#ffffff',
+  },
+  // Blue, and darker than the diamond's cyan so the two never read as the same
+  // mark in different light. #1f5fae in the CSS.
+  rare: {
+    outline: '#0a1730',
+    shades: ['#27469b', '#4a7ada', '#8ab4ff'],
+    sheen: '#dbe8ff',
+    spark: '#ffffff',
+  },
+  // Gold, which the gold standing star also uses — the two never appear
+  // together, since a standing takes precedence, and both mean the same thing
+  // at a glance. #8a5c05 in the CSS.
+  legendary: {
+    outline: '#33220a',
+    shades: ['#8a5c05', '#d09a20', '#ffd76a'],
+    sheen: '#fff6cf',
+    spark: '#fffbe8',
+  },
   // Warm gold, kept slightly desaturated at the dark end so it sits on a
   // portrait rather than glowing off it.
   star: {
@@ -315,12 +383,74 @@ function compileMask(mask: string[]): Compiled {
 }
 
 const COMPILED: Record<Exclude<DistinctionTier, null>, Compiled> = {
+  notable: compileMask(STAR_MASK),
+  rare: compileMask(STAR_MASK),
+  legendary: compileMask(STAR_MASK),
   star: compileMask(STAR_MASK),
   diamond: compileMask(DIAMOND_MASK),
 };
 
 /** Inset from the top-right corner, in art pixels. */
 const INSET = 3;
+
+/** Where a mark goes when the canvas is not the square the bust was drawn on. */
+export interface MarkPlacement {
+  width: number;
+  height: number;
+  /** Distance from the top-right corner. Defaults to `INSET`. */
+  inset?: number;
+}
+
+/** Thickness of the frame, in art pixels: outline, bevel, inner band. */
+export const FRAME_WIDTH = 3;
+
+/**
+ * The mount lives in `spec/anatomy.ts`, because it moves where the body is
+ * rather than being something painted over a finished one. Re-exported here so
+ * that everything the frame needs arrives from the module that draws it.
+ */
+export { MOUNT_X, MOUNT_Y } from '../spec/anatomy';
+
+/**
+ * A frame in the mark's own colours.
+ *
+ * The corner mark is eleven pixels and easy to miss on a portrait seen small
+ * in a list. The frame says the same thing at any size and from across the
+ * room, and saying it in the same three palettes means the two never have to
+ * be learned separately: blue is unusual, gold is a standing, cyan is the
+ * rarest standing of all.
+ *
+ * Lit from the upper left like everything else here — the top and left edges
+ * take the light step, the bottom and right the dark one, so the frame reads
+ * as a raised moulding rather than as a drawn rectangle.
+ */
+export function drawPortraitFrame(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  tier: DistinctionTier,
+): void {
+  if (!tier) return;
+  const ramp = RAMPS[tier];
+
+  for (let ring = 0; ring < FRAME_WIDTH; ring += 1) {
+    const left = ring;
+    const top = ring;
+    const right = width - 1 - ring;
+    const bottom = height - 1 - ring;
+    if (right < left || bottom < top) break;
+
+    const lit = ring === 0 ? ramp.outline : ring === 1 ? ramp.shades[2] : ramp.shades[1];
+    const shade = ring === 0 ? ramp.outline : ring === 1 ? ramp.shades[0] : ramp.shades[1];
+
+    ctx.fillStyle = lit;
+    ctx.fillRect(left, top, right - left + 1, 1);        // top
+    ctx.fillRect(left, top, 1, bottom - top + 1);        // left
+    ctx.fillStyle = shade;
+    ctx.fillRect(left, bottom, right - left + 1, 1);     // bottom
+    ctx.fillRect(right, top, 1, bottom - top + 1);       // right
+  }
+}
 
 /**
  * How the two marks move.
@@ -334,6 +464,12 @@ const MOTION: Record<
   Exclude<DistinctionTier, null>,
   { sweep: number; band: number; twinkle: number; lift: number }
 > = {
+  // The rarity marks are the quietest, because they are on far more portraits
+  // than the standing ones and have to sit in a corner without asking for
+  // anything. The rarer the tier, the livelier it is allowed to be.
+  notable: { sweep: 3800, band: 0.22, twinkle: 0, lift: 2 },
+  rare: { sweep: 3400, band: 0.26, twinkle: 0, lift: 2 },
+  legendary: { sweep: 2800, band: 0.3, twinkle: 0, lift: 2 },
   // Gold needs two steps of lift before a highlight is visible on it at all.
   star: { sweep: 2600, band: 0.34, twinkle: 0, lift: 2 },
   // Cyan does not: two steps turned the whole gem white for a third of every
@@ -367,17 +503,23 @@ const TWINKLE_ARMS: Array<[number, number]> = [
  */
 export function drawDistinctionMark(
   ctx: CanvasRenderingContext2D,
-  canvasSize: number,
+  canvas: number | MarkPlacement,
   tier: DistinctionTier,
   phase = 0,
 ): void {
   if (!tier) return;
 
+  // A number is the square canvas the mark was first written for.
+  const place: MarkPlacement = typeof canvas === 'number'
+    ? { width: canvas, height: canvas }
+    : canvas;
+  const inset = place.inset ?? INSET;
+
   const art = COMPILED[tier];
   const ramp = RAMPS[tier];
   const motion = MOTION[tier];
-  const originX = canvasSize - art.width - INSET;
-  const originY = INSET;
+  const originX = place.width - art.width - inset;
+  const originY = inset;
 
   // The sheen is a band travelling down the diagonal. Starting it off the top
   // corner and ending past the bottom one means it enters and leaves cleanly
@@ -426,7 +568,7 @@ export function drawDistinctionMark(
     const [dx, dy] = TWINKLE_ARMS[i];
     const px = originX + art.width - 4 + dx;
     const py = originY + 3 + dy;
-    if (px < 0 || py < 0 || px >= canvasSize || py >= canvasSize) continue;
+    if (px < 0 || py < 0 || px >= place.width || py >= place.height) continue;
     ctx.fillRect(px, py, 1, 1);
   }
 }

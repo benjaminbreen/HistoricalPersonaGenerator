@@ -11,10 +11,11 @@ import { writeFileSync } from 'node:fs';
 import { Raster } from '../core/raster';
 import { buildPortraitSpec, restingExpression } from '../spec/buildSpec';
 import { compilePortrait, renderFrame } from '../render/pipeline';
+import { CANVAS } from '../spec/anatomy';
 import { idleFrame } from '../render/animation';
 import { encodePNG, scaleRGBA } from './png';
 
-const CELL = 96;
+const CELL = CANVAS;
 const SCALE = 4;
 
 interface HatCase {

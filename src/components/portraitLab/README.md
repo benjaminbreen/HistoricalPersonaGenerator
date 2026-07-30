@@ -45,6 +45,16 @@ both can be worked on at the same time without conflicts.
   npm run hat-sheet -- fur.png fur     # just the fur ones, 10x
   ```
 
+- **`npm run garment-sheet`** crops the head off and shows the chest, which is
+  otherwise the hardest part of the picture to judge. Four axes:
+
+  ```bash
+  npm run garment-sheet -- g.png            # kind × wealth
+  npm run garment-sheet -- g.png material   # kind × fabric
+  npm run garment-sheet -- g.png surface    # real decorated items
+  npm run garment-sheet -- g.png wear       # patched, faded, torn, …
+  ```
+
 - **<kbd>F2</kbd>** (or <kbd>⌘⇧D</kbd>) opens the **dev panel** over the running
   app: forty-two live-generated personas at a time, along one axis — a hat
   parade, an age ramp, a complexion ladder, forty-two seeds of the same face.
@@ -124,6 +134,15 @@ and health decide the *resting* face — a cheerful persona sits at a faint smil
 an exhausted one at half-lidded eyes — and occasionally flicker into a fuller
 expression on their own.
 
+Three faces cannot be reached that way, because valence is a single axis and a
+grin is not a stronger `content` but a rarer one. Those go through
+`MoodSpec.flourish`: a seeded roll, gated on the traits that make each face
+plausible, which hands out a `smile`, `grin`, `smirk` or `surprise` to about one
+persona in fourteen and is stable for a given portrait seed. `npm run
+portrait-audit` prints the resulting population share, which is the only honest
+way to tune it — every threshold tried on the personality vector alone produced
+either nobody or a new fourth-commonest mood.
+
 ## Coverage, honestly
 
 Faces, hair, ageing, expression and animation are complete for every persona the
@@ -136,6 +155,59 @@ plain rather than confidently wrong, matching the posture
 
 Adding a sixth pack means one `case` in `art/garments.ts` and, if it needs one, a
 covering in `art/headwear.ts`.
+
+## The frame, and the chest inside it
+
+The figure is built to a 96px module and drawn on a 120×120 square, of which the
+top 108 rows are shown. The extra room is a mount: the panel a portrait sits in
+is wider than it is tall, and matting the drawing was better than scaling the
+figure up and coarsening it. The mount lives in `spec/anatomy.ts` — `MOUNT_X`,
+`MOUNT_Y` — rather than in the compositing code, because it moves where the body
+is. An earlier pass added it at composite time and filled the new rows by
+repeating the bust's last row, which smeared the garment into vertical streaks;
+the cloth has to be *drawn* down there.
+
+That leaves about twenty-seven rows of chest, and three things happen in them.
+
+**Drape** (`art/garments.ts`) is a three-entry vocabulary chosen the same way
+`HairSilhouette` was: every entry has to be distinguishable from every other in
+a grid of forty thumbnails, and what actually distinguishes them is not the
+number of folds but where the folds start and which way they run.
+
+- `tailored` — cut to the body, hung from a sleeve set into an armhole. Flat
+  across the chest, breaking inward from each armhole. The flatness is the
+  signal.
+- `hanging` — a width of cloth supported at the shoulders. Folds start at the
+  shoulder line and *diverge* as they fall, because the cloth is wider at the
+  hem than the shoulders carrying it.
+- `wound` — gathered at one point and taken across the body, so the folds
+  radiate diagonally from the gather and flatten as they travel.
+
+A fold is a trough with a lit ridge beside it, never a dark line on its own; the
+first version drew the trough and not the ridge and read as scratches. Material
+sets how many and how soft: silk gets many fine wandering ones, hide gets few
+broad straight ones.
+
+**The head's shadow on the chest** is one falloff hung off the neckline, and of
+everything in the file it does the most for the least. Without it the head
+floats over an evenly lit shirt and the whole figure reads as flat shapes on a
+ground rather than one solid thing in a light. It is hung off the *neckline*
+rather than a fixed row, so a deep V carries it lower down the middle and a boat
+neck spreads it wide and shallow, for free.
+
+**Wear** (`art/garmentWear.ts`) is what has happened to the garment, from the
+`adjectives` the clothing tables have carried since they were written — Patched,
+Faded, Darned, Worn, Stained, Torn — plus what poverty implies where the table
+said nothing. Those adjectives had never reached the renderer: `characterGenerator`
+rebuilt `appearance.garment` from the equipped item and kept only the name and
+material, so the card printed "Rough, Patched" beside a picture of new cloth.
+
+This is worth more than it sounds. Ornament is how the rich are told apart from
+each other, and this renderer had a great deal of it. Wear is how everybody else
+is told apart from the rich, and there was none — a poor persona and a
+comfortable one differed in dye saturation and the width of a collar band. For
+an app about ordinary people, that was the wrong asymmetry. The audit reports
+the mix under **Garment wear drawn**.
 
 ## Ageing
 

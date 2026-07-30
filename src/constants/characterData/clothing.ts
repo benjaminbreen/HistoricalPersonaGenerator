@@ -56,6 +56,10 @@ const CULTURAL_SIMILARITY: Partial<Record<CulturalZone, CulturalZone[]>> = {
     'SOUTH_AMERICAN': ['NORTH_AMERICAN_PRE_COLUMBIAN'],
     'EAST_ASIAN': ['SOUTH_ASIAN'],
     'SOUTH_ASIAN': ['MENA', 'EAST_ASIAN'],
+    // No wardrobe of its own yet, and without a line here it fell through every
+    // cultural fallback to the generic robe. South Asian first: the mainland
+    // wore wrapped cotton before it wore anything cut.
+    'SOUTHEAST_ASIAN': ['SOUTH_ASIAN', 'EAST_ASIAN'],
     'MENA': ['SOUTH_ASIAN', 'EUROPEAN'],
     'SUB_SAHARAN_AFRICAN': ['OCEANIA'],
     'OCEANIA': ['SUB_SAHARAN_AFRICAN'],

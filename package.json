@@ -14,6 +14,7 @@
     "culture-audit": "esbuild scripts/auditCulturalFit.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditCulturalFit.mjs && node node_modules/.cache/auditCulturalFit.mjs",
     "narrative-audit": "esbuild scripts/auditNarrative.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditNarrative.mjs && node node_modules/.cache/auditNarrative.mjs",
     "wiki-audit": "esbuild scripts/auditWikipediaLinks.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditWikipediaLinks.mjs && node node_modules/.cache/auditWikipediaLinks.mjs",
+    "tier-audit": "esbuild scripts/auditAttributeTiers.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditAttributeTiers.mjs && node node_modules/.cache/auditAttributeTiers.mjs",
     "share-test": "node scripts/testPersonaShare.mjs",
     "start": "node server.js",
     "preview": "vite preview",

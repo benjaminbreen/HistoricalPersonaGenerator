@@ -16,8 +16,15 @@ import React, {
   forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState,
 } from 'react';
 import { Raster } from './core/raster';
-import { distinctionTierFor, drawDistinctionMark } from './art/distinctionMark';
+import {
+  portraitMarkFor,
+  drawDistinctionMark,
+  drawPortraitFrame,
+  FRAME_WIDTH,
+  MOUNT_Y,
+} from './art/distinctionMark';
 import { buildPortraitSpec, normalizeExpression, PortraitSource, restingExpression } from './spec/buildSpec';
+import { VIEW_HEIGHT } from './spec/anatomy';
 import { Expression } from './spec/types';
 import { compilePortrait, renderFrame, FrameState } from './render/pipeline';
 import { idleFrame } from './render/animation';
@@ -40,6 +47,8 @@ export interface PixelPortraitProps {
   /** How long a temporary expression holds before returning to rest. */
   expressionHoldMs?: number;
   title?: string;
+  /** Reports the generated portrait's dominant backdrop color to its layout. */
+  onBackdropColor?: (color: string) => void;
 }
 
 const FRAME_MS = 1000 / 24;
@@ -87,6 +96,7 @@ const PixelPortrait = forwardRef<PixelPortraitHandle, PixelPortraitProps>(functi
     animated = true,
     expressionHoldMs = 2200,
     title,
+    onBackdropColor,
   },
   ref
 ) {
@@ -106,11 +116,18 @@ const PixelPortrait = forwardRef<PixelPortraitHandle, PixelPortraitProps>(functi
   const spec = useMemo(() => buildPortraitSpec(character), [signature]);
   const compiled = useMemo(() => compilePortrait(spec), [spec]);
   const resting = useMemo(() => restingExpression(spec.mood, spec.condition), [spec]);
+
+  useEffect(() => {
+    onBackdropColor?.(spec.background.base);
+  }, [onBackdropColor, spec.background.base]);
+
   // Only the rarest standings are marked, and the threshold is the share of the
-  // population that held them rather than the fact of holding one.
-  const distinction = distinctionTierFor(
+  // population that held them rather than the fact of holding one. Failing
+  // that, the persona's own rarity — the figure the card states in words.
+  const distinction = portraitMarkFor(
     (character as { distinctionShare?: number }).distinctionShare,
     (character as { profession?: string }).profession,
+    (character as { rarityTier?: string }).rarityTier,
   );
 
   const [override, setOverride] = useState<Expression | null>(null);
@@ -151,22 +168,34 @@ const PixelPortrait = forwardRef<PixelPortraitHandle, PixelPortraitProps>(functi
     offCtx.putImageData(image, 0, 0);
 
     ctx.imageSmoothingEnabled = false;
-    const n = compiled.size;
+    const width = compiled.size;
+    const height = VIEW_HEIGHT;
+
+    // The canvas is drawn square and shown short: the mount is already part of
+    // the anatomy, so the figure — background, shoulders, chest and all — is
+    // painted at its final position and the rows past `VIEW_HEIGHT` simply run
+    // off the bottom the way the shoulders always did.
     if (breath === 0) {
-      ctx.drawImage(off, 0, 0);
+      ctx.drawImage(off, 0, 0, width, height, 0, 0, width, height);
     } else {
       // Shift the whole bust by a pixel, then repeat the edge row so the
       // vacated line never shows as a seam.
-      ctx.drawImage(off, 0, 0, n, n - 1, 0, breath > 0 ? 1 : 0, n, n - 1);
-      const srcRow = breath > 0 ? 0 : n - 1;
-      const destRow = breath > 0 ? 0 : n - 1;
-      ctx.drawImage(off, 0, srcRow, n, 1, 0, destRow, n, 1);
+      ctx.drawImage(off, 0, 0, width, height - 1, 0, 1, width, height - 1);
+      ctx.drawImage(off, 0, 0, width, 1, 0, 0, width, 1);
     }
 
-    // Painted last and over the finished bust, so it does not ride the breath
+    // Painted last and over the finished bust, so neither rides the breath
     // shift above. A badge that bobbed with the chest would read as part of the
     // drawing rather than as a note about it.
-    drawDistinctionMark(ctx, n, distinction, performance.now());
+    drawPortraitFrame(ctx, width, height, distinction);
+    drawDistinctionMark(
+      ctx,
+      // Inside the frame and inside the mount, so the mark sits on the picture
+      // rather than on its edge.
+      { width, height, inset: Math.max(FRAME_WIDTH + 1, MOUNT_Y + 2) },
+      distinction,
+      performance.now(),
+    );
   }, [compiled, distinction]);
 
   // Static render whenever the portrait, expression, or animation flag changes.
@@ -235,7 +264,7 @@ const PixelPortrait = forwardRef<PixelPortraitHandle, PixelPortraitProps>(functi
       if (!canvas) return null;
       const out = document.createElement('canvas');
       out.width = compiled.size * scale;
-      out.height = compiled.size * scale;
+      out.height = VIEW_HEIGHT * scale;
       const ctx = out.getContext('2d');
       if (!ctx) return null;
       ctx.imageSmoothingEnabled = false;
@@ -249,10 +278,12 @@ const PixelPortrait = forwardRef<PixelPortraitHandle, PixelPortraitProps>(functi
     <canvas
       ref={canvasRef}
       width={compiled.size}
-      height={compiled.size}
+      height={VIEW_HEIGHT}
       className={className}
       style={{
-        width: size,
+        // `size` stays the caller's idea of how tall a portrait is, so every
+        // existing call site keeps its layout; the mount adds width.
+        width: Math.round(size * compiled.size / VIEW_HEIGHT),
         height: size,
         imageRendering: 'pixelated',
         display: 'block',

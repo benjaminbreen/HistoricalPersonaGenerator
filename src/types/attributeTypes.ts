@@ -12,7 +12,49 @@ import { PlayerCharacter } from './playerCharacter';
 import { NpcEntity } from './npcTypes';
 import { CulturalZone, WealthLevel } from './characterData';
 
-export type AttributeRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+/**
+ * Six bands of prevalence, named for what they mean rather than for what a
+ * loot table would call them. `epic` and `legendary` said nothing about how
+ * many people were mute or carried a crooked back, and the old bottom band ran
+ * unbounded from one in three hundred to one in a million.
+ */
+export type AttributeRarity =
+  | 'common'
+  | 'uncommon'
+  | 'seldom_seen'
+  | 'rare'
+  | 'very_rare'
+  | 'exceedingly_rare';
+
+/** What the card prints. Ids stay underscored so they survive serialisation. */
+export const RARITY_LABELS: Record<AttributeRarity, string> = {
+  common: 'common',
+  uncommon: 'uncommon',
+  seldom_seen: 'seldom seen',
+  rare: 'rare',
+  very_rare: 'very rare',
+  exceedingly_rare: 'exceedingly rare',
+};
+
+/** Tiers the card leaves unlabelled: nothing is gained by saying "common". */
+export const UNLABELLED_RARITIES: ReadonlySet<AttributeRarity> = new Set<AttributeRarity>(['common']);
+
+const LEGACY_RARITIES: Record<string, AttributeRarity> = {
+  // The old ladder's bands, mapped onto the ones covering the same prevalence.
+  rare: 'seldom_seen',   // was 5-20 per thousand
+  epic: 'rare',          // was 1.5-5
+  legendary: 'very_rare', // was everything below 1.5, so this loses the tail
+};
+
+/**
+ * Personas saved under the old ladder carry `epic` and `legendary` strings.
+ * Read them through this rather than showing a tier that no longer exists.
+ */
+export function normalizeRarity(value: string | undefined | null): AttributeRarity | undefined {
+  if (!value) return undefined;
+  if (value in RARITY_LABELS) return value as AttributeRarity;
+  return LEGACY_RARITIES[value];
+}
 
 export type AttributeCategory =
   | 'physical'    // durable bodily facts (stature, strength, sensory loss)
@@ -90,7 +132,13 @@ export interface AttributeBadge {
   id: string;
   name: string;
   icon: string; // Icon name as string, resolved to a component in the UI
-  rarity: AttributeRarity;
+  /**
+   * Stamped at generation from the effective prevalence. Definitions do not
+   * declare it: a hand-written tier and a computed one drift apart, and when
+   * they did, a hundred of the two hundred definitions disagreed with their
+   * own weights.
+   */
+  rarity?: AttributeRarity;
   description: string;
   category: AttributeCategory;
 
@@ -143,22 +191,32 @@ export interface CharacterAttributes {
 export const RARITY_COLORS: Record<AttributeRarity, string> = {
   common: '#6B7280', // Gray
   uncommon: '#10B981', // Green
+  seldom_seen: '#0EA5E9', // Cyan
   rare: '#3B82F6', // Blue
-  epic: '#8B5CF6', // Purple
-  legendary: '#F59E0B', // Gold
+  very_rare: '#8B5CF6', // Purple
+  exceedingly_rare: '#F59E0B', // Gold
 };
 
 /**
  * Derive the display rarity from an effective prevalence weight (per 1000).
  * This makes the badge colour mean something: a pox-scarred Londoner in 1700
  * reads as common, while the same scarring in 1400 does not appear at all.
+ *
+ * The bands, in people:
+ *   common          more than 6 in 100
+ *   uncommon        2 to 6 in 100
+ *   seldom seen     1 in 200 to 1 in 50
+ *   rare            1 in 700 to 1 in 200
+ *   very rare       1 in 3,000 to 1 in 700
+ *   exceedingly rare  fewer than 1 in 3,000
  */
 export function deriveRarity(effectiveWeight: number): AttributeRarity {
   if (effectiveWeight >= 60) return 'common';
   if (effectiveWeight >= 20) return 'uncommon';
-  if (effectiveWeight >= 5) return 'rare';
-  if (effectiveWeight >= 1.5) return 'epic';
-  return 'legendary';
+  if (effectiveWeight >= 5) return 'seldom_seen';
+  if (effectiveWeight >= 1.5) return 'rare';
+  if (effectiveWeight >= 0.3) return 'very_rare';
+  return 'exceedingly_rare';
 }
 
 /**
@@ -168,7 +226,8 @@ export function deriveRarity(effectiveWeight: number): AttributeRarity {
 export const RARITY_WEIGHTS: Record<AttributeRarity, number> = {
   common: 400,
   uncommon: 250,
-  rare: 100,
-  epic: 30,
-  legendary: 10,
+  seldom_seen: 100,
+  rare: 30,
+  very_rare: 10,
+  exceedingly_rare: 3,
 };

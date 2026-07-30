@@ -74,6 +74,27 @@ export function bayer(x: number, y: number): number {
   return BAYER_4[(y & 3) * 4 + (x & 3)] / 16;
 }
 
+/**
+ * A dither threshold that is evenly spread but has no visible period.
+ *
+ * `bayer` is the right tool for a hard, deliberate ordered pattern — a woven
+ * texture, a stippled edge — and the wrong one for dissolving the boundary
+ * between two ramp steps across a large soft area. Its matrix repeats every
+ * four pixels, and wherever a gradient crosses a step boundary slowly, that
+ * repeat is exactly what the eye picks out: a fine checkered lattice hanging in
+ * front of the picture, which is what the corner of every backdrop in this app
+ * had in it.
+ *
+ * This is interleaved gradient noise. It has the property that matters — any
+ * small neighbourhood contains a good spread of thresholds, so a gradient
+ * dissolves smoothly rather than clumping — without the short period, so there
+ * is no pattern to find. One multiply and a fract, so it costs nothing.
+ */
+export function dispersed(x: number, y: number): number {
+  const v = 52.9829189 * ((0.06711056 * x + 0.00583715 * y) % 1);
+  return v - Math.floor(v);
+}
+
 const clampIdx = (v: number) => (v < 0 ? 0 : v > RAMP_LEN - 1 ? RAMP_LEN - 1 : v);
 
 export class Raster {
@@ -482,7 +503,11 @@ export function fillMask(
     for (let x = 0; x < width; x += 1) {
       if (!mask[y * width + x]) continue;
       let index = shader(x, y);
-      if (dither > 0) index += (bayer(x, y) - 0.5) * dither;
+      // Dispersed rather than ordered. Every shaded fill in the renderer goes
+      // through here — skin, cloth, hair, the ground — so the four-pixel repeat
+      // of a Bayer matrix was showing up on all of them wherever the shading
+      // crossed a ramp step gently enough to give it room.
+      if (dither > 0) index += (dispersed(x, y) - 0.5) * dither;
       const step = clampIdx(Math.round(index));
       if (alpha >= 1) raster.set(x, y, ramp.steps[step], material, step);
       else raster.blend(x, y, ramp.steps[step], alpha, material, step);

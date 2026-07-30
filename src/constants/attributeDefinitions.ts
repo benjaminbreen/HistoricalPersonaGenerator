@@ -6,6 +6,10 @@
  * by era, region, class, occupation, age and sex. A multiplier of 0 removes the
  * attribute from the pool entirely, which is how era- and culture-gating works.
  *
+ * No definition here declares a rarity. The tier printed on the card is derived
+ * from the effective weight at selection time, so an attribute is only ever as
+ * rare as it actually was for that person, in that place, in that year.
+ *
  * The numbers are deliberate estimates, not decoration. Where a real historical
  * rate is known (smallpox scarring in an eighteenth-century city, lactase
  * non-persistence by region, twin births), the weight reflects it. Where it is
@@ -142,11 +146,12 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'blind',
     name: 'Blind',
     icon: 'FaEyeSlash',
-    rarity: 'epic',
     category: 'physical',
-    baseWeight: 1.4,
-    // Blindness rose steeply with age, and with trachoma and smallpox in the
-    // regions where those were endemic.
+    // Modern blindness figures are the wrong anchor. Before cataract surgery
+    // and against endemic trachoma and smallpox, five to fifteen people per
+    // thousand were blind across most of the world, and far more than that
+    // among the old.
+    baseWeight: 3,
     weight: (ctx) => withAge(ctx, 45, 0.9, 5)
       * (inZone(ctx, 'MENA', 'SOUTH_ASIAN') && ctx.year < 1950 ? 2.2 : 1)
       * (ctx.year < 1900 ? 1.6 : 1),
@@ -161,7 +166,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'nearsighted',
     name: 'Nearsighted',
     icon: 'FaGlasses',
-    rarity: 'common',
     category: 'physical',
     baseWeight: 35,
     weight: (ctx) => (job(ctx, 'scholar', 'scribe', 'clerk', 'monk', 'notary', 'printer') ? 2 : 1),
@@ -174,7 +178,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'keen_eyed',
     name: 'Keen-Eyed',
     icon: 'IoEye',
-    rarity: 'uncommon',
     category: 'mental',
     baseWeight: 25,
     weight: (ctx, char) => ((char as any).stats?.perception >= 8 ? 2.5 : 0.7)
@@ -188,7 +191,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'color_blind',
     name: 'Color-Blind',
     icon: 'IoEyeOff',
-    rarity: 'uncommon',
     category: 'physical',
     baseWeight: 45,
     // Around one man in twelve, one woman in two hundred.
@@ -202,7 +204,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'night_blind',
     name: 'Night-Blind',
     icon: 'IoMoonSharp',
-    rarity: 'rare',
     category: 'condition',
     baseWeight: 12,
     // Vitamin A deficiency: a hungry-season affliction of the rural poor.
@@ -213,6 +214,40 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     phrase: 'helpless in the dark',
     dialogueHint: 'Avoids travelling after sunset',
   },
+  {
+    id: 'clouded_eyes',
+    name: 'Clouded Eyes',
+    icon: 'IoEye',
+    category: 'condition',
+    // The commonest cause of blindness in old age anywhere, and the one the
+    // period could do something about: a couching needle displaced the lens
+    // and traded a white blur for a dim, unfocused light. Sunlit latitudes had
+    // more of it, and had it earlier.
+    baseWeight: 6,
+    minAge: 45,
+    weight: (ctx) => withAge(ctx, 50, 1.2, 9)
+      * (inZone(ctx, 'MENA', 'SOUTH_ASIAN', 'SUB_SAHARAN_AFRICAN') ? 1.5 : 1)
+      * (ctx.year < 1900 ? 1 : 0.35),
+    exclusiveGroup: 'sight',
+    excludes: ['keen_eyed', 'calligrapher', 'water_diviner'],
+    description: 'A white film thickening across the eye; shapes remain, faces do not',
+    phrase: 'going blind behind a white film',
+    foundational: true,
+    dialogueHint: 'Leans close and asks who is speaking',
+  },
+  {
+    id: 'wall_eyed',
+    name: 'Wall-Eyed',
+    icon: 'IoEyeOff',
+    category: 'physical',
+    // Two or three people in a hundred, and among the most reliably recorded
+    // facts about a face: a squint is what a description mentions first.
+    baseWeight: 25,
+    excludes: ['blind', 'beautiful', 'clouded_eyes'],
+    description: 'One eye turns outward; strangers are never sure which eye to meet',
+    phrase: 'wall-eyed, one eye turning outward',
+    dialogueHint: 'Is used to people looking past them',
+  },
 
   // =========================================================================
   // HEARING
@@ -221,7 +256,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'deaf',
     name: 'Deaf',
     icon: 'FaDeaf',
-    rarity: 'epic',
     category: 'physical',
     baseWeight: 2.5,
     weight: (ctx) => (ctx.year < 1900 ? 1.5 : 1),
@@ -236,7 +270,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'hard_of_hearing',
     name: 'Hard of Hearing',
     icon: 'IoEar',
-    rarity: 'uncommon',
     category: 'condition',
     baseWeight: 20,
     // Occupational deafness was the standing hazard of the forge and the mill.
@@ -251,7 +284,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'ringing_ears',
     name: 'Ringing Ears',
     icon: 'IoWarning',
-    rarity: 'rare',
     category: 'condition',
     baseWeight: 12,
     weight: (ctx) => (job(ctx, 'smith', 'gunner', 'artiller', 'miller', 'soldier', 'mine') ? 5 : 1)
@@ -269,7 +301,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'mute',
     name: 'Mute',
     icon: 'GiMute',
-    rarity: 'legendary',
     category: 'physical',
     // Congenital mutism was genuinely rare. The old pool made it ~2% of all
     // personas; this puts it near its real incidence.
@@ -285,7 +316,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'stammer',
     name: 'Stammer',
     icon: 'GiTalk',
-    rarity: 'common',
     category: 'physical',
     baseWeight: 30,
     weight: (ctx) => (ctx.sex === 'Male' ? 1.4 : 0.7),
@@ -299,7 +329,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'hoarse_voiced',
     name: 'Hoarse-Voiced',
     icon: 'GiTalk',
-    rarity: 'uncommon',
     category: 'physical',
     baseWeight: 14,
     weight: (ctx) => (job(ctx, 'crier', 'hawker', 'preacher', 'sergeant', 'auction') ? 4 : 1),
@@ -317,7 +346,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'lame',
     name: 'Lame',
     icon: 'GiWalkingBoot',
-    rarity: 'uncommon',
     category: 'physical',
     baseWeight: 18,
     weight: (ctx) => withAge(ctx, 35, 0.4, 3)
@@ -334,7 +362,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'clubfoot',
     name: 'Clubfoot',
     icon: 'GiWalkingBoot',
-    rarity: 'epic',
     category: 'physical',
     baseWeight: 2,
     exclusiveGroup: 'mobility',
@@ -348,7 +375,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'bowed_legs',
     name: 'Bowed Legs',
     icon: 'GiBrokenBone',
-    rarity: 'rare',
     category: 'condition',
     baseWeight: 4,
     // Rickets: the signature deformity of the sunless industrial slum.
@@ -363,7 +389,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'one_armed',
     name: 'One-Armed',
     icon: 'GiHandBandage',
-    rarity: 'epic',
     category: 'physical',
     baseWeight: 1.6,
     weight: (ctx) => (job(ctx, 'soldier', 'sailor', 'gunner') ? 6 : 1)
@@ -378,10 +403,15 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'hunchback',
     name: 'Crooked Back',
     icon: 'GiBrokenBone',
-    rarity: 'rare',
     category: 'physical',
-    baseWeight: 3,
-    weight: (ctx) => (ctx.year < 1900 ? 1.5 : 1),
+    // Spinal tuberculosis, rickets and fractures that healed as they liked
+    // between them made a visibly crooked spine an ordinary sight, not a
+    // singular one. Rickets in particular was a disease of sunless courts and
+    // early factory towns.
+    baseWeight: 7,
+    weight: (ctx) => (ctx.year < 1900 ? 1.5 : 1)
+      * (poor(ctx) ? 1.6 : 0.8)
+      * (ctx.urban && ctx.year > 1600 ? 1.5 : 1),
     excludes: ['athletic', 'towering'],
     description: 'A spine curved since childhood; carries one shoulder far above the other',
     phrase: 'crooked of back',
@@ -392,7 +422,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'left_handed',
     name: 'Left-Handed',
     icon: 'IoHandLeft',
-    rarity: 'common',
     category: 'physical',
     baseWeight: 100,
     // Roughly a tenth of people, but suppressed wherever schooling or scribal
@@ -407,7 +436,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'ambidextrous',
     name: 'Ambidextrous',
     icon: 'IoHandLeft',
-    rarity: 'rare',
     category: 'skill',
     baseWeight: 10,
     exclusiveGroup: 'handedness',
@@ -423,7 +451,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'towering',
     name: 'Towering',
     icon: 'IoStar',
-    rarity: 'uncommon',
     category: 'physical',
     baseWeight: 22,
     weight: (ctx) => (rich(ctx) ? 1.6 : poor(ctx) ? 0.6 : 1),
@@ -436,7 +463,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'diminutive',
     name: 'Diminutive',
     icon: 'GiSnail',
-    rarity: 'common',
     category: 'physical',
     baseWeight: 30,
     weight: (ctx) => (poor(ctx) ? 1.8 : 0.8),
@@ -446,10 +472,43 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     dialogueHint: 'Surprisingly small',
   },
   {
+    id: 'little_stature',
+    name: 'Of Little Stature',
+    icon: 'GiSnail',
+    category: 'physical',
+    // Achondroplasia, about one birth in twenty-five thousand, and distinct
+    // from simply being short: a different frame, and in much of the world a
+    // named place in a household or a court that a short person did not get.
+    baseWeight: 0.04,
+    weight: (ctx) => (rich(ctx) || job(ctx, 'court', 'jester', 'fool', 'entertain') ? 4 : 1),
+    exclusiveGroup: 'stature',
+    excludes: ['athletic', 'towering', 'strong'],
+    description: 'Short-limbed since birth; the world is built a size too large',
+    phrase: 'short-limbed since birth',
+    foundational: true,
+    dialogueHint: 'Has spent a life being looked down at',
+  },
+  {
+    id: 'giant_boned',
+    name: 'Giant-Boned',
+    icon: 'GiGiant',
+    category: 'condition',
+    // Pituitary gigantism, rarer than one birth in ten thousand, and never
+    // only a matter of height: the jaw, hands and feet keep growing, the
+    // headaches come, and the life is short.
+    baseWeight: 0.06,
+    minAge: 18,
+    exclusiveGroup: 'stature',
+    excludes: ['diminutive', 'little_stature', 'beautiful'],
+    description: 'Grown past all proportion; hands, jaw and brow still thickening, and the head aches',
+    phrase: 'grown past all ordinary proportion',
+    foundational: true,
+    dialogueHint: 'Stoops through doorways and is stared at everywhere',
+  },
+  {
     id: 'corpulent',
     name: 'Corpulent',
     icon: 'GiWeight',
-    rarity: 'uncommon',
     category: 'physical',
     baseWeight: 12,
     // Before industrial food surpluses, bulk was a badge of the well-fed.
@@ -465,7 +524,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'gaunt',
     name: 'Gaunt',
     icon: 'FaFeather',
-    rarity: 'common',
     category: 'physical',
     baseWeight: 35,
     weight: (ctx) => (poor(ctx) ? 2.2 : rich(ctx) ? 0.3 : 1) * (ctx.year < 1900 ? 1.4 : 1),
@@ -478,7 +536,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'strong',
     name: 'Strong',
     icon: 'FaDumbbell',
-    rarity: 'common',
     category: 'physical',
     baseWeight: 45,
     weight: (ctx, char) => ((char as any).stats?.strength >= 8 ? 3 : 0.5)
@@ -492,7 +549,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'frail',
     name: 'Frail',
     icon: 'FaFeather',
-    rarity: 'common',
     category: 'physical',
     baseWeight: 30,
     weight: (ctx, char) => ((char as any).health < 40 ? 3 : 0.6) * withAge(ctx, 55, 0.6, 3),
@@ -505,7 +561,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'athletic',
     name: 'Athletic',
     icon: 'FaRunning',
-    rarity: 'uncommon',
     category: 'physical',
     baseWeight: 25,
     weight: (ctx, char) => ((char as any).stats?.dexterity >= 8 ? 2.5 : 0.6)
@@ -522,7 +577,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'pox_scarred',
     name: 'Pox-Scarred',
     icon: 'GiSpotedFlower',
-    rarity: 'common',
     category: 'condition',
     baseWeight: 110,
     // The commonest mark on an early modern face. Endemic smallpox scarred a
@@ -545,11 +599,10 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'scarred',
     name: 'Battle-Scarred',
     icon: 'GiSwordWound',
-    rarity: 'uncommon',
     category: 'physical',
     baseWeight: 14,
     weight: (ctx) => (job(ctx, 'soldier', 'guard', 'merc', 'sailor', 'knight') ? 6 : 1)
-      * (ctx.sex === 'Male' ? 1.8 : 0.5),
+      * (ctx.sex === 'Male' ? 1.8 : 0.25),
     description: 'Bears prominent scars from past violence; marks of survival',
     phrase: 'covered in scars',
     dialogueHint: 'Bears visible marks of violence',
@@ -558,7 +611,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'burn_scarred',
     name: 'Burn-Scarred',
     icon: 'IoFlame',
-    rarity: 'uncommon',
     category: 'physical',
     baseWeight: 12,
     // Open hearths and forges made burns the ordinary domestic injury.
@@ -572,7 +624,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'disfigured',
     name: 'Disfigured',
     icon: 'IoWarning',
-    rarity: 'rare',
     category: 'physical',
     baseWeight: 6,
     excludes: ['beautiful'],
@@ -585,7 +636,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'beautiful',
     name: 'Beautiful',
     icon: 'IoHeart',
-    rarity: 'uncommon',
     category: 'physical',
     baseWeight: 22,
     weight: (ctx, char) => ((char as any).stats?.charisma >= 8 ? 2.5 : 0.6)
@@ -598,9 +648,11 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'toothless',
     name: 'Toothless',
     icon: 'GiTooth',
-    rarity: 'uncommon',
     category: 'condition',
     baseWeight: 20,
+    // The age ramp did the work of a gate but not its job: it multiplies from
+    // 35 and never reaches zero, so a nineteen-year-old could draw it.
+    minAge: 30,
     weight: (ctx) => (ctx.year < 1900 ? 1 : 0.3) * withAge(ctx, 35, 1.4, 8)
       * (rich(ctx) && ctx.year > 1600 ? 1.5 : 1), // sugar reached the rich first
     excludes: ['beautiful'],
@@ -612,7 +664,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'rotten_tooth',
     name: 'Aching Tooth',
     icon: 'GiTooth',
-    rarity: 'common',
     category: 'condition',
     baseWeight: 55,
     weight: (ctx) => (ctx.year < 1900 ? 1 : 0.25)
@@ -626,7 +677,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'red_haired',
     name: 'Red-Haired',
     icon: 'IoFlame',
-    rarity: 'uncommon',
     category: 'physical',
     baseWeight: 8,
     // Concentrated in the Atlantic fringe, and read as an omen almost everywhere.
@@ -643,7 +693,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'prematurely_gray',
     name: 'Prematurely Gray',
     icon: 'GiHourglass',
-    rarity: 'uncommon',
     category: 'physical',
     baseWeight: 20,
     minAge: 22,
@@ -656,7 +705,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'heterochromia',
     name: 'Two-Colored Eyes',
     icon: 'IoEye',
-    rarity: 'legendary',
     category: 'physical',
     baseWeight: 0.7,
     description: 'Eyes of two different colors; strangers stare and then look away',
@@ -667,7 +715,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'birthmark_omen',
     name: 'Marked at Birth',
     icon: 'GiSpotedFlower',
-    rarity: 'rare',
     category: 'spiritual',
     baseWeight: 9,
     description: 'A vivid birthmark that midwives and neighbors read as a sign',
@@ -678,7 +725,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'six_fingered',
     name: 'Six-Fingered',
     icon: 'IoHandLeft',
-    rarity: 'legendary',
     category: 'physical',
     baseWeight: 0.8,
     description: 'An extra finger on one hand; hidden in company, useful at work',
@@ -690,7 +736,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'cleft_lip',
     name: 'Hare Lip',
     icon: 'IoWarning',
-    rarity: 'epic',
     category: 'physical',
     baseWeight: 1.4,
     excludes: ['beautiful'],
@@ -703,7 +748,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'vitiligo',
     name: 'Piebald Skin',
     icon: 'GiSpotedFlower',
-    rarity: 'rare',
     category: 'physical',
     baseWeight: 6,
     description: 'Pale patches spreading across the skin, taken by many for a judgment',
@@ -715,7 +759,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'albino',
     name: 'Albino',
     icon: 'IoSparkles',
-    rarity: 'legendary',
     category: 'physical',
     baseWeight: 0.3,
     // Notably higher in parts of West and Southern Africa and among the Kuna,
@@ -736,7 +779,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'consumptive',
     name: 'Consumptive',
     icon: 'GiLungs',
-    rarity: 'uncommon',
     category: 'condition',
     baseWeight: 22,
     // Tuberculosis: the great urban killer, worst in the crowded industrial city.
@@ -753,7 +795,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'malarial',
     name: 'Ague-Ridden',
     icon: 'IoThermometer',
-    rarity: 'uncommon',
     category: 'condition',
     baseWeight: 10,
     // Recurrent malaria: the defining affliction of marsh and river country.
@@ -773,7 +814,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'goiter',
     name: 'Goitrous',
     icon: 'GiMountainRoad',
-    rarity: 'rare',
     category: 'condition',
     baseWeight: 2,
     // Endemic goiter tracked dietary iodine, which tracked geology.
@@ -788,7 +828,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'worm_ridden',
     name: 'Worm-Ridden',
     icon: 'GiSnail',
-    rarity: 'common',
     category: 'condition',
     baseWeight: 50,
     weight: (ctx) => (ctx.year > 1930 ? 0.15 : 1)
@@ -802,7 +841,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'gouty',
     name: 'Gouty',
     icon: 'GiWineGlass',
-    rarity: 'rare',
     category: 'condition',
     baseWeight: 3,
     minAge: 35,
@@ -815,7 +853,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'the_stone',
     name: 'Troubled by the Stone',
     icon: 'IoWarning',
-    rarity: 'rare',
     category: 'condition',
     baseWeight: 5,
     minAge: 25,
@@ -828,7 +865,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'trachoma',
     name: 'Sore-Eyed',
     icon: 'IoEyeOff',
-    rarity: 'rare',
     category: 'condition',
     baseWeight: 3,
     weight: (ctx) => (ctx.year > 1960 ? 0.05 : 1)
@@ -842,7 +878,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'yaws',
     name: 'Yaws-Scarred',
     icon: 'GiSpotedFlower',
-    rarity: 'epic',
     category: 'condition',
     baseWeight: 1,
     weight: (ctx) => (ctx.year > 1960 ? 0.02 : 1)
@@ -855,7 +890,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'scrofulous',
     name: 'King\'s Evil',
     icon: 'GiPrayer',
-    rarity: 'rare',
     category: 'condition',
     baseWeight: 6,
     weight: (ctx) => ramp(ctx.year, 900, 1100, 1750, 1850)
@@ -868,7 +902,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'syphilitic',
     name: 'Pox-Ridden',
     icon: 'GiVirus',
-    rarity: 'rare',
     category: 'condition',
     baseWeight: 8,
     weight: (ctx) => ramp(ctx.year, 1494, 1520, 1940, 1970)
@@ -883,7 +916,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'chronic_cough',
     name: 'Bronchitic',
     icon: 'GiLungs',
-    rarity: 'common',
     category: 'condition',
     baseWeight: 25,
     // Coal smoke and open fires; worse in every city that burned sea-coal.
@@ -897,7 +929,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'rheumatic',
     name: 'Rheumatic',
     icon: 'IoSnow',
-    rarity: 'common',
     category: 'condition',
     baseWeight: 30,
     minAge: 35,
@@ -908,10 +939,94 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     dialogueHint: 'Predicts rain by their joints',
   },
   {
+    id: 'ruptured',
+    name: 'Ruptured',
+    icon: 'GiHandBandage',
+    category: 'condition',
+    // Truss societies existed to hand these out by the thousand. Among men who
+    // lifted for a living, past forty, something like one in twenty carried a
+    // rupture and knew exactly which movement would let it down.
+    baseWeight: 20,
+    minAge: 25,
+    weight: (ctx) => (ctx.sex === 'Male' ? 1 : 0.25)
+      * withAge(ctx, 35, 0.5, 3)
+      * (job(ctx, 'labor', 'porter', 'mine', 'dock', 'smith', 'farm', 'carrier', 'mason') ? 2.2 : 1),
+    description: 'A rupture in the belly wall, held in by a truss and a careful way of lifting',
+    phrase: 'ruptured, and careful how they lift',
+    dialogueHint: 'Refuses the heavy end of anything',
+  },
+  {
+    id: 'leg_ulcer',
+    name: 'Ulcerated Leg',
+    icon: 'GiScarWound',
+    category: 'condition',
+    // The standing trades' disease. Once open it stayed open for years, was
+    // dressed with whatever was to hand, and could be smelled across a room.
+    baseWeight: 8,
+    minAge: 35,
+    weight: (ctx) => withAge(ctx, 45, 0.7, 4)
+      * (ctx.sex === 'Female' ? 1.4 : 1) // childbearing, and standing to work
+      * (job(ctx, 'cook', 'wash', 'weav', 'smith', 'baker', 'servant', 'sailor', 'soldier') ? 1.8 : 1)
+      * (poor(ctx) ? 1.5 : 0.7),
+    description: 'An open sore on the shin that has not closed in years and is dressed each morning',
+    phrase: 'troubled by a sore on the leg that will not close',
+    dialogueHint: 'Shifts weight off one leg without noticing',
+  },
+  {
+    id: 'scald_head',
+    name: 'Scald-Head Scars',
+    icon: 'GiSpotedFlower',
+    category: 'condition',
+    // Ringworm of the scalp, caught in childhood off a shared cap or comb and
+    // treated by pitch plaster or by pulling the hair out at the root. What
+    // remained was bald patches for life and a strong memory of the cure.
+    baseWeight: 12,
+    weight: (ctx) => (ctx.year < 1920 ? 1 : 0.2)
+      * (poor(ctx) ? 2 : 0.5)
+      * (ctx.urban ? 1.4 : 1),
+    excludes: ['beautiful'],
+    description: 'Bald patches across the scalp from a childhood ringworm and its brutal cure',
+    phrase: 'scarred at the scalp from a childhood scald-head',
+    dialogueHint: 'Keeps their head covered indoors and out',
+  },
+  {
+    id: 'barren',
+    name: 'Barren',
+    icon: 'GiFamilyTree',
+    category: 'circumstance',
+    // Roughly one married woman in ten bore no living child, and in almost
+    // every society the fault was assigned to her. This is a social fact as
+    // much as a medical one, which is why it sits in circumstance.
+    baseWeight: 55,
+    sex: 'Female',
+    minAge: 28,
+    excludes: ['buried_children', 'midwife_skill'],
+    description: 'Has borne no living child, and has heard what the neighbors make of it',
+    phrase: 'childless, and blamed for it',
+    foundational: true,
+    dialogueHint: 'Turns the talk away from other people\'s children',
+  },
+  {
+    id: 'bearded_woman',
+    name: 'Bearded',
+    icon: 'GiFragile',
+    category: 'physical',
+    // Marked hirsutism, and one of the few conditions with a documented
+    // career attached to it: fairs and courts paid for the sight, and some
+    // women took the money rather than the shaving.
+    baseWeight: 0.6,
+    sex: 'Female',
+    minAge: 20,
+    excludes: ['beautiful'],
+    description: 'A woman with a full beard; some pay to look, and she has considered charging them',
+    phrase: 'a woman grown a full beard',
+    foundational: true,
+    dialogueHint: 'Meets staring with a flat, practiced look',
+  },
+  {
     id: 'falling_sickness',
     name: 'Falling Sickness',
     icon: 'FaBolt',
-    rarity: 'rare',
     category: 'condition',
     baseWeight: 5,
     description: 'Seized by fits without warning; opinion is divided on whether it is holy or foul',
@@ -923,7 +1038,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'palsied',
     name: 'Palsied',
     icon: 'GiHourglass',
-    rarity: 'rare',
     category: 'condition',
     baseWeight: 3,
     minAge: 45,
@@ -937,12 +1051,14 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'soldiers_heart',
     name: 'Soldier\'s Heart',
     icon: 'GiBattleGear',
-    rarity: 'rare',
     category: 'condition',
     baseWeight: 2,
     // What a later century would name differently: the startle, the sleepless
     // nights and the racing heart of someone who has been in a war.
-    weight: (ctx) => (job(ctx, 'soldier', 'sailor', 'merc', 'gunner') ? 30 : 1),
+    // War reached women as siege, sack and camp rather than as service, so
+    // the sex difference is real but nothing like the one for enlistment.
+    weight: (ctx) => (job(ctx, 'soldier', 'sailor', 'merc', 'gunner') ? 30 : 1)
+      * (ctx.sex === 'Male' ? 1 : 0.3),
     description: 'Starts at every sudden noise; the heart races for no cause they will name',
     phrase: 'given to starting at every sudden noise',
     foundational: true,
@@ -952,7 +1068,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'cannot_digest_milk',
     name: 'Milk Sickens Them',
     icon: 'GiMilkCarton',
-    rarity: 'uncommon',
     category: 'condition',
     baseWeight: 60,
     // Lactase persistence is genuinely geographic. Northern Europe and the
@@ -981,7 +1096,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'black_lung',
     name: 'Black Lung',
     icon: 'GiMineWagon',
-    rarity: 'epic',
     category: 'condition',
     baseWeight: 1,
     minAge: 25,
@@ -995,7 +1109,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'mercury_tremor',
     name: 'Quicksilver Shakes',
     icon: 'GiChemicalDrop',
-    rarity: 'epic',
     category: 'condition',
     baseWeight: 0.5,
     // Hatters, gilders, mirror-makers and amalgam miners all breathed mercury.
@@ -1011,7 +1124,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'lead_palsy',
     name: 'Lead Palsy',
     icon: 'GiChemicalDrop',
-    rarity: 'epic',
     category: 'condition',
     baseWeight: 0.6,
     weight: (ctx) => (job(ctx, 'paint', 'print', 'plumb', 'potter', 'glaz', 'type') ? 80 : 0.05)
@@ -1024,7 +1136,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'weavers_stoop',
     name: 'Weaver\'s Stoop',
     icon: 'GiSewingString',
-    rarity: 'epic',
     category: 'condition',
     baseWeight: 0.8,
     minAge: 25,
@@ -1037,7 +1148,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'millers_cough',
     name: 'Miller\'s Cough',
     icon: 'GiWheat',
-    rarity: 'epic',
     category: 'condition',
     baseWeight: 0.5,
     weight: (ctx) => (job(ctx, 'mill', 'baker', 'thresh', 'grain') ? 100 : 0.05),
@@ -1049,7 +1159,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'scriveners_cramp',
     name: 'Scrivener\'s Cramp',
     icon: 'GiQuillInk',
-    rarity: 'epic',
     category: 'condition',
     baseWeight: 0.4,
     weight: (ctx) => (job(ctx, 'scribe', 'clerk', 'notary', 'copy', 'secretar', 'account') ? 100 : 0.05),
@@ -1061,7 +1170,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'tanners_hands',
     name: 'Tanner\'s Hands',
     icon: 'GiChemicalDrop',
-    rarity: 'epic',
     category: 'condition',
     baseWeight: 0.4,
     weight: (ctx) => (job(ctx, 'tann', 'dye', 'fuller', 'currier', 'butcher') ? 100 : 0.05),
@@ -1086,7 +1194,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'genius',
     name: 'Brilliant Mind',
     icon: 'FaBrain',
-    rarity: 'epic',
     category: 'mental',
     baseWeight: 2,
     weight: (_ctx, char) => ((char as any).stats?.intelligence >= 8 ? 4 : 0.4),
@@ -1099,7 +1206,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'slow_witted',
     name: 'Slow-Witted',
     icon: 'FaFeather',
-    rarity: 'common',
     category: 'mental',
     baseWeight: 25,
     weight: (_ctx, char) => ((char as any).stats?.intelligence <= 3 ? 3 : 0.5),
@@ -1111,7 +1217,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'educated',
     name: 'Educated',
     icon: 'FaBookOpen',
-    rarity: 'uncommon',
     category: 'mental',
     baseWeight: 25,
     // Literacy was scarce, unevenly distributed, and rose late. Once schooling
@@ -1138,7 +1243,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'learned_by_ear',
     name: 'Learned by Ear',
     icon: 'GiTiedScroll',
-    rarity: 'uncommon',
     category: 'mental',
     baseWeight: 30,
     // Unlettered but far from ignorant: whole texts held in memory, as most
@@ -1154,7 +1258,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'polyglot',
     name: 'Polyglot',
     icon: 'FaScroll',
-    rarity: 'rare',
     category: 'mental',
     baseWeight: 8,
     weight: (ctx) => (place(ctx, ...PORTS) ? 5 : 1)
@@ -1167,7 +1270,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'second_script',
     name: 'Reads a Second Script',
     icon: 'GiScrollQuill',
-    rarity: 'rare',
     category: 'skill',
     baseWeight: 5,
     weight: (ctx) => (can('writing', ctx) ? (job(ctx, 'merchant', 'scribe', 'scholar', 'priest', 'clerk') ? 8 : 1) : 0),
@@ -1179,7 +1281,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'sharp_memory',
     name: 'Prodigious Memory',
     icon: 'GiBrain',
-    rarity: 'uncommon',
     category: 'mental',
     baseWeight: 14,
     exclusiveGroup: 'memory',
@@ -1191,7 +1292,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'forgetful',
     name: 'Forgetful',
     icon: 'FaFeather',
-    rarity: 'common',
     category: 'mental',
     baseWeight: 28,
     weight: (ctx) => withAge(ctx, 55, 0.8, 4),
@@ -1204,7 +1304,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'counts_everything',
     name: 'Counts Everything',
     icon: 'GiAbacus',
-    rarity: 'rare',
     category: 'mental',
     baseWeight: 5,
     description: 'Counts steps, tiles, and sheaves without deciding to; the numbers simply arrive',
@@ -1215,7 +1314,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'single_subject',
     name: 'One Subject Only',
     icon: 'GiSpellBook',
-    rarity: 'rare',
     category: 'mental',
     baseWeight: 5,
     description: 'Knows one narrow subject exhaustively and returns every conversation to it',
@@ -1226,7 +1324,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'crowd_averse',
     name: 'Cannot Abide Crowds',
     icon: 'IoPeople',
-    rarity: 'rare',
     category: 'mental',
     baseWeight: 8,
     excludes: ['charming', 'garrulous'],
@@ -1238,7 +1335,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'numerate',
     name: 'Quick Reckoner',
     icon: 'GiAbacus',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 12,
     weight: (ctx) => (job(ctx, 'merchant', 'account', 'steward', 'bank', 'clerk', 'survey') ? 7 : 1),
@@ -1250,7 +1346,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'dreamer',
     name: 'Daydreamer',
     icon: 'IoSparkles',
-    rarity: 'common',
     category: 'mental',
     baseWeight: 25,
     description: 'Drifts off mid-task into elaborate imaginings',
@@ -1261,7 +1356,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'curious',
     name: 'Insatiably Curious',
     icon: 'IoTelescope',
-    rarity: 'common',
     category: 'mental',
     baseWeight: 28,
     description: 'Asks questions well past the point of politeness',
@@ -1276,7 +1370,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'insomniac',
     name: 'Insomniac',
     icon: 'GiCandleFlame',
-    rarity: 'common',
     category: 'habit',
     baseWeight: 38,
     weight: (ctx) => withAge(ctx, 45, 0.4, 2.5),
@@ -1289,7 +1382,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'wakeful_hour',
     name: 'Keeps the Watch',
     icon: 'GiCandleFlame',
-    rarity: 'uncommon',
     category: 'habit',
     baseWeight: 40,
     // Segmented sleep was ordinary before cheap lighting: people woke between
@@ -1304,7 +1396,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'early_riser',
     name: 'Early Riser',
     icon: 'GiSunrise',
-    rarity: 'common',
     category: 'habit',
     baseWeight: 40,
     exclusiveGroup: 'sleep',
@@ -1316,7 +1407,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'night_owl',
     name: 'Night Owl',
     icon: 'GiOwl',
-    rarity: 'common',
     category: 'habit',
     baseWeight: 25,
     exclusiveGroup: 'sleep',
@@ -1328,7 +1418,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'heavy_sleeper',
     name: 'Heavy Sleeper',
     icon: 'GiBed',
-    rarity: 'common',
     category: 'habit',
     baseWeight: 25,
     exclusiveGroup: 'sleep',
@@ -1340,7 +1429,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'sleepwalker',
     name: 'Sleepwalker',
     icon: 'GiNightSleep',
-    rarity: 'rare',
     category: 'habit',
     baseWeight: 8,
     exclusiveGroup: 'sleep',
@@ -1353,7 +1441,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'lucid_dreamer',
     name: 'Lucid Dreamer',
     icon: 'GiThirdEye',
-    rarity: 'uncommon',
     category: 'habit',
     baseWeight: 15,
     excludes: ['nightmare_ridden'],
@@ -1365,7 +1452,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'nightmare_ridden',
     name: 'Nightmare-Ridden',
     icon: 'GiNightSleep',
-    rarity: 'uncommon',
     category: 'habit',
     baseWeight: 18,
     excludes: ['lucid_dreamer'],
@@ -1377,7 +1463,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'snorer',
     name: 'Snorer',
     icon: 'GiBed',
-    rarity: 'common',
     category: 'habit',
     baseWeight: 30,
     weight: (ctx) => withAge(ctx, 35, 0.4, 2.5),
@@ -1393,7 +1478,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'glutton',
     name: 'Great Appetite',
     icon: 'GiCookingPot',
-    rarity: 'uncommon',
     category: 'habit',
     baseWeight: 15,
     weight: (ctx) => (rich(ctx) ? 3 : poor(ctx) ? 0.4 : 1),
@@ -1406,7 +1490,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'ascetic',
     name: 'Abstemious',
     icon: 'GiPrayer',
-    rarity: 'uncommon',
     category: 'habit',
     baseWeight: 12,
     exclusiveGroup: 'appetite',
@@ -1418,7 +1501,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'heavy_drinker',
     name: 'Heavy Drinker',
     icon: 'GiDrinking',
-    rarity: 'common',
     category: 'habit',
     baseWeight: 40,
     weight: (ctx) => (job(ctx, 'sailor', 'soldier', 'brewer', 'innkeep', 'carter') ? 3 : 1)
@@ -1433,7 +1515,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'teetotal',
     name: 'Takes No Drink',
     icon: 'IoWater',
-    rarity: 'uncommon',
     category: 'habit',
     baseWeight: 15,
     weight: (ctx) => (inZone(ctx, 'MENA') ? 12 : 1)
@@ -1448,7 +1529,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'tobacco',
     name: 'Devoted to Tobacco',
     icon: 'GiSmokingPipe',
-    rarity: 'common',
     category: 'habit',
     baseWeight: 60,
     // Tobacco left the Americas after 1492 and had reached nearly everywhere
@@ -1465,7 +1545,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'snuff_taker',
     name: 'Snuff-Taker',
     icon: 'GiSmokingPipe',
-    rarity: 'uncommon',
     category: 'habit',
     baseWeight: 25,
     weight: (ctx) => ramp(ctx.year, 1640, 1700, 1820, 1900)
@@ -1480,7 +1559,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'opium_eater',
     name: 'Opium-Eater',
     icon: 'GiChemicalDrop',
-    rarity: 'rare',
     category: 'habit',
     baseWeight: 3,
     weight: (ctx) => {
@@ -1503,7 +1581,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'charming',
     name: 'Charming',
     icon: 'IoHeart',
-    rarity: 'uncommon',
     category: 'social',
     baseWeight: 25,
     weight: (_ctx, char) => ((char as any).stats?.charisma >= 8 ? 2.5 : 0.6),
@@ -1516,7 +1593,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'shy',
     name: 'Shy',
     icon: 'FaFeather',
-    rarity: 'common',
     category: 'social',
     baseWeight: 30,
     weight: (_ctx, char) => ((char as any).stats?.charisma <= 3 ? 2.5 : 0.7),
@@ -1529,7 +1605,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'garrulous',
     name: 'Garrulous',
     icon: 'GiTalk',
-    rarity: 'common',
     category: 'social',
     baseWeight: 30,
     exclusiveGroup: 'sociability',
@@ -1541,7 +1616,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'taciturn',
     name: 'Taciturn',
     icon: 'GiMute',
-    rarity: 'common',
     category: 'social',
     baseWeight: 30,
     exclusiveGroup: 'sociability',
@@ -1553,7 +1627,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'loner',
     name: 'Solitary',
     icon: 'GiFootprint',
-    rarity: 'uncommon',
     category: 'social',
     baseWeight: 20,
     exclusiveGroup: 'sociability',
@@ -1565,7 +1638,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'honest',
     name: 'Honest',
     icon: 'FaHeart',
-    rarity: 'common',
     category: 'social',
     baseWeight: 30,
     excludes: ['cunning'],
@@ -1577,7 +1649,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'cunning',
     name: 'Cunning',
     icon: 'GiSpiderWeb',
-    rarity: 'uncommon',
     category: 'social',
     baseWeight: 22,
     excludes: ['honest'],
@@ -1589,7 +1660,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'generous',
     name: 'Generous',
     icon: 'FaHeart',
-    rarity: 'uncommon',
     category: 'social',
     baseWeight: 22,
     excludes: ['greedy'],
@@ -1601,7 +1671,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'greedy',
     name: 'Miserly',
     icon: 'GiMoneyStack',
-    rarity: 'common',
     category: 'social',
     baseWeight: 25,
     excludes: ['generous'],
@@ -1613,7 +1682,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'brave',
     name: 'Brave',
     icon: 'GiShield',
-    rarity: 'uncommon',
     category: 'social',
     baseWeight: 22,
     // The old condition tested char.stats.courage, which does not exist on
@@ -1629,7 +1697,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'coward',
     name: 'Cowardly',
     icon: 'IoWarning',
-    rarity: 'common',
     category: 'social',
     baseWeight: 22,
     weight: (_ctx, char) => ((char as any).personality?.neuroticism > 60 ? 2.5 : 0.7),
@@ -1643,7 +1710,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'hot_tempered',
     name: 'Hot-Tempered',
     icon: 'IoFlame',
-    rarity: 'common',
     category: 'social',
     baseWeight: 28,
     exclusiveGroup: 'temper',
@@ -1655,7 +1721,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'patient',
     name: 'Patient',
     icon: 'GiHourglass',
-    rarity: 'uncommon',
     category: 'social',
     baseWeight: 25,
     exclusiveGroup: 'temper',
@@ -1667,7 +1732,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'quarrelsome',
     name: 'Quarrelsome',
     icon: 'GiCrossedSwords',
-    rarity: 'common',
     category: 'social',
     baseWeight: 25,
     exclusiveGroup: 'temper',
@@ -1679,7 +1743,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'proud',
     name: 'Proud',
     icon: 'GiCrown',
-    rarity: 'common',
     category: 'social',
     baseWeight: 28,
     weight: (ctx) => (rich(ctx) ? 2 : 1),
@@ -1692,7 +1755,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'humble',
     name: 'Humble',
     icon: 'FaPray',
-    rarity: 'uncommon',
     category: 'social',
     baseWeight: 22,
     excludes: ['proud'],
@@ -1704,7 +1766,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'melancholic',
     name: 'Melancholic',
     icon: 'IoWarning',
-    rarity: 'common',
     category: 'social',
     baseWeight: 25,
     // Before the humors faded, this reads as a humoral diagnosis instead.
@@ -1718,7 +1779,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'cheerful',
     name: 'Cheerful',
     icon: 'IoHeart',
-    rarity: 'uncommon',
     category: 'social',
     baseWeight: 25,
     excludes: ['melancholic'],
@@ -1730,7 +1790,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'stubborn',
     name: 'Stubborn',
     icon: 'GiAnvil',
-    rarity: 'common',
     category: 'social',
     baseWeight: 30,
     description: 'Will not be moved once decided, however good the argument',
@@ -1741,7 +1800,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'reckless',
     name: 'Reckless',
     icon: 'IoRocket',
-    rarity: 'common',
     category: 'social',
     baseWeight: 22,
     weight: (ctx) => (ctx.age < 30 ? 2 : 0.5),
@@ -1754,7 +1812,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'cautious',
     name: 'Cautious',
     icon: 'GiShield',
-    rarity: 'common',
     category: 'social',
     baseWeight: 25,
     weight: (ctx) => (ctx.age > 45 ? 1.8 : 0.8),
@@ -1767,7 +1824,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'gossip',
     name: 'Gossip',
     icon: 'GiTalk',
-    rarity: 'common',
     category: 'social',
     baseWeight: 28,
     description: 'Knows everyone\'s business and trades it as currency',
@@ -1778,7 +1834,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'peacemaker',
     name: 'Peacemaker',
     icon: 'GiPeaceDove',
-    rarity: 'uncommon',
     category: 'social',
     baseWeight: 18,
     weight: (ctx) => withAge(ctx, 40, 0.3, 2),
@@ -1790,7 +1845,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'loyal',
     name: 'Steadfast',
     icon: 'GiShield',
-    rarity: 'uncommon',
     category: 'social',
     baseWeight: 22,
     description: 'Keeps faith with kin and patron past the point of self-interest',
@@ -1801,7 +1855,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'animal_lover',
     name: 'Good with Animals',
     icon: 'IoPaw',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 20,
     weight: (ctx) => (job(ctx, 'shepherd', 'herd', 'farm', 'ostler', 'groom', 'drover') ? 4 : 1),
@@ -1817,7 +1870,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'devout',
     name: 'Devout',
     icon: 'FaPray',
-    rarity: 'common',
     category: 'spiritual',
     baseWeight: 55,
     weight: (ctx) => (ctx.year > 1900 ? 0.6 : 1) * withAge(ctx, 45, 0.3, 2),
@@ -1831,7 +1883,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'lax_in_faith',
     name: 'Lax in Faith',
     icon: 'GiCandleFlame',
-    rarity: 'common',
     category: 'spiritual',
     baseWeight: 35,
     exclusiveGroup: 'faith',
@@ -1843,7 +1894,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'skeptic',
     name: 'Skeptical',
     icon: 'FaBrain',
-    rarity: 'rare',
     category: 'spiritual',
     baseWeight: 6,
     // Open unbelief was dangerous before it was merely unfashionable.
@@ -1857,7 +1907,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'blessed',
     name: 'Blessed',
     icon: 'FaCross',
-    rarity: 'rare',
     category: 'spiritual',
     baseWeight: 4,
     exclusiveGroup: 'fortune',
@@ -1869,7 +1918,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'cursed',
     name: 'Cursed',
     icon: 'IoSkull',
-    rarity: 'rare',
     category: 'spiritual',
     baseWeight: 5,
     exclusiveGroup: 'fortune',
@@ -1882,7 +1930,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'visionary',
     name: 'Visionary',
     icon: 'GiThirdEye',
-    rarity: 'rare',
     category: 'spiritual',
     baseWeight: 5,
     description: 'Experiences vivid dreams and visions; some believe them prophetic',
@@ -1894,7 +1941,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'evil_eye_feared',
     name: 'Feared for the Eye',
     icon: 'GiEyeOfHorus',
-    rarity: 'rare',
     category: 'spiritual',
     baseWeight: 4,
     weight: (ctx) => (inZone(ctx, 'MENA', 'SOUTH_ASIAN') ? 8
@@ -1908,7 +1954,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'ancestor_dreams',
     name: 'Visited by the Dead',
     icon: 'GiSpellBook',
-    rarity: 'rare',
     category: 'spiritual',
     baseWeight: 5,
     weight: (ctx) => (inZone(ctx, 'SUB_SAHARAN_AFRICAN', 'OCEANIA', 'NORTH_AMERICAN_PRE_COLUMBIAN', 'EAST_ASIAN') ? 6 : 1),
@@ -1920,7 +1965,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'under_vow',
     name: 'Under a Vow',
     icon: 'GiPrayer',
-    rarity: 'uncommon',
     category: 'spiritual',
     baseWeight: 10,
     weight: (ctx) => (ctx.year > 1900 ? 0.3 : 1),
@@ -1937,7 +1981,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'eldest',
     name: 'Eldest Child',
     icon: 'GiCrown',
-    rarity: 'common',
     category: 'circumstance',
     baseWeight: 90,
     exclusiveGroup: 'birth_order',
@@ -1949,7 +1992,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'youngest',
     name: 'Youngest Child',
     icon: 'IoHeart',
-    rarity: 'common',
     category: 'circumstance',
     baseWeight: 90,
     exclusiveGroup: 'birth_order',
@@ -1961,7 +2003,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'middle_child',
     name: 'Middle Child',
     icon: 'GiFamilyTree',
-    rarity: 'common',
     category: 'circumstance',
     baseWeight: 70,
     exclusiveGroup: 'birth_order',
@@ -1973,7 +2014,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'only_survivor',
     name: 'Only One to Live',
     icon: 'GiBabyFace',
-    rarity: 'uncommon',
     category: 'circumstance',
     baseWeight: 35,
     // With a third to half of children dead before five, being the sole
@@ -1989,7 +2029,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'only_child',
     name: 'Only Child',
     icon: 'GiBabyFace',
-    rarity: 'uncommon',
     category: 'circumstance',
     baseWeight: 20,
     weight: (ctx) => (ctx.year > 1900 ? 3 : 1),
@@ -2002,7 +2041,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'twin',
     name: 'Twin',
     icon: 'IoPeople',
-    rarity: 'uncommon',
     category: 'circumstance',
     // Roughly 12 twin births per thousand; markedly higher in West Africa.
     baseWeight: 12,
@@ -2016,7 +2054,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'orphan',
     name: 'Orphan',
     icon: 'IoWarning',
-    rarity: 'common',
     category: 'circumstance',
     baseWeight: 45,
     weight: (ctx) => (ctx.year < 1900 ? 1.5 : 0.4) * (ctx.age > 25 ? 1.3 : 1),
@@ -2029,7 +2066,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'bastard_born',
     name: 'Base-Born',
     icon: 'GiCrossMark',
-    rarity: 'uncommon',
     category: 'circumstance',
     baseWeight: 28,
     weight: (ctx) => urbanBoost(ctx, 2) * (ctx.year > 1950 ? 0.5 : 1),
@@ -2042,7 +2078,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'foundling',
     name: 'Foundling',
     icon: 'GiBabyFace',
-    rarity: 'rare',
     category: 'circumstance',
     baseWeight: 7,
     weight: (ctx) => urbanBoost(ctx, 4) * (ctx.year > 1950 ? 0.3 : 1),
@@ -2056,7 +2091,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'raised_by_kin',
     name: 'Raised by Kin',
     icon: 'GiFamilyTree',
-    rarity: 'common',
     category: 'circumstance',
     baseWeight: 30,
     weight: (ctx) => (ctx.year < 1900 ? 1.4 : 0.7),
@@ -2069,7 +2103,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'buried_children',
     name: 'Has Buried Children',
     icon: 'GiDeathSkull',
-    rarity: 'common',
     category: 'circumstance',
     baseWeight: 55,
     minAge: 26,
@@ -2084,7 +2117,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'widowed_young',
     name: 'Widowed Young',
     icon: 'GiRing',
-    rarity: 'uncommon',
     category: 'circumstance',
     baseWeight: 28,
     minAge: 22,
@@ -2098,7 +2130,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'second_son',
     name: 'Second Son',
     icon: 'GiCrown',
-    rarity: 'uncommon',
     category: 'circumstance',
     baseWeight: 25,
     sex: 'Male',
@@ -2121,7 +2152,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'exile',
     name: 'Exile',
     icon: 'IoCompass',
-    rarity: 'uncommon',
     category: 'circumstance',
     baseWeight: 10,
     exclusiveGroup: 'rootedness',
@@ -2134,7 +2164,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'never_left',
     name: 'Never Left the Parish',
     icon: 'GiTrail',
-    rarity: 'common',
     category: 'circumstance',
     baseWeight: 90,
     // Before cheap transport, most people died within a day's walk of birth.
@@ -2149,7 +2178,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'wanderer',
     name: 'Wanderer',
     icon: 'IoCompass',
-    rarity: 'uncommon',
     category: 'circumstance',
     baseWeight: 22,
     exclusiveGroup: 'rootedness',
@@ -2161,7 +2189,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'foreigner',
     name: 'A Stranger Here',
     icon: 'IoAirplane',
-    rarity: 'uncommon',
     category: 'circumstance',
     baseWeight: 18,
     weight: (ctx) => (place(ctx, ...PORTS) ? 2.5 : 1) * urbanBoost(ctx, 1.6),
@@ -2175,12 +2202,24 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'veteran',
     name: 'War Veteran',
     icon: 'GiCrossedSwords',
-    rarity: 'uncommon',
     category: 'circumstance',
     baseWeight: 8,
-    minAge: 18,
-    weight: (ctx) => (ctx.sex === 'Male' ? 4 : 0.3)
-      * (job(ctx, 'soldier', 'merc', 'guard', 'sailor') ? 8 : 1),
+    minAge: 20,
+    // Armies were male almost everywhere, and 0.3 for a woman was far too
+    // generous — it put a wet nurse of eighteen in the ranks. The exceptions
+    // are real and specific rather than general: the Dahomean ahosi, the
+    // steppe and Scythian burials with weapons, and any woman whose trade is
+    // arms, who is a soldier by the same test as a man.
+    weight: (ctx) => {
+      const soldier = job(ctx, 'soldier', 'merc', 'guard', 'sailor', 'warrior', 'cavalry');
+      const womenBoreArms = place(ctx, 'dahomey', 'abomey', 'scythia', 'sarmat', 'steppe', 'mongol');
+      const bySex = ctx.sex === 'Male' ? 4
+        : soldier || womenBoreArms ? 2
+          : 0.03;
+      // Veterans accumulate: a man of sixty has had four decades of wars to be
+      // caught by, and a man of twenty has had one.
+      return bySex * (soldier ? 8 : 1) * withAge(ctx, 25, 0.25, 2.5);
+    },
     description: 'Fought in past wars or conflicts; carries the memories of battle',
     phrase: 'a veteran of war',
     foundational: true,
@@ -2190,7 +2229,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'survivor',
     name: 'Survivor',
     icon: 'GiShield',
-    rarity: 'uncommon',
     category: 'circumstance',
     baseWeight: 18,
     // The old condition required a stat named `endurance`, which does not
@@ -2204,7 +2242,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'plague_survivor',
     name: 'Plague Survivor',
     icon: 'GiVirus',
-    rarity: 'rare',
     category: 'circumstance',
     baseWeight: 3,
     weight: (ctx) => (inZone(ctx, ...OLD_WORLD) && ctx.year > 1340 && ctx.year < 1730 ? 20
@@ -2218,7 +2255,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'famine_survivor',
     name: 'Famine Survivor',
     icon: 'GiWheat',
-    rarity: 'uncommon',
     category: 'circumstance',
     baseWeight: 12,
     weight: (ctx) => {
@@ -2236,7 +2272,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'shipwrecked',
     name: 'Shipwrecked',
     icon: 'GiShipWheel',
-    rarity: 'epic',
     category: 'circumstance',
     baseWeight: 1,
     weight: (ctx) => (job(ctx, 'sailor', 'fish', 'merchant', 'boat') ? 30 : 1)
@@ -2250,7 +2285,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'former_slave',
     name: 'Formerly Enslaved',
     icon: 'GiHandcuffs',
-    rarity: 'rare',
     category: 'circumstance',
     baseWeight: 2,
     weight: (ctx) => {
@@ -2272,7 +2306,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'indentured',
     name: 'Served an Indenture',
     icon: 'GiPadlock',
-    rarity: 'rare',
     category: 'circumstance',
     baseWeight: 4,
     weight: (ctx) => (inZone(ctx, 'NORTH_AMERICAN_COLONIAL') && ctx.year > 1607 && ctx.year < 1800 ? 20
@@ -2283,10 +2316,68 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     dialogueHint: 'Counts the years of their term',
   },
   {
+    id: 'impressed',
+    name: 'Taken by the Press',
+    icon: 'GiShipWheel',
+    category: 'circumstance',
+    // The press gang was a legal instrument, not a story: in wartime it took
+    // men out of taverns and off merchant decks in every English port, and
+    // took some of them for years.
+    baseWeight: 6,
+    sex: 'Male',
+    minAge: 18,
+    yearRange: [1650, 1815],
+    weight: (ctx) => {
+      if (!inZone(ctx, 'EUROPEAN', 'NORTH_AMERICAN_COLONIAL')) return 0;
+      // Inland was not out of reach — the gangs worked the river towns and the
+      // roads to them — but it was very much safer.
+      if (!place(ctx, ...PORTS, 'coast', 'harbor', 'harbour', 'wapping', 'deptford', 'portsmouth', 'plymouth')) return 0.4;
+      return job(ctx, 'sailor', 'fish', 'water', 'dock', 'ship') ? 6 : 1.5;
+    },
+    description: 'Was taken off the street by a press gang and served a war they never volunteered for',
+    phrase: 'taken by the press gang and made to serve',
+    foundational: true,
+    dialogueHint: 'Watches the door in a strange tavern',
+  },
+  {
+    id: 'excommunicate',
+    name: 'Under the Ban',
+    icon: 'GiCrossMark',
+    category: 'spiritual',
+    // Excommunication, herem, or the equivalent: not damnation so much as
+    // social death. Nobody may eat with them, trade with them, or bury them.
+    baseWeight: 2,
+    minAge: 20,
+    weight: (ctx) => (inZone(ctx, 'EUROPEAN', 'NORTH_AMERICAN_COLONIAL', 'SOUTH_AMERICAN')
+      && ctx.year > 400 && ctx.year < 1850 ? 1 : 0.15),
+    excludes: ['devout', 'tonsured', 'pilgrim'],
+    description: 'Cut off from the congregation; neighbors who fear the penalty will not eat with them',
+    phrase: 'cut off from the congregation',
+    foundational: true,
+    dialogueHint: 'Expects to be refused before they ask',
+  },
+  {
+    id: 'bonded_for_debt',
+    name: 'Bonded for Debt',
+    icon: 'GiHandcuffs',
+    category: 'circumstance',
+    // The commonest unfreedom in most of the world, and the least remarked on:
+    // a debt that outlives the year it was borrowed in and takes the labour of
+    // whoever is at hand until it is called settled.
+    baseWeight: 12,
+    minAge: 16,
+    weight: (ctx) => (poor(ctx) ? 2 : 0.15)
+      * (ctx.year < 1900 ? 1 : 0.4)
+      * (ctx.urban ? 0.8 : 1.3),
+    excludes: ['generous'],
+    description: 'Works against a debt that has not shrunk in years, on terms set by the lender',
+    phrase: 'working against a debt that never shrinks',
+    dialogueHint: 'Reckons every sum against what is owed',
+  },
+  {
     id: 'serf_born',
     name: 'Born to the Land',
     icon: 'GiWheat',
-    rarity: 'uncommon',
     category: 'circumstance',
     baseWeight: 20,
     weight: (ctx) => {
@@ -2306,11 +2397,13 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'runaway_apprentice',
     name: 'Runaway Apprentice',
     icon: 'GiHammerNails',
-    rarity: 'rare',
     category: 'circumstance',
     baseWeight: 5,
     minAge: 15,
-    weight: (ctx) => ramp(ctx.year, 1200, 1400, 1850, 1920) * urbanBoost(ctx, 2.5),
+    // Girls were bound apprentice too — to mantua-makers, milliners and silk
+    // throwsters — but formal indenture was overwhelmingly a boy's contract.
+    weight: (ctx) => ramp(ctx.year, 1200, 1400, 1850, 1920) * urbanBoost(ctx, 2.5)
+      * (ctx.sex === 'Male' ? 1 : 0.2),
     description: 'Broke an indenture to a master and has been looking over one shoulder since',
     phrase: 'a runaway from your apprenticeship',
     foundational: true,
@@ -2320,7 +2413,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'branded',
     name: 'Branded',
     icon: 'GiPrisoner',
-    rarity: 'epic',
     category: 'circumstance',
     baseWeight: 1.5,
     weight: (ctx) => ramp(ctx.year, -500, 1, 1780, 1880) * 2,
@@ -2333,7 +2425,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'convert',
     name: 'A Convert',
     icon: 'FaCross',
-    rarity: 'uncommon',
     category: 'spiritual',
     baseWeight: 12,
     description: 'Changed faith in adulthood, and is fully trusted by neither side',
@@ -2345,7 +2436,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'pilgrim',
     name: 'Has Made the Pilgrimage',
     icon: 'GiFootprint',
-    rarity: 'uncommon',
     category: 'spiritual',
     baseWeight: 10,
     minAge: 20,
@@ -2366,7 +2456,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'skilled_hands',
     name: 'Skilled Hands',
     icon: 'IoHammer',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 25,
     weight: (ctx) => (job(ctx, 'carpenter', 'smith', 'joiner', 'mason', 'jewel', 'watch', 'cooper', 'weav') ? 4 : 1),
@@ -2378,7 +2467,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'storyteller',
     name: 'Storyteller',
     icon: 'FaScroll',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 25,
     weight: (ctx) => (ctx.year < 1850 ? 1.5 : 1),
@@ -2390,7 +2478,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'healer',
     name: 'Healer',
     icon: 'IoMedkit',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 18,
     weight: (ctx) => (job(ctx, 'physician', 'apothec', 'barber', 'midwife', 'herb', 'surgeon') ? 8 : 1),
@@ -2402,7 +2489,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'herbalist',
     name: 'Knows the Herbs',
     icon: 'GiHerbsBundle',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 20,
     weight: (ctx) => (ctx.sex === 'Female' ? 1.6 : 1) * (ctx.urban ? 0.6 : 1.4),
@@ -2414,7 +2500,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'midwife_skill',
     name: 'Has Caught Babies',
     icon: 'GiBabyFace',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 14,
     sex: 'Female',
@@ -2427,7 +2512,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'singer',
     name: 'Singer',
     icon: 'IoMusicalNotes',
-    rarity: 'common',
     category: 'skill',
     baseWeight: 28,
     description: 'Possesses a beautiful voice; often called upon to sing',
@@ -2438,7 +2522,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'musician',
     name: 'Musician',
     icon: 'GiMusicalNotes',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 20,
     description: 'Plays an instrument well enough to be asked for at weddings and wakes',
@@ -2449,11 +2532,12 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'navigator',
     name: 'Navigator',
     icon: 'IoCompass',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 12,
     weight: (ctx) => (job(ctx, 'sailor', 'pilot', 'fish', 'caravan', 'guide') ? 8 : 1)
-      * (inZone(ctx, 'OCEANIA') ? 4 : 1),
+      * (inZone(ctx, 'OCEANIA') ? 4 : 1)
+      // Deep-water and caravan navigation were closed to women nearly everywhere.
+      * (ctx.sex === 'Male' ? 1 : 0.15),
     description: 'Reads stars and landmarks; rarely loses their way',
     phrase: 'able to find your way by the stars',
     dialogueHint: 'Never gets lost',
@@ -2462,7 +2546,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'weather_sense',
     name: 'Weather Sense',
     icon: 'IoUmbrella',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 22,
     weight: (ctx) => (job(ctx, 'sailor', 'farm', 'fish', 'shepherd', 'drover') ? 3.5 : 1),
@@ -2474,7 +2557,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'can_swim',
     name: 'Can Swim',
     icon: 'IoWater',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 25,
     // A genuine minority skill in much of premodern Europe, and near-universal
@@ -2491,11 +2573,13 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'rides_well',
     name: 'Fine Horseman',
     icon: 'GiHorseHead',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 20,
     weight: (ctx) => (rich(ctx) ? 5 : poor(ctx) ? 0.25 : 1)
-      * (place(ctx, 'steppe', 'mongol', 'kazakh', 'arabia', 'hungar', 'pampas', 'plains') ? 8 : 1)
+      // On the steppe women rode as a matter of course; in settled societies
+      // riding well was a man's accomplishment and an expensive one.
+      * (place(ctx, 'steppe', 'mongol', 'kazakh', 'arabia', 'hungar', 'pampas', 'plains') ? 8
+        : ctx.sex === 'Male' ? 1 : 0.3)
       * (job(ctx, 'cavalry', 'courier', 'drover', 'herd', 'post') ? 4 : 1),
     description: 'Rides as though born to it, in a world where most people walk',
     phrase: 'a fine horseman',
@@ -2505,11 +2589,24 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'hunter',
     name: 'Hunter',
     icon: 'GiBowArrow',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 18,
+    // Hunting large game was men's work in the great majority of societies
+    // documented, with the Agta and a handful of others as the exceptions that
+    // are cited precisely because they are exceptions.
+    // The zone, wealth and countryside terms compounded to roughly twelve times
+    // base weight and there was no year term at all, which is how a 22-year-old
+    // in the Rwanda–Burundi highlands in 2007 — the most densely farmed land in
+    // Africa, and long since emptied of game — came back an experienced hunter.
+    // Hunting survives after 1900 as a livelihood in forest and frontier
+    // country and as recreation for the rich; as an ordinary skill of ordinary
+    // people it does not.
     weight: (ctx) => (inZone(ctx, 'NORTH_AMERICAN_PRE_COLUMBIAN', 'SUB_SAHARAN_AFRICAN', 'OCEANIA') ? 4 : 1)
-      * (ctx.urban ? 0.3 : 1.5) * (rich(ctx) ? 2 : 1),
+      * (ctx.urban ? 0.3 : 1.5) * (rich(ctx) ? 2 : 1)
+      * (ctx.sex === 'Male' ? 1 : 0.2)
+      * (ctx.year < 1900 ? 1
+        : /forest|rainforest|amazon|congo|taiga|siberia|arctic|subarctic|tundra|outback|desert|savanna|highlands of new guinea|papua|borneo|kalahari|okavango/.test(ctx.placeLower) ? 0.6
+        : 0.12),
     description: 'Reads tracks and takes game where others would go home empty',
     phrase: 'an experienced hunter',
     dialogueHint: 'Talks about tracking and game',
@@ -2518,7 +2615,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'bee_keeper',
     name: 'Keeps Bees',
     icon: 'GiBeehive',
-    rarity: 'rare',
     category: 'skill',
     baseWeight: 8,
     weight: (ctx) => (ctx.urban ? 0.4 : 1.6),
@@ -2530,7 +2626,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'water_diviner',
     name: 'Water-Diviner',
     icon: 'GiWaterDrop',
-    rarity: 'rare',
     category: 'skill',
     baseWeight: 5,
     weight: (ctx) => (ctx.urban ? 0.4 : 1.8),
@@ -2542,7 +2637,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'knows_the_roads',
     name: 'Knows the Roads',
     icon: 'GiTrail',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 15,
     weight: (ctx) => (job(ctx, 'carter', 'pedlar', 'peddler', 'drover', 'courier', 'merchant', 'guide') ? 6 : 1),
@@ -2554,7 +2648,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'fine_cook',
     name: 'Fine Cook',
     icon: 'GiCookingPot',
-    rarity: 'uncommon',
     category: 'skill',
     baseWeight: 20,
     weight: (ctx) => (job(ctx, 'cook', 'inn', 'tavern', 'baker') ? 6 : 1),
@@ -2572,9 +2665,10 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
   // rules held throughout:
   //
   // The prevalence sets the tier, not the drama. Synaesthesia is startling and
-  // affects perhaps four people in a hundred, so it is epic; congenital
-  // analgesia is barely describable and affects fewer than one in a million, so
-  // it is the rarest thing in the file. Getting this backwards would make the
+  // affects perhaps four people in a hundred, so it reads as merely seldom
+  // seen; congenital analgesia is barely describable and affects fewer than one
+  // in a million, so it is the rarest thing in the file. Getting this
+  // backwards would make the
   // rarity badge lie, and the badge is the one number on the card that is doing
   // arithmetic rather than description.
   //
@@ -2589,7 +2683,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'born_with_caul',
     name: 'Born with a Caul',
     icon: 'GiBabyFace',
-    rarity: 'legendary',
     category: 'spiritual',
     baseWeight: 1.0,
     // Under one birth in a thousand, and almost every European tradition read
@@ -2605,7 +2698,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'witch_teat',
     name: 'Supernumerary Nipple',
     icon: 'IoWarning',
-    rarity: 'rare',
     category: 'physical',
     baseWeight: 7,
     // Common enough to be unremarkable in most of history and lethal in one
@@ -2622,7 +2714,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'never_took_pox',
     name: 'Never Took the Pox',
     icon: 'GiVirus',
-    rarity: 'rare',
     category: 'condition',
     baseWeight: 5,
     excludes: ['pox_scarred'],
@@ -2639,7 +2730,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'born_under_comet',
     name: 'Born Under the Comet',
     icon: 'IoStar',
-    rarity: 'epic',
     category: 'spiritual',
     baseWeight: 40,
     // Dated against the real returns of Halley's comet rather than sprinkled at
@@ -2659,7 +2749,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'tetrachromat',
     name: 'Sees Colors Others Cannot',
     icon: 'IoEye',
-    rarity: 'legendary',
     category: 'physical',
     baseWeight: 1.2,
     excludes: ['blind', 'color_blind'],
@@ -2676,7 +2765,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'no_pain',
     name: 'Feels No Pain',
     icon: 'GiHandBandage',
-    rarity: 'legendary',
     category: 'condition',
     baseWeight: 0.15,
     // The rarest entry in the file, and it should be: fewer than one in a
@@ -2688,10 +2776,26 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     dialogueHint: 'Checks their own body for damage by eye',
   },
   {
+    id: 'lightning_struck',
+    name: 'Struck by Lightning and Lived',
+    icon: 'FaBolt',
+    category: 'circumstance',
+    // Around one person in ten thousand over a lifetime, most of whom lived,
+    // and every one of whom was written about. The mark it leaves is a
+    // branching scar and, often, an ear that never came back.
+    baseWeight: 0.1,
+    minAge: 12,
+    weight: (ctx) => (job(ctx, 'shepherd', 'farm', 'field', 'herd', 'sailor', 'mason', 'roof', 'bell')
+      ? 4 : ctx.urban ? 0.6 : 1.5),
+    description: 'Was struck by lightning and got up again; the scar branches like a fern and the ear on that side is gone',
+    phrase: 'struck by lightning once, and standing',
+    foundational: true,
+    dialogueHint: 'Is asked to tell the story at every gathering',
+  },
+  {
     id: 'absolute_pitch',
     name: 'Perfect Pitch',
     icon: 'IoMusicalNotes',
-    rarity: 'legendary',
     category: 'skill',
     baseWeight: 1.4,
     excludes: ['deaf'],
@@ -2710,7 +2814,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'synaesthete',
     name: 'Tastes Sound, Sees Number',
     icon: 'GiThirdEye',
-    rarity: 'epic',
     category: 'mental',
     baseWeight: 12,
     // Around four in a hundred, so not legendary however strange it sounds.
@@ -2725,7 +2828,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'never_forgets_a_day',
     name: 'Forgets Nothing',
     icon: 'GiBrain',
-    rarity: 'legendary',
     category: 'mental',
     baseWeight: 0.5,
     excludes: ['forgetful', 'slow_witted'],
@@ -2738,7 +2840,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'mirrored_within',
     name: 'Mirrored Within',
     icon: 'GiLungs',
-    rarity: 'legendary',
     category: 'condition',
     baseWeight: 0.6,
     // One in ten thousand, and — the detail that makes it worth having — almost
@@ -2754,7 +2855,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'achromatopsia',
     name: 'Sees No Color At All',
     icon: 'IoGlasses',
-    rarity: 'legendary',
     category: 'physical',
     baseWeight: 0.5,
     excludes: ['keen_eyed', 'tetrachromat'],
@@ -2772,7 +2872,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'face_blind',
     name: 'Cannot Hold a Face',
     icon: 'FaEyeSlash',
-    rarity: 'epic',
     category: 'mental',
     baseWeight: 8,
     excludes: ['keen_eyed'],
@@ -2784,7 +2883,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'no_minds_eye',
     name: 'No Picture in the Mind',
     icon: 'FaBrain',
-    rarity: 'epic',
     category: 'mental',
     baseWeight: 10,
     excludes: ['dreamer', 'visionary'],
@@ -2796,7 +2894,6 @@ export const UNIVERSAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'mother_tongue_alone',
     name: 'Last Speaker Here',
     icon: 'GiTalk',
-    rarity: 'epic',
     category: 'cultural',
     baseWeight: 6,
     excludes: ['polyglot'],
@@ -2822,7 +2919,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'humor_sanguine',
     name: 'Sanguine Humor',
     icon: 'GiHeartPlus',
-    rarity: 'common',
     category: 'cultural',
     baseWeight: 45,
     weight: humoralWeight,
@@ -2835,7 +2931,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'humor_choleric',
     name: 'Choleric Humor',
     icon: 'IoFlame',
-    rarity: 'common',
     category: 'cultural',
     baseWeight: 40,
     weight: humoralWeight,
@@ -2848,7 +2943,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'humor_phlegmatic',
     name: 'Phlegmatic Humor',
     icon: 'IoSnow',
-    rarity: 'common',
     category: 'cultural',
     baseWeight: 40,
     weight: humoralWeight,
@@ -2861,7 +2955,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'humor_melancholic',
     name: 'Melancholic Humor',
     icon: 'GiSandsOfTime',
-    rarity: 'common',
     category: 'cultural',
     baseWeight: 40,
     weight: humoralWeight,
@@ -2878,7 +2971,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'bound_feet',
     name: 'Bound Feet',
     icon: 'GiBallerinaShoes',
-    rarity: 'common',
     category: 'cultural',
     baseWeight: 200,
     sex: 'Female',
@@ -2899,7 +2991,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'queue_worn',
     name: 'Wears the Queue',
     icon: 'GiSewingString',
-    rarity: 'common',
     category: 'cultural',
     baseWeight: 200,
     sex: 'Male',
@@ -2913,7 +3004,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'kin_tattoos',
     name: 'Kin Tattoos',
     icon: 'GiSpiralShell',
-    rarity: 'common',
     category: 'cultural',
     baseWeight: 180,
     weight: (ctx) => (inZone(ctx, 'OCEANIA') ? 1
@@ -2928,7 +3018,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'scarified',
     name: 'Scarified',
     icon: 'GiScarWound',
-    rarity: 'common',
     category: 'cultural',
     baseWeight: 160,
     weight: (ctx) => (inZone(ctx, 'SUB_SAHARAN_AFRICAN') ? 1 : 0),
@@ -2941,7 +3030,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'caste_marked',
     name: 'Marked by Caste',
     icon: 'GiThreeLeaves',
-    rarity: 'common',
     category: 'cultural',
     baseWeight: 120,
     weight: (ctx) => (inZone(ctx, 'SOUTH_ASIAN') ? 1 : 0),
@@ -2954,7 +3042,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'tonsured',
     name: 'Tonsured',
     icon: 'FaCross',
-    rarity: 'uncommon',
     category: 'cultural',
     baseWeight: 60,
     sex: 'Male',
@@ -2968,11 +3055,12 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'hafiz',
     name: 'Keeper of the Text',
     icon: 'GiOpenBook',
-    rarity: 'rare',
     category: 'cultural',
     baseWeight: 12,
     weight: (ctx) => (inZone(ctx, 'MENA') ? 1
-      : inZone(ctx, 'SOUTH_ASIAN', 'SUB_SAHARAN_AFRICAN') ? 0.5 : 0),
+      : inZone(ctx, 'SOUTH_ASIAN', 'SUB_SAHARAN_AFRICAN') ? 0.5 : 0)
+      // Women memorized and taught the text, but the public title went to men.
+      * (ctx.sex === 'Male' ? 1 : 0.3),
     exclusiveGroup: 'memory',
     description: 'Holds the whole of the scripture in memory, and is addressed with the title it earns',
     phrase: 'one who holds the whole scripture in memory',
@@ -2983,13 +3071,14 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'guild_sworn',
     name: 'Guild-Sworn',
     icon: 'GiHammerNails',
-    rarity: 'uncommon',
     category: 'cultural',
     baseWeight: 70,
     minAge: 18,
     weight: (ctx) => (can('guilds', ctx) && inZone(ctx, 'EUROPEAN') && ctx.urban
       && job(ctx, 'smith', 'baker', 'weav', 'carpenter', 'mason', 'tailor', 'cooper', 'butcher', 'gold', 'shoe')
-      ? ramp(ctx.year, 1100, 1250, 1750, 1850) : 0),
+      // Widows kept their husbands' mastership in several crafts, and silk and
+      // brewing had women's guilds outright, but the sworn master was a man.
+      ? ramp(ctx.year, 1100, 1250, 1750, 1850) * (ctx.sex === 'Male' ? 1 : 0.15) : 0),
     description: 'Sworn to a craft guild, with all the protection and all the restriction that carries',
     phrase: 'sworn to your craft guild',
     dialogueHint: 'Invokes guild rules and privileges',
@@ -2998,7 +3087,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'dhimmi',
     name: 'Under the Covenant',
     icon: 'GiTiedScroll',
-    rarity: 'uncommon',
     category: 'cultural',
     baseWeight: 60,
     weight: (ctx) => (inZone(ctx, 'MENA') ? ramp(ctx.year, 640, 700, 1850, 1930) * 0.25 : 0),
@@ -3011,7 +3099,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'crypto_believer',
     name: 'Secret Believer',
     icon: 'GiPadlock',
-    rarity: 'epic',
     category: 'cultural',
     baseWeight: 2,
     weight: (ctx) => {
@@ -3030,7 +3117,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'outcaste',
     name: 'Outcaste',
     icon: 'GiCrossMark',
-    rarity: 'uncommon',
     category: 'cultural',
     baseWeight: 55,
     weight: (ctx) => (inZone(ctx, 'SOUTH_ASIAN') ? 1
@@ -3045,7 +3131,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'betel_chewer',
     name: 'Betel Chewer',
     icon: 'GiCurledLeaf',
-    rarity: 'common',
     category: 'cultural',
     baseWeight: 180,
     weight: (ctx) => (inZone(ctx, 'SOUTH_ASIAN') ? 1
@@ -3060,7 +3145,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'khat_chewer',
     name: 'Khat Chewer',
     icon: 'GiCurledLeaf',
-    rarity: 'common',
     category: 'cultural',
     baseWeight: 150,
     weight: (ctx) => (place(ctx, 'yemen', 'aden', 'ethiop', 'abyssin', 'somal', 'harar', 'djibouti')
@@ -3074,7 +3158,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'coca_chewer',
     name: 'Coca Chewer',
     icon: 'GiThreeLeaves',
-    rarity: 'common',
     category: 'cultural',
     baseWeight: 160,
     weight: (ctx) => (place(ctx, 'andes', 'peru', 'bolivia', 'cusco', 'cuzco', 'potosi', 'quito', 'inca')
@@ -3088,7 +3171,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'kava_drinker',
     name: 'Kava Drinker',
     icon: 'GiCookingPot',
-    rarity: 'common',
     category: 'cultural',
     baseWeight: 140,
     weight: (ctx) => (inZone(ctx, 'OCEANIA') ? 1 : 0),
@@ -3101,13 +3183,15 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'sworn_brother',
     name: 'Sworn Brother',
     icon: 'GiRelationshipBounds',
-    rarity: 'uncommon',
     category: 'cultural',
     baseWeight: 35,
     minAge: 16,
     weight: (ctx) => (inZone(ctx, 'EAST_ASIAN') ? 1
       : place(ctx, 'balkan', 'serbia', 'montenegro', 'albania', 'greece') ? 0.8
-      : inZone(ctx, 'SUB_SAHARAN_AFRICAN') ? 0.4 : 0.1),
+      : inZone(ctx, 'SUB_SAHARAN_AFRICAN') ? 0.4 : 0.1)
+      // Sworn sisterhoods are attested, notably the Guangdong silk workers, but
+      // the oath-bond was mostly between men.
+      * (ctx.sex === 'Male' ? 1 : 0.35),
     description: 'Bound by a sworn brotherhood that outranks most claims of blood',
     phrase: 'bound to a sworn brother',
     foundational: true,
@@ -3117,7 +3201,6 @@ export const CULTURAL_ATTRIBUTES: EnhancedAttributeBadge[] = [
     id: 'godparent_web',
     name: 'Godparent Many Times Over',
     icon: 'GiFamilyTree',
-    rarity: 'uncommon',
     category: 'cultural',
     baseWeight: 45,
     minAge: 25,

@@ -343,7 +343,8 @@ function drawMandarin(context: RenderContext, body: Mask, frogs: boolean): void 
     const metal = spec.garment.ornament > 0.3;
     for (let i = 0; i < 4; i += 1) {
       const y = bandTop + 6 + i * 5;
-      if (y >= size - 1) break;
+      // `viewHeight`: the canvas is drawn taller than it is shown.
+      if (y >= anatomy.viewHeight - 1) break;
       if (metal) {
         raster.set(centerX, y, ramps.metal.steps[1], MAT.METAL, 1);
         raster.set(centerX + 1, y, ramps.metal.steps[4], MAT.METAL, 4);
@@ -629,7 +630,10 @@ function drawShawl(context: RenderContext, body: Mask): void {
   for (let x = 0; x < size; x += 1) {
     let bottom = -1;
     for (let y = 0; y < size; y += 1) if (band[y * size + x]) bottom = y;
-    if (bottom < 0 || bottom >= size - 1) continue;
+    // A band that reaches the bottom of the *frame* has no visible hem to fringe.
+    // Testing against `size` instead let bands that run off the picture grow a
+    // fringe in the rows past it, where nobody sees it.
+    if (bottom < 0 || bottom >= anatomy.viewHeight - 1) continue;
     if (noise(x * 0.8) < 0.35) continue;
     const drop = 1 + Math.round(noise(x * 1.4 + 9) * 2.4);
     for (let i = 1; i <= drop; i += 1) {
@@ -695,7 +699,8 @@ function drawPlacket(context: RenderContext, body: Mask): void {
   }
   for (let i = 0; i < 3; i += 1) {
     const y = top + 5 + i * 5;
-    if (y >= size - 1) break;
+    // `viewHeight`: the canvas is drawn taller than it is shown.
+    if (y >= anatomy.viewHeight - 1) break;
     put(centerX, y, ramps.clothA, MAT.CLOTH_A, 0.6);
     put(centerX + 1, y, ramps.clothA, MAT.CLOTH_A, 6);
   }

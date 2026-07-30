@@ -18,11 +18,18 @@ import { writeFileSync } from 'node:fs';
 import { Raster } from '../core/raster';
 import { buildPortraitSpec, restingExpression } from '../spec/buildSpec';
 import { compilePortrait, renderFrame } from '../render/pipeline';
+import { CANVAS, VIEW_HEIGHT } from '../spec/anatomy';
 import { idleFrame } from '../render/animation';
-import { drawDistinctionMark, type DistinctionTier } from '../art/distinctionMark';
+import {
+  drawDistinctionMark,
+  drawPortraitFrame,
+  FRAME_WIDTH,
+  MOUNT_Y,
+  type DistinctionTier,
+} from '../art/distinctionMark';
 import { encodePNG, scaleRGBA } from './png';
 
-const CELL = 96;
+const CELL = CANVAS;
 const SCALE = 6;
 
 /**
@@ -66,14 +73,14 @@ function renderOne(label: string, tier: DistinctionTier, profession: string, pha
     region: 'France',
     wealthLevel: tier ? 'wealthy' : 'modest',
     hasDistinction: Boolean(tier),
-    rarityTier: tier === 'diamond' ? 'legendary' : 'ordinary',
+    rarityTier: tier === 'star' || tier === 'diamond' ? 'ordinary' : tier ?? 'ordinary',
     appearance: { skinColor: '#e8c5a0', hairColor: '#3a2a18', eyeColor: '#4a3a24', build: 'average' },
     portraitSeed: 20482,
   };
 
   const spec = buildPortraitSpec(character);
   const compiled = compilePortrait(spec);
-  const raster = new Raster(compiled.size, compiled.size);
+  const square = new Raster(compiled.size, compiled.size);
   renderFrame(
     compiled,
     idleFrame(0, {
@@ -84,10 +91,24 @@ function renderOne(label: string, tier: DistinctionTier, profession: string, pha
       override: null,
       reducedMotion: true,
     }),
-    raster,
+    square,
   );
 
-  drawDistinctionMark(rasterContext(raster) as any, compiled.size, tier, phase);
+  // Cropped and framed exactly as the component does it, or the sheet would be
+  // judging a picture the app never shows.
+  const width = compiled.size;
+  const height = VIEW_HEIGHT;
+  const raster = new Raster(width, height);
+  raster.data.set(square.data.subarray(0, width * height * 4));
+  const ctx = rasterContext(raster) as any;
+
+  drawPortraitFrame(ctx, width, height, tier);
+  drawDistinctionMark(
+    ctx,
+    { width, height, inset: Math.max(FRAME_WIDTH + 1, MOUNT_Y + 2) },
+    tier,
+    phase,
+  );
   return raster;
 }
 
@@ -105,15 +126,17 @@ function renderOne(label: string, tier: DistinctionTier, profession: string, pha
 // way to judge whether the mark is the right size *relative to a face* rather
 // than pretty in isolation.
 const FULL = process.argv.includes('--full');
-const CROP = FULL ? CELL : 20;
+// The mounted portrait is no longer square, so the two axes are tracked apart.
+const CROP_W = FULL ? CELL : 20;
+const CROP_H = FULL ? VIEW_HEIGHT : 20;
 const FRAMES = FULL ? 3 : 7;
 
 function corner(cell: Raster): Uint8ClampedArray {
-  const out = new Uint8ClampedArray(CROP * CROP * 4);
-  for (let y = 0; y < CROP; y += 1) {
-    for (let x = 0; x < CROP; x += 1) {
-      const from = (y * cell.width + (cell.width - CROP + x)) * 4;
-      out.set(cell.data.subarray(from, from + 4), (y * CROP + x) * 4);
+  const out = new Uint8ClampedArray(CROP_W * CROP_H * 4);
+  for (let y = 0; y < CROP_H; y += 1) {
+    for (let x = 0; x < CROP_W; x += 1) {
+      const from = (y * cell.width + (cell.width - CROP_W + x)) * 4;
+      out.set(cell.data.subarray(from, from + 4), (y * CROP_W + x) * 4);
     }
   }
   return out;
@@ -124,10 +147,19 @@ function corner(cell: Raster): Uint8ClampedArray {
 const rows: Uint8ClampedArray[][] = FULL
   ? [[
     corner(renderOne('none', null, 'Farmer', 0)),
+    corner(renderOne('notable', 'notable', 'Farmer', 3800 * 0.11)),
+    corner(renderOne('rare', 'rare', 'Farmer', 3400 * 0.13)),
+    corner(renderOne('legendary', 'legendary', 'Farmer', 2800 * 0.15)),
     corner(renderOne('star', 'star', 'Magistrate', 2600 * 0.17)),
     corner(renderOne('diamond', 'diamond', 'Viceroy', 3400 * 0.05)),
   ]]
   : [
+    Array.from({ length: FRAMES }, (_, i) =>
+      corner(renderOne('notable', 'notable', 'Farmer', (3800 * 0.22 * i) / (FRAMES - 2)))),
+    Array.from({ length: FRAMES }, (_, i) =>
+      corner(renderOne('rare', 'rare', 'Farmer', (3400 * 0.26 * i) / (FRAMES - 2)))),
+    Array.from({ length: FRAMES }, (_, i) =>
+      corner(renderOne('legendary', 'legendary', 'Farmer', (2800 * 0.3 * i) / (FRAMES - 2)))),
     Array.from({ length: FRAMES }, (_, i) =>
       corner(renderOne('star', 'star', 'Magistrate', (2600 * 0.34 * i) / (FRAMES - 2)))),
     Array.from({ length: FRAMES }, (_, i) =>
@@ -135,15 +167,15 @@ const rows: Uint8ClampedArray[][] = FULL
   ];
 
 const cols = rows[0].length;
-const width = CROP * cols;
-const height = CROP * rows.length;
+const width = CROP_W * cols;
+const height = CROP_H * rows.length;
 const sheet = new Uint8ClampedArray(width * height * 4);
 rows.forEach((row, rowIndex) => {
   row.forEach((cell, colIndex) => {
-    for (let y = 0; y < CROP; y += 1) {
-      for (let x = 0; x < CROP; x += 1) {
-        const from = (y * CROP + x) * 4;
-        const to = ((rowIndex * CROP + y) * width + colIndex * CROP + x) * 4;
+    for (let y = 0; y < CROP_H; y += 1) {
+      for (let x = 0; x < CROP_W; x += 1) {
+        const from = (y * CROP_W + x) * 4;
+        const to = ((rowIndex * CROP_H + y) * width + colIndex * CROP_W + x) * 4;
         sheet.set(cell.subarray(from, from + 4), to);
       }
     }

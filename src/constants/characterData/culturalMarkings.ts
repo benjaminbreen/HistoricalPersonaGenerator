@@ -213,6 +213,10 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'SCARIFICATION',
     type: 'scarification',
     culturalZones: ['SUB_SAHARAN_AFRICAN'],
+    // Widespread across the Sudanic belt and West Africa, and never universal:
+    // it was appearing on Swahili-coast and southern-African personas whose
+    // communities did not cut. Also in steep decline since independence.
+    places: /west africa|sudan|sahel|nigeria|yoruba|igbo|benin|dahomey|burkina|mossi|mali|niger|chad|cameroon|congo|kongo|azande|dinka|nuer|nuba|tiv|hausa/,
     patterns: [
       {
         id: 'yoruba_marks',
@@ -256,6 +260,7 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'WHITE_CHALK',
     type: 'paint',
     culturalZones: ['SUB_SAHARAN_AFRICAN'],
+    places: /congo|kongo|azande|luba|lunda|angola|gabon|cameroon|nigeria|igbo|yoruba|sierra leone|liberia|mende|sande|poro/,
     patterns: [
       {
         id: 'white_dots',
@@ -279,6 +284,7 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'OCHRE_PAINT',
     type: 'paint',
     culturalZones: ['SUB_SAHARAN_AFRICAN'],
+    places: /turkana|omo|surma|suri|mursi|karamoja|nilotic|maasai|masai|samburu|rift valley|kalahari|khoisan|namib|kaokoveld|herero|himba|sahel/,
     patterns: [
       {
         id: 'red_ochre',
@@ -487,6 +493,22 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'DAILY_OCHRE',
     type: 'paint',
     culturalZones: ['SUB_SAHARAN_AFRICAN', 'OCEANIA', 'SOUTH_AMERICAN'],
+    // Three zones, no era and no place: the widest entry in the table, and it
+    // put daily ochre on a Christian office-holder in the Rwandan highlands in
+    // 2007. Ochre as everyday wear belongs to arid pastoral country and to the
+    // forest interiors — the Nilotic and Khoisan south, the New Guinea
+    // highlands, the Amazon — and outside those it did not survive the
+    // twentieth century. The communities where it did are covered by their own
+    // entries (HAIR_OCHRE for the Himba, the Amazonian and Highland paints
+    // below), so this one stops at the industrial era.
+    places: /turkana|omo|surma|suri|mursi|karamoja|nilotic|maasai|masai|samburu|rift valley|serengeti|kalahari|khoisan|namib|kaokoveld|herero|himba|sahel|sahara|new guinea|papua|highlands of new guinea|sepik|amazon|orinoco|xingu|rio negro|mato grosso|rainforest/,
+    eras: [
+      HistoricalEra.PREHISTORY,
+      HistoricalEra.ANTIQUITY,
+      HistoricalEra.MEDIEVAL,
+      HistoricalEra.RENAISSANCE_EARLY_MODERN,
+      HistoricalEra.INDUSTRIAL_ERA,
+    ],
     patterns: [
       {
         id: 'daily_ochre',
@@ -637,6 +659,7 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'JAGUAR_PAINT',
     type: 'paint',
     culturalZones: ['SOUTH_AMERICAN'],
+    places: /amazon|orinoco|xingu|rio negro|ucayali|mato grosso|rainforest|tapajos|guiana/,
     patterns: [
       {
         id: 'jaguar_spots',
@@ -684,6 +707,7 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'YANOMAMI_PAINT',
     type: 'paint',
     culturalZones: ['SOUTH_AMERICAN'],
+    places: /orinoco|rio negro|amazon|yanomami|guiana shield|rainforest/,
     patterns: [
       {
         id: 'yanomami_pattern',
@@ -866,6 +890,7 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'EAR_STRETCHING',
     type: 'structural',
     culturalZones: ['SUB_SAHARAN_AFRICAN', 'OCEANIA', 'SOUTH_AMERICAN'],
+    places: /maasai|masai|samburu|turkana|rift valley|kenya|tanzania|borneo|dayak|kalimantan|sarawak|amazon|xingu|orinoco|new guinea|papua/,
     patterns: [
       {
         id: 'ear_plugs',
@@ -892,6 +917,9 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'LIP_PLATE',
     type: 'structural',
     culturalZones: ['SUB_SAHARAN_AFRICAN', 'SOUTH_AMERICAN'],
+    // Mursi, Surma and Suri in the Omo valley; Kayapó and Suyá on the Xingu.
+    // Nowhere else, and it was reaching the whole of Africa and South America.
+    places: /omo|mursi|surma|suri|ethiopia|sudan|chad|sara|xingu|kayapo|amazon|mato grosso/,
     patterns: [
       {
         id: 'lower_lip_plate',
@@ -918,6 +946,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'NECK_RINGS',
     type: 'structural', // Proper structural modification type
     culturalZones: ['SUB_SAHARAN_AFRICAN', 'EAST_ASIAN'],
+    // Ndebele in the south, Kayan Padaung on the Thai–Burmese border.
+    places: /ndebele|zimbabwe|transvaal|south africa|southern africa|kayan|padaung|shan|karen|burma|myanmar|thailand/,
     patterns: [
       {
         id: 'brass_neck_coils',
@@ -972,6 +1002,7 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'TOOTH_FILING',
     type: 'structural', // Permanent dental modification
     culturalZones: ['OCEANIA', 'SUB_SAHARAN_AFRICAN', 'SOUTH_AMERICAN'],
+    places: /bali|java|sumatra|mentawai|borneo|dayak|sulawesi|new guinea|papua|australia|amazon|xingu|orinoco|congo|gabon|angola/,
     patterns: [
       {
         id: 'filed_teeth',
@@ -1077,6 +1108,7 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'CHEEK_PLUGS',
     type: 'structural',
     culturalZones: ['SOUTH_AMERICAN'],
+    places: /amazon|xingu|orinoco|rio negro|mato grosso|rainforest|guiana/,
     patterns: [
       {
         id: 'cheek_disc',
@@ -1102,6 +1134,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'RITUAL_AMPUTATION',
     type: 'scarification',
     culturalZones: ['OCEANIA'],
+    // Dani finger amputation in mourning, in the New Guinea highlands.
+    places: /new guinea|papua|dani|baliem|highlands|sepik/,
     patterns: [
       {
         id: 'finger_amputation',
@@ -1127,6 +1161,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'SUBINCISION',
     type: 'structural',
     culturalZones: ['OCEANIA'],
+    // Central and Western Desert Aboriginal initiation, not a Pacific practice.
+    places: /australia|aboriginal|outback|arnhem|western desert|central desert|alice springs|macdonnell|kimberley|pilbara/,
     patterns: [
       {
         id: 'ritual_subincision',

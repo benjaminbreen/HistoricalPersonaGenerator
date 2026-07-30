@@ -24,6 +24,7 @@ import {
   GarmentKind,
   GarmentSpec,
   GarmentSurfaceSpec,
+  GarmentWearSpec,
   HairLength,
   HairSilhouette,
   HeadwearKind,
@@ -92,7 +93,7 @@ export interface PortraitSource {
    */
   attributes?: Array<{ id?: string } | null | undefined>;
   diseaseHealth?: { currentDiseases?: Array<{ disease?: { name?: string } }> };
-  equippedItems?: Record<string, { name?: string; material?: string; color?: string } | undefined>;
+  equippedItems?: Record<string, Piece | undefined>;
   appearance?: Record<string, any>;
   portraitVisualOverrides?: Record<string, any>;
 }
@@ -414,9 +415,15 @@ const GARMENT_SURFACE_KEYWORDS: Array<{
 export function garmentSurfacesFor(
   name: string,
   material: string,
-  wealth: number
+  wealth: number,
+  adjectives: string[] = []
 ): { surfaces: GarmentSurfaceSpec[]; matched: boolean } {
-  const text = `${name} ${material}`;
+  // The adjectives come last but are read the same way, and they are where most
+  // of the matches actually are. The app names clothing as colour + material +
+  // form — "Green Cotton Cap" — so a treatment almost never appears in the name
+  // it is looking at; it appears in the adjective list beside it, where the
+  // words are Embroidered, Beaded, Painted, Patterned and Gilded.
+  const text = `${name} ${material} ${adjectives.join(' ')}`;
   const surfaces: GarmentSurfaceSpec[] = [];
   const usedGroups = new Set<string>();
 
@@ -446,6 +453,78 @@ export function garmentSurfacesFor(
   }
 
   return { surfaces, matched: surfaces.length > 0 };
+}
+
+/**
+ * What the item's own adjectives say has happened to it.
+ *
+ * Matched against the adjectives and the name together, because the data puts
+ * the same fact in either place — "Patched Cloak" and `adjectives: ['Patched']`
+ * both occur. Material is deliberately *not* in the text: "Rough Wool" is a
+ * statement about the yarn, not about the garment's condition, and reading it
+ * as wear would put a mend on every coarse cloth in the app.
+ */
+const GARMENT_WEAR_KEYWORDS: Array<[RegExp, GarmentWearSpec['kind']]> = [
+  [/patch|mended|repaired/i, 'patched'],
+  [/darn/i, 'darned'],
+  [/torn|ragged|tattered|frayed|threadbare/i, 'torn'],
+  [/faded|bleached|sun.?bleached|washed.?out/i, 'faded'],
+  [/worn|old|shabby|battered|weathered|second.?hand|hand.?me.?down/i, 'worn'],
+  [/stained|soiled|dirty|grimy|sooty|greasy|filthy|blood/i, 'stained'],
+];
+
+/**
+ * Wear the item claims, plus wear its owner's circumstances imply.
+ *
+ * Two sources, because the adjectives are sparse: about a fifth of the entries
+ * in `clothing.ts` carry one, so relying on them alone would leave four poor
+ * personas in five in clothes that look newly cut. Poverty is the other source,
+ * and it is the honest one — a garment worn by someone with no second garment
+ * is worn, whether or not the table happened to say so. Named wear is drawn
+ * harder than implied wear, so an item that *says* patched gets a patch and an
+ * item that is merely poor gets rubbed crests and a little soil.
+ */
+export function garmentWearFor(
+  name: string,
+  adjectives: string[],
+  wealth: string,
+  age: number,
+  seed: number
+): GarmentWearSpec[] {
+  const text = `${name} ${adjectives.join(' ')}`;
+  const wear: GarmentWearSpec[] = [];
+  const seen = new Set<GarmentWearSpec['kind']>();
+
+  for (const [pattern, kind] of GARMENT_WEAR_KEYWORDS) {
+    if (seen.has(kind) || !pattern.test(text)) continue;
+    seen.add(kind);
+    wear.push({ kind, intensity: 0.7 });
+  }
+
+  // Implied wear. Only the two bottom tiers: "comfortable" is precisely the
+  // level at which a person owns something to change into, and drawing every
+  // portrait in the app as threadbare would say something about the past that
+  // is no truer than drawing them all in new cloth.
+  const poor = wealth === 'poor' ? 1 : wealth === 'modest' ? 0.45 : 0;
+  if (poor > 0) {
+    // Cloth outlasts fashion and is handed on, so an older wearer is more
+    // likely to be in something that has already had a life.
+    const carried = poor * (0.6 + Math.min(0.4, Math.max(0, age - 25) / 100));
+    const roll = unit(seed, 'wear');
+    if (!seen.has('worn') && roll < carried) {
+      wear.push({ kind: 'worn', intensity: 0.35 + carried * 0.3 });
+      seen.add('worn');
+    }
+    if (!seen.has('patched') && wealth === 'poor' && unit(seed, 'wear-patch') < 0.45) {
+      wear.push({ kind: 'patched', intensity: 0.5 });
+      seen.add('patched');
+    }
+    if (!seen.has('stained') && unit(seed, 'wear-soil') < poor * 0.4) {
+      wear.push({ kind: 'stained', intensity: 0.4 });
+    }
+  }
+
+  return wear;
 }
 
 function classify<T>(name: string, table: Array<[RegExp, T]>, fallback: T): T {
@@ -481,6 +560,12 @@ interface Piece {
   name?: string;
   material?: string;
   color?: string;
+  /**
+   * `ClothingPiece.adjectives` from `clothing.ts`, carried through unchanged.
+   * Patched, Faded, Darned, Embroidered, Beaded — the words the card already
+   * prints next to the picture.
+   */
+  adjectives?: string[];
 }
 
 function isEmptyPiece(piece: Piece | null | undefined): boolean {
@@ -903,7 +988,7 @@ function buildCondition(source: PortraitSource): ConditionSpec {
   };
 }
 
-function buildMood(source: PortraitSource, condition: ConditionSpec): MoodSpec {
+function buildMood(source: PortraitSource, condition: ConditionSpec, seed: number): MoodSpec {
   const personality = source.personality || {};
   const affect = String(source.appearance?.affect || 'neutral').toLowerCase();
 
@@ -925,12 +1010,84 @@ function buildMood(source: PortraitSource, condition: ConditionSpec): MoodSpec {
   valence -= condition.severity * 0.12 + condition.fatigueRatio * 0.2;
   energy -= condition.fatigueRatio * 0.45 + condition.severity * 0.12;
 
+  const finalValence = Math.max(-1, Math.min(1, valence));
+
   return {
-    valence: Math.max(-1, Math.min(1, valence)),
+    valence: finalValence,
     energy: clamp01(energy),
     guarded: clamp01(guarded),
     disposition: dispositionFor(personality),
+    flourish: flourishFor(personality, finalValence, condition, seed),
   };
+}
+
+/**
+ * The rare face. See `MoodSpec.flourish`.
+ *
+ * Each candidate names a face, the stats that make it plausible, and the share
+ * of the people who qualify who actually wear it. The gates are loose on
+ * purpose — they are asking "could this person look like that?", not "must
+ * they?" — and the rate does the rarefying. That division is what lets a grin
+ * exist at all: a gate tight enough to *mean* grin catches nobody, and a gate
+ * loose enough to catch anybody hands out grins by the hundred.
+ *
+ * The rates are per-qualifier, so the population share of each face is the rate
+ * times however much of the population clears its gate; `portrait-audit`'s
+ * resting-expression table is the measurement. Read in order, first match wins,
+ * so the rarer and stranger faces come first.
+ */
+function flourishFor(
+  personality: {
+    openness?: number;
+    conscientiousness?: number;
+    extraversion?: number;
+    agreeableness?: number;
+    neuroticism?: number;
+  },
+  valence: number,
+  condition: ConditionSpec,
+  seed: number
+): Expression | null {
+  // Illness owns the face outright, and `restingExpression` already returns
+  // `weary` above severity 2. Below that it does not, but a fever is still no
+  // time to be handed a grin.
+  if (condition.severity >= 2 || condition.fever > 0.5) return null;
+
+  const openness = personality.openness ?? 0.5;
+  const extraversion = personality.extraversion ?? 0.5;
+  const agreeableness = personality.agreeableness ?? 0.5;
+  const neuroticism = personality.neuroticism ?? 0.5;
+
+  const roll = unit(seed, 'flourish');
+
+  // Caught mid-thought by whoever is painting them. Reads as startled, which is
+  // a moment and not a disposition — so this is the rarest face in the set, and
+  // it goes to the people most likely to be having one: curious and highly
+  // strung. Valence is allowed to run low here, unlike the warm faces below,
+  // because being wide-eyed is not the same as being pleased.
+  if (openness > 0.58 && neuroticism > 0.58 && valence > -0.45 && roll < 0.025) return 'surprise';
+
+  // The warm faces. All three require a valence that is not actively against
+  // them: a persona whose affect is `intimidating` or who is worn down enough
+  // to read grim does not get to be beaming, or the picture contradicts the
+  // rest of the card.
+  if (valence > -0.12) {
+    // Open-mouthed, teeth showing. Sociable, warm, and not anxious.
+    if (extraversion > 0.56 && agreeableness > 0.52 && neuroticism < 0.56 && roll < 0.12) return 'grin';
+
+    // The same warmth, held closed. A wider gate and a wider rate — of the
+    // three this is the one that should turn up often enough to feel like part
+    // of the population rather than a find.
+    if (agreeableness > 0.48 && neuroticism < 0.62 && roll < 0.16) return 'smile';
+  }
+
+  // Amused at something they are not saying. `dispositionFor` already has a
+  // smirk rule, but it is narrow enough to reach about one persona in thirty;
+  // this one catches the near-misses — anyone curious and a little cool — and
+  // lets the seed decide.
+  if (openness > 0.52 && agreeableness < 0.52 && roll < 0.09) return 'smirk';
+
+  return null;
 }
 
 /**
@@ -1154,6 +1311,12 @@ export function restingExpression(mood: MoodSpec, condition: ConditionSpec): Exp
   // it puts on valence and energy; it no longer decides this.
   if (condition.severity >= 2) return 'weary';
 
+  // The rare face, before valence gets a say. This is the whole point of it
+  // being a separate field: `disposition` below is only consulted once the
+  // valence branches have declined, and those branches own every face that a
+  // smile or a grin would have to displace.
+  if (mood.flourish) return mood.flourish;
+
   // The strong moods keep their faces. A disposition never overrides someone
   // who is plainly delighted or plainly furious — it is a tie-breaker for the
   // large middle of the population, which is where the dull faces were.
@@ -1277,7 +1440,10 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     ),
     ornament: ornamentBase,
     surfaces: garmentSurfacesFor(
-      garmentPiece.name || '', garmentPiece.material || '', ornamentBase).surfaces,
+      garmentPiece.name || '', garmentPiece.material || '', ornamentBase,
+      garmentPiece.adjectives || []).surfaces,
+    wear: garmentWearFor(
+      garmentPiece.name || '', garmentPiece.adjectives || [], wealth, age, seed),
   };
 
   // --- headwear -------------------------------------------------------------
@@ -1310,7 +1476,7 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
 
   // --- everything else ------------------------------------------------------
   const condition = buildCondition(source);
-  const mood = buildMood(source, condition);
+  const mood = buildMood(source, condition, seed);
 
   // --- attributes that show on a face ---------------------------------------
   const attributeIds = new Set(

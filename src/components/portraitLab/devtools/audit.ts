@@ -36,16 +36,17 @@ import { auditNameRules } from '../../../constants/characterData/nameSetEras';
 import { REGION_NAME_MAPPING } from '../../../constants/characterData/names';
 import { ERA_BOUNDS } from '../../../services/demographyService';
 import { HistoricalEra } from '../../../types/enums';
-import { MAT, Raster } from '../core/raster';
+import { BODY_MATS, MAT, Raster } from '../core/raster';
 import {
   buildPortraitSpec, classifyGarmentName, classifyHairstyleName, classifyHeadwearName, restingExpression,
 } from '../spec/buildSpec';
 import { Expression, PortraitSpec } from '../spec/types';
 import { compilePortrait, poseForExpression, renderFrame } from '../render/pipeline';
+import { buildAnatomy, CANVAS, VIEW_HEIGHT } from '../spec/anatomy';
 import { idleFrame } from '../render/animation';
 import { encodePNG, scaleRGBA } from './png';
 
-const CELL = 96;
+const CELL = CANVAS;
 
 // ---------------------------------------------------------------------------
 // Deterministic runs
@@ -84,6 +85,40 @@ interface Counted {
 const bump = (table: Counted, key: string) => {
   table[key] = (table[key] || 0) + 1;
 };
+
+/**
+ * Half the width of the figure across the shoulder line, measured off the
+ * finished raster.
+ *
+ * Two decisions here, both learned the hard way.
+ *
+ * It reads the raster rather than the anatomy because `shoulderHalf` is a claim
+ * and this is the outcome — the silhouette profile, the pose and the crop all
+ * get a say in between, and it was exactly that gap which let a torso render
+ * barely wider than its own head while the number said 33 pixels.
+ *
+ * And it samples one band of rows just below the chin rather than taking the
+ * widest row in the crop. The maximum is not discriminating: the old profile
+ * reached its full width too, only at t = 0.78, which is off the bottom of the
+ * frame — a portrait can be head-on-a-post where anyone looks at it and still
+ * score well on a measurement taken at the very last visible row. The shoulder
+ * line is where a viewer reads the shoulders, so that is where to measure.
+ */
+function shoulderReach(raster: Raster, shoulderTop: number): number {
+  let widest = 0;
+  for (let y = shoulderTop + 11; y <= shoulderTop + 16; y += 1) {
+    if (y < 0 || y >= Math.min(VIEW_HEIGHT, CANVAS)) continue;
+    let left = -1;
+    let right = -1;
+    for (let x = 0; x < CANVAS; x += 1) {
+      if (!BODY_MATS.has(raster.mat[y * CANVAS + x])) continue;
+      if (left < 0) left = x;
+      right = x;
+    }
+    if (left >= 0) widest = Math.max(widest, (right - left + 1) / 2);
+  }
+  return widest;
+}
 
 /**
  * Things that are unambiguously wrong regardless of taste. At two hundred
@@ -125,6 +160,23 @@ function inspect(raster: Raster, spec: PortraitSpec, expression: Expression): st
   }
   if (at(MAT.CLOTH_A) + at(MAT.CLOTH_B) + at(MAT.CLOTH_C) < 60 && spec.garment.kind !== 'bare') {
     problems.push('garment barely drawn');
+  }
+
+  // Below about 1.15 an adult reads as a head balanced on a post, whatever the
+  // build label says. Two hundred personas on the profile this replaced ran a
+  // median of 1.21 and a fifth percentile of 0.92; the same two hundred on the
+  // current one run 1.62 and 1.27. So the threshold sits under everything the
+  // renderer now produces and over two fifths of what it used to — a regression
+  // in either the widths or the curve lights up dozens of portraits at once.
+  //
+  // Not a way of pinning the numbers, which are a matter of taste and should
+  // stay adjustable. The floor is for the silhouette collapsing.
+  if (spec.age >= 16) {
+    const anatomy = buildAnatomy(spec);
+    const ratio = shoulderReach(raster, anatomy.shoulderTop) / anatomy.headHalfWidth;
+    if (ratio < 1.15) {
+      problems.push(`shoulders barely wider than head (${ratio.toFixed(2)}×, build ${spec.build})`);
+    }
   }
   return problems;
 }
@@ -191,6 +243,7 @@ const restingFaces: Counted = {};
 const poseReasons: Counted = {};
 const ornamentKinds: Counted = {};
 const garmentSurfaces: Counted = {};
+const garmentWear: Counted = {};
 const ornamentMaterials: Counted = {};
 const plainHeadwear: Counted = {};
 const severities: Counted = {};
@@ -264,6 +317,8 @@ for (let i = 0; i < count; i += 1) {
     // that matters: it is where the next batch of keywords comes from, and it
     // is what stops 263 named items quietly reverting to plain bands.
     for (const s2 of spec.garment.surfaces) bump(garmentSurfaces, `${s2.kind}/${s2.material}`);
+    for (const w of spec.garment.wear) bump(garmentWear, w.kind);
+    if (!spec.garment.wear.length) bump(garmentWear, '(new cloth)');
     if (spec.headwear) {
       if (spec.headwear.ornaments.length === 0) bump(plainHeadwear, spec.headwear.name);
       for (const o of spec.headwear.ornaments) {
@@ -414,6 +469,8 @@ rule('Greying');
 table(greyBands, rendered);
 rule('Garment surfaces drawn');
 table(garmentSurfaces, rendered);
+rule('Garment wear drawn');
+table(garmentWear, rendered);
 rule('Ornament parts drawn');
 table(ornamentKinds, rendered);
 rule('Ornament materials drawn');

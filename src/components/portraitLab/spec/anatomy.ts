@@ -1,24 +1,64 @@
 /**
  * portraitLab/spec/anatomy.ts
  *
- * Where everything sits on a 96×96 canvas.
+ * Where everything sits on the canvas.
  *
- * The framing is a tight bust: crown near the top edge, shoulders running off
- * the bottom. That gives the head about 48px of width, which is the whole point
- * of moving up from 64×64 — a nose gets five pixels instead of three, and an
- * eye gets ten instead of four. Features are placed as fractions of the skull
- * so a long face and a round face keep believable proportions.
+ * The framing is a tight bust: crown near the top, shoulders running off the
+ * bottom. The figure is built to a 96px module — that gives the head about 48px
+ * of width, which is the whole point of moving up from 64×64: a nose gets five
+ * pixels instead of three, and an eye gets ten instead of four. Features are
+ * placed as fractions of the skull so a long face and a round face keep
+ * believable proportions.
  */
 
 import { unit } from '../core/rng';
 import { PortraitSpec, PoseSpec, SkullShape } from './types';
 
-export const CANVAS = 96;
+/** The figure's own module. Every measurement below is in these pixels. */
+export const BUST = 96;
+
+/**
+ * The mount the bust is set into, in art pixels.
+ *
+ * The panel a portrait sits in is wider than it is tall, so a bare 96×96 square
+ * left a gutter down each side and read as smaller than the space it had.
+ * Rather than scale the figure up — which would crop the shoulders and coarsen
+ * everything — the drawing is set into a wider mount, the way a print is
+ * matted. The figure keeps its size and gains room around it.
+ *
+ * These are part of the *anatomy* rather than of the frame that is painted over
+ * it, because they move where the body is: the extra rows at the bottom are
+ * chest, drawn like any other chest. An earlier pass added the mount at
+ * composite time and filled those rows by repeating the bust's last row, which
+ * smeared the garment into vertical streaks — the cloth has to be drawn there,
+ * not stretched into there.
+ */
+export const MOUNT_X = 12;
+export const MOUNT_Y = 6;
+
+/**
+ * The square everything is drawn on.
+ *
+ * Square, though the picture shown is not, because every mask in `art/` is
+ * indexed `y * size + x` against a single `size`. Drawing on the wider square
+ * and showing only the top `VIEW_HEIGHT` rows of it costs one dimension's worth
+ * of unshown pixels and keeps that assumption true everywhere.
+ */
+export const CANVAS = BUST + MOUNT_X * 2;
+
+/** How much of the canvas is actually shown. The rest runs off the bottom. */
+export const VIEW_HEIGHT = BUST + MOUNT_Y * 2;
 
 export type ProfileKeys = Array<[number, number]>;
 
 export interface Anatomy {
   size: number;
+  /**
+   * How many of the canvas's rows are shown. Anything that has to be centred on
+   * what the viewer sees — the vignette, the fall of the ground — uses this
+   * rather than `size`, which describes the square being drawn on.
+   */
+  viewHeight: number;
   centerX: number;
 
   headTop: number;
@@ -61,6 +101,16 @@ export interface Anatomy {
 
   shoulderTop: number;
   shoulderHalf: number;
+  /**
+   * The line from the neck out to the point of the shoulder, as fractions of
+   * the distance from `shoulderTop` to the bottom of the canvas.
+   *
+   * Lives here beside `headProfile` rather than in `art/garments.ts`, where it
+   * used to, because it describes the body: cloth is stretched over a torso, it
+   * does not decide how wide the torso is. Keeping it here also means the one
+   * curve is what the audit measures and what the renderer draws.
+   */
+  shoulderProfile: ProfileKeys;
   /** Where a collar or neckline crosses the chest. */
   collarY: number;
 
@@ -180,16 +230,60 @@ function limitDeviation(base: ProfileKeys, shaped: ProfileKeys, maxStep: number)
   return base.map(([t, half], i) => [t, Math.max(2, half * ratio[i])]);
 }
 
+/**
+ * Half the width across the points of the shoulders, per build.
+ *
+ * These were all about six pixels narrower, which put `average` at 33 against a
+ * head half-width of 24 — a shoulder-to-head ratio of 1.37, where a bust
+ * portrait of an adult wants 1.6 to 1.9. Every persona in the app read
+ * narrow-shouldered, and the ones labelled `average` read that way with no
+ * label to explain it. The spread was also too tight to see: 29 to 41 is ±18%
+ * about the mean, and after the silhouette's own taper and pixel rounding
+ * `slight` and `stocky` differed by about three visible pixels.
+ *
+ * So: `average` sits at 1.63× the head, and the spread is stretched to roughly
+ * ±30% about it. The top end is capped where it is because pose can add another
+ * 10% (`square`) and the silhouette another 6% at the arm, and 46 × 1.1 × 1.06
+ * already runs to nine pixels of the canvas edge — closer than that and a broad
+ * persona's shoulders collide with the distinction frame.
+ */
 const SHOULDER_HALF: Record<string, number> = {
-  slight: 29,
-  short: 31,
-  average: 33,
-  athletic: 36,
-  tall: 34,
-  stocky: 37.5,
-  heavy: 39,
-  imposing: 41,
+  slight: 33,
+  short: 35,
+  average: 39,
+  tall: 40,
+  athletic: 42,
+  stocky: 44,
+  heavy: 45,
+  imposing: 46,
 };
+
+/**
+ * The neck-to-deltoid line.
+ *
+ * Two facts set this curve. The first is that the crop ends about 27 rows below
+ * `shoulderTop`, a little past t = 0.6, so anything that happens later than
+ * that happens off-screen: the old profile did not reach full width until
+ * t = 0.78 and opened at 0.7 × the shoulder half-width, which meant the widest
+ * row a viewer ever saw was roughly the width of the head. Full width has to
+ * arrive early — here by t = 0.29, some thirteen rows down — or the number
+ * above is a measurement of something nobody looks at.
+ *
+ * The second is that the slope decelerates. Trapezius to deltoid is steep, the
+ * deltoid rounds over, and the upper arm below it falls very nearly vertical;
+ * a straight ramp from neck to shoulder point gives the sloping-shouldered
+ * silhouette of a coat on a hanger instead.
+ */
+function shoulderKeys(neckHalf: number, shoulderHalf: number): ProfileKeys {
+  return [
+    [0, neckHalf + 2.5],
+    [0.09, shoulderHalf * 0.66],
+    [0.18, shoulderHalf * 0.87],
+    [0.29, shoulderHalf],
+    [0.55, shoulderHalf * 1.03],
+    [1, shoulderHalf * 1.06],
+  ];
+}
 
 export function buildAnatomy(spec: PortraitSpec): Anatomy {
   const centerX = CANVAS / 2;
@@ -253,7 +347,10 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
 
   keys = limitDeviation(scaled, keys, 0.075);
 
-  const headTop = Math.round(9 - (headHeight - 58) * 0.35);
+  // Nine pixels of air above the crown, plus the mount. Everything else on the
+  // figure is measured off `headTop` or off `chinY`, so offsetting it here is
+  // the whole of what setting the bust into the mount takes.
+  const headTop = Math.round(9 - (headHeight - 58) * 0.35) + MOUNT_Y;
   const chinY = headTop + headHeight;
   const headHalfWidth = Math.max(...keys.map(([, half]) => half));
 
@@ -285,6 +382,7 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
 
   return applyPose(applySkullShape({
     size: CANVAS,
+    viewHeight: VIEW_HEIGHT,
     centerX,
 
     headTop,
@@ -328,6 +426,7 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
 
     shoulderTop: chinY + 8,
     shoulderHalf,
+    shoulderProfile: shoulderKeys(neckHalf, shoulderHalf),
     collarY: chinY + 12,
 
     asymmetry: {
@@ -402,6 +501,11 @@ function applyPose(anatomy: Anatomy, pose: PoseSpec): Anatomy {
 
     shoulderTop: down(anatomy.shoulderTop) - shoulderLift,
     shoulderHalf,
+    // Rebuilt rather than scaled: the profile starts at the neck, and squared
+    // shoulders widen the neck by less than they widen the shoulders, so
+    // multiplying the whole curve by one factor would drag the collar out with
+    // the deltoids.
+    shoulderProfile: shoulderKeys(neckHalf, shoulderHalf),
     collarY: down(anatomy.collarY) - shoulderLift,
   };
 }

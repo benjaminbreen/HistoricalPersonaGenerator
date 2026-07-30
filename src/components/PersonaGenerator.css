@@ -178,6 +178,10 @@ body.dark-mode .top-bar {
   background: var(--color-accent-primary);
 }
 
+.top-bar .source-studio-toolbar-button {
+  display: none;
+}
+
 .source-ingestion-panel {
   border: 1.5px solid var(--color-border);
   background: var(--color-surface);
@@ -1293,6 +1297,10 @@ body.dark-mode .top-bar {
 
 .footer a:hover {
   text-decoration: underline;
+}
+
+.footer-mobile-details {
+  display: none;
 }
 
 /* Modal */
@@ -2891,14 +2899,26 @@ body.dark-mode .area-pill {
   border-radius: 0;
 }
 
+.portrait-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.portrait-details-button {
+  display: none;
+}
+
 .portrait-container canvas {
   border: 0;
   border-radius: 2px;
   /* Fill the column rather than sitting at a fixed pixel size inside it, and
-     keep the pixel grid crisp when it scales. */
+     keep the pixel grid crisp when it scales. The cap used to be the square
+     canvas's 232px, which left a gutter down each side of a panel wider than
+     that; the portrait is now mounted wider and allowed to take the room. */
   width: 100%;
   height: auto;
-  max-width: 232px;
+  max-width: 300px;
   image-rendering: pixelated;
 }
 
@@ -3227,6 +3247,17 @@ body.dark-mode .area-pill {
 .profession-emoji {
   font-style: normal;
   margin-right: 0.25em;
+}
+
+/* The plain-English reading of a role that names a standing rather than a
+   trade. Set below the name, in the tertiary colour the card uses elsewhere for
+   an editorial aside. */
+.profession-gloss {
+  display: block;
+  font-size: 0.8125rem;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
 }
 
 .parent-dates {
@@ -5877,6 +5908,8 @@ body.dark-mode .rarity-legendary { --rarity-ink: #e6b542; }
   letter-spacing: 0.06em;
   font-weight: 600;
   opacity: 0.9;
+  /* "exceedingly rare" is two words and must not break across the name. */
+  white-space: nowrap;
 }
 
 .draw-odds-mode {
@@ -6139,8 +6172,8 @@ body.dark-mode .sampling-mode {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: var(--sp-sm);
-    padding: var(--sp-sm) var(--sp-md);
+    gap: 6px;
+    padding: var(--sp-xs) var(--sp-sm);
     /* Sticky is worth keeping — the actions are genuinely useful mid-read —
        but only once it is the height of a single row. */
     border-bottom-width: 1px;
@@ -6153,8 +6186,8 @@ body.dark-mode .sampling-mode {
   }
 
   .top-bar-brand .brand-icon {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     flex: 0 0 auto;
   }
 
@@ -6181,7 +6214,11 @@ body.dark-mode .sampling-mode {
     display: flex;
     width: auto;
     flex: 0 0 auto;
-    gap: 4px;
+    gap: 3px;
+  }
+
+  .top-bar .source-studio-toolbar-button {
+    display: flex;
   }
 
   .top-bar-label {
@@ -6199,8 +6236,8 @@ body.dark-mode .sampling-mode {
   }
 
   .top-bar button {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     justify-content: center;
     border-radius: 50%;
@@ -6208,7 +6245,7 @@ body.dark-mode .sampling-mode {
   }
 
   .top-bar button svg {
-    font-size: 15px;
+    font-size: 14px;
     flex: 0 0 auto;
   }
 
@@ -6216,10 +6253,12 @@ body.dark-mode .sampling-mode {
 
   .controls {
     padding: var(--sp-md) var(--sp-md);
+    margin-bottom: var(--sp-sm);
   }
 
   .control-buttons {
     gap: var(--sp-sm);
+    margin-bottom: 0;
   }
 
   .generation-random-button {
@@ -6236,18 +6275,112 @@ body.dark-mode .sampling-mode {
     flex-wrap: nowrap;
   }
 
-  /* Provenance matters, but it is not what a reader came for. It stays
-     legible and stays on the page — it just stops taking three lines above
-     the fold. */
+  /* Provenance stays available in the footer without occupying the space
+     between the primary controls and the persona. */
   .controls-disclaimer,
-  .controls-info {
-    font-size: 0.6875rem;
-    line-height: 1.35;
-    opacity: 0.75;
-  }
-
+  .controls-info,
   .controls-divider {
     display: none;
+  }
+
+  /* Source Studio is opened from the sticky toolbar on phones. Its collapsed
+     directory card is useful on desktop but costs too much of the first
+     viewport here; collapsing the workspace returns directly to the persona. */
+  .source-ingestion-panel-collapsed {
+    display: none;
+  }
+
+  .source-ingestion-panel:not(.source-ingestion-panel-collapsed) {
+    scroll-margin-top: 3.25rem;
+  }
+
+  /* The renderer reports its own backdrop base, extending the portrait's
+     field through the side gutters without enlarging the face. */
+  .appearance-content {
+    padding: 0;
+    gap: 0;
+  }
+
+  .appearance-section-compact > h3 {
+    display: none;
+  }
+
+  .portrait-stage {
+    align-items: center;
+    padding: 0.35rem var(--sp-sm);
+    background: var(--portrait-backdrop, var(--color-surface-elevated));
+  }
+
+  .portrait-container {
+    padding: 0;
+    background: transparent;
+  }
+
+  .portrait-container canvas {
+    max-width: min(100%, 320px);
+  }
+
+  .portrait-details-button {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+    padding: 0.38rem 0.62rem;
+    background: rgba(26, 22, 18, 0.78);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    font: 700 0.625rem var(--font-sans);
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+    backdrop-filter: blur(5px);
+    cursor: pointer;
+  }
+
+  .portrait-details-button svg {
+    font-size: 0.8rem;
+  }
+
+  .appearance-text {
+    padding: 0.6rem 0.9rem;
+    border: 0;
+    border-radius: 0;
+    gap: var(--sp-sm);
+  }
+
+  .age-gender-display {
+    align-items: center;
+    gap: 0.85rem;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .age-number {
+    font-size: 2rem;
+  }
+
+  .age-label {
+    font-size: 0.6875rem;
+  }
+
+  .gender-block {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .gender-label {
+    font-size: 1rem;
+  }
+
+  .gender-build {
+    font-size: 0.75rem;
+  }
+
+  .footer-mobile-details {
+    display: inline;
   }
 
   /* --- Location pills: wrap instead of clipping ------------------------ */

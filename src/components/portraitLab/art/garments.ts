@@ -14,7 +14,7 @@
  */
 
 import {
-  applyContactShadow, ellipsoidShader, fillMask, MAT, Mask, makeMask,
+  applyContactShadow, bayer, ellipsoidShader, fillMask, MAT, Mask, makeMask,
   maskDilate, maskEllipse, maskFromProfile, maskIntersect, maskRect, maskSubtract,
 } from '../core/raster';
 import { Ramp } from '../core/color';
@@ -23,6 +23,7 @@ import { RenderContext } from '../render/context';
 import { GarmentKind } from '../spec/types';
 import { drawGarmentSurface } from './garmentSurface';
 import { drawGarmentFeature, garmentFeatureFor, GarmentFeature } from './garmentFeatures';
+import { drawGarmentWear } from './garmentWear';
 
 export interface BodyMasks {
   body: Mask;
@@ -33,13 +34,9 @@ function shoulderMask(context: RenderContext): Mask {
   const { anatomy } = context;
   const { size } = anatomy;
   const mask = maskFromProfile(size, size, {
-    keys: [
-      [0, anatomy.neckHalf + 2.5],
-      [0.22, anatomy.shoulderHalf * 0.7],
-      [0.5, anatomy.shoulderHalf * 0.92],
-      [0.78, anatomy.shoulderHalf],
-      [1, anatomy.shoulderHalf * 1.02],
-    ],
+    // The body's own silhouette, from `spec/anatomy.ts`. Cloth follows the
+    // torso; it does not get its own opinion about how wide the torso is.
+    keys: anatomy.shoulderProfile,
     top: anatomy.shoulderTop,
     bottom: size + 5,
     centerX: anatomy.centerX,
@@ -288,7 +285,15 @@ export function drawGarment(context: RenderContext): BodyMasks {
   // pattern the way real cloth does — a brocade that ignores the fold it is
   // lying in reads as wallpaper rather than as a garment.
   drawGarmentSurface(context, body, opening);
-  drawFolds(context, body);
+  drawDrape(context, body);
+  // Wear reads the shade plane the folds just wrote — fading follows the light
+  // and rubbing follows the form, and neither can find either until the cloth
+  // has been modelled. So it goes here rather than with the surface treatments.
+  drawGarmentWear(context, body);
+  // After the folds and the wear, because a cast shadow falls across whatever
+  // is under it, and before the collar, which stands proud of the chest and is
+  // lit rather than shadowed.
+  drawChestShadow(context, body);
   drawCollar(context, body, opening);
 
   // What this garment is called, as opposed to what shape it is. Resolved
@@ -403,21 +408,288 @@ function drawUndergarment(context: RenderContext, opening: Mask, body: Mask): vo
   }, { dither: 0.4 });
 }
 
-/** A few soft vertical folds, dithered so they read as cloth and not as stripes. */
-function drawFolds(context: RenderContext, body: Mask): void {
-  const { raster, anatomy, spec, book } = context;
+// ---------------------------------------------------------------------------
+// Drape
+// ---------------------------------------------------------------------------
+
+/**
+ * How a garment hangs, as distinct from what it is cut into.
+ *
+ * The same move as `HairSilhouette`: a small vocabulary chosen so that every
+ * entry is distinguishable from every other *at thumbnail size*, and the finer
+ * distinctions a historian of dress would draw live in the prose instead. There
+ * is no point separating a doublet's drape from a jerkin's when the frame gives
+ * the chest twenty-seven rows.
+ *
+ * What actually separates them at this size is not how many folds there are but
+ * **where the folds start and which way they run** — which is a fact about
+ * construction, and therefore true across cultures and centuries rather than
+ * borrowed from one of them:
+ *
+ * - `tailored` cloth is cut to the body and hung from a sleeve set into an
+ *   armhole, so it is flat across the chest and breaks in short folds *inward*
+ *   from each armhole. Flatness is the signal; a tailored garment covered in
+ *   folds has stopped being tailored.
+ * - `hanging` cloth is a width of fabric supported at the shoulders and left to
+ *   fall, so folds start at the shoulder line and *diverge* on the way down —
+ *   the cloth is wider at the hem than the shoulders that carry it.
+ * - `wound` cloth is gathered at one point and taken across the body, so its
+ *   folds *radiate* diagonally from that point and flatten as they travel.
+ *
+ * Those three read differently in a grid of forty portraits. Anything finer
+ * does not.
+ */
+type Drape = 'tailored' | 'hanging' | 'wound' | 'none';
+
+const DRAPE_FOR_KIND: Record<GarmentKind, Drape> = {
+  doublet: 'tailored',
+  jacket: 'tailored',
+  work_shirt: 'tailored',
+  tunic: 'hanging',
+  robe: 'hanging',
+  gown: 'hanging',
+  wrapped_garment: 'wound',
+  bare: 'none',
+};
+
+/**
+ * How the cloth behaves, from what it is made of.
+ *
+ * Stiff cloth takes few, broad, straight folds and holds them; fluid cloth takes
+ * many fine ones that wander. This is the axis the old fold pass had, in the
+ * form of `material.includes('silk') ? 6 : 4`, and it was the right instinct
+ * applied to one fibre.
+ */
+function fabricHand(material: string): { count: number; wobble: number; depth: number } {
+  if (/silk|satin|muslin|gauze|chiffon|voile|crepe|fine/.test(material)) {
+    return { count: 1.45, wobble: 1.9, depth: 1 };
+  }
+  if (/leather|hide|skin|fur|felt|barkcloth|bark cloth|canvas|quilted|padded|fustian/.test(material)) {
+    return { count: 0.55, wobble: 0.45, depth: 2 };
+  }
+  if (/wool|broadcloth|serge|tweed|kersey|frieze/.test(material)) {
+    return { count: 0.8, wobble: 0.8, depth: 2 };
+  }
+  return { count: 1, wobble: 1.2, depth: 1 };
+}
+
+interface FoldRun {
+  /** Where the fold's core sits at `top`. */
+  x0: number;
+  top: number;
+  bottom: number;
+  /** Sideways drift per row. Positive runs to the viewer's right. */
+  lean: number;
+  /** How much of the drift is spent by the time the fold reaches `bottom`. */
+  ease: number;
+  /**
+   * Which end of the run the fold is deepest at.
+   *
+   * `fall` is cloth hanging free: shallow where it is still supported, deepest
+   * where it has fallen away. `pull` is cloth under tension from a seam:
+   * deepest at the seam and dying out as the strain is taken up. Getting this
+   * backwards is why a tailored break was invisible — it was drawn faintest at
+   * the armhole, which is the only part of it that is short enough to see.
+   */
+  from: 'fall' | 'pull';
+}
+
+/**
+ * One fold.
+ *
+ * A fold is not a dark line. It is a trough with a ridge beside it, and at this
+ * size the ridge is what makes it read: a single darkened column is a scratch on
+ * the cloth, while the same column with a lit one on its left is cloth turning
+ * away from the light. The old pass drew the trough and not the ridge, which is
+ * most of why the chest read as a flat noisy field with a few streaks in it.
+ *
+ * The lit side is always the left, because the key light is upper-left and every
+ * other form in this renderer is modelled from there.
+ */
+function drawFold(
+  context: RenderContext,
+  body: Mask,
+  run: FoldRun,
+  depth: number,
+  wobble: number,
+  noise: (n: number) => number,
+  phase: number,
+): void {
+  const { raster, anatomy, book } = context;
+  const { size } = anatomy;
+  const span = Math.max(1, run.bottom - run.top);
+
+  for (let y = run.top; y <= run.bottom; y += 1) {
+    if (y < 0 || y >= size) continue;
+    const t = (y - run.top) / span;
+    // Folds are born at the shoulder and deepen as the cloth falls away from
+    // what is holding it up, so both the drift and the depth follow the run.
+    const travel = run.ease === 1 ? t : 1 - Math.pow(1 - t, run.ease);
+    const x = Math.round(run.x0 + run.lean * travel * span + noise(y * 0.16 + phase) * wobble);
+    if (x < 1 || x >= size - 1) continue;
+    if (!body[y * size + x]) continue;
+
+    const strength = run.from === 'pull' ? 1 - t * 0.75 : 0.35 + 0.65 * travel;
+    const core = strength > 0.7 ? depth : Math.max(1, depth - 1);
+    raster.shift(x, y, core, book);
+    if (body[y * size + x - 1]) raster.shift(x - 1, y, -1, book);
+    // A broad fold in stiff cloth occupies two columns of trough.
+    if (depth > 1 && strength > 0.75 && body[y * size + x + 1]) raster.shift(x + 1, y, 1, book);
+  }
+}
+
+/**
+ * The folds a garment falls into, by how it is worn.
+ *
+ * Runs after the surface treatment and before the collar, so that a brocade is
+ * shaded *by* the fold it lies in rather than ignoring it, and so the collar is
+ * laid over the top of both.
+ */
+function drawDrape(context: RenderContext, body: Mask): void {
+  const { anatomy, spec } = context;
   const { size, centerX } = anatomy;
+  const drape = DRAPE_FOR_KIND[spec.garment.kind] ?? 'hanging';
+  if (drape === 'none') return;
+
+  const hand = fabricHand(spec.garment.material);
   const rng = makeRng(spec.seed ^ 0x4d21);
   const noise = makeNoise1D(spec.seed ^ 0x1177);
-  const count = spec.garment.material.includes('silk') ? 6 : 4;
+  const top = anatomy.shoulderTop;
+  const floor = size - 1;
+  const half = anatomy.shoulderHalf;
 
-  for (let i = 0; i < count; i += 1) {
-    const x0 = Math.round(centerX + (rng() * 2 - 1) * anatomy.shoulderHalf * 0.85);
-    for (let y = anatomy.shoulderTop + 4; y < size; y += 1) {
-      const x = Math.round(x0 + noise(y * 0.18 + i * 9) * 1.6);
-      if (x < 0 || x >= size || !body[y * size + x]) continue;
-      raster.shift(x, y, 1, book);
-      if (rng() > 0.75 && body[y * size + x + 1]) raster.shift(x + 1, y, 1, book);
+  const runs: FoldRun[] = [];
+
+  if (drape === 'hanging') {
+    // From the shoulder line, spreading. `lean` is signed away from the centre,
+    // so the folds fan: at the bottom of the frame they are further apart than
+    // the shoulders that carry them, which is what hanging cloth does and what
+    // a column of parallel lines can never say.
+    const count = Math.max(3, Math.round(5 * hand.count));
+    for (let i = 0; i < count; i += 1) {
+      // Spread across the chest rather than placed at random, so no persona
+      // gets four folds in the same two inches and a bare side.
+      const u = (i + 0.35 + rng() * 0.3) / count;
+      const x0 = centerX + (u * 2 - 1) * half * 0.78;
+      const side = x0 >= centerX ? 1 : -1;
+      runs.push({
+        x0: Math.round(x0),
+        top: top + 4,
+        bottom: floor,
+        lean: side * (0.09 + rng() * 0.07) * Math.abs(x0 - centerX) / Math.max(1, half) * 1.6,
+        ease: 1.6,
+        from: 'fall',
+      });
+    }
+  } else if (drape === 'tailored') {
+    // Two short breaks inward from each armhole, and nothing across the chest.
+    // The empty middle is the point: it is where a cut garment is flat, and
+    // leaving it alone is what distinguishes a coat from a sack.
+    const count = Math.max(1, Math.round(2 * hand.count));
+    for (const side of [-1, 1] as const) {
+      for (let i = 0; i < count; i += 1) {
+        // Inboard of the armhole rather than on it. Placed on the shoulder
+        // point itself the break landed where the cylinder shading is already
+        // at its darkest and simply vanished — a fold has to sit somewhere the
+        // cloth still has value left to lose.
+        const x0 = centerX + side * (half * (0.58 - i * 0.12));
+        runs.push({
+          x0: Math.round(x0),
+          top: anatomy.collarY + 2 + i * 2,
+          // Short, and running down and inward: the strain a set sleeve puts on
+          // a chest pulls toward the opposite hip. Also the only direction that
+          // is not already occupied — outward is the armhole, straight down is
+          // the closure.
+          bottom: Math.min(floor, anatomy.collarY + 17 - i * 3),
+          lean: -side * 0.42,
+          ease: 1,
+          from: 'pull',
+        });
+      }
+    }
+  } else {
+    // Wound: everything radiates from the point the cloth is gathered at. The
+    // shoulder it gathers on is fixed per persona, and the same one the pin in
+    // `drawGenericConstruction` goes on, so the two agree about which shoulder
+    // is carrying the weight.
+    const side = (spec.seed & 1) === 0 ? 1 : -1;
+    const gatherX = centerX + side * (anatomy.neckHalf + 9);
+    const gatherY = anatomy.collarY + 2;
+    const count = Math.max(3, Math.round(4 * hand.count));
+    for (let i = 0; i < count; i += 1) {
+      runs.push({
+        x0: Math.round(gatherX - side * (1 + i * 1.6)),
+        top: gatherY + 1 + i,
+        bottom: floor,
+        // Steeply across at first, flattening out — the cloth leaves the gather
+        // nearly horizontal and is vertical again by the time it hangs free.
+        lean: -side * (0.85 - i * 0.13),
+        ease: 2.4,
+        from: 'pull',
+      });
+    }
+  }
+
+  runs.forEach((run, i) => drawFold(context, body, run, hand.depth, hand.wobble, noise, i * 9));
+}
+
+/**
+ * The shadow the head throws down the front of the chest.
+ *
+ * A bust has a head sitting over a chest with a neck between them, lit from
+ * above and to the left, and that geometry casts — always, in every portrait
+ * ever painted. This renderer modelled the cloth as a lit cylinder and then
+ * stopped, so the head floated over an evenly lit shirt and the whole figure
+ * read as flat pieces on a ground rather than as one solid thing in a light.
+ *
+ * Of everything in this file this is the cheapest and does the most: it is one
+ * falloff, it costs nothing, and it is the difference between a portrait and a
+ * paper doll. Offset to the viewer's right, because the key light is on the
+ * left and a shadow falls away from its source.
+ */
+function drawChestShadow(context: RenderContext, body: Mask): void {
+  const { raster, anatomy, book } = context;
+  const { size, centerX } = anatomy;
+
+  // Hung off the neckline rather than off a fixed row.
+  //
+  // Anchoring it at `collarY` did nothing visible, and the reason is worth
+  // keeping: the rows just under the collar are mostly *opening* — neck and
+  // undershirt, not garment — so by the time the falloff reached actual cloth
+  // it had already spent itself. Finding, per column, the row where the cloth
+  // begins fixes that and buys something better than a fix: the shadow now
+  // follows whatever shape the neckline is. A deep V carries it lower down the
+  // middle and a boat neck spreads it wide and shallow, for free, because that
+  // is what the geometry does.
+  const reach = 13;
+  const spread = anatomy.neckHalf + 13;
+  // The key light is upper-left, so the shadow falls to the lower right.
+  const centre = centerX + 2;
+  const searchTop = anatomy.collarY - 10;
+  const searchBottom = Math.min(size, anatomy.collarY + 18);
+
+  for (let x = Math.round(centre - spread); x <= Math.round(centre + spread); x += 1) {
+    if (x < 0 || x >= size) continue;
+
+    let start = -1;
+    for (let y = Math.max(0, searchTop); y < searchBottom; y += 1) {
+      if (body[y * size + x]) { start = y; break; }
+    }
+    if (start < 0) continue;
+
+    // Strongest directly under the neck, gone at the point of the shoulder.
+    const across = (x - centre) / spread;
+    const lateral = Math.max(0, 1 - across * across);
+
+    for (let d = 0; d < reach; d += 1) {
+      const y = start + d;
+      if (y >= size || !body[y * size + x]) continue;
+      const local = lateral * Math.pow(1 - d / reach, 1.5);
+      if (local < 0.14) continue;
+      // Dithered at the fringe so the boundary dissolves rather than drawing a
+      // second neckline an inch below the first.
+      if (local < 0.5 && bayer(x, y) > local * 1.8) continue;
+      raster.shift(x, y, local > 0.58 ? 2 : 1, book);
     }
   }
 }
@@ -712,17 +984,25 @@ function drawGenericConstruction(context: RenderContext, body: Mask, feature: Ga
     // pixels, so the only question is how many and how bright. Metal for
     // anyone who can afford it, self-coloured cord for anyone who cannot.
     //
-    // Spacing is set by the frame rather than by the garment: there are only
-    // seventeen rows below the collar before the canvas ends, so the original
-    // six-pixel pitch put half of a doublet's buttons off the bottom edge and
-    // the persona came back wearing two.
+    // Spacing is set by the frame rather than by the garment, and the count
+    // falls out of it rather than being asserted: the fixed three that a
+    // doublet used to get was chosen against a shorter canvas and put its last
+    // button off the bottom edge. Counting the rows that are actually there
+    // means the run fills whatever chest the frame gives it, and a doublet
+    // simply gets a closer pitch than a jacket because that is what a doublet
+    // has.
     const metal = spec.garment.ornament > 0.3;
-    const count = kind === 'doublet' ? 3 : 2;
-    const pitch = 5;
+    const pitch = kind === 'doublet' ? 4 : 5;
+    const first = anatomy.collarY + 4;
+    // Against `viewHeight`, not `size`: the canvas runs twelve rows past what is
+    // shown, so counting buttons to the edge of it spent the last two or three
+    // of them below the frame.
+    const floor = anatomy.viewHeight;
+    const count = Math.max(2, Math.min(6, Math.floor((floor - 2 - first) / pitch)));
     for (let i = 0; i < count; i += 1) {
-      const y = anatomy.collarY + 4 + i * pitch;
+      const y = first + i * pitch;
       const x = centerX + offset - 2;
-      if (y >= size - 1) break;
+      if (y >= floor - 1) break;
       if (!onBody(x, y)) continue;
       if (metal) {
         raster.set(x, y, ramps.metal.steps[1], MAT.METAL, 1);

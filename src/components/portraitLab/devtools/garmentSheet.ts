@@ -18,10 +18,11 @@ import { writeFileSync } from 'node:fs';
 import { Raster } from '../core/raster';
 import { buildPortraitSpec, restingExpression } from '../spec/buildSpec';
 import { compilePortrait, renderFrame } from '../render/pipeline';
+import { CANVAS } from '../spec/anatomy';
 import { idleFrame } from '../render/animation';
 import { encodePNG, scaleRGBA } from './png';
 
-const CELL = 96;
+const CELL = CANVAS;
 
 /** One representative item name per kind, so the classifier routes it there. */
 const KINDS: Array<{ label: string; name: string; material: string }> = [
@@ -60,8 +61,28 @@ const SURFACES: Array<{ label: string; name: string; material: string; wealth: s
   { label: 'plain-linen', name: 'Simple Tunic', material: 'Linen', wealth: 'poor' },
 ];
 
+/**
+ * Real adjective sets from `clothing.ts`, one per cell.
+ *
+ * These are the words the card has always printed beside the portrait and the
+ * renderer never read. Each row is a treatment; the first is the control, so a
+ * mark that turns out to be invisible is visibly invisible.
+ */
+const WEAR: Array<{ label: string; adjectives: string[]; wealth: string }> = [
+  { label: 'none', adjectives: [], wealth: 'comfortable' },
+  { label: 'worn', adjectives: ['Worn'], wealth: 'modest' },
+  { label: 'patched', adjectives: ['Rough', 'Patched'], wealth: 'poor' },
+  { label: 'faded', adjectives: ['Faded'], wealth: 'modest' },
+  { label: 'darned', adjectives: ['Darned'], wealth: 'poor' },
+  { label: 'torn', adjectives: ['Torn'], wealth: 'poor' },
+  { label: 'stained', adjectives: ['Stained'], wealth: 'poor' },
+  { label: 'worn+patched', adjectives: ['Worn', 'Patched'], wealth: 'poor' },
+  { label: 'implied poor', adjectives: [], wealth: 'poor' },
+  { label: 'implied modest', adjectives: [], wealth: 'modest' },
+];
+
 function renderOne(
-  kind: { label: string; name: string; material: string },
+  kind: { label: string; name: string; material: string; adjectives?: string[] },
   wealth: string,
   index: number
 ): Raster {
@@ -82,7 +103,7 @@ function renderOne(
       facialHairStyle: 'none',
     },
     equippedItems: {
-      torso: { name: kind.name, material: kind.material },
+      torso: { name: kind.name, material: kind.material, adjectives: kind.adjectives },
     },
   };
   const spec = buildPortraitSpec(character);
@@ -105,12 +126,44 @@ function main() {
   const mode = process.argv[3] || 'wealth';
   const scale = Number(process.argv[4]) || 5;
 
-  // The garment occupies roughly the bottom quarter of a 96px bust, so a full
-  // cell spends most of its pixels on a face we are not looking at. Cropping to
-  // the neck and chest is what makes this sheet legible at all.
-  const cropTop = process.argv.includes('--full') ? 0 : 52;
+  // The garment occupies roughly the bottom quarter of the bust, so a full cell
+  // spends most of its pixels on a face we are not looking at. Cropping to the
+  // neck and chest is what makes this sheet legible at all.
+  const cropTop = process.argv.includes('--full') ? 0 : 58;
   const cellH = CELL - cropTop;
   const gap = 4;
+
+  // `wear` mode crosses the wear vocabulary with a couple of garment kinds, so
+  // a mark can be judged both on cloth that hangs and on cloth that is cut.
+  if (mode === 'wear') {
+    const kinds = [KINDS[0], KINDS[6]];
+    const cells = kinds.flatMap(kind => WEAR.map(entry => ({ kind, entry })));
+    const cols = 5;
+    const rows = Math.ceil(cells.length / cols);
+    const width = cols * CELL + (cols + 1) * gap;
+    const height = rows * cellH + (rows + 1) * gap;
+    const out = new Uint8ClampedArray(width * height * 4);
+    for (let i = 0; i < width * height; i += 1) {
+      out[i * 4] = 26; out[i * 4 + 1] = 26; out[i * 4 + 2] = 30; out[i * 4 + 3] = 255;
+    }
+    cells.forEach(({ kind, entry }, index) => {
+      const raster = renderOne({ ...kind, adjectives: entry.adjectives }, entry.wealth, index);
+      const x0 = gap + (index % cols) * (CELL + gap);
+      const y0 = gap + Math.floor(index / cols) * (cellH + gap);
+      for (let y = 0; y < cellH; y += 1) {
+        for (let x = 0; x < CELL; x += 1) {
+          const s = ((y + cropTop) * CELL + x) * 4;
+          const d = ((y0 + y) * width + (x0 + x)) * 4;
+          out[d] = raster.data[s]; out[d + 1] = raster.data[s + 1];
+          out[d + 2] = raster.data[s + 2]; out[d + 3] = 255;
+        }
+      }
+    });
+    const scaled = scaleRGBA(out, width, height, scale);
+    writeFileSync(outfile, encodePNG(scaled.data, scaled.width, scaled.height));
+    console.log(`wrote ${outfile} — ${WEAR.map(w => w.label).join(', ')}`);
+    return;
+  }
 
   // `surface` mode is its own thing: one real decorated item per cell rather
   // than a cross-product, because a treatment is a property of the item and not

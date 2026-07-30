@@ -220,6 +220,59 @@ export const CULTURE_WINDOWS: CultureWindow[] = [
     places: /\b(egypt|nile|thebes|memphis|fayum|alexandria|aswan|nubia)\b/,
     markers: /\b(shendyt|kalasiris|nemes|galabeya)\b/i,
   },
+
+  // --- Sub-Saharan Africa --------------------------------------------------
+  // The zone had no windows at all, which meant `resolveCulture` returned null
+  // for the whole continent and every marker in the zone's tables passed for
+  // everyone in it. That is how a wealthy man in the Rwanda–Burundi highlands
+  // came to be wearing senator wear, which is Nigerian formal dress, over a
+  // Yoruba-adjacent wardrobe assembled two thousand miles from him.
+  //
+  // As with MENA, the marker lists are deliberately thin: cloth, beadwork and
+  // wrapped garments are shared across the whole continent, and a marker that
+  // is merely typical of one region would wrongly reject it for its neighbours.
+  // Only terms with a single home are listed — kanzu is absent on purpose,
+  // because the coast gave it to Buganda and both wear it.
+  {
+    id: 'culture-swahili-coast',
+    label: 'Swahili coast',
+    zones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    yearRange: [800, 2100],
+    places: /\b(swahili|zanzibar|kilwa|mombasa|malindi|lamu|pemba|comoro|sofala|mogadishu|kenyan coast|tanzanian coast)\b/,
+    markers: /\b(kanga|kikoi|kofia|buibui)\b/i,
+  },
+  {
+    id: 'culture-horn',
+    label: 'Ethiopian and Horn',
+    zones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    yearRange: [-1000, 2100],
+    places: /\b(ethiopia|abyssinia|amhara|tigray|shewa|gondar|lalibela|axum|aksum|eritrea|somali|ogaden|harar|oromo|afar|danakil|blue nile)\b/,
+    markers: /\b(shamma|habesha kemis|netela|gabi|macawis)\b/i,
+  },
+  {
+    id: 'culture-west-africa',
+    label: 'West African',
+    zones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    yearRange: [-1000, 2100],
+    places: /\b(nigeria|yoruba|igbo|ibo|benin|dahomey|oyo|ogun|jos|niger delta|ghana|ashanti|asante|akan|volta|senegal|senegambia|gambia|mali|jenne|timbuktu|guinea|sierra leone|liberia|mende|ivory coast|togo|hausa|kano|sokoto|bornu|cameroon|sahel)\b/,
+    markers: /\b(senator wear|agbada|babban riga|dashiki|kente|gele|aso oke|adire|fila|buba|iro|boubou|kaba|dansiki)\b/i,
+  },
+  {
+    id: 'culture-great-lakes',
+    label: 'Great Lakes and Congo basin',
+    zones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    yearRange: [-1000, 2100],
+    places: /\b(rwanda|burundi|buganda|uganda|bunyoro|ankole|kivu|congo|kongo|luba|lunda|kuba|tanganyika|nyanza|victoria|virunga|great lakes)\b/,
+    markers: /\b(mushanana|imigongo|bark ?cloth|raffia pile|kuba cloth)\b/i,
+  },
+  {
+    id: 'culture-southern-africa',
+    label: 'Southern African',
+    zones: ['SUB_SAHARAN_AFRICAN' as CulturalZone],
+    yearRange: [-1000, 2100],
+    places: /\b(zulu|xhosa|sotho|tswana|swazi|ndebele|natal|transvaal|drakensberg|highveld|cape|karoo|orange river|limpopo|zambezi|zimbabwe|kalahari|namib|okavango|herero|himba|kaokoveld|damaraland)\b/,
+    markers: /\b(isicholo|umqhele|shweshwe|kaross|karross|otjize|herero dress|basotho blanket)\b/i,
+  },
 ];
 
 const normalize = (value: string | undefined): string =>

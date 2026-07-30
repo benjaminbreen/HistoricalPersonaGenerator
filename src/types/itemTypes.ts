@@ -52,6 +52,15 @@ export interface Item extends ItemDefinition {
     culturalStyle?: string; // Cultural variation (e.g., "Celtic", "Roman", "Japanese")
     crafterName?: string; // Name of the crafter for unique items
     age?: number; // Age of the item in years
+    /**
+     * The descriptive words the clothing table gave the piece this item was
+     * built from — Rough, Patched, Faded, Embroidered. Carried on the instance
+     * rather than the definition because two people can be wearing the same
+     * garment in different states. Read by the equipment panel, by the
+     * accessory matcher in `npcUtils`, and by the portrait renderer, which
+     * draws the mends and the fading.
+     */
+    adjectives?: string[];
     enchantments?: string[]; // Magical or special properties (if applicable)
 }
 

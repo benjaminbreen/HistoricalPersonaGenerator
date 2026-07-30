@@ -8,13 +8,46 @@ const stableId = (value: string): string => value
   .replace(/[^a-z0-9]+/g, '_')
   .replace(/^_+|_+$/g, '') || 'unknown';
 
+/**
+ * Whether a place is a settlement dense enough to hold urban institutions.
+ *
+ * The institution gates below used to ask `!== 'rural'`, which reads as a
+ * reasonable test and is not one: `unknown` is the answer for 295 of the 569
+ * areas in the geography, so more than half the world was quietly treated as
+ * urban. A man in the Mekong Delta in 2001 was handed a university, a factory,
+ * a railway station, a bureaucracy and chain retail, all on the strength of the
+ * word "Delta" not being in a list. The question the gates mean to ask is
+ * whether this is a town or a city, so that is what they now ask.
+ */
+const isUrban = (locale: LocaleType): boolean => locale === 'city' || locale === 'town';
+
+/**
+ * Named cities, for the areas that are cities rather than landforms.
+ *
+ * The list was drawn from the North Atlantic and its usual counterparts and had
+ * no Southeast Asian entry at all — not Ayutthaya, Angkor, Bagan, Thăng Long,
+ * Malacca, Batavia or Manila, several of which were among the largest cities on
+ * earth in their day. Angkor may have been the largest pre-industrial city
+ * anywhere.
+ */
+const CITY_NAMES = /\b(?:london|paris|rome|vienna|constantinople|istanbul|venice|prague|berlin|madrid|lisbon|amsterdam|cairo|alexandria|baghdad|damascus|jerusalem|mecca|medina|isfahan|tehran|beijing|nanjing|hangzhou|kyoto|edo|tokyo|seoul|delhi|agra|lahore|dhaka|timbuktu|kilwa|cuzco|lima|potosi|boston|philadelphia|montreal|moscow|new york|manhattan|hudson|kiev|kyiv|novgorod|warsaw|budapest|athens|naples|florence|milan|antwerp|bruges|hamburg|copenhagen|stockholm|dublin|edinburgh|bristol|liverpool|manchester|marseille|lyon|seville|barcelona|granada|fez|tunis|aleppo|smyrna|izmir|samarkand|bukhara|kabul|multan|calcutta|kolkata|bombay|mumbai|madras|chennai|canton|guangzhou|shanghai|nagasaki|osaka|kaifeng|xian|chang'an|tenochtitlan|mexico city|potosí|salvador|havana|charleston|quebec|ayutthaya|angkor|bagan|pagan|pegu|ava|mandalay|rangoon|yangon|bangkok|thonburi|phnom penh|thang long|thăng long|hanoi|hà nội|hue|huế|saigon|sài gòn|ho chi minh|malacca|melaka|batavia|jakarta|surabaya|palembang|makassar|manila|cebu|vientiane|luang prabang|singapore|penang|george town|brunei)\b/i;
+
 function inferLocaleType(region: string, location: string): LocaleType {
   const place = `${region} ${location}`;
-  if (/\b(?:london|paris|rome|vienna|constantinople|istanbul|venice|prague|berlin|madrid|lisbon|amsterdam|cairo|alexandria|baghdad|damascus|jerusalem|mecca|medina|isfahan|tehran|beijing|nanjing|hangzhou|kyoto|edo|tokyo|seoul|delhi|agra|lahore|dhaka|timbuktu|kilwa|cuzco|lima|potosi|boston|philadelphia|montreal|moscow|new york|manhattan|hudson|kiev|kyiv|novgorod|warsaw|budapest|athens|naples|florence|milan|antwerp|bruges|hamburg|copenhagen|stockholm|dublin|edinburgh|bristol|liverpool|manchester|marseille|lyon|seville|barcelona|granada|fez|tunis|aleppo|smyrna|izmir|samarkand|bukhara|kabul|multan|calcutta|kolkata|bombay|mumbai|madras|chennai|canton|guangzhou|shanghai|nagasaki|osaka|kaifeng|xian|chang'an|tenochtitlan|mexico city|potosí|salvador|havana|charleston|quebec)\b/i.test(place)) return 'city';
+  // A water feature named after a city is not that city. The Strait of Malacca
+  // is a shipping lane a hundred kilometres wide; Malacca is a port on it.
+  if (/\b(?:strait|straits|gulf|bay|sea|isthmus|cape|mouths?|delta)\s+of\b/i.test(place)) return 'rural';
+  if (CITY_NAMES.test(place)) return 'city';
   if (/\b(?:city|capital|metropolis|urban|port|harbor|harbour)\b/i.test(place)) return 'city';
   if (/\b(?:town|borough|market|settlement)\b/i.test(place)) return 'town';
   if (/\b(?:steppe|nomad|pastoral|caravan|migratory)\b/i.test(place)) return 'mobile';
-  if (/\b(?:valley|plain|plateau|highland|lowland|forest|coast|basin|river|mountain|desert|island|rural|village)\b/i.test(place)) return 'rural';
+  // Landforms, which is what most areas in the geography are named after. The
+  // list stopped at nine words and so missed most of the world's coastlines:
+  // deltas, straits, peninsulas, fjords, hills and archipelagos are countryside
+  // as surely as a valley is.
+  // The trailing `s?` matters as much as the vocabulary: the old list had
+  // "highland" but not "highlands", so the Annam Highlands were unclassified.
+  if (/\b(?:valley|plain|plateau|highland|lowland|forest|coast|coastal|basin|river|mountain|desert|island|isle|rural|village|delta|estuary|strait|sound|channel|peninsula|cordillera|range|ridge|foothill|hill|upland|down|moor|fen|marsh|swamp|bog|tundra|savanna|savannah|prairie|grassland|oasis|canyon|gorge|cape|bay|gulf|lagoon|lake|fjord|glacier|badland|break|archipelago|atoll|reef)s?\b/i.test(place)) return 'rural';
   return 'unknown';
 }
 
@@ -51,12 +84,12 @@ function technologiesForYear(year: number): string[] {
 function institutionsForYear(year: number, localeType: LocaleType): string[] {
   const institutions: string[] = [];
   if (year >= -3000) institutions.push('organized_religion');
-  if (year >= 900 && year <= 1850 && localeType !== 'rural') institutions.push('craft_guild');
-  if (year >= 1080 && localeType !== 'rural') institutions.push('university');
-  if (year >= 1760 && localeType !== 'rural') institutions.push('factory');
-  if (year >= 1800 && localeType !== 'rural') institutions.push('modern_bureaucracy');
-  if (year >= 1830 && localeType !== 'rural') institutions.push('railway_station');
-  if (year >= 1900 && localeType !== 'rural') institutions.push('mass_political_party');
+  if (year >= 900 && year <= 1850 && isUrban(localeType)) institutions.push('craft_guild');
+  if (year >= 1080 && isUrban(localeType)) institutions.push('university');
+  if (year >= 1760 && isUrban(localeType)) institutions.push('factory');
+  if (year >= 1800 && isUrban(localeType)) institutions.push('modern_bureaucracy');
+  if (year >= 1830 && isUrban(localeType)) institutions.push('railway_station');
+  if (year >= 1900 && isUrban(localeType)) institutions.push('mass_political_party');
   // The institutions below reach the countryside too — that reach is most of
   // what distinguishes a twentieth-century village from an earlier one — so
   // they are not gated on locale the way the urban ones above are.
@@ -65,7 +98,7 @@ function institutionsForYear(year: number, localeType: LocaleType): string[] {
   if (year >= 1920) institutions.push('identity_papers');
   if (year >= 1930) institutions.push('mass_media');
   if (year >= 1945) institutions.push('welfare_state');
-  if (year >= 1960 && localeType !== 'rural') institutions.push('chain_retail');
+  if (year >= 1960 && isUrban(localeType)) institutions.push('chain_retail');
   if (year >= 2000) institutions.push('mobile_network');
   return institutions;
 }

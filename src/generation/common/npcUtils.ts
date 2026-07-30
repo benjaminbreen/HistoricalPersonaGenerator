@@ -1521,6 +1521,12 @@ export function generateCulturalAppearance(
         culturalZone === 'SOUTH_ASIAN' &&
         /(southeast asia|indochina|maritime|philippines|malay|java|sumatra|borneo|sulawesi|spice islands|malacca|vietnam|tonkin|annam|cochinchina|siam|thailand|ayutthaya|cambodia|khmer|angkor|burma|myanmar|irrawaddy)/.test(regionalText);
 
+    const southeastAsianAppearance = {
+        skinTones: ['#c18b62', '#ae7650', '#98613f', '#c99a72', '#855437'],
+        hairColors: ['#090807', '#17120f', '#241a15', '#2c1810'],
+        eyeColors: ['#17120f', '#241a15', '#30231c', '#000000'],
+    };
+
     const appearances: Record<string, {skinTones: string[], hairColors: string[], eyeColors: string[]}> = {
         'EAST_ASIAN': { skinTones: ['#fdbcb4', '#f4d1ae', '#e8c5a0', '#deb887', '#f0dcc4'], hairColors: ['#000000', '#1a0a05', '#2c1810', '#0f0f0f'], eyeColors: ['#2c1810', '#000000', '#1a1a1a', '#342c24'] },
         'EUROPEAN': { skinTones: ['#fde2d1', '#f4d1ae', '#e8c5a0', '#deb887', '#d2b48c', '#f5e6d3'], hairColors: ['#8b4513', '#654321', '#d4af37', '#dc7633', '#000000', '#696969', '#2c1810', '#f4d03f', '#b22222', '#daa520'], eyeColors: ['#4169e1', '#006400', '#8b4513', '#2c1810', '#654321', '#708090', '#87ceeb', '#228b22'] },
@@ -1529,12 +1535,12 @@ export function generateCulturalAppearance(
         'SOUTH_ASIAN': { skinTones: ['#bc9a6a', '#a0835a', '#8d5524', '#deb887', '#cd853f'], hairColors: ['#000000', '#2c1810', '#1a1a1a'], eyeColors: ['#2c1810', '#000000', '#654321', '#1a1a1a'] },
         'SOUTH_AMERICAN': { skinTones: ['#bc9a6a', '#a0835a', '#d2b48c', '#8d5524', '#deb887'], hairColors: ['#000000', '#2c1810', '#1a1a1a'], eyeColors: ['#2c1810', '#000000', '#654321', '#1a1a1a'] },
         'NORTH_AMERICAN_PRE_COLUMBIAN': { skinTones: ['#bc9a6a', '#a0835a', '#d2b48c', '#8d5524'], hairColors: ['#000000', '#2c1810', '#1a1a1a'], eyeColors: ['#2c1810', '#000000', '#654321'] },
-        'OCEANIA': { skinTones: ['#8d5524', '#a0835a', '#bc9a6a', '#654321', '#4a3018'], hairColors: ['#000000', '#2c1810', '#654321', '#1a1a1a'], eyeColors: ['#2c1810', '#000000', '#654321'] }
-    };
-    const southeastAsianAppearance = {
-        skinTones: ['#c18b62', '#ae7650', '#98613f', '#c99a72', '#855437'],
-        hairColors: ['#090807', '#17120f', '#241a15', '#2c1810'],
-        eyeColors: ['#17120f', '#241a15', '#30231c', '#000000'],
+        'OCEANIA': { skinTones: ['#8d5524', '#a0835a', '#bc9a6a', '#654321', '#4a3018'], hairColors: ['#000000', '#2c1810', '#654321', '#1a1a1a'], eyeColors: ['#2c1810', '#000000', '#654321'] },
+        // Southeast Asia arrives here two ways: as a region inside SOUTH_ASIAN,
+        // caught by the test above, and as a zone of its own. The zone was
+        // missing from this table, and the `|| EUROPEAN` fallback below then
+        // gave a man in the Mekong Delta blue eyes and auburn hair.
+        'SOUTHEAST_ASIAN': southeastAsianAppearance,
     };
     const appearance = isSoutheastAsianRegion
         ? southeastAsianAppearance
@@ -1772,6 +1778,13 @@ function getFallbackRole(
     // Work that is not food-getting looks completely different before there are
     // villages to labour in or pots to throw. "Laborer" and "Servant" presuppose
     // someone to labour for.
+    //
+    // It looks different again after industrialisation, and that half was
+    // missing: the village list below was the answer for every year from the
+    // Neolithic to the present, so a man born in the Mekong Delta in 2001 whom
+    // the tables could not place came back a weaver, with a spindle, wool
+    // carders and a guild commission to match. Handloom weaving is alive; it is
+    // not what a modern persona defaults to.
     const otherRoles = foraging
         ? [
             { role: 'Toolmaker', emoji: '🪨', gender: 'any' },
@@ -1780,6 +1793,17 @@ function getFallbackRole(
             { role: 'Healer', emoji: '🌿', gender: 'any' },
             { role: 'Storyteller', emoji: '🗣️', gender: 'any' },
             { role: 'Child Watcher', emoji: '👶', gender: 'any' },
+        ]
+        : year >= 1900
+        ? [
+            { role: 'Laborer', emoji: '🧑‍🔧', gender: 'any' },
+            { role: 'Factory Worker', emoji: '🏭', gender: 'any' },
+            { role: 'Construction Worker', emoji: '🧱', gender: 'any' },
+            { role: 'Shop Assistant', emoji: '🏪', gender: 'any' },
+            { role: 'Cleaner', emoji: '🧹', gender: 'any' },
+            { role: 'Driver', emoji: '🚌', gender: 'any' },
+            { role: 'Clerk', emoji: '📋', gender: 'any' },
+            { role: 'Care Worker', emoji: '🧑‍⚕️', gender: 'any' },
         ]
         : [
             { role: 'Laborer', emoji: '🧑‍🔧', gender: 'any' },

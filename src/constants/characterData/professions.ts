@@ -41,6 +41,44 @@ export interface ProfessionDefinition {
     decadeRange?: [number, number];  // [startDecade, endDecade] for temporal filtering (e.g., [1940, 2019])
 }
 
+/**
+ * Roles that name a standing rather than a trade.
+ *
+ * A few entries in these tables are positions in a society, not occupations,
+ * and the biography's "makes his living as a ___" grammar makes nonsense of
+ * them: "he makes his living as a big man" reads as a joke about his size, and
+ * "as a maharaja" as though ruling were a job one applies for. The term is the
+ * right one — big man is what the anthropology of patronage politics calls
+ * exactly this figure, and the card should keep the phrase — so what changes is
+ * the sentence around it and a gloss on the card, not the label.
+ *
+ * `gloss` is the plain-English translation, shown beside the name. `livelihood`
+ * is a whole clause, used in place of the profession openers, and must read
+ * correctly after "Now 34, he ".
+ */
+export const STANDING_ROLES: Record<string, { gloss: string; livelihood: string }> = {
+  'Big Man': {
+    gloss: 'a patron and political broker',
+    livelihood: 'lives by patronage — the man others come to for a job, a loan or a word in the right ear, and who is owed accordingly',
+  },
+  'Maharaja': {
+    gloss: 'a ruling prince',
+    livelihood: 'rules, and lives on what the land and its cultivators render up to him',
+  },
+  'Householder': {
+    gloss: 'the head of a household',
+    livelihood: 'keeps a household, which is the whole of the work and answer enough when anyone asks',
+  },
+  'Landholder': {
+    gloss: 'a holder of land worked by others',
+    livelihood: 'lives on land that other hands work',
+  },
+};
+
+/** The gloss for a standing role, or undefined for an ordinary trade. */
+export const standingRole = (profession?: string) =>
+  (profession ? STANDING_ROLES[profession] : undefined);
+
 /* ---------- Helper alias types ----------------------------------------- */
 export type RoleMap        = { [role: string]: ProfessionDefinition };
 export type SocialClassMap = { [className: string]: RoleMap };

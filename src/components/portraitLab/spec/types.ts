@@ -161,6 +161,40 @@ export interface GarmentSurfaceSpec {
   intensity: number;
 }
 
+/**
+ * The state a garment is in, as distinct from what it is or how it is decorated.
+ *
+ * `clothing.ts` has carried an `adjectives` field on every clothing piece since
+ * it was written — 260 of them — and the persona card prints it in words beside
+ * the portrait: "Rough, Patched Deer Hide Hide Wrap". The renderer never saw it,
+ * because the adapter's `Piece` type had three fields and this was not one of
+ * them. So the card said patched and the picture drew new cloth.
+ *
+ * Wear is worth more than any amount of trim for what this app is trying to
+ * show. Ornament is how the rich are told apart from each other; wear is how
+ * most of the population is told apart from the rich, and until now the only
+ * thing separating a poor persona's clothing from a comfortable one's was dye
+ * saturation and the width of a collar band.
+ *
+ * Deliberately small, and each entry has to be legible in the twenty-seven rows
+ * of chest the frame allows. "Ceremonial", "Practical" and "Imported" are real
+ * adjectives in the data and say nothing a bust portrait can draw, so they are
+ * not here.
+ */
+export type GarmentWearKind =
+  | 'patched'   // a square of other cloth set in and stitched round
+  | 'darned'    // a worked mend, smaller and in the garment's own colour
+  | 'torn'      // an unmended split, the cloth parting
+  | 'faded'     // the dye gone where the light reaches it
+  | 'worn'      // the nap rubbed off the crests: shoulders, fold tops
+  | 'stained';  // what the work leaves on the front of what you work in
+
+export interface GarmentWearSpec {
+  kind: GarmentWearKind;
+  /** 0..1 — how far it has gone. Poverty and age both feed it. */
+  intensity: number;
+}
+
 export interface GarmentSpec {
   kind: GarmentKind;
   name: string;
@@ -170,6 +204,8 @@ export interface GarmentSpec {
   ornament: number;
   /** Decoration read out of the item's own name. */
   surfaces: GarmentSurfaceSpec[];
+  /** What the item's own adjectives say has happened to it. */
+  wear: GarmentWearSpec[];
 }
 
 export interface HeadwearSpec {
@@ -367,6 +403,25 @@ export interface MoodSpec {
    * Null for the large majority. It is meant to be rare.
    */
   disposition: Expression | null;
+  /**
+   * The face this persona wears instead of *any* of the above — the one you
+   * notice in a grid of forty.
+   *
+   * `disposition` is a tie-breaker: it only reaches people whose valence is
+   * unremarkable, which is why `smile`, `grin` and `surprise` were dead code in
+   * the resting vocabulary. A grin is not a stronger `content`, it is a rarer
+   * one, and the branch that decides between them cannot be a threshold —
+   * personality is a continuum and any cut on it produces either nobody or a
+   * new fourth-commonest mood.
+   *
+   * So this is a seeded roll instead, gated on stats: the candidate faces are
+   * the ones a persona's traits could plausibly support, and the roll picks
+   * whether they actually got one. Seeded from the portrait seed, so a given
+   * persona wears the same face every time they are drawn.
+   *
+   * Around one in fourteen personas. Checked before valence, after illness.
+   */
+  flourish: Expression | null;
 }
 
 export interface BackgroundSpec {

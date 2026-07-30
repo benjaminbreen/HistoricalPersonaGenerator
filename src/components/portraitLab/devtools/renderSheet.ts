@@ -15,11 +15,12 @@ import { writeFileSync } from 'node:fs';
 import { Raster } from '../core/raster';
 import { buildPortraitSpec, restingExpression } from '../spec/buildSpec';
 import { compilePortrait, renderFrame } from '../render/pipeline';
+import { CANVAS } from '../spec/anatomy';
 import { idleFrame } from '../render/animation';
 import { allFixtures, sheets, Fixture } from '../fixtures';
 import { encodePNG, scaleRGBA } from './png';
 
-const CELL = 96;
+const CELL = CANVAS;
 
 function renderOne(fixture: Fixture, timeMs: number): Raster {
   const spec = buildPortraitSpec(fixture.character);

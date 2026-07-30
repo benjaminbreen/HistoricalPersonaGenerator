@@ -1378,6 +1378,14 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             if (baseProfile.appearance.garment.material) {
                 garmentItem.material = baseProfile.appearance.garment.material;
             }
+            // Carried onto the item as well as onto the appearance, because
+            // consumers disagree about which is authoritative: the portrait
+            // adapter reads the equipped item first and only falls back to the
+            // appearance, so adjectives put on the appearance alone would still
+            // never reach it.
+            if (baseProfile.appearance.garment.adjectives?.length) {
+                garmentItem.adjectives = [...baseProfile.appearance.garment.adjectives];
+            }
             // Check if this is a leg item (pants, trousers, etc.) or torso item
             if (garmentItem.equipmentSlot === 'legs') {
                 equippedItems.legs = garmentItem;
@@ -1505,8 +1513,20 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     const finalAppearance: Appearance = {
         ...baseProfile.appearance,
         palette: palette,
-        garment: equippedItems.torso 
-            ? { name: equippedItems.torso.name, material: equippedItems.torso.material || 'cloth' } 
+        // The equipped item wins on name and material, because it is what the
+        // character is actually wearing — but the adjectives only ever existed
+        // on the clothing-table piece the item was built from, and rebuilding
+        // the appearance out of the item alone threw them away. That was a
+        // silent loss with two visible consequences: the equipment panel printed
+        // "Deer Hide Hide Wrap" where the table said "Rough, Patched", and the
+        // portrait renderer — which reads this field — drew new cloth on every
+        // persona in the app.
+        garment: equippedItems.torso
+            ? {
+                name: equippedItems.torso.name,
+                material: equippedItems.torso.material || 'cloth',
+                adjectives: baseProfile.appearance.garment?.adjectives,
+            }
             : baseProfile.appearance.garment,
         headgear: equippedItems.head 
             ? { name: equippedItems.head.name, material: equippedItems.head.material || 'cloth' } 

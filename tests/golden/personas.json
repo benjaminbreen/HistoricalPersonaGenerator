@@ -3,19 +3,19 @@
     "name": "Yuk Shek",
     "gender": "Female",
     "age": 75,
-    "profession": "Shepherd",
+    "profession": "Rice Farmer",
     "religion": "Austronesian Traditional Religion",
     "language": "Formosan Austronesian (reconstructed)",
     "languageBasis": "ea-taiwan",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in East Asia",
-    "head": "Green Cotton Scarf [Plain Cotton]",
-    "torso": "Yellow Work Robe [Ramie]",
-    "feet": "Straw Shoes [Woven Straw]",
+    "head": "Green Pearl Ornament [Pearls and Silk]",
+    "torso": "Yellow Court Dress [Embroidered Silk]",
+    "feet": "Green Embroidered Slippers [Silk]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "band",
       "headwearColor": "#5a6b3b",
-      "garmentKind": "robe",
+      "garmentKind": "gown",
       "garmentColor": "#c8a63e",
       "backgroundBase": "#3f5a55",
       "pose": null
@@ -26,15 +26,18 @@
       "brother: Fai Shek",
       "sister: Ling Shek",
       "spouse: Lam",
-      "son: Yiu Wong",
-      "daughter: Wai"
+      "son: Ming",
+      "daughter: Ying the Carp"
     ],
     "events": [
-      "1231: Born in a small settlement to a Merchant family",
-      "1245: Learned to read weather signs and where the water would still be running",
-      "1256: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1263: The family pooled their resources to purchase a market stall, a significant investment",
-      "1275: Arranged favorable marriage for younger sister"
+      "1231: Born in a small settlement to a Middling Sort family",
+      "1245: Learned to read weather signs and predict harvest yields from a parent",
+      "1263: The family pooled their resources to purchase a new plow, a significant investment",
+      "1267: A brother's marriage brought valuable new trade connections and opportunities",
+      "1269: After years of careful selection, successfully bred a hardier variety of soybeans",
+      "1278: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1285: Returned home to care for aging parents",
+      "1291: Experimenting with a new plowing method led to a marked increase in field productivity"
     ]
   },
   "formosan-highlands-1306#2": {
@@ -309,7 +312,7 @@
       "headwearColor": "#8a5a3b",
       "garmentKind": "jacket",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#535c65",
+      "backgroundBase": "#525c66",
       "pose": "build:broad+brave"
     },
     "family": [
@@ -474,7 +477,7 @@
     "name": "Yakup ibn Taner",
     "gender": "Male",
     "age": 46,
-    "profession": "Machine Operator",
+    "profession": "Plumber",
     "religion": "Sunni Islam",
     "language": "Modern Turkish",
     "languageBasis": "attested-table",
@@ -492,16 +495,14 @@
       "pose": null
     },
     "family": [
-      "father: Abu Burak (Taner)",
-      "mother: Filiz bint Hüseyin",
-      "brother: Mustafa",
-      "sister: Elif Yılmaz",
-      "spouse: Emine Doğan",
-      "daughter: Emine Bayram"
+      "father: Taner ibn Yakup",
+      "mother: Emine Çakır",
+      "sister: Neslihan bint Taner",
+      "brother: Ömer ibn Taner"
     ],
     "events": [
       "1906: Born in a small settlement to a Middle Class family",
-      "1918: Began learning the trade of machine operator from an experienced practitioner",
+      "1918: Began learning the trade of plumber from an experienced practitioner",
       "1923: saw the Ottoman Empire give way to the Republic of Turkey",
       "1932: A brother's marriage brought valuable new trade connections and opportunities",
       "1936: Took over the family business after a parent retired from active work",
@@ -512,7 +513,7 @@
     "name": "Mehmet Yıldırım",
     "gender": "Male",
     "age": 21,
-    "profession": "Assembly Line Worker",
+    "profession": "Hospital Orderly",
     "religion": "Sunni Islam",
     "language": "Modern Turkish",
     "languageBasis": "attested-table",
@@ -527,7 +528,7 @@
       "garmentKind": "work_shirt",
       "garmentColor": "#566370",
       "backgroundBase": "#5d6271",
-      "pose": "build:broad+coward"
+      "pose": "build:broad+brave"
     },
     "family": [
       "father: Onur Yıldırım",
@@ -537,7 +538,7 @@
     ],
     "events": [
       "1931: Born in a small settlement to a Working Class family",
-      "1946: Began learning the trade of assembly line worker from an experienced practitioner",
+      "1946: Began learning the trade of hospital orderly from an experienced practitioner",
       "1948: A brother's marriage brought valuable new trade connections and opportunities",
       "1951: The family pooled their resources to purchase a delivery truck, a significant investment"
     ]
@@ -546,7 +547,7 @@
     "name": "Gayane Tavitian",
     "gender": "Female",
     "age": 75,
-    "profession": "Tax Farmer",
+    "profession": "Coffeehouse Keeper",
     "religion": "Alevi Islam",
     "language": "Ottoman Turkish",
     "languageBasis": "attested-table",
@@ -556,8 +557,8 @@
     "torso": "Red Robe [Linen]",
     "feet": "Slippers [Leather]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
-      "headwearColor": "#c2a463",
+      "headwearKind": null,
+      "headwearColor": null,
       "garmentKind": "robe",
       "garmentColor": "#a33327",
       "backgroundBase": "#373a44",
@@ -570,14 +571,12 @@
       "sister: Maro Tavitian"
     ],
     "events": [
-      "1575: Born in a small settlement to a Gentry family",
-      "1589: Learned to read weather signs and predict harvest yields from a parent",
-      "1599: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
-      "1601: Broke ground on land nobody had ploughed before, and it paid",
-      "1611: Completed hajj to Mecca, earning title of Hajji",
-      "1612: The family pooled their resources to purchase a storage barn, a significant investment",
-      "1614: A brother's marriage brought valuable new trade connections and opportunities",
-      "1615: Mother was killed in the fighting despite efforts to save her"
+      "1575: Born in a small settlement to a Merchant family",
+      "1589: Began learning the trade of coffeehouse keeper from an experienced practitioner",
+      "1597: A brother's marriage brought valuable new trade connections and opportunities",
+      "1609: Visited Jerusalem's holy sites during pilgrimage",
+      "1615: Father was murdered despite seeking help",
+      "1622: The family pooled their resources to purchase draft animals, a significant investment"
     ]
   },
   "anatolia-1650#2": {
@@ -1341,7 +1340,7 @@
       "headwearColor": null,
       "garmentKind": "gown",
       "garmentColor": "#e8e4d9",
-      "backgroundBase": "#497685",
+      "backgroundBase": "#4c7481",
       "pose": null
     },
     "family": [
@@ -1433,18 +1432,18 @@
     "name": "Phuyupatamanta",
     "gender": "Female",
     "age": 75,
-    "profession": "Shepherd",
+    "profession": "Farm Worker",
     "religion": "Roman Catholicism",
     "language": "Quechuan (reconstructed)",
     "languageBasis": "sam-andes",
     "languageConfidence": "reconstructed",
     "odds": "the early modern period in South America",
-    "head": "Madder Head Scarf [Cotton]",
+    "head": null,
     "torso": "Green Wool Skirt [Undyed Wool]",
-    "feet": "Madder Barefoot [None]",
+    "feet": "Madder Simple Shoes [Canvas]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
-      "headwearColor": "#a63a2b",
+      "headwearKind": null,
+      "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#5a6b3b",
       "backgroundBase": "#455e4f",
@@ -1457,12 +1456,11 @@
       "sister: Killa"
     ],
     "events": [
-      "1425: Born in a small settlement to a Merchant family",
+      "1425: Born in a small settlement to a Commoner family",
       "1438: came under the Inca Empire, where no state had claimed the place before",
-      "1439: Learned to read weather signs and where the water would still be running",
-      "1455: A sister married into a well-connected noble panaca, improving the family's social standing",
-      "1467: The family lost their father when he died from typhus",
-      "1481: Learned healing songs from village shaman"
+      "1439: Began learning the trade of farm worker from an experienced practitioner",
+      "1450: Participated in Inti Raymi sun ceremony",
+      "1458: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "andes-1500#2": {
@@ -1641,7 +1639,7 @@
       "garmentKind": "wrapped_garment",
       "garmentColor": "#566370",
       "backgroundBase": "#4b5a4e",
-      "pose": "build:broad"
+      "pose": "build:broad+humble"
     },
     "family": [
       "father: Cochiti Badger-Clan",
@@ -1927,7 +1925,7 @@
     "name": "Mahesh",
     "gender": "Male",
     "age": 67,
-    "profession": "Jute Mill Worker",
+    "profession": "Rickshaw Puller",
     "religion": "Hinduism",
     "language": "Hindi",
     "languageBasis": "attested-table",
@@ -1952,19 +1950,18 @@
     ],
     "events": [
       "1833: Born in a small settlement to a Working Class family",
-      "1845: Started working alongside father in backbreaking toil",
+      "1845: Began learning the trade of rickshaw puller from an experienced practitioner",
+      "1849: A sister married into a well-connected merchant caste, improving the family's social standing",
+      "1853: Took over the family business after a parent retired from active work",
       "1858: came under the British Raj, having been born under East India Company rule",
-      "1865: Bathed in the Ganges during Kumbh Mela",
-      "1866: The family pooled their resources to purchase a shop, a significant investment",
-      "1875: A sister married into a well-connected Brahmin family, improving the family's social standing",
-      "1898: walked to a relief camp and did not find all of the family there afterwards"
+      "1882: Bathed in the Ganges during Kumbh Mela"
     ]
   },
   "bengal-1900#3": {
     "name": "Kamlesh Srivastava",
     "gender": "Male",
     "age": 59,
-    "profession": "Construction Labourer",
+    "profession": "Fisherman",
     "religion": "Hinduism",
     "language": "Hindi",
     "languageBasis": "attested-table",
@@ -1988,12 +1985,13 @@
       "spouse: Kiran Khan"
     ],
     "events": [
-      "1841: Born in a small settlement to a Middle Class family",
-      "1856: Began learning the trade of construction labourer from an experienced practitioner",
-      "1857: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1841: Born in a small settlement to a Working Class family",
+      "1856: Learned to read the weather and the water from a parent",
       "1858: saw East India Company rule give way to the British Raj",
-      "1881: Inherited valuable tools and a workshop from a childless uncle",
-      "1894: Learned sacred texts under a guru's guidance"
+      "1869: Completed temple service during festival season",
+      "1877: A brother's marriage brought valuable new trade connections and opportunities",
+      "1879: walked to a relief camp and did not find all of the family there afterwards",
+      "1893: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "london-2020#1": {
@@ -2082,7 +2080,7 @@
       "garmentKind": "work_shirt",
       "garmentColor": "#e8e4d9",
       "backgroundBase": "#535c65",
-      "pose": "build:broad+proud"
+      "pose": "build:broad"
     },
     "family": [
       "father: Muiris O'Kelly",
@@ -2379,13 +2377,11 @@
       "pose": null
     },
     "family": [
-      "father: Gabriel Diaz",
-      "mother: Patricia Vargas",
-      "sister: Alejandra Diaz",
+      "father: Nicolás Diaz",
+      "mother: Valeria",
+      "sister: Paulina Diaz",
       "brother: Hector Diaz",
-      "spouse: Camila",
-      "daughter: Victoria Silva",
-      "son: Alejandro Ramirez"
+      "spouse: Liliana Silva"
     ],
     "events": [
       "1943: Born in a small settlement to a Middle Class family",
@@ -2523,7 +2519,7 @@
       "headwearColor": "#6f5237",
       "garmentKind": "work_shirt",
       "garmentColor": "#3a3a38",
-      "backgroundBase": "#708389",
+      "backgroundBase": "#6e838a",
       "pose": "build:broad"
     },
     "family": [
@@ -2669,13 +2665,13 @@
       "pose": null
     },
     "family": [
-      "father: Fuxi",
-      "mother: Ehuang",
-      "brother: Li",
+      "father: Ku",
+      "mother: Tushan",
+      "brother: Qi the Wanderer",
       "sister: Nüwa",
-      "spouse: Huangdi",
-      "daughter: Ji",
-      "son: Zhou"
+      "spouse: Tang",
+      "son: Fuxi",
+      "daughter: Moxi"
     ],
     "events": [
       "-7075: Born to the band that ranged this country",
@@ -3488,7 +3484,7 @@
       "garmentKind": "work_shirt",
       "garmentColor": "#6f5237",
       "backgroundBase": "#4a5a6a",
-      "pose": null
+      "pose": "lame"
     },
     "family": [
       "father: Steffan the WELSH",
@@ -3637,7 +3633,7 @@
       "headwearColor": "#d8cdb6",
       "garmentKind": "work_shirt",
       "garmentColor": "#8e2436",
-      "backgroundBase": "#343d46",
+      "backgroundBase": "#333d47",
       "pose": "build:broad"
     },
     "family": [
@@ -4067,7 +4063,7 @@
     ]
   },
   "egypt-1350bce#3": {
-    "name": "Omari the Watchful",
+    "name": "Omari the Squinting",
     "gender": "Male",
     "age": 20,
     "profession": "Fisher",
@@ -4632,7 +4628,7 @@
       "garmentKind": "work_shirt",
       "garmentColor": "#566370",
       "backgroundBase": "#535865",
-      "pose": "build:broad+cunning"
+      "pose": "build:broad"
     },
     "family": [
       "father: Hassan Khalil",
@@ -5094,9 +5090,9 @@
     ],
     "events": [
       "1348: Born in a small settlement to a Laboring Poor family",
-      "1360: Learned the marks and the ailments of every beast in the family's care",
-      "1385: The family lost their father when he was murdered",
-      "1390: The family pooled their resources to purchase a mill share, a significant investment"
+      "1362: Trusted to take the animals out alone for the first time",
+      "1387: The mother's death changed the household",
+      "1395: The family pooled their resources to purchase a new plow, a significant investment"
     ]
   },
   "southafrica-1890#1": {
@@ -5118,7 +5114,7 @@
       "garmentKind": "tunic",
       "garmentColor": "#6f5237",
       "backgroundBase": "#44494b",
-      "pose": "lame"
+      "pose": null
     },
     "family": [
       "father: Kabelo Khama",
@@ -5554,20 +5550,20 @@
     "name": "Swift Deer",
     "gender": "Female",
     "age": 75,
-    "profession": "Herder",
+    "profession": "Corn Farmer",
     "religion": "Aztec Polytheism",
     "language": "Mayan (attested)",
     "languageBasis": "na-mesoamerica-late",
     "languageConfidence": "attested",
     "odds": "the medieval period in pre-Columbian North America",
     "head": null,
-    "torso": "Hide Dress [Soft Leather]",
-    "feet": "Soft Moccasins [Deer Hide]",
+    "torso": "Walnut Fringed Shawl [Woven Wool]",
+    "feet": "Beaded Moccasins [Decorated Hide]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
-      "garmentKind": "gown",
-      "garmentColor": "#6b482f",
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c2a463",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#748b79",
       "pose": null
     },
@@ -5578,12 +5574,14 @@
       "brother: Nine Dog"
     ],
     "events": [
-      "625: Born in a small settlement to a Merchant family",
-      "639: Learned to read weather signs and where the water would still be running",
-      "641: A sister married into a well-connected clan elders, improving the family's social standing",
-      "655: Tragedy struck when a parent died from ritual sacrifice",
-      "656: Took over the family business after a parent retired from active work",
-      "696: Was made keeper of a sacred bundle, and of what is owed to it"
+      "625: Born in a small settlement to a Commoner family",
+      "639: Learned to read weather signs and predict harvest yields from a parent",
+      "645: Inherited valuable tools and a workshop from a childless uncle",
+      "648: Received a vision during the coming-of-age fast, and was told what it meant",
+      "660: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "663: A brother's marriage brought valuable new trade connections and opportunities",
+      "692: Became the first in the village to successfully grow beans, earning respect from neighbors",
+      "693: With the help of extended family, cleared new land for cultivation"
     ]
   },
   "mesoamerica-700#2": {
@@ -5672,35 +5670,35 @@
     "name": "Beshad-e the Elder",
     "gender": "Female",
     "age": 75,
-    "profession": "Herder",
+    "profession": "Tanner",
     "religion": "Buffalo Shamanism",
     "language": "Pawnee",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in pre-Columbian North America",
     "head": null,
-    "torso": "Hide Dress [Soft Leather]",
-    "feet": "Soft Moccasins [Deer Hide]",
+    "torso": "Red Fringed Shawl [Woven Wool]",
+    "feet": "Beaded Moccasins [Decorated Hide]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "gown",
-      "garmentColor": "#6b482f",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#a33327",
       "backgroundBase": "#4a594d",
       "pose": null
     },
     "family": [
-      "father: Dark Golden Eagle",
-      "mother: Crossing Bison",
-      "brother: Juh",
-      "sister: Chosposi",
+      "father: Chasing Golden Eagle",
+      "mother: Jacali",
+      "sister: Zi-yeh",
+      "brother: Cochise",
       "spouse: Nana Jicarilla",
-      "son: Bodaway San-Carlos",
-      "daughter: Ipa the Younger"
+      "son: Kuruk",
+      "daughter: Dezba"
     ],
     "events": [
-      "1425: Born in a small settlement to a Merchant family",
-      "1439: Learned to read weather signs and where the water would still be running",
+      "1425: Born in a small settlement to a Commoner family",
+      "1439: Took up the tanner's craft in the way of the household, by being there for it",
       "1455: A sister married into a well-connected clan elders, improving the family's social standing"
     ]
   },
@@ -5875,7 +5873,7 @@
       "garmentKind": "wrapped_garment",
       "garmentColor": "#566370",
       "backgroundBase": "#4b5a4e",
-      "pose": "build:broad"
+      "pose": "build:broad+proud"
     },
     "family": [
       "father: Siku Mukluk",
@@ -5995,7 +5993,7 @@
       "garmentKind": "wrapped_garment",
       "garmentColor": "#2e3f5c",
       "backgroundBase": "#4b5a4e",
-      "pose": "build:broad+humble"
+      "pose": "build:broad+proud"
     },
     "family": [
       "father: Wiyot",
@@ -6902,7 +6900,7 @@
       "headwearColor": "#3a4f6d",
       "garmentKind": "bare",
       "garmentColor": "#5a6b3b",
-      "backgroundBase": "#46585d",
+      "backgroundBase": "#47575c",
       "pose": "build:broad"
     },
     "family": [

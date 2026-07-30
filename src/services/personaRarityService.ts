@@ -27,7 +27,7 @@
  * gets its own badge, from `eliteStrataService`.
  */
 
-import type { AttributeRarity } from '../types/attributeTypes';
+import { normalizeRarity, type AttributeRarity } from '../types/attributeTypes';
 
 export type PersonaRarityTier = 'ordinary' | 'notable' | 'rare' | 'legendary';
 
@@ -149,19 +149,22 @@ const EXCESS_TAIL: number[] = (() => {
  *
  * Measured, not derived, because an attribute's chance of being drawn depends
  * on the age, sex, class, trade, place and year of the person drawing it, and
- * no closed form survives that. Figures are from a 3,000-persona sample at the
- * default sampling mode; regenerate them the same way if the attribute tables
- * move substantially.
+ * no closed form survives that. Figures are from a 20,000-persona sample at the
+ * default sampling mode; regenerate with `npm run tier-audit` if the attribute
+ * tables move substantially.
  */
 const ATTRIBUTE_TIER_SHARE: Record<AttributeRarity, number> = {
-  common: 0.883,
-  uncommon: 0.698,
-  rare: 0.222,
-  epic: 0.024,
-  legendary: 0.005,
+  common: 0.879,
+  uncommon: 0.717,
+  seldom_seen: 0.252,
+  rare: 0.021,
+  very_rare: 0.0057,
+  exceedingly_rare: 0.0004,
 };
 
-const TIER_ORDER: AttributeRarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+const TIER_ORDER: AttributeRarity[] = [
+  'common', 'uncommon', 'seldom_seen', 'rare', 'very_rare', 'exceedingly_rare',
+];
 
 // ---------------------------------------------------------------------------
 // The figure on the card
@@ -178,7 +181,8 @@ function roundOdds(n: number): number {
 
 interface RarityInput {
   stats?: Record<string, number> | null;
-  attributes?: Array<{ name?: string; rarity?: AttributeRarity }> | null;
+  /** `rarity` is loose because saved personas carry the old ladder's strings. */
+  attributes?: Array<{ name?: string; rarity?: string }> | null;
 }
 
 export function describePersonaRarity(character: RarityInput): PersonaRarity {
@@ -202,7 +206,7 @@ export function describePersonaRarity(character: RarityInput): PersonaRarity {
   let rarest: AttributeRarity | null = null;
   let rarestName = '';
   for (const attribute of attributes) {
-    const tier = attribute?.rarity;
+    const tier = normalizeRarity(attribute?.rarity);
     if (!tier || !TIER_ORDER.includes(tier)) continue;
     if (!rarest || TIER_ORDER.indexOf(tier) > TIER_ORDER.indexOf(rarest)) {
       rarest = tier;
@@ -213,17 +217,24 @@ export function describePersonaRarity(character: RarityInput): PersonaRarity {
   // something "uncommon", and a figure that treats that as remarkable is just
   // an inflated figure.
   const attributeProbability =
-    rarest && TIER_ORDER.indexOf(rarest) >= TIER_ORDER.indexOf('rare')
+    rarest && TIER_ORDER.indexOf(rarest) >= TIER_ORDER.indexOf('seldom_seen')
       ? ATTRIBUTE_TIER_SHARE[rarest]
       : 1;
 
   const probability = Math.max(1e-9, statProbability * attributeProbability);
   const oneIn = roundOdds(1 / probability);
 
+  // The `notable` cut was one in twenty, which fired on eight personas in a
+  // hundred — rare enough that the line, and the mark that goes with it, were
+  // easy to go a dozen draws without seeing. One in ten roughly doubles that
+  // to around fifteen in a hundred, which is often enough to be a feature of
+  // the card and still infrequent enough to mean something. It is the tuning
+  // knob for both the sentence and the portrait's blue star; measure the
+  // effect with `npm run tier-audit` rather than guessing.
   const tier: PersonaRarityTier =
     probability <= 0.001 ? 'legendary'
       : probability <= 0.01 ? 'rare'
-        : probability <= 0.05 ? 'notable'
+        : probability <= 0.10 ? 'notable'
           : 'ordinary';
 
   const reasons: string[] = [];

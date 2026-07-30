@@ -43,6 +43,18 @@ export interface PolityContext {
 }
 
 /**
+ * The zone as the table spells it.
+ *
+ * Personas carry their zone flattened for display — "NORTH AMERICAN COLONIAL",
+ * "SOUTHEAST ASIAN" — and several callers hand that straight back with a cast.
+ * Since the zone test below is now fail-closed, an unrecognised spelling would
+ * quietly cost a persona their state, so the spacing is repaired here rather
+ * than at each call site.
+ */
+const canonicalZone = (zone?: string): string | undefined =>
+  zone ? zone.toUpperCase().replace(/[\s-]+/g, '_') : undefined;
+
+/**
  * A device the state actually used, and what kind of thing it was.
  *
  * The distinction is the point. Most states in this table never had a flag —
@@ -289,6 +301,9 @@ const MODERN_STATE_BY_AREA: Record<string, string> = {
   'Mount Kilimanjaro Foothills': 'Tanzania',
   'Olduvai Gorge': 'Tanzania',
   'Bangui Highlands': 'the Central African Republic',
+  // Two states, and neither of them in the Congo basin: the plural label the
+  // era table supplies for this area reads "the Congo Basin republics".
+  'Rwanda Burundi Highlands': 'Rwanda and Burundi',
   'Okavango Delta': 'Botswana',
   'Ibo Plateau': 'Nigeria',
   'Niger Delta': 'Nigeria',
@@ -305,6 +320,18 @@ const MODERN_STATE_BY_AREA: Record<string, string> = {
   'Red River Delta': 'Vietnam',
   'Chao Phraya Basin': 'Thailand',
   'Tonle Sap Basin': 'Cambodia',
+  'Annam Highlands': 'Vietnam',
+  'Mekong River Basin': 'Laos',
+  'Malay Peninsula': 'Malaysia',
+  'Sumatra Highlands': 'Indonesia',
+  'Central Java': 'Indonesia',
+  'West Java Coast': 'Indonesia',
+  'East Java Coast': 'Indonesia',
+  'Bali': 'Indonesia',
+  'Spice Islands': 'Indonesia',
+  'Luzon Highlands': 'the Philippines',
+  'Mindanao': 'the Philippines',
+  'Palawan': 'the Philippines',
   'Samarkand Region': 'Uzbekistan',
   'Balkh Plains': 'Afghanistan',
   'Han River Valley': 'South Korea',
@@ -436,6 +463,59 @@ const WIKIPEDIA_OVERRIDES: Record<string, string> = {
   'the Indus Valley civilization': 'Indus_Valley_Civilisation',
   'the Rashtrakuta empire': 'Rashtrakuta_dynasty',
   'the Rashidun Caliphate': 'Rashidun_Caliphate',
+
+  // Southeast Asia. Most of these names are not the titles Wikipedia files them
+  // under — "Đại Việt under the Lê" is the Lê dynasty, the post-Angkor Khmer
+  // kingdom has no article of its own — so the join-with-underscores default
+  // would produce a dead link for nearly every one.
+  'the kingdoms of Ava and Pegu': 'Kingdom_of_Ava',
+  'the Toungoo Dynasty': 'Toungoo_dynasty',
+  'the Konbaung Dynasty': 'Konbaung_dynasty',
+  'the Dvaravati kingdoms': 'Dvaravati',
+  'the Kingdom of Sukhothai': 'Sukhothai_Kingdom',
+  'the Kingdom of Thonburi': 'Thonburi_Kingdom',
+  'the Post-Angkor Khmer kingdom': 'Post-Angkor_Period',
+  'the French protectorate of Cambodia': 'French_protectorate_of_Cambodia',
+  'the Kingdom of Cambodia': 'Kingdom_of_Cambodia_(1953–1970)',
+  "the People's Republic of Kampuchea": "People's_Republic_of_Kampuchea",
+  'the Kingdom of Lan Xang': 'Lan_Xang',
+  'the Lao kingdoms': 'Kingdom_of_Vientiane',
+  'the Lao kingdoms under Siamese suzerainty': 'Kingdom_of_Vientiane',
+  'French Laos': 'French_protectorate_of_Laos',
+  "the Lao People's Democratic Republic": 'Laos',
+  'the Chinese commanderies of Jiaozhi': 'Jiaozhi',
+  'Đại Việt': 'Đại_Việt',
+  'the Ming occupation': 'Fourth_Era_of_Northern_Domination',
+  'Đại Việt under the Lê': 'Lê_dynasty',
+  'the Nguyễn lords': 'Nguyễn_lords',
+  'the Nguyễn Empire of Đại Nam': 'Nguyễn_dynasty',
+  'the Democratic Republic of Vietnam': 'North_Vietnam',
+  'the Republic of Vietnam': 'South_Vietnam',
+  'the Kingdom of Champa': 'Champa',
+  'the Johor Sultanate and Dutch Malacca': 'Johor_Sultanate',
+  'the Federation of Malaya': 'Federation_of_Malaya',
+  'the Pagaruyung Kingdom': 'Pagaruyung_Kingdom',
+  'the Medang Kingdom': 'Medang_Kingdom',
+  'the Kingdom of Kediri': 'Kediri_Kingdom',
+  'the Singhasari Kingdom': 'Singhasari',
+  'the sultanates of Demak and Pajang': 'Demak_Sultanate',
+  'the Sultanate of Mataram': 'Mataram_Sultanate',
+  'the courts of Surakarta and Yogyakarta': 'Surakarta_Sunanate',
+  'the Balinese kingdoms': 'Bali_Kingdom',
+  // Gelgel has no article of its own; the Bali Kingdom article covers it.
+  'the Kingdom of Gelgel': 'Bali_Kingdom',
+  'the nine Balinese kingdoms': 'Bali_Kingdom',
+  'the Sultanate of Brunei': 'Bruneian_Sultanate_(1368–1888)',
+  'the British and Dutch Borneo territories': 'British_Borneo',
+  'Indonesia, Malaysia and Brunei': 'Borneo',
+  'the Sultanate of Gowa': 'Sultanate_of_Gowa',
+  'the sultanates of Ternate and Tidore': 'Sultanate_of_Ternate',
+  'the sultanates of Sulu and Maguindanao': 'Sultanate_of_Sulu',
+  'the Sultanate of Sulu': 'Sultanate_of_Sulu',
+  'the Empire of Japan': 'Empire_of_Japan',
+  'the Timorese kingdoms': 'History_of_East_Timor',
+  'Indonesian East Timor': 'Indonesian_occupation_of_East_Timor',
+  'Timor-Leste': 'East_Timor',
 };
 
 function wikipediaTitleFor(name: string): string {
@@ -947,33 +1027,267 @@ const ALLEGIANCES: Array<{
     ],
   },
 
+  // --- Southeast Asia ------------------------------------------------------
+  //
+  // Three entries used to cover eleven countries, and because a single regex
+  // took the whole mainland, every place on it received the same sequence: a
+  // persona in the Red River Delta in 1300 was a subject of the Khmer Empire,
+  // one in the Irrawaddy Valley in 1900 a subject of Siam. The overlapping
+  // eras made it worse — `eras.find` returns the first covering the year, so
+  // Pagan sat inside the Khmer span and was unreachable, and French Indochina
+  // sat inside Rattanakosin Siam and never once resolved.
+  //
+  // The two entries below are now only the fallback for a place none of the
+  // basin entries after them names. The basins are the real answer, and they
+  // are ordered river by river, because that is how mainland states were: a
+  // valley each, with uplands between them that belonged to nobody in the
+  // lowland sense.
   {
-    match: /mainland southeast asia|indochina|siam|ayutthaya|irrawaddy|mekong|burma|annam/i,
+    match: /mainland southeast asia|indochina/i,
     eras: [
-      { from: 802, until: 1431, name: 'the Khmer Empire' },
-      { from: 1044, until: 1297, name: 'the Pagan Kingdom' },
-      { from: 1351, until: 1767, name: 'the Kingdom of Ayutthaya' },
-      { from: 1782, until: 1932, name: 'the Kingdom of Siam' },
       { from: 1887, until: 1954, name: 'French Indochina' },
       { from: 1954, name: 'the mainland Southeast Asian states' },
     ],
   },
   {
-    match: /maritime southeast asia|java|sumatra|malacca|malay|borneo|celebes/i,
+    match: /maritime southeast asia/i,
     eras: [
       { from: 671, until: 1288, name: 'Srivijaya' },
       { from: 1293, until: 1527, name: 'the Majapahit Empire' },
-      { from: 1400, until: 1511, name: 'the Malacca Sultanate' },
       { from: 1619, until: 1800, name: 'the Dutch East India Company' },
-      { from: 1800, until: 1949, name: 'the Dutch East Indies' },
-      { from: 1949, name: 'Indonesia' },
+      { from: 1800, until: 1942, name: 'the Dutch East Indies' },
+      { from: 1942, until: 1945, name: 'the Empire of Japan' },
+      { from: 1945, name: 'Indonesia' },
+    ],
+  },
+
+  // The Irrawaddy. Tenasserim changed hands between Pegu, Ayutthaya and Ava
+  // repeatedly and is given to the Burmese sequence, which is where it spent
+  // most of its history; the Shan states held their own princes under Burmese
+  // and later British suzerainty, which this entry flattens.
+  {
+    match: /irrawaddy|tenasserim|shan plateau|bagan|pegu|\bava\b|mandalay|rangoon|yangon|burma|myanmar/i,
+    eras: [
+      { from: 849, until: 1287, name: 'the Pagan Kingdom' },
+      { from: 1287, until: 1510, name: 'the kingdoms of Ava and Pegu' },
+      { from: 1510, until: 1752, name: 'the Toungoo Dynasty' },
+      { from: 1752, until: 1885, name: 'the Konbaung Dynasty' },
+      { from: 1885, until: 1942, name: 'British Burma' },
+      { from: 1942, until: 1945, name: 'the Empire of Japan' },
+      { from: 1945, until: 1948, name: 'British Burma' },
+      { from: 1948, until: 1989, name: 'Burma' },
+      { from: 1989, name: 'Myanmar' },
+    ],
+  },
+  // The Chao Phraya. Dvaravati was Mon, and the Tai kingdoms that followed it
+  // were tributary to Angkor before they were rivals to it.
+  {
+    match: /chao phraya|ayutthaya|sukhothai|thonburi|siam|thailand|bangkok/i,
+    eras: [
+      { from: 600, until: 1050, name: 'the Dvaravati kingdoms' },
+      { from: 1050, until: 1238, name: 'the Khmer Empire' },
+      { from: 1238, until: 1351, name: 'the Kingdom of Sukhothai' },
+      { from: 1351, until: 1767, name: 'the Kingdom of Ayutthaya' },
+      { from: 1767, until: 1782, name: 'the Kingdom of Thonburi' },
+      { from: 1782, until: 1939, name: 'the Kingdom of Siam' },
+      { from: 1939, name: 'Thailand' },
+    ],
+  },
+  // The Tonle Sap and the Angkorian heartland.
+  {
+    match: /tonle sap|angkor|khmer|cambodia|kampuchea|phnom penh/i,
+    eras: [
+      { from: 68, until: 550, name: 'Funan' },
+      { from: 550, until: 802, name: 'Chenla' },
+      { from: 802, until: 1431, name: 'the Khmer Empire' },
+      { from: 1431, until: 1863, name: 'the Post-Angkor Khmer kingdom' },
+      { from: 1863, until: 1953, name: 'the French protectorate of Cambodia' },
+      { from: 1953, until: 1970, name: 'the Kingdom of Cambodia' },
+      { from: 1970, until: 1975, name: 'the Khmer Republic' },
+      { from: 1975, until: 1979, name: 'Democratic Kampuchea' },
+      { from: 1979, until: 1993, name: "the People's Republic of Kampuchea" },
+      { from: 1993, name: 'Cambodia' },
+    ],
+  },
+  // The middle Mekong. Lan Xang split into three kingdoms in 1707 and all
+  // three were Siamese tributaries within a century.
+  {
+    match: /mekong river basin|lan xang|laos|vientiane|luang prabang|champasak/i,
+    eras: [
+      { from: 1353, until: 1707, name: 'the Kingdom of Lan Xang' },
+      { from: 1707, until: 1779, name: 'the Lao kingdoms' },
+      { from: 1779, until: 1893, name: 'the Lao kingdoms under Siamese suzerainty' },
+      { from: 1893, until: 1953, name: 'French Laos' },
+      { from: 1953, until: 1975, name: 'the Kingdom of Laos' },
+      { from: 1975, name: "the Lao People's Democratic Republic" },
+    ],
+  },
+  // The Red River. A thousand years of Chinese rule, then a thousand of
+  // independence: the two halves of Vietnamese history that the old table had
+  // no room for at all. The Mạc and the Trịnh–Nguyễn division are elided into
+  // the Lê span, whose emperors both sides went on claiming to serve.
+  {
+    match: /red river|tonkin|thang long|hanoi|dai viet|đại việt/i,
+    eras: [
+      { from: -111, until: 938, name: 'the Chinese commanderies of Jiaozhi' },
+      { from: 938, until: 1407, name: 'Đại Việt' },
+      { from: 1407, until: 1428, name: 'the Ming occupation' },
+      { from: 1428, until: 1802, name: 'Đại Việt under the Lê' },
+      { from: 1802, until: 1883, name: 'the Nguyễn Empire of Đại Nam' },
+      { from: 1883, until: 1945, name: 'French Indochina' },
+      { from: 1945, until: 1976, name: 'the Democratic Republic of Vietnam' },
+      { from: 1976, name: 'Vietnam' },
+    ],
+  },
+  // The lower Mekong, which is Khmer ground until it is Vietnamese: the Nguyễn
+  // lords took Prey Nokor in 1698 and the delta was theirs by the 1750s. This
+  // is the one place where the two national histories overlap on the same soil,
+  // and giving it Cambodia's sequence or Vietnam's alone would be wrong.
+  {
+    match: /mekong delta|cochinchina|saigon|prey nokor/i,
+    eras: [
+      { from: 68, until: 550, name: 'Funan' },
+      { from: 550, until: 802, name: 'Chenla' },
+      { from: 802, until: 1431, name: 'the Khmer Empire' },
+      { from: 1431, until: 1698, name: 'the Post-Angkor Khmer kingdom' },
+      { from: 1698, until: 1802, name: 'the Nguyễn lords' },
+      { from: 1802, until: 1862, name: 'the Nguyễn Empire of Đại Nam' },
+      { from: 1862, until: 1955, name: 'French Cochinchina' },
+      { from: 1955, until: 1975, name: 'the Republic of Vietnam' },
+      { from: 1975, name: 'Vietnam' },
+    ],
+  },
+  // The Cham coast and the cordillera behind it. Champa lost Vijaya in 1471
+  // and survived as Panduranga until 1832, which is the date used here.
+  {
+    // `champa\b` rather than `champa`, so Champasak on the Laotian Mekong does
+    // not come back as a Cham kingdom.
+    match: /annam|annamite|champa\b|\bcham\b/i,
+    eras: [
+      { from: 192, until: 1832, name: 'the Kingdom of Champa' },
+      { from: 1832, until: 1883, name: 'the Nguyễn Empire of Đại Nam' },
+      { from: 1883, until: 1955, name: 'French Indochina' },
+      { from: 1955, until: 1975, name: 'the Republic of Vietnam' },
+      { from: 1975, name: 'Vietnam' },
+    ],
+  },
+  // The peninsula and the strait, which are one polity for most of their
+  // history because whoever held the strait held the trade through it.
+  {
+    match: /malay peninsula|malacca|melaka|malaya|johor|penang|singapore/i,
+    eras: [
+      { from: 671, until: 1288, name: 'Srivijaya' },
+      { from: 1400, until: 1511, name: 'the Malacca Sultanate' },
+      { from: 1511, until: 1641, name: 'Portuguese Malacca' },
+      { from: 1641, until: 1824, name: 'the Johor Sultanate and Dutch Malacca' },
+      { from: 1824, until: 1942, name: 'British Malaya' },
+      { from: 1942, until: 1945, name: 'the Empire of Japan' },
+      { from: 1946, until: 1963, name: 'the Federation of Malaya' },
+      { from: 1963, name: 'Malaysia' },
     ],
   },
   {
-    match: /philippines|luzon|visayas|mindanao|manila/i,
+    match: /sumatra|palembang|aceh|minangkabau/i,
+    eras: [
+      { from: 671, until: 1288, name: 'Srivijaya' },
+      { from: 1347, until: 1833, name: 'the Pagaruyung Kingdom' },
+      { from: 1833, until: 1942, name: 'the Dutch East Indies' },
+      { from: 1942, until: 1945, name: 'the Empire of Japan' },
+      { from: 1945, name: 'Indonesia' },
+    ],
+  },
+  // Java, where the succession of kingdoms is better attested than anywhere
+  // else in the region and the old table gave it three lines.
+  {
+    match: /java|sunda strait|majapahit|mataram|batavia|jakarta|yogyakarta|surabaya/i,
+    eras: [
+      { from: 732, until: 1016, name: 'the Medang Kingdom' },
+      { from: 1042, until: 1222, name: 'the Kingdom of Kediri' },
+      { from: 1222, until: 1293, name: 'the Singhasari Kingdom' },
+      { from: 1293, until: 1527, name: 'the Majapahit Empire' },
+      { from: 1527, until: 1587, name: 'the sultanates of Demak and Pajang' },
+      { from: 1587, until: 1755, name: 'the Sultanate of Mataram' },
+      { from: 1755, until: 1800, name: 'the courts of Surakarta and Yogyakarta' },
+      { from: 1800, until: 1942, name: 'the Dutch East Indies' },
+      { from: 1942, until: 1945, name: 'the Empire of Japan' },
+      { from: 1945, name: 'Indonesia' },
+    ],
+  },
+  // Bali took Majapahit's court culture when Java turned Muslim and kept its
+  // own kingdoms until the Dutch conquests of 1906–08, which is why it is not
+  // simply Java's sequence.
+  {
+    match: /\bbali\b|gelgel|klungkung/i,
+    eras: [
+      { from: 914, until: 1343, name: 'the Balinese kingdoms' },
+      { from: 1343, until: 1686, name: 'the Kingdom of Gelgel' },
+      { from: 1686, until: 1908, name: 'the nine Balinese kingdoms' },
+      { from: 1908, until: 1942, name: 'the Dutch East Indies' },
+      { from: 1942, until: 1945, name: 'the Empire of Japan' },
+      { from: 1945, name: 'Indonesia' },
+    ],
+  },
+  {
+    match: /borneo|brunei|sarawak|kalimantan/i,
+    eras: [
+      { from: 1368, until: 1888, name: 'the Sultanate of Brunei' },
+      { from: 1888, until: 1942, name: 'the British and Dutch Borneo territories' },
+      { from: 1942, until: 1945, name: 'the Empire of Japan' },
+      { from: 1945, name: 'Indonesia, Malaysia and Brunei' },
+    ],
+  },
+  {
+    match: /celebes|sulawesi|makassar|\bgowa\b/i,
+    eras: [
+      { from: 1320, until: 1669, name: 'the Sultanate of Gowa' },
+      { from: 1669, until: 1800, name: 'the Dutch East India Company' },
+      { from: 1800, until: 1942, name: 'the Dutch East Indies' },
+      { from: 1942, until: 1945, name: 'the Empire of Japan' },
+      { from: 1945, name: 'Indonesia' },
+    ],
+  },
+  // The Moluccas: the clove islands the Dutch fought Portugal and each other's
+  // sultans for, and the reason the Company was in the archipelago at all.
+  {
+    match: /spice islands|maluku|moluccas|banda|ternate|tidore/i,
+    eras: [
+      { from: 1257, until: 1607, name: 'the sultanates of Ternate and Tidore' },
+      { from: 1607, until: 1800, name: 'the Dutch East India Company' },
+      { from: 1800, until: 1942, name: 'the Dutch East Indies' },
+      { from: 1942, until: 1945, name: 'the Empire of Japan' },
+      { from: 1945, name: 'Indonesia' },
+    ],
+  },
+  {
+    match: /timor/i,
+    eras: [
+      // Portugal traded for sandalwood from 1515 and administered nothing: the
+      // island stayed a patchwork of its own kingdoms until the crown appointed
+      // a governor in 1702.
+      { from: 1515, until: 1702, name: 'the Timorese kingdoms' },
+      { from: 1702, until: 1975, name: 'Portuguese Timor' },
+      { from: 1976, until: 1999, name: 'Indonesian East Timor' },
+      { from: 2002, name: 'Timor-Leste' },
+    ],
+  },
+  {
+    match: /philippines|luzon|visayas|visayan|manila/i,
     eras: [
       { from: 1565, until: 1898, name: 'the Spanish East Indies' },
-      { from: 1898, until: 1946, name: 'the American colonial Philippines' },
+      { from: 1898, until: 1942, name: 'the American colonial Philippines' },
+      { from: 1942, until: 1945, name: 'the Empire of Japan' },
+      { from: 1946, name: 'the Republic of the Philippines' },
+    ],
+  },
+  // The Muslim south, which Spain never held. Sulu was still a sovereign
+  // sultanate when the Americans arrived and did not renounce sovereignty
+  // until 1915, four hundred years after Manila fell.
+  {
+    match: /sulu|mindanao|palawan|jolo|maguindanao/i,
+    eras: [
+      { from: 1405, until: 1915, name: 'the sultanates of Sulu and Maguindanao' },
+      { from: 1915, until: 1942, name: 'the American colonial Philippines' },
+      { from: 1942, until: 1945, name: 'the Empire of Japan' },
       { from: 1946, name: 'the Republic of the Philippines' },
     ],
   },
@@ -1285,9 +1599,14 @@ const ALLEGIANCES: Array<{
       { from: 1986, name: 'the Micronesian republics' },
     ],
   },
-  // Filed under Oceania by the map, but its modern history is Indonesian.
+  // Filed under Oceania by the map, but its modern history is Indonesian. The
+  // Moluccas, the Banda Sea and Timor were matched here too and, because this
+  // entry is tried before the Southeast Asian ones, it took them: the Banda
+  // islands got a generic colonial label in place of Ternate and Tidore, and
+  // Timor never reached Portuguese Timor or Timor-Leste at all. They are named
+  // in their own entries now and removed from this one.
   {
-    match: /indonesian and melanesian islands|moluccas|banda|timor/i,
+    match: /indonesian and melanesian islands/i,
     eras: [
       { from: 1512, until: 1800, name: 'the Dutch and Portuguese spice colonies' },
       { from: 1800, until: 1949, name: 'the Dutch East Indies' },
@@ -1351,10 +1670,17 @@ const ALLEGIANCES: Array<{
 export function getPolityAt(ctx: PolityContext): ResolvedPolity | undefined {
   const place = `${ctx.location ?? ''} ${ctx.region ?? ''}`;
   if (!place.trim()) return undefined;
+  const zone = canonicalZone(ctx.culturalZone);
 
   for (let i = ALLEGIANCES.length - 1; i >= 0; i -= 1) {
     const entry = ALLEGIANCES[i];
-    if (entry.zones && ctx.culturalZone && !entry.zones.includes(ctx.culturalZone)) continue;
+    // A zone-scoped entry needs the zone to agree, and a caller who supplies
+    // none does not get a free pass. The test used to fall open in that case,
+    // which is how a persona in the Mekong Delta was handed the Stars and
+    // Stripes: "Mainland Southeast Asia" contains the word "southeast", the
+    // Carolinas entry matches on it, and with no zone to check there was
+    // nothing between the two.
+    if (entry.zones && !(zone && entry.zones.includes(zone as CulturalZone))) continue;
     if (!entry.match.test(place)) continue;
 
     const era = entry.eras.find(candidate =>
@@ -1468,10 +1794,11 @@ export function describeYear(year: number): string {
 export function getPolityNames(ctx: Omit<PolityContext, 'year'>): string[] {
   const place = `${ctx.location ?? ''} ${ctx.region ?? ''}`;
   if (!place.trim()) return [];
+  const zone = canonicalZone(ctx.culturalZone);
 
   for (let i = ALLEGIANCES.length - 1; i >= 0; i -= 1) {
     const entry = ALLEGIANCES[i];
-    if (entry.zones && ctx.culturalZone && !entry.zones.includes(ctx.culturalZone)) continue;
+    if (entry.zones && !(zone && entry.zones.includes(zone as CulturalZone))) continue;
     if (entry.match.test(place)) return entry.eras.map(era => era.name);
   }
   return [];

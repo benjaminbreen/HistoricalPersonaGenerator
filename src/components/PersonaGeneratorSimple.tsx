@@ -159,6 +159,7 @@ import { HistoricalEra, CulturalZone, Gender } from '../types';
 import { generateNpcName } from '../generation/common/npcUtils';
 import { ValueNoise } from '../utils/noise';
 import { EventImportance, EventKind } from '../constants/characterData/lifeHistoryService';
+import { standingRole } from '../constants/characterData/professions';
 import { HistoricalPersonaAnnotationRecord } from '../types/personaAnnotation';
 import {
   annotationRecordToJsonl,
@@ -176,7 +177,7 @@ import { createPastedTextSource, getRandomWikidataPerson, ingestRandomOldBaileyS
 import PixelPortrait from './portraitLab/PixelPortrait';
 import { generateStatDescription } from '../utils/statToText';
 import MiniLocationMap from './MiniLocationMap';
-import { RARITY_COLORS } from '../types/attributeTypes';
+import { RARITY_COLORS, RARITY_LABELS, UNLABELLED_RARITIES, normalizeRarity } from '../types/attributeTypes';
 import { PERSONAL_BELIEFS, IDEOLOGIES, getProfessionEmoji } from '../constants';
 import { getLanguageForCharacter } from '../constants/gameData/languages';
 import { confidenceBlurb } from '../services/languageAttributionService';
@@ -916,6 +917,7 @@ const normalizeDisplayZone = (zone: string): CulturalZone | undefined => {
     'NORTH_AMERICAN_COLONIAL',
     'OCEANIA',
     'SOUTH_ASIAN',
+    'SOUTHEAST_ASIAN',
     'SOUTH_AMERICAN',
     'SUB_SAHARAN_AFRICAN',
   ];
@@ -1107,6 +1109,7 @@ export default function PersonaGenerator() {
   const [sandAnimationKey, setSandAnimationKey] = useState(0); // Key to restart animation on flip
   const [portraitExpressionIndex, setPortraitExpressionIndex] = useState(0);
   const [mainPortraitHoverExpression, setMainPortraitHoverExpression] = useState<string | undefined>(undefined);
+  const [portraitBackdropColor, setPortraitBackdropColor] = useState('#5c6272');
   const [showGreetingBubble, setShowGreetingBubble] = useState(false);
   const [bubblePosition, setBubblePosition] = useState({ top: 0, left: 0 });
   const [annotationRecord, setAnnotationRecord] = useState<HistoricalPersonaAnnotationRecord | null>(null);
@@ -1150,6 +1153,7 @@ export default function PersonaGenerator() {
   const [categoryEditDrafts, setCategoryEditDrafts] = useState<Record<string, string>>({});
   const [sourcePanelCollapsed, setSourcePanelCollapsed] = useState(true);
   const [sourceStudioView, setSourceStudioView] = useState<SourceStudioView>('full');
+  const sourcePanelRef = useRef<HTMLDivElement>(null);
   const [sharedPersonaId, setSharedPersonaId] = useState<string | null>(() => currentShareId());
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [isCreatingShare, setIsCreatingShare] = useState(false);
@@ -1159,6 +1163,18 @@ export default function PersonaGenerator() {
   const [sharedPersonaError, setSharedPersonaError] = useState<string | null>(null);
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const initialPersonaLoadStarted = useRef(false);
+
+  const openMobileSourceStudio = () => {
+    setSourceStudioView('full');
+    setSourcePanelCollapsed(false);
+    // Wait for the expanded workspace to enter the layout before bringing it
+    // below the sticky toolbar.
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        sourcePanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  };
 
   const materialAdapter = annotationRecord ? adaptPersonaMaterialRecord(annotationRecord, {
     useSourceTitleAsName: sourceTarget === 'named_subject',
@@ -2674,7 +2690,7 @@ export default function PersonaGenerator() {
     const attributes = char.attributes || [];
     const attributesHtml = attributes.length > 0
       ? attributes.map((attr: any) => {
-          const rarity = attr.rarity || 'common';
+          const rarity = normalizeRarity(attr.rarity) || 'common';
           return `<span class="attr-badge attr-${rarity}">${attr.name}</span>`;
         }).join('')
       : '<span class="no-data">None</span>';
@@ -2828,8 +2844,10 @@ export default function PersonaGenerator() {
           }
           .attr-common { background: #e8e6e2; color: #555; }
           .attr-uncommon { background: #d4e8d4; color: #2a5a2a; }
+          .attr-seldom_seen { background: #d2e6f0; color: #23566b; }
           .attr-rare { background: #d4d4e8; color: #3a3a6a; }
-          .attr-legendary { background: #e8d4d4; color: #6a3a3a; }
+          .attr-very_rare { background: #ded4e8; color: #4a3a6a; }
+          .attr-exceedingly_rare { background: #e8d4d4; color: #6a3a3a; }
 
           /* Equipment and inventory */
           .equip-item { font-size: 0.8rem; padding: 0.1rem 0; }
@@ -3478,6 +3496,8 @@ export default function PersonaGenerator() {
       'EAST ASIAN': 'East Asia',
       'SOUTH_ASIAN': 'South Asia',
       'SOUTH ASIAN': 'South Asia',
+      'SOUTHEAST_ASIAN': 'Southeast Asia',
+      'SOUTHEAST ASIAN': 'Southeast Asia',
       'MENA': 'the Middle East and North Africa',
       'SUB_SAHARAN_AFRICAN': 'Sub-Saharan Africa',
       'SUB SAHARAN AFRICAN': 'Sub-Saharan Africa',
@@ -4036,12 +4056,14 @@ export default function PersonaGenerator() {
             <span className="top-bar-label">{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
           <button
-            className="top-bar-donate"
-            onClick={() => setShowDonate(true)}
-            aria-label="Support this project"
+            className="source-studio-toolbar-button"
+            onClick={openMobileSourceStudio}
+            aria-label="Open Source Studio"
+            aria-controls="source-studio-panel"
+            aria-expanded={!sourcePanelCollapsed}
           >
-            <IoHeart aria-hidden="true" />
-            <span className="top-bar-label">Donate</span>
+            <IoLibrary aria-hidden="true" />
+            <span className="top-bar-label">Source Studio</span>
           </button>
           <button
             onClick={handleShare}
@@ -4058,6 +4080,14 @@ export default function PersonaGenerator() {
           <button onClick={() => setShowAbout(true)} aria-label="About this application">
             <IoInformationCircle aria-hidden="true" />
             <span className="top-bar-label">About</span>
+          </button>
+          <button
+            className="top-bar-donate"
+            onClick={() => setShowDonate(true)}
+            aria-label="Support this project"
+          >
+            <IoHeart aria-hidden="true" />
+            <span className="top-bar-label">Donate</span>
           </button>
         </div>
       </div>
@@ -4145,7 +4175,13 @@ export default function PersonaGenerator() {
           </span>
         </div>
 
-        <div className={`source-ingestion-panel ${sourcePanelCollapsed ? 'source-ingestion-panel-collapsed' : ''}`} role="region" aria-label="Source-based persona generation">
+        <div
+          id="source-studio-panel"
+          ref={sourcePanelRef}
+          className={`source-ingestion-panel ${sourcePanelCollapsed ? 'source-ingestion-panel-collapsed' : ''}`}
+          role="region"
+          aria-label="Source-based persona generation"
+        >
           <div className="source-ingestion-header">
             <button
               type="button"
@@ -4759,26 +4795,42 @@ export default function PersonaGenerator() {
                   <h3>Portrait</h3>
                   <div className="appearance-content">
                     <div
-                      ref={portraitContainerRef}
-                      className="portrait-container clickable-portrait"
-                      onClick={() => setShowSecrets(true)}
-                      onMouseEnter={handleMainPortraitHover}
-                      onMouseLeave={handleMainPortraitLeave}
-                      title="Click to reveal character secrets"
+                      className="portrait-stage"
+                      style={sourcePortraitUrl
+                        ? undefined
+                        : { '--portrait-backdrop': portraitBackdropColor } as React.CSSProperties}
                     >
-                      {sourcePortraitUrl ? (
-                        <img
-                          className="source-portrait-image"
-                          src={sourcePortraitUrl}
-                          alt={`Portrait of ${persona.character.name}`}
-                        />
-                      ) : (
-                        <PixelPortrait
-                          character={persona.character}
-                          size={232}
-                          temporaryExpression={mainPortraitHoverExpression}
-                        />
-                      )}
+                      <div
+                        ref={portraitContainerRef}
+                        className="portrait-container clickable-portrait"
+                        onClick={() => setShowSecrets(true)}
+                        onMouseEnter={handleMainPortraitHover}
+                        onMouseLeave={handleMainPortraitLeave}
+                      >
+                        {sourcePortraitUrl ? (
+                          <img
+                            className="source-portrait-image"
+                            src={sourcePortraitUrl}
+                            alt={`Portrait of ${persona.character.name}`}
+                          />
+                        ) : (
+                          <PixelPortrait
+                            character={persona.character}
+                            size={248}
+                            temporaryExpression={mainPortraitHoverExpression}
+                            onBackdropColor={setPortraitBackdropColor}
+                          />
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        className="portrait-details-button"
+                        onClick={() => setShowSecrets(true)}
+                        aria-label={`View details for ${persona.character.name}`}
+                      >
+                        <IoEye aria-hidden="true" />
+                        Character details
+                      </button>
                     </div>
                     {sourcePortraitAttribution && (
                       <div className="source-portrait-credit">{sourcePortraitAttribution}</div>
@@ -4815,6 +4867,13 @@ export default function PersonaGenerator() {
                       <span className="value">
                         <span className="profession-emoji">{getProfessionEmoji(persona.character.profession)}</span>
                         {persona.character.profession}
+                        {/* A standing rather than a trade — "Big Man", "Maharaja" —
+                            reads as a joke without the plain-English gloss beside it. */}
+                        {standingRole(persona.character.profession) && (
+                          <span className="profession-gloss">
+                            {standingRole(persona.character.profession)!.gloss}
+                          </span>
+                        )}
                       </span>
                     </div>
                     <div className="info-item">
@@ -5768,40 +5827,48 @@ export default function PersonaGenerator() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.45 + idx * 0.08 }}
                           >
-                            {/* RARITY_COLORS has been imported and unused since
-                                the rarity ladder was built. A prevalence the
-                                generator computes and the card discards may as
-                                well not have been computed. */}
-                            <div
-                              className="attribute-icon-wrapper"
-                              style={attr.rarity && attr.rarity !== 'common'
-                                ? {
-                                  color: RARITY_COLORS[attr.rarity],
-                                  background: `color-mix(in srgb, ${RARITY_COLORS[attr.rarity]} 16%, var(--color-surface))`,
-                                }
-                                : undefined}
-                            >
-                              {IconComponent ? (
-                                <IconComponent className="attribute-icon" />
-                              ) : (
-                                <IoStar className="attribute-icon" />
-                              )}
-                            </div>
-                            <div className="attribute-text">
-                              <div className="attribute-name">
-                                {attr.name}
-                                {attr.rarity && attr.rarity !== 'common' && attr.rarity !== 'uncommon' && (
-                                  <span
-                                    className="attribute-rarity"
-                                    style={{ color: RARITY_COLORS[attr.rarity] }}
-                                    title={`${attr.rarity} — how many people of this age, sex, trade and place carried it`}
+                            {/* Personas saved under the old five-tier ladder
+                                carry `epic` and `legendary`; normalizeRarity
+                                maps them onto the bands covering the same
+                                prevalence. */}
+                            {(() => {
+                              const rarity = normalizeRarity(attr.rarity);
+                              const labelled = rarity && !UNLABELLED_RARITIES.has(rarity);
+                              return (
+                                <>
+                                  <div
+                                    className="attribute-icon-wrapper"
+                                    style={labelled
+                                      ? {
+                                        color: RARITY_COLORS[rarity!],
+                                        background: `color-mix(in srgb, ${RARITY_COLORS[rarity!]} 16%, var(--color-surface))`,
+                                      }
+                                      : undefined}
                                   >
-                                    {attr.rarity}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="attribute-description">{attr.description}</div>
-                            </div>
+                                    {IconComponent ? (
+                                      <IconComponent className="attribute-icon" />
+                                    ) : (
+                                      <IoStar className="attribute-icon" />
+                                    )}
+                                  </div>
+                                  <div className="attribute-text">
+                                    <div className="attribute-name">
+                                      {attr.name}
+                                      {labelled && (
+                                        <span
+                                          className="attribute-rarity"
+                                          style={{ color: RARITY_COLORS[rarity!] }}
+                                          title={`${RARITY_LABELS[rarity!]} — how many people of this age, sex, trade and place carried it`}
+                                        >
+                                          {RARITY_LABELS[rarity!]}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="attribute-description">{attr.description}</div>
+                                  </div>
+                                </>
+                              );
+                            })()}
                           </motion.div>
                         );
                       })}
@@ -5996,6 +6063,10 @@ export default function PersonaGenerator() {
       © {new Date().getFullYear()} Benjamin Breen. All rights reserved. |{' '}
       <a href="https://ucsc.edu" target="_blank" rel="noopener noreferrer">UC Santa Cruz</a> |{' '}
       Created as a free educational resource
+      <span className="footer-mobile-details">
+        {' '}| Prototype – may contain errors |{' '}
+        <a href="https://github.com/benjaminbreen/HistoricalPersonaGenerator" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </span>
     </footer>
 
     <AnimatePresence>
@@ -6723,6 +6794,13 @@ export default function PersonaGenerator() {
                       <span className="value">
                         <span className="profession-emoji">{getProfessionEmoji(persona.character.profession)}</span>
                         {persona.character.profession}
+                        {/* A standing rather than a trade — "Big Man", "Maharaja" —
+                            reads as a joke without the plain-English gloss beside it. */}
+                        {standingRole(persona.character.profession) && (
+                          <span className="profession-gloss">
+                            {standingRole(persona.character.profession)!.gloss}
+                          </span>
+                        )}
                       </span>
                     </div>
                     <div className="info-item">

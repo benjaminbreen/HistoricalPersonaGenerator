@@ -20,6 +20,7 @@ import { historicalPlaceLabel } from '../constants/gameData/placeLabels';
 import { describeBirthplace } from './birthplaceService';
 import { getPolityAt, isPluralPolity, rulerTitleFor, withPolityArticle } from './polityService';
 import { disruptionClause } from './disruptionResolution';
+import { standingRole } from '../constants/characterData/professions';
 import {
   conjugate,
   describeIdeology,
@@ -463,12 +464,21 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
   const professionName = lowerProfession(character.profession);
   const professionArticle = withIndefiniteArticle(professionName).split(' ')[0];
 
-  const professionOpeners = [
-    `Now ${character.age}, ${pronoun} ${conjugate('make', narrativePronouns)} ${pronounPoss} living as ${professionArticle} ${professionName}`,
-    `At ${character.age}, ${pronoun} ${conjugate('work', narrativePronouns)} as ${professionArticle} ${professionName}`,
-    `${subjectCap} ${conjugate('earn', narrativePronouns)} ${pronounPoss} bread as ${professionArticle} ${professionName}, and ${conjugate('have', narrativePronouns)} done for years`,
-    `${subjectCap} ${conjugate('follow', narrativePronouns)} the ${professionName}'s trade`
-  ];
+  // A standing is not a trade, and the openers below all assume a trade. See
+  // STANDING_ROLES: without this, a patronage politician "makes his living as a
+  // big man" and a prince "works as a maharaja".
+  const roleStanding = standingRole(character.profession);
+  const professionOpeners = roleStanding
+    ? [
+      `Now ${character.age}, ${pronoun} ${roleStanding.livelihood}`,
+      `${subjectCap} ${roleStanding.livelihood}`,
+    ]
+    : [
+      `Now ${character.age}, ${pronoun} ${conjugate('make', narrativePronouns)} ${pronounPoss} living as ${professionArticle} ${professionName}`,
+      `At ${character.age}, ${pronoun} ${conjugate('work', narrativePronouns)} as ${professionArticle} ${professionName}`,
+      `${subjectCap} ${conjugate('earn', narrativePronouns)} ${pronounPoss} bread as ${professionArticle} ${professionName}, and ${conjugate('have', narrativePronouns)} done for years`,
+      `${subjectCap} ${conjugate('follow', narrativePronouns)} the ${professionName}'s trade`
+    ];
   let professionSentence = pickBiography(professionOpeners);
 
   // Work context for the trades where the stats say something specific.
