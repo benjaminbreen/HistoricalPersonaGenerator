@@ -257,9 +257,17 @@ export function signatureDyeFor(
     wealthLevel: WealthLevel,
     slot: 'accent' | 'field',
     roll: () => number,
+    /**
+     * How much of this wealth tier's dye access the persona's work leaves them.
+     * A field labourer's clothes are not a place to spend a costly dye, and
+     * without this the work-dress garments come out in showcase colours —
+     * "Scarlet Denim Bib Overalls" instead of "Scarlet Business Suit", which is
+     * a stranger version of the same bug. 1 leaves the roll untouched.
+     */
+    dyeDamping = 1,
 ): string | null {
     const access = WEALTH_DYE_ACCESS[wealthLevel] || WEALTH_DYE_ACCESS.comfortable;
-    if (roll() > access[slot]) return null;
+    if (roll() > access[slot] * dyeDamping) return null;
 
     const ceiling = era === HistoricalEra.PREHISTORY ? 'everyday' : access.ceiling;
     const limit = TIER_RANK[ceiling];
@@ -5764,7 +5772,7 @@ function getMaterialQualityTier(material: string): string {
     return 'standard'; // Default tier
 }
 
-function adjustMaterialQuality(material: string, targetQuality: 'poor' | 'standard' | 'good' | 'excellent'): string {
+export function adjustMaterialQuality(material: string, targetQuality: 'poor' | 'standard' | 'good' | 'excellent'): string {
     const category = getMaterialCategory(material);
     const tiers = MATERIAL_QUALITY_TIERS[category];
     const targetMaterials = tiers[targetQuality];

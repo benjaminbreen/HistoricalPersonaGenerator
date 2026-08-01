@@ -8,6 +8,11 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { IconType } from 'react-icons';
+import {
+  LuEye, LuFootprints, LuHandshake, LuHourglass, LuInfo,
+  LuMessageCircle, LuScale, LuStar, LuSwords, LuX,
+} from 'react-icons/lu';
 import { HistoricalPersona } from '../services/personaGenerator';
 import {
   ActionId, availableActions, BattleEvent, createEncounter, EncounterState,
@@ -16,6 +21,7 @@ import {
 import { displayStats } from './engine/stats';
 import { speakLine, SpokenLine } from './dialogue/speak';
 import SpriteCanvas, { SpriteAnim, SpriteCommand } from './sprite/SpriteCanvas';
+import { SPRITE_SCALE } from './sprite/skeleton';
 import './encounter.css';
 
 interface Props {
@@ -31,14 +37,35 @@ interface Floater {
   side: Side | 'center';
 }
 
-const ACTION_META: Record<ActionId, { label: string; icon: string; blurb: string }> = {
-  talk: { label: 'Talk', icon: '💬', blurb: 'Engage in conversation and build rapport.' },
-  trade: { label: 'Trade', icon: '⚖', blurb: 'Propose an exchange of goods or services.' },
-  observe: { label: 'Observe', icon: '👁', blurb: 'Carefully observe to learn about your counterpart.' },
-  befriend: { label: 'Befriend', icon: '🤝', blurb: 'Attempt to build trust and goodwill.' },
-  steal: { label: 'Steal', icon: '🕳', blurb: 'Light fingers, while their eyes are elsewhere.' },
-  attack: { label: 'Attack', icon: '⚔', blurb: 'Settle this the old way.' },
-  flee: { label: 'Flee', icon: '🏃', blurb: 'Leave, fast, while leaving is possible.' },
+const ACTION_META: Record<ActionId, { label: string; icon: IconType; blurb: string; prompt: string }> = {
+  talk: {
+    label: 'Talk', icon: LuMessageCircle,
+    blurb: 'Engage in conversation and build rapport.', prompt: 'A cautious opening.',
+  },
+  trade: {
+    label: 'Trade', icon: LuScale,
+    blurb: 'Propose an exchange of goods or services.', prompt: 'Offer something of recognizable value.',
+  },
+  observe: {
+    label: 'Observe', icon: LuEye,
+    blurb: 'Carefully observe to learn about your counterpart.', prompt: 'Watch first; risk little.',
+  },
+  befriend: {
+    label: 'Befriend', icon: LuHandshake,
+    blurb: 'Attempt to build trust and goodwill.', prompt: 'Make a deliberate gesture of trust.',
+  },
+  steal: {
+    label: 'Steal', icon: LuFootprints,
+    blurb: 'Take something while their attention is elsewhere.', prompt: 'A dangerous opportunity.',
+  },
+  attack: {
+    label: 'Attack', icon: LuSwords,
+    blurb: 'Settle this by force.', prompt: 'Violence will define the encounter.',
+  },
+  flee: {
+    label: 'Flee', icon: LuHourglass,
+    blurb: 'Leave while leaving is possible.', prompt: 'Put distance between you.',
+  },
 };
 
 function formatYear(year: number): string {
@@ -100,7 +127,7 @@ function TypeText({ text, onTyping }: { text: string; onTyping?: (typing: boolea
 
 export default function EncounterMode({ a, b, onClose }: Props) {
   const [state, setState] = useState<EncounterState>(() => createEncounter(a, b));
-  const [busy, setBusy] = useState(true);
+  const [busy, setBusy] = useState(false);
   const [realMode, setRealMode] = useState(false);
   const [lines, setLines] = useState<Partial<Record<Side, SpokenLine>>>({});
   const [typing, setTyping] = useState<Partial<Record<Side, boolean>>>({});
@@ -111,6 +138,7 @@ export default function EncounterMode({ a, b, onClose }: Props) {
   const [showFactors, setShowFactors] = useState(false);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [koSides, setKoSides] = useState<Side[]>([]);
+  const [selectedAction, setSelectedAction] = useState<ActionId>('talk');
   const realModeRef = useRef(realMode);
   realModeRef.current = realMode;
   const floaterId = useRef(1);
@@ -140,9 +168,30 @@ export default function EncounterMode({ a, b, onClose }: Props) {
       switch (event.type) {
         case 'speak': {
           const line = speakLine(eventState, event.side, event.intent, realModeRef.current);
-          setLines((l) => ({ ...l, [event.side]: line }));
+          const hasSpeech = !!(line.text || line.real);
+
+          if (hasSpeech) {
+            setLines((current) => ({
+              ...current,
+              [event.side]: { ...line, action: null, physicalAnimation: null },
+            }));
+          } else {
+            setLines((current) => ({ ...current, [event.side]: undefined }));
+          }
+
+          if (line.action) {
+            setNarration(line.action);
+            if (line.physicalAnimation) playAnim(event.side, line.physicalAnimation);
+            if (line.cueId) {
+              const history = eventState.nonverbalHistory[event.side];
+              if (!history.includes(line.cueId)) history.push(line.cueId);
+              if (history.length > 12) history.splice(0, history.length - 12);
+            }
+          }
+
           const spoken = line.real?.text ?? line.text;
-          const readMs = Math.min(3200, 600 + spoken.length * 26 + (line.action ? 800 : 0));
+          const contentLength = spoken.length + (line.action?.length ?? 0);
+          const readMs = Math.min(3800, 650 + contentLength * 18);
           await wait(readMs);
           break;
         }
@@ -163,7 +212,7 @@ export default function EncounterMode({ a, b, onClose }: Props) {
           break;
         }
         case 'rapportShift':
-          addFloater(`${event.amount > 0 ? '+' : ''}${event.amount} ♥`, event.amount > 0 ? 'good' : 'bad', 'center');
+          addFloater(`${event.amount > 0 ? '+' : ''}${event.amount} rapport`, event.amount > 0 ? 'good' : 'bad', 'center');
           await wait(240);
           break;
         case 'tensionShift':
@@ -173,7 +222,7 @@ export default function EncounterMode({ a, b, onClose }: Props) {
           await wait(160);
           break;
         case 'item':
-          addFloater(`${event.how === 'stolen' ? '🕳' : '⚖'} ${event.name}`, 'item', event.side);
+          addFloater(`${event.how === 'stolen' ? 'taken' : 'traded'} · ${event.name}`, 'item', event.side);
           await wait(700);
           break;
         case 'reveal':
@@ -188,22 +237,6 @@ export default function EncounterMode({ a, b, onClose }: Props) {
     }
   }, [addFloater, playAnim, wait]);
 
-  // The opening beat: a greeting from each side.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      await wait(900);
-      if (cancelled) return;
-      await playEvents(
-        [{ type: 'speak', side: 'left', intent: 'greet' }, { type: 'speak', side: 'right', intent: 'greet' }],
-        state
-      );
-      setBusy(false);
-    })();
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const act = useCallback(async (action: ActionId) => {
     if (busy || outcome) return;
     setBusy(true);
@@ -215,12 +248,15 @@ export default function EncounterMode({ a, b, onClose }: Props) {
     setBusy(false);
   }, [busy, outcome, state, playEvents]);
 
-  const actions = useMemo(
+  const actions = useMemo<ActionId[]>(
     () => availableActions(state).filter((id) => id !== 'flee'),
     [state]
   );
   const hostile = isHostile(state);
   const scene = sceneTitle(state, outcome);
+  const activeAction = actions.includes(selectedAction) ? selectedAction : actions[0];
+  const activeMeta = ACTION_META[activeAction];
+  const ActiveActionIcon = activeMeta.icon;
 
   const renderBubble = (side: Side) => {
     const line = lines[side];
@@ -242,7 +278,6 @@ export default function EncounterMode({ a, b, onClose }: Props) {
         ) : line.text ? (
           <p><TypeText text={line.text} onTyping={(t) => setTyping((v) => ({ ...v, [side]: t }))} /></p>
         ) : null}
-        {line.action && <p className="encounter-bubble-action">✳ {line.action}</p>}
       </div>
     );
   };
@@ -253,21 +288,20 @@ export default function EncounterMode({ a, b, onClose }: Props) {
     const c = persona.character;
     const stats = displayStats(c, combatant.battle);
     const hpPct = Math.round((combatant.hp / combatant.battle.maxHp) * 100);
-    const hurtOrHostile = hostile || combatant.hp < combatant.battle.maxHp;
+    const isHurt = combatant.hp < combatant.battle.maxHp;
     return (
       <aside className={`encounter-card is-${side}`}>
         <div className="encounter-card-head">
           <h3>{c.name}</h3>
-          <span className="encounter-card-star">★</span>
+          <LuStar className="encounter-card-star" aria-hidden="true" />
         </div>
-        <div className="encounter-card-pills">
-          <span className="encounter-pill is-zone">{persona.region}</span>
-          <span className="encounter-pill">{persona.location}</span>
+        <div className="encounter-card-place">
+          <span>{formatYear(persona.year)}</span>
+          <span>{persona.region}</span>
         </div>
-        <div className="encounter-card-year">{formatYear(persona.year)}</div>
         <div className="encounter-card-line">{c.gender} · {c.age} years old</div>
         <div className="encounter-card-profession">{c.profession}</div>
-        {hurtOrHostile && (
+        {isHurt && (
           <div className="encounter-hpbar" role="meter" aria-label="Health" aria-valuenow={hpPct}>
             <div
               className={`encounter-hpbar-fill ${hpPct < 30 ? 'is-low' : hpPct < 60 ? 'is-mid' : ''}`}
@@ -279,8 +313,10 @@ export default function EncounterMode({ a, b, onClose }: Props) {
         <ul className="encounter-card-stats">
           {stats.map((s) => (
             <li key={s.label}>
-              <span className="stat-icon" aria-hidden="true">{s.icon}</span>
               <span className="stat-label">{s.label}</span>
+              <span className={`stat-track is-${s.label.toLowerCase()}`} aria-hidden="true">
+                <span style={{ width: `${s.value}%` }} />
+              </span>
               <span className="stat-value">{s.value}</span>
             </li>
           ))}
@@ -291,7 +327,7 @@ export default function EncounterMode({ a, b, onClose }: Props) {
 
   return (
     <div className={`encounter-overlay ${shake === 2 ? 'shake-hard' : shake === 1 ? 'shake' : ''}`} role="dialog" aria-label="Encounter">
-      <button className="encounter-close" onClick={onClose} aria-label="End encounter">✕</button>
+      <button className="encounter-close" onClick={onClose} aria-label="End encounter"><LuX /></button>
 
       <div className={`encounter-main ${hostile ? 'is-hostile' : ''}`}>
         {renderCard('left')}
@@ -301,7 +337,7 @@ export default function EncounterMode({ a, b, onClose }: Props) {
             {renderBubble('left')}
             <SpriteCanvas
               persona={a} facing="right" talking={!!typing.left}
-              ko={koSides.includes('left')} command={commands.left ?? null}
+              ko={koSides.includes('left')} command={commands.left ?? null} scale={SPRITE_SCALE}
             />
             <div className="encounter-ground-shadow" />
           </div>
@@ -309,14 +345,14 @@ export default function EncounterMode({ a, b, onClose }: Props) {
           <div className="encounter-caption-block">
             <h2 className="encounter-scene-title">{scene.title}</h2>
             <p className="encounter-scene-sub">{narration ?? scene.sub}</p>
-            <div className="encounter-scene-ornament">❧</div>
+            <div className="encounter-scene-ornament"><span>◇</span></div>
           </div>
 
           <div className="encounter-figure is-right">
             {renderBubble('right')}
             <SpriteCanvas
               persona={b} facing="left" talking={!!typing.right}
-              ko={koSides.includes('right')} command={commands.right ?? null}
+              ko={koSides.includes('right')} command={commands.right ?? null} scale={SPRITE_SCALE}
             />
             <div className="encounter-ground-shadow" />
           </div>
@@ -333,7 +369,7 @@ export default function EncounterMode({ a, b, onClose }: Props) {
         <aside className="encounter-factors">
           <header>
             <strong>Why {state.rapport >= 60 ? 'they get along' : state.rapport >= 40 ? 'it could go either way' : 'this is going badly'}</strong>
-            <button onClick={() => setShowFactors(false)} aria-label="Close breakdown">✕</button>
+            <button onClick={() => setShowFactors(false)} aria-label="Close breakdown"><LuX /></button>
           </header>
           <ul>
             {state.report.factors.map((f) => (
@@ -363,56 +399,42 @@ export default function EncounterMode({ a, b, onClose }: Props) {
               {busy ? '· · ·' : 'Choose an action.'}
             </div>
             <div className="encounter-actions">
-              {actions.map((id) => (
-                <button
-                  key={id}
-                  className={`encounter-action is-${id}`}
-                  disabled={busy}
-                  onClick={() => act(id)}
-                >
-                  <span className="encounter-action-icon">{ACTION_META[id].icon}</span>
-                  <span className="encounter-action-label">{ACTION_META[id].label}</span>
-                  <span className="encounter-action-blurb">{ACTION_META[id].blurb}</span>
+              {actions.map((id) => {
+                const Icon = ACTION_META[id].icon;
+                return (
+                  <button
+                    key={id}
+                    className={`encounter-action is-${id} ${id === activeAction ? 'is-active' : ''}`}
+                    disabled={busy}
+                    onMouseEnter={() => setSelectedAction(id)}
+                    onFocus={() => setSelectedAction(id)}
+                    onClick={() => act(id)}
+                  >
+                    <Icon className="encounter-action-icon" aria-hidden="true" />
+                    <span className="encounter-action-label">{ACTION_META[id].label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="encounter-action-detail" aria-live="polite">
+              <div className="encounter-action-detail-main">
+                <ActiveActionIcon aria-hidden="true" />
+                <span>{activeMeta.blurb}</span>
+              </div>
+              <p>{busy ? 'The encounter unfolds…' : activeMeta.prompt}</p>
+              <div className="encounter-action-detail-tools">
+                <label className="encounter-realmode">
+                  <input type="checkbox" checked={realMode} onChange={(e) => setRealMode(e.target.checked)} />
+                  <span>Real language</span>
+                </label>
+                <button className="encounter-factors-toggle" onClick={() => setShowFactors((v) => !v)}>
+                  <LuInfo aria-hidden="true" /> Encounter factors
                 </button>
-              ))}
-            </div>
-            <div className="encounter-menu-foot">
-              <label className="encounter-realmode">
-                <input type="checkbox" checked={realMode} onChange={(e) => setRealMode(e.target.checked)} />
-                <span>Real language</span>
-              </label>
-              <button className="encounter-flee" disabled={busy} onClick={() => act('flee')}>
-                🏃 Flee
-              </button>
-            </div>
-          </section>
-
-          <section className="encounter-meters" aria-label="Mood">
-            <div className="encounter-meter">
-              <span>Rapport{state.turn === 0 ? ' Potential' : ''}</span>
-              <div className="encounter-meter-track">
-                <div className="encounter-meter-fill is-rapport" style={{ width: `${state.rapport}%` }} />
+                <button className="encounter-flee" disabled={busy} onClick={() => act('flee')}>
+                  <LuFootprints aria-hidden="true" /> Leave encounter
+                </button>
               </div>
-              <strong>{state.rapport}</strong>
             </div>
-            <div className="encounter-meter">
-              <span>Tension</span>
-              <div className="encounter-meter-track">
-                <div className="encounter-meter-fill is-tension" style={{ width: `${state.tension}%` }} />
-              </div>
-              <strong>{state.tension}</strong>
-            </div>
-            <div className="encounter-meter">
-              <span>Curiosity (Both)</span>
-              <div className="encounter-meter-track">
-                <div className="encounter-meter-fill is-curiosity" style={{ width: `${state.curiosity}%` }} />
-              </div>
-              <strong>{state.curiosity}</strong>
-            </div>
-            <p className="encounter-meters-note">
-              <button className="encounter-factors-toggle" onClick={() => setShowFactors((v) => !v)}>ⓘ</button>
-              {' '}Values are estimated from era, culture, language, and personal traits.
-            </p>
           </section>
         </div>
       )}

@@ -1,6 +1,6 @@
 /* Beautiful Information-Dense Design with Rich Typography */
 
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@400;500;600;700&display=swap');
 
 :root {
   /* Rich Color Palette - Light Mode */
@@ -2647,38 +2647,12 @@ body.dark-mode .disclaimer-box {
   font-size: 1rem;
 }
 
-.biography-tabs {
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
-}
-
-.biography-tabs button {
-  padding: 0.82rem 0.75rem 0.7rem;
-  text-transform: none;
-  letter-spacing: 0.025em;
-  border-bottom-width: 2px;
-}
-
-.biography-tabs button.tab-active {
-  border-bottom-width: 2px;
-  background: transparent;
-}
-
-.tab-content {
-  padding: 1.55rem 1.8rem;
-}
-
-.narrative-biography,
-.narrative-biography p {
-  max-width: 46rem;
-  font-size: 1.16rem !important;
-  line-height: 1.62;
-  text-align: left;
-}
-
-.narrative-biography p:first-of-type::first-letter {
-  font-size: 2.2em;
-}
+/* `.biography-tabs`, `.tab-content` and `.narrative-biography` were declared
+   here as well as further down this file, at equal specificity — so every
+   property in this block that the later one also sets was dead, including the
+   `!important` font sizes that were presumably added when the conflict was
+   noticed. The single property that did survive, `max-width` on the
+   paragraphs, has moved to the surviving block. See "Narrative Biography". */
 
 .equipment-grid,
 .inventory-list,
@@ -3319,13 +3293,15 @@ body.dark-mode .area-pill {
   border-bottom: 2px solid var(--color-border);
 }
 
+/* Matched to the right column's banded headers below: same element, same
+   size, same padding, and only the hue distinguishes the two rails. */
 .appearance-section-compact h3,
 .info-section-compact h3,
 .backstory-section-compact h3,
 .stats-section-compact h3 {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   margin: 0;
-  padding: var(--sp-lg) var(--sp-xl);
+  padding: var(--sp-md) var(--sp-lg);
   color: white;
   background: var(--color-accent-secondary);
   text-transform: uppercase;
@@ -3403,6 +3379,10 @@ body.dark-mode .area-pill {
   color: var(--color-accent-primary);
   line-height: 1;
   letter-spacing: -0.02em;
+  /* The prose takes text figures; a stat read at a glance takes lining ones,
+     on a fixed advance so the number does not shift as the persona changes. */
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: 'lnum' 1, 'tnum' 1;
 }
 
 .age-label {
@@ -3500,6 +3480,7 @@ body.dark-mode .area-pill {
   font-weight: 600;
   font-size: 1.125rem;
   font-family: var(--font-sans);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .info-item .value::first-letter {
@@ -3558,40 +3539,91 @@ body.dark-mode .area-pill {
 }
 
 .tab-content {
-  padding: var(--sp-2xl) var(--sp-2xl);
+  /* 18px all round put the measure hard against both edges of the panel.
+     Prose wants more room at the sides than above and below. */
+  padding: var(--sp-3xl) 2rem;
   min-height: 200px;
 }
 
-/* Narrative Biography */
+/* Narrative Biography
+   The only declaration of this block. `!important` is not needed here now that
+   the duplicate earlier in the file is gone. */
 .narrative-biography {
   font-family: var(--font-serif);
-  font-size: 1.3rem !important;
+  font-size: 1.3rem;
   line-height: 1.55;
   color: var(--color-text-primary);
-  max-width: 800px;
+  /* In em rather than px, so the measure tracks the type size instead of
+     drifting to 80 characters the next time the size changes. At 1.3rem this
+     is ~728px, which is where it already was. The loose word spacing at this
+     measure is fixed by hyphenation on the paragraphs below, not by setting
+     the type smaller. */
+  max-width: 35em;
+  /* Prose in a serif wants text figures. "one of 7 children" sets badly in
+     lining figures, which are cap-height and read as headings mid-sentence. */
+  font-variant-numeric: oldstyle-num;
+  font-feature-settings: 'onum' 1;
 }
 
+/* The section name is in the selector on purpose.
+
+   The biography renders inside `.backstory-section-compact`, so
+   `.backstory-section-compact p` — written for the legacy backstory block —
+   also matches these paragraphs, at exactly the same specificity as
+   `.narrative-biography p`. It sets `font-size: 1.125rem` and
+   `padding: var(--sp-xl)`, and a copy inside the 768px media query sets
+   `1rem` / `var(--sp-lg)`.
+
+   Two consequences, both of which looked like something else. The type was
+   18px rather than the 20.8px this file appears to specify, because the
+   container's font-size was never what the paragraphs used. And 12px of
+   padding above and below every paragraph put 24px between them — which is
+   the "paragraph gap", and why changing `margin-top` never moved it.
+
+   Naming the section lifts this to (0,2,1) so it wins outright rather than on
+   document order, and the properties it needs to hold are declared here
+   explicitly rather than left to inherit. */
+.backstory-section-compact .narrative-biography p,
 .narrative-biography p {
   margin: 0;
-  text-align: justify;
-  font-size: 1.3rem !important;
+  padding: 0;
+  font-size: 1.3rem;
   line-height: 1.55;
+  text-align: justify;
+  /* Justification without hyphenation is what opened the gaps in lines like
+     "Strangers in Satpura Range read her caste before her name" — at a 70+
+     character measure the setting has nowhere else to put the slack. The
+     mobile rules already said this; the desktop ones never applied it. */
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
 }
 
 .narrative-biography p:first-of-type::first-letter {
-  font-size: 2.5em;
   font-weight: 700;
-  float: left;
-  line-height: 0.8;
-  margin-right: 0.08em;
-  margin-top: 0.1em;
   color: var(--color-accent-primary);
+  /* Fallback metrics for browsers without `initial-letter`; the real rule is
+     at the foot of this file, where it can outrank the mobile overrides. */
+  font-size: 3.15em;
+  float: left;
+  line-height: 0.78;
+  margin-right: 0.07em;
+  padding-top: 0.03em;
 }
 
-/* The biography is two paragraphs; only the first takes the drop cap. */
+/* Paragraph separation, book convention: the indent carries the break, so no
+   vertical space is needed at all. The gap was 0.95em on top of 1.55 leading,
+   which read as a full blank line between two justified blocks. */
+/* The gap was 24px — 12px of `.backstory-section-compact p` padding above and
+   below each paragraph — which read as a full blank line. Zero was too far the
+   other way: with justified text the paragraphs ran together. Half the
+   original, with the indent still carrying the break. */
+.backstory-section-compact .narrative-biography p + p,
 .narrative-biography p + p {
-  margin-top: 0.95em;
+  margin-top: 0.5em;
+  text-indent: 1.2em;
 }
+
 
 /* Character name styling in biography */
 .character-name {
@@ -5040,36 +5072,35 @@ body.dark-mode .timeline-content:hover {
   gap: var(--sp-xl);
 }
 
+/* A rail for the person, then two columns of description. The body is the
+   only thing that scrolls — nested scroll panes clipped the columns against
+   each other and collapsed into two thumbnail-sized boxes on a phone. */
 .two-column-layout {
   display: grid;
-  /* The left column carries two figures side by side; give it the room. */
-  grid-template-columns: 1.35fr 1fr;
+  grid-template-columns: 260px 1fr 1fr;
   gap: var(--sp-2xl);
-  max-height: calc(85vh - 100px);
+  align-items: start;
 }
 
-.left-column-appearance {
-  overflow-y: auto;
-  padding-right: var(--sp-md);
-}
-
+.left-column-appearance,
 .right-column-secrets {
-  overflow-y: auto;
-  padding-right: var(--sp-md);
+  min-width: 0;
 }
 
-/* The portrait and the full-length figure sit side by side: the face at
-   full size, the standing body beside it — bottom-aligned, so the figure
-   stands on the same visual baseline instead of floating in a column. */
-.portrait-sprite-row {
+/* The face above, the standing body below, both held in place while the
+   descriptions scroll past. Sticky only takes hold when the rail is shorter
+   than the body; on a short window it simply scrolls along. */
+.character-rail {
+  position: sticky;
+  top: var(--sp-md);
   display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: var(--sp-lg);
-  align-items: flex-end;
-  margin-bottom: var(--sp-xl);
 }
 
 .portrait-section-large {
-  flex: 1;
+  width: 100%;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -5088,8 +5119,9 @@ body.dark-mode .timeline-content:hover {
   height: auto;
 }
 
-/* The figure stands plainly on the page — no frame, no stage, just the
-   body at full length. It breathes, blinks, and glances on its own. */
+/* The figure stands plainly on the page — no frame, no box, just the body
+   at full length. It breathes, blinks, glances, and shifts its posture
+   every so often on its own. */
 .sprite-figure-panel {
   flex: 0 0 auto;
   display: flex;
@@ -5098,9 +5130,43 @@ body.dark-mode .timeline-content:hover {
   gap: var(--sp-xs);
 }
 
+/* Ground: a faint horizon and a shadow pooled at the feet. Without them the
+   body hangs in the white and its weight shift reads as jitter. */
+.sprite-figure-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-bottom: var(--sp-sm);
+}
+
+.sprite-figure-stage::before {
+  content: '';
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  bottom: calc(var(--sp-sm) + 2px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+}
+
+.sprite-figure-stage::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: var(--sp-sm);
+  width: 62%;
+  height: 12px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(26, 22, 18, 0.28), rgba(26, 22, 18, 0) 70%);
+  pointer-events: none;
+}
+
 .sprite-figure-panel canvas {
   image-rendering: pixelated;
   display: block;
+  position: relative;
+  z-index: 1;
 }
 
 .sprite-figure-caption {
@@ -5238,6 +5304,64 @@ body.dark-mode .timeline-content:hover {
   letter-spacing: 0.01em;
 }
 
+/* Name and placing line share the header; the button stays at the far end. */
+.secrets-modal-header {
+  align-items: flex-start;
+  gap: var(--sp-lg);
+}
+
+.secrets-modal-title {
+  min-width: 0;
+}
+
+.secrets-modal-subtitle {
+  margin: var(--sp-xs) 0 0;
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+  max-width: 62ch;
+}
+
+/* The scores, in the same order as the printed card. */
+.attribute-score-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+  gap: var(--sp-sm);
+}
+
+.attribute-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--sp-sm) var(--sp-xs);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
+.attribute-abbr {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+.attribute-value {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.1;
+}
+
+.attribute-score-health .attribute-value {
+  font-size: 0.95rem;
+}
+
 .secrets-modal .appearance-item {
   transition: background 0.15s ease;
   border-radius: 4px;
@@ -5274,24 +5398,78 @@ body.dark-mode .timeline-content:hover {
 }
 
 /* Responsive design for smaller screens */
+
+/* Not enough width for three columns: the rail keeps its place and the two
+   descriptions become one. */
+@media (max-width: 1100px) {
+  .two-column-layout {
+    grid-template-columns: 240px 1fr;
+    gap: var(--sp-xl);
+  }
+}
+
 @media (max-width: 900px) {
   .two-column-layout {
     grid-template-columns: 1fr;
     gap: var(--sp-xl);
   }
 
-  .portrait-sprite-row {
-    flex-wrap: wrap;
+  /* The rail unstacks into a hero row across the top: face beside body,
+     standing on the same line. Nothing sticks — there is no room for it. */
+  .character-rail {
+    position: static;
+    flex-direction: row;
+    align-items: flex-end;
     justify-content: center;
+    gap: var(--sp-lg);
+  }
+
+  .portrait-section-large {
+    width: auto;
+    flex: 1 1 200px;
+    max-width: 260px;
   }
 
   .sprite-figure-panel {
-    min-width: 120px;
+    flex: 0 0 auto;
   }
 
   .secrets-modal.two-column-modal {
     max-width: 600px;
     width: 90vw;
+  }
+}
+
+/* On a phone the modal is the screen. The old 32px overlay padding cost a
+   sixth of a 390px viewport, and vh sat behind the browser chrome. */
+@media (max-width: 600px) {
+  .modal-overlay:has(.secrets-modal) {
+    padding: var(--sp-sm);
+  }
+
+  .secrets-modal.two-column-modal {
+    width: 100%;
+    max-width: none;
+    max-height: 92dvh;
+  }
+
+  .secrets-modal .modal-body {
+    padding: var(--sp-lg);
+    max-height: calc(92dvh - 84px);
+  }
+
+  .secrets-modal .modal-header {
+    padding: var(--sp-lg);
+  }
+
+  /* The figure is worth the width here; the face can give some up. */
+  .character-rail {
+    flex-wrap: wrap;
+  }
+
+  .portrait-section-large {
+    flex: 1 1 160px;
+    padding: var(--sp-md);
   }
 }
 
@@ -6372,7 +6550,11 @@ body.dark-mode .death-stat {
   margin-top: 0.3rem;
   font-size: 0.76rem;
   font-style: italic;
-  opacity: 0.72;
+  /* Was `opacity: 0.72` on inherited white, over a gradient that starts at
+     cream — the least readable text on the card. De-emphasis has to come from
+     a colour that holds against the wash, as `.season-narrative` does, not
+     from thinning white until it disappears into the background. */
+  color: color-mix(in srgb, var(--color-text-primary) 78%, transparent);
   cursor: help;
 }
 
@@ -6950,17 +7132,22 @@ body.dark-mode .sampling-mode {
      anything but a ransom note. At 315px with `hyphens: manual` it had
      neither, so it is ragged-right here — and hyphenation is switched on in
      case a long place name still forces a bad line. */
+  /* Matches the specificity of the desktop rule, which had to be raised above
+     `.backstory-section-compact p`. */
   .narrative-biography,
+  .backstory-section-compact .narrative-biography p,
   .narrative-biography p {
-    font-size: 1.0625rem !important;
+    font-size: 1.0625rem;
     line-height: 1.6;
     text-align: left;
     hyphens: auto;
     -webkit-hyphens: auto;
   }
 
+  /* Fallback drop cap only; the `initial-letter` rule at the foot of the file
+     overrides this for engines that support it. */
   .narrative-biography p:first-of-type::first-letter {
-    font-size: 2.1em;
+    font-size: 2.7em;
   }
 
   /* --- General density -------------------------------------------------- */
@@ -7275,5 +7462,26 @@ body.dark-mode .sampling-mode {
     left: 50%;
     transform: translateX(-50%);
     width: min(19rem, 88vw);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Drop cap
+   `font-size: 2.5em; line-height: 0.8; margin-top: 0.1em` were hand-tuned
+   numbers with no relation to the body's leading, so the cap's baseline did
+   not sit on a body baseline at any size. `initial-letter` is the property
+   for this and lets the browser do the metric arithmetic; the float rule in
+   the main block stays as the fallback for engines without it.
+   ------------------------------------------------------------------------- */
+@supports (initial-letter: 2) or (-webkit-initial-letter: 2) {
+  .narrative-biography p:first-of-type::first-letter {
+    -webkit-initial-letter: 2;
+    initial-letter: 2;
+    float: none;
+    font-size: inherit;
+    line-height: inherit;
+    margin-top: 0;
+    padding-top: 0;
+    margin-right: 0.07em;
   }
 }

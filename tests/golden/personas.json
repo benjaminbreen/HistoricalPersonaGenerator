@@ -9,14 +9,14 @@
     "languageBasis": "ea-taiwan",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in East Asia",
-    "head": "Henna Pearl Ornament [Pearls and Silk]",
-    "torso": "Turmeric Court Dress [Embroidered Silk]",
-    "feet": "Henna Embroidered Slippers [Silk]",
+    "head": "Henna Cotton Headscarf [Linen]",
+    "torso": "Charcoal Short Cotton Jacket And Wrap Skirt [Wool]",
+    "feet": "Henna Straw Sandals [Wool]",
     "portrait": {
-      "headwearKind": "band",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#b5502e",
-      "garmentKind": "gown",
-      "garmentColor": "#dfa62c",
+      "garmentKind": "jacket",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#3f5a55",
       "pose": null
     },
@@ -32,12 +32,12 @@
     "events": [
       "1231: Born in a small settlement to a Middling Sort family",
       "1245: Learned to read weather signs and predict harvest yields from a parent",
-      "1248: A brother's marriage brought valuable new trade connections and opportunities",
-      "1263: Returned home to care for aging parents",
-      "1266: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
-      "1269: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "1277: Took over the family business after a parent retired from active work",
-      "1285: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
+      "1263: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1266: Returned home to care for aging parents",
+      "1268: A brother's marriage brought valuable new trade connections and opportunities",
+      "1270: After years of careful selection, successfully bred a hardier variety of wheat",
+      "1274: The family lost their mother when she was murdered by bandits",
+      "1281: Took over the family business after a parent retired from active work"
     ]
   },
   "formosan-highlands-1306#2": {
@@ -50,14 +50,14 @@
     "languageBasis": "ea-taiwan",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in East Asia",
-    "head": "Natural Cloth Headband [Hemp Cloth]",
-    "torso": "White Cotton Jacket [Coarse Cotton]",
-    "feet": "Straw Sandals [Woven Straw]",
+    "head": "Natural Conical Straw Hat [Linen]",
+    "torso": "Walnut Cropped Trousers [Wool]",
+    "feet": "Natural Straw Sandals [Cotton]",
     "portrait": {
-      "headwearKind": "band",
+      "headwearKind": "brimmed_hat",
       "headwearColor": "#d8cdb6",
-      "garmentKind": "jacket",
-      "garmentColor": "#e8e4d9",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#3f5a55",
       "pose": null
     },
@@ -72,11 +72,10 @@
     ],
     "events": [
       "1266: Born in a small settlement to a Middling Sort family",
-      "1278: Learned to read weather signs and where the water would still be running",
-      "1283: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1286: The family pooled their resources to purchase a new plow, a significant investment",
-      "1304: Returned home to care for aging parents",
-      "1304: Tragedy struck when a parent died from dysentery"
+      "1279: Trusted to take the animals out alone for the first time",
+      "1290: Performed ancestral rites as eldest son",
+      "1295: The family pooled their resources to purchase a new plow, a significant investment",
+      "1302: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "formosan-highlands-1306#3": {
@@ -123,14 +122,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in East Asia",
-    "head": "Silver Silk Hairpiece [Embroidered Silk]",
-    "torso": "Crimson Court Dress [Embroidered Silk]",
-    "feet": "Silver Lotus Shoes [Silk and Brocade]",
+    "head": "Silver Conical Straw Hat [Linen]",
+    "torso": "Olive Ramie Work Jacket [Linen]",
+    "feet": "Barefoot [Wool]",
     "portrait": {
-      "headwearKind": "band",
+      "headwearKind": "brimmed_hat",
       "headwearColor": "#b9bcc2",
-      "garmentKind": "gown",
-      "garmentColor": "#8e2436",
+      "garmentKind": "jacket",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#3f5a55",
       "pose": null
     },
@@ -146,9 +145,9 @@
     "events": [
       "1231: Born in a small settlement to a Merchant family",
       "1245: Learned to read the weather and the water from a parent",
-      "1247: A sister married into a well-connected merchant consortium, improving the family's social standing",
-      "1256: Took over the family business after a parent retired from active work",
-      "1264: Returned home to care for aging parents"
+      "1253: A sister married into a well-connected warrior house sworn to a provincial governor, improving the family's social standing",
+      "1263: Returned home to care for aging parents",
+      "1272: Took over the family business after a parent retired from active work"
     ]
   },
   "japan-kyoto-1306#2": {
@@ -196,16 +195,16 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in East Asia",
-    "head": "Sugegasa [Sedge Grass]",
-    "torso": "Crimson Cotton Jacket [Coarse Cotton]",
-    "feet": "Straw Sandals [Woven Straw]",
+    "head": "Green Cloth Headband [Cotton]",
+    "torso": "Olive Hemp Work Jacket [Wool]",
+    "feet": "Green Straw Sandals [Wool]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
-      "headwearColor": "#c2a463",
+      "headwearKind": "band",
+      "headwearColor": "#5a6b3b",
       "garmentKind": "jacket",
-      "garmentColor": "#8e2436",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#3f5a55",
-      "pose": "build:broad+brave"
+      "pose": "build:broad"
     },
     "family": [
       "father: Katsuki Suzuki",
@@ -215,9 +214,9 @@
     ],
     "events": [
       "1286: Born in a small settlement to a Laboring Poor family",
-      "1301: Began learning the trade of carter from an experienced practitioner",
-      "1304: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1305: The family pooled their resources to purchase a new plow, a significant investment"
+      "1299: Began learning the trade of carter from an experienced practitioner",
+      "1302: A brother's marriage brought valuable new trade connections and opportunities",
+      "1305: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "stockholm-1920#1": {
@@ -250,7 +249,7 @@
     "events": [
       "1839: Born in a small settlement to a Merchant family",
       "1853: Began learning the trade of aristocrat from an experienced practitioner",
-      "1865: A sister married into a well-connected cathedral chapter, improving the family's social standing",
+      "1865: A sister married into a well-connected noble house, improving the family's social standing",
       "1869: A sister married and moved across the city, and the house was quieter for it",
       "1875: Tragedy struck when a parent died from Spanish flu",
       "1885: The family pooled their resources to purchase a tractor, a significant investment"
@@ -266,15 +265,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in Europe",
-    "head": "Ochre Fedora [Felt]",
-    "torso": "Verdigris Cardigan [Wool]",
-    "feet": "Oxford Shoes [Quality Leather]",
+    "head": null,
+    "torso": "Olive Cotton Coveralls [Wool]",
+    "feet": "Leather Work Shoes [Leather]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
-      "headwearColor": "#b1803c",
-      "garmentKind": "jacket",
-      "garmentColor": "#3c8f7f",
-      "backgroundBase": "#615365",
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "work_shirt",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#535c65",
       "pose": null
     },
     "family": [
@@ -288,10 +287,11 @@
     ],
     "events": [
       "1874: Born in a small settlement to a Middle Class family",
-      "1886: Began learning the trade of motor mechanic from an experienced practitioner",
-      "1893: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1900: The family pooled their resources to purchase a plot on the edge of town, a significant investment",
-      "1905: A sister married and moved across the city, and the house was quieter for it"
+      "1887: Began learning the trade of motor mechanic from an experienced practitioner",
+      "1900: A sister married into a well-connected cathedral chapter, improving the family's social standing",
+      "1901: Mother was murdered despite efforts to save her",
+      "1913: The family pooled their resources to purchase a second-hand truck, a significant investment",
+      "1915: A sibling's wedding filled a rented hall and emptied a year of savings"
     ]
   },
   "stockholm-1920#3": {
@@ -413,13 +413,13 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in Europe",
-    "head": "Grey Coif [Linen]",
-    "torso": "Walnut Peasant Shirt [Hemp]",
-    "feet": "Wooden Clogs [Oak Wood]",
+    "head": "Grey Linen Veil [Rough Wool]",
+    "torso": "Walnut Wool Kirtle [Rough Wool]",
+    "feet": "Turnshoes [Rough Leather]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "veil",
       "headwearColor": "#8a8781",
-      "garmentKind": "work_shirt",
+      "garmentKind": "gown",
       "garmentColor": "#5b4229",
       "backgroundBase": "#4a5a6a",
       "pose": "build:broad"
@@ -432,8 +432,8 @@
     ],
     "events": [
       "1130: Born in a small settlement to a Laboring Poor family",
-      "1145: Began hauling loads for merchants, building strength",
-      "1147: Paid annual tribute to local lord",
+      "1143: Started working alongside father in backbreaking toil",
+      "1148: Required to provide labor for castle repairs",
       "1149: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
@@ -488,14 +488,14 @@
     "languageConfidence": "attested",
     "odds": "the modern era in the Middle East and North Africa",
     "head": null,
-    "torso": "Navy T-Shirt [Cotton]",
+    "torso": "Olive T-Shirt [Cotton]",
     "feet": "Rust Barefoot [None]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#23304a",
-      "backgroundBase": "#715d64",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#5d6271",
       "pose": null
     },
     "family": [
@@ -525,14 +525,14 @@
     "languageConfidence": "attested",
     "odds": "the modern era in the Middle East and North Africa",
     "head": null,
-    "torso": "Navy T-Shirt [Cotton]",
+    "torso": "Olive T-Shirt [Cotton]",
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#23304a",
-      "backgroundBase": "#715d64",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#5d6271",
       "pose": "build:broad+brave"
     },
     "family": [
@@ -597,14 +597,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in the Middle East and North Africa",
-    "head": "Walnut Turban [Linen]",
-    "torso": "Red Thobe [Cotton]",
-    "feet": "Sandals [Leather]",
+    "head": "Walnut Cotton Turban [Hemp]",
+    "torso": "Turmeric Cotton Entari Robe [Rough Wool]",
+    "feet": "Walnut Barefoot [Hemp]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#5b4229",
       "garmentKind": "robe",
-      "garmentColor": "#a33327",
+      "garmentColor": "#dfa62c",
       "backgroundBase": "#373a44",
       "pose": null
     },
@@ -616,10 +616,11 @@
     ],
     "events": [
       "1610: Born in a small settlement to a Laboring Poor family",
-      "1622: Learned to read weather signs and where the water would still be running",
-      "1628: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1637: The family pooled their resources to purchase a storage barn, a significant investment",
-      "1643: Completed hajj to Mecca, earning title of Hajji"
+      "1623: Trusted to take the animals out alone for the first time",
+      "1636: Father died from starvation after the scorched-earth retreat, leaving the family to manage affairs alone",
+      "1641: The family pooled their resources to purchase a mill share, a significant investment",
+      "1642: Studied at Al-Azhar for three years",
+      "1649: A sister married into a well-connected tribal confederation, improving the family's social standing"
     ]
   },
   "anatolia-1650#3": {
@@ -666,9 +667,9 @@
     "languageBasis": "ssa-west-sahel",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in sub-Saharan Africa",
-    "head": null,
-    "torso": "Umber Head Tie [Cotton]",
-    "feet": "Barefoot [None]",
+    "head": "Grey Cotton Headwrap [Burlap]",
+    "torso": "Indigo Cotton Wrap Dress [Burlap]",
+    "feet": "Barefoot [Rough Wool]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
@@ -689,12 +690,12 @@
     "events": [
       "1275: Born in a small settlement to a Laboring Poor family",
       "1289: Learned to read weather signs and predict harvest yields from a parent",
-      "1305: Took over the family business after a parent retired from active work",
-      "1310: A sister married into a well-connected trading family, improving the family's social standing",
-      "1312: Father died from sleeping sickness despite seeking help",
-      "1314: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
-      "1325: With the help of extended family, cleared new land for cultivation",
-      "1328: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit"
+      "1296: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1303: Divided the land among the children, keeping the best field for old age",
+      "1310: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1313: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
+      "1321: Took over the family business after a parent retired from active work",
+      "1333: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit"
     ]
   },
   "sahel-1350#2": {
@@ -708,15 +709,15 @@
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in sub-Saharan Africa",
     "head": null,
-    "torso": "Brown Folk Tunic [Rough Wool]",
-    "feet": "Natural Barefoot [None]",
+    "torso": "Leather Apron [Leather]",
+    "feet": "Natural Barefoot [Cotton]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#a98258",
       "garmentKind": "tunic",
       "garmentColor": "#9b704c",
       "backgroundBase": "#587f6b",
-      "pose": null
+      "pose": "taciturn"
     },
     "family": [
       "father: Mamadou",
@@ -729,10 +730,9 @@
     ],
     "events": [
       "1310: Born in a small settlement to a Middling Sort family",
-      "1323: Apprenticed to guild master, learning trade secrets",
-      "1339: Father was murdered despite seeking help",
-      "1348: Took over the family business after a parent retired from active work",
-      "1349: A sister married into a well-connected trading family, improving the family's social standing"
+      "1323: Began apprenticeship as a tanner under skilled master craftsman",
+      "1343: Took over the family business after a parent retired from active work",
+      "1349: A sister married into a well-connected family of court griots to a ruling house, improving the family's social standing"
     ]
   },
   "sahel-1350#3": {
@@ -745,9 +745,9 @@
     "languageBasis": "ssa-west-sahel",
     "languageConfidence": "attested",
     "odds": "the medieval period in sub-Saharan Africa",
-    "head": "Grey Cotton Cap [Plain Cotton]",
-    "torso": "Slate Work Blouse [Hemp Cloth]",
-    "feet": "Barefoot [None]",
+    "head": null,
+    "torso": "Henna Handwoven Cotton Wrap Cloth [Rough Wool]",
+    "feet": "Barefoot [Rough Wool]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
@@ -779,9 +779,9 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Silver Kerchief [Cotton]",
-    "torso": "Black Peasant Skirt [Coarse Linen]",
-    "feet": "Wooden Clogs [Carved Wood]",
+    "head": "Silver Linen Cap [Rough Wool]",
+    "torso": "Walnut Linen Shift And Wool Bodice [Burlap]",
+    "feet": "Leather Shoes [Rough Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#ddd5c3",
@@ -797,11 +797,11 @@
     ],
     "events": [
       "1665: Born in a small settlement to a Laboring Poor family",
-      "1679: Began learning the trade of water carrier from an experienced practitioner",
-      "1681: A brother's marriage brought valuable new trade connections and opportunities",
-      "1701: The family pooled their resources to purchase draft animals, a significant investment",
-      "1705: Father died from infected wounds, leaving the family to manage affairs alone",
-      "1706: Paid annual tribute to local lord",
+      "1680: Began learning the trade of water carrier from an experienced practitioner",
+      "1681: A sister married into a well-connected town council, improving the family's social standing",
+      "1686: Paid annual tribute to local lord",
+      "1700: Mother was killed in religious wars, leaving the household in grief",
+      "1705: Took over the family business after a parent retired from active work",
       "1707: came under the Kingdom of Great Britain, having been born under the Kingdom of England"
     ]
   },
@@ -815,12 +815,12 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Cream Biggins [Rough Wool]",
-    "torso": "Tyrian Peasant Shirt [Coarse Linen]",
-    "feet": "Leather Shoes [Cracked Leather]",
+    "head": "Cream Wool Cap [Linen]",
+    "torso": "Bronze Canvas Trousers [Wool]",
+    "feet": "Leather Sea Boots [Leather]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "cap",
+      "headwearColor": "#584d43",
       "garmentKind": "work_shirt",
       "garmentColor": "#5d5548",
       "backgroundBase": "#3b403d",
@@ -835,10 +835,11 @@
     "events": [
       "1700: Born in a small settlement to a Middling Sort family",
       "1707: grew up under the Kingdom of Great Britain, which had taken the place from the Kingdom of England too early to be remembered",
-      "1712: Began learning the trade of dock labourer from an experienced practitioner",
-      "1722: Paid annual tribute to local lord",
-      "1728: A sister married into a well-connected merchant guild, improving the family's social standing",
-      "1732: Took over the family business after a parent retired from active work"
+      "1713: Began learning the trade of dock labourer from an experienced practitioner",
+      "1715: Required to provide labor for castle repairs",
+      "1727: Mother was executed as heretic despite efforts to save her",
+      "1730: Took over the family business after a parent retired from active work",
+      "1731: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "london-1740#3": {
@@ -883,14 +884,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in Europe",
-    "head": "Ivory Kerchief [Linen]",
-    "torso": "Brown Work Apron [Canvas]",
-    "feet": "Work Boots [Thick Leather]",
+    "head": "Ivory White Cotton Cap [Rough Wool]",
+    "torso": "Walnut Maid'S Uniform Dress [Burlap]",
+    "feet": "Black Leather Shoes [Rough Leather]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "cap",
       "headwearColor": "#e5ddd0",
-      "garmentKind": "work_shirt",
-      "garmentColor": "#6f5237",
+      "garmentKind": "gown",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#565a5f",
       "pose": null
     },
@@ -902,7 +903,7 @@
     "events": [
       "1790: Born in a small settlement to a Working Class family",
       "1801: grew up under the United Kingdom, which had taken the place from the Kingdom of Great Britain too early to be remembered",
-      "1804: Apprenticed to a midwife, witnessing a first birth at a young age",
+      "1805: Began learning household management and domestic skills from a parent",
       "1809: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1830: Mother was murdered despite efforts to save her",
       "1840: The family pooled their resources to purchase a plot on the edge of town, a significant investment"
@@ -988,15 +989,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in the Middle East and North Africa",
-    "head": null,
-    "torso": "Purple Robe [Linen]",
-    "feet": "Slippers [Leather]",
+    "head": "Silver Cotton Skullcap [Rough Wool]",
+    "torso": "Indigo Cotton Tunic [Burlap]",
+    "feet": "Barefoot [Rough Linen]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
-      "garmentKind": "robe",
-      "garmentColor": "#5c3f63",
-      "backgroundBase": "#4b505d",
+      "headwearKind": "cap",
+      "headwearColor": "#b9bcc2",
+      "garmentKind": "tunic",
+      "garmentColor": "#2e3f5c",
+      "backgroundBase": "#5d4b52",
       "pose": null
     },
     "family": [
@@ -1010,11 +1011,11 @@
     ],
     "events": [
       "425: Born in a small settlement to a Laboring Poor family",
-      "439: Learned to read the weather and the water from a parent",
-      "441: A sister married into a well-connected merchant caravan, improving the family's social standing",
-      "455: Tragedy struck when a parent was murdered",
-      "456: Took over the family business after a parent retired from active work",
-      "497: Studied at Al-Azhar for three years"
+      "440: Went out with the adults for the first time and came back carrying a share",
+      "447: A sister married into a well-connected merchant caravan, improving the family's social standing",
+      "466: Took over the family business after a parent retired from active work",
+      "468: Mother died from cholera despite efforts to save her",
+      "499: Studied at Al-Azhar for three years"
     ]
   },
   "arabia-500#2": {
@@ -1027,16 +1028,16 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in the Middle East and North Africa",
-    "head": "Cream Turban [Linen]",
-    "torso": "Tyrian Thobe [Cotton]",
-    "feet": "Sandals [Leather]",
+    "head": "Cream Cotton Turban [Linen]",
+    "torso": "Bronze Loose Cotton Trousers [Wool]",
+    "feet": "Leather Sandals [Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#ddd3ba",
-      "garmentKind": "robe",
-      "garmentColor": "#6a2450",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#5c6272",
-      "pose": null
+      "pose": "loner"
     },
     "family": [
       "father: Jafar son of Abbas",
@@ -1046,11 +1047,11 @@
     ],
     "events": [
       "460: Born in a small settlement to a Middling Sort family",
-      "472: Taken as apprentice by renowned carpenter, bound for seven years",
-      "482: Inherited valuable tools and a workshop from a childless uncle",
-      "485: Visited Jerusalem's holy sites during pilgrimage",
-      "498: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "499: Created masterwork that drew crowds to market square"
+      "473: Began apprenticeship as a carpenter under skilled master craftsman",
+      "484: Took over the family business after a parent retired from active work",
+      "487: Completed hajj to Mecca, earning title of Hajji",
+      "489: Noble household commissioned full set of masterworks",
+      "496: A sister married into a well-connected military elite, improving the family's social standing"
     ]
   },
   "arabia-500#3": {
@@ -1063,15 +1064,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in the Middle East and North Africa",
-    "head": "White Turban [Linen]",
-    "torso": "Indigo Thobe [Cotton]",
-    "feet": "Sandals [Leather]",
+    "head": "White Cotton Turban [Rough Wool]",
+    "torso": "Charcoal Loose Cotton Trousers (Sarawil) [Hemp]",
+    "feet": "Leather Sandals [Rough Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#e8e4d9",
-      "garmentKind": "robe",
-      "garmentColor": "#2e3f5c",
-      "backgroundBase": "#725c64",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#3a3a38",
+      "backgroundBase": "#5c6272",
       "pose": "build:broad"
     },
     "family": [
@@ -1082,9 +1083,9 @@
     ],
     "events": [
       "480: Born in a small settlement to a Laboring Poor family",
-      "495: Learned the marks and the ailments of every beast in the family's care",
-      "497: A sister married into a well-connected military elite, improving the family's social standing",
-      "499: The family pooled their resources to purchase a market stall, a significant investment"
+      "494: Trusted to take the animals out alone for the first time",
+      "498: Inherited valuable tools and a workshop from a childless uncle",
+      "499: A sister married into a well-connected tribal confederation, improving the family's social standing"
     ]
   },
   "indus-2000bce#1": {
@@ -1098,14 +1099,14 @@
     "languageConfidence": "attested",
     "odds": "antiquity in South Asia",
     "head": null,
-    "torso": "Woad Simple Choli [Cotton]",
+    "torso": "Olive Simple Choli [Cotton]",
     "feet": "Henna Barefoot [None]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "doublet",
-      "garmentColor": "#3a4f6d",
-      "backgroundBase": "#6c4c59",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#504c6c",
       "pose": null
     },
     "family": [
@@ -1135,14 +1136,14 @@
     "languageBasis": "sa-harappan",
     "languageConfidence": "attested",
     "odds": "antiquity in South Asia",
-    "head": "Henna Cotton Cap [White Cotton]",
-    "torso": "Rose Cotton Lungi [Plain Cotton]",
-    "feet": "Henna Barefoot [None]",
+    "head": "Henna Cotton Head Cloth [Wool]",
+    "torso": "Walnut Cotton Dhoti [Wool]",
+    "feet": "Henna Barefoot [Linen]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#b5502e",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#cf7288",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#494663",
       "pose": null
     },
@@ -1155,10 +1156,9 @@
     ],
     "events": [
       "-2061: Born in a small settlement to a Commoner family",
-      "-2049: Learned to read weather signs and where the water would still be running",
-      "-2043: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "-2025: Inherited valuable tools and a workshop from a childless uncle",
-      "-2018: The family lost their father when he died from malaria"
+      "-2048: Spent a first season away with the herd and came back taller",
+      "-2026: A brother's marriage brought valuable new trade connections and opportunities",
+      "-2009: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "indus-2000bce#3": {
@@ -1171,14 +1171,14 @@
     "languageBasis": "sa-harappan",
     "languageConfidence": "reconstructed",
     "odds": "antiquity in South Asia",
-    "head": "Green Cotton Cap [White Cotton]",
-    "torso": "White Cotton Lungi [Plain Cotton]",
-    "feet": "Barefoot [None]",
+    "head": "Green Cotton Head Cloth [Hemp]",
+    "torso": "Walnut Cotton Dhoti [Rough Wool]",
+    "feet": "Barefoot [Rough Wool]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#5a6b3b",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#e8e4d9",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#8884a8",
       "pose": "build:broad"
     },
@@ -1190,9 +1190,9 @@
     ],
     "events": [
       "-2052: Born in a small settlement to a Peasant family",
-      "-2037: Learned the marks and the ailments of every beast in the family's care",
-      "-2017: Father died from starvation during famine despite seeking help",
-      "-2011: Inherited valuable tools and a workshop from a childless uncle"
+      "-2038: Trusted to take the animals out alone for the first time",
+      "-2008: The mother's death changed the household",
+      "-2001: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "arnhem-1200#1": {
@@ -1206,8 +1206,8 @@
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in Oceania",
     "head": null,
-    "torso": "Fiber Skirt [Grass and Fiber]",
-    "feet": "Madder Barefoot [None]",
+    "torso": "Walnut Field Shirt [Rough Wool]",
+    "feet": "Madder Barefoot [Rough Wool]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
@@ -1227,13 +1227,13 @@
     ],
     "events": [
       "1125: Born to the band that ranged this country",
-      "1135: Learned the way to a spring that held water through the dry months",
-      "1139: Learned to read the weather and the water from a parent",
-      "1143: Was taken from the camp by the elders, kept apart, and came back changed and marked",
-      "1160: Lost a child before it could walk, and buried it under the floor of the shelter",
-      "1161: Was among the party that drove a herd into the narrows, and the band ate well for many days",
-      "1168: An elder died, and with them went the knowledge of country nobody else held",
-      "1172: Was caught by an animal that did not die quickly, and carried the scars afterwards"
+      "1132: An elder died, and with them went the knowledge of country nobody else held",
+      "1134: The herds did not come that year, and the camp moved three times looking for them",
+      "1138: Sat through the long night when the songs are given to those old enough to hold them",
+      "1140: Went out with the adults for the first time and came back carrying a share",
+      "1143: Lost a child before it could walk, and buried it under the floor of the shelter",
+      "1151: Fell badly on the rocks, and the leg never set straight",
+      "1168: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season"
     ]
   },
   "arnhem-1200#2": {
@@ -1247,7 +1247,7 @@
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in Oceania",
     "head": "Henna Sun Hat [Woven Palm]",
-    "torso": "Natural Work Wrap [Rough Fiber]",
+    "torso": "Bronze Work Wrap [Rough Fiber]",
     "feet": "Henna Barefoot [None]",
     "portrait": {
       "headwearKind": null,
@@ -1284,16 +1284,16 @@
     "languageBasis": "oc-australia-pn",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in Oceania",
-    "head": "Turmeric Sun Hat [Woven Palm]",
-    "torso": "Bronze Work Wrap [Rough Fiber]",
-    "feet": "Turmeric Barefoot [None]",
+    "head": null,
+    "torso": "Olive Bark-Cloth Wrap [Rough Wool]",
+    "feet": "Turmeric Barefoot [Rough Wool]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#927454",
       "backgroundBase": "#53826e",
-      "pose": "build:broad"
+      "pose": "build:broad+curious"
     },
     "family": [
       "father: Tamati the Lastborn",
@@ -1303,13 +1303,12 @@
     ],
     "events": [
       "1180: Born to the band that ranged this country",
-      "1188: Walked with the band to the far camp, further than the children had ever been",
-      "1191: Went through the ice, and lost feeling in the fingers of one hand for good",
-      "1193: Brought down a large animal alone for the first time, and carried the meat back to the camp",
-      "1195: Was set to the simple part of the work, and kept at it until the hands knew it",
-      "1197: Left the band of birth to live with another, as is the custom",
-      "1198: Sat through the long night when the songs are given to those old enough to hold them",
-      "1199: Lost a child before it could walk, and buried it under the floor of the shelter"
+      "1186: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
+      "1188: Fell badly on the rocks, and the leg never set straight",
+      "1191: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
+      "1194: Learned the potter's work by doing it badly alongside someone who did it well",
+      "1195: Speared a beast that had eluded the band all season",
+      "1198: Left the band of birth to live with another, as is the custom"
     ]
   },
   "tahiti-1200#1": {
@@ -1323,14 +1322,14 @@
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in Oceania",
     "head": null,
-    "torso": "White Work Dress [Plain Tapa]",
+    "torso": "Indigo Work Dress [Plain Tapa]",
     "feet": "Woad Barefoot [None]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "gown",
-      "garmentColor": "#e8e4d9",
-      "backgroundBase": "#4c7481",
+      "garmentColor": "#2e3f5c",
+      "backgroundBase": "#a15e77",
       "pose": null
     },
     "family": [
@@ -1344,7 +1343,7 @@
     "events": [
       "1125: Born in a small settlement to a Commoner family",
       "1139: Took up the carpenter's craft in the way of the household, by being there for it",
-      "1150: A sister married into a well-connected navigator guild, improving the family's social standing",
+      "1150: A sister married into a well-connected senior line of a chiefly house, improving the family's social standing",
       "1157: The mother's death changed the household",
       "1158: Hosted important feast, strengthening clan ties"
     ]
@@ -1430,13 +1429,13 @@
     "languageConfidence": "reconstructed",
     "odds": "the early modern period in South America",
     "head": null,
-    "torso": "Green Wool Skirt [Undyed Wool]",
-    "feet": "Madder Simple Shoes [Canvas]",
+    "torso": "Walnut Wool Wrap Dress [Wool]",
+    "feet": "Leather Sandals [Leather]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#5a6b3b",
+      "garmentKind": "gown",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#455e4f",
       "pose": null
     },
@@ -1453,8 +1452,9 @@
       "1425: Born in a small settlement to a Commoner family",
       "1438: came under the Inca Empire, where no state had claimed the place before",
       "1439: Began learning the trade of farm worker from an experienced practitioner",
-      "1450: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1466: Learned healing songs from village shaman"
+      "1448: Participated in Inti Raymi sun ceremony",
+      "1450: A sister married into a well-connected noble panaca, improving the family's social standing",
+      "1460: Mother died from yellow fever, leaving the household in grief"
     ]
   },
   "andes-1500#2": {
@@ -1467,14 +1467,14 @@
     "languageBasis": "sam-andes",
     "languageConfidence": "inferred",
     "odds": "the early modern period in South America",
-    "head": "Madder Wide Brim Hat [Felt]",
-    "torso": "Fur Cloak [Fur]",
-    "feet": "Hide Foot Wrappings [Hide]",
+    "head": "Madder Woven Wool Cap [Wool]",
+    "torso": "Indigo Wool Tunic (Uncu) [Wool]",
+    "feet": "Leather Sandals [Treated Hide]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "cap",
       "headwearColor": "#a63a2b",
-      "garmentKind": "jacket",
-      "garmentColor": "#8b7358",
+      "garmentKind": "tunic",
+      "garmentColor": "#2e3f5c",
       "backgroundBase": "#34463b",
       "pose": null
     },
@@ -1489,12 +1489,12 @@
     ],
     "events": [
       "1460: Born in a small settlement to a Commoner family",
-      "1472: Learned to read weather signs and predict harvest yields from a parent",
-      "1479: Participated in Inti Raymi sun ceremony",
-      "1482: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1487: With the help of extended family, cleared new land for cultivation",
-      "1496: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
-      "1499: Became the first in the village to successfully grow quinoa, earning respect from neighbors"
+      "1473: Trusted to tend the family's animals alone for the first time",
+      "1480: A brother's marriage brought valuable new trade connections and opportunities",
+      "1485: Participated in Inti Raymi sun ceremony",
+      "1490: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "1497: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
+      "1499: After years of careful selection, successfully bred a hardier variety of coca"
     ]
   },
   "andes-1500#3": {
@@ -1542,13 +1542,13 @@
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in pre-Columbian North America",
     "head": null,
-    "torso": "Slate Fringed Shawl [Woven Wool]",
-    "feet": "Beaded Moccasins [Decorated Hide]",
+    "torso": "Buckskin Wrap Dress [Treated Hide]",
+    "feet": "Cream Plant-Fibre Sandals [Wool]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#566370",
+      "garmentKind": "gown",
+      "garmentColor": "#6b482f",
       "backgroundBase": "#748b79",
       "pose": null
     },
@@ -1564,11 +1564,12 @@
     "events": [
       "1125: Born in a small settlement to a Commoner family",
       "1139: Learned to read weather signs and predict harvest yields from a parent",
-      "1149: Became the first in the village to successfully grow squash, earning respect from neighbors",
-      "1165: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
-      "1172: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1180: Inherited an additional field from a childless uncle, expanding the family holdings",
-      "1192: Received a vision during the coming-of-age fast, and was told what it meant"
+      "1148: A sister married into a well-connected warrior society, improving the family's social standing",
+      "1150: Became the first in the village to successfully grow sunflowers, earning respect from neighbors",
+      "1155: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "1157: A father's death changed everything for the household",
+      "1158: Was made keeper of a sacred bundle, and of what is owed to it",
+      "1196: With the help of extended family, cleared new land for cultivation"
     ]
   },
   "southwest-1200#2": {
@@ -1582,13 +1583,13 @@
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in pre-Columbian North America",
     "head": null,
-    "torso": "Brown Hide Shirt [Buckskin]",
-    "feet": "Simple Moccasins [Raw Hide]",
+    "torso": "Buckskin Breechclout [Leather]",
+    "feet": "Natural Plant-Fibre Sandals [Cotton]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#6f5237",
+      "garmentKind": "bare",
+      "garmentColor": "#6b482f",
       "backgroundBase": "#4b5a4e",
       "pose": null
     },
@@ -1600,12 +1601,12 @@
     ],
     "events": [
       "1139: Born in a small settlement to a Commoner family",
-      "1151: Learned to read weather signs and predict harvest yields from a parent",
-      "1156: Was made keeper of a sacred bundle, and of what is owed to it",
-      "1167: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
-      "1175: After years of careful selection, successfully bred a hardier variety of beans",
-      "1181: A brother's marriage brought valuable new trade connections and opportunities",
-      "1182: Inherited an additional field from a childless uncle, expanding the family holdings"
+      "1152: Began working family fields, learning the rotation from elders",
+      "1156: Became the first in the village to successfully grow beans, earning respect from neighbors",
+      "1171: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "1172: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1185: A sister married into a well-connected family of turquoise workers trading south, improving the family's social standing",
+      "1195: Received a vision during the coming-of-age fast, and was told what it meant"
     ]
   },
   "southwest-1200#3": {
@@ -1619,15 +1620,15 @@
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in pre-Columbian North America",
     "head": null,
-    "torso": "Slate Hide Shirt [Buckskin]",
-    "feet": "Simple Moccasins [Raw Hide]",
+    "torso": "Buckskin Breechclout [Raw Hide]",
+    "feet": "Natural Plant-Fibre Sandals [Burlap]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#566370",
+      "garmentKind": "bare",
+      "garmentColor": "#6b482f",
       "backgroundBase": "#4b5a4e",
-      "pose": "build:broad+humble"
+      "pose": "build:broad"
     },
     "family": [
       "father: Masewa",
@@ -1640,12 +1641,12 @@
     ],
     "events": [
       "1148: Born in a small settlement to a Peasant family",
-      "1163: Helped with the harvest for the first season and proved capable despite a young age",
-      "1172: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1175: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
-      "1177: Became the first in the village to successfully grow squash, earning respect from neighbors",
-      "1185: Was made keeper of a sacred bundle, and of what is owed to it",
-      "1192: Divided the land among the children, keeping the best field for old age"
+      "1161: Trusted to tend the family's animals alone for the first time",
+      "1174: Became the first in the village to successfully grow sunflowers, earning respect from neighbors",
+      "1175: A sister married into a well-connected household of a kiva society, improving the family's social standing",
+      "1183: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1193: Divided the land among the children, keeping the best field for old age",
+      "1199: Was made keeper of a sacred bundle, and of what is owed to it"
     ]
   },
   "newengland-1780#1": {
@@ -1658,14 +1659,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "Ivory Kerchief [Linen]",
-    "torso": "Black Work Apron [Canvas]",
-    "feet": "Work Boots [Thick Leather]",
+    "head": "Ivory Mob Cap [Wool]",
+    "torso": "Saffron Servant'S Calico Dress [Wool]",
+    "feet": "Simple Leather Shoes [Treated Hide]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "cap",
       "headwearColor": "#e5ddd0",
-      "garmentKind": "work_shirt",
-      "garmentColor": "#1f1f22",
+      "garmentKind": "gown",
+      "garmentColor": "#d9a441",
       "backgroundBase": "#4c5354",
       "pose": null
     },
@@ -1677,12 +1678,11 @@
     ],
     "events": [
       "1705: Born in a small settlement to a Gentry family",
-      "1719: Began learning the trade of laundress from an experienced practitioner",
-      "1729: A brother's marriage brought valuable new trade connections and opportunities",
-      "1741: Mother died from childbirth complications, leaving the household in grief",
-      "1746: Took over the family business after a parent retired from active work",
-      "1749: Served as juror in important trial",
-      "1753: Established homestead on prairie",
+      "1720: Began learning the trade of laundress from an experienced practitioner",
+      "1736: A brother's marriage brought valuable new trade connections and opportunities",
+      "1740: Took over the family business after a parent retired from active work",
+      "1755: Elected to town council",
+      "1774: Staked claim during gold rush",
       "1776: came under the United States, having been born under the British American colonies"
     ]
   },
@@ -1716,7 +1716,7 @@
     "events": [
       "1740: Born in a small settlement to a Laboring Poor family",
       "1753: Began learning the trade of publican from an experienced practitioner",
-      "1762: A sister married into a well-connected merchant family, improving the family's social standing",
+      "1762: A sister married into a well-connected family with a wharf and a share in a brig, improving the family's social standing",
       "1769: Established homestead on prairie",
       "1770: Elected to town council",
       "1775: The family pooled their resources to purchase a delivery van, a significant investment",
@@ -1768,9 +1768,9 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in East Asia",
-    "head": null,
-    "torso": "Black Work Jacket [Hemp]",
-    "feet": "Green Cloth Slippers [Cotton]",
+    "head": "Green Cotton Headscarf [Rough Wool]",
+    "torso": "Turmeric Short Cotton Jacket [Burlap]",
+    "feet": "Green Straw Sandals [Rough Linen]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
@@ -1790,13 +1790,13 @@
     ],
     "events": [
       "1425: Born in a small settlement to a Laboring Poor family",
-      "1439: Learned to read weather signs and predict harvest yields from a parent",
-      "1447: Performed ancestral rites as eldest son",
-      "1460: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
-      "1464: Inherited valuable tools and a workshop from a childless uncle",
-      "1466: With the help of extended family, cleared new land for cultivation",
-      "1468: The family lost their mother when she died from plague",
-      "1469: A brother's marriage brought valuable new trade connections and opportunities"
+      "1440: Began working family fields, learning the rotation from elders",
+      "1448: A sister married into a well-connected lineage with a son in the imperial examinations, improving the family's social standing",
+      "1450: The family lost their mother when she died from plague",
+      "1451: Divided the land among the children, keeping the best field for old age",
+      "1460: Returned home to care for aging parents",
+      "1466: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "1471: Took over the family business after a parent retired from active work"
     ]
   },
   "ming-china-1500#2": {
@@ -1809,16 +1809,16 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in East Asia",
-    "head": "Bamboo Hat [Woven Bamboo]",
-    "torso": "White Hemp Jacket [Rough Hemp]",
-    "feet": "Natural Cloth Shoes [Cotton Canvas]",
+    "head": "Natural Conical Straw Hat [Linen]",
+    "torso": "Walnut Loose Cotton Trousers [Wool]",
+    "feet": "Natural Straw Sandals [Cotton]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#4b463d",
       "garmentKind": "robe",
       "garmentColor": "#59645d",
       "backgroundBase": "#3b403a",
-      "pose": null
+      "pose": "cunning"
     },
     "family": [
       "father: Bao Zheng",
@@ -1831,10 +1831,11 @@
     ],
     "events": [
       "1460: Born in a small settlement to a Middling Sort family",
-      "1472: Learned to read weather signs and where the water would still be running",
-      "1477: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1497: Performed ancestral rites as eldest son",
-      "1499: Took over the family business after a parent retired from active work"
+      "1473: Trusted to take the animals out alone for the first time",
+      "1488: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1488: The family lost their mother when she died from childbirth complications",
+      "1489: The family pooled their resources to purchase draft animals, a significant investment",
+      "1498: Returned home to care for aging parents"
     ]
   },
   "ming-china-1500#3": {
@@ -1847,12 +1848,12 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in East Asia",
-    "head": "Bamboo Hat [Woven Bamboo]",
-    "torso": "Crimson Hemp Jacket [Rough Hemp]",
-    "feet": "Straw Sandals [Rice Straw]",
+    "head": "Silver Cloth Headband [Hemp]",
+    "torso": "Olive Servant'S Cotton Dress [Rough Wool]",
+    "feet": "Silver Cloth Shoes [Rough Wool]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "cap",
+      "headwearColor": "#4b463d",
       "garmentKind": "robe",
       "garmentColor": "#59645d",
       "backgroundBase": "#3b403a",
@@ -1866,9 +1867,9 @@
     ],
     "events": [
       "1480: Born in a small settlement to a Laboring Poor family",
-      "1495: Began learning the trade of servant from an experienced practitioner",
-      "1498: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1499: Inherited valuable tools and a workshop from a childless uncle"
+      "1494: Began learning the trade of servant from an experienced practitioner",
+      "1498: The family pooled their resources to purchase a new plow, a significant investment",
+      "1499: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "bengal-1900#1": {
@@ -1882,14 +1883,14 @@
     "languageConfidence": "attested",
     "odds": "the modern era in South Asia",
     "head": null,
-    "torso": "Indigo Cotton Sari [Printed Cotton]",
-    "feet": "Brown Plastic Sandals [PVC]",
+    "torso": "Walnut Cotton Coveralls [Wool]",
+    "feet": "Brown Rubber Sandals [Wool]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "gown",
-      "garmentColor": "#2e3f5c",
-      "backgroundBase": "#65535a",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#5b4229",
+      "backgroundBase": "#555365",
       "pose": null
     },
     "family": [
@@ -1904,11 +1905,11 @@
     "events": [
       "1819: Born in a small settlement to a Working Class family",
       "1833: Apprenticed to a midwife, witnessing a first birth at a young age",
-      "1835: A sister married into a well-connected artisan guild, improving the family's social standing",
-      "1845: Took over the family business after a parent retired from active work",
+      "1836: Bathed in the Ganges during Kumbh Mela",
+      "1844: The family lost their father when he died from starvation during famine",
       "1858: came under the British Raj, having been born under East India Company rule",
-      "1878: walked to a relief camp and did not find all of the family there afterwards",
-      "1899: Learned sacred texts under a guru's guidance"
+      "1860: A brother's marriage brought valuable new trade connections and opportunities",
+      "1863: Took over the family business after a parent retired from active work"
     ]
   },
   "bengal-1900#2": {
@@ -1960,15 +1961,15 @@
     "languageConfidence": "attested",
     "odds": "the modern era in South Asia",
     "head": null,
-    "torso": "White T-Shirt [Cotton]",
-    "feet": "Brown Rubber Chappals [Rubber]",
+    "torso": "Turmeric Cotton Work Shirt [Wool]",
+    "feet": "Brown Rubber Sandals [Wool]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#e8e4d9",
+      "garmentColor": "#dfa62c",
       "backgroundBase": "#8e8ba0",
-      "pose": "build:broad+coward"
+      "pose": "build:broad"
     },
     "family": [
       "father: Dinesh Srivastava",
@@ -1981,11 +1982,12 @@
     ],
     "events": [
       "1841: Born in a small settlement to a Working Class family",
-      "1856: Began learning the trade of construction labourer from an experienced practitioner",
+      "1854: Began learning the trade of construction labourer from an experienced practitioner",
       "1858: saw East India Company rule give way to the British Raj",
-      "1861: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1873: Bathed in the Ganges during Kumbh Mela",
-      "1883: The family pooled their resources to purchase a taxi and the licence to drive it, a significant investment"
+      "1866: Inherited valuable tools and a workshop from a childless uncle",
+      "1869: A brother's marriage brought valuable new trade connections and opportunities",
+      "1882: Mother was killed in Partition violence, and the family faced new responsibilities",
+      "1886: Completed temple service during festival season"
     ]
   },
   "london-2020#1": {
@@ -1998,16 +2000,16 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in Europe",
-    "head": "Brown Feathered Headdress [Ostrich and Gems]",
-    "torso": "Slate Cocktail Dress [Beaded Silk]",
-    "feet": "Brown Satin Slippers [Silk Satin]",
+    "head": null,
+    "torso": "Slate Skirt Suit And Blouse [Fine Linen]",
+    "feet": "Low-Heeled Court Shoes [Soft Leather]",
     "portrait": {
-      "headwearKind": "coronet",
-      "headwearColor": "#6f5237",
-      "garmentKind": "gown",
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "jacket",
       "garmentColor": "#566370",
       "backgroundBase": "#535c65",
-      "pose": null
+      "pose": "corpulent+build:broad"
     },
     "family": [
       "father: Cai Davies",
@@ -2019,10 +2021,10 @@
     ],
     "events": [
       "1938: Born in a small settlement to a Merchant family",
-      "1955: Started on a trainee's wage, which was most of the training",
-      "1964: Took over the family business when a parent's health gave out",
-      "1969: A sister married and moved across the city, and the house was quieter for it",
-      "1969: Father died from cancer despite seeking help"
+      "1956: Left school and started work, and learned the job in the first month of doing it",
+      "1966: Took over the family business when a parent's health gave out",
+      "1973: Mother died from heart disease, leaving the household in grief",
+      "1981: A sister married and moved across the city, and the house was quieter for it"
     ]
   },
   "london-2020#2": {
@@ -2035,15 +2037,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in Europe",
-    "head": "Ochre Fedora [Felt]",
-    "torso": "Verdigris Cardigan [Wool]",
-    "feet": "Oxford Shoes [Quality Leather]",
+    "head": "Ochre Canvas Work Cap [Linen]",
+    "torso": "Olive Flannel Work Shirt [Wool]",
+    "feet": "Leather Work Boots [Leather]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "cap",
       "headwearColor": "#b1803c",
-      "garmentKind": "jacket",
-      "garmentColor": "#3c8f7f",
-      "backgroundBase": "#615365",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#535c65",
       "pose": null
     },
     "family": [
@@ -2056,12 +2058,12 @@
     ],
     "events": [
       "1973: Born in a small settlement to a Middle Class family",
-      "1988: Took up the carpenter's craft in the way of the household, by being there for it",
-      "2000: Father died from tuberculosis, leaving the family to manage affairs alone",
-      "2003: The family pooled what they had for a deposit on a taxi and the licence to drive it",
-      "2007: Created masterwork that drew crowds to market square",
-      "2016: A brother married young, and the wedding cost more than the family had",
-      "2018: Admitted to the Carpenter guild after presenting masterwork"
+      "1989: Learned the carpenter's work by doing it badly alongside someone who did it well",
+      "1998: Father died from pneumonia, leaving the family to manage affairs alone",
+      "2001: Took over the family business when a parent's health gave out",
+      "2002: Admitted to the Carpenter guild after presenting masterwork",
+      "2005: Work displayed at important festival",
+      "2010: Stood as witness at a sibling's wedding, and understood that the household had changed shape"
     ]
   },
   "london-2020#3": {
@@ -2074,14 +2076,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in Europe",
-    "head": "Russet Newsboy Cap [Wool Tweed]",
-    "torso": "White Denim Overalls [Heavy Denim]",
-    "feet": "Work Boots [Thick Leather]",
+    "head": "Russet Flat Cap [Wool]",
+    "torso": "Charcoal Cotton Twill Work Jacket [Cotton]",
+    "feet": "Leather Work Boots [Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#8a5a3b",
-      "garmentKind": "work_shirt",
-      "garmentColor": "#e8e4d9",
+      "garmentKind": "jacket",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#535c65",
       "pose": "build:broad"
     },
@@ -2092,9 +2094,9 @@
     ],
     "events": [
       "1999: Born in a small settlement to a Middle Class family",
-      "2017: The family pooled what they had for a deposit on a delivery van",
-      "2018: Stood as witness at a sibling's wedding, and understood that the household had changed shape",
-      "2019: Started work at a place a schoolfriend was already working"
+      "2015: A sister married and moved across the city, and the house was quieter for it",
+      "2017: The family pooled what they had for a deposit on a second-hand truck",
+      "2018: Found the job through a friend of a friend, and stayed longer than planned"
     ]
   },
   "paris-1850#1": {
@@ -2107,15 +2109,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in Europe",
-    "head": "White Silk Bonnet [Silk and Ribbon]",
-    "torso": "Slate Walking Dress [Quality Wool]",
-    "feet": "White Silk Slippers [Embroidered Silk]",
+    "head": "White Headscarf [Linen]",
+    "torso": "Indigo Wool Gansey [Linen]",
+    "feet": "Leather Clogs [Leather]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#e8e4d9",
-      "garmentKind": "gown",
-      "garmentColor": "#566370",
-      "backgroundBase": "#565a5f",
+      "garmentKind": "tunic",
+      "garmentColor": "#2e3f5c",
+      "backgroundBase": "#5f5659",
       "pose": null
     },
     "family": [
@@ -2128,10 +2130,10 @@
       "1770: Born in a small settlement to a Merchant family",
       "1784: Learned to read the weather and the water from a parent",
       "1792: saw the Kingdom of France give way to the French First Republic",
-      "1796: Took over the family business after a parent retired from active work",
-      "1801: A sister married into a well-connected noble house, improving the family's social standing",
-      "1801: Father died of wounds after a battle despite seeking help",
+      "1798: Took over the family business after a parent retired from active work",
       "1804: lived through a third change of rule, to the First French Empire",
+      "1805: Mother died in a railway accident, leaving the household in grief",
+      "1806: A sister married into a well-connected town council, improving the family's social standing",
       "1814: lived through a fourth change of rule, to the restored French monarchy"
     ]
   },
@@ -2170,7 +2172,7 @@
       "1814: grew up under the restored French monarchy, which had taken the place from the First French Empire too early to be remembered",
       "1818: Began learning the trade of publican from an experienced practitioner",
       "1832: The family pooled their resources to purchase a plot on the edge of town, a significant investment",
-      "1836: A sister married into a well-connected merchant guild, improving the family's social standing",
+      "1836: A sister married into a well-connected family with a share in a chartered company, improving the family's social standing",
       "1848: lived through a third change of rule, to the French Second Republic"
     ]
   },
@@ -2219,15 +2221,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in Europe",
-    "head": "Blue Kerchief [Linen]",
-    "torso": "Indigo Work Dress [Sturdy Cotton]",
-    "feet": "Work Boots [Thick Leather]",
+    "head": "Blue Headscarf [Wool]",
+    "torso": "Walnut Cotton Housedress [Wool]",
+    "feet": "Blue Rubber Galoshes [Linen]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#41608c",
       "garmentKind": "gown",
-      "garmentColor": "#2e3f5c",
-      "backgroundBase": "#655359",
+      "garmentColor": "#5b4229",
+      "backgroundBase": "#535c65",
       "pose": null
     },
     "family": [
@@ -2238,9 +2240,10 @@
     ],
     "events": [
       "1822: Born in a small settlement to a Working Class family",
-      "1836: Began learning the trade of farm worker from an experienced practitioner",
-      "1848: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1867: The family pooled their resources to purchase a tractor, a significant investment",
+      "1837: Began learning the trade of farm worker from an experienced practitioner",
+      "1849: Took over the family business after a parent retired from active work",
+      "1857: Mother died from heart disease, leaving the household in grief",
+      "1858: A sister married into a well-connected town council, improving the family's social standing",
       "1878: came under the Balkan kingdoms, having been born under the Ottoman Empire"
     ]
   },
@@ -2277,7 +2280,7 @@
       "1867: Began learning the trade of night watchman from an experienced practitioner",
       "1878: saw the Ottoman Empire give way to the Balkan kingdoms",
       "1881: The family pooled their resources to purchase a plot on the edge of town, a significant investment",
-      "1886: A sister married into a well-connected noble house, improving the family's social standing"
+      "1886: A sister married into a well-connected mill-owning family with a name over the gate, improving the family's social standing"
     ]
   },
   "balkans-1900#3": {
@@ -2325,13 +2328,13 @@
     "languageConfidence": "reconstructed",
     "odds": "the modern era in South America",
     "head": null,
-    "torso": "White Skirt [Cotton Blend]",
+    "torso": "Charcoal Skirt [Cotton Blend]",
     "feet": "Blue Canvas Shoes [Canvas]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#e8e4d9",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#53655a",
       "pose": null
     },
@@ -2434,13 +2437,13 @@
     "languageConfidence": "reconstructed",
     "odds": "the modern era in Oceania",
     "head": null,
-    "torso": "Marigold Tank Top [Cotton]",
+    "torso": "Walnut Tank Top [Cotton]",
     "feet": "Blue Sandals [Rubber]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#d9822f",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#708389",
       "pose": null
     },
@@ -2504,13 +2507,13 @@
     "languageConfidence": "reconstructed",
     "odds": "the modern era in Oceania",
     "head": "Russet Baseball Cap [Cotton]",
-    "torso": "White T-Shirt [Cotton]",
+    "torso": "Charcoal T-Shirt [Cotton]",
     "feet": "Russet Flip Flops [Rubber]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#8a5a3b",
       "garmentKind": "work_shirt",
-      "garmentColor": "#e8e4d9",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#536065",
       "pose": "build:broad"
     },
@@ -2537,14 +2540,14 @@
     "languageBasis": "ca-old-iranian",
     "languageConfidence": "conjectural",
     "odds": "antiquity in East Asia",
-    "head": "Gilt Hairpin Set [Gilt Bronze]",
-    "torso": "Crimson Simple Tunic [Hemp Cloth]",
-    "feet": "Lotus Shoes [Silk and Gold]",
+    "head": "White Cloth Headscarf [Wool]",
+    "torso": "Saffron Short Ramie Jacket [Wool]",
+    "feet": "White Straw Sandals [Linen]",
     "portrait": {
-      "headwearKind": "band",
-      "headwearColor": "#a8763f",
-      "garmentKind": "tunic",
-      "garmentColor": "#8e2436",
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#e8e4d9",
+      "garmentKind": "jacket",
+      "garmentColor": "#d9a441",
       "backgroundBase": "#445f5a",
       "pose": null
     },
@@ -2559,11 +2562,11 @@
     ],
     "events": [
       "-711: Born in a small settlement to a Commoner family",
-      "-697: Took up the weaver's craft in the way of the household, by being there for it",
-      "-695: A sister married into a well-connected merchant consortium, improving the family's social standing",
-      "-686: Took over the family business after a parent retired from active work",
-      "-681: Mother died from childbirth complications, and the family faced new responsibilities",
-      "-678: Returned home to care for aging parents"
+      "-696: Learned the weaver's work by doing it badly alongside someone who did it well",
+      "-687: A brother's marriage brought valuable new trade connections and opportunities",
+      "-685: Inherited valuable tools and a workshop from a childless uncle",
+      "-684: Mother was drowned in flood, leaving the household in grief",
+      "-674: Performed ancestral rites as eldest son"
     ]
   },
   "kazakh-steppe-636bce#2": {
@@ -2576,15 +2579,15 @@
     "languageBasis": "ca-old-iranian",
     "languageConfidence": "conjectural",
     "odds": "antiquity in East Asia",
-    "head": "Li [Rice Straw]",
-    "torso": "Woad Hemp Robe [Rough Hemp]",
-    "feet": "Natural Hemp Sandals [Hemp Cloth]",
+    "head": "Natural Conical Bamboo Hat [Linen]",
+    "torso": "Olive Short Hemp Work Jacket (Duanhe) [Wool]",
+    "feet": "Natural Barefoot [Linen]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#c2a463",
-      "garmentKind": "robe",
-      "garmentColor": "#3a4f6d",
-      "backgroundBase": "#5f444f",
+      "headwearColor": "#d8cdb6",
+      "garmentKind": "jacket",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#445f5a",
       "pose": null
     },
     "family": [
@@ -2598,10 +2601,11 @@
     ],
     "events": [
       "-676: Born in a small settlement to a Commoner family",
-      "-664: Learned to read weather signs and where the water would still be running",
-      "-659: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "-639: Performed ancestral rites as eldest son",
-      "-637: Took over the family business after a parent retired from active work"
+      "-663: Trusted to take the animals out alone for the first time",
+      "-648: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "-648: The family lost their mother when she died from childbirth complications",
+      "-647: Inherited valuable tools and a workshop from a childless uncle",
+      "-638: Returned home to care for aging parents"
     ]
   },
   "kazakh-steppe-636bce#3": {
@@ -2614,16 +2618,16 @@
     "languageBasis": "ca-old-iranian",
     "languageConfidence": "reconstructed",
     "odds": "antiquity in East Asia",
-    "head": "Li [Rice Straw]",
-    "torso": "Crimson Hemp Robe [Rough Hemp]",
-    "feet": "Silver Hemp Sandals [Hemp Cloth]",
+    "head": "Silver Conical Bamboo Hat [Cotton]",
+    "torso": "Olive Cropped Hemp Trousers [Cotton]",
+    "feet": "Silver Straw Sandals [Wool]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#c2a463",
-      "garmentKind": "robe",
-      "garmentColor": "#8e2436",
+      "headwearColor": "#b9bcc2",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#445f5a",
-      "pose": "build:broad"
+      "pose": "build:broad+shy"
     },
     "family": [
       "father: *Bayar",
@@ -2633,9 +2637,9 @@
     ],
     "events": [
       "-656: Born in a small settlement to a Peasant family",
-      "-641: Learned the marks and the ailments of every beast in the family's care",
-      "-640: A brother's marriage brought valuable new trade connections and opportunities",
-      "-637: Inherited valuable tools and a workshop from a childless uncle"
+      "-642: Trusted to take the animals out alone for the first time",
+      "-639: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "-638: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "fujian-7000bce#1": {
@@ -2649,13 +2653,13 @@
     "languageConfidence": "conjectural",
     "odds": "prehistory in East Asia",
     "head": null,
-    "torso": "Hide Cloak [Animal Fur]",
+    "torso": "Skin Tunic [Hide and Sinew]",
     "feet": "Walnut Barefoot [None]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
-      "garmentKind": "jacket",
-      "garmentColor": "#8b7358",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#6b482f",
       "backgroundBase": "#435653",
       "pose": null
     },
@@ -2669,13 +2673,13 @@
     ],
     "events": [
       "-7075: Born to the band that ranged this country",
+      "-7062: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
       "-7061: Learned to read weather signs and predict harvest yields from a parent",
-      "-7058: An elder died, and with them went the knowledge of country nobody else held",
-      "-7056: Received the marks that say who this person is and who they may speak to",
-      "-7038: Walked with the band to the far camp, further than the children had ever been",
-      "-7023: Took a partner from a band met at the summer gathering",
-      "-7021: Learned the way to a spring that held water through the dry months",
-      "-7018: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring"
+      "-7055: Took a partner from a band met at the summer gathering",
+      "-7032: An elder died, and with them went the knowledge of country nobody else held",
+      "-7032: The family lost their mother when she died from starvation during famine",
+      "-7030: A birth went wrong in the night, and by morning the camp was quieter by two",
+      "-7027: Was caught by an animal that did not die quickly, and carried the scars afterwards"
     ]
   },
   "fujian-7000bce#2": {
@@ -2726,12 +2730,12 @@
     "languageBasis": "ea-early",
     "languageConfidence": "conjectural",
     "odds": "prehistory in East Asia",
-    "head": "Douli [Bamboo Strips]",
-    "torso": "Hide Wrap [Animal Hide]",
+    "head": null,
+    "torso": "Hide Wrap [Hide]",
     "feet": "Cream Barefoot [None]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
-      "headwearColor": "#c0a566",
+      "headwearKind": null,
+      "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
       "backgroundBase": "#435653",
@@ -2745,13 +2749,12 @@
     ],
     "events": [
       "-7020: Born to the band that ranged this country",
-      "-7014: The herds did not come that year, and the camp moved three times looking for them",
-      "-7012: Was caught by an animal that did not die quickly, and carried the scars afterwards",
-      "-7007: Was among the party that drove a herd into the narrows, and the band ate well for many days",
-      "-7005: Learned which ground gave what, and in which month",
-      "-7004: Walked with the band to the far camp, further than the children had ever been",
-      "-7003: Left the band of birth to live with another, as is the custom",
-      "-7002: An elder died, and with them went the knowledge of country nobody else held"
+      "-7011: Buried a kinsman with ochre and with the things they had made",
+      "-7009: Was taken from the camp by the elders, kept apart, and came back changed and marked",
+      "-7007: Trusted alone with the traps for a season",
+      "-7006: Fell badly on the rocks, and the leg never set straight",
+      "-7003: Speared a beast that had eluded the band all season",
+      "-7002: A birth went wrong in the night, and by morning the camp was quieter by two"
     ]
   },
   "korea-1400#1": {
@@ -2764,14 +2767,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in East Asia",
-    "head": null,
-    "torso": "White Hemp Jacket [Rough Hemp]",
-    "feet": "White Cloth Slippers [Cotton]",
+    "head": "White Cotton Headscarf [Burlap]",
+    "torso": "Walnut Short Cotton Jacket And Wrap Skirt [Burlap]",
+    "feet": "White Straw Sandals [Rough Wool]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
-      "headwearColor": "#c2a463",
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "jacket",
-      "garmentColor": "#e8e4d9",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#3f5a55",
       "pose": null
     },
@@ -2787,12 +2790,12 @@
     "events": [
       "1325: Born in a small settlement to a Laboring Poor family",
       "1339: Learned to read weather signs and predict harvest yields from a parent",
-      "1342: A brother's marriage brought valuable new trade connections and opportunities",
-      "1357: Returned home to care for aging parents",
-      "1360: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
-      "1363: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "1371: Took over the family business after a parent retired from active work",
-      "1379: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation"
+      "1357: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1360: Returned home to care for aging parents",
+      "1375: Took over the family business after a parent retired from active work",
+      "1379: A brother's marriage brought valuable new trade connections and opportunities",
+      "1384: Broke ground on land nobody had ploughed before, and it paid",
+      "1392: came under Joseon, having been born under Goryeo"
     ]
   },
   "korea-1400#2": {
@@ -2805,16 +2808,16 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in East Asia",
-    "head": "White Cloth Headband [Hemp Cloth]",
-    "torso": "Green Cotton Jacket [Coarse Cotton]",
-    "feet": "White Hemp Shoes [Hemp Cloth]",
+    "head": "White Conical Straw Hat [Linen]",
+    "torso": "Bronze Cropped Trousers [Wool]",
+    "feet": "White Straw Sandals [Cotton]",
     "portrait": {
-      "headwearKind": "band",
+      "headwearKind": "brimmed_hat",
       "headwearColor": "#e8e4d9",
-      "garmentKind": "jacket",
-      "garmentColor": "#5a6b3b",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#3f5a55",
-      "pose": null
+      "pose": "cunning"
     },
     "family": [
       "father: Chang-ho Hwang",
@@ -2827,12 +2830,11 @@
     ],
     "events": [
       "1360: Born in a small settlement to a Middling Sort family",
-      "1372: Learned to read weather signs and where the water would still be running",
-      "1377: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1380: The family pooled their resources to purchase a new plow, a significant investment",
+      "1373: Trusted to take the animals out alone for the first time",
+      "1384: Performed ancestral rites as eldest son",
+      "1389: The family pooled their resources to purchase a new plow, a significant investment",
       "1392: came under Joseon, having been born under Goryeo",
-      "1398: Returned home to care for aging parents",
-      "1398: Tragedy struck when a parent died from dysentery"
+      "1396: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "korea-1400#3": {
@@ -2845,14 +2847,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in East Asia",
-    "head": "Woven Sun Hat [Straw]",
-    "torso": "Crimson Cotton Jacket [Coarse Cotton]",
-    "feet": "Straw Sandals [Woven Straw]",
+    "head": null,
+    "torso": "Olive Plain Hemp Servant'S Robe [Rough Wool]",
+    "feet": "Green Cloth Shoes [Rough Wool]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
-      "headwearColor": "#c2a463",
-      "garmentKind": "jacket",
-      "garmentColor": "#8e2436",
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "robe",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#3f5a55",
       "pose": "build:broad"
     },
@@ -2865,8 +2867,7 @@
     "events": [
       "1380: Born in a small settlement to a Laboring Poor family",
       "1392: saw Goryeo give way to Joseon",
-      "1395: Began hauling loads for merchants, building strength",
-      "1399: Inherited valuable tools and a workshop from a childless uncle"
+      "1394: Experienced hard labor for the first time, joining work crews at dawn"
     ]
   },
   "mongolia-1250#1": {
@@ -2879,14 +2880,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in East Asia",
-    "head": null,
-    "torso": "White Hemp Jacket [Rough Hemp]",
-    "feet": "Natural Cloth Slippers [Cotton]",
+    "head": "Natural Conical Straw Hat [Rough Wool]",
+    "torso": "Walnut Ramie Work Jacket [Burlap]",
+    "feet": "Natural Barefoot [Rough Linen]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#d8cdb6",
       "garmentKind": "jacket",
-      "garmentColor": "#e8e4d9",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#3f5a55",
       "pose": null
     },
@@ -2898,11 +2899,11 @@
     ],
     "events": [
       "1175: Born in a small settlement to a Laboring Poor family",
-      "1189: Learned to read the weather and the water from a parent",
-      "1191: A sister married into a well-connected merchant consortium, improving the family's social standing",
-      "1200: Took over the family business after a parent retired from active work",
-      "1206: came under the Mongol Empire, where no state had claimed the place before",
-      "1208: Returned home to care for aging parents"
+      "1190: Went out with the adults for the first time and came back carrying a share",
+      "1200: Arranged favorable marriage for younger sister",
+      "1206: came under the Mongol Empire, having been born under the Jin dynasty",
+      "1207: The family pooled their resources to purchase draft animals, a significant investment",
+      "1214: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "mongolia-1250#2": {
@@ -2915,16 +2916,16 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in East Asia",
-    "head": "Silver Cloth Headband [Hemp Cloth]",
-    "torso": "Woad Cotton Jacket [Coarse Cotton]",
-    "feet": "Straw Sandals [Woven Straw]",
+    "head": "Silver Conical Straw Hat [Linen]",
+    "torso": "Olive Cropped Trousers [Wool]",
+    "feet": "Silver Straw Sandals [Cotton]",
     "portrait": {
-      "headwearKind": "band",
+      "headwearKind": "brimmed_hat",
       "headwearColor": "#b9bcc2",
-      "garmentKind": "jacket",
-      "garmentColor": "#3a4f6d",
-      "backgroundBase": "#5a3f4a",
-      "pose": null
+      "garmentKind": "work_shirt",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#3f5a55",
+      "pose": "humble"
     },
     "family": [
       "father: Jochi the Frugal",
@@ -2935,11 +2936,10 @@
     ],
     "events": [
       "1210: Born in a small settlement to a Middling Sort family",
-      "1222: Learned to read weather signs and where the water would still be running",
-      "1227: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1230: The family pooled their resources to purchase a new plow, a significant investment",
-      "1248: Returned home to care for aging parents",
-      "1248: Tragedy struck when a parent was killed when the city was taken"
+      "1223: Trusted to take the animals out alone for the first time",
+      "1234: Performed ancestral rites as eldest son",
+      "1239: The family pooled their resources to purchase a new plow, a significant investment",
+      "1246: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "mongolia-1250#3": {
@@ -2952,14 +2952,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in East Asia",
-    "head": "Woven Sun Hat [Straw]",
-    "torso": "Turmeric Cotton Jacket [Coarse Cotton]",
-    "feet": "Straw Sandals [Woven Straw]",
+    "head": "Henna Conical Straw Hat [Rough Wool]",
+    "torso": "Charcoal Cropped Trousers [Hemp]",
+    "feet": "Henna Straw Sandals [Burlap]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#c2a463",
-      "garmentKind": "jacket",
-      "garmentColor": "#dfa62c",
+      "headwearColor": "#b5502e",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#3f5a55",
       "pose": "build:broad"
     },
@@ -2971,9 +2971,9 @@
     ],
     "events": [
       "1230: Born in a small settlement to a Laboring Poor family",
-      "1245: Learned the marks and the ailments of every beast in the family's care",
-      "1246: A brother's marriage brought valuable new trade connections and opportunities",
-      "1249: Inherited valuable tools and a workshop from a childless uncle"
+      "1243: Spent a first season away with the herd and came back taller",
+      "1248: The family pooled their resources to purchase a mill share, a significant investment",
+      "1249: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "japan-1870#1": {
@@ -2986,14 +2986,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in East Asia",
-    "head": null,
-    "torso": "Slate Work Jacket [Hemp]",
-    "feet": "Ivory Cloth Slippers [Cotton]",
+    "head": "Ivory Cloth Headband [Burlap]",
+    "torso": "Walnut Servant'S Plain Cotton Dress [Burlap]",
+    "feet": "Ivory Cloth Shoes [Rough Wool]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
-      "garmentKind": "jacket",
-      "garmentColor": "#566370",
+      "headwearKind": "band",
+      "headwearColor": "#e5ddd0",
+      "garmentKind": "gown",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#49504f",
       "pose": null
     },
@@ -3009,9 +3009,10 @@
     "events": [
       "1790: Born in a small settlement to a Working Class family",
       "1804: Apprenticed to a midwife, witnessing a first birth at a young age",
-      "1806: A sister married into a well-connected samurai clan, improving the family's social standing",
-      "1816: Took over the family business after a parent retired from active work",
-      "1824: Returned home to care for aging parents",
+      "1822: Tragedy struck when a parent died from cholera",
+      "1823: Returned home to care for aging parents",
+      "1830: A brother's marriage brought valuable new trade connections and opportunities",
+      "1833: Took over the family business after a parent retired from active work",
       "1868: came under the Empire of Japan, having been born under the Tokugawa shogunate"
     ]
   },
@@ -3025,14 +3026,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in East Asia",
-    "head": "Bamboo Hat [Woven Bamboo]",
-    "torso": "Black Hemp Jacket [Rough Hemp]",
-    "feet": "Ivory Cloth Shoes [Cotton Canvas]",
+    "head": "Ivory Conical Bamboo Hat [Linen]",
+    "torso": "Olive Cropped Trousers [Wool]",
+    "feet": "Ivory Straw Sandals [Cotton]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#c0a566",
-      "garmentKind": "jacket",
-      "garmentColor": "#1f1f22",
+      "headwearColor": "#e5ddd0",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#49504f",
       "pose": null
     },
@@ -3044,13 +3045,13 @@
     ],
     "events": [
       "1826: Born in a small settlement to a Middle Class family",
-      "1838: Learned to read weather signs and predict harvest yields from a parent",
-      "1846: A brother's marriage brought valuable new trade connections and opportunities",
+      "1839: Began working family fields, learning the rotation from elders",
+      "1842: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
       "1850: Performed ancestral rites as eldest son",
-      "1852: Purchased the neighbor's plot after they decided to seek fortune in the city",
-      "1853: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "1858: Took over the family business after a parent retired from active work",
-      "1867: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed"
+      "1851: A sister married into a well-connected Osaka rice-broking house, improving the family's social standing",
+      "1857: Inherited valuable tools and a workshop from a childless uncle",
+      "1860: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "1861: Broke ground on land nobody had ploughed before, and it paid"
     ]
   },
   "japan-1870#3": {
@@ -3063,14 +3064,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in East Asia",
-    "head": "Bamboo Hat [Woven Bamboo]",
-    "torso": "Navy Hemp Jacket [Rough Hemp]",
-    "feet": "Straw Sandals [Rice Straw]",
+    "head": "White Cloth Headband [Cotton]",
+    "torso": "Charcoal Work Jacket [Wool]",
+    "feet": "White Straw Sandals [Wool]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
-      "headwearColor": "#c0a566",
+      "headwearKind": "band",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "jacket",
-      "garmentColor": "#23304a",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#49504f",
       "pose": "build:broad"
     },
@@ -3082,11 +3083,10 @@
     ],
     "events": [
       "1849: Born in a small settlement to a Working Class family",
-      "1864: Apprenticed to guild master, learning trade secrets",
-      "1867: The family pooled their resources to purchase a shop of their own, a significant investment",
-      "1868: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1868: saw the Tokugawa shogunate give way to the Empire of Japan",
-      "1869: Performed ancestral rites as eldest son"
+      "1862: Taken as apprentice by renowned tailor, bound for seven years",
+      "1867: The family pooled their resources to purchase a delivery van, a significant investment",
+      "1868: A brother's marriage brought valuable new trade connections and opportunities",
+      "1868: saw the Tokugawa shogunate give way to the Empire of Japan"
     ]
   },
   "europe-8000bce#1": {
@@ -3175,14 +3175,14 @@
     "languageBasis": "eu-forager",
     "languageConfidence": "conjectural",
     "odds": "prehistory in Europe",
-    "head": "Fur Cap [Rabbit Fur]",
-    "torso": "Skin Cloak [Bear Fur]",
-    "feet": "Hide Boots [Mammoth Leather]",
+    "head": null,
+    "torso": "Hide Wrap Tunic [Leather]",
+    "feet": "Rawhide Foot Wraps [Treated Hide]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#8b7358",
-      "garmentKind": "jacket",
-      "garmentColor": "#8b7358",
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#6b482f",
       "backgroundBase": "#4b5762",
       "pose": "build:broad"
     },
@@ -3195,13 +3195,12 @@
     ],
     "events": [
       "-8020: Born to the band that ranged this country",
-      "-8014: The herds did not come that year, and the camp moved three times looking for them",
-      "-8012: Was caught by an animal that did not die quickly, and carried the scars afterwards",
-      "-8007: Was among the party that drove a herd into the narrows, and the band ate well for many days",
-      "-8005: Learned which ground gave what, and in which month",
-      "-8004: Walked with the band to the far camp, further than the children had ever been",
-      "-8003: Left the band of birth to live with another, as is the custom",
-      "-8002: An elder died, and with them went the knowledge of country nobody else held"
+      "-8011: Buried a kinsman with ochre and with the things they had made",
+      "-8009: Was taken from the camp by the elders, kept apart, and came back changed and marked",
+      "-8007: Trusted alone with the traps for a season",
+      "-8006: Fell badly on the rocks, and the leg never set straight",
+      "-8003: Speared a beast that had eluded the band all season",
+      "-8002: A birth went wrong in the night, and by morning the camp was quieter by two"
     ]
   },
   "greece-430bce#1": {
@@ -3214,9 +3213,9 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in Europe",
-    "head": null,
-    "torso": "Purple Work Dress [Hemp]",
-    "feet": "Simple Sandals [Leather]",
+    "head": "Cream Felt Cap (Pileus) [Linen]",
+    "torso": "Walnut Short Wool Tunic (Exomis) [Wool]",
+    "feet": "Cream Barefoot [Wool]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
@@ -3237,9 +3236,10 @@
     "events": [
       "-505: Born in a small settlement to a Gentry family",
       "-491: Learned to read the weather and the water from a parent",
-      "-478: The family pooled their resources to purchase a storage barn, a significant investment",
-      "-444: A sister married into a well-connected noble house, improving the family's social standing",
-      "-430: survived the sickness that emptied a third of the city"
+      "-478: Took over the family business after a parent retired from active work",
+      "-470: A sister married into a well-connected noble house, improving the family's social standing",
+      "-470: Mother died from dysentery, leaving the household in grief",
+      "-430: was called up when the levy came round"
     ]
   },
   "greece-430bce#2": {
@@ -3323,9 +3323,9 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in Europe",
-    "head": null,
-    "torso": "Woad Work Dress [Hemp]",
-    "feet": "Simple Sandals [Leather]",
+    "head": "Tan Felt Cap (Pileus) [Linen]",
+    "torso": "Olive Short Wool Tunic (Exomis) [Wool]",
+    "feet": "Barefoot [Wool]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
@@ -3343,9 +3343,9 @@
     "events": [
       "25: Born in a small settlement to a Gentry family",
       "39: Learned to read the weather and the water from a parent",
-      "50: Took over the family business after a parent retired from active work",
-      "55: A sister married into a well-connected noble house, improving the family's social standing",
-      "56: Father died from malaria despite seeking help"
+      "52: Took over the family business after a parent retired from active work",
+      "60: A sister married into a well-connected noble house, improving the family's social standing",
+      "60: Mother died from dysentery, leaving the household in grief"
     ]
   },
   "rome-100#2": {
@@ -3382,7 +3382,7 @@
       "60: Born in a small settlement to a Laboring Poor family",
       "72: Began learning the trade of beekeeper from an experienced practitioner",
       "84: The family pooled their resources to purchase a market stall, a significant investment",
-      "88: A sister married into a well-connected noble house, improving the family's social standing"
+      "88: A sister married into a well-connected household of a decurion in the local ordo, improving the family's social standing"
     ]
   },
   "rome-100#3": {
@@ -3429,15 +3429,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in Europe",
-    "head": null,
-    "torso": "Woad Work Dress [Hemp]",
-    "feet": "Wooden Shoes [Carved Wood]",
+    "head": "Grey Linen Veil [Rough Wool]",
+    "torso": "Olive Wool Kirtle [Burlap]",
+    "feet": "Turnshoes [Rough Leather]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
-      "headwearColor": "#c2a463",
+      "headwearKind": "veil",
+      "headwearColor": "#8a8781",
       "garmentKind": "gown",
-      "garmentColor": "#3a4f6d",
-      "backgroundBase": "#6a4a57",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#4a5a6a",
       "pose": null
     },
     "family": [
@@ -3448,13 +3448,13 @@
     ],
     "events": [
       "825: Born in a small settlement to a Laboring Poor family",
-      "839: Learned to read weather signs and predict harvest yields from a parent",
-      "843: A brother's marriage brought valuable new trade connections and opportunities",
-      "851: Inherited valuable tools and a workshop from a childless uncle",
-      "855: Broke ground on land nobody had ploughed before, and it paid",
-      "861: Required to provide labor for castle repairs",
-      "862: The family lost their mother when she was killed in a raid",
-      "864: After years of careful selection, successfully bred a hardier variety of wheat"
+      "840: Began working family fields, learning the rotation from elders",
+      "842: A brother's marriage brought valuable new trade connections and opportunities",
+      "849: Broke ground on land nobody had ploughed before, and it paid",
+      "850: Inherited an additional field from a childless uncle, expanding the family holdings",
+      "861: Father died from taken by raiders and never returned, leaving the family to manage affairs alone",
+      "870: Paid annual tribute to local lord",
+      "875: Took over the family business after a parent retired from active work"
     ]
   },
   "ireland-900#2": {
@@ -3467,16 +3467,16 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in Europe",
-    "head": "Harvest Cap [Rye Straw]",
-    "torso": "Marigold Peasant Shirt [Hemp]",
-    "feet": "Natural Foot Wraps [Linen]",
+    "head": "Natural Coif [Linen]",
+    "torso": "Bronze Heavy Top [Scratchy Fleece]",
+    "feet": "Turnshoes [Treated Hide]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#c2a463",
+      "headwearColor": "#d8cdb6",
       "garmentKind": "work_shirt",
-      "garmentColor": "#d9822f",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#4a5a6a",
-      "pose": "lame"
+      "pose": null
     },
     "family": [
       "father: Gruffydd son of Steffan",
@@ -3489,11 +3489,11 @@
     ],
     "events": [
       "860: Born in a small settlement to a Middling Sort family",
-      "873: Spent a first season away with the herd and came back taller",
-      "891: Inherited valuable tools and a workshop from a childless uncle",
-      "896: Father was killed in a raid, leaving the family to manage affairs alone",
-      "897: Summoned to lord's court as witness in land dispute",
-      "899: A sister married into a well-connected cathedral chapter, improving the family's social standing"
+      "872: Trusted to take the animals out alone for the first time",
+      "884: Inherited valuable tools and a workshop from a childless uncle",
+      "888: The family lost their father when he died from starvation during famine",
+      "892: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "896: Required to provide labor for castle repairs"
     ]
   },
   "ireland-900#3": {
@@ -3506,15 +3506,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in Europe",
-    "head": "Grey Coif [Linen]",
-    "torso": "Woad Peasant Shirt [Hemp]",
-    "feet": "Wooden Clogs [Oak Wood]",
+    "head": "Grey Coif [Rough Wool]",
+    "torso": "Olive Wool Tunic [Rough Wool]",
+    "feet": "Turnshoes [Raw Hide]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#8a8781",
-      "garmentKind": "work_shirt",
-      "garmentColor": "#3a4f6d",
-      "backgroundBase": "#6a4a57",
+      "garmentKind": "tunic",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#4a5a6a",
       "pose": "build:broad"
     },
     "family": [
@@ -3525,10 +3525,10 @@
     ],
     "events": [
       "880: Born in a small settlement to a Laboring Poor family",
-      "893: Learned to read weather signs and where the water would still be running",
-      "896: Summoned to lord's court as witness in land dispute",
-      "897: A brother's marriage brought valuable new trade connections and opportunities",
-      "899: Took over the family business after a parent retired from active work"
+      "894: Trusted to take the animals out alone for the first time",
+      "896: Paid annual tribute to local lord",
+      "898: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "899: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "iberia-1480#1": {
@@ -3541,14 +3541,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Turmeric Linen Coif [Rough Linen]",
-    "torso": "Black Peasant Skirt [Coarse Linen]",
-    "feet": "Wooden Clogs [Carved Wood]",
+    "head": "Turmeric Linen Cap [Rough Linen]",
+    "torso": "Walnut Linen Shift [Burlap]",
+    "feet": "Leather Shoes [Raw Hide]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#dfa62c",
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#1f1f22",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#343d46",
       "pose": null
     },
@@ -3564,12 +3564,12 @@
     "events": [
       "1405: Born in a small settlement to a Laboring Poor family",
       "1419: Learned to read weather signs and predict harvest yields from a parent",
-      "1424: Paid annual tribute to local lord",
-      "1427: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
-      "1428: The family pooled their resources to purchase a market stall, a significant investment",
-      "1430: A brother's marriage brought valuable new trade connections and opportunities",
-      "1435: Became the first in the village to successfully grow potatoes, earning respect from neighbors",
-      "1458: Inherited an additional field from a childless uncle, expanding the family holdings"
+      "1433: Broke ground on land nobody had ploughed before, and it paid",
+      "1435: Took over the family business after a parent retired from active work",
+      "1443: A brother's marriage brought valuable new trade connections and opportunities",
+      "1449: Paid annual tribute to local lord",
+      "1456: Divided the land among the children, keeping the best field for old age",
+      "1463: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit"
     ]
   },
   "iberia-1480#2": {
@@ -3604,7 +3604,7 @@
       "1440: Born in a small settlement to a Middling Sort family",
       "1452: Began learning the trade of cottager from an experienced practitioner",
       "1462: Paid annual tribute to local lord",
-      "1468: A sister married into a well-connected merchant guild, improving the family's social standing",
+      "1468: A sister married into a well-connected family holding a manor from the abbey, improving the family's social standing",
       "1472: Took over the family business after a parent retired from active work"
     ]
   },
@@ -3618,14 +3618,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Silver Rush Hat [Woven Rushes]",
-    "torso": "Crimson Peasant Shirt [Coarse Linen]",
-    "feet": "Wooden Shoes [Oak]",
+    "head": "Silver Straw Hat [Burlap]",
+    "torso": "Olive Linen Shirt [Hemp]",
+    "feet": "Leather Shoes [Raw Hide]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#b9bcc2",
       "garmentKind": "work_shirt",
-      "garmentColor": "#8e2436",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#343d46",
       "pose": "build:broad"
     },
@@ -3637,8 +3637,9 @@
     ],
     "events": [
       "1460: Born in a small settlement to a Laboring Poor family",
-      "1475: Began learning the trade of thresher from an experienced practitioner",
-      "1478: Paid annual tribute to local lord"
+      "1474: Began learning the trade of thresher from an experienced practitioner",
+      "1475: Required to provide labor for castle repairs",
+      "1479: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "russia-1600#1": {
@@ -3651,14 +3652,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Turmeric Kerchief [Cotton]",
-    "torso": "Black Work Bodice [Rough Wool]",
-    "feet": "Wooden Clogs [Carved Wood]",
+    "head": "Turmeric Linen Cap [Linen]",
+    "torso": "Walnut Wool Bodice And Petticoat [Wool]",
+    "feet": "Leather Shoes [Leather]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "cap",
       "headwearColor": "#dfa62c",
       "garmentKind": "doublet",
-      "garmentColor": "#1f1f22",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#343d46",
       "pose": null
     },
@@ -3674,11 +3675,10 @@
     "events": [
       "1525: Born in a small settlement to a Gentry family",
       "1539: Began learning the trade of farm labourer from an experienced practitioner",
+      "1541: A sister married into a well-connected cathedral chapter, improving the family's social standing",
       "1547: saw Grand Duchy of Moscow give way to Tsardom of Russia",
-      "1550: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1552: Mother died from smallpox despite efforts to save her",
-      "1557: The family pooled their resources to purchase draft animals, a significant investment",
-      "1566: Paid annual tribute to local lord"
+      "1548: Required to provide labor for castle repairs",
+      "1550: Took over the family business after a parent retired from active work"
     ]
   },
   "russia-1600#2": {
@@ -3691,16 +3691,16 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Turmeric Biggins [Rough Wool]",
-    "torso": "Tyrian Worker Jerkin [Rough Wool]",
-    "feet": "Leather Shoes [Cracked Leather]",
+    "head": "Turmeric Wool Cap [Rough Linen]",
+    "torso": "Bronze Linen Shirt [Rough Wool]",
+    "feet": "Leather Shoes [Raw Hide]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#dfa62c",
-      "garmentKind": "doublet",
-      "garmentColor": "#6a2450",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#343d46",
-      "pose": null
+      "pose": "consumptive"
     },
     "family": [
       "father: Stefan Sapieha",
@@ -3713,12 +3713,11 @@
     ],
     "events": [
       "1560: Born in a small settlement to a Laboring Poor family",
-      "1572: Began learning the trade of ploughman from an experienced practitioner",
-      "1578: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1587: Father died from typhus, leaving the family to manage affairs alone",
-      "1593: Broke ground on land nobody had ploughed before, and it paid",
-      "1595: The family pooled their resources to purchase a market stall, a significant investment",
-      "1597: Required to provide labor for castle repairs"
+      "1573: Began learning the trade of ploughman from an experienced practitioner",
+      "1585: Paid annual tribute to local lord",
+      "1589: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1593: Took over the family business after a parent retired from active work",
+      "1599: Experimenting with a new plowing method led to a marked increase in field productivity"
     ]
   },
   "russia-1600#3": {
@@ -3731,14 +3730,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Cream Biggins [Rough Wool]",
-    "torso": "Charcoal Worker Jerkin [Rough Wool]",
-    "feet": "Hide Boots [Hide]",
+    "head": "Cream Wool Cap [Hemp]",
+    "torso": "Olive Wool Breeches [Rough Wool]",
+    "feet": "Leather Shoes [Raw Hide]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#ddd3ba",
-      "garmentKind": "doublet",
-      "garmentColor": "#3a3a38",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#343d46",
       "pose": "build:broad"
     },
@@ -3750,10 +3749,10 @@
     ],
     "events": [
       "1580: Born in a small settlement to a Laboring Poor family",
-      "1593: Learned to read weather signs and where the water would still be running",
-      "1594: Paid annual tribute to local lord",
-      "1597: A brother's marriage brought valuable new trade connections and opportunities",
-      "1598: Inherited valuable tools and a workshop from a childless uncle"
+      "1594: Trusted to take the animals out alone for the first time",
+      "1597: Paid annual tribute to local lord",
+      "1598: Inherited valuable tools and a workshop from a childless uncle",
+      "1599: A sister married into a well-connected town council, improving the family's social standing"
     ]
   },
   "lowcountries-1650#1": {
@@ -3766,14 +3765,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Cream Linen Coif [Rough Linen]",
-    "torso": "Charcoal Simple Chemise [Hemp]",
-    "feet": "Cream Cloth Shoes [Rough Cloth]",
+    "head": "Cream Linen Cap [Wool]",
+    "torso": "Olive Wool Bodice And Petticoat [Linen]",
+    "feet": "Leather Shoes [Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#ddd3ba",
-      "garmentKind": "work_shirt",
-      "garmentColor": "#3a3a38",
+      "garmentKind": "doublet",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#343d46",
       "pose": null
     },
@@ -3790,9 +3789,10 @@
       "1575: Born in a small settlement to a Merchant family",
       "1581: grew up under the Dutch Republic, which had taken the place from Habsburg Netherlands too early to be remembered",
       "1589: Learned to read weather signs and where the water would still be running",
-      "1598: A sister married into a well-connected merchant guild, improving the family's social standing",
-      "1606: Took over the family business after a parent retired from active work",
-      "1647: Summoned to lord's court as witness in land dispute"
+      "1600: Paid annual tribute to local lord",
+      "1602: Took over the family business after a parent retired from active work",
+      "1605: Tragedy struck when a parent was killed in the fighting",
+      "1610: A sister married into a well-connected town council, improving the family's social standing"
     ]
   },
   "lowcountries-1650#2": {
@@ -3805,14 +3805,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Cream Biggins [Rough Wool]",
-    "torso": "Black Peasant Shirt [Coarse Linen]",
-    "feet": "Leather Shoes [Cracked Leather]",
+    "head": "Cream Wool Cap [Linen]",
+    "torso": "Walnut Linen Shirt [Wool]",
+    "feet": "Leather Shoes [Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#ddd3ba",
       "garmentKind": "work_shirt",
-      "garmentColor": "#1f1f22",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#343d46",
       "pose": null
     },
@@ -3827,12 +3827,11 @@
     ],
     "events": [
       "1610: Born in a small settlement to a Middling Sort family",
-      "1622: Began learning the trade of ploughman from an experienced practitioner",
-      "1628: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1637: Father was murdered, leaving the family to manage affairs alone",
-      "1643: Broke ground on land nobody had ploughed before, and it paid",
-      "1645: The family pooled their resources to purchase a market stall, a significant investment",
-      "1647: Required to provide labor for castle repairs"
+      "1623: Began learning the trade of ploughman from an experienced practitioner",
+      "1635: Paid annual tribute to local lord",
+      "1639: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1643: Took over the family business after a parent retired from active work",
+      "1649: Experimenting with a new plowing method led to a marked increase in field productivity"
     ]
   },
   "lowcountries-1650#3": {
@@ -3845,14 +3844,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Natural Biggins [Rough Wool]",
-    "torso": "Crimson Peasant Shirt [Coarse Linen]",
-    "feet": "Wooden Shoes [Oak]",
+    "head": "Natural Straw Hat [Wool]",
+    "torso": "Olive Wool Breeches [Cotton]",
+    "feet": "Leather Shoes [Leather]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "brimmed_hat",
       "headwearColor": "#d8cdb6",
       "garmentKind": "work_shirt",
-      "garmentColor": "#8e2436",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#343d46",
       "pose": "build:broad"
     },
@@ -3864,10 +3863,10 @@
     ],
     "events": [
       "1630: Born in a small settlement to a Laboring Poor family",
-      "1643: Learned to read weather signs and where the water would still be running",
-      "1644: Paid annual tribute to local lord",
-      "1647: A brother's marriage brought valuable new trade connections and opportunities",
-      "1648: Inherited valuable tools and a workshop from a childless uncle"
+      "1644: Trusted to take the animals out alone for the first time",
+      "1647: Paid annual tribute to local lord",
+      "1648: Inherited valuable tools and a workshop from a childless uncle",
+      "1649: A sister married into a well-connected town council, improving the family's social standing"
     ]
   },
   "germany-1930#1": {
@@ -3904,7 +3903,7 @@
       "1849: Born in a small settlement to a Middle Class family",
       "1863: Began learning the trade of hospital orderly from an experienced practitioner",
       "1871: saw the German Confederation give way to the German Empire",
-      "1875: A sister married into a well-connected cathedral chapter, improving the family's social standing",
+      "1875: A sister married into a well-connected noble house, improving the family's social standing",
       "1879: A sister married and moved across the city, and the house was quieter for it",
       "1885: Tragedy struck when a parent died from Spanish flu",
       "1895: The family pooled their resources to purchase a tractor, a significant investment",
@@ -3921,15 +3920,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in Europe",
-    "head": "Russet Fedora [Felt]",
-    "torso": "Indigo Cardigan [Wool]",
-    "feet": "Oxford Shoes [Quality Leather]",
+    "head": "Russet Wool Watch Cap [Linen]",
+    "torso": "Walnut Guernsey Sweater [Wool]",
+    "feet": "Russet Rubber Sea Boots [Cotton]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "cap",
       "headwearColor": "#8a5a3b",
-      "garmentKind": "jacket",
-      "garmentColor": "#2e3f5c",
-      "backgroundBase": "#655359",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#5b4229",
+      "backgroundBase": "#535c65",
       "pose": null
     },
     "family": [
@@ -3941,11 +3940,10 @@
     ],
     "events": [
       "1884: Born in a small settlement to a Working Class family",
-      "1896: Learned to read the weather and the water from a parent",
-      "1902: Stood as witness at a sibling's wedding, and understood that the household had changed shape",
-      "1903: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1914: The family pooled their resources to purchase a second-hand truck, a significant investment",
-      "1918: came under the Weimar Republic, having been born under the German Empire"
+      "1897: Went out with the adults for the first time and came back carrying a share",
+      "1918: came under the Weimar Republic, having been born under the German Empire",
+      "1919: The family pooled their resources to purchase a plot on the edge of town, a significant investment",
+      "1929: A sister married and moved across the city, and the house was quieter for it"
     ]
   },
   "germany-1930#3": {
@@ -3993,14 +3991,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Crimson Linen Veil [White Linen]",
-    "torso": "Brown Linen Dress [Plain Linen]",
-    "feet": "Simple Sandals [Leather]",
+    "head": null,
+    "torso": "Walnut Linen Sheath Dress (Kalasiris) [Burlap]",
+    "feet": "Barefoot [Rough Wool]",
     "portrait": {
-      "headwearKind": "veil",
-      "headwearColor": "#8e2436",
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c2a463",
       "garmentKind": "gown",
-      "garmentColor": "#6f5237",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#4b505d",
       "pose": null
     },
@@ -4013,12 +4011,12 @@
     "events": [
       "-1425: Born in a small settlement to a Peasant family",
       "-1411: Learned to read weather signs and predict harvest yields from a parent",
-      "-1403: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "-1400: A brother's marriage brought valuable new trade connections and opportunities",
-      "-1389: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
-      "-1377: Took over the family business after a parent retired from active work",
-      "-1364: After years of careful selection, successfully bred a hardier variety of wheat",
-      "-1357: Inherited an additional field from a childless uncle, expanding the family holdings"
+      "-1409: A brother's marriage brought valuable new trade connections and opportunities",
+      "-1397: Broke ground on land nobody had ploughed before, and it paid",
+      "-1395: Took over the family business after a parent retired from active work",
+      "-1374: Divided the land among the children, keeping the best field for old age",
+      "-1367: After years of careful selection, successfully bred a hardier variety of dates",
+      "-1359: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed"
     ]
   },
   "egypt-1350bce#2": {
@@ -4031,14 +4029,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Green Head Cloth [Linen]",
-    "torso": "Turmeric Linen Tunic [Coarse Linen]",
-    "feet": "Leather Sandals [Raw Leather]",
+    "head": "Green Linen Head-Cloth [Linen]",
+    "torso": "Olive Linen Kilt (Schenti) [Wool]",
+    "feet": "Green Woven Reed Sandals [Linen]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "cap",
       "headwearColor": "#5a6b3b",
       "garmentKind": "tunic",
-      "garmentColor": "#dfa62c",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#5c6272",
       "pose": null
     },
@@ -4053,13 +4051,13 @@
     ],
     "events": [
       "-1390: Born in a small settlement to a Commoner family",
-      "-1378: Learned to read weather signs and where the water would still be running",
-      "-1372: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "-1363: Inherited valuable tools and a workshop from a childless uncle"
+      "-1377: Trusted to take the animals out alone for the first time",
+      "-1359: Inherited valuable tools and a workshop from a childless uncle",
+      "-1351: A sister married into a well-connected tribal confederation, improving the family's social standing"
     ]
   },
   "egypt-1350bce#3": {
-    "name": "Omari the Captive",
+    "name": "Omari the Slow-Spoken",
     "gender": "Male",
     "age": 20,
     "profession": "Miner",
@@ -4068,28 +4066,29 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Tan Head Cloth [Linen]",
-    "torso": "Ivory Linen Tunic [Coarse Linen]",
-    "feet": "Reed Sandals [Woven Reed]",
+    "head": "Tan Linen Head-Cloth [Hemp]",
+    "torso": "Charcoal Linen Loincloth [Rough Wool]",
+    "feet": "Barefoot [Rough Wool]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "cap",
       "headwearColor": "#a98a63",
-      "garmentKind": "tunic",
-      "garmentColor": "#e5ddd0",
+      "garmentKind": "bare",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#4b505d",
-      "pose": "build:broad+brave"
+      "pose": "build:broad"
     },
     "family": [
-      "father: Narmer the Younger",
-      "mother: Neithhotep",
-      "brother: Badari",
-      "sister: Betresh"
+      "father: Scorpion",
+      "mother: Tetisheri",
+      "brother: Khenti the Highlander",
+      "sister: Nakhtneith the Grave",
+      "twin: Abydos"
     ],
     "events": [
       "-1370: Born in a small settlement to a Peasant family",
-      "-1355: Began learning the trade of miner from an experienced practitioner",
-      "-1352: Took over the family business after a parent retired from active work",
-      "-1351: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "-1356: Began learning the trade of miner from an experienced practitioner",
+      "-1352: A brother's marriage brought valuable new trade connections and opportunities",
+      "-1351: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "mesopotamia-1750bce#1": {
@@ -4102,14 +4101,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Indigo Linen Veil [White Linen]",
-    "torso": "Ivory Linen Dress [Plain Linen]",
-    "feet": "Simple Sandals [Leather]",
+    "head": null,
+    "torso": "Charcoal Linen Sheath Dress (Kalasiris) [Burlap]",
+    "feet": "Barefoot [Rough Wool]",
     "portrait": {
-      "headwearKind": "veil",
-      "headwearColor": "#2e3f5c",
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c2a463",
       "garmentKind": "gown",
-      "garmentColor": "#e5ddd0",
+      "garmentColor": "#3a3a38",
       "backgroundBase": "#4b505d",
       "pose": null
     },
@@ -4125,12 +4124,12 @@
     "events": [
       "-1825: Born in a small settlement to a Peasant family",
       "-1811: Learned to read weather signs and predict harvest yields from a parent",
-      "-1803: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "-1800: A brother's marriage brought valuable new trade connections and opportunities",
-      "-1789: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
-      "-1777: Took over the family business after a parent retired from active work",
-      "-1764: After years of careful selection, successfully bred a hardier variety of wheat",
-      "-1757: Inherited an additional field from a childless uncle, expanding the family holdings"
+      "-1797: Broke ground on land nobody had ploughed before, and it paid",
+      "-1795: Took over the family business after a parent retired from active work",
+      "-1792: Mother died in desert despite efforts to save her",
+      "-1787: A brother's marriage brought valuable new trade connections and opportunities",
+      "-1774: Divided the land among the children, keeping the best field for old age",
+      "-1767: After years of careful selection, successfully bred a hardier variety of dates"
     ]
   },
   "mesopotamia-1750bce#2": {
@@ -4143,14 +4142,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Tan Head Cloth [Linen]",
-    "torso": "Brown Linen Tunic [Coarse Linen]",
-    "feet": "Leather Sandals [Raw Leather]",
+    "head": "Tan Linen Head-Cloth [Linen]",
+    "torso": "Walnut Linen Kilt (Schenti) [Wool]",
+    "feet": "Tan Woven Reed Sandals [Linen]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "cap",
       "headwearColor": "#a98a63",
       "garmentKind": "tunic",
-      "garmentColor": "#6f5237",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#5c6272",
       "pose": null
     },
@@ -4165,9 +4164,9 @@
     ],
     "events": [
       "-1790: Born in a small settlement to a Commoner family",
-      "-1778: Learned to read weather signs and where the water would still be running",
-      "-1772: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "-1763: Inherited valuable tools and a workshop from a childless uncle"
+      "-1777: Trusted to take the animals out alone for the first time",
+      "-1759: Inherited valuable tools and a workshop from a childless uncle",
+      "-1751: A sister married into a well-connected military elite, improving the family's social standing"
     ]
   },
   "mesopotamia-1750bce#3": {
@@ -4180,16 +4179,16 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Indigo Head Cloth [Linen]",
-    "torso": "Woad Linen Tunic [Coarse Linen]",
-    "feet": "Reed Sandals [Woven Reed]",
+    "head": "Indigo Linen Head-Cloth [Hemp]",
+    "torso": "Olive Linen Loincloth [Rough Wool]",
+    "feet": "Barefoot [Rough Wool]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "cap",
       "headwearColor": "#2e3f5c",
-      "garmentKind": "tunic",
-      "garmentColor": "#3a4f6d",
-      "backgroundBase": "#725c65",
-      "pose": "build:broad+brave"
+      "garmentKind": "bare",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#5c6272",
+      "pose": "build:broad"
     },
     "family": [
       "father: Hammurabi the Patient One",
@@ -4199,9 +4198,9 @@
     ],
     "events": [
       "-1770: Born in a small settlement to a Peasant family",
-      "-1755: Began learning the trade of miner from an experienced practitioner",
-      "-1752: Took over the family business after a parent retired from active work",
-      "-1751: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "-1756: Began learning the trade of miner from an experienced practitioner",
+      "-1752: A brother's marriage brought valuable new trade connections and opportunities",
+      "-1751: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "persia-500bce#1": {
@@ -4214,14 +4213,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Green Linen Veil [White Linen]",
-    "torso": "Brown Linen Dress [Plain Linen]",
-    "feet": "Simple Sandals [Leather]",
+    "head": null,
+    "torso": "Walnut Linen Sheath Dress (Kalasiris) [Burlap]",
+    "feet": "Barefoot [Rough Wool]",
     "portrait": {
-      "headwearKind": "veil",
-      "headwearColor": "#5a6b3b",
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c2a463",
       "garmentKind": "gown",
-      "garmentColor": "#6f5237",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#4b505d",
       "pose": null
     },
@@ -4234,12 +4233,12 @@
     "events": [
       "-575: Born in a small settlement to a Laboring Poor family",
       "-561: Learned to read weather signs and predict harvest yields from a parent",
-      "-553: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "-550: A brother's marriage brought valuable new trade connections and opportunities",
       "-550: came under the Achaemenid Empire, where no state had claimed the place before",
-      "-543: A father's death changed everything for the household",
-      "-539: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
-      "-536: Took over the family business after a parent retired from active work"
+      "-547: Broke ground on land nobody had ploughed before, and it paid",
+      "-545: Took over the family business after a parent retired from active work",
+      "-542: Mother died in desert despite efforts to save her",
+      "-537: A brother's marriage brought valuable new trade connections and opportunities",
+      "-524: Divided the land among the children, keeping the best field for old age"
     ]
   },
   "persia-500bce#2": {
@@ -4252,15 +4251,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Turmeric Head Cloth [Linen]",
-    "torso": "Woad Linen Tunic [Coarse Linen]",
-    "feet": "Leather Sandals [Raw Leather]",
+    "head": "Turmeric Linen Head-Cloth [Linen]",
+    "torso": "Olive Linen Kilt (Schenti) [Wool]",
+    "feet": "Turmeric Woven Reed Sandals [Linen]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "cap",
       "headwearColor": "#dfa62c",
       "garmentKind": "tunic",
-      "garmentColor": "#3a4f6d",
-      "backgroundBase": "#725c65",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#5c6272",
       "pose": null
     },
     "family": [
@@ -4271,9 +4270,9 @@
     ],
     "events": [
       "-540: Born in a small settlement to a Middling Sort family",
-      "-528: Learned to read weather signs and where the water would still be running",
-      "-522: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "-513: The family pooled their resources to purchase a storage barn, a significant investment"
+      "-527: Trusted to take the animals out alone for the first time",
+      "-509: The family pooled their resources to purchase a mill share, a significant investment",
+      "-501: A sister married into a well-connected military elite, improving the family's social standing"
     ]
   },
   "persia-500bce#3": {
@@ -4286,16 +4285,16 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Green Head Cloth [Linen]",
-    "torso": "Woad Linen Tunic [Coarse Linen]",
-    "feet": "Reed Sandals [Woven Reed]",
+    "head": null,
+    "torso": "Olive Linen Kilt [Rough Wool]",
+    "feet": "Barefoot [Burlap]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
-      "headwearColor": "#5a6b3b",
+      "headwearKind": "cap",
+      "headwearColor": "#6b482f",
       "garmentKind": "tunic",
-      "garmentColor": "#3a4f6d",
-      "backgroundBase": "#725c65",
-      "pose": "build:broad+brave"
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#5c6272",
+      "pose": "build:broad"
     },
     "family": [
       "father: Orodes",
@@ -4305,9 +4304,9 @@
     ],
     "events": [
       "-520: Born in a small settlement to a Laboring Poor family",
-      "-505: Began learning the trade of smith from an experienced practitioner",
-      "-502: A brother's marriage brought valuable new trade connections and opportunities",
-      "-501: Inherited valuable tools and a workshop from a childless uncle"
+      "-507: Began learning the trade of smith from an experienced practitioner",
+      "-502: Created masterwork that drew crowds to market square",
+      "-501: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "levant-30#1": {
@@ -4321,13 +4320,13 @@
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
     "head": null,
-    "torso": "Brown Cotton Robe [Rough Cotton]",
-    "feet": "Simple Sandals [Leather]",
+    "torso": "Walnut Linen Sheath Dress (Kalasiris) [Wool]",
+    "feet": "Barefoot [Wool]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
-      "garmentKind": "robe",
-      "garmentColor": "#6f5237",
+      "garmentKind": "gown",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#4b505d",
       "pose": null
     },
@@ -4343,12 +4342,12 @@
     "events": [
       "-45: Born in a small settlement to a Gentry family",
       "-31: Learned to read weather signs and predict harvest yields from a parent",
-      "-23: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "-20: A brother's marriage brought valuable new trade connections and opportunities",
-      "-9: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
-      "3: Inherited valuable tools and a workshop from a childless uncle",
-      "16: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
-      "23: Purchased the neighbor's plot after they decided to seek fortune in the city"
+      "-17: Broke ground on land nobody had ploughed before, and it paid",
+      "-15: Took over the family business after a parent retired from active work",
+      "-8: Mother died from starvation during drought despite efforts to save her",
+      "6: Divided the land among the children, keeping the best field for old age",
+      "11: A sister married into a well-connected Alexandrian grain-shipping family, improving the family's social standing",
+      "13: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit"
     ]
   },
   "levant-30#2": {
@@ -4361,15 +4360,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Crimson Head Cloth [Linen]",
-    "torso": "Natural Desert Robe [Rough Wool]",
-    "feet": "Leather Sandals [Raw Leather]",
+    "head": "Crimson Linen Head-Cloth [Rough Linen]",
+    "torso": "Indigo Linen Kilt (Schenti) [Rough Wool]",
+    "feet": "Crimson Woven Reed Sandals [Rough Linen]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "cap",
       "headwearColor": "#8e2436",
-      "garmentKind": "robe",
-      "garmentColor": "#d8cdb6",
-      "backgroundBase": "#5c6272",
+      "garmentKind": "tunic",
+      "garmentColor": "#2e3f5c",
+      "backgroundBase": "#725c64",
       "pose": null
     },
     "family": [
@@ -4380,9 +4379,9 @@
     ],
     "events": [
       "-10: Born in a small settlement to a Laboring Poor family",
-      "2: Learned to read weather signs and where the water would still be running",
-      "8: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "17: The family pooled their resources to purchase a storage barn, a significant investment"
+      "3: Trusted to take the animals out alone for the first time",
+      "18: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "23: Took over the family business after a parent retired from active work"
     ]
   },
   "levant-30#3": {
@@ -4396,15 +4395,15 @@
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
     "head": null,
-    "torso": "Charcoal Desert Robe [Rough Wool]",
-    "feet": "Reed Sandals [Woven Reed]",
+    "torso": "Olive Linen Kilt [Rough Wool]",
+    "feet": "Barefoot [Burlap]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#6b482f",
-      "garmentKind": "robe",
-      "garmentColor": "#3a3a38",
+      "garmentKind": "tunic",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#5c6272",
-      "pose": "build:broad+brave"
+      "pose": "build:broad"
     },
     "family": [
       "father: Baruch son of Obadiah",
@@ -4414,9 +4413,9 @@
     ],
     "events": [
       "10: Born in a small settlement to a Laboring Poor family",
-      "25: Began learning the trade of smith from an experienced practitioner",
-      "28: A brother's marriage brought valuable new trade connections and opportunities",
-      "29: Inherited valuable tools and a workshop from a childless uncle"
+      "23: Began learning the trade of smith from an experienced practitioner",
+      "28: Created masterwork that drew crowds to market square",
+      "29: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "maghreb-620bce#1": {
@@ -4429,14 +4428,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Jeweled Headband [Silver and Gems]",
-    "torso": "Brown Cotton Dress [Quality Cotton]",
-    "feet": "Green Silk Slippers [Embroidered Silk]",
+    "head": null,
+    "torso": "Walnut Linen Sheath Dress (Kalasiris) [Wool]",
+    "feet": "Barefoot [Wool]",
     "portrait": {
-      "headwearKind": "band",
-      "headwearColor": "#b9bcc2",
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c2a463",
       "garmentKind": "gown",
-      "garmentColor": "#6f5237",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#4b505d",
       "pose": null
     },
@@ -4452,12 +4451,12 @@
     "events": [
       "-695: Born in a small settlement to a Commoner family",
       "-681: Learned to read weather signs and predict harvest yields from a parent",
-      "-673: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "-670: A brother's marriage brought valuable new trade connections and opportunities",
-      "-659: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
-      "-647: Took over the family business after a parent retired from active work",
-      "-634: After years of careful selection, successfully bred a hardier variety of wheat",
-      "-627: Inherited an additional field from a childless uncle, expanding the family holdings"
+      "-667: Broke ground on land nobody had ploughed before, and it paid",
+      "-665: Took over the family business after a parent retired from active work",
+      "-662: Mother died in desert despite efforts to save her",
+      "-657: A brother's marriage brought valuable new trade connections and opportunities",
+      "-644: Divided the land among the children, keeping the best field for old age",
+      "-637: After years of careful selection, successfully bred a hardier variety of dates"
     ]
   },
   "maghreb-620bce#2": {
@@ -4470,14 +4469,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Tan Head Cloth [Linen]",
-    "torso": "Brown Linen Tunic [Coarse Linen]",
-    "feet": "Leather Sandals [Raw Leather]",
+    "head": "Tan Linen Head-Cloth [Linen]",
+    "torso": "Walnut Linen Kilt (Schenti) [Wool]",
+    "feet": "Tan Woven Reed Sandals [Linen]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "cap",
       "headwearColor": "#a98a63",
       "garmentKind": "tunic",
-      "garmentColor": "#6f5237",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#5c6272",
       "pose": null
     },
@@ -4489,9 +4488,9 @@
     ],
     "events": [
       "-660: Born in a small settlement to a Commoner family",
-      "-648: Learned to read weather signs and where the water would still be running",
-      "-642: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "-633: Inherited valuable tools and a workshop from a childless uncle"
+      "-647: Trusted to take the animals out alone for the first time",
+      "-629: Inherited valuable tools and a workshop from a childless uncle",
+      "-621: A sister married into a well-connected military elite, improving the family's social standing"
     ]
   },
   "maghreb-620bce#3": {
@@ -4504,16 +4503,16 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": "Indigo Head Cloth [Linen]",
-    "torso": "Charcoal Linen Tunic [Coarse Linen]",
-    "feet": "Reed Sandals [Woven Reed]",
+    "head": "Indigo Linen Head-Cloth [Cotton]",
+    "torso": "Olive Linen Loincloth [Wool]",
+    "feet": "Barefoot [Cotton]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "cap",
       "headwearColor": "#2e3f5c",
-      "garmentKind": "tunic",
-      "garmentColor": "#3a3a38",
+      "garmentKind": "bare",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#5c6272",
-      "pose": "build:broad+brave"
+      "pose": "build:broad"
     },
     "family": [
       "father: Dihya",
@@ -4523,9 +4522,9 @@
     ],
     "events": [
       "-640: Born in a small settlement to a Peasant family",
-      "-625: Began learning the trade of miner from an experienced practitioner",
-      "-622: Took over the family business after a parent retired from active work",
-      "-621: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "-626: Began learning the trade of miner from an experienced practitioner",
+      "-622: A brother's marriage brought valuable new trade connections and opportunities",
+      "-621: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "baghdad-1924#1": {
@@ -4539,14 +4538,14 @@
     "languageConfidence": "attested",
     "odds": "the modern era in the Middle East and North Africa",
     "head": null,
-    "torso": "Navy Cotton Sari [Printed Cotton]",
+    "torso": "Olive Cotton Sari [Printed Cotton]",
     "feet": "Ivory Plastic Sandals [PVC]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "gown",
-      "garmentColor": "#23304a",
-      "backgroundBase": "#655359",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#535865",
       "pose": null
     },
     "family": [
@@ -4560,7 +4559,7 @@
     "events": [
       "1843: Born in a small settlement to a Working Class family",
       "1857: Began learning the trade of postal worker from an experienced practitioner",
-      "1869: A sister married into a well-connected Sufi order, improving the family's social standing",
+      "1869: A sister married into a well-connected merchant caravan, improving the family's social standing",
       "1873: A sister married and moved across the city, and the house was quieter for it",
       "1879: Tragedy struck when a parent died from tuberculosis",
       "1889: The family pooled their resources to purchase a tractor, a significant investment"
@@ -4577,13 +4576,13 @@
     "languageConfidence": "attested",
     "odds": "the modern era in the Middle East and North Africa",
     "head": null,
-    "torso": "Black T-Shirt [Cotton]",
+    "torso": "Bronze T-Shirt [Cotton]",
     "feet": "Rust Barefoot [None]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#1f1f22",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#5d6271",
       "pose": null
     },
@@ -4728,12 +4727,12 @@
     "languageConfidence": "conjectural",
     "odds": "prehistory in sub-Saharan Africa",
     "head": null,
-    "torso": "Hide Loincloth [Antelope Hide]",
+    "torso": "Hide Wrap Kilt [Leather]",
     "feet": "Woad Barefoot [None]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "bare",
+      "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
       "backgroundBase": "#4a5b60",
       "pose": "build:broad"
@@ -4748,11 +4747,10 @@
     "events": [
       "-9020: Born to the band that ranged this country",
       "-9014: The herds did not come that year, and the camp moved three times looking for them",
-      "-9012: Was caught by an animal that did not die quickly, and carried the scars afterwards",
-      "-9007: Was among the party that drove a herd into the narrows, and the band ate well for many days",
-      "-9005: Learned which ground gave what, and in which month",
-      "-9004: Walked with the band to the far camp, further than the children had ever been",
-      "-9003: Left the band of birth to live with another, as is the custom",
+      "-9012: Fell badly on the rocks, and the leg never set straight",
+      "-9006: Went out with the adults for the first time and came back carrying a share",
+      "-9004: Came back to the band of birth after years away, and was taken in again",
+      "-9003: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
       "-9002: An elder died, and with them went the knowledge of country nobody else held"
     ]
   },
@@ -4805,13 +4803,13 @@
     "languageConfidence": "reconstructed",
     "odds": "prehistory in sub-Saharan Africa",
     "head": null,
-    "torso": "Natural Bark Cloth [Beaten Bark]",
+    "torso": "Bronze Bark Cloth [Beaten Bark]",
     "feet": "Henna Barefoot [None]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#d8cdb6",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#5d7379",
       "pose": null
     },
@@ -4846,13 +4844,13 @@
     "languageConfidence": "reconstructed",
     "odds": "prehistory in sub-Saharan Africa",
     "head": null,
-    "torso": "Green Bark Cloth [Beaten Bark]",
-    "feet": "Turmeric Barefoot [None]",
+    "torso": "Hide Wrap Kilt [Leather]",
+    "feet": "Turmeric Barefoot [Cotton]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#5a6b3b",
+      "garmentColor": "#6b482f",
       "backgroundBase": "#4a5b60",
       "pose": "build:broad"
     },
@@ -4866,11 +4864,10 @@
     "events": [
       "-4320: Born to the band that ranged this country",
       "-4314: The herds did not come that year, and the camp moved three times looking for them",
-      "-4312: Was caught by an animal that did not die quickly, and carried the scars afterwards",
-      "-4307: Was among the party that drove a herd into the narrows, and the band ate well for many days",
-      "-4305: Learned which ground gave what, and in which month",
-      "-4304: Walked with the band to the far camp, further than the children had ever been",
-      "-4303: Left the band of birth to live with another, as is the custom",
+      "-4312: Fell badly on the rocks, and the leg never set straight",
+      "-4306: Went out with the adults for the first time and came back carrying a share",
+      "-4304: Came back to the band of birth after years away, and was taken in again",
+      "-4303: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
       "-4302: An elder died, and with them went the knowledge of country nobody else held"
     ]
   },
@@ -4884,13 +4881,13 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in sub-Saharan Africa",
-    "head": null,
-    "torso": "Walnut Head Tie [Cotton]",
-    "feet": "Barefoot [None]",
+    "head": "Ivory Cotton Headwrap [Burlap]",
+    "torso": "Walnut Cotton Wrap Dress [Burlap]",
+    "feet": "Barefoot [Rough Wool]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
-      "headwearColor": "#c2a463",
-      "garmentKind": "tunic",
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#e5ddd0",
+      "garmentKind": "gown",
       "garmentColor": "#5b4229",
       "backgroundBase": "#35525a",
       "pose": null
@@ -4907,12 +4904,12 @@
     "events": [
       "1025: Born in a small settlement to a Laboring Poor family",
       "1039: Learned to read weather signs and predict harvest yields from a parent",
-      "1043: Took over the family business after a parent retired from active work",
-      "1050: A brother's marriage brought valuable new trade connections and opportunities",
-      "1055: Broke ground on land nobody had ploughed before, and it paid",
-      "1058: Mother was murdered despite efforts to save her",
-      "1064: After years of careful selection, successfully bred a hardier variety of millet",
-      "1081: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest"
+      "1042: A brother's marriage brought valuable new trade connections and opportunities",
+      "1046: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1053: Divided the land among the children, keeping the best field for old age",
+      "1065: Took over the family business after a parent retired from active work",
+      "1071: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "1083: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit"
     ]
   },
   "ethiopia-1100#2": {
@@ -4926,13 +4923,13 @@
     "languageConfidence": "attested",
     "odds": "the medieval period in sub-Saharan Africa",
     "head": null,
-    "torso": "Brown Folk Tunic [Rough Wool]",
-    "feet": "Natural Barefoot [None]",
+    "torso": "Bronze Handwoven Cotton Wrap Cloth [Wool]",
+    "feet": "Natural Barefoot [Linen]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "tunic",
-      "garmentColor": "#6f5237",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#4c7581",
       "pose": null
     },
@@ -4950,7 +4947,7 @@
       "1073: Spent a first season away with the herd and came back taller",
       "1089: Father died from malaria despite seeking help",
       "1098: Took over the family business after a parent retired from active work",
-      "1099: A sister married into a well-connected trading family, improving the family's social standing"
+      "1099: A sister married into a well-connected age-grade society, improving the family's social standing"
     ]
   },
   "ethiopia-1100#3": {
@@ -4963,15 +4960,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in sub-Saharan Africa",
-    "head": "Ivory Cotton Cap [Plain Cotton]",
-    "torso": "Woad Work Blouse [Hemp Cloth]",
-    "feet": "Barefoot [None]",
+    "head": null,
+    "torso": "Olive Handwoven Cotton Wrap Cloth [Rough Wool]",
+    "feet": "Barefoot [Rough Wool]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#e5ddd0",
-      "garmentKind": "work_shirt",
-      "garmentColor": "#3a4f6d",
-      "backgroundBase": "#8b5269",
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#3f616b",
       "pose": "build:broad"
     },
     "family": [
@@ -4996,14 +4993,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in sub-Saharan Africa",
-    "head": "Ivory Duku [Tied Fabric]",
-    "torso": "Turmeric Slit [Woven Cotton]",
-    "feet": "Ivory Sandals [Woven Palm]",
+    "head": "Ivory Cotton Headwrap [Linen]",
+    "torso": "Olive Cotton Wrap Dress [Wool]",
+    "feet": "Barefoot [Wool]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#e5ddd0",
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#dfa62c",
+      "garmentKind": "gown",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#35525a",
       "pose": null
     },
@@ -5019,12 +5016,12 @@
     "events": [
       "1325: Born in a small settlement to a Middling Sort family",
       "1339: Learned to read weather signs and predict harvest yields from a parent",
-      "1343: Took over the family business after a parent retired from active work",
-      "1350: A brother's marriage brought valuable new trade connections and opportunities",
-      "1355: Broke ground on land nobody had ploughed before, and it paid",
-      "1358: Mother was murdered despite efforts to save her",
-      "1364: After years of careful selection, successfully bred a hardier variety of millet",
-      "1381: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest"
+      "1342: A brother's marriage brought valuable new trade connections and opportunities",
+      "1346: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1353: Divided the land among the children, keeping the best field for old age",
+      "1365: Took over the family business after a parent retired from active work",
+      "1371: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "1383: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit"
     ]
   },
   "swahili-1400#2": {
@@ -5038,13 +5035,13 @@
     "languageConfidence": "attested",
     "odds": "the medieval period in sub-Saharan Africa",
     "head": null,
-    "torso": "Brown Folk Tunic [Rough Wool]",
-    "feet": "Natural Barefoot [None]",
+    "torso": "Bronze Handwoven Cotton Wrap Cloth [Wool]",
+    "feet": "Natural Barefoot [Linen]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "tunic",
-      "garmentColor": "#6f5237",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#4c7581",
       "pose": null
     },
@@ -5057,7 +5054,7 @@
     "events": [
       "1339: Born in a small settlement to a Middling Sort family",
       "1352: Spent a first season away with the herd and came back taller",
-      "1355: A sister married into a well-connected royal lineage, improving the family's social standing",
+      "1355: A sister married into a well-connected patrician family of a stone town, improving the family's social standing",
       "1365: Inherited valuable tools and a workshop from a childless uncle",
       "1374: The family lost their father when he died from dysentery"
     ]
@@ -5072,13 +5069,13 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in sub-Saharan Africa",
-    "head": "Grey Cotton Cap [Plain Cotton]",
-    "torso": "Walnut Work Blouse [Hemp Cloth]",
-    "feet": "Barefoot [None]",
+    "head": null,
+    "torso": "Walnut Handwoven Cotton Wrap Cloth [Rough Wool]",
+    "feet": "Barefoot [Rough Wool]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#8a8781",
-      "garmentKind": "work_shirt",
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "wrapped_garment",
       "garmentColor": "#5b4229",
       "backgroundBase": "#3f616b",
       "pose": "build:broad"
@@ -5170,7 +5167,7 @@
       "1845: Born in a small settlement to a Middle Class family",
       "1857: Began learning the trade of field labourer from an experienced practitioner",
       "1871: The family pooled their resources to purchase a plot on the edge of town, a significant investment",
-      "1876: A sister married into a well-connected royal lineage, improving the family's social standing"
+      "1876: A sister married into a well-connected lineage with cattle enough to lend, improving the family's social standing"
     ]
   },
   "southafrica-1890#3": {
@@ -5184,13 +5181,13 @@
     "languageConfidence": "attested",
     "odds": "the industrial era in sub-Saharan Africa",
     "head": "White Kofia [Cotton Twill]",
-    "torso": "Black Work Shirt [Rough Cotton]",
+    "torso": "Olive Work Shirt [Rough Cotton]",
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
-      "garmentColor": "#1f1f22",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#505759",
       "pose": "build:broad"
     },
@@ -5378,13 +5375,13 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in South Asia",
-    "head": "White Topi [Cotton Khadi]",
-    "torso": "Walnut Cotton Kurta [Coarse Cotton]",
-    "feet": "Barefoot [None]",
+    "head": "White Cotton Head Cloth [Rough Wool]",
+    "torso": "Walnut Cotton Dhoti [Rough Wool]",
+    "feet": "Barefoot [Rough Linen]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#e8e4d9",
-      "garmentKind": "tunic",
+      "garmentKind": "wrapped_garment",
       "garmentColor": "#5b4229",
       "backgroundBase": "#464267",
       "pose": null
@@ -5400,11 +5397,10 @@
     ],
     "events": [
       "1139: Born in a small settlement to a Laboring Poor family",
-      "1151: Learned to read weather signs and where the water would still be running",
-      "1157: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1175: Father died from taken as a captive to Ghazni, leaving the family to manage affairs alone",
-      "1181: Took over the family business after a parent retired from active work",
-      "1196: Bathed in the Ganges during Kumbh Mela"
+      "1152: Spent a first season away with the herd and came back taller",
+      "1158: Inherited valuable tools and a workshop from a childless uncle",
+      "1184: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1191: Learned sacred texts under a guru's guidance"
     ]
   },
   "tamil-1200#3": {
@@ -5417,15 +5413,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in South Asia",
-    "head": "Cream Topi [Cotton Khadi]",
-    "torso": "Woad Cotton Kurta [Coarse Cotton]",
-    "feet": "Cream Barefoot [None]",
+    "head": "Cream Palm-Leaf Hat [Hemp]",
+    "torso": "Olive Cotton Lungi [Rough Wool]",
+    "feet": "Cream Barefoot [Rough Wool]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "brimmed_hat",
       "headwearColor": "#ddd3ba",
-      "garmentKind": "tunic",
-      "garmentColor": "#3a4f6d",
-      "backgroundBase": "#9b647b",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#6e6b3a",
+      "backgroundBase": "#6b649b",
       "pose": "build:broad"
     },
     "family": [
@@ -5436,11 +5432,11 @@
     ],
     "events": [
       "1148: Born in a small settlement to a Laboring Poor family",
-      "1163: Learned which ground gave what, and in which month",
-      "1166: A sister married into a well-connected warrior clan, improving the family's social standing",
-      "1187: The family pooled their resources to purchase a mill share, a significant investment",
-      "1188: Completed temple service during festival season",
-      "1190: Father was killed in the raids despite seeking help"
+      "1162: Went out with the adults for the first time and came back carrying a share",
+      "1164: A brother's marriage brought valuable new trade connections and opportunities",
+      "1176: Tragedy struck when a parent died from plague",
+      "1185: Bathed in the Ganges during Kumbh Mela",
+      "1191: Took over the family business after a parent retired from active work"
     ]
   },
   "indus-8000bce#1": {
@@ -5495,13 +5491,13 @@
     "languageConfidence": "conjectural",
     "odds": "prehistory in South Asia",
     "head": null,
-    "torso": "Brown Bark Cloth [Tree Bark]",
+    "torso": "Hide Wrap [Hide]",
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#6f5237",
+      "garmentColor": "#6b482f",
       "backgroundBase": "#4c495f",
       "pose": null
     },
@@ -5513,13 +5509,13 @@
     ],
     "events": [
       "-8061: Born to the band that ranged this country",
-      "-8050: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
-      "-8049: Learned to read the weather and the water from a parent",
-      "-8046: Found an outcrop of workable stone, and the band returned to it for years afterwards",
-      "-8029: Fell badly on the rocks, and the leg never set straight",
-      "-8024: Speared a beast that had eluded the band all season",
-      "-8022: Left the band of birth to live with another, as is the custom",
-      "-8021: A summer of no rain drove the band far from the usual ground, into country nobody knew"
+      "-8048: Trusted alone with the traps for a season",
+      "-8032: An elder died, and with them went the knowledge of country nobody else held",
+      "-8024: Took a partner from a band met at the summer gathering",
+      "-8022: Learned the way to a spring that held water through the dry months",
+      "-8015: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-8014: A birth went wrong in the night, and by morning the camp was quieter by two",
+      "-8009: Fell badly on the rocks, and the leg never set straight"
     ]
   },
   "indus-8000bce#3": {
@@ -5571,13 +5567,13 @@
     "languageConfidence": "attested",
     "odds": "the medieval period in pre-Columbian North America",
     "head": null,
-    "torso": "Marigold Fringed Shawl [Woven Wool]",
-    "feet": "Beaded Moccasins [Decorated Hide]",
+    "torso": "Buckskin Wrap Dress [Treated Hide]",
+    "feet": "Ivory Plant-Fibre Sandals [Wool]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#d9822f",
+      "garmentKind": "gown",
+      "garmentColor": "#6b482f",
       "backgroundBase": "#748b79",
       "pose": null
     },
@@ -5590,12 +5586,12 @@
     "events": [
       "625: Born in a small settlement to a Commoner family",
       "639: Learned to read weather signs and predict harvest yields from a parent",
-      "649: Became the first in the village to successfully grow squash, earning respect from neighbors",
-      "652: A father's death changed everything for the household",
-      "664: With the help of extended family, cleared new land for cultivation",
-      "665: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
-      "667: Inherited valuable tools and a workshop from a childless uncle",
-      "672: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "642: Became the first in the village to successfully grow squash, earning respect from neighbors",
+      "648: A sister married into a well-connected warrior society, improving the family's social standing",
+      "650: A terrible blight spread through the maize crop, ruining the harvest and making for a lean winter",
+      "656: Inherited valuable tools and a workshop from a childless uncle",
+      "658: Was made keeper of a sacred bundle, and of what is owed to it",
+      "696: With the help of extended family, cleared new land for cultivation"
     ]
   },
   "mesoamerica-700#2": {
@@ -5644,13 +5640,13 @@
     "languageConfidence": "attested",
     "odds": "the medieval period in pre-Columbian North America",
     "head": null,
-    "torso": "Slate Hide Shirt [Buckskin]",
-    "feet": "Simple Moccasins [Raw Hide]",
+    "torso": "Buckskin Breechclout [Raw Hide]",
+    "feet": "Grey Plant-Fibre Sandals [Burlap]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#566370",
+      "garmentKind": "bare",
+      "garmentColor": "#6b482f",
       "backgroundBase": "#4b5a4e",
       "pose": "build:broad"
     },
@@ -5662,13 +5658,13 @@
     ],
     "events": [
       "648: Born in a small settlement to a Peasant family",
-      "663: Helped with the harvest for the first season and proved capable despite a young age",
-      "673: Inherited valuable tools and a workshop from a childless uncle",
-      "675: A devastating drought destroyed the entire season's planting, leaving the family with nothing to harvest",
-      "677: Became the first in the village to successfully grow squash, earning respect from neighbors",
-      "684: Inherited an additional field from a childless uncle, expanding the family holdings",
-      "685: Was made keeper of a sacred bundle, and of what is owed to it",
-      "690: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "661: Trusted to tend the family's animals alone for the first time",
+      "664: A brother's marriage brought valuable new trade connections and opportunities",
+      "665: Received a vision during the coming-of-age fast, and was told what it meant",
+      "683: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "685: Inherited valuable tools and a workshop from a childless uncle",
+      "687: With the help of extended family, cleared new land for cultivation",
+      "695: Became the first in the village to successfully grow beans, earning respect from neighbors"
     ]
   },
   "plains-1500#1": {
@@ -5682,13 +5678,13 @@
     "languageConfidence": "attested",
     "odds": "the early modern period in pre-Columbian North America",
     "head": null,
-    "torso": "Red Fringed Shawl [Woven Wool]",
+    "torso": "Walnut Fringed Shawl [Woven Wool]",
     "feet": "Beaded Moccasins [Decorated Hide]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#a33327",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#4a594d",
       "pose": null
     },
@@ -5755,13 +5751,13 @@
     "languageConfidence": "attested",
     "odds": "the early modern period in pre-Columbian North America",
     "head": null,
-    "torso": "Red Hide Shirt [Buckskin]",
-    "feet": "Simple Moccasins [Raw Hide]",
+    "torso": "Buckskin Wrap [Raw Hide]",
+    "feet": "Hide Moccasins [Raw Hide]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#a33327",
+      "garmentColor": "#6b482f",
       "backgroundBase": "#38433a",
       "pose": "build:broad"
     },
@@ -5776,8 +5772,8 @@
     ],
     "events": [
       "1448: Born in a small settlement to a Peasant family",
-      "1463: Began learning the trade of cook from an experienced practitioner",
-      "1488: A brother's marriage brought valuable new trade connections and opportunities"
+      "1462: Began learning the trade of cook from an experienced practitioner",
+      "1485: A sister married into a well-connected medicine society, improving the family's social standing"
     ]
   },
   "arctic-1400#1": {
@@ -5791,13 +5787,13 @@
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in pre-Columbian North America",
     "head": null,
-    "torso": "Indigo Fringed Shawl [Woven Wool]",
-    "feet": "Beaded Moccasins [Decorated Hide]",
+    "torso": "Buckskin Breechclout [Treated Hide]",
+    "feet": "Barefoot [Wool]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#2e3f5c",
+      "garmentKind": "bare",
+      "garmentColor": "#6b482f",
       "backgroundBase": "#748b79",
       "pose": null
     },
@@ -5808,13 +5804,13 @@
     ],
     "events": [
       "1325: Born to the band that ranged this country",
+      "1336: Met a band nobody knew at the river, and there was trading and wariness and then singing",
       "1339: Learned to read the weather and the water from a parent",
-      "1344: Found an outcrop of workable stone, and the band returned to it for years afterwards",
-      "1345: Came back to the band of birth after years away, and was taken in again",
-      "1346: Was among the party that drove a herd into the narrows, and the band ate well for many days",
-      "1349: The herds did not come that year, and the camp moved three times looking for them",
-      "1352: Mother died from starvation, leaving the household in grief",
-      "1360: Was caught by an animal that did not die quickly, and carried the scars afterwards"
+      "1342: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
+      "1344: A birth went wrong in the night, and by morning the camp was quieter by two",
+      "1345: Followed a river further than anyone in the band had gone, and came back able to describe it",
+      "1346: Left the band of birth to live with another, as is the custom",
+      "1347: Brought down a large animal alone for the first time, and carried the meat back to the camp"
     ]
   },
   "arctic-1400#2": {
@@ -5866,15 +5862,15 @@
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in pre-Columbian North America",
     "head": null,
-    "torso": "Walnut Hide Shirt [Buckskin]",
-    "feet": "Simple Moccasins [Raw Hide]",
+    "torso": "Buckskin Breechclout [Raw Hide]",
+    "feet": "Cream Plant-Fibre Sandals [Burlap]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#5b4229",
+      "garmentKind": "bare",
+      "garmentColor": "#6b482f",
       "backgroundBase": "#4b5a4e",
-      "pose": "build:broad+proud"
+      "pose": "build:broad"
     },
     "family": [
       "father: Yuka Mukluk",
@@ -5887,13 +5883,13 @@
     ],
     "events": [
       "1348: Born to the band that ranged this country",
-      "1363: Learned which ground gave what, and in which month",
-      "1366: Went through the ice, and lost feeling in the fingers of one hand for good",
-      "1368: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
-      "1371: Found an outcrop of workable stone, and the band returned to it for years afterwards",
-      "1372: Met a band nobody knew at the river, and there was trading and wariness and then singing",
-      "1373: An elder died, and with them went the knowledge of country nobody else held",
-      "1374: Speared a beast that had eluded the band all season"
+      "1359: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "1361: Trusted alone with the traps for a season",
+      "1363: Received the marks that say who this person is and who they may speak to",
+      "1366: Lost a child before it could walk, and buried it under the floor of the shelter",
+      "1369: Followed a river further than anyone in the band had gone, and came back able to describe it",
+      "1374: Left the band of birth to live with another, as is the custom",
+      "1389: Went through the ice, and lost feeling in the fingers of one hand for good"
     ]
   },
   "california-1000#1": {
@@ -5907,8 +5903,8 @@
     "languageConfidence": "inferred",
     "odds": "the medieval period in pre-Columbian North America",
     "head": null,
-    "torso": "Hide Dress [Soft Leather]",
-    "feet": "Soft Moccasins [Deer Hide]",
+    "torso": "Buckskin Wrap Dress [Treated Hide]",
+    "feet": "Grey Plant-Fibre Sandals [Wool]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
@@ -5928,13 +5924,13 @@
     ],
     "events": [
       "925: Born to the band that ranged this country",
+      "936: Met a band nobody knew at the river, and there was trading and wariness and then singing",
       "939: Learned to read the weather and the water from a parent",
-      "944: Found an outcrop of workable stone, and the band returned to it for years afterwards",
-      "945: Came back to the band of birth after years away, and was taken in again",
-      "946: Was among the party that drove a herd into the narrows, and the band ate well for many days",
-      "949: The herds did not come that year, and the camp moved three times looking for them",
-      "952: Mother died from starvation, leaving the household in grief",
-      "960: Was caught by an animal that did not die quickly, and carried the scars afterwards"
+      "942: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
+      "944: A birth went wrong in the night, and by morning the camp was quieter by two",
+      "945: Followed a river further than anyone in the band had gone, and came back able to describe it",
+      "946: Left the band of birth to live with another, as is the custom",
+      "947: Brought down a large animal alone for the first time, and carried the meat back to the camp"
     ]
   },
   "california-1000#2": {
@@ -5989,15 +5985,15 @@
     "languageConfidence": "inferred",
     "odds": "the medieval period in pre-Columbian North America",
     "head": null,
-    "torso": "Brown Hide Shirt [Buckskin]",
-    "feet": "Simple Moccasins [Raw Hide]",
+    "torso": "Buckskin Breechclout [Raw Hide]",
+    "feet": "Ivory Plant-Fibre Sandals [Burlap]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#6f5237",
+      "garmentKind": "bare",
+      "garmentColor": "#6b482f",
       "backgroundBase": "#4b5a4e",
-      "pose": "build:broad+proud"
+      "pose": "build:broad"
     },
     "family": [
       "father: Karuk",
@@ -6010,13 +6006,13 @@
     ],
     "events": [
       "948: Born to the band that ranged this country",
-      "963: Learned which ground gave what, and in which month",
-      "966: Went through the ice, and lost feeling in the fingers of one hand for good",
-      "968: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
-      "971: Found an outcrop of workable stone, and the band returned to it for years afterwards",
-      "972: Met a band nobody knew at the river, and there was trading and wariness and then singing",
-      "973: An elder died, and with them went the knowledge of country nobody else held",
-      "974: Speared a beast that had eluded the band all season"
+      "959: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "961: Trusted alone with the traps for a season",
+      "963: Received the marks that say who this person is and who they may speak to",
+      "966: Lost a child before it could walk, and buried it under the floor of the shelter",
+      "969: Followed a river further than anyone in the band had gone, and came back able to describe it",
+      "974: Left the band of birth to live with another, as is the custom",
+      "989: Went through the ice, and lost feeling in the fingers of one hand for good"
     ]
   },
   "newengland-1870#1": {
@@ -6029,14 +6025,14 @@
     "languageBasis": "nac-modern",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "Ivory Kerchief [Linen]",
-    "torso": "Black Work Apron [Canvas]",
-    "feet": "Work Boots [Thick Leather]",
+    "head": "Ivory Mob Cap [Rough Wool]",
+    "torso": "Olive Servant'S Calico Dress [Burlap]",
+    "feet": "Simple Leather Shoes [Rough Leather]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "cap",
       "headwearColor": "#e5ddd0",
-      "garmentKind": "work_shirt",
-      "garmentColor": "#1f1f22",
+      "garmentKind": "gown",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#4c5354",
       "pose": null
     },
@@ -6051,12 +6047,11 @@
     ],
     "events": [
       "1790: Born in a small settlement to a Working Class family",
-      "1804: Apprenticed to a midwife, witnessing a first birth at a young age",
-      "1812: The family pooled their resources to purchase a shop of their own, a significant investment",
-      "1818: Mother died from influenza, and the family faced new responsibilities",
-      "1823: Established homestead on prairie",
-      "1832: A sister married into a well-connected merchant family, improving the family's social standing",
-      "1862: Served as juror in important trial"
+      "1805: Began learning household management and domestic skills from a parent",
+      "1811: The family pooled their resources to purchase a shop of their own, a significant investment",
+      "1840: A brother's marriage brought valuable new trade connections and opportunities",
+      "1861: Organized petition for local improvements",
+      "1863: Joined wagon train heading west for new land"
     ]
   },
   "newengland-1870#2": {
@@ -6069,14 +6064,14 @@
     "languageBasis": "nac-modern",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "Ivory Phrygian Cap [Red Wool]",
-    "torso": "Charcoal Workshop Bottoms [Coarse Wool]",
-    "feet": "Work Boots [Thick Leather]",
+    "head": "Ivory Slouch Hat [Cotton]",
+    "torso": "Saffron Duck Canvas Jumper [Wool]",
+    "feet": "Lace-Up Work Boots [Treated Hide]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "brimmed_hat",
       "headwearColor": "#e5ddd0",
-      "garmentKind": "tunic",
-      "garmentColor": "#3a3a38",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#d9a441",
       "backgroundBase": "#4c5354",
       "pose": null
     },
@@ -6088,12 +6083,12 @@
     ],
     "events": [
       "1826: Born in a small settlement to a Middle Class family",
-      "1839: Apprenticed to guild master, learning trade secrets",
-      "1844: Established homestead on prairie",
-      "1860: Elected to town council",
-      "1861: The family pooled their resources to purchase a delivery van, a significant investment",
-      "1862: The guild selected a piece of work for a noble commission",
-      "1863: A brother's marriage brought valuable new trade connections and opportunities"
+      "1839: Began apprenticeship as a stonemason under skilled master craftsman",
+      "1848: Staked claim during gold rush",
+      "1852: A brother's marriage brought valuable new trade connections and opportunities",
+      "1856: Took over the family business after a parent retired from active work",
+      "1857: Elected to town council",
+      "1865: The guild selected a piece of work for a noble commission"
     ]
   },
   "newengland-1870#3": {
@@ -6141,15 +6136,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "White Work Bonnet [Cotton]",
-    "torso": "Slate Mill Dress [Coarse Wool]",
-    "feet": "White Cloth Shoes [Canvas]",
+    "head": "White Poke Bonnet [Linen]",
+    "torso": "Indigo Calico Work Dress [Linen]",
+    "feet": "Simple Leather Shoes [Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e8e4d9",
       "garmentKind": "gown",
-      "garmentColor": "#566370",
-      "backgroundBase": "#4c5354",
+      "garmentColor": "#2e3f5c",
+      "backgroundBase": "#544c4f",
       "pose": null
     },
     "family": [
@@ -6160,13 +6155,12 @@
     ],
     "events": [
       "1741: Born in a small settlement to a Merchant family",
-      "1755: Learned to read weather signs and where the water would still be running",
-      "1763: The family pooled their resources to purchase a shop of their own, a significant investment",
-      "1769: Mother died from influenza, and the family faced new responsibilities",
-      "1774: Established homestead on prairie",
-      "1782: A sister married into a well-connected merchant family, improving the family's social standing",
+      "1756: Trusted to take the animals out alone for the first time",
+      "1761: The family pooled their resources to purchase a shop of their own, a significant investment",
+      "1791: A brother's marriage brought valuable new trade connections and opportunities",
       "1803: came under the United States, where no state had claimed the place before",
-      "1812: Served as juror in important trial"
+      "1811: Organized petition for local improvements",
+      "1813: Joined wagon train heading west for new land"
     ]
   },
   "louisiana-1820#2": {
@@ -6179,14 +6173,14 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "Ivory Phrygian Cap [Red Wool]",
-    "torso": "Black Workshop Bottoms [Coarse Wool]",
-    "feet": "Work Boots [Thick Leather]",
+    "head": "Ivory Straw Field Hat [Linen]",
+    "torso": "Bronze Broadfall Trousers [Wool]",
+    "feet": "Brogans [Leather]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "brimmed_hat",
       "headwearColor": "#e5ddd0",
-      "garmentKind": "tunic",
-      "garmentColor": "#1f1f22",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#4c5354",
       "pose": null
     },
@@ -6199,12 +6193,11 @@
     "events": [
       "1778: Born in a small settlement to a Laboring Poor family",
       "1791: Began learning the trade of farm hand from an experienced practitioner",
-      "1801: A sister married into a well-connected merchant family, improving the family's social standing",
       "1803: came under the United States, where no state had claimed the place before",
-      "1808: Established homestead on prairie",
-      "1809: Elected to town council",
-      "1810: Inherited valuable tools and a workshop from a childless uncle",
-      "1812: The family lost their mother when she died from typhoid fever"
+      "1806: The family pooled their resources to purchase a delivery van, a significant investment",
+      "1808: Joined wagon train heading west for new land",
+      "1811: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1818: Served as juror in important trial"
     ]
   },
   "louisiana-1820#3": {
@@ -6217,15 +6210,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "Ivory Phrygian Cap [Red Wool]",
-    "torso": "Saffron Labor Breeches [Patched Canvas]",
-    "feet": "Work Boots [Thick Leather]",
+    "head": "Ivory Straw Field Hat [Cotton]",
+    "torso": "Indigo Homespun Shirt [Wool]",
+    "feet": "Brogans [Treated Hide]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "brimmed_hat",
       "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
-      "garmentColor": "#d9a441",
-      "backgroundBase": "#4c5354",
+      "garmentColor": "#2e3f5c",
+      "backgroundBase": "#544c4f",
       "pose": "build:broad"
     },
     "family": [
@@ -6236,12 +6229,11 @@
     ],
     "events": [
       "1799: Born in a small settlement to a Middling Sort family",
-      "1813: Began working family fields, learning the rotation from elders",
-      "1815: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit",
-      "1816: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "1817: Staked claim during gold rush",
-      "1818: A brother's marriage brought valuable new trade connections and opportunities",
-      "1819: The family pooled their resources to purchase a tractor, a significant investment"
+      "1812: Trusted to tend the family's animals alone for the first time",
+      "1816: Broke ground on land nobody had ploughed before, and it paid",
+      "1817: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1818: After years of careful selection, successfully bred a hardier variety of corn",
+      "1819: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "amazon-1200#1": {
@@ -6315,7 +6307,7 @@
       "1160: Born in a small settlement to a Commoner family",
       "1172: Began learning the trade of miller from an experienced practitioner",
       "1185: Learned healing songs from village shaman",
-      "1188: A sister married into a well-connected military order, improving the family's social standing",
+      "1188: A sister married into a well-connected merchant family, improving the family's social standing",
       "1188: The family lost their father when he died from starvation"
     ]
   },
@@ -6330,13 +6322,13 @@
     "languageConfidence": "inferred",
     "odds": "the medieval period in South America",
     "head": "Woad Knit Cap [Llama Wool]",
-    "torso": "Green Wool Poncho [Undyed Wool]",
+    "torso": "Walnut Wool Poncho [Undyed Wool]",
     "feet": "Sandals [Woven Grass]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#3a4f6d",
       "garmentKind": "jacket",
-      "garmentColor": "#5a6b3b",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#3d5a48",
       "pose": "build:broad+brave"
     },
@@ -6364,15 +6356,15 @@
     "languageConfidence": "inferred",
     "odds": "the early modern period in South America",
     "head": null,
-    "torso": "White Wool Skirt [Undyed Wool]",
-    "feet": "Woad Simple Shoes [Canvas]",
+    "torso": "Indigo Woolen Shirt [Scratchy Fleece]",
+    "feet": "Leather Sandals [Rough Leather]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#e8e4d9",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#2e3f5c",
       "backgroundBase": "#455e4f",
-      "pose": null
+      "pose": "brave"
     },
     "family": [
       "father: Leftraru",
@@ -6385,13 +6377,13 @@
     ],
     "events": [
       "1525: Born to the band that ranged this country",
-      "1531: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
-      "1539: Began learning the trade of dyer from an experienced practitioner",
-      "1542: Followed a river further than anyone in the band had gone, and came back able to describe it",
-      "1547: An elder died, and with them went the knowledge of country nobody else held",
-      "1549: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
-      "1558: Lost a child before it could walk, and buried it under the floor of the shelter",
-      "1559: lived through the sickness that took most of the town in a season"
+      "1538: Began learning the trade of dyer from an experienced practitioner",
+      "1539: lived through the sickness that took most of the town in a season",
+      "1540: A summer of no rain drove the band far from the usual ground, into country nobody knew",
+      "1541: Walked with the band to the far camp, further than the children had ever been",
+      "1543: Lost a child before it could walk, and buried it under the floor of the shelter",
+      "1552: Left the band of birth to live with another, as is the custom",
+      "1559: Found an outcrop of workable stone, and the band returned to it for years afterwards"
     ]
   },
   "patagonia-1600#2": {
@@ -6404,14 +6396,14 @@
     "languageBasis": "sam-patagonia",
     "languageConfidence": "conjectural",
     "odds": "the early modern period in South America",
-    "head": "Tan Felt Hat [Local Felt]",
-    "torso": "Natural Wool Pants [Coarse Wool]",
-    "feet": "Barefoot [None]",
+    "head": "Tan Woven Wool Cap [Wool]",
+    "torso": "Bronze Wool Tunic (Uncu) [Wool]",
+    "feet": "Leather Sandals [Treated Hide]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "cap",
       "headwearColor": "#a98a63",
-      "garmentKind": "work_shirt",
-      "garmentColor": "#d8cdb6",
+      "garmentKind": "tunic",
+      "garmentColor": "#a8763f",
       "backgroundBase": "#34463b",
       "pose": null
     },
@@ -6426,13 +6418,13 @@
     ],
     "events": [
       "1560: Born to the band that ranged this country",
-      "1565: lived through the sickness that took most of the town in a season",
-      "1572: Learned to read weather signs and where the water would still be running",
-      "1577: Followed a river further than anyone in the band had gone, and came back able to describe it",
-      "1581: Met a band nobody knew at the river, and there was trading and wariness and then singing",
-      "1587: A summer of no rain drove the band far from the usual ground, into country nobody knew",
-      "1588: Speared a beast that had eluded the band all season",
-      "1593: Buried a kinsman with ochre and with the things they had made"
+      "1573: Spent a first season away with the herd and came back taller",
+      "1580: An elder died, and with them went the knowledge of country nobody else held",
+      "1586: Took a partner from a band met at the summer gathering",
+      "1587: Learned the way to a spring that held water through the dry months",
+      "1590: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "1592: A birth went wrong in the night, and by morning the camp was quieter by two",
+      "1594: Fell badly on the rocks, and the leg never set straight"
     ]
   },
   "patagonia-1600#3": {
@@ -6445,14 +6437,14 @@
     "languageBasis": "sam-patagonia",
     "languageConfidence": "inferred",
     "odds": "the early modern period in South America",
-    "head": "Madder Felt Hat [Local Felt]",
-    "torso": "Cream Wool Pants [Coarse Wool]",
-    "feet": "Leather Sandals [Raw Leather]",
+    "head": "Madder Woven Wool Cap [Hemp]",
+    "torso": "Olive Wool Tunic (Uncu) [Rough Wool]",
+    "feet": "Leather Sandals [Raw Hide]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "cap",
       "headwearColor": "#a63a2b",
-      "garmentKind": "work_shirt",
-      "garmentColor": "#ddd3ba",
+      "garmentKind": "tunic",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#34463b",
       "pose": "build:broad"
     },
@@ -6464,12 +6456,12 @@
     ],
     "events": [
       "1580: Born to the band that ranged this country",
+      "1584: lived through the sickness that took most of the town in a season",
       "1586: The herds did not come that year, and the camp moved three times looking for them",
-      "1588: Was caught by an animal that did not die quickly, and carried the scars afterwards",
-      "1593: Was among the party that drove a herd into the narrows, and the band ate well for many days",
-      "1595: Learned the marks and the ailments of every beast in the family's care",
-      "1596: Walked with the band to the far camp, further than the children had ever been",
-      "1597: Left the band of birth to live with another, as is the custom",
+      "1588: Fell badly on the rocks, and the leg never set straight",
+      "1594: Trusted to take the animals out alone for the first time",
+      "1596: Came back to the band of birth after years away, and was taken in again",
+      "1597: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
       "1598: An elder died, and with them went the knowledge of country nobody else held"
     ]
   },
@@ -6505,7 +6497,7 @@
       "1813: Began learning the trade of landowner from an experienced practitioner",
       "1815: saw Portuguese Brazil give way to the Empire of Brazil",
       "1817: Took over the family business after a parent retired from active work",
-      "1830: A sister married into a well-connected ayllu, improving the family's social standing",
+      "1830: A sister married into a well-connected family with a hacienda and a name in the cabildo, improving the family's social standing",
       "1845: Inherited an additional field from a childless uncle, expanding the family holdings",
       "1876: Learned healing songs from village shaman"
     ]
@@ -6521,13 +6513,13 @@
     "languageConfidence": "attested",
     "odds": "the industrial era in South America",
     "head": "Ivory Panama Hat [Toquilla Palm]",
-    "torso": "Charcoal Work Shirt [Rough Cotton]",
+    "torso": "Olive Work Shirt [Rough Cotton]",
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
-      "garmentColor": "#3a3a38",
+      "garmentColor": "#6e6b3a",
       "backgroundBase": "#484f4b",
       "pose": null
     },
@@ -6546,7 +6538,7 @@
       "1855: The family pooled their resources to purchase a sewing machine, a significant investment",
       "1858: Learned healing songs from village shaman",
       "1862: Mother was murdered despite efforts to save her",
-      "1866: A sister married into a well-connected ayllu, improving the family's social standing"
+      "1866: A sister married into a well-connected family with a hacienda and a name in the cabildo, improving the family's social standing"
     ]
   },
   "brazil-1880#3": {
@@ -6617,7 +6609,7 @@
       "1425: Born in a small settlement to a Commoner family",
       "1439: Learned to read weather signs and predict harvest yields from a parent",
       "1441: After years of careful selection, successfully bred a hardier variety of coconuts",
-      "1448: A sister married into a well-connected chiefly family, improving the family's social standing",
+      "1448: A sister married into a well-connected household holding rights in the trading ring, improving the family's social standing",
       "1455: Mother died from starvation, and the family faced new responsibilities",
       "1458: Hosted important feast, strengthening clan ties"
     ]
@@ -6726,7 +6718,7 @@
       "1625: Born in a small settlement to a Commoner family",
       "1639: Learned to read weather signs and predict harvest yields from a parent",
       "1641: After years of careful selection, successfully bred a hardier variety of coconuts",
-      "1648: A sister married into a well-connected chiefly family, improving the family's social standing",
+      "1648: A sister married into a well-connected household holding the breadfruit groves, improving the family's social standing",
       "1655: Mother died from starvation, and the family faced new responsibilities",
       "1658: Hosted important feast, strengthening clan ties"
     ]
@@ -6893,14 +6885,14 @@
     "languageBasis": "none",
     "languageConfidence": "conjectural",
     "odds": "prehistory in Oceania",
-    "head": "Woad Feather Band [Bird Feathers]",
-    "torso": "Green Fiber Loincloth [Plant Fiber]",
-    "feet": "Woad Barefoot [None]",
+    "head": "Fur Hood [Fur]",
+    "torso": "Walnut Kangaroo Hide Wrap [Kangaroo Skin]",
+    "feet": "Hide Foot Wrappings [Hide]",
     "portrait": {
-      "headwearKind": "band",
-      "headwearColor": "#3a4f6d",
-      "garmentKind": "bare",
-      "garmentColor": "#5a6b3b",
+      "headwearKind": "hood",
+      "headwearColor": "#8b7358",
+      "garmentKind": "wrapped_garment",
+      "garmentColor": "#5b4229",
       "backgroundBase": "#47575c",
       "pose": "build:broad"
     },
@@ -6913,11 +6905,10 @@
     "events": [
       "-20020: Born to the band that ranged this country",
       "-20014: The herds did not come that year, and the camp moved three times looking for them",
-      "-20012: Was caught by an animal that did not die quickly, and carried the scars afterwards",
-      "-20007: Was among the party that drove a herd into the narrows, and the band ate well for many days",
-      "-20005: Learned which ground gave what, and in which month",
-      "-20004: Walked with the band to the far camp, further than the children had ever been",
-      "-20003: Left the band of birth to live with another, as is the custom",
+      "-20012: Fell badly on the rocks, and the leg never set straight",
+      "-20006: Went out with the adults for the first time and came back carrying a share",
+      "-20004: Came back to the band of birth after years away, and was taken in again",
+      "-20003: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
       "-20002: An elder died, and with them went the knowledge of country nobody else held"
     ]
   }

@@ -2177,7 +2177,7 @@ export function generateLifeHistory(
     const capabilityCtx: CapabilityContext = {
       year: eventYear,
       culturalZone,
-      placeLower: `${(character as { location?: string }).location ?? ''} ${(character as { region?: string }).region ?? ''}`.toLowerCase(),
+      placeLower: capabilityPlace,
     };
     const possible = selectedTemplate.templates.filter(variant => textIsPossible(variant, capabilityCtx));
     // Nothing in this template fits the material culture: say nothing rather
@@ -2186,7 +2186,7 @@ export function generateLifeHistory(
     let text = possible[Math.floor(seededRandom() * possible.length)];
 
     // Replace placeholders with context-appropriate values
-    text = replacePlaceholders(text, culturalZone, era, character, eventYear);
+    text = replacePlaceholders(text, culturalZone, era, character, eventYear, capabilityPlace);
 
     // Add cultural context for certain events
     let culturalContext: string | undefined;
@@ -2510,7 +2510,18 @@ function replacePlaceholders(
   culturalZone: CulturalZone,
   era: HistoricalEra,
   character: PlayerCharacter | NpcEntity,
-  year?: number
+  year?: number,
+  /**
+   * "<location> <region>", as `generateLifeHistory` receives it.
+   *
+   * The social and enemy groups read this off `character.region` and
+   * `character.location`, which the object does not carry at the point life
+   * events are generated: both were `undefined` on every call, so
+   * `resolveCulture` returned null and the culture filter these two functions
+   * exist to apply had never once run. A Formosan highlander could marry into
+   * a samurai clan, which is exactly what the filter was written to stop.
+   */
+  place?: string,
 ): string {
   const commodities = TRADE_GOODS[culturalZone]?.[era] || ['goods'];
   const allCauses = HISTORICAL_CAUSES_OF_DEATH[era][culturalZone] || ['illness'];
@@ -2558,7 +2569,7 @@ function replacePlaceholders(
   text = text.replace('[INSTITUTION]', getInstitution(culturalZone, era));
 
   // Social placeholders
-  const region = (character as { region?: string }).region;
+  const region = place ?? (character as { region?: string }).region;
   const location = (character as { location?: string }).location;
   text = text.replace('[SOCIAL_GROUP]', getSocialGroup(culturalZone, era, year, region, location));
   text = text.replace('[ENEMY]', getEnemyGroup(culturalZone, era, year, region, location));
@@ -2644,6 +2655,234 @@ function getInstitution(zone: CulturalZone, era: HistoricalEra): string {
  * never used, so an eighth-century BCE persona could marry into a cathedral
  * chapter. Entries that belong to a period now say so.
  */
+/**
+ * Social groups that belong to one culture and one stretch of its history.
+ *
+ * The zone table below is four entries wide and covers, for EAST_ASIAN alone,
+ * four thousand years across five countries: a sister could marry into "a
+ * well-connected merchant consortium" in Shang-dynasty Henan and in Meiji
+ * Osaka, and the phrase said nothing about either. Keyed on the culture window
+ * `resolveCulture` already computes, these can name the actual institution a
+ * household would have been trying to marry into.
+ *
+ * Entries are bare noun phrases: they follow "a well-connected" in one template
+ * and stand alone in another, so none may carry its own article.
+ */
+const CULTURE_SOCIAL_GROUPS: Record<string, Array<{ text: string; min?: number; max?: number }>> = {
+  'culture-china': [
+    { text: 'clan of bronze-casters in the royal workshops', max: -700 },
+    { text: 'household holding a fief from the Zhou king', min: -1046, max: -256 },
+    { text: 'family of salt and iron contractors', min: -200, max: 900 },
+    { text: 'lineage with a son in the imperial examinations', min: 600, max: 1905 },
+    { text: 'silk-merchant consortium out of the southern ports', min: 700, max: 1900 },
+    { text: 'household of Hanlin academicians', min: 750, max: 1905 },
+    { text: 'tea-and-horse trading house on the Sichuan road', min: 900, max: 1900 },
+    { text: 'Shanxi banking family with paper in every province', min: 1700, max: 1930 },
+    { text: 'treaty-port compradore family', min: 1842, max: 1949 },
+    { text: 'cadre household with a work-unit allocation', min: 1949 },
+  ],
+  'culture-japan': [
+    { text: 'clan holding rice land under the court', min: 600, max: 1180 },
+    { text: 'warrior house sworn to a provincial governor', min: 1100, max: 1600 },
+    { text: 'temple establishment with lands of its own', min: 700, max: 1870 },
+    { text: 'Osaka rice-broking house', min: 1600, max: 1900 },
+    { text: 'castle-town merchant family with a domain licence', min: 1600, max: 1870 },
+    { text: 'family with a son in the new ministries', min: 1868, max: 1945 },
+    { text: 'company family with a name on the exchange', min: 1950 },
+  ],
+  'culture-korea': [
+    { text: 'bone-rank family of the capital', min: -100, max: 935 },
+    { text: 'yangban household with an examination pass in it', min: 1392, max: 1894 },
+    { text: 'lineage holding land and a village shrine', min: 900, max: 1900 },
+    { text: 'family with a son in the colonial bureaucracy', min: 1910, max: 1945 },
+    { text: 'household with a foothold in one of the chaebol', min: 1960 },
+  ],
+  'culture-vietnam': [
+    { text: 'family holding a communal-land share in the village', min: -100, max: 1900 },
+    { text: 'household with a mandarin degree in it', min: 1075, max: 1919 },
+    { text: 'river-trading family working the delta', min: 500 },
+    { text: 'family with a place in the colonial administration', min: 1885, max: 1954 },
+    { text: 'cadre household with a party card', min: 1945 },
+  ],
+  'culture-persia': [
+    { text: 'landed family of the Achaemenid satrapies', min: -550, max: -330 },
+    { text: 'dihqan house holding a village and its water', min: 200, max: 1100 },
+    { text: 'caravan house trading to Herat and beyond', min: 300, max: 1900 },
+    { text: 'family of court poets and secretaries', min: 800, max: 1800 },
+    { text: 'Safavid household with a share of the silk monopoly', min: 1501, max: 1736 },
+    { text: 'bazaar family with a stake in the carpet trade', min: 1600 },
+    { text: 'family with sons in the oil administration', min: 1908 },
+  ],
+  'culture-anatolia': [
+    { text: 'household holding a timar from the Sultan', min: 1300, max: 1839 },
+    { text: 'guild of Bursa silk weavers', min: 1350, max: 1900 },
+    { text: 'family with a place in the palace service', min: 1400, max: 1922 },
+    { text: 'Aegean trading family with Greek and Italian correspondents', min: 1100, max: 1922 },
+    { text: 'family with sons in the republican officer corps', min: 1923 },
+  ],
+  'culture-egypt': [
+    { text: 'family of temple scribes at Karnak', min: -2000, max: -300 },
+    { text: 'household holding land from the granary of the nome', min: -2600, max: -300 },
+    { text: 'Alexandrian grain-shipping family', min: -300, max: 640 },
+    { text: 'Coptic landholding family of the Sa\'id', min: 300, max: 1900 },
+    { text: 'family of Cairo sugar merchants', min: 900, max: 1800 },
+    { text: 'cotton-exporting family of the Delta', min: 1820, max: 1960 },
+    { text: 'family with sons in the ministries', min: 1952 },
+  ],
+  'culture-west-africa': [
+    { text: 'lineage holding the office of a village head', max: 2100 },
+    { text: 'family of gold traders on the Sahara road', min: 700, max: 1700 },
+    { text: 'household of the Mande merchant diaspora', min: 1100, max: 1900 },
+    { text: 'family of court griots to a ruling house', min: 1200 },
+    { text: 'kola-trading house working the forest routes', min: 1300, max: 1930 },
+    { text: 'palm-oil trading family of the coast', min: 1800, max: 1960 },
+    { text: 'family with sons in the civil service', min: 1957 },
+  ],
+  'culture-swahili-coast': [
+    { text: 'patrician family of a stone town', min: 1000, max: 1900 },
+    { text: 'household with dhows working the monsoon to Arabia', min: 800 },
+    { text: 'family of Hadrami scholars settled on the coast', min: 1200 },
+    { text: 'clove-planting family of the islands', min: 1820, max: 1960 },
+  ],
+  'culture-horn': [
+    { text: 'family holding rist land in the highlands', min: 1100, max: 1974 },
+    { text: 'household of the church clergy at Aksum', min: 100, max: 900 },
+    { text: 'family of Harar caravan merchants', min: 1200, max: 1900 },
+    { text: 'household with a place at the imperial court', min: 1270, max: 1974 },
+  ],
+  'culture-southern-africa': [
+    { text: 'lineage with cattle enough to lend', max: 2100 },
+    { text: 'household of a chief\'s senior house', max: 2100 },
+    { text: 'family holding a mining licence at the stone towns', min: 1000, max: 1500 },
+    { text: 'family with a man in the mine compounds', min: 1870, max: 1990 },
+  ],
+  'culture-great-lakes': [
+    { text: 'lineage holding a hill and the herds on it', max: 2100 },
+    { text: 'household of the royal drum-keepers', min: 1400, max: 1900 },
+    { text: 'family of ivory traders working east to the coast', min: 1700, max: 1900 },
+  ],
+  'culture-mesoamerica': [
+    { text: 'lineage holding land from the calpulli', min: -500, max: 1600 },
+    { text: 'pochteca trading house', min: 1200, max: 1600 },
+    { text: 'family of temple scribes and day-keepers', min: -300, max: 1600 },
+    { text: 'household of a lord\'s court at the ballcourt town', min: -200, max: 1000 },
+  ],
+  'culture-plains': [
+    { text: 'family with horses enough to give away', min: 1700, max: 1890 },
+    { text: 'household of a band\'s pipe-keeper', max: 2100 },
+    { text: 'family whose men are counted in the warrior societies', max: 2100 },
+  ],
+  'culture-southwest': [
+    { text: 'household of a kiva society', max: 2100 },
+    { text: 'family with fields at the best of the springs', max: 2100 },
+    { text: 'family of turquoise workers trading south', min: -200, max: 1600 },
+  ],
+  'culture-polynesia': [
+    { text: 'senior line of a chiefly house', max: 2100 },
+    { text: 'family of navigators who hold the sailing directions', max: 2100 },
+    { text: 'household with rights to a whole valley', max: 2100 },
+  ],
+  'culture-melanesia': [
+    { text: 'lineage of a man with pigs enough to feast the village', max: 2100 },
+    { text: 'household holding rights in the trading ring', max: 2100 },
+  ],
+  'culture-central-asia': [
+    { text: 'family of Sogdian caravan merchants', min: -100, max: 1000 },
+    { text: 'household of a clan with pasture of its own', max: 2100 },
+    { text: 'family endowing a madrasa in the oasis city', min: 900, max: 1900 },
+    { text: 'household with a place in the khan\'s service', min: 1200, max: 1870 },
+  ],
+  'culture-arctic': [
+    { text: 'household of a boat-captain with a crew behind him', max: 2100 },
+    { text: 'family whose hunters feed more than themselves', max: 2100 },
+  ],
+  'culture-siberia': [
+    { text: 'family with the largest reindeer herd on the river', max: 2100 },
+    { text: 'household of a shaman\'s line', max: 2100 },
+    { text: 'family trading furs to the Russian posts', min: 1600, max: 1917 },
+  ],
+  'culture-aboriginal-australia': [
+    { text: 'family holding the songs for a stretch of country', max: 2100 },
+    { text: 'household with standing in the ceremony ground', max: 2100 },
+  ],
+  'culture-taiwan-indigenous': [
+    { text: 'household of a village\'s head family', max: 1650 },
+    { text: 'lineage whose men have taken heads', max: 1650 },
+  ],
+  'culture-taiwan-han': [
+    { text: 'Hakka lineage with land on the frontier', min: 1650 },
+    { text: 'camphor-trading family of the foothills', min: 1700, max: 1945 },
+    { text: 'family with a factory on the export lists', min: 1960 },
+  ],
+};
+
+/**
+ * The same idea one level coarser, for the zones `CULTURE_WINDOWS` does not
+ * cover — Europe and South Asia have no windows at all, so a culture-keyed
+ * table alone would leave half the corpus on the four-entry zone list.
+ */
+const ZONE_ERA_SOCIAL_GROUPS: Partial<Record<CulturalZone, Array<{ text: string; min?: number; max?: number }>>> = {
+  EUROPEAN: [
+    { text: 'household of a decurion in the local ordo', min: -100, max: 400 },
+    { text: 'family holding a manor from the abbey', min: 800, max: 1550 },
+    { text: 'household of the cathedral canons', min: 900, max: 1789 },
+    { text: 'guild of Flemish cloth finishers', min: 1200, max: 1600 },
+    { text: 'Hanse trading house with a factory at Bergen', min: 1200, max: 1650 },
+    { text: 'family of Florentine wool merchants', min: 1250, max: 1600 },
+    { text: 'household of a robe magistrate', min: 1550, max: 1789 },
+    { text: 'family with a share in a chartered company', min: 1600, max: 1860 },
+    { text: 'family of Huguenot silk weavers', min: 1600, max: 1800 },
+    { text: 'mill-owning family with a name over the gate', min: 1780, max: 1960 },
+    { text: 'family with a son articled to a solicitor', min: 1800, max: 1960 },
+    { text: 'family with a shop on the high street and a car behind it', min: 1930 },
+  ],
+  SOUTH_ASIAN: [
+    { text: 'lineage holding a village grant from the king', min: -300, max: 1800 },
+    { text: 'family of temple trustees', min: 400 },
+    { text: 'household of the local revenue farmers', min: 1300, max: 1860 },
+    { text: 'Marwari trading family with agents in three cities', min: 1600 },
+    { text: 'family with a son in the Company\'s service', min: 1750, max: 1858 },
+    { text: 'zamindari household with a name on the settlement rolls', min: 1793, max: 1955 },
+    { text: 'family with a son at the Presidency college', min: 1830, max: 1947 },
+    { text: 'family with a son in the administrative service', min: 1947 },
+  ],
+  SOUTHEAST_ASIAN: [
+    { text: 'household of a lord holding manpower at court', min: 800, max: 1850 },
+    { text: 'Peranakan family with a foot in the Straits trade', min: 1600 },
+    { text: 'family with a share of the rice mills', min: 1850 },
+    { text: 'family holding a plantation concession', min: 1870, max: 1965 },
+  ],
+  SOUTH_AMERICAN: [
+    { text: 'ayllu with the best of the terraces', min: -500, max: 1600 },
+    { text: 'family of Potosí silver contractors', min: 1545, max: 1820 },
+    { text: 'creole household with an encomienda in the family memory', min: 1550, max: 1830 },
+    { text: 'family with a hacienda and a name in the cabildo', min: 1600, max: 1920 },
+    { text: 'family with a stake in the coffee estates', min: 1830, max: 1970 },
+  ],
+  NORTH_AMERICAN_COLONIAL: [
+    { text: 'family with a pew at the front of the meeting house', min: 1620, max: 1820 },
+    { text: 'family with a wharf and a share in a brig', min: 1650, max: 1840 },
+    { text: 'planter household with land along the river', min: 1650, max: 1865 },
+    { text: 'family with a mill and a store', min: 1750, max: 1910 },
+  ],
+  MENA: [
+    { text: 'household of the tribe that guards the pilgrim road', min: 650, max: 1920 },
+    { text: 'family of Damascus silk brokers', min: 800, max: 1920 },
+    { text: 'household with a place in the Maghrib sultan\'s service', min: 1000, max: 1900 },
+    { text: 'family with a stake in the pearl fleets', min: 1700, max: 1950 },
+    { text: 'family with sons in the oil companies', min: 1935 },
+  ],
+  SUB_SAHARAN_AFRICAN: [
+    { text: 'household holding the ironworking of the district', min: -500, max: 1900 },
+    { text: 'family with cattle out on loan across three villages', max: 2100 },
+    { text: 'family of mission-school teachers', min: 1850, max: 1980 },
+  ],
+  OCEANIA: [
+    { text: 'household holding the breadfruit groves', max: 2100 },
+    { text: 'family with a copra trader\'s account', min: 1860, max: 1980 },
+  ],
+};
+
 const ERA_BOUND_GROUPS: Record<string, [min: number, max: number]> = {
   'cathedral chapter': [800, 1900],
   'town council': [1100, 2100],
@@ -2688,6 +2927,21 @@ function getSocialGroup(
     OCEANIA: ['chiefly family', 'navigator guild', 'warrior band', 'trading partnership']
   };
 
+  const culture = year === undefined ? null : resolveCulture(zone, year, region, location);
+
+  // A culture-specific group beats the zone-wide one whenever the place and the
+  // year have one to offer, which is what turns "a well-connected merchant
+  // consortium" into "a well-connected silk-merchant consortium out of the
+  // southern ports".
+  const inYear = (entry: { min?: number; max?: number }): boolean => year === undefined
+    || ((entry.min === undefined || year >= entry.min)
+      && (entry.max === undefined || year <= entry.max));
+
+  const specific = (culture && CULTURE_SOCIAL_GROUPS[culture.id] ? CULTURE_SOCIAL_GROUPS[culture.id] : [])
+    .filter(inYear)
+    .map(entry => entry.text);
+  const zoneSpecific = (ZONE_ERA_SOCIAL_GROUPS[zone] ?? []).filter(inYear).map(entry => entry.text);
+
   const all = groups[zone] || ['influential family'];
   const inPeriod = year === undefined
     ? all
@@ -2695,10 +2949,13 @@ function getSocialGroup(
       const bounds = ERA_BOUND_GROUPS[group];
       return !bounds || (year >= bounds[0] && year <= bounds[1]);
     });
-  const culture = year === undefined ? null : resolveCulture(zone, year, region, location);
-  const list = filterByCulture(inPeriod, group => group, culture);
-  const usable = list.length > 0 ? list : ['influential family'];
-  return usable[Math.floor(seededRandom() * usable.length)];
+  const generic = filterByCulture(inPeriod, group => group, culture);
+
+  // The zone list stays in the pool so the specific entries do not become the
+  // only thing a Chinese household can marry into.
+  const usable = [...specific, ...specific, ...zoneSpecific, ...generic];
+  const pool = usable.length > 0 ? usable : ['influential family'];
+  return pool[Math.floor(seededRandom() * pool.length)];
 }
 
 function getEnemyGroup(

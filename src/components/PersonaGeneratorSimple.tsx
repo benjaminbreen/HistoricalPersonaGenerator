@@ -183,6 +183,7 @@ import PixelPortrait from './portraitLab/PixelPortrait';
 import RosterStrip, { SavePersonaStar } from '../encounter/RosterStrip';
 import { loadRoster } from '../encounter/roster';
 import { generateStatDescription } from '../utils/statToText';
+import { personaSummaryLine } from '../utils/personaSummaryLine';
 import MiniLocationMap from './MiniLocationMap';
 import { RARITY_COLORS, RARITY_LABELS, UNLABELLED_RARITIES, normalizeRarity } from '../types/attributeTypes';
 import { PERSONAL_BELIEFS, IDEOLOGIES, getProfessionEmoji } from '../constants';
@@ -226,6 +227,7 @@ import {
   StoredSharedPersona,
 } from '../types/sharedPersona';
 import { getDisplayZone } from '../utils/zoneDisplayUtils';
+import type { SpriteAnim, SpriteCommand } from '../encounter/sprite/SpriteCanvas';
 import './PersonaGenerator.css';
 
 /**
@@ -236,6 +238,54 @@ import './PersonaGenerator.css';
 const EncounterMode = React.lazy(() => import('../encounter/EncounterMode'));
 const SpriteTunerPanel = React.lazy(() => import('../encounter/sprite/SpriteTunerPanel'));
 const SpriteFigure = React.lazy(() => import('../encounter/sprite/SpriteCanvas'));
+
+/**
+ * The figure breathes, blinks and glances on its own, but outside a fight
+ * nothing ever asks it to shift its weight. Every so often, while the reader
+ * is looking at it, hand it a small idle posture — a shrug, a half step, an
+ * open hand. Nothing with a target: no lunges, no bows at empty air.
+ */
+const IDLE_POSTURES: SpriteAnim[] = ['shrug', 'step', 'gesture', 'reach'];
+
+/** The attribute scores, in the order the printed card lists them. */
+const ATTRIBUTE_SCORES = [
+  { key: 'strength', abbr: 'STR', label: 'Strength' },
+  { key: 'dexterity', abbr: 'DEX', label: 'Dexterity' },
+  { key: 'constitution', abbr: 'CON', label: 'Constitution' },
+  { key: 'intelligence', abbr: 'INT', label: 'Intelligence' },
+  { key: 'wisdom', abbr: 'WIS', label: 'Wisdom' },
+  { key: 'charisma', abbr: 'CHA', label: 'Charisma' },
+  { key: 'perception', abbr: 'PER', label: 'Perception' },
+  { key: 'luck', abbr: 'LCK', label: 'Luck' },
+  { key: 'craftiness', abbr: 'CRF', label: 'Craftiness' },
+] as const;
+
+function useIdlePosture(active: boolean): SpriteCommand | null {
+  const [command, setCommand] = useState<SpriteCommand | null>(null);
+
+  useEffect(() => {
+    if (!active) {
+      setCommand(null);
+      return;
+    }
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+
+    let timer: number;
+    const schedule = () => {
+      timer = window.setTimeout(() => {
+        setCommand((prev) => ({
+          anim: IDLE_POSTURES[Math.floor(Math.random() * IDLE_POSTURES.length)],
+          key: (prev?.key ?? 0) + 1,
+        }));
+        schedule();
+      }, 9000 + Math.random() * 11000);
+    };
+    schedule();
+    return () => window.clearTimeout(timer);
+  }, [active]);
+
+  return command;
+}
 
 const statusFieldLabel = (persona: HistoricalPersona): string =>
   socialStatusFieldLabel(polityFormFor({
@@ -1364,6 +1414,8 @@ export default function PersonaGenerator() {
   const handlePortraitClick = () => {
     setPortraitExpressionIndex((prev) => (prev + 1) % expressionCycle.length);
   };
+
+  const detailsIdlePosture = useIdlePosture(showSecrets && !!persona);
 
   // Handler for main portrait hover - randomly selects an expression and shows greeting bubble
   const handleMainPortraitHover = () => {
@@ -4091,7 +4143,10 @@ export default function PersonaGenerator() {
     const rawBio = generateNarrativeBiography(persona);
     const diseaseName = persona.character.diseaseHealth?.currentDiseases?.[0]?.disease?.name;
     // The biography is now two paragraphs, separated by a blank line.
-    return rawBio.split(/\n{2,}/).filter(Boolean).map((paragraph, index) => {
+    // Trim before filtering: `.filter(Boolean)` drops '' but keeps a chunk of
+    // pure whitespace, and a whitespace-only paragraph renders a full
+    // line-height of empty space that reads as a doubled paragraph break.
+    return rawBio.split(/\n{2,}/).map(part => part.trim()).filter(Boolean).map((paragraph, index) => {
       const withWikiLinks = makeTermsClickable(
         paragraph,
         persona.character.religion,
@@ -7078,47 +7133,65 @@ export default function PersonaGenerator() {
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
           >
-            <div className="modal-header">
-              <h2>Character Details</h2>
+            {/* The name, not "Character Details" — the reader knows what they
+                opened. The line beneath places them before the columns start. */}
+            <div className="modal-header secrets-modal-header">
+              <div className="secrets-modal-title">
+                <h2>{persona.character.name}</h2>
+                <p className="secrets-modal-subtitle">{personaSummaryLine(persona)}</p>
+              </div>
               <button className="modal-close" onClick={() => setShowSecrets(false)}>
                 <IoClose />
                 Close
               </button>
             </div>
             <div className="modal-body two-column-layout">
-              {/* Left Column: Portrait, full figure, and Appearance */}
-              <div className="left-column-appearance">
-                <div className="portrait-sprite-row">
-                  <div
-                    className="portrait-section-large clickable-portrait"
-                    onClick={handlePortraitClick}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && handlePortraitClick()}
-                    title="Click to cycle through expressions"
-                  >
-                    <PixelPortrait
-                      character={persona.character}
-                      size={340}
-                      temporaryExpression={expressionCycle[portraitExpressionIndex].expression}
-                    />
-                    <div className="expression-label">
-                      <span className="expression-indicator">
-                        {expressionCycle[portraitExpressionIndex].label}
-                      </span>
-                      <span className="expression-hint">Click to change expression</span>
-                    </div>
-                  </div>
-                  <div className="sprite-figure-panel" title="Full figure">
-                    <React.Suspense fallback={null}>
-                      <SpriteFigure persona={persona} facing="right" scale={0.8} />
-                    </React.Suspense>
-                    <div className="sprite-figure-caption">
-                      {persona.character.equippedItems?.torso?.name ?? 'Full figure'}
-                    </div>
+              {/* The face and the standing body hold their own rail, out of the
+                  scroll: the reader keeps looking at the person while the
+                  descriptions move past them. */}
+              <div className="character-rail">
+                <div
+                  className="portrait-section-large clickable-portrait"
+                  onClick={handlePortraitClick}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && handlePortraitClick()}
+                  title="Click to cycle through expressions"
+                >
+                  <PixelPortrait
+                    character={persona.character}
+                    size={210}
+                    temporaryExpression={expressionCycle[portraitExpressionIndex].expression}
+                  />
+                  <div className="expression-label">
+                    <span className="expression-indicator">
+                      {expressionCycle[portraitExpressionIndex].label}
+                    </span>
+                    <span className="expression-hint">Click to change expression</span>
                   </div>
                 </div>
+                <div className="sprite-figure-panel" title="Full figure">
+                  {/* The stage carries the shadow and the ground line; without
+                      them the figure hangs in the white and the weight shift
+                      reads as jitter rather than standing. */}
+                  <div className="sprite-figure-stage">
+                    <React.Suspense fallback={null}>
+                      <SpriteFigure
+                        persona={persona}
+                        facing="right"
+                        scale={1}
+                        command={detailsIdlePosture}
+                      />
+                    </React.Suspense>
+                  </div>
+                  <div className="sprite-figure-caption">
+                    {persona.character.equippedItems?.torso?.name ?? 'Full figure'}
+                  </div>
+                </div>
+              </div>
 
+              {/* Middle column: appearance */}
+              <div className="left-column-appearance">
                 <div className="secrets-section">
                   <h3>Physical Appearance</h3>
                   <div className="appearance-details-list">
@@ -7324,6 +7397,29 @@ export default function PersonaGenerator() {
                         </span>
                       </div>
                     )}
+                  </div>
+                </div>
+
+                {/* The same numbers the printed card carries. They were only
+                    ever visible in the PDF, which is a strange place to hide
+                    the one part of the sheet that is a game statistic. */}
+                <div className="secrets-section">
+                  <h3>Attributes</h3>
+                  <div className="attribute-score-grid">
+                    {ATTRIBUTE_SCORES.map(({ key, abbr, label }) => (
+                      <div className="attribute-score" key={key} title={label}>
+                        <span className="attribute-abbr">{abbr}</span>
+                        <span className="attribute-value">
+                          {persona.character.stats?.[key] ?? '—'}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="attribute-score attribute-score-health" title="Health">
+                      <span className="attribute-abbr">HP</span>
+                      <span className="attribute-value">
+                        {persona.character.health ?? '—'}/{persona.character.maxHealth ?? '—'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

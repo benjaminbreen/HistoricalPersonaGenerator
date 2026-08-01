@@ -64,6 +64,8 @@ export interface EncounterState {
   curiosity: number;
   report: RapportReport;
   comm: CommunicationReport;
+  /** Recently used physical communication cues, used to avoid repetition. */
+  nonverbalHistory: Record<Side, string[]>;
   outcome: Outcome | null;
 }
 
@@ -87,6 +89,7 @@ export function createEncounter(a: HistoricalPersona, b: HistoricalPersona, seed
     tension: report.tension,
     curiosity: report.curiosity,
     report, comm,
+    nonverbalHistory: { left: [], right: [] },
     outcome: null,
   };
 }

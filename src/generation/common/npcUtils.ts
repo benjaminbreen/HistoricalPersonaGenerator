@@ -12,6 +12,8 @@ import { CITIES_DATA } from '../../constants/gameData/cities';
 
 // Import clothing data synchronously
 import * as clothingModule from '../../constants/characterData/clothing';
+import { adjustMaterialQuality } from '../../constants/characterData/clothing';
+import { workDressFor, resolveWorkCategory, WORK_DYE_DAMPING } from '../../constants/characterData/workDress';
 import { hasCapability, SocietyCapability } from '../../constants/societyCapabilities';
 import { cleanShavenChance, pickFacialHairStyle, type FacialHairContext } from '../../constants/characterData/facialHair';
 import { ValueNoise } from '../../utils/noise';
@@ -733,7 +735,7 @@ function getRandomFromList(list: any[] | undefined, noise: ValueNoise): any {
     return list[Math.floor(noise.random() * list.length)];
 }
 
-export function generateClothingPalette(wealthLevel: WealthLevel, era: HistoricalEra, culturalZone: CulturalZone, gender: Gender, noise: ValueNoise): ClothingPalette {
+export function generateClothingPalette(wealthLevel: WealthLevel, era: HistoricalEra, culturalZone: CulturalZone, gender: Gender, noise: ValueNoise, occupation?: string): ClothingPalette {
     const mapWealthToClothingTier = (wealth: WealthLevel): 'poor' | 'common' | 'wealthy' => {
         switch (wealth) {
             case 'poor': case 'modest': return 'poor';
@@ -768,8 +770,25 @@ export function generateClothingPalette(wealthLevel: WealthLevel, era: Historica
                 }
                 : { primary: ['#8B4513'], secondary: ['#654321'], accent: ['#D2691E'] };
 
+    // Work damps the dye. See WORK_DYE_DAMPING: an office holder keeps full
+    // access to the place's showcase colours, a miner keeps a fifth of it.
+    const workCategory = resolveWorkCategory(occupation);
+    const damping = (workCategory && WORK_DYE_DAMPING[workCategory]) ?? 1;
+
+    // Damping the signature-dye roll alone was not enough: when the roll fails
+    // the field falls back to the era/zone palette, and those lists carry the
+    // showcase colours themselves — NORTH_AMERICAN_COLONIAL's primary list is
+    // Madder, Scarlet, Marigold, Saffron, Azurite, Verdigris. So a labourer
+    // whose signature dye was correctly suppressed still came out in Scarlet.
+    // For damped work the field is drawn from undyed and cheap-dye colours
+    // instead: fustian, madder-brown, indigo, iron-grey, walnut, ash. Era-level
+    // rather than zone-level, because that is genuinely what working cloth
+    // looked like everywhere it was not being shown off.
+    const WORK_NEUTRAL_FIELD = ['#6B6255', '#4A4A4A', '#2F4156', '#5C4A38', '#7A6F5D', '#8B7355'];
+    const fieldOptions = damping < 1 ? WORK_NEUTRAL_FIELD : options.primary;
+
     const chosen = {
-        primary: getRandomFromList(options.primary, noise) || '#8B4513',
+        primary: getRandomFromList(fieldOptions, noise) || '#8B4513',
         secondary: getRandomFromList(options.secondary, noise) || '#654321',
         accent: getRandomFromList(options.accent, noise) || '#D2691E',
     };
@@ -802,8 +821,8 @@ export function generateClothingPalette(wealthLevel: WealthLevel, era: Historica
         `${culturalZone}|${era}|${wealthLevel}|${gender}|${chosen.primary}${chosen.secondary}${chosen.accent}`
     );
     const dyeRoll = new ValueNoise(dyeSeed).random;
-    const field = clothingModule.signatureDyeFor(culturalZone, era, wealthLevel, 'field', dyeRoll);
-    const accent = clothingModule.signatureDyeFor(culturalZone, era, wealthLevel, 'accent', dyeRoll);
+    const field = clothingModule.signatureDyeFor(culturalZone, era, wealthLevel, 'field', dyeRoll, damping);
+    const accent = clothingModule.signatureDyeFor(culturalZone, era, wealthLevel, 'accent', dyeRoll, damping);
 
     return {
         primary: field || chosen.primary,
@@ -945,7 +964,40 @@ export function generateCompleteOutfit(
     belt: ClothingPiece;
     accessory: ClothingPiece;
 } {
-    const clothingSet = clothingModule.getClothingData(culturalZone, era, wealthLevel, gender);
+    const baseClothingSet = clothingModule.getClothingData(culturalZone, era, wealthLevel, gender);
+
+    // What this persona wears TO WORK, where their trade has its own dress.
+    //
+    // `occupation` has been a parameter of this function since it was written
+    // and was consulted in exactly one branch (the Central Asian modern-era
+    // override below), so a carpenter and a bank clerk of the same wealth drew
+    // the same wardrobe — which is how a 1941 Californian carpenter ended up in
+    // a black business suit and a 1943 railway worker in a scarlet one.
+    //
+    // Only the garment, headgear and footwear slots are replaced. Belts and
+    // accessories stay on the wealth table, which already strips jewels and
+    // gold from working-class outfits via `filterByOccupation`. The result is
+    // handed to the same filter pipeline as before, so every region, contact,
+    // material-era, thermal and culture-marker rule still applies.
+    const workSet = workDressFor(culturalZone, era, gender, occupation);
+    // One entry per zone/era/category is graded to the persona's wealth here
+    // rather than duplicated three times in the table: the same garment in
+    // better or worse cloth, which is what actually varied.
+    const workQuality = wealthLevel === 'poor' ? 'poor'
+        : wealthLevel === 'wealthy' ? 'good'
+            : wealthLevel === 'noble' ? 'excellent'
+                : 'standard';
+    const graded = (items: ClothingPiece[]): ClothingPiece[] =>
+        items.map(item => ({ ...item, material: adjustMaterialQuality(item.material, workQuality) }));
+
+    const clothingSet = workSet
+        ? {
+            ...baseClothingSet,
+            garments: graded(workSet.garments),
+            headgear: graded(workSet.headgear),
+            footwear: graded(workSet.footwear),
+        }
+        : baseClothingSet;
 
     // Cultural gate. The zone tables are continent-wide, so `EAST_ASIAN` offers
     // a Japanese sugegasa to a Formosan highlander and `OCEANIA` would offer a
@@ -1399,7 +1451,7 @@ export function generateBaseProfile(
             culturalZone: context.culturalZone,
         });
         
-        const clothingPalette = generateClothingPalette(wealthLevel, context.era, context.culturalZone, gender, noise);
+        const clothingPalette = generateClothingPalette(wealthLevel, context.era, context.culturalZone, gender, noise, overrides.occupation);
         const clothingPieces = generateCompleteOutfit(
             context.culturalZone,
             context.era,
@@ -1430,7 +1482,7 @@ export function generateBaseProfile(
         let finalCurrency = currency;
 
         if (constrainedWealthLevel !== wealthLevel) {
-            finalClothingPalette = generateClothingPalette(constrainedWealthLevel, context.era, context.culturalZone, gender, noise);
+            finalClothingPalette = generateClothingPalette(constrainedWealthLevel, context.era, context.culturalZone, gender, noise, overrides.occupation);
             finalClothingPieces = generateCompleteOutfit(
                 context.culturalZone,
                 context.era,

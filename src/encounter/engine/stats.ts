@@ -69,24 +69,20 @@ export const WEALTH_RANK: Record<string, number> = {
 
 export interface DisplayStat {
   label: string;
-  icon: string;
   value: number;
 }
 
 /**
- * The four numbers on the persona cards, 0–100, each read off the sheet:
- * charm for diplomacy, the attack line for strength, Big-Five openness for
- * curiosity, and station (nudged by coin) for wealth.
+ * The four encounter-facing qualities shown in the compact side dossiers.
+ * These are derived from the existing character sheet rather than rolled just
+ * for the encounter.
  */
-export function displayStats(c: PlayerCharacter, battle: BattleStats): DisplayStat[] {
+export function displayStats(_c: PlayerCharacter, battle: BattleStats): DisplayStat[] {
   const clamp100 = (v: number) => Math.max(1, Math.min(99, Math.round(v)));
   return [
-    { label: 'Diplomacy', icon: '🕊', value: clamp100((battle.charm / 32) * 100) },
-    { label: 'Strength', icon: '✊', value: clamp100((battle.attack / 62) * 100) },
-    { label: 'Curiosity', icon: '🌿', value: clamp100(c.personality?.openness ?? 50) },
-    {
-      label: 'Wealth', icon: '🪙',
-      value: clamp100(WEALTH_RANK[c.wealthLevel] * 20 + 8 + Math.min(14, Math.sqrt(Math.max(0, c.currency ?? 0)))),
-    },
+    { label: 'Resolve', value: clamp100((battle.nerve / 27) * 100) },
+    { label: 'Strength', value: clamp100((battle.attack / 62) * 100) },
+    { label: 'Cunning', value: clamp100(((battle.wit + battle.guile) / 68) * 100) },
+    { label: 'Fortune', value: clamp100((battle.luck / 18) * 100) },
   ];
 }

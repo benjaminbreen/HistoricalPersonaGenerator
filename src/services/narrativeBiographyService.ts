@@ -26,6 +26,7 @@ import {
   describeIdeology,
   describeLifeEvent,
   describeParents,
+  lifeEventClause,
   describePhysicalAppearance,
   getNarrativePronouns,
   isPluralDiseaseName,
@@ -33,6 +34,7 @@ import {
   withIndefiniteArticle,
 } from './narrativeTextService';
 import {
+  spouseWorkPhrase,
   describeChildhood,
   describeFoundationalAttribute,
   describeParentalLivelihood,
@@ -47,6 +49,274 @@ import {
 import type { Clause } from './narrativeClauseService';
 
 const capitalize = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
+
+const fnv1a = (text: string): number => {
+  let hash = 2166136261;
+  for (let i = 0; i < text.length; i += 1) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+};
+
+/**
+ * murmur3's finalizer. Full avalanche, which is the property the old draw
+ * lacked: adjacent inputs have to produce unrelated outputs, or two choices
+ * made one after another are not independent.
+ */
+const mix32 = (value: number): number => {
+  let hash = value >>> 0;
+  hash ^= hash >>> 16;
+  hash = Math.imul(hash, 0x85ebca6b);
+  hash ^= hash >>> 13;
+  hash = Math.imul(hash, 0xc2b2ae35);
+  hash ^= hash >>> 16;
+  return hash >>> 0;
+};
+
+const SMALL_NUMBERS = [
+  'no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
+  'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen',
+];
+
+/**
+ * How far apart two adult events may be and still be told as one stretch of a
+ * life. Measured against the generator's own output, the gap between
+ * consecutive adult events is 3 years at the median and 12 at the 90th
+ * percentile, so a bound of eight left most pairs unchainable.
+ */
+const CHAIN_MAX_GAP = 15;
+
+/**
+ * The interval between two events, for joining them into one sentence. Written
+ * out rather than numeric: "At age 31, her father died, and 5 years later she
+ * married" puts two figures in one sentence and reads like a ledger.
+ */
+const yearsLater = (gap: number): string => {
+  if (gap === 1) return 'the year after';
+  if (gap === 2) return 'two years on';
+  return `${SMALL_NUMBERS[gap] ?? gap} years later`;
+};
+
+/**
+ * How long a regime has held a place, as someone living under it would put it.
+ *
+ * A date is precise and says nothing: "and has since 1046 BCE" asks the reader
+ * to do the subtraction that is the whole point of the sentence. A span is
+ * what a subject actually knows — that it has been there longer than anyone
+ * can remember, or that it arrived within living memory.
+ */
+const reignSpan = (years: number): string => {
+  if (years < 20) return `${SMALL_NUMBERS[years] ?? years} years`;
+  if (years < 45) return `${years} years`;
+  if (years < 80) return 'a lifetime';
+  if (years < 130) return 'the better part of a century';
+  if (years < 175) return 'a century and more';
+  const centuries = Math.round(years / 100);
+  if (centuries >= 10) return 'longer than the records run';
+  const word = SMALL_NUMBERS[centuries] ?? String(centuries);
+  return years % 100 >= 50 && years % 100 < 90
+    ? `something over ${word} centuries`
+    : `${word} centuries and more`;
+};
+
+/** Stream names are fixed strings, so their salts are worth caching. */
+const STREAM_SALTS = new Map<string, number>();
+const streamSalt = (stream: string): number => {
+  const cached = STREAM_SALTS.get(stream);
+  if (cached !== undefined) return cached;
+  const salt = mix32(fnv1a(stream));
+  STREAM_SALTS.set(stream, salt);
+  return salt;
+};
+
+/**
+ * What an event left behind.
+ *
+ * Events were emitted as a list of dated facts — measured, 2.4 per biography,
+ * and only 8.9% of biographies contained a causal or temporal connective of
+ * any kind. A life told that way is a chronology, not a life: the persona
+ * object already knows why this household is poor and why this person is in
+ * this town, and the prose never drew the line. One adult event per biography
+ * now carries a tail that ties it to something the rest of the text says.
+ *
+ * These are whole sentences rather than appended clauses, so that no event
+ * phrasing can produce a run-on when one is attached.
+ */
+const CONSEQUENCE_AFTER_LOSS: Clause[] = [
+  { text: 'The household never made that ground back.' },
+  { text: 'What it cost was still being paid off years afterward.' },
+  { text: '${subjectCap} ${verb:have} been the one the others come to since.' },
+  { text: 'The holding has been worked by fewer hands than it needs ever since.', register: ['band', 'village', 'district'], band: ['poor', 'working', 'bonded'] },
+  { text: 'The work of two was done by one from then on.', register: ['band', 'village', 'district'], band: ['poor', 'working', 'bonded'] },
+  { text: 'There was no question of schooling after that.', minYear: 1850, band: ['poor', 'working'] },
+  { text: 'Whatever had been put by went on it.', minYear: 1850, band: ['poor', 'working'] },
+  { text: 'It settled where ${subject} would live, and ${subject} ${verb:have} not moved since.' },
+  { text: 'The debt from it outlived the person who incurred it.', minYear: 1500 },
+  { text: 'Work ${subject} would not have taken before, ${subject} ${verb:take} now.' },
+  { text: 'The house was quieter afterward and has stayed that way.' },
+  { text: 'It is the reason ${subject} ${verb:keep} something set by, however little.' },
+];
+
+const CONSEQUENCE_AFTER_GAIN: Clause[] = [
+  { text: 'It is the reason the household eats as well as it does.' },
+  { text: 'Nothing since has been as good, and ${subject} ${verb:know} it.' },
+  { text: 'It bought a standing in ${location} that ${subject} ${verb:have} been careful with.' },
+  { text: 'The neighbors have not entirely forgiven the luck of it.', register: ['band', 'village'] },
+  { text: 'It is still brought up, and not always kindly.', register: ['band', 'village'] },
+  { text: 'What came of it paid for the roof and not much else.', band: ['poor', 'working', 'bonded'] },
+  { text: 'It bought a year of not being afraid, which was worth more than the sum.', band: ['poor', 'working', 'bonded'] },
+  { text: 'It is the one thing ${subject} would put on a record of ${possessive} life.', minYear: 1700 },
+  { text: 'It is the piece of luck ${subject} ${verb:measure} the rest against.' },
+  { text: 'The household has lived off the margin of it ever since.' },
+];
+
+const CONSEQUENCE_AFTER_TURN: Clause[] = [
+  { text: 'Everything after it has been arranged around that fact.' },
+  { text: 'It is where ${subject} ${verb:date} the life ${subject} ${verb:have} now.' },
+  { text: 'The household has organised itself around it since.' },
+  { text: 'It is the story ${subject} ${verb:tell} when someone asks how ${subject} came to be here.' },
+  { text: 'Nothing has looked quite the same to ${object} since.' },
+  { text: 'It is the year ${subject} ${verb:count} from, when ${subject} ${verb:count} at all.' },
+  { text: 'What ${subject} had expected of ${possessive} life was settled differently after that.' },
+  // `selectClause` prefers the most specific clause that fits, so a lone gated
+  // entry in a small bank is not a rare variant — it becomes the only thing
+  // every persona it fits can say. One register-gated clause here measured at
+  // 158 of 1200 biographies. Every tier needs alternatives.
+  { text: 'The neighbors still date things by it.', register: ['band', 'village', 'district'] },
+  { text: 'It is known about, in the way everything here is known about.', register: ['band', 'village', 'district'] },
+  { text: 'It closed off the trade ${subject} had been raised to expect.', band: ['poor', 'working', 'bonded'] },
+  { text: 'There was no margin to absorb it, and none has appeared since.', band: ['poor', 'working', 'bonded'] },
+  { text: 'It decided what ${subject} could and could not ask for afterward.', band: ['poor', 'working', 'bonded'] },
+  { text: 'It is on the record somewhere, which is more than most of ${possessive} life is.', minYear: 1800 },
+  { text: 'The paperwork from it took longer than the thing itself.', minYear: 1800 },
+];
+
+/**
+ * What the neighbours made of it.
+ *
+ * "The settlement adjusted its opinion of him accordingly" is a sentence that
+ * reports a reaction without saying what the reaction was. These say what it
+ * was, and which one is drawn depends on whether the event was good or bad for
+ * the persona and on whether the persona is someone their neighbours are
+ * inclined to be generous to. All of them are gated to places small enough to
+ * have a collective opinion in the first place.
+ */
+const REACTION_GOOD_WELCOMED: Clause[] = [
+  { text: 'The neighbors were pleased for ${object}, and said so.', register: ['band', 'village', 'district'] },
+  { text: 'It was thought no more than ${subject} was owed.', register: ['band', 'village', 'district'] },
+  { text: 'The settlement took some credit for it, having watched ${object} grow up.', register: ['village', 'district'] },
+  { text: 'The band counted it as everyone\'s good fortune, which is how such things are counted here.', register: ['band'] },
+];
+
+const REACTION_GOOD_RESENTED: Clause[] = [
+  { text: 'The neighbors were civil about it and no more than that.', register: ['band', 'village', 'district'] },
+  { text: 'It was noticed, and not warmly.', register: ['band', 'village', 'district'] },
+  { text: 'Some in ${location} took it as ${possessive} due and some took it badly.', register: ['village', 'district'] },
+  { text: 'There was talk about how it had been come by.', register: ['band', 'village', 'district'] },
+];
+
+const REACTION_BAD_SUPPORTED: Clause[] = [
+  { text: 'The neighbors carried what they could of it for ${object}.', register: ['band', 'village', 'district'] },
+  { text: 'Food came to the door for a while without anyone being asked.', register: ['village', 'district'] },
+  { text: 'The band closed around ${object} the way it does.', register: ['band'] },
+  { text: 'People were kind, in the practical way that costs them something.', register: ['band', 'village', 'district'] },
+];
+
+const REACTION_BAD_IGNORED: Clause[] = [
+  { text: 'Nobody came, and ${subject} ${verb:have} not forgotten which doors stayed shut.', register: ['band', 'village', 'district'] },
+  { text: 'The settlement let ${object} get on with it.', register: ['band', 'village', 'district'] },
+  { text: 'Sympathy was offered where it could be heard and withheld where it could not.', register: ['village', 'district'] },
+  { text: 'It was held to be ${possessive} own affair, and ${subject} ${verb:have} not argued.', register: ['band', 'village', 'district'] },
+];
+
+/**
+ * The persona's own household.
+ *
+ * The generator has always built this in full — a spouse with a name, an age
+ * and a trade, and children walked year by year through a mortality model that
+ * decides which of them are buried — and the biography never mentioned any of
+ * it. Measured across 1200 biographies, the persona's own marriage appeared in
+ * none of them, while a sibling's appeared in 73%. A life with a husband of
+ * twenty years and four children, two of them dead, that reports only that a
+ * sister married well is not a life anyone would recognise as theirs.
+ */
+const HOUSEHOLD_MARRIAGE: Clause[] = [
+  { text: '${subjectCap} ${verb:have} been married to ${spouse} these ${years} years.' },
+  { text: '${possessiveCap} ${partner} ${spouse} keeps the household with ${object}, and has since ${subject} ${was} young.' },
+  { text: '${subjectCap} married ${spouse} ${years} years ago, and they have held together since.' },
+  { text: '${possessiveCap} ${partner} is ${spouse}; the match was made when ${subject} ${was} of an age for it.', maxYear: 1900 },
+  { text: '${subjectCap} and ${spouse} have been married ${years} years, which in ${location} is long enough to stop being remarked on.' },
+];
+
+/**
+ * The marriage clause has already given the name and the relation, so this one
+ * gives neither twice: "His wife is Betresh the Slow-Spoken; the match was made
+ * when he was of an age for it. His wife Betresh the Slow-Spoken works as a
+ * foraging."
+ */
+const HOUSEHOLD_MARRIAGE_TRADE: Clause[] = [
+  { text: '${possessiveCap} ${partner} ${trade}.' },
+  { text: '${spouse} ${trade}.' },
+  { text: 'What ${spouse} brings in is the other half of what the household lives on.' },
+  { text: 'The household runs on two trades, ${possessive} own and ${spouse}\'s.' },
+];
+
+const HOUSEHOLD_CHILDREN: Clause[] = [
+  { text: 'There are ${children} children in the house.' },
+  { text: '${subjectCap} ${verb:have} ${children} children living.' },
+  { text: 'The house holds ${children} children, the eldest ${eldest}.' },
+  { text: '${children} children have come of it, and the eldest is ${eldest}.' },
+];
+
+/** `${eldest}` here is a whole age phrase, so that an only child of one is "a
+ *  year old" rather than "1 years old". */
+const HOUSEHOLD_ONE_CHILD: Clause[] = [
+  { text: 'There is one child, ${eldest}.' },
+  { text: '${subjectCap} ${verb:have} one child living, ${eldest}.' },
+  { text: 'One child has come of it, ${eldest}.' },
+];
+
+// `${born}` and `${lost}` carry their own noun ("five children", "one child"),
+// because these are often the first sentence in the biography to mention
+// children at all and "they buried two of them" then has nothing to refer to.
+const HOUSEHOLD_LOSS: Clause[] = [
+  { text: 'Of the ${born} born to them, ${children} are living.' },
+  { text: '${born} were born and ${children} are living, which is the ordinary arithmetic here.', maxYear: 1900 },
+  { text: 'They buried ${lost}, which was not thought extraordinary.', maxYear: 1900 },
+  { text: 'They lost ${lost}, and it is not spoken of.' },
+];
+
+/**
+ * Where none survived. "They buried three of them" needs a count of the living
+ * to have been given first, and when there are none there is nothing to give.
+ */
+const HOUSEHOLD_LOSS_ALL: Clause[] = [
+  { text: '${born} were born to them and none lived.' },
+  { text: 'They buried all ${born}, and there were no more after that.' },
+  { text: 'Of the ${born} born to them, none is living.' },
+];
+
+/** The same, for the households where exactly one child survived. */
+const HOUSEHOLD_LOSS_ONE_LEFT: Clause[] = [
+  { text: 'Of the ${born} born to them, one is living.' },
+  { text: '${born} were born and one is living, which is the ordinary arithmetic here.', maxYear: 1900 },
+  { text: 'They buried ${lost} and kept one, which was not thought extraordinary.', maxYear: 1900 },
+  { text: 'One child is living, and they lost ${lost}.' },
+];
+
+const HOUSEHOLD_CHILDLESS: Clause[] = [
+  { text: 'There are no children, which is a thing the neighbors have opinions about.', maxYear: 1950, register: ['band', 'village', 'district'] },
+  { text: 'No children have come, and the household has arranged itself around that.' },
+  { text: 'They have no children.' },
+];
+
+const HOUSEHOLD_UNMARRIED: Clause[] = [
+  { text: '${subjectCap} ${verb:have} never married.' },
+  { text: 'No marriage was ever made for ${object}, and none is expected now.', maxYear: 1900 },
+  { text: '${subjectCap} ${verb:live} unmarried, which in a settlement this size is its own kind of position.', register: ['band', 'village'] },
+  { text: '${subjectCap} ${verb:have} not married, and ${verb:have} stopped being asked about it.', minYear: 1900 },
+];
 
 /**
  * Injuries happen somewhere. Naming the part turns "Torn muscle has made
@@ -169,7 +439,6 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
   const pronounPossCap = character.gender === 'Male' ? 'His' : character.gender === 'Female' ? 'Her' : 'Their';
   const pronounVerb = character.gender === 'Non-binary' ? 'have' : 'has';
   const pronounBe = character.gender === 'Non-binary' ? 'are' : 'is';
-  let biographyChoiceIndex = 0;
   const biographySeed = [
     character.name,
     persona.year,
@@ -179,16 +448,43 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
     character.age,
     character.portraitSeed,
   ].join('|');
-  const seededIndex = (length: number): number => {
-    let hash = 2166136261 + biographyChoiceIndex;
-    biographyChoiceIndex += 1;
-    for (let i = 0; i < biographySeed.length; i += 1) {
-      hash ^= biographySeed.charCodeAt(i);
-      hash = Math.imul(hash, 16777619);
-    }
-    return Math.abs(hash) % Math.max(1, length);
+  const biographyBase = fnv1a(biographySeed);
+
+  /**
+   * Named draw sequences.
+   *
+   * Every choice used to come from one counter, and the counter fed a start
+   * value into a fresh FNV-1a pass over the seed string. Both of FNV's steps —
+   * XOR with a byte, multiply by an odd constant — preserve bit 0, so the low
+   * bit of each result tracked the low bit of the start value exactly, and
+   * consecutive draws always came out with opposite parity. `Math.abs` and
+   * `% n` for even `n` preserve parity as well, so half the joint space of any
+   * two adjacent draws was unreachable: measured over 40k trials, adjacent
+   * draws mod 6 filled 18 of 36 cells. `originPlan` and `presentPlan` are
+   * adjacent draws of length 6, which meant exactly half the paragraph
+   * arrangements this file defines could never be produced.
+   *
+   * The seed is now hashed once and mixed with a per-stream salt and step
+   * through a finalizer that avalanches. Naming the streams is the second half
+   * of the fix: two sites drawing from different names cannot disturb one
+   * another, so adding or removing a beat no longer reshuffles every choice
+   * downstream of it.
+   */
+  const streamSteps = new Map<string, number>();
+  const draw = (stream: string, length: number): number => {
+    const step = streamSteps.get(stream) ?? 0;
+    streamSteps.set(stream, step + 1);
+    const mixed = mix32(biographyBase ^ streamSalt(stream) ^ Math.imul(step + 1, 0x9e3779b9));
+    return mixed % Math.max(1, length);
   };
+
+  /**
+   * The shared stream, for the clause banks reached through `pickBiography`.
+   * Structural decisions take a name of their own instead.
+   */
+  const seededIndex = (length: number): number => draw('shared', length);
   const pickBiography = <T,>(values: T[]): T => values[seededIndex(values.length)];
+  const pickFrom = <T,>(stream: string, values: T[]): T => values[draw(stream, values.length)];
 
   // Get proper wealth description
   // Opening - birth and background
@@ -256,8 +552,11 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
     if (lines.length === 0) return;
     beats.set(id, [...(beats.get(id) ?? []), ...lines]);
   };
-  /** A roll in 0–99, for deciding whether an optional beat is kept. */
-  const chance = (percent: number): boolean => seededIndex(100) < percent;
+  /**
+   * A roll in 0–99, for deciding whether an optional beat is kept. Each caller
+   * names its own stream so that one beat's presence never moves another's.
+   */
+  const chance = (stream: string, percent: number): boolean => draw(stream, 100) < percent;
 
   // Vary opening phrases
   // "Born in Moscow Basin" names a map region rather than a place anyone lived
@@ -285,8 +584,7 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
     `In ${formatYear(birthYear)}, ${styledName} entered the world in ${birthplace}. ${pronounPossCap} `
   ];
 
-  const selectedOpening = seededIndex(openingTemplates.length);
-  let opening = openingTemplates[selectedOpening];
+  const selectedOpening = draw('opening', openingTemplates.length);
 
   // Family context
   const siblings = character.family?.filter(f =>
@@ -296,23 +594,39 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
     f.relation === 'father' || f.relation === 'mother'
   ) || [];
 
-  // Adjust verb based on which opening template was used
-  // These openings end with a possessive pronoun ("his/her/their"), so they need noun-led phrasing.
-  const needsPossessiveForm = [1, 2, 3, 5].includes(selectedOpening);
+  let beliefPredicate = '';
 
-  if (siblings.length > 0) {
-    opening += needsPossessiveForm
-      ? `upbringing was as one of ${siblings.length + 1} children in ${aWealthHousehold}`
-      : `grew up as one of ${siblings.length + 1} children in ${aWealthHousehold}`;
-  } else if (parents.length > 0) {
-    opening += needsPossessiveForm
-      ? `parents raised ${pronounObj} in ${aWealthFamily}`
-      : `was raised by ${pronounPoss} parents in ${aWealthFamily}`;
-  } else {
-    opening += needsPossessiveForm
+  /**
+   * The household clause, in the two forms the leads need. Noun-led follows a
+   * possessive ("…and her | upbringing was as one of seven children"); verb-led
+   * follows a subject ("Jumoke Olowu | grew up as one of seven children").
+   */
+  const householdPhrase = (nounLed: boolean): string => {
+    // Several belief clauses open on "grew up", and so does the verb-led
+    // household phrase: "Jiang grew up as one of six children in a humble
+    // household, where she grew up among the observances the district has
+    // always kept". When they would collide, the household clause takes the
+    // other verb.
+    const grewUpTaken = /^grew up\b/i.test(beliefPredicate);
+    if (siblings.length > 0) {
+      return nounLed
+        ? `upbringing was as one of ${siblings.length + 1} children in ${aWealthHousehold}`
+        : grewUpTaken
+          ? `was one of ${siblings.length + 1} children in ${aWealthHousehold}`
+          : `grew up as one of ${siblings.length + 1} children in ${aWealthHousehold}`;
+    }
+    if (parents.length > 0) {
+      return nounLed
+        ? `parents raised ${pronounObj} in ${aWealthFamily}`
+        : `was raised by ${pronounPoss} parents in ${aWealthFamily}`;
+    }
+    return nounLed
       ? `upbringing was in ${aWealthHousehold}`
       : `came of age in ${aWealthHousehold}`;
-  }
+  };
+
+  // These openings end with a possessive pronoun ("his/her/their"), so they need noun-led phrasing.
+  const needsPossessiveForm = [1, 2, 3, 5].includes(selectedOpening);
 
   // Religion and cultural context with varied religiosity
   const hasNamedReligion = character.religion
@@ -321,7 +635,7 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
 
   if (hasNamedReligion) {
     // Use character's religiosity score if available, otherwise random
-    const religiosity = character.socialContext?.religiosity ?? (seededIndex(100) / 100);
+    const religiosity = character.socialContext?.religiosity ?? (draw('religiosity', 100) / 100);
 
     let religionPhrase = '';
     if (religiosity > 0.8) {
@@ -355,20 +669,75 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
       // Barely religious/cultural only
       const culturalTemplates = [
         `was nominally of the ${character.religion} faith, though it played little role in ${pronounPoss} upbringing`,
-        `came from a ${character.religion} household, though ${pronoun} practiced little`,
+        `came from ${withIndefiniteArticle(`${character.religion} household`)}, though ${pronoun} practiced little`,
         `was counted among the ${character.religion} households without being much observed`,
         `knew of ${character.religion} mainly as a cultural background, not a daily practice`
       ];
       religionPhrase = pickBiography(culturalTemplates);
     }
 
-    opening += `, where ${pronoun} ${religionPhrase}`;
+    beliefPredicate = religionPhrase;
   } else {
     // "Local Beliefs" used to skip this clause entirely, which silenced every
     // prehistoric persona at the exact point the biography establishes them.
-    opening += `, where ${pronoun} ${describeUnnamedBelief(bioContext, pickBiography)}`;
+    beliefPredicate = describeUnnamedBelief(bioContext, pickBiography);
   }
-  addBeat('opening', `${opening}.`);
+
+  /**
+   * Opening template 4 already ends on "where <pronoun>", so attaching the
+   * belief clause with a second "where" produced "…where she grew up as one of
+   * five children in a poor household, where she learned the proper conduct
+   * toward the dead". After a lead that has spent its "where", it becomes a
+   * plain conjunction.
+   */
+  const beliefClause = (leadSpentItsWhere: boolean): string => beliefPredicate
+    ? `${leadSpentItsWhere ? ', and' : ', where'} ${pronoun} ${beliefPredicate}`
+    : '';
+  const openingSpendsWhere = selectedOpening === 4;
+
+  /**
+   * What the biography leads on.
+   *
+   * Every biography used to open on birth, date and place — measured, 100% of
+   * them — because the opener was the only sentence that carried the name and
+   * the plans were required to place it first. Two of the three leads below
+   * carry the name instead, which frees birth to be an ordinary sentence
+   * somewhere in the origins paragraph.
+   */
+  const originLead = pickFrom('origin-lead', ['birth', 'birth', 'birth', 'birth', 'household', 'household', 'household', 'place', 'place', 'place'] as const);
+
+  /**
+   * A life told from the present backwards. Roughly a fifth of them, because
+   * the shape is striking and wears out if it is the usual one.
+   */
+  const presentFirst = chance('paragraph-order', 20);
+
+  if (presentFirst) {
+    // The present paragraph has already introduced the persona by name, so the
+    // origins paragraph takes the pronoun. Repeating the full name two
+    // paragraphs running reads as two biographies stapled together.
+    addBeat('lead', pickFrom('origin-lead-pronoun', [
+      `${subjectCap} ${conjugate('was', narrativePronouns)} born in ${formatYear(birthYear)}, in ${birthplace}, and ${pronounPoss} ${householdPhrase(true)}${beliefClause(false)}.`,
+      `Born in ${formatYear(birthYear)} in ${birthplace}, ${pronoun} ${householdPhrase(false)}${beliefClause(false)}.`,
+      `${pronounPossCap} birth fell in ${formatYear(birthYear)}, in ${birthplace}, and ${pronounPoss} ${householdPhrase(true)}${beliefClause(false)}.`,
+    ]));
+  } else if (originLead === 'birth') {
+    addBeat('lead', `${openingTemplates[selectedOpening]}${householdPhrase(needsPossessiveForm)}${beliefClause(openingSpendsWhere)}.`);
+  } else {
+    if (originLead === 'household') {
+      addBeat('lead', `${styledName} ${householdPhrase(false)}${beliefClause(false)}.`);
+    } else {
+      // Leading on where rather than when. The place is the one fact about an
+      // ordinary life that its neighbours would have given first.
+      addBeat('lead', `In ${placeName(persona)}, ${styledName} ${householdPhrase(false)}${beliefClause(false)}.`);
+    }
+    // Birth demoted to a plain sentence the plans can put anywhere.
+    addBeat('birth', pickFrom('birth-line', [
+      `${subjectCap} ${conjugate('was', narrativePronouns)} born in ${formatYear(birthYear)}, in ${birthplace}.`,
+      `${pronounPossCap} birth fell in ${formatYear(birthYear)}, in ${birthplace}.`,
+      `The household ${pronoun} ${conjugate('was', narrativePronouns)} born into, in ${formatYear(birthYear)}, was ${birthplace}.`,
+    ]));
+  }
 
   // Foundational attributes, split between the two paragraphs by whether they
   // describe where the persona came from or what they are now.
@@ -412,8 +781,25 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
   const adultEvents = datedEvents.filter(e => e.ageAtEvent > 17).sort(byImportance);
 
   const chosenYouth = youthEvents.slice(0, 1);
-  // Fall back to a third adult event when there was no childhood event to tell.
-  const adultQuota = chosenYouth.length > 0 ? 2 : 3;
+  /**
+   * How much of a life there is to report.
+   *
+   * Biography length used to be near-constant: measured, a persona under 25
+   * averaged 192 words and one over 55 averaged 210, and the 10th and 90th
+   * percentiles of the whole corpus sat at 169 and 238. Every life came out the
+   * same size regardless of how much had happened in it, which is the one thing
+   * a reader comparing two cards notices immediately.
+   *
+   * A short life gets a short biography. The optional beats below take their
+   * odds from this too, so the effect compounds rather than being one extra
+   * sentence.
+   */
+  const fullness = character.age < 25 ? 'brief'
+    : character.age < 45 ? 'ordinary'
+      : 'long';
+  // Fall back to an extra adult event when there was no childhood event to tell.
+  const adultQuota = (fullness === 'brief' ? 1 : fullness === 'ordinary' ? 2 : 3)
+    + (chosenYouth.length > 0 ? 0 : 1);
   // Two events of the same kind in one paragraph read as a template repeating.
   const usedKinds = new Set(chosenYouth.map(e => e.event.kind));
   const chosenAdult: typeof adultEvents = [];
@@ -435,7 +821,7 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
   const canFoldParentNames = Boolean(
     father?.name && mother?.name && father?.profession && mother?.profession
   );
-  const foldParentNames = canFoldParentNames && chance(45);
+  const foldParentNames = canFoldParentNames && chance('fold-parents', 45);
 
   const livelihood = describeParentalLivelihood(
     father, mother, bioContext, pickBiography, foldParentNames,
@@ -444,9 +830,9 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
 
   // The optional beats are what make one life's biography a different length
   // from another's, rather than every life getting the same twelve sentences.
-  if (chance(85)) addBeat('childhood', describeChildhood(bioContext, pickBiography));
+  if (chance('childhood', fullness === 'brief' ? 70 : 88)) addBeat('childhood', describeChildhood(bioContext, pickBiography));
 
-  if (chance(65)) {
+  if (chance('appearance', fullness === 'brief' ? 50 : 70)) {
     addBeat('appearance', describePhysicalAppearance(
       character.appearance,
       narrativePronouns,
@@ -468,22 +854,34 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
   // STANDING_ROLES: without this, a patronage politician "makes his living as a
   // big man" and a prince "works as a maharaja".
   const roleStanding = standingRole(character.profession);
+
+  // When the present paragraph runs first, the profession sentence is the one
+  // that has to carry the name. A name is grammatically singular even for a
+  // persona referred to as "they", so verbs are conjugated against a singular
+  // subject while the possessives stay as they were.
+  const subjectPronouns = presentFirst
+    ? { ...narrativePronouns, subject: 'he' as const }
+    : narrativePronouns;
+  const leadSubject = presentFirst ? styledName : pronoun;
+  const leadSubjectCap = presentFirst ? styledName : subjectCap;
+  const leadBe = presentFirst ? 'is' : narrativePronouns.be;
+
   const professionOpeners = roleStanding
     ? [
-      `Now ${character.age}, ${pronoun} ${roleStanding.livelihood}`,
-      `${subjectCap} ${roleStanding.livelihood}`,
+      `Now ${character.age}, ${leadSubject} ${roleStanding.livelihood}`,
+      `${leadSubjectCap} ${roleStanding.livelihood}`,
     ]
     : [
-      `Now ${character.age}, ${pronoun} ${conjugate('make', narrativePronouns)} ${pronounPoss} living as ${professionArticle} ${professionName}`,
-      `At ${character.age}, ${pronoun} ${conjugate('work', narrativePronouns)} as ${professionArticle} ${professionName}`,
-      `${subjectCap} ${conjugate('earn', narrativePronouns)} ${pronounPoss} bread as ${professionArticle} ${professionName}, and ${conjugate('have', narrativePronouns)} done for years`,
+      `Now ${character.age}, ${leadSubject} ${conjugate('make', subjectPronouns)} ${pronounPoss} living as ${professionArticle} ${professionName}`,
+      `At ${character.age}, ${leadSubject} ${conjugate('work', subjectPronouns)} as ${professionArticle} ${professionName}`,
+      `${leadSubjectCap} ${conjugate('earn', subjectPronouns)} ${pronounPoss} bread as ${professionArticle} ${professionName}, and ${conjugate('have', subjectPronouns)} done for years`,
       // A trade is a thing followed where trades exist. "She follows the
       // cleaner's trade" is a sentence about 1750 wearing 2015's job title.
       persona.year >= 1900
-        ? `${subjectCap} ${narrativePronouns.be} ${professionArticle} ${professionName}, and ${conjugate('have', narrativePronouns)} been for a while now`
-        : `${subjectCap} ${conjugate('follow', narrativePronouns)} the ${professionName}'s trade`
+        ? `${leadSubjectCap} ${leadBe} ${professionArticle} ${professionName}, and ${conjugate('have', subjectPronouns)} been for a while now`
+        : `${leadSubjectCap} ${conjugate('follow', subjectPronouns)} the ${professionName}'s trade`
     ];
-  let professionSentence = pickBiography(professionOpeners);
+  let professionSentence = pickFrom('profession-opener', professionOpeners);
 
   // Work context for the trades where the stats say something specific.
   if (character.stats) {
@@ -502,38 +900,111 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
   const trade = describeProfessionWork(bioContext, pickBiography);
   const attitude = describeTradeAttitude(bioContext, pickBiography);
   const fold = (text: string): string => {
-    const stripped = text.replace(/^(?:The work means|That means|It comes down to|The trade is|The job is)\s+/, '');
+    const stripped = text.replace(/^(?:The work means|That means|It comes down to|The trade is|The job is|In practice,|Day to day,|Mostly it is|It amounts to|The whole of it is|What that gets (?:him|her|them) is)\s+/, '');
     return `${professionSentence} — ${stripped.charAt(0).toLowerCase()}${stripped.slice(1)}`;
   };
 
   // `trade` is empty when there is nothing specific to say about the work, in
   // which case the shapes that fold or append it collapse to the bare opener.
   // Saying nothing beats the generality it replaced.
-  const professionShape = seededIndex(10);
-  switch (trade ? professionShape : (professionShape < 5 ? 5 : 9)) {
-    case 0: case 1: case 2:
-      addBeat('profession', fold(trade));
-      break;
-    case 3: case 4:
+  // The trade texture is a frame over a compressed noun phrase, and it used to
+  // follow the profession sentence in seven biographies out of ten. At that
+  // rate it stops being a detail and becomes the form: every persona's work
+  // described in the same voice at the same length. Half of them now say what
+  // the trade is and stop.
+  const professionShape = draw('profession-shape', 10);
+  // Cases 7-9 all render `trade`, so an empty one must never map into them:
+  // `fold('')` leaves the profession sentence trailing an em-dash.
+  switch (trade ? professionShape : (professionShape < 7 ? 0 : 5)) {
+    case 0: case 1: case 2: case 3: case 4:
       addBeat('profession', `${professionSentence}.`);
-      addBeat('trade', trade);
       break;
     case 5: case 6:
       addBeat('profession', [`${professionSentence}.`, attitude]);
       break;
     case 7:
-      addBeat('profession', [`${professionSentence}.`, attitude]);
-      addBeat('trade', trade);
+      addBeat('profession', fold(trade));
       break;
     case 8:
-      addBeat('profession', [fold(trade), attitude]);
+      addBeat('profession', `${professionSentence}.`);
+      addBeat('trade', trade);
       break;
     default:
-      addBeat('profession', `${professionSentence}.`);
+      addBeat('profession', [fold(trade), attitude]);
   }
 
-  for (const { event, ageAtEvent } of chosenAdult) {
-    addBeat('adult-events', describeLifeEvent(event, ageAtEvent, narrativePronouns));
+  // ---- Adult events, told as a sequence rather than a list ----------------
+  //
+  // Two events close enough together to have been the same stretch of a life
+  // are joined into one sentence, and one event in the run is followed by what
+  // it left behind. Both are what turns "At age 31, a parent died. At age 37, a
+  // brother's marriage brought new trade connections." into something with a
+  // shape.
+  {
+    const clauses = chosenAdult.map(({ event, ageAtEvent }) => ({
+      text: lifeEventClause(event, narrativePronouns),
+      age: ageAtEvent,
+      importance: event.importance,
+    })).filter(entry => entry.text);
+
+    const sentences: string[] = [];
+    // Which sentence of the run gets a consequence, decided up front so that a
+    // chained pair does not also draw one and end up over-explained.
+    const tailAt = clauses.length > 0 ? draw('consequence-slot', clauses.length) : -1;
+    const wantsTail = chance('consequence', 55);
+
+    let index = 0;
+    while (index < clauses.length) {
+      const current = clauses[index];
+      const next = clauses[index + 1];
+      const gap = next ? next.age - current.age : Infinity;
+      // Same-year events read as one moment and would need a different
+      // connective; beyond CHAIN_MAX_GAP is not a sequence anyone would narrate
+      // as one.
+      const chains = Boolean(next) && gap >= 1 && gap <= CHAIN_MAX_GAP && chance('event-chain', 65);
+
+      if (chains && next) {
+        sentences.push(pickFrom('chain-shape', [
+          `At age ${current.age}, ${current.text}. ${capitalize(yearsLater(gap))}, ${next.text}.`,
+          `At age ${current.age}, ${current.text}, and ${yearsLater(gap)} ${next.text}.`,
+          `At age ${current.age}, ${current.text} — ${next.text} ${yearsLater(gap)}.`,
+        ]));
+        index += 2;
+      } else {
+        sentences.push(`At age ${current.age}, ${current.text}.`);
+        index += 1;
+      }
+
+      if (wantsTail && tailAt >= index - (chains ? 2 : 1) && tailAt < index) {
+        const last = clauses[Math.min(tailAt, clauses.length - 1)];
+        const bad = last.importance === EventImportance.TRAGEDY
+          || last.importance === EventImportance.INJURY;
+        const good = last.importance === EventImportance.OPPORTUNITY;
+        const consequence = bad ? CONSEQUENCE_AFTER_LOSS
+          : good ? CONSEQUENCE_AFTER_GAIN
+            : CONSEQUENCE_AFTER_TURN;
+
+        // Whether the neighbours are inclined to be generous. Agreeableness is
+        // the trait the rest of the biography already reads as "how this person
+        // is with other people", so the reaction follows it.
+        const wellRegarded = (character.personality?.agreeableness ?? 0.5) >= 0.45;
+        const reaction = bad
+          ? (wellRegarded ? REACTION_BAD_SUPPORTED : REACTION_BAD_IGNORED)
+          : good
+            ? (wellRegarded ? REACTION_GOOD_WELCOMED : REACTION_GOOD_RESENTED)
+            : undefined;
+
+        // Reactions are register-gated, so `selectDetail` returns nothing where
+        // there is no community close enough to have a view. Fall back to the
+        // consequence rather than dropping the slot.
+        const tail = (reaction && chance('reaction', 40)
+          ? selectDetail(reaction, bioContext, pickBiography)
+          : '') || selectDetail(consequence, bioContext, pickBiography);
+        if (tail) sentences.push(tail);
+      }
+    }
+
+    addBeat('adult-events', sentences);
   }
 
   // Health status
@@ -569,7 +1040,86 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
       : `${capitalize(subject)} ${hasVerb} made ordinary labor uncertain, but ${pronoun} ${conjugate('continue', narrativePronouns)} as circumstances allow.`);
   }
 
-  if (chance(80)) addBeat('world', describeWorldTexture(bioContext, pickBiography));
+  // ---- The persona's own household ----------------------------------------
+  {
+    const spouse = character.family?.find((m: any) => m.relation === 'spouse');
+    const offspring = (character.family ?? []).filter((m: any) => m.relation === 'son' || m.relation === 'daughter');
+    const living = offspring.filter((m: any) => !m.isDeceased);
+    const lost = offspring.length - living.length;
+    const eldest = living.reduce(
+      (oldest: number, child: any) => Math.max(oldest, child.age ?? 0), 0);
+    const spelled = (count: number): string => SMALL_NUMBERS[count] ?? String(count);
+    // A clause may open on an expanded placeholder ("${born} were born and
+    // ${children} are living"), and placeholder expansion does not capitalise.
+    const household = (bank: Clause[], extras: Record<string, string | undefined>): string => {
+      const text = selectDetail(bank, bioContext, pickBiography, extras);
+      return text ? capitalize(text) : '';
+    };
+
+    // "No marriage was ever made for her" cannot follow "she lost a child before
+    // it could walk". The event bank can hand out a marriage or a child without
+    // the family record carrying a spouse, and the two then contradict.
+    const impliesAPartner = offspring.length > 0 || chosenAdult.some(({ event }) =>
+      /\b(child|children|son|daughter|wife|husband|spouse|married|marriage|wedding|widow)\b/i.test(event.text ?? ''));
+
+    const lines: string[] = [];
+    if (spouse) {
+      const marriedYears = typeof spouse.marriedSince === 'number'
+        ? Math.max(1, persona.year - spouse.marriedSince)
+        : undefined;
+      const partnerNoun = character.gender === 'Male' ? 'wife'
+        : character.gender === 'Female' ? 'husband'
+          : 'spouse';
+      // The duration-bearing clauses are unusable without a marriage year, and
+      // records written before the field existed do not carry one.
+      const marriageBank = marriedYears === undefined
+        ? HOUSEHOLD_MARRIAGE.filter(clause => !clause.text.includes('${years}'))
+        : HOUSEHOLD_MARRIAGE;
+      lines.push(household(marriageBank, {
+        spouse: spouse.name,
+        partner: partnerNoun,
+        years: marriedYears === undefined ? undefined : spelled(marriedYears),
+      }));
+
+      const spouseWork = spouseWorkPhrase(spouse.profession);
+      if (spouseWork && chance('spouse-trade', 40)) {
+        lines.push(household(HOUSEHOLD_MARRIAGE_TRADE, {
+          spouse: spouse.name,
+          partner: partnerNoun,
+          trade: spouseWork,
+        }));
+      }
+
+      if (living.length === 0 && lost === 0) {
+        if (chance('childless', 70)) lines.push(household(HOUSEHOLD_CHILDLESS, {}));
+      } else if (lost > 0 && chance('child-loss', 75)) {
+        const lossBank = living.length === 0 ? HOUSEHOLD_LOSS_ALL
+          : living.length === 1 ? HOUSEHOLD_LOSS_ONE_LEFT
+            : HOUSEHOLD_LOSS;
+        const countOf = (n: number): string => n === 1 ? 'one child' : `${spelled(n)} children`;
+        lines.push(household(lossBank, {
+          children: spelled(living.length),
+          born: countOf(offspring.length),
+          lost: countOf(lost),
+        }));
+      } else if (living.length === 1) {
+        lines.push(household(HOUSEHOLD_ONE_CHILD, {
+          eldest: eldest <= 1 ? 'a year old' : `${eldest} years old`,
+        }));
+      } else if (living.length > 1) {
+        lines.push(household(HOUSEHOLD_CHILDREN, {
+          children: spelled(living.length),
+          eldest: String(eldest),
+        }));
+      }
+    } else if (character.age >= 22 && !impliesAPartner && chance('unmarried', 60)) {
+      lines.push(household(HOUSEHOLD_UNMARRIED, {}));
+    }
+
+    addBeat('household', lines.filter(Boolean));
+  }
+
+  if (chance('world', fullness === 'brief' ? 55 : 85)) addBeat('world', describeWorldTexture(bioContext, pickBiography));
 
   // Who the persona answers to, where there is anyone. Most of the table's
   // states are not a going concern in a subject's daily life, so this is one
@@ -586,7 +1136,7 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
     location: persona.location,
     culturalZone: persona.culturalZone as CulturalZone,
   });
-  if (standing && chance(80)) {
+  if (standing && chance('polity', fullness === 'brief' ? 60 : 85)) {
     const held = persona.year - standing.since;
     const title = rulerTitleFor(standing.name);
     const state = withPolityArticle(standing.name);
@@ -595,13 +1145,29 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
     // table are a set of powers rather than one, and they need the plural verb.
     const plural = isPluralPolity(standing.name);
 
-    addBeat('polity', title && chance(55)
+    const span = reignSpan(held);
+    const hasVerb = plural ? 'have' : 'has';
+
+    addBeat('polity', title && chance('polity-title', 55)
       ? `${capitalize(pronoun)} ${pronounBe} a subject of ${title}.`
       : held <= 25
-        ? `${capitalize(state)} ${plural ? 'are' : 'is'} new here, ${held} years in and not yet settled into the habits of rule.`
+        ? pickFrom('polity-new', [
+          `${capitalize(state)} ${plural ? 'are' : 'is'} new here, ${held} years in and not yet settled into the habits of rule.`,
+          `${capitalize(state)} ${hasVerb} held this country only ${span}, and it shows.`,
+          `Authority here passed to ${state} within ${pronounPoss} own memory.`,
+        ])
         : held >= 150
-          ? `${capitalize(state)} ${plural ? 'have' : 'has'} held this country since ${formatYear(standing.since)}, beyond anyone's memory.`
-          : `Authority here runs up to ${state}, and has since ${formatYear(standing.since)}.`);
+          ? pickFrom('polity-old', [
+            `${capitalize(state)} ${hasVerb} held this country since ${formatYear(standing.since)}, beyond anyone's memory.`,
+            `${capitalize(state)} ${hasVerb} held this country ${span}, which is to say always.`,
+            `Authority here runs up to ${state}, and ${hasVerb} for ${span}.`,
+            `No one alive remembers this country under anyone but ${state}.`,
+          ])
+          : pickFrom('polity-mid', [
+            `Authority here runs up to ${state}, and ${hasVerb} for ${span}.`,
+            `${capitalize(state)} ${hasVerb} held this country ${span}.`,
+            `Authority here runs up to ${state}, and has since ${formatYear(standing.since)}.`,
+          ]));
   }
 
   // What was happening here that the steady-state tables know nothing about.
@@ -617,7 +1183,7 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
     persona.year,
     persona.region,
     persona.location,
-    () => seededIndex(1000) / 1000,
+    () => draw('disruption', 1000) / 1000,
   );
   if (catastrophe) addBeat('disruption', catastrophe);
 
@@ -630,7 +1196,7 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
   if (persona.socialCondition) addBeat('condition', persona.socialCondition.clause);
 
   // Helper function to get belief description
-  const getBeliefDescription = (beliefs: any[]): string | null => {
+  const getBeliefDescription = (beliefs: any[]): { nounPhrase: boolean; text: string } | null => {
     if (!beliefs || beliefs.length === 0) return null;
 
     // Sort by conviction to get the strongest belief
@@ -642,21 +1208,24 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
     // Look up the belief text from PERSONAL_BELIEFS constant
     const beliefData = PERSONAL_BELIEFS.find((b: any) => b.id === primaryBelief.beliefId);
 
-    if (beliefData && beliefData.text) {
-      // Strip common prefixes and lowercase the first letter to integrate into sentence
-      let cleanText = beliefData.text
-        .replace(/^[Bb]elieves that /i, '')
-        .replace(/^[Bb]elieves in /i, '')
-        .replace(/^[Bb]elieves /i, '')
-        .replace(/^[Dd]eeply /i, '');
-      return cleanText.charAt(0).toLowerCase() + cleanText.slice(1);
-    }
+    if (!beliefData?.text) return null;
 
-    return null;
+    // "Believes in X" heads a noun phrase and "Believes that X" heads a
+    // clause, and the two cannot share a frame: stripping both prefixes and
+    // dropping the remainder into "the conviction that …" produced "Her
+    // worldview is shaped by the conviction that only what can be observed and
+    // tested through experience", which has no verb in it.
+    const source = beliefData.text.replace(/^[Dd]eeply /, '');
+    const nounPhrase = /^[Bb]elieves in /.test(source);
+    const body = source
+      .replace(/^[Bb]elieves that /i, '')
+      .replace(/^[Bb]elieves in /i, '')
+      .replace(/^[Bb]elieves /i, '');
+    return { nounPhrase, text: body.charAt(0).toLowerCase() + body.slice(1) };
   };
 
   // Social standing and beliefs - more sophisticated integration
-  const beliefText = getBeliefDescription(character.beliefs);
+  const belief = getBeliefDescription(character.beliefs);
 
   const professionText = professionName;
   const canCarryAbstractIdeology = /merchant|banker|lawyer|clerk|scribe|scholar|teacher|operator|official|administrator|printer|journalist|student|activist|politician|priest|monk|imam|rabbi|minister|reformer|writer|artist|entrepreneur|shopkeeper|trader/.test(professionText);
@@ -665,9 +1234,11 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
   if (character.ideology && character.ideology !== 'Pragmatism' && (!ideologyLooksModern || canCarryAbstractIdeology)) {
     const ideology = IDEOLOGIES.find((i: any) => i.id === character.ideology);
     addBeat('outlook', describeIdeology(ideology, narrativePronouns, pickBiography));
-  } else if (beliefText) {
+  } else if (belief) {
     // If no ideology but has beliefs, mention them
-    addBeat('outlook', `${pronounPossCap} worldview ${pronounBe} shaped by the conviction that ${beliefText}.`);
+    addBeat('outlook', belief.nounPhrase
+      ? `${pronounPossCap} worldview ${pronounBe} shaped by a settled belief in ${belief.text}.`
+      : `${pronounPossCap} worldview ${pronounBe} shaped by the conviction that ${belief.text}.`);
   }
 
   // Personality - sophisticated and varied
@@ -734,8 +1305,8 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
       // Every trait that qualified used to be listed, so most personas ended on
       // a three-clause sentence of the same shape. One trait is often the more
       // characterful choice.
-      const traitCount = Math.min(traits.length, pickBiography([1, 1, 2, 2, 3]));
-      let personalitySentence = pickBiography(personalityIntros);
+      const traitCount = Math.min(traits.length, pickFrom('trait-count', [1, 1, 2, 2, 3]));
+      let personalitySentence = pickFrom('personality-intro', personalityIntros);
       if (traitCount > 1) personalitySentence += `, as well as ${traits[1]}`;
       if (traitCount > 2) personalitySentence += `, and ${traits[2]}`;
       addBeat('personality', `${personalitySentence}.`);
@@ -744,40 +1315,51 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
 
   // The closing roll-call of parents is dropped whenever the names have already
   // been folded into the livelihood sentence, and often when they have not.
-  if (!foldParentNames && character.family && character.family.length > 0 && chance(55)) {
+  if (!foldParentNames && character.family && character.family.length > 0 && chance('parents-rollcall', fullness === 'long' ? 45 : 60)) {
     addBeat('parents', describeParents(father?.name, mother?.name, narrativePronouns, true));
   }
 
   // ---- Arrangement -------------------------------------------------------
 
   /**
-   * Orderings of the origins beats. The opening is anchored first because it
-   * carries the birth, and everything else reads as a subordinate clause of it.
+   * Orderings of the origins beats. `lead` is anchored first because it is the
+   * sentence that carries the name. `birth` is only populated when the lead is
+   * something other than birth, and then it is an ordinary beat that can fall
+   * anywhere in the paragraph.
    */
   const ORIGIN_PLANS: string[][] = [
-    ['opening', 'livelihood', 'childhood', 'appearance', 'origin-attr', 'youth-event'],
-    ['opening', 'childhood', 'livelihood', 'origin-attr', 'youth-event', 'appearance'],
-    ['opening', 'origin-attr', 'livelihood', 'childhood', 'youth-event', 'appearance'],
-    ['opening', 'livelihood', 'youth-event', 'childhood', 'origin-attr', 'appearance'],
-    ['opening', 'appearance', 'livelihood', 'childhood', 'origin-attr', 'youth-event'],
-    ['opening', 'childhood', 'origin-attr', 'appearance', 'livelihood', 'youth-event'],
+    ['lead', 'birth', 'livelihood', 'childhood', 'appearance', 'origin-attr', 'youth-event'],
+    ['lead', 'childhood', 'birth', 'livelihood', 'origin-attr', 'youth-event', 'appearance'],
+    ['lead', 'origin-attr', 'livelihood', 'birth', 'childhood', 'youth-event', 'appearance'],
+    ['lead', 'livelihood', 'youth-event', 'childhood', 'birth', 'origin-attr', 'appearance'],
+    ['lead', 'appearance', 'livelihood', 'childhood', 'origin-attr', 'youth-event', 'birth'],
+    ['lead', 'childhood', 'origin-attr', 'birth', 'appearance', 'livelihood', 'youth-event'],
   ];
 
   /**
-   * Orderings of the present beats. Every plan ends on the closing three, and
-   * `trade` must immediately follow `profession` in all of them: the texture
-   * sentence is a continuation of the profession sentence, and separating them
-   * produced "At 49, she works as a farm worker. At age 31, her mother died…
-   * The trade is piece rates, a contractor, and a season that ends without
-   * notice."
+   * Orderings of the present beats. `trade` must immediately follow
+   * `profession` in all of them: the texture sentence is a continuation of the
+   * profession sentence, and separating them produced "At 49, she works as a
+   * farm worker. At age 31, her mother died… The trade is piece rates, a
+   * contractor, and a season that ends without notice."
+   *
+   * The first six end on temperament and outlook. The last four do not, and
+   * exist because 91.7% of biographies were closing on the same two beats —
+   * which made a temperament read as an appended trait list rather than as
+   * something the preceding life had demonstrated.
    */
   const PRESENT_PLANS: string[][] = [
-    ['profession', 'trade', 'condition', 'present-attr', 'adult-events', 'health', 'world', 'polity', 'disruption', 'outlook', 'personality', 'parents'],
-    ['profession', 'trade', 'condition', 'world', 'disruption', 'polity', 'adult-events', 'present-attr', 'health', 'personality', 'outlook', 'parents'],
-    ['adult-events', 'profession', 'trade', 'condition', 'present-attr', 'polity', 'disruption', 'health', 'world', 'personality', 'outlook', 'parents'],
-    ['disruption', 'polity', 'world', 'profession', 'trade', 'condition', 'adult-events', 'present-attr', 'health', 'outlook', 'personality', 'parents'],
-    ['profession', 'trade', 'condition', 'health', 'disruption', 'present-attr', 'adult-events', 'world', 'polity', 'outlook', 'personality', 'parents'],
-    ['present-attr', 'profession', 'trade', 'condition', 'polity', 'disruption', 'adult-events', 'world', 'health', 'personality', 'outlook', 'parents'],
+    ['profession', 'trade', 'condition', 'household', 'present-attr', 'adult-events', 'health', 'world', 'polity', 'disruption', 'outlook', 'personality', 'parents'],
+    ['profession', 'trade', 'condition', 'world', 'disruption', 'polity', 'adult-events', 'household', 'present-attr', 'health', 'personality', 'outlook', 'parents'],
+    ['adult-events', 'profession', 'trade', 'condition', 'household', 'present-attr', 'polity', 'disruption', 'health', 'world', 'personality', 'outlook', 'parents'],
+    ['disruption', 'polity', 'world', 'profession', 'trade', 'condition', 'household', 'adult-events', 'present-attr', 'health', 'outlook', 'personality', 'parents'],
+    ['profession', 'trade', 'condition', 'health', 'household', 'disruption', 'present-attr', 'adult-events', 'world', 'polity', 'outlook', 'personality', 'parents'],
+    ['present-attr', 'profession', 'trade', 'condition', 'household', 'polity', 'disruption', 'adult-events', 'world', 'health', 'personality', 'outlook', 'parents'],
+    // Closing on the life rather than on the person.
+    ['profession', 'trade', 'condition', 'personality', 'outlook', 'present-attr', 'polity', 'disruption', 'world', 'health', 'adult-events', 'household', 'parents'],
+    ['profession', 'trade', 'outlook', 'condition', 'parents', 'personality', 'present-attr', 'adult-events', 'health', 'household', 'disruption', 'polity', 'world'],
+    ['adult-events', 'personality', 'profession', 'trade', 'condition', 'outlook', 'parents', 'household', 'present-attr', 'world', 'polity', 'health', 'disruption'],
+    ['profession', 'trade', 'personality', 'present-attr', 'condition', 'household', 'parents', 'outlook', 'world', 'disruption', 'health', 'polity', 'adult-events'],
   ];
 
   /** Beats that describe the person rather than the life, for the last break. */
@@ -785,17 +1367,31 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
 
   const render = (plan: string[]): string[] => plan.flatMap(id => beats.get(id) ?? []);
 
-  const originPlan = pickBiography(ORIGIN_PLANS);
-  const presentPlan = pickBiography(PRESENT_PLANS);
+  const originPlan = pickFrom('origin-plan', ORIGIN_PLANS);
+  // When the present runs first, the profession sentence is the one carrying
+  // the name, so it has to be the sentence the biography opens on. A plan that
+  // leads on an event gave "At age 32, her father died from pneumonia" as a
+  // first line, with no indication yet of whose father.
+  const presentPlan = pickFrom(
+    'present-plan',
+    presentFirst ? PRESENT_PLANS.filter(plan => plan[0] === 'profession') : PRESENT_PLANS,
+  );
 
   // A long life with a lot to report earns a third paragraph; a short one does
   // not. Previously every biography was two paragraphs regardless.
+  //
+  // The break falls at the first person-describing beat, but only when that
+  // beat is late enough for the first half to be a paragraph. The plans that
+  // close on the life put `personality` a third of the way in, and splitting
+  // there left a two-sentence opener followed by everything else.
   const presentLength = render(presentPlan).length;
-  const closingIndex = presentPlan.findIndex(id => CLOSING_BEATS.has(id));
+  const firstClosing = presentPlan.findIndex(id => CLOSING_BEATS.has(id));
+  const closingIndex = firstClosing >= Math.ceil(presentPlan.length * 0.55) ? firstClosing : -1;
   const splitPresent = presentLength >= 8
-    && character.age >= 40
+    && fullness === 'long'
     && closingIndex > 0
-    && chance(45);
+    && !presentFirst
+    && chance('split-present', 45);
 
   const paragraphSentences = splitPresent
     ? [
@@ -803,7 +1399,9 @@ export function generateNarrativeBiography(persona: HistoricalPersona): string {
       render(presentPlan.slice(0, closingIndex)),
       render(presentPlan.slice(closingIndex)),
     ]
-    : [render(originPlan), render(presentPlan)];
+    : presentFirst
+      ? [render(presentPlan), render(originPlan)]
+      : [render(originPlan), render(presentPlan)];
 
   const cleanParagraph = (sentences: string[]): string => sentences
     .map(sentence => sentence.trim())

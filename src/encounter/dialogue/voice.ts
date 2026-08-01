@@ -5,8 +5,8 @@
  * language data. For everything else this generates *impressionistic* speech —
  * seeded syllables shaped by the language family's broad phonology, clearly a
  * game effect, never a linguistic claim. Reconstructed languages are marked
- * with the linguist's asterisk. When two people cannot talk, this layer shows
- * the pantomime instead.
+ * with the linguist's asterisk. Physical communication lives in nonverbal.ts
+ * so this layer stays concerned with language.
  */
 
 import { makeRng, hashString, Rng } from '../../components/portraitLab/core/rng';
@@ -137,28 +137,6 @@ export function attestedPhrase(lang: LanguageData, intent: SpeakIntent): string 
     case 'talk-miss': return mark(g.no);
     default: return null;
   }
-}
-
-const GESTURES: Record<string, string[]> = {
-  greet: ['raises an open hand, palm out', 'touches chest, then extends both hands', 'stops at a careful distance and nods slowly'],
-  talk: ['points at the horizon, then mimes walking', 'sketches shapes in the dirt with a stick', 'mimes eating, then shrugs a question'],
-  'talk-warm': ['nods vigorously, smiling', 'laughs and claps once', 'taps their temple: *understood*'],
-  'talk-miss': ['squints, tilts head', 'spreads hands wide: *nothing*', 'looks around as if the meaning fell somewhere nearby'],
-  'trade-offer': ['holds out goods on both palms', 'sets an item on the ground and steps back from it', 'points: yours — mine — trade?'],
-  'trade-accept': ['presses the item to their chest and bows', 'grins and holds up the new prize'],
-  'trade-refuse': ['pushes the air away with both hands', 'turns a shoulder, clutching their goods'],
-  befriend: ['offers an open hand, waiting', 'shares out food, half and half'],
-  threat: ['draws a line in the dirt with a heel', 'shows a fist, slowly'],
-  attack: ['drops everything and charges'],
-  flee: ['backs away, then turns and runs'],
-  friendship: ['grips your forearm hard, grinning', 'points at you, then themself: *us*'],
-  default: ['gestures urgently', 'watches your face for any sign of meaning'],
-};
-
-export function gestureFor(intent: SpeakIntent, seedText: string): string {
-  const pool = GESTURES[intent] ?? GESTURES.default;
-  const rng = makeRng(hashString(seedText));
-  return pool[Math.floor(rng() * pool.length)];
 }
 
 /** Degrade a fluent English line to what partial comprehension actually yields. */

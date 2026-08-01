@@ -95,8 +95,13 @@ const clauseExtras = (ctx: BiographyContext): Record<string, string | undefined>
   name: ctx.name,
 });
 
-const fromBank = (bank: Clause[], ctx: BiographyContext, pick: Pick): string =>
-  selectText(bank, clauseContextFor(ctx), pick, ctx.pronouns, clauseExtras(ctx));
+const fromBank = (
+  bank: Clause[],
+  ctx: BiographyContext,
+  pick: Pick,
+  extras?: Record<string, string | undefined>,
+): string =>
+  selectText(bank, clauseContextFor(ctx), pick, ctx.pronouns, { ...clauseExtras(ctx), ...extras });
 
 /**
  * Choose one fragment from a gated bank, for callers outside this module that
@@ -104,8 +109,15 @@ const fromBank = (bank: Clause[], ctx: BiographyContext, pick: Pick): string =>
  * temperament thresholds rather than by anything historical, but whose wording
  * still ought to depend on when and where the person lived.
  */
-export function selectDetail(bank: Clause[], ctx: BiographyContext, pick: Pick): string {
-  return fromBank(bank, ctx, pick);
+export function selectDetail(
+  bank: Clause[],
+  ctx: BiographyContext,
+  pick: Pick,
+  /** Placeholder values the caller holds and `BiographyContext` does not — a
+   *  spouse's name, a count of children. */
+  extras?: Record<string, string | undefined>,
+): string {
+  return fromBank(bank, ctx, pick, extras);
 }
 
 /**
@@ -582,9 +594,17 @@ export function describeProfessionWork(ctx: BiographyContext, pick: Pick): strin
   // stripping regex in narrativeBiographyService, which folds the clause into
   // the profession sentence.
   const openers = ctx.year >= 1900
-    ? ['The work means ', 'That means ', 'It comes down to ', 'The job is ']
-    : ['The work means ', 'That means ', 'It comes down to ', 'The trade is '];
-  return `${pick(openers)}${clause}.`;
+    ? [
+      'The work means ', 'That means ', 'It comes down to ', 'The job is ',
+      'In practice, ', 'Day to day, ', 'Mostly it is ', 'It amounts to ',
+      'The whole of it is ', 'What that gets ${object} is ',
+    ]
+    : [
+      'The work means ', 'That means ', 'It comes down to ', 'The trade is ',
+      'In practice, ', 'Day to day, ', 'Mostly it is ', 'It amounts to ',
+      'The whole of it is ', 'What that gets ${object} is ',
+    ];
+  return renderClause(`${pick(openers)}${clause}.`, ctx.pronouns, clauseExtras(ctx));
 }
 
 /**
@@ -698,6 +718,34 @@ const FORAGING_ACTIVITIES: Record<string, string> = {
   'brewing': 'prepared and stored what the hunt brought in',
   'market selling': 'traded with the neighboring bands',
 };
+
+/**
+ * The same domestic work in the present tense, for a spouse who is still doing
+ * it. Pre-modern domestic work is recorded as an activity label ("Foraging",
+ * "Textile Work"), which cannot be dropped into "works as a ___": the household
+ * sentence said "His wife Betresh the Slow-Spoken works as a foraging".
+ */
+const HOUSEHOLD_ACTIVITIES_PRESENT: Record<string, string> = {
+  'child-rearing': 'raises the children',
+  'textile work': 'spins and sews for the household',
+  'food preparation': 'feeds the household',
+  'household management': 'runs the household',
+  'foraging': 'forages for the household',
+  'farming (household)': 'works the family plot',
+  'weaving': 'weaves',
+  'brewing': 'brews',
+  'dairy work': 'keeps the dairy',
+  'market selling': 'sells at market',
+  'homemaker': 'keeps the house',
+};
+
+/** A spouse's work as a present-tense predicate, ready to follow a subject. */
+export function spouseWorkPhrase(profession: string | undefined): string | undefined {
+  if (!profession) return undefined;
+  const activity = HOUSEHOLD_ACTIVITIES_PRESENT[profession.trim().toLowerCase()];
+  if (activity) return activity;
+  return `works as ${withIndefiniteArticle(lowerProfession(profession))}`;
+}
 
 const maternalClause = (
   profession: string | undefined,
@@ -981,7 +1029,7 @@ const CHILDHOOD_CLAUSES: Clause[] = [
   { text: 'The household kept a servant and worried about keeping her, which is its own particular kind of childhood.', band: ['middling'], register: ['district'], maxYear: 1950 },
   { text: 'Hunger was not constant but it was familiar, and ${subject} learned early which neighbors could be asked.', band: ['poor'] },
   { text: 'What ${subject} ${verb:remember} of being small is mostly being cold, and being sent on errands.', band: ['poor'], register: ['village', 'district'], maxYear: 1950 },
-  { text: 'From about the age of eight ${subject} was another pair of hands, and the household reckoned accordingly.', band: ['poor', 'working'], register: ['village', 'district'], maxYear: 1930 },
+  { text: 'From about the age of eight ${subject} was another pair of hands.', band: ['poor', 'working'], register: ['village', 'district'], maxYear: 1930 },
   { text: 'The work ${possessive} family owed was owed before ${subject} was born, and ${subject} was counted into it as soon as ${subject} could lift.', band: ['bonded'] },
   { text: 'Childhood ended at whatever age the estate decided it had, which was not an age anyone in the household chose.', band: ['bonded'] },
 

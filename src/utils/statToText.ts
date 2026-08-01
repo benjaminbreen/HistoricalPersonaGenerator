@@ -4,7 +4,8 @@
  */
 
 import { PlayerCharacter } from '../types';
-import { random as seededRandom } from './seededRandom';
+import { random as seededRandom, withSeed } from './seededRandom';
+import { hashString } from '../components/portraitLab/core/rng';
 
 const getStatLevel = (value: number): 'very_low' | 'low' | 'average' | 'high' | 'very_high' => {
   if (value <= 3) return 'very_low';
@@ -16,9 +17,16 @@ const getStatLevel = (value: number): 'very_low' | 'low' | 'average' | 'high' | 
 
 const pickRandom = <T,>(arr: T[]): T => arr[Math.floor(seededRandom() * arr.length)];
 
+/** "yet hardy", or just "hardy" when there is no connector to hang it on. */
+const joined = (connector: string, phrase: string): string =>
+  connector ? `${connector} ${phrase}` : phrase;
+
 // Enhanced descriptors with more variety
 const strengthDescriptors = {
-  very_low: ['frail', 'weak', 'of feeble constitution', 'lacking in physical vigor', 'delicate of frame'],
+  // Nothing here may speak to health — strength and constitution are drawn
+  // separately and land in the same sentence: "of feeble constitution yet
+  // hardy" was the result of a health phrase sitting in the strength bank.
+  very_low: ['frail', 'weak', 'feeble of arm', 'lacking in physical vigor', 'delicate of frame'],
   low: ['of modest strength', 'not particularly robust', 'lacking in physical power', 'somewhat weak of limb'],
   average: ['of average strength', 'reasonably robust', 'adequately powerful', 'of typical physical ability'],
   high: ['strong', 'powerful', 'robust of body', 'physically formidable', 'possessed of considerable strength'],
@@ -368,9 +376,49 @@ const getMentalSocialObservations = (character: PlayerCharacter): string[] => {
   return sentences;
 };
 
-export const generateStatDescription = (character: PlayerCharacter): string => {
+/** Fisher-Yates on a copy. `sort(() => rng() - 0.5)` is neither a shuffle nor
+ *  non-destructive, and it was reordering the caller's array in place. */
+const shuffled = <T,>(items: T[]): T[] => {
+  const out = items.slice();
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(seededRandom() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+};
+
+/** The first two words, for spotting two observations that open alike. */
+const opening = (sentence: string): string =>
+  sentence.toLowerCase().split(/\s+/).slice(0, 2).join(' ');
+
+/**
+ * Attribute clauses — "frail", "slow of wit", "charming" — folded into as few
+ * sentences as the connectors allow.
+ *
+ * They used to come out one per sentence, which read: "You are not
+ * particularly agile. You are prone to poor decisions. You are awkward in
+ * manner." Three sentences, one shape, and the reader stops at the second.
+ */
+const foldClauses = (clauses: string[]): string[] => {
+  if (clauses.length === 0) return [];
+  if (clauses.length === 1) return [`You are ${clauses[0]}.`];
+  if (clauses.length === 2) {
+    return [`You are ${clauses[0]}${pickRandom([', and ', ' and '])}${clauses[1]}.`];
+  }
+  // Three or more: a list, then whatever is left over in a second sentence,
+  // so nothing runs past the length a reader will hold in their head.
+  const head = clauses.slice(0, 3);
+  const tail = clauses.slice(3);
+  const listed = `You are ${head[0]}, ${head[1]}, and ${head[2]}.`;
+  if (tail.length === 0) return [listed];
+  return [listed, `You are ${tail.join(' and ')} besides.`];
+};
+
+const composeStatDescription = (character: PlayerCharacter): string => {
   const { stats, age } = character;
   const sentences: string[] = [];
+  /** Bare predicates — "frail", "quick of mind" — folded together at the end. */
+  const clauses: string[] = [];
 
   // Get stat levels
   const strLevel = getStatLevel(stats.strength);
@@ -389,18 +437,24 @@ export const generateStatDescription = (character: PlayerCharacter): string => {
 
   if (conLevel !== 'average' && conLevel !== strLevel) {
     const connector = physicalParts.length > 0 ? pickRandom(['and', 'yet']) : '';
-    physicalParts.push(`${connector} ${pickRandom(constitutionDescriptors[conLevel])}`);
+    physicalParts.push(joined(connector, pickRandom(constitutionDescriptors[conLevel])));
   }
 
   if (physicalParts.length > 0) {
-    sentences.push(`You are ${physicalParts.join(' ')}.`);
+    clauses.push(physicalParts.join(' '));
   }
 
-  // Agility with context
+  // Agility with context. The age aside is a sentence's worth of turn on its
+  // own, so it stands apart rather than joining the list.
   if (dexLevel !== 'average') {
     const ageContext = age > 50 ? pickRandom([', despite your years', ', though age should have slowed you', '']) : '';
     const youthContext = age < 25 && dexLevel === 'very_high' ? ', blessed with the quickness of youth' : '';
-    sentences.push(`You are ${pickRandom(dexterityDescriptors[dexLevel])}${ageContext}${youthContext}.`);
+    const aside = `${ageContext}${youthContext}`;
+    if (aside) {
+      sentences.push(`You are ${pickRandom(dexterityDescriptors[dexLevel])}${aside}.`);
+    } else {
+      clauses.push(pickRandom(dexterityDescriptors[dexLevel]));
+    }
   }
 
   // Mental attributes with more variety
@@ -412,20 +466,23 @@ export const generateStatDescription = (character: PlayerCharacter): string => {
 
   if (wisLevel !== 'average' && Math.abs(stats.intelligence - stats.wisdom) > 2) {
     const connector = mentalParts.length > 0 ? (stats.wisdom > stats.intelligence ? 'yet' : 'though') : '';
-    mentalParts.push(`${connector} ${pickRandom(wisdomDescriptors[wisLevel])}`);
+    mentalParts.push(joined(connector, pickRandom(wisdomDescriptors[wisLevel])));
   } else if (wisLevel !== 'average') {
     const connector = mentalParts.length > 0 ? 'and' : '';
-    mentalParts.push(`${connector} ${pickRandom(wisdomDescriptors[wisLevel])}`);
+    mentalParts.push(joined(connector, pickRandom(wisdomDescriptors[wisLevel])));
   }
 
   if (mentalParts.length > 0) {
-    sentences.push(`You are ${mentalParts.join(' ')}.`);
+    clauses.push(mentalParts.join(' '));
   }
 
   // Social characteristics
   if (chaLevel !== 'average') {
-    sentences.push(`You are ${pickRandom(charismaDescriptors[chaLevel])}.`);
+    clauses.push(pickRandom(charismaDescriptors[chaLevel]));
   }
+
+  // The attribute clauses lead; the dexterity aside, if there was one, follows.
+  sentences.unshift(...foldClauses(clauses));
 
   // Add sophisticated observations
   const physical = getPhysicalObservations(character);
@@ -436,10 +493,18 @@ export const generateStatDescription = (character: PlayerCharacter): string => {
   // Intelligently select observations to avoid overwhelming
   const allObservations = [...physical, ...mentalSocial, ...personality, ...social];
 
-  // Select 2-4 most interesting observations
-  const selectedCount = Math.min(Math.max(2, Math.floor(allObservations.length * 0.4)), 4);
-  const shuffled = allObservations.sort(() => seededRandom() - 0.5);
-  sentences.push(...shuffled.slice(0, selectedCount));
+  // Select 2-3, refusing any that opens the way one already chosen does. Four
+  // observations in a row all beginning "Your ..." is a list, not a portrait.
+  const selectedCount = Math.min(Math.max(2, Math.floor(allObservations.length * 0.4)), 3);
+  const taken: string[] = [];
+  const usedOpenings = new Set(sentences.map(opening));
+  for (const candidate of shuffled(allObservations)) {
+    if (taken.length >= selectedCount) break;
+    if (usedOpenings.has(opening(candidate))) continue;
+    usedOpenings.add(opening(candidate));
+    taken.push(candidate);
+  }
+  sentences.push(...taken);
 
   // Fallback for very average characters
   if (sentences.length < 2) {
@@ -451,4 +516,18 @@ export const generateStatDescription = (character: PlayerCharacter): string => {
   }
 
   return sentences.join(' ');
+};
+
+/**
+ * The same character always reads the same way.
+ *
+ * This is called during render, outside any seeded scope, so every draw came
+ * off `Math.random()` — and the paragraph rewrote itself on any re-render that
+ * happened to touch this modal. Seed it from the character's own identity and
+ * the text becomes a property of the person rather than of the render.
+ */
+export const generateStatDescription = (character: PlayerCharacter): string => {
+  const identity = character.id
+    || `${character.name}|${character.age}|${character.profession}`;
+  return withSeed(hashString(`stat-prose|${identity}`), () => composeStatDescription(character));
 };

@@ -224,7 +224,7 @@ export function renderClause(
   return text
     .replace(/\$\{verb:([a-z]+)\}/gi, (_, verb: string) => conjugate(verb, pronouns))
     .replace(/\$\{Verb:([a-z]+)\}/gi, (_, verb: string) => upperFirst(conjugate(verb, pronouns)))
-    .replace(/\$\{(location|language|religion|name)\}/g, (whole, key: string) => extras?.[key] ?? whole)
+    .replace(/\$\{(location|language|religion|name|spouse|partner|children|eldest|years|trade|lost|born)\}/g, (whole, key: string) => extras?.[key] ?? whole)
     .replace(/\$\{subjectCap\}/g, upperFirst(pronouns.subject))
     .replace(/\$\{subject\}/g, pronouns.subject)
     .replace(/\$\{objectCap\}/g, upperFirst(pronouns.object))

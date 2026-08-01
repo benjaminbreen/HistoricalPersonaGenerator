@@ -37,7 +37,10 @@ interface Cell {
 }
 
 const POSE_FRAMES: FrameId[] = [
-  'stand', 'standBreathe', 'blink', 'talk', 'glance', 'bowLight', 'bowDeep', 'reach', 'raise', 'offer',
+  // The four idle frames first, in cycle order — this is the run to watch when
+  // checking that the drape's wind actually travels.
+  'stand', 'stand2', 'standBreathe', 'standBreathe2',
+  'blink', 'talk', 'glance', 'bowLight', 'bowDeep', 'reach', 'raise', 'offer',
 ];
 
 function cellsFor(fixture: Fixture): Cell[] {

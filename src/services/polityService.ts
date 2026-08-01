@@ -542,6 +542,485 @@ const ALLEGIANCES: Array<{
   zones?: CulturalZone[];
   eras: PolityEra[];
 }> = [
+  // ---------------------------------------------------------------------
+  // Era fill-ins (added 2026-07). These carry ONLY the years the entry of
+  // the same regex further down does not cover. `getPolityAt` walks this
+  // array from the end, and an entry that matches but has no era for the
+  // year falls through, so placing these first makes them the last resort
+  // rather than an override. See the block at the foot of the array.
+  // ---------------------------------------------------------------------
+  { // GANGETIC_PLAIN_ADDITIONS
+    match: /gangetic|ganges|doab|uttar|varanasi|bengal/i,
+    eras: [
+      { from: -185, until: -73, name: 'the Shunga dynasty' },
+      { from: -73, until: -28, name: 'the Kanva dynasty' },
+      // UNCERTAIN: Kushan control of the middle/eastern Gangetic plain (Bengal,
+      // Bihar) was looser than of Mathura/the upper plain; treat as approximate.
+      { from: 30, until: 230, name: 'the Kushan Empire' },
+      { from: 606, until: 647, name: "Harsha's Vardhana empire" },
+      // Gap 647-750 (post-Harsha fragmentation) left deliberately open.
+      { from: 750, until: 1036, name: 'the Gurjara-Pratihara dynasty' },
+      // Gap 1036-1090 (Pratihara collapse to Gahadavala rise) left open.
+      { from: 1090, until: 1194, name: 'the Gahadavala dynasty' },
+    ],
+  },
+  { // INDUS_VALLEY_ADDITIONS
+    match: /\bindus|punjab|sindh|lahore/i,
+    eras: [
+      // UNCERTAIN: Indo-Greek control was never a single continuous state; this
+      // collapses several kings/decades into one label, as the file already
+      // does for e.g. "the taifa kingdoms of al-Andalus".
+      { from: -190, until: -55, name: 'the Indo-Greek kingdoms' },
+      { from: -55, until: 30, name: 'the Indo-Scythian kingdom' },
+      { from: 30, until: 375, name: 'the Kushan Empire' },
+      { from: 450, until: 560, name: 'the Hephthalite Empire' },
+    ],
+  },
+  { // DECCAN_CENTRAL_INDIA_ADDITIONS
+    match: /deccan|maharashtra|central india/i,
+    eras: [
+      { from: 250, until: 500, name: 'the Vakataka dynasty' },
+      { from: 543, until: 753, name: 'the Chalukyas of Badami' },
+      { from: 973, until: 1189, name: 'the Western Chalukyas of Kalyani' },
+      // UNCERTAIN: the Seuna/Yadava line was a Chalukya feudatory long before
+      // this; using their run as the dominant independent Deccan power.
+      { from: 1189, until: 1317, name: 'the Yadava dynasty of Devagiri' },
+    ],
+  },
+  { // SRI_LANKA_ADDITIONS
+    match: /sri lanka|ceylon|anuradhapura|kandy/i,
+    eras: [
+      { from: 1232, until: 1345, name: 'the Dambadeniya and Gampola kingdoms' },
+      // UNCERTAIN: Kotte's reach into the central highlands overlaps with
+      // Kandy's; for Kandy Plateau/Central Highlands specifically, prefer "the
+      // Kingdom of Kandy" (already in the base entry, from 1469) for the
+      // overlap years — the same approximation the file already accepts for
+      // Bahmani/Vijayanagara in the Deccan.
+      { from: 1345, until: 1597, name: 'the Kingdom of Kotte' },
+    ],
+  },
+  { // KAZAKH_STEPPES_ADDITIONS
+    match: /kazakh|altai|aral sea|tian shan|dzungarian/i,
+    eras: [
+      { from: 552, until: 744, name: 'the Turkic Khaganate' },
+      { from: 744, until: 1050, name: 'the Kimek Khaganate' }, // UNCERTAIN
+      { from: 1050, until: 1220, name: 'the Cuman-Kipchak confederation' }, // UNCERTAIN
+      { from: 1206, until: 1368, name: 'Mongol Empire' },
+      { from: 1428, until: 1465, name: "the Uzbek Khanate of Abu'l-Khayr" },
+    ],
+  },
+  { // XINJIANG_ADDITIONS
+    match: /xinjiang|tarim|kunlun|qaidam/i,
+    eras: [
+      { from: -60, until: 220, name: 'the Han Protectorate of the Western Regions' },
+      { from: 999, until: 1211, name: 'the Qarakhanid Khanate' },
+      // UNCERTAIN: Moghulistan's grip on the Tarim Basin oases (as opposed to
+      // the steppe/Ili region) was loose and contested with local Chagatayid
+      // lines; treat as approximate.
+      { from: 1347, until: 1514, name: 'Moghulistan' },
+      { from: 1514, until: 1680, name: 'the Yarkent Khanate' }, // must precede the existing Dzungar Khanate era in the array
+    ],
+  },
+  { // MONGOLIA_ADDITIONS
+    match: /mongolia|manchuria|gobi/i,
+    eras: [
+      // UNCERTAIN: the Xianbei confederation's unity was real under Tanshihuai
+      // but brief and personal; treat dates as approximate.
+      { from: 155, until: 234, name: 'the Xianbei confederation' },
+      { from: 330, until: 555, name: 'the Rouran Khaganate' },
+      { from: 744, until: 840, name: 'the Uyghur Khaganate' },
+      // Gap 840-907 (post-Uyghur steppe fragmentation) left deliberately open.
+      { from: 907, until: 1125, name: 'the Liao dynasty' },
+      // UNCERTAIN: Jin's hold on Mongolia proper was loose frontier suzerainty
+      // over Mongol tribes, not direct administration, before Genghis Khan's
+      // unification in 1206.
+      { from: 1125, until: 1206, name: 'the Jin dynasty' },
+    ],
+  },
+  { // NORTH_CHINA_ADDITIONS
+    match: /north china|yellow river|hebei|beijing|shandong/i,
+    eras: [
+      { from: 220, until: 266, name: 'Cao Wei' },
+      { from: 266, until: 317, name: 'Western Jin dynasty' },
+      { from: 317, until: 386, name: 'the Sixteen Kingdoms period' },
+      { from: 386, until: 534, name: 'Northern Wei dynasty' },
+      // UNCERTAIN: collapses Northern Qi (550-577) and Northern Zhou (557-581),
+      // which split the north between them, into one collective label — the
+      // same move the file already makes for e.g. "the Balkan kingdoms".
+      { from: 534, until: 581, name: 'the Northern dynasties' },
+    ],
+  },
+  { // SOUTH_CHINA_ADDITIONS
+    match: /south china|yangtze|yangzi|jiangnan|pearl river|guangdong|suzhou|fujian/i,
+    eras: [
+      { from: 222, until: 280, name: 'Eastern Wu' },
+      { from: 266, until: 317, name: 'Western Jin dynasty' },
+      { from: 317, until: 420, name: 'Eastern Jin dynasty' },
+      { from: 420, until: 589, name: 'the Southern dynasties' },
+    ],
+  },
+  { // JAPAN_ADDITIONS
+    match: /japan|kansai|yamato|kinai|kanto|kyoto|\bedo\b/i,
+    eras: [
+      { from: 300, until: 710, name: 'the Yamato court' },
+    ],
+  },
+  { // KOREA_ADDITIONS
+    match: /korea|han river|gyeonggi|seoul/i,
+    eras: [
+      { from: -18, until: 475, name: 'the kingdom of Baekje' },
+      { from: 475, until: 553, name: 'the kingdom of Goguryeo' },
+      { from: 553, until: 668, name: 'the kingdom of Silla' },
+    ],
+  },
+  { // MENA_EGYPT_ERAS_TO_SPLICE_IN
+    match: /nile valley|egypt|nile delta|thebes|luxor|cairo|eastern desert|red sea/i,
+    eras: [
+      // Before "the Old Kingdom of Egypt" (-2686):
+      // UNCERTAIN: unification conventionally 3100 BCE (some put it c. 3150);
+      // this is the run of the 1st-2nd Dynasties before the Old Kingdom.
+      { from: -3100, until: -2686, name: 'Early Dynastic Egypt' },
+
+      // Between "the New Kingdom of Egypt" (ends -1069) and "Ptolemaic Kingdom"
+      // (starts -305). First and Second Intermediate Periods are deliberately
+      // NOT bridged — rival dynasties contesting the throne at once is a real
+      // answer, and a gap, not a state.
+      { from: -1069, until: -664, name: 'the Third Intermediate Period of Egypt' },
+      { from: -664, until: -525, name: 'the Saite Dynasty of Egypt' },
+      { from: -525, until: -404, name: 'the first Achaemenid occupation of Egypt' },
+      { from: -404, until: -343, name: 'restored Egyptian independence' },
+      { from: -343, until: -332, name: 'the second Achaemenid occupation of Egypt' },
+      { from: -332, until: -305, name: 'Macedonian Egypt' },
+    ],
+  },
+  { // MENA_NUBIA_ERAS_TO_SPLICE_IN
+    match: /nubian|kush|meroe|sudan/i,
+    eras: [
+      // UNCERTAIN: Kerma's rise from culture to kingdom was gradual; 2500 BCE is
+      // the conventional textbook start.
+      { from: -2500, until: -1500, name: 'the Kingdom of Kerma' },
+      { from: -1500, until: -1070, name: 'the New Kingdom of Egypt' },
+    ],
+  },
+  { // MENA_CAUCASUS_ERAS_TO_SPLICE_IN
+    match: /caucasus|georgia|armenia|azerbaijan/i,
+    eras: [
+      { from: -860, until: -590, name: 'Urartu' },
+      { from: -590, until: -331, name: 'Achaemenid Empire' },
+    ],
+  },
+  { // SSA_ETHIOPIA_ERA_TO_SPLICE_IN
+    match: /horn of africa|ethiopian|abyssin|aksum/i,
+    eras: [
+      // UNCERTAIN: D'mt's dates are poorly attested and disputed; 980-400 BCE is
+      // a commonly cited range. -400 to -100 (before Aksum) is left as a genuine
+      // gap rather than bridged, since the record thins badly there.
+      { from: -980, until: -400, name: "the Kingdom of D'mt" },
+    ],
+  },
+  { // SEA_VIETNAM_ERAS_TO_SPLICE_IN
+    match: /red river|tonkin|thang long|hanoi|dai viet|đại việt/i,
+    eras: [
+      // Văn Lang, the legendary Hùng-king state before this, is left out: its
+      // dates are traditional rather than historical, and asserting one would be
+      // exactly the kind of invention this table avoids. Âu Lạc and Nam Việt are
+      // on firmer ground and slot in cleanly before -111.
+      { from: -257, until: -179, name: 'Âu Lạc' },
+      { from: -179, until: -111, name: 'Nam Việt' },
+    ],
+  },
+  { // CENTRAL_ASIAN_OASES_ADDITIONS
+    match: /central asian oases|transoxiana|samarkand|bukhara|ferghana|kyzylkum|khorasan/i,
+    eras: [
+      // UNCERTAIN for Ferghana specifically (peripheral/contested by Saka
+      // groups); solid for Balkh, Samarkand, Hindu Kush.
+      { from: -539, until: -330, name: 'the Achaemenid Empire' },
+      { from: -250, until: -125, name: 'the Greco-Bactrian Kingdom' },
+      // Gap -125-30 (Yuezhi/Saka migrations, no single named state) left open.
+      { from: 30, until: 375, name: 'the Kushan Empire' },
+      // UNCERTAIN: Kidarite chronology is poorly fixed in the sources I have.
+      { from: 380, until: 450, name: 'the Kidarite Kingdom' },
+      { from: 450, until: 560, name: 'the Hephthalite Empire' },
+      { from: 560, until: 659, name: 'the Western Turkic Khaganate' },
+      // Gap 659-710 (contested Sogdian city-states/Tang nominal claims) open.
+      { from: 710, until: 750, name: 'Umayyad Caliphate' },
+      { from: 750, until: 819, name: 'Abbasid Caliphate' },
+      { from: 999, until: 1141, name: 'the Qarakhanid Khanate' },
+      { from: 1141, until: 1211, name: 'the Qara Khitai' },
+      { from: 1211, until: 1220, name: 'the Khwarezmian Empire' },
+      { from: 1500, until: 1785, name: 'the Khanate of Bukhara' },
+      // UNCERTAIN: Bukhara's status 1785-1873 as a still-independent Emirate
+      // vs. the existing entry's 1876 Russian Turkestan date leaves a small
+      // 1873-1876 seam; not worth resolving precisely here.
+      { from: 1785, until: 1873, name: 'the Emirate of Bukhara' },
+    ],
+  },
+  { // TIBET_ADDITIONS
+    match: /tibet|west china|himalaya|nepal/i,
+    eras: [
+      // Gap 842-1240 (the "era of fragmentation" among petty kingdoms) left
+      // deliberately open.
+      { from: 1244, until: 1354, name: 'the Sakya regime' },
+      // UNCERTAIN: power passed from the Phagmodrupa to the Rinpungpa (1435)
+      // and then Tsangpa (1565) hegemons in practice; treating the nominal
+      // Phagmodrupa framework as continuous through 1618 is an approximation
+      // in the same spirit as the file's other collective/successor labels.
+      { from: 1354, until: 1618, name: 'the Phagmodrupa dynasty' },
+      // Gap 1618-1642 (Tsangpa civil war) left deliberately open.
+    ],
+  },
+  // --- Medieval era fill-ins (added 2026-08). Same last-resort placement as
+  // the block above: these carry only years the entry of the same regex
+  // further down does not cover.
+  { // BRITISH_ISLES_ANGLOSAXON — same regex as the base British Isles entry.
+    // Closes the Heptarchy-era gap: Roman Britain (ends 410) to Kingdom of
+    // England (starts 927) was previously entirely blank. Thames Estuary
+    // alone was 22 of the sampled gap-hits; Oxfordshire, York and Hadrian's
+    // Wall the rest.
+    match: /british isles|england|thames|london|york|oxfordshire|dover/i,
+    eras: [
+      // UNCERTAIN: collapses Kent, Wessex, Mercia, Northumbria, Essex, Sussex
+      // and East Anglia into one collective label, the same move this file
+      // already makes for "the Balkan kingdoms" and "the taifa kingdoms of
+      // al-Andalus". 410-500 (sub-Roman Britain, before the Heptarchy's
+      // kingdoms are individually attested) is left open deliberately.
+      { from: 500, until: 927, name: 'the Anglo-Saxon kingdoms' },
+    ],
+  },
+  { // SCOTLAND_PICTISH — same regex as the base Scotland entry.
+    match: /scotland|scottish|edinburgh/i,
+    eras: [
+      // UNCERTAIN: collapses Pictland and Dál Riata, which were rival and
+      // only sometimes allied, into one label ahead of their 843 union under
+      // Kenneth MacAlpin.
+      { from: 500, until: 843, name: 'the Pictish and Gaelic kingdoms' },
+    ],
+  },
+  { // IRELAND_GAELIC — same regex as the base Ireland entry. Dublin gets its
+    // own narrower override further down (DUBLIN_ENTRY, APPEND) which wins.
+    match: /ireland|leinster|munster|connacht|dublin/i,
+    eras: [
+      // UNCERTAIN: pre-Norman Ireland was several competing provincial
+      // kingdoms (Leinster, Munster, Connacht, Ulster, Meath) under a nominal
+      // and often contested High King; this is the same collective move as
+      // the Balkans/al-Andalus entries.
+      { from: 500, until: 1177, name: 'the Gaelic Irish kingdoms' },
+    ],
+  },
+  { // GERMANIC_LANDS_FRANKISH — same regex as the base Germanic Lands entry.
+    // Mirrors the France entry's own Merovingian/Carolingian dates exactly,
+    // since this was the same state.
+    match: /germanic|rhine|black forest|brandenburg|hamburg|bavarian|saxon/i,
+    eras: [
+      { from: 486, until: 751, name: 'Frankish kingdom under the Merovingians' },
+      // UNCERTAIN for Brandenburg and the Saxon marches specifically: this
+      // was independent Slavic Wend territory, not conquered until the
+      // 12th-century Ostsiedlung (Albert the Bear founded the Margraviate of
+      // Brandenburg in 1157) — but the base entry already claims it from 843
+      // (East Francia) with the same imprecision, so this is not a new
+      // simplification, just an earlier instance of the existing one.
+      { from: 751, until: 843, name: 'Carolingian empire' },
+    ],
+  },
+  { // CENTRAL_EUROPE_EARLY — same regex as the base Central Europe entry.
+    // Closes Vienna Basin, Carpathian Foothills, Tatra Mountains, Danube Bend.
+    match: /central europe|bohemia|moravia|hungar|carpathian|danube/i,
+    eras: [
+      { from: 567, until: 803, name: 'the Avar Khaganate' },
+      // Gap 803-833 (Frankish Ostmark/March of Pannonia, briefly) left open.
+      // UNCERTAIN: neither the Avar nor the Moravian core was Vienna itself —
+      // approximated at the same level of precision the base entry already
+      // uses by treating Bohemia, Moravia, Hungary, the Carpathians and the
+      // Danube as one region.
+      { from: 833, until: 907, name: 'Great Moravia' },
+      // Gap 907-1000 (Magyar conquest/settlement, before the Kingdom of
+      // Hungary's 1000 founding) left open deliberately.
+    ],
+  },
+  { // EASTERN_EUROPE_EARLY — same regex as the base Eastern Europe entry.
+    // Closes most of Dnieper River Valley, Novgorod Woods, Steppe Borderlands.
+    match: /eastern europe|russia|moscow|volga|dnieper|steppe frontier|ural|pechora|komi/i,
+    eras: [
+      // UNCERTAIN: a Byzantine/Gothic-attested Slavic tribal confederation
+      // north of the Black Sea, not a state in the fuller sense; dates follow
+      // the conventional span before its collapse under Avar pressure (602).
+      { from: 500, until: 602, name: 'the Antae confederation' },
+      // Gap 602-700 (post-Antae Slavic fragmentation) left open deliberately.
+      // UNCERTAIN: Khazar tribute over the Dnieper Slavic tribes (the
+      // Polianians of Kyiv among them) is textually attested in the Russian
+      // Primary Chronicle and reached its firmest extent in the 8th-9th
+      // centuries; this regex also reaches Novgorod and the northern forest
+      // zone, which Khazar power never touched, so this is approximated at
+      // the same regional-umbrella level the base entry already accepts.
+      { from: 700, until: 882, name: 'the Khazar Khaganate' },
+    ],
+  },
+  { // NORTH_CHINA_5DYN_MONGOL — same regex as the base North China Plain
+    // entry. Closes the Five Dynasties interregnum and the Mongol-conquest
+    // interregnum, both previously blank.
+    match: /north china|yellow river|hebei|beijing|shandong/i,
+    eras: [
+      { from: 907, until: 960, name: 'the Five Dynasties period' },
+      { from: 1234, until: 1271, name: 'Mongol Empire' },
+    ],
+  },
+  { // SOUTH_CHINA_SUI — same regex as the base South China entry. The Sui
+    // reunified all of China in 589; the existing SOUTH_CHINA_ADDITIONS
+    // fill-in stops at the Southern dynasties' end (589) and the base entry
+    // does not pick up again until Tang (618), leaving Sui itself unnamed
+    // even though it is already used for North China.
+    match: /south china|yangtze|yangzi|jiangnan|pearl river|guangdong|suzhou|fujian/i,
+    eras: [
+      { from: 589, until: 618, name: 'Sui dynasty' },
+    ],
+  },
+  { // GANGETIC_PLAIN_MEDIEVAL — same regex as the existing
+    // GANGETIC_PLAIN_ADDITIONS fill-in. That block explicitly left two gaps
+    // "deliberately open": 647-750 and 1036-1090. Under the new maximalist
+    // instruction I am closing the first of those (it was the single largest
+    // gap in the whole sample — 94 of 1,238 hits, concentrated at Varanasi
+    // Basin) and leaving the second, which I still could not name anything
+    // defensible for (see note at the foot of this file).
+    match: /gangetic|ganges|doab|uttar|varanasi|bengal/i,
+    eras: [
+      { from: 550, until: 606, name: 'the Maukhari dynasty' },
+      // UNCERTAIN: the Later Guptas were a Magadha (Bihar)-based regional
+      // power, not paramount over the whole Gangetic Plain — but they are the
+      // best-attested named state of this specific interregnum (Adityasena's
+      // inscriptions claim imperial titles c. 650s-670s), and the alternative
+      // is the same "gap" the previous pass left, which this pass is
+      // instructed to reconsider rather than default to.
+      { from: 647, until: 725, name: 'the Later Gupta dynasty of Magadha' },
+      { from: 725, until: 750, name: 'the kingdom of Kannauj under Yashovarman' },
+      // 750 dovetails exactly with the existing Gurjara-Pratihara era below.
+      // 1036-1090 remains open — see note at the foot of this file.
+    ],
+  },
+  { // INDUS_VALLEY_MEDIEVAL — same regex as the existing
+    // INDUS_VALLEY_ADDITIONS fill-in. Closes the 665-1206 span that was
+    // previously blank across Salt Range Foothills, Harappa Basin, Punjab
+    // Plains, and (via the general regex) most of the Indus basin broadly.
+    match: /\bindus|punjab|sindh|lahore/i,
+    eras: [
+      // Gap 560-665 (post-Hephthalite, pre-Turk Shahi) left open deliberately.
+      { from: 665, until: 843, name: 'the Turk Shahi dynasty' },
+      { from: 843, until: 1026, name: 'the Hindu Shahi dynasty' },
+      // Extended a little past the narrower PUNJAB_ENTRY override's 1186 so
+      // the broad regex does not leave a seam before Delhi Sultanate (1206);
+      // Ghaznavid Lahore was in practice the last redoubt of the dynasty
+      // through this stretch anyway.
+      { from: 1026, until: 1206, name: 'the Ghaznavid dynasty' },
+    ],
+  },
+  { // SRI_LANKA_CHOLA — same regex as the base Sri Lanka entry. Closes the
+    // 1017-1055 seam between the Anuradhapura Kingdom's end and the
+    // Polonnaruwa Kingdom's start, which was in fact direct Chola rule.
+    match: /sri lanka|ceylon|anuradhapura|kandy/i,
+    eras: [
+      // UNCERTAIN on the exact end date (1055 vs. 1070 both appear in
+      // sources for when Vijayabahu I finished expelling the Cholas).
+      { from: 1017, until: 1070, name: 'Chola dynasty' },
+    ],
+  },
+  { // LOW_COUNTRIES_EARLY — same regex as the base Low Countries entry.
+    // Closes the pre-Burgundian span (486-1384), previously entirely blank.
+    match: /low countries|scheldt|holland|flanders|antwerp|amsterdam/i,
+    eras: [
+      { from: 486, until: 751, name: 'Frankish kingdom under the Merovingians' },
+      { from: 751, until: 843, name: 'Carolingian empire' },
+      // UNCERTAIN: Flanders itself was a French royal fief throughout this
+      // span, not Imperial territory — see FLANDERS_ENTRY (APPEND) below,
+      // which wins for Flanders specifically and corrects this.
+      { from: 843, until: 1384, name: 'Holy Roman Empire' },
+    ],
+  },
+  { // SCANDINAVIA_EARLY — same regex as the base Scandinavia entry.
+    match: /scandinavia|norway|sweden|denmark|jutland|baltic shield/i,
+    eras: [
+      // UNCERTAIN: one collective label averaging three different
+      // unification dates (Norway under Harald Fairhair c. 872, Denmark
+      // under Harald Bluetooth c. 958-965, Sweden under Olof Skötkonung
+      // c. 995-1022) — the same kind of simplification as "the Nordic
+      // kingdoms" the base entry already uses post-1809. Before 900, this
+      // was genuinely fragmented among many petty chiefdoms with nothing
+      // collective to name; left open deliberately.
+      { from: 900, until: 1397, name: 'the Scandinavian kingdoms' },
+    ],
+  },
+  { // MAGHREB_VANDAL_BYZANTINE — same regex as the base Maghreb entry.
+    // Closes the 439-647 seam between Roman North Africa's end and the Arab
+    // caliphates' start.
+    match: /maghreb|atlas|ifriqiya|tunis|carthage|cyrenaica/i,
+    eras: [
+      { from: 439, until: 534, name: 'Vandal Kingdom' },
+      { from: 534, until: 647, name: 'Byzantine North Africa' },
+    ],
+  },
+  { // ARABIAN_SHARIFATE — same regex as the base Arabian Peninsula entry.
+    // Closes the 969-1517 span, previously blank for 548 years. Hejaz
+    // Mountains was 6 of the sampled gap-hits.
+    match: /arabian peninsula|hejaz|mecca|yemen|nejd/i,
+    eras: [
+      { from: 968, until: 1517, name: 'the Sharifate of Mecca' },
+      // Pre-622 (pre-Islamic Hejaz) is left open — genuinely tribal Arabia,
+      // outside Yemen's older Himyarite kingdom, which this regex does not
+      // reach specifically.
+    ],
+  },
+  { // MESOPOTAMIA_SEAMS — same regex as the base Mesopotamia entry. Closes
+    // two gaps: the immediate post-Sasanian conquest years, and the long
+    // 1335-1534 span between the Ilkhanate's collapse and Ottoman conquest.
+    match: /mesopotamia|tigris|euphrates|babylon|baghdad|assyria/i,
+    eras: [
+      { from: 637, until: 661, name: 'the Rashidun Caliphate' },
+      { from: 661, until: 750, name: 'Umayyad Caliphate' },
+      { from: 1335, until: 1432, name: 'the Jalayirid Sultanate' },
+      // UNCERTAIN: the Qara Qoyunlu ("Black Sheep") confederation's control
+      // of Iraq specifically (as opposed to Azerbaijan/eastern Anatolia) was
+      // contested and its internal chronology is messy; treated the same way
+      // this file already treats "the Cuman-Kipchak confederation".
+      { from: 1432, until: 1467, name: 'the Qara Qoyunlu confederation' },
+      { from: 1467, until: 1508, name: 'the Ak Qoyunlu confederation' },
+      { from: 1508, until: 1534, name: 'Safavid Empire' },
+    ],
+  },
+  { // PERSIAN_PLATEAU_LATE — same regex as the base Persian Plateau entry.
+    // Closes the 1335-1501 seam between the Ilkhanate's fall and the Safavids.
+    match: /persian plateau|isfahan|khorasan|fars/i,
+    eras: [
+      // UNCERTAIN: Muzaffarid control was centred on Fars/Yazd/Isfahan
+      // specifically, not the whole Persian Plateau this regex names.
+      { from: 1314, until: 1393, name: 'the Muzaffarid dynasty' },
+      { from: 1393, until: 1501, name: 'Timurid Empire' },
+    ],
+  },
+  { // CAUCASUS_EARLY — same regex as the base Caucasus entry. Closes the
+    // 428-1008 span. Tbilisi Valley gets a narrower, more accurate override
+    // further down (TBILISI_ENTRY, APPEND) which wins for that location.
+    match: /caucasus|georgia|armenia|azerbaijan/i,
+    eras: [
+      // UNCERTAIN: Sasanian control over Caucasian Iberia/Armenia was
+      // suzerainty exercised through local marzbans (governors) and client
+      // kings, not always direct rule.
+      { from: 428, until: 628, name: 'Sasanian Empire' },
+      { from: 628, until: 654, name: 'Byzantine Empire' },
+      { from: 654, until: 750, name: 'Umayyad Caliphate' },
+      // UNCERTAIN: nominal Abbasid suzerainty exercised mostly through
+      // semi-autonomous local Arab emirates (see TBILISI_ENTRY below).
+      { from: 750, until: 1008, name: 'Abbasid Caliphate' },
+    ],
+  },
+  { // MEKONG_BASIN_KHMER — same regex as the base "middle Mekong" entry
+    // (Lan Xang etc.), which previously started at 1353 with nothing before
+    // it. Wat Phou at Champasak was a major Chenla/Khmer religious and
+    // political centre from the 5th century, so the Khmer sequence used for
+    // Cambodia proper is defensible here too.
+    match: /mekong river basin|lan xang|laos|vientiane|luang prabang|champasak/i,
+    eras: [
+      { from: 550, until: 802, name: 'Chenla' },
+      { from: 802, until: 1353, name: 'the Khmer Empire' },
+    ],
+  },
   // --- Europe --------------------------------------------------------------
   {
     match: /british isles|england|thames|london|york|oxfordshire|dover/i,
@@ -615,7 +1094,7 @@ const ALLEGIANCES: Array<{
     ],
   },
   {
-    match: /italy|roman campagna|apennine|florence|po valley/i,
+    match: /italy|roman campagna|apennine|florence|\bpo valley/i,
     eras: [
       { from: -509, until: -27, name: 'Roman Republic' },
       { from: -27, until: 476, name: 'Roman Empire' },
@@ -859,7 +1338,7 @@ const ALLEGIANCES: Array<{
     ],
   },
   {
-    match: /indus|punjab|sindh|lahore/i,
+    match: /\bindus|punjab|sindh|lahore/i,
     eras: [
       { from: -2600, until: -1900, name: 'the Indus Valley civilization' },
       { from: -518, until: -330, name: 'Achaemenid Empire' },
@@ -919,7 +1398,7 @@ const ALLEGIANCES: Array<{
     ],
   },
   {
-    match: /japan|kansai|yamato|kinai|kanto|kyoto|edo/i,
+    match: /japan|kansai|yamato|kinai|kanto|kyoto|\bedo\b/i,
     eras: [
       { from: 710, until: 794, name: 'the Nara court' },
       { from: 794, until: 1185, name: 'the Heian court' },
@@ -1174,7 +1653,7 @@ const ALLEGIANCES: Array<{
   // The peninsula and the strait, which are one polity for most of their
   // history because whoever held the strait held the trade through it.
   {
-    match: /malay peninsula|malacca|melaka|malaya|johor|penang|singapore/i,
+    match: /malay peninsula|malacca|melaka|\bmalaya\b|johor|penang|singapore/i,
     eras: [
       { from: 671, until: 1288, name: 'Srivijaya' },
       { from: 1400, until: 1511, name: 'the Malacca Sultanate' },
@@ -1301,17 +1780,41 @@ const ALLEGIANCES: Array<{
       { from: 1948, name: 'Sri Lanka' },
     ],
   },
+  // Taiwan and the Ryukyus were one entry, and `.find()` returns the first era
+  // whose range covers the year by array position — so every Taiwanese
+  // location read as "the Ryukyu Kingdom" from 1683 to 1879. Taiwan was never
+  // part of it. Split in two; the Ryukyu entry sits after this one so its
+  // narrower regex wins for the islands themselves.
   {
-    match: /taiwan|ryukyu|formosa/i,
+    match: /taiwan|formosa/i,
     eras: [
-      { from: 1429, until: 1879, name: 'the Ryukyu Kingdom' },
+      { from: 1624, until: 1662, name: 'Dutch Formosa' },
+      { from: 1662, until: 1683, name: 'the Kingdom of Tungning' },
       { from: 1683, until: 1895, name: 'Qing dynasty' },
       { from: 1895, until: 1945, name: 'Japanese colonial rule' },
       { from: 1945, name: 'Republic of China' },
     ],
   },
   {
+    // Anchored: `place` is "<location> <region>" and the region is named
+    // "Taiwan and Ryukyu", so an unanchored /ryukyu/ matches every Taiwanese
+    // location too. Only a location that *begins* with Ryukyu is the Ryukyus.
+    match: /^(?:ryukyu|okinawa)/i,
+    eras: [
+      { from: 1429, until: 1879, name: 'the Ryukyu Kingdom' },
+      { from: 1879, until: 1945, name: 'Japanese colonial rule' },
+      { from: 1945, until: 1972, name: 'the United States administration of the Ryukyus' },
+      { from: 1972, name: 'Japan' },
+    ],
+  },
+  {
+    // Zone-scoped because the bare regex also matches the South Asian region
+    // "Himalayas and Northeast" — Kashmir Valley, Sikkim Highlands, Assam
+    // Plains, Naga Hills and the Brahmaputra Valley all carry that region
+    // name, and all of them were being handed the Tibetan Empire, the Ganden
+    // Phodrang or the Qing, none of which ever ruled any of them.
     match: /tibet|west china|himalaya|nepal/i,
+    zones: ['EAST_ASIAN'],
     eras: [
       { from: 618, until: 842, name: 'the Tibetan Empire' },
       { from: 1642, until: 1720, name: 'the Ganden Phodrang' },
@@ -1654,6 +2157,761 @@ const ALLEGIANCES: Array<{
       { from: 1787, until: 1897, name: 'the Merina Kingdom' },
       { from: 1897, until: 1960, name: 'French Madagascar' },
       { from: 1960, name: 'Madagascar' },
+    ],
+  },
+  // ---------------------------------------------------------------------
+  // Location overrides (added 2026-07). Last in the array, so the backwards
+  // walk in `getPolityAt` reaches them before the broader regexes above.
+  // ---------------------------------------------------------------------
+  // BENGAL_DELTA_ENTRY
+  {
+    match: /bengal delta|sundarbans/i,
+    eras: [
+      { from: 750, until: 1161, name: 'the Pala dynasty' },
+      { from: 1161, until: 1204, name: 'the Sena dynasty' },
+      // UNCERTAIN: Bakhtiyar Khalji's raid is conventionally dated 1204/1206;
+      // the general entry's Delhi Sultanate era (1206-) covers the rest.
+    ],
+  },
+  // PUNJAB_ENTRY
+  {
+    match: /punjab/i,
+    eras: [
+      { from: 843, until: 1026, name: 'the Hindu Shahi dynasty' },
+      { from: 1026, until: 1186, name: 'the Ghaznavid dynasty' },
+    ],
+  },
+  // SINDH_ENTRY
+  {
+    match: /sindh|thar desert|rann of kutch/i,
+    eras: [
+      { from: 712, until: 750, name: 'Umayyad Caliphate' },
+      { from: 750, until: 861, name: 'Abbasid Caliphate' },
+      { from: 861, until: 1024, name: 'the Habbari dynasty' },
+      { from: 1024, until: 1351, name: 'the Soomra dynasty' },
+    ],
+  },
+  // KARNATAKA_ENTRY
+  {
+    match: /karnataka/i,
+    eras: [
+      { from: 1026, until: 1343, name: 'the Hoysala dynasty' },
+    ],
+  },
+  // HYDERABAD_HIGHLANDS_ENTRY
+  {
+    match: /hyderabad highlands/i,
+    eras: [
+      { from: 1163, until: 1323, name: 'the Kakatiya dynasty' },
+    ],
+  },
+  // KASHMIR_ENTRY
+  {
+    match: /kashmir/i,
+    zones: ['SOUTH_ASIAN'],
+    eras: [
+      { from: 625, until: 855, name: 'the Karkota dynasty' },
+      { from: 855, until: 1003, name: 'the Utpala dynasty' },
+      { from: 1003, until: 1339, name: 'the Lohara dynasty' },
+      { from: 1339, until: 1586, name: 'the Kashmir Sultanate' },
+      { from: 1586, until: 1752, name: 'Mughal Empire' },
+      // UNCERTAIN: "Durrani rule" is the conventional label; Kashmir was a
+      // contested Durrani province, not its core.
+      { from: 1752, until: 1819, name: 'the Durrani Empire' },
+      { from: 1819, until: 1846, name: 'Sikh Empire' },
+      { from: 1846, until: 1947, name: 'the princely state of Jammu and Kashmir' },
+      // UNCERTAIN: post-1947 sovereignty over Kashmir is disputed between
+      // India, Pakistan, and China; "Republic of India" describes only the
+      // portion India has administered since 1947, not the whole region.
+      { from: 1947, name: 'Republic of India' },
+    ],
+  },
+  // SIKKIM_ENTRY
+  {
+    match: /sikkim/i,
+    zones: ['SOUTH_ASIAN'],
+    eras: [
+      { from: 1642, until: 1975, name: 'the Kingdom of Sikkim' },
+      { from: 1975, name: 'Republic of India' },
+    ],
+  },
+  // DARJEELING_ENTRY
+  {
+    match: /darjeeling/i,
+    zones: ['SOUTH_ASIAN'],
+    eras: [
+      // UNCERTAIN: Darjeeling's pre-1835 status as a Sikkimese dependency vs.
+      // contested with Nepal/Bhutan is not cleanly a single polity; using
+      // Sikkim as the nearest defensible label.
+      { from: 1642, until: 1835, name: 'the Kingdom of Sikkim' },
+      { from: 1835, until: 1947, name: 'British Raj' },
+      { from: 1947, name: 'Republic of India' },
+    ],
+  },
+  // ASSAM_BRAHMAPUTRA_ENTRY
+  {
+    match: /assam|brahmaputra/i,
+    zones: ['SOUTH_ASIAN'],
+    eras: [
+      { from: 350, until: 1140, name: 'the Kamarupa kingdom' },
+      // Gap 1140-1228 (post-Kamarupa fragmentation) left deliberately open.
+      { from: 1228, until: 1826, name: 'the Ahom kingdom' },
+      { from: 1826, until: 1947, name: 'British Raj' },
+      { from: 1947, name: 'Republic of India' },
+    ],
+  },
+  // NAGA_HILLS_ENTRY
+  {
+    match: /naga hills/i,
+    zones: ['SOUTH_ASIAN'],
+    eras: [
+      { from: 1881, until: 1947, name: 'British Raj' },
+      { from: 1947, name: 'Republic of India' },
+    ],
+  },
+  // JAFFNA_ENTRY
+  {
+    match: /jaffna/i,
+    eras: [
+      { from: 1215, until: 1619, name: 'the Kingdom of Jaffna' },
+      { from: 1619, until: 1658, name: 'Portuguese Ceylon' },
+      { from: 1658, until: 1796, name: 'Dutch Ceylon' },
+      { from: 1796, until: 1948, name: 'British Ceylon' },
+      { from: 1948, name: 'Sri Lanka' },
+    ],
+  },
+  // MALDIVES_ENTRY
+  {
+    match: /maldives/i,
+    eras: [
+      { from: 1153, until: 1968, name: 'the Sultanate of the Maldives' },
+      { from: 1968, name: 'Republic of Maldives' },
+    ],
+  },
+  // FERGHANA_ENTRY
+  {
+    match: /ferghana/i,
+    eras: [
+      { from: 1709, until: 1876, name: 'the Khanate of Kokand' },
+    ],
+  },
+  // YANGTZE_DELTA_ENTRY
+  {
+    match: /yangtze delta/i,
+    eras: [
+      { from: 907, until: 978, name: 'the Wuyue Kingdom' },
+    ],
+  },
+  // FUJIAN_ENTRY
+  {
+    match: /fujian/i,
+    eras: [
+      { from: 909, until: 945, name: 'the Min Kingdom' },
+      // Gap 945-960 (Southern Tang interlude) left open rather than adding a
+      // third short-lived state for a 15-year window.
+    ],
+  },
+  // PEARL_RIVER_GUANGXI_ENTRY
+  {
+    match: /pearl river delta|guangxi/i,
+    eras: [
+      { from: 917, until: 971, name: 'the Southern Han Kingdom' },
+    ],
+  },
+  // YANGTZE_GORGES_ENTRY
+  {
+    match: /yangtze gorges/i,
+    eras: [
+      { from: 924, until: 963, name: 'the Kingdom of Jingnan' },
+    ],
+  },
+  // HOKKAIDO_ENTRY
+  {
+    match: /hokkaido/i,
+    eras: [
+      // UNCERTAIN: "Matsumae Domain" describes trading-post control of the
+      // coast, not the whole island; the Ainu interior remained outside any
+      // state's administration for most of this span too.
+      { from: 1604, until: 1869, name: 'the Matsumae Domain' },
+    ],
+  },
+  // GYEONGJU_ENTRY
+  {
+    match: /gyeongju/i,
+    eras: [
+      { from: -57, until: 668, name: 'the kingdom of Silla' },
+    ],
+  },
+  // JEOLLA_ENTRY
+  {
+    match: /jeolla/i,
+    eras: [
+      { from: -18, until: 660, name: 'the kingdom of Baekje' },
+    ],
+  },
+  // BAEKDU_ENTRY
+  {
+    match: /baekdu/i,
+    eras: [
+      { from: -37, until: 668, name: 'the kingdom of Goguryeo' },
+    ],
+  },
+  // BUSAN_ENTRY
+  {
+    match: /busan/i,
+    eras: [
+      { from: 42, until: 562, name: 'the Gaya confederacy' },
+      { from: 562, until: 668, name: 'the kingdom of Silla' },
+    ],
+  },
+  // KAESONG_ENTRY
+  {
+    match: /kaesong/i,
+    eras: [
+      { from: 901, until: 918, name: 'Taebong' }, // UNCERTAIN: brief, but well-attested and a clean fit for this specific location
+    ],
+  },
+  // TAIWAN_ENTRY
+  {
+    match: /taiwan|formosa/i,
+    eras: [
+      // Pre-1624 left deliberately open (Austronesian aboriginal societies,
+      // no state).
+      { from: 1624, until: 1662, name: 'Dutch Formosa' },
+      { from: 1662, until: 1683, name: 'the Kingdom of Tungning' },
+      { from: 1683, until: 1895, name: 'Qing dynasty' },
+      { from: 1895, until: 1945, name: 'Japanese colonial rule' },
+      { from: 1945, name: 'Republic of China' },
+    ],
+  },
+  // RYUKYU_ENTRY
+  {
+    match: /ryukyu/i,
+    eras: [
+      // Pre-1429 (the Sanzan/"Three Kingdoms of Ryukyu" period) left open —
+      // three competing polities, no single name.
+      { from: 1429, until: 1879, name: 'the Ryukyu Kingdom' },
+      { from: 1879, until: 1945, name: 'Japan' },
+      { from: 1945, until: 1972, name: 'United States administration' },
+      { from: 1972, name: 'Japan' },
+    ],
+  },
+  // SICHUAN_ENTRY
+  {
+    match: /sichuan/i,
+    eras: [
+      { from: -221, until: -206, name: 'Qin dynasty' },
+      { from: -206, until: 220, name: 'Han dynasty' },
+      { from: 221, until: 263, name: 'Shu Han' },
+      { from: 266, until: 317, name: 'Western Jin dynasty' },
+      // UNCERTAIN: Cheng-Han's exact borders/dates within the wider Sixteen
+      // Kingdoms chaos are not tightly fixed.
+      { from: 304, until: 347, name: 'the Cheng-Han kingdom' },
+      { from: 581, until: 618, name: 'Sui dynasty' },
+      { from: 618, until: 907, name: 'Tang dynasty' },
+      { from: 907, until: 925, name: 'Former Shu' },
+      { from: 934, until: 965, name: 'Later Shu' },
+      { from: 965, until: 1279, name: 'Song dynasty' },
+      { from: 1279, until: 1368, name: 'Yuan dynasty' },
+      { from: 1368, until: 1644, name: 'Ming dynasty' },
+      { from: 1644, until: 1912, name: 'Qing dynasty' },
+      { from: 1912, until: 1949, name: 'Republic of China' },
+      { from: 1949, name: "People's Republic of China" },
+    ],
+  },
+  // YUNNAN_ENTRY
+  {
+    match: /yunnan/i,
+    eras: [
+      // UNCERTAIN: 738 is the conventional founding date (Piluoge's
+      // unification of the six zhao under Tang sponsorship); some sources
+      // give dates a decade or two either side.
+      { from: 738, until: 902, name: 'the Nanzhao Kingdom' },
+      { from: 937, until: 1253, name: 'the Dali Kingdom' },
+      { from: 1253, until: 1368, name: 'Yuan dynasty' },
+      { from: 1368, until: 1644, name: 'Ming dynasty' },
+      { from: 1644, until: 1912, name: 'Qing dynasty' },
+      { from: 1912, until: 1949, name: 'Republic of China' },
+      { from: 1949, name: "People's Republic of China" },
+    ],
+  },
+  // SSA_SOUTHERN_AFRICA_ENTRY
+  {
+    match: /southern africa|zimbabwe|zulu|cape|limpopo/i,
+    // Zone-scoped: bare "cape" also matches "Cape Cod" (Massachusetts), which
+    // has nothing to do with southern Africa. "Southern Africa" is not reused
+    // as a region name by any other zone, so this scoping is safe.
+    zones: ['SUB_SAHARAN_AFRICAN'],
+    eras: [
+      { from: 1075, until: 1220, name: 'the Kingdom of Mapungubwe' },
+      { from: 1220, until: 1450, name: 'the Kingdom of Zimbabwe' },
+      { from: 1652, until: 1806, name: 'the Dutch Cape Colony' },
+      { from: 1806, until: 1910, name: 'the British Cape Colony' },
+      { from: 1816, until: 1897, name: 'Zulu Kingdom' },
+      { from: 1910, name: 'South Africa' },
+    ],
+  },
+  // SSA_COMOROS_ENTRY
+  {
+    match: /comoros/i,
+    zones: ['SUB_SAHARAN_AFRICAN'],
+    eras: [
+      { from: 1500, until: 1886, name: 'the Comorian sultanates' }, // UNCERTAIN: founding dates vary by island and dynasty
+      { from: 1886, until: 1975, name: 'French Comoros' },
+      { from: 1975, name: 'Comoros' },
+    ],
+  },
+  // NA_MAYA_ENTRY
+  {
+    // The Maya lowlands (Yucatán and the Petén) currently fall through to
+    // whichever of the Mexico or Central America entries reaches them first
+    // for a given year, handing them Teotihuacan, the Toltec state and the
+    // Aztec Triple Alliance — none of which ever ruled the Maya region, which
+    // stayed politically independent (many rival city-states, never one
+    // empire) until Spain finished conquering it in 1697, three centuries
+    // after Tenochtitlan fell.
+    match: /yucat|maya/i,
+    eras: [
+      { from: -400, until: 900, name: 'the Preclassic and Classic Maya city-states' }, // UNCERTAIN: -400 marks Late Preclassic centers like El Mirador; before that, Maya settlement was village-scale
+      { from: 900, until: 1200, name: 'Chichen Itza' }, // UNCERTAIN: Chichen Itza's dominant span is debated, roughly 800-1100/1200
+      { from: 1220, until: 1441, name: 'the Mayapan League' },
+      { from: 1441, until: 1697, name: 'the independent Maya kingdoms' },
+      { from: 1697, until: 1821, name: 'the Viceroyalty of New Spain' },
+      // Honest compound: Yucatán became part of Mexico, the Petén part of
+      // Guatemala. No single successor state, same idea as the Guiana entry.
+      { from: 1821, name: 'Mexico and the Central American republics' },
+    ],
+  },
+  // SA_ECUADOR_ENTRY
+  {
+    // Quito was an Inca provincial seat, then the Audiencia de Quito under
+    // Peru's viceroyalty, transferred to New Granada in 1717, part of Gran
+    // Colombia at independence, and Ecuador since the 1830 split.
+    match: /quito|chimborazo/i,
+    zones: ['SOUTH_AMERICAN'],
+    eras: [
+      { from: 1470, until: 1533, name: 'the Inca Empire' }, // UNCERTAIN: conquest under Huayna Capac, dated variously 1460s-1500s
+      { from: 1563, until: 1717, name: 'the Real Audiencia de Quito' },
+      { from: 1739, until: 1822, name: 'the Viceroyalty of New Granada' },
+      { from: 1822, until: 1830, name: 'Gran Colombia' },
+      { from: 1830, name: 'Ecuador' },
+    ],
+  },
+  // SA_MAPUCHE_ENTRY
+  {
+    // Araucanía. Never held by the Inca or by Spain in any lasting way — the
+    // Mapuche fought both to a standstill for three centuries — this table
+    // names no polity here before Chile's Occupation of Araucanía finished it
+    // in 1883. Whether the Mapuche's own long-lived war confederacy belongs in
+    // a table like this one is a real design question; see the summary above.
+    match: /mapuche/i,
+    zones: ['SOUTH_AMERICAN'],
+    eras: [{ from: 1883, name: 'Chile' }],
+  },
+  // SA_CUYO_ENTRY
+  {
+    // Cuyo (Mendoza, Aconcagua): settled from Chile in 1561, administered from
+    // Santiago until the 1776 reshuffle moved it to the new Río de la Plata
+    // viceroyalty, then Argentina at independence.
+    match: /mendoza|aconcagua/i,
+    zones: ['SOUTH_AMERICAN'],
+    eras: [
+      { from: 1561, until: 1776, name: 'the Captaincy General of Chile' },
+      { from: 1776, until: 1810, name: 'the Viceroyalty of the Río de la Plata' },
+      { from: 1816, name: 'Argentina' },
+    ],
+  },
+  // SA_ATACAMA_ENTRY
+  {
+    // The Atacama coast was Bolivia's until the War of the Pacific; the Treaty
+    // of Ancón ceded it to Chile in 1884.
+    match: /atacama/i,
+    zones: ['SOUTH_AMERICAN'],
+    eras: [
+      { from: 1450, until: 1533, name: 'the Inca Empire' },
+      { from: 1542, until: 1825, name: 'the Viceroyalty of Peru' },
+      { from: 1825, until: 1884, name: 'Bolivia' },
+      { from: 1884, name: 'Chile' },
+    ],
+  },
+  // SA_BOLIVIA_ENTRY
+  {
+    // Upper Peru / Charcas: Sucre, Potosí, Tarija, Cochabamba, Santa Cruz, the
+    // Yungas, and the Altiplano proper are Bolivia, not Brazil. The generic
+    // "amazon|southern highlands|..." entry claims all of "Southern Highlands"
+    // for Brazil because that is the literal region name it was written to
+    // catch — a bug, not a judgement call, since every location ever filed
+    // under "Southern Highlands" in this map is Bolivian.
+    match: /sucre|potos|tarija|cochabamba|santa cruz|yungas|upper peru|charcas|altiplano/i,
+    zones: ['SOUTH_AMERICAN'],
+    eras: [
+      { from: -200, until: 1000, name: 'Tiwanaku' },
+      { from: 1438, until: 1533, name: 'the Inca Empire' },
+      { from: 1542, until: 1776, name: 'the Viceroyalty of Peru' },
+      { from: 1776, until: 1825, name: 'the Viceroyalty of the Río de la Plata' },
+      { from: 1825, name: 'Bolivia' },
+    ],
+  },
+  // SA_URUGUAY_ENTRY
+  {
+    // The Banda Oriental: fought over by Spain and Portugal, briefly Brazilian
+    // as Cisplatina, and independent as the buffer state both Argentina and
+    // Brazil settled for in 1828.
+    match: /uruguay/i,
+    zones: ['SOUTH_AMERICAN'],
+    eras: [
+      { from: 1680, until: 1776, name: 'the Spanish and Portuguese borderlands of the Río de la Plata' }, // UNCERTAIN: a century of contested Colônia do Sacramento claims, flattened
+      { from: 1776, until: 1821, name: 'the Viceroyalty of the Río de la Plata' },
+      { from: 1821, until: 1828, name: 'Cisplatina under the Empire of Brazil' },
+      { from: 1828, name: 'Uruguay' },
+    ],
+  },
+  // SA_PANTANAL_ENTRY
+  {
+    // The Pantanal is overwhelmingly Brazilian (Mato Grosso), not Argentine; it
+    // only falls into "Gran Chaco and Pampas" because that is the region label
+    // the map filed it under.
+    match: /pantanal/i,
+    zones: ['SOUTH_AMERICAN'],
+    eras: [{ from: 1822, name: 'Brazil' }],
+  },
+  // SA_COLOMBIA_LLANOS_ENTRY
+  {
+    // Villavicencio and the Meta river basin are the Colombian Llanos, not
+    // Venezuela; the generic "llanos|orinoco" entry only ever reaches for
+    // Venezuela.
+    match: /villavicencio|meta river/i,
+    zones: ['SOUTH_AMERICAN'],
+    eras: [
+      { from: 1717, until: 1819, name: 'the Viceroyalty of New Granada' },
+      { from: 1819, until: 1831, name: 'Gran Colombia' },
+      { from: 1831, name: 'Colombia' },
+    ],
+  },
+  // --- Medieval location overrides (added 2026-08). Last in the array, so
+  // the backwards walk reaches them first. Order within the Deccan cluster
+  // is load-bearing; see the source file's note.
+  // --- Europe ----------------------------------------------------------------
+  { // DUBLIN_ENTRY — narrower than the Ireland regex; wins for Dublin itself.
+    match: /dublin/i,
+    eras: [
+      { from: 853, until: 1170, name: 'the Kingdom of Dublin' },
+      // 1170-1177 (fall of the city to Anglo-Norman force, before the
+      // Lordship of Ireland's formal 1177 date) is a 7-year seam, left as is.
+    ],
+  },
+  { // FLANDERS_ENTRY — narrower than the Low Countries regex; wins for
+    // Flanders specifically, correcting the general fill's "Holy Roman
+    // Empire" label (Flanders was a French fief, not Imperial territory).
+    match: /flanders/i,
+    eras: [
+      { from: 862, until: 1384, name: 'the County of Flanders' },
+    ],
+  },
+  { // TBILISI_ENTRY — narrower than the Caucasus regex; wins for Tbilisi
+    // itself, where a Muslim emirate held out well after the Bagrationi
+    // kings' 1008 union of Georgia elsewhere.
+    match: /tbilisi/i,
+    eras: [
+      { from: 735, until: 1122, name: 'the Emirate of Tbilisi' },
+      // 1122 onward falls through to the base Caucasus entry's "Kingdom of
+      // Georgia" (from 1008), which is accurate again once David IV took the
+      // city.
+    ],
+  },
+
+  // --- South Asia --------------------------------------------------------
+  { // SINDH_EARLY_ENTRY — same regex as the existing SINDH_ENTRY. Its own
+    // eras start at 712 (Arab conquest); these are the two indigenous
+    // dynasties immediately before it.
+    match: /sindh|thar desert|rann of kutch/i,
+    eras: [
+      { from: 489, until: 632, name: 'the Rai dynasty of Sindh' },
+      { from: 632, until: 712, name: 'the Chach dynasty of Sindh' },
+    ],
+  },
+  { // KARNATAKA_KADAMBA_ENTRY — same regex as the existing KARNATAKA_ENTRY
+    // (Hoysala 1026-1343). This is the era immediately before it.
+    match: /karnataka/i,
+    eras: [
+      { from: 345, until: 540, name: 'the Kadamba dynasty of Banavasi' },
+    ],
+  },
+  { // DECCAN_TUGHLUQ_ENTRY — reuses the BROAD Deccan Plateau regex. Must be
+    // spliced in BEFORE (i.e. physically above) COROMANDEL_ENTRY and
+    // MALABAR_ENTRY below, so those two narrower, more accurate entries win
+    // for Tamil Nadu/Kerala specifically. Closes the 1317-1336 seam between
+    // the Yadava dynasty's fall and Vijayanagara's rise — this is exactly
+    // when Muhammad bin Tughluq annexed the Deccan and briefly moved the
+    // Delhi Sultanate's capital to Daulatabad (former Devagiri), 1327.
+    match: /deccan|maharashtra|central india/i,
+    eras: [
+      { from: 1317, until: 1336, name: 'Delhi Sultanate' },
+    ],
+  },
+  { // COROMANDEL_ENTRY — narrower than the Deccan Plateau regex; wins for
+    // Tamil Nadu specifically, which the generic Deccan sequence
+    // (Satavahana/Chalukya/Rashtrakuta/Yadava/Bahmani) never actually ruled.
+    // MUST be spliced in AFTER DECCAN_TUGHLUQ_ENTRY above.
+    match: /coromandel/i,
+    eras: [
+      { from: 275, until: 897, name: 'the Pallava dynasty' },
+      { from: 848, until: 1216, name: 'Chola dynasty' },
+      { from: 1216, until: 1335, name: 'the Pandyan Empire' },
+      // UNCERTAIN: a short-lived independent sultanate, absorbed by
+      // Vijayanagara in 1378 — the base Deccan Plateau entry's Vijayanagara
+      // era (1336-1646) picks up automatically once this entry's own eras
+      // run out.
+      { from: 1335, until: 1378, name: 'the Madurai Sultanate' },
+    ],
+  },
+  { // MALABAR_ENTRY — narrower than the Deccan Plateau regex; wins for
+    // Kerala specifically. MUST be spliced in AFTER DECCAN_TUGHLUQ_ENTRY.
+    match: /malabar/i,
+    eras: [
+      // 500-800 (post-Sangam Kerala, before the Chera revival) left open —
+      // genuinely undocumented, no defensible name.
+      { from: 800, until: 1102, name: 'the Chera dynasty' },
+      // 1102-1250 (post-Chera fragmentation into small Nair principalities)
+      // left open deliberately.
+      // UNCERTAIN founding date: the Zamorins' predecessors (the Eradis of
+      // Nediyiruppu) are attested from c. 1100 but did not become the
+      // dominant Calicut power until the 13th-14th century; left open-ended
+      // since the Zamorins remained Malabar's leading power well past 1500.
+      { from: 1250, name: 'the Zamorin of Calicut' },
+    ],
+  },
+
+  // --- East Asia -----------------------------------------------------------
+  { // SICHUAN_EARLY_ENTRY — same regex as the existing SICHUAN_ENTRY. Closes
+    // the 347-581 gap between the Cheng-Han kingdom's fall and the Sui.
+    match: /sichuan/i,
+    eras: [
+      { from: 347, until: 420, name: 'Eastern Jin dynasty' },
+      { from: 420, until: 553, name: 'the Southern dynasties' },
+      // UNCERTAIN: specifically Western Wei then Northern Zhou control after
+      // their 553 conquest of Chengdu from Liang; labelled to match this
+      // file's existing "the Northern dynasties" collective for the same
+      // years elsewhere in China.
+      { from: 553, until: 581, name: 'the Northern dynasties' },
+    ],
+  },
+  { // FUJIAN_SOUTHERNTANG_ENTRY — same regex as the existing FUJIAN_ENTRY.
+    // The existing entry's comment explicitly left 945-960 open "rather than
+    // adding a third short-lived state for a 15-year window"; under the new
+    // maximalist instruction, naming it is the better call.
+    match: /fujian/i,
+    eras: [
+      // UNCERTAIN: Southern Tang took the north of Min's former territory in
+      // 945; the south (Quanzhou/Zhangzhou) was actually held by the local
+      // warlord Liu Congxiao, nominally submitting to Southern Tang and then
+      // Song, formally absorbed in 978.
+      { from: 945, until: 978, name: 'the Southern Tang' },
+    ],
+  },
+  { // KAILASH_GUGE_ENTRY — zone-scoped like the base Tibet entry, for the
+    // same reason (the bare terms this file uses for Tibet also match South
+    // Asian Himalayan regions). Mount Kailash and the surrounding Ngari
+    // region were the Guge Kingdom's core, distinct from central Tibet's
+    // "era of fragmentation", which this file already and correctly leaves
+    // open elsewhere.
+    match: /kailash/i,
+    zones: ['EAST_ASIAN'],
+    eras: [
+      { from: 980, until: 1630, name: 'the Guge Kingdom' },
+    ],
+  },
+  { // AMDO_TSONGKHA_ENTRY — zone-scoped for the same reason. "Eastern
+    // Plateau Slopes" is this map's name for the Amdo/eastern-Tibet-plateau
+    // fringe, which Tsongkha (centred near modern Xining) actually ruled.
+    // UNCERTAIN: this location name is generic enough that it may not always
+    // denote Amdo specifically; flagged rather than assumed.
+    match: /eastern plateau slopes/i,
+    zones: ['EAST_ASIAN'],
+    eras: [
+      { from: 997, until: 1104, name: 'the Tsongkha kingdom' },
+    ],
+  },
+
+  // --- Southeast Asia --------------------------------------------------------
+  { // WEST_JAVA_ENTRY — narrower than the base Java regex; wins for West
+    // Java specifically, which was never part of the Medang/Kediri/
+    // Singhasari/Majapahit sequence centred further east — it was Sundanese,
+    // and at times (the 1357 Bubat war) at war with Majapahit.
+    match: /west java/i,
+    eras: [
+      { from: 450, until: 669, name: 'Tarumanagara' },
+      // Left open-ended: the Sunda Kingdom lasted to 1579, well past this
+      // file's 500-1500 scope, and nothing later in this override list would
+      // otherwise contradict that.
+      { from: 669, name: 'the Sunda Kingdom' },
+    ],
+  },
+  { // VISAYAS_CEBU_ENTRY — the pre-Spanish Visayas were never part of the
+    // Sulu/Maguindanao sultanates (which were Mindanao-based) or under any
+    // Luzon polity; Cebu had its own Hindu-Buddhist-influenced rajahnate,
+    // attested at Spanish contact (Rajah Humabon, 1521) and traditionally
+    // founded earlier.
+    match: /visayan sea/i,
+    eras: [
+      // UNCERTAIN founding date: oral tradition traces the line to a 13th-
+      // century Sri Lumay; treated as approximate.
+      { from: 1200, until: 1565, name: 'the Rajahnate of Cebu' },
+    ],
+  },
+
+  // --- Sub-Saharan Africa ----------------------------------------------------
+  { // BENIN_OGISO_ENTRY — narrower than either regex that currently reaches
+    // "Benin" text; wins outright. The Ogiso ("kings of the sky") dynasty
+    // predates the current Oba dynasty (1180-) named in the base entry.
+    // UNCERTAIN: dating rests on oral king-lists rather than epigraphy;
+    // treated the same way this file already treats other oral-tradition
+    // African dynasties (e.g. the Zagwe).
+    match: /\bbenin\b/i,
+    eras: [
+      { from: 900, until: 1180, name: 'the Ogiso dynasty of Benin' },
+    ],
+  },
+  { // NRI_ENTRY — the Igbo heartland (Niger Delta, Ibo Plateau) was and is
+    // famously acephalous/stateless in the usual sense — but the Kingdom of
+    // Nri was a real, named, non-military ritual kingship whose authority
+    // (over ritual purification and titled ozo status, not territorial rule
+    // in the usual sense) was recognised across a wide area of Igboland.
+    // UNCERTAIN: dating is contested — Igbo-Ukwu bronzes are carbon-dated to
+    // the 9th-10th century, and the first named king (Ìfikuánim) is placed
+    // at 1043 by oral chronology; 900 is used here as the conservative
+    // (later, better-attested) end of that range.
+    match: /niger delta|ibo plateau/i,
+    eras: [
+      { from: 900, until: 1911, name: 'the Kingdom of Nri' },
+    ],
+  },
+  { // SWAHILI_EARLY_ENTRY — narrower than the base Swahili regex. The base
+    // entry's "Swahili city-states" era starts at 1000, which is when the
+    // stone-built sultanates are attested; the Tana Tradition coastal
+    // trading settlements (Shanga, Manda, Unguja Ukuu) are attested from the
+    // 8th century, before they coalesced into named sultanates.
+    match: /swahili coast/i,
+    eras: [
+      // UNCERTAIN: no single named state, just the settlements that later
+      // became one — flagged as approximate the way this file already
+      // flags "the Cuman-Kipchak confederation".
+      { from: 750, until: 1000, name: 'the early Swahili settlements' },
+    ],
+  },
+  { // MAGHREB_MOROCCO_ENTRY — narrower than the base Maghreb regex; wins for
+    // the Morocco-specific locations. Between entries, years fall through to
+    // the base Maghreb entry's Fatimid (909-1171) and Almohad (1121-1269)
+    // eras, which is accurate enough for the seams (974-1062, 1147-1244).
+    match: /fez plateau|rif coast|atlas mountains/i,
+    eras: [
+      { from: 788, until: 974, name: 'the Idrisid dynasty' },
+      { from: 1062, until: 1147, name: 'the Almoravid dynasty' },
+      { from: 1244, until: 1465, name: 'the Marinid dynasty' },
+      { from: 1465, until: 1554, name: 'the Wattasid dynasty' },
+    ],
+  },
+  { // MAGHREB_TUNISIA_ENTRY — narrower than the base Maghreb regex; wins for
+    // Tunisia/eastern Maghreb specifically, closing the 1269-1574 gap that
+    // the Marinid/Wattasid sequence above does not cover here (the Hafsids
+    // ruled Ifriqiya, not Morocco).
+    match: /tunisian sahel|tripolitania|cyrenaica coast/i,
+    eras: [
+      { from: 1229, until: 1574, name: 'the Hafsid dynasty' },
+    ],
+  },
+
+  // --- The Americas ------------------------------------------------------
+  { // YORUBA_IFE_ENTRY — narrower than the base West African Forests regex
+    // (which contains "oyo" and would otherwise eventually hand these
+    // locations the Oyo Empire from 1400, six centuries too early). Ile-Ife
+    // is the traditional and archaeological cradle of Yoruba civilization,
+    // both these locations sit in its immediate hinterland, and the base
+    // entry's Oyo Empire (which succeeded Ife as the dominant Yoruba power)
+    // still applies automatically once its own eras run out.
+    match: /oyo hinterland|ogun river basin/i,
+    eras: [
+      // UNCERTAIN: Ife's founding is traditionally far older (Yoruba oral
+      // tradition and some archaeology place initial settlement centuries
+      // BCE), but 1000-1420 is the period the urban/political core and its
+      // famous naturalistic bronze and terracotta portraiture are actually
+      // well attested, so that is what is asserted here.
+      { from: 1000, until: 1420, name: 'the Kingdom of Ife' },
+    ],
+  },
+  { // AKAN_BONOMAN_ENTRY — narrower than the base regex (which contains
+    // "ashanti" and "gold coast" and would otherwise reach for the Ashanti
+    // Empire, 1670). Bonoman/Bono state was the earlier Akan gold-trading
+    // kingdom these two locations' Akan populations descend from, and it
+    // fed the same trans-Saharan gold trade Mali and Songhai ran on the
+    // other end.
+    match: /gold coast savanna|ashanti forest/i,
+    eras: [
+      // UNCERTAIN: founding dates given in the sources I could check range
+      // from the 11th century to 1450; 1250 is a middle-of-the-road pick
+      // consistent with the 12th-century gold-trade boom that is better
+      // attested than the state's formal founding.
+      { from: 1250, until: 1670, name: 'the Bono state' },
+    ],
+  },
+  { // MISSISSIPPI_VALLEY_CAHOKIA_ENTRY — Cahokia was a real paramount
+    // chiefdom with monumental earthworks and an estimated peak population
+    // of 10,000-20,000, the largest pre-Columbian settlement north of
+    // Mexico. Zone-scoped (not strictly necessary for this text, but matches
+    // the file's convention for new Americas entries).
+    match: /mississippi valley/i,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN'],
+    eras: [
+      { from: 1050, until: 1350, name: 'Cahokia' },
+    ],
+  },
+  { // SOUTHEAST_MISSISSIPPIAN_ENTRY — zone-scoped, LOAD-BEARING here: without
+    // it, "Piedmont Uplands" would also match Italy's Piedmont region under
+    // the EUROPEAN zone. The Georgia/Tennessee Piedmont and the Smoky
+    // Mountains foothills were the historical range of the Mississippian
+    // paramount chiefdoms (Coosa among them, attested in detail by the 1540
+    // De Soto chronicles).
+    match: /smoky mountains|piedmont uplands/i,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN'],
+    eras: [
+      // UNCERTAIN: a collective label for the region's mound-building
+      // paramount chiefdoms generally (Coosa specifically is attested only
+      // 1400-1600); mirrors "the Swahili city-states" convention.
+      { from: 1000, until: 1600, name: 'the Mississippian chiefdoms' },
+    ],
+  },
+  { // ANDES_CUZCO_ENTRY — the pre-imperial Kingdom of Cusco, well before the
+    // 1438 Inca imperial expansion the base entry already names.
+    match: /cuzco valley/i,
+    zones: ['SOUTH_AMERICAN'],
+    eras: [
+      // UNCERTAIN founding date (John Rowe's conventional c. 1200, based on
+      // king-list reign-counting rather than direct evidence).
+      { from: 1200, until: 1438, name: 'the Kingdom of Cusco' },
+    ],
+  },
+  { // ANDES_TITICACA_AYMARA_ENTRY — narrower than the base Andes regex;
+    // wins for Lake Titicaca Basin specifically. The base entry's Tiwanaku
+    // era already covers -200 to 1000; this is the Late Intermediate Period
+    // that followed its collapse.
+    match: /titicaca/i,
+    zones: ['SOUTH_AMERICAN'],
+    eras: [
+      // 1000-1150 (immediate post-Tiwanaku-collapse instability) left open.
+      // UNCERTAIN: a collective label for the rival Lupaqa, Colla and other
+      // Aymara-speaking lordships, matching "the taifa kingdoms" convention.
+      { from: 1150, until: 1450, name: 'the Aymara kingdoms' },
+    ],
+  },
+  { // ANDES_CHACHAPOYA_ENTRY — the "Warriors of the Clouds", a documented
+    // confederation of related highland-forest polities in northern Peru.
+    match: /chachapoyas/i,
+    zones: ['SOUTH_AMERICAN'],
+    eras: [
+      // UNCERTAIN: a confederation of allied cacicazgos (small kingdoms)
+      // rather than one centralised state — flagged the same way "the
+      // Swahili city-states" is.
+      { from: 800, until: 1470, name: 'the Chachapoya confederation' },
     ],
   },
 ];

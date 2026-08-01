@@ -166,25 +166,36 @@ function eventAlreadyHasSubject(text: string): boolean {
   return !PREDICATE_OPENERS.test(text);
 }
 
-export function describeLifeEvent(
+/**
+ * An event as a bare clause, with no date marker and no terminal stop, so that
+ * callers can join two of them into one sentence. Every event used to be
+ * rendered straight into "At age N, …", which is why a biography read as a
+ * chronology: nothing could be said about how one event followed from another.
+ */
+export function lifeEventClause(
   event: Pick<EnhancedLifeEvent, 'text'>,
-  ageAtEvent: number,
   pronouns: NarrativePronouns,
 ): string {
   const text = stripTerminalPunctuation(event.text);
   if (!text) return '';
 
-  let clause: string;
   if (/^(?:father|mother|brother|sister)\b/i.test(text)) {
-    clause = `${pronouns.possessive} ${lowerFirst(text)}`;
-  } else if (eventAlreadyHasSubject(text)) {
-    clause = lowerFirst(text);
-  } else if (/^(?:admitted|cast out|chosen|elected|forced|invited|placed|required|sent|taken|taught|trusted|allowed)\b/i.test(text)) {
-    clause = `${pronouns.subject} ${pronouns.subject === 'they' ? 'were' : 'was'} ${lowerFirst(text)}`;
-  } else {
-    clause = `${pronouns.subject} ${lowerFirst(text)}`;
+    return `${pronouns.possessive} ${lowerFirst(text)}`;
   }
-  return `At age ${ageAtEvent}, ${clause}.`;
+  if (eventAlreadyHasSubject(text)) return lowerFirst(text);
+  if (/^(?:admitted|cast out|chosen|elected|forced|invited|placed|required|sent|taken|taught|trusted|allowed)\b/i.test(text)) {
+    return `${pronouns.subject} ${pronouns.subject === 'they' ? 'were' : 'was'} ${lowerFirst(text)}`;
+  }
+  return `${pronouns.subject} ${lowerFirst(text)}`;
+}
+
+export function describeLifeEvent(
+  event: Pick<EnhancedLifeEvent, 'text'>,
+  ageAtEvent: number,
+  pronouns: NarrativePronouns,
+): string {
+  const clause = lifeEventClause(event, pronouns);
+  return clause ? `At age ${ageAtEvent}, ${clause}.` : '';
 }
 
 export function describeLifeEventSecondPerson(
@@ -226,6 +237,46 @@ export function describeBeliefSecondPerson(beliefText: string): string {
   return `Your guiding belief is that ${lowerFirst(text)}.`;
 }
 
+/**
+ * Ideology descriptions in the table come in two shapes: a third-person verb
+ * phrase ("Values tradition, hierarchy, continuity") and a noun phrase
+ * ("Buddhist path emphasizing liberation"), and each needs its own frame.
+ *
+ * The list below is the fast path. The shape test behind it is what stops a
+ * newly added entry from being silently mistaken for a noun and given an
+ * article: "Holds that history moves by class struggle" rendered as "the Holds
+ * that history moves by class struggle" in 6% of biographies, and nothing in
+ * the audit noticed, because the list was the only thing consulted.
+ */
+const IDEOLOGY_VERB_HEADS = new Set([
+  'values', 'seeks', 'believes', 'emphasizes', 'pursues', 'prioritizes',
+  'champions', 'renounces', 'rejects', 'idealizes', 'bridges', 'sees',
+  'focuses', 'holds', 'looks', 'reads', 'treats', 'denies', 'insists',
+  'asserts', 'maintains', 'regards', 'teaches', 'takes', 'places',
+]);
+
+/**
+ * Nouns ending in -s that must not be read as verbs. "Synthesis of religious
+ * devotion with philosophical inquiry" heads a perfectly good noun phrase.
+ */
+const NOUN_LOOKS_PLURAL = /(?:ss|us|is|ics|ness|ology|osis)$/i;
+
+function isVerbHead(word: string): boolean {
+  const lower = word.toLowerCase().replace(/[^a-z]/g, '');
+  if (IDEOLOGY_VERB_HEADS.has(lower)) return true;
+  return /s$/.test(lower) && !NOUN_LOOKS_PLURAL.test(lower);
+}
+
+/**
+ * "he holds" → "they hold". Dropping the final -s is right for every verb in
+ * the table except the ones where the -es is epenthetic ("focuses" → "focus").
+ */
+function toPluralAgreement(verb: string): string {
+  const lower = verb.toLowerCase();
+  if (/(?:s|ch|sh|x)es$/.test(lower)) return lower.slice(0, -2);
+  return lower.replace(/s$/, '');
+}
+
 export function describeIdeology(
   ideology: Pick<Ideology, 'description'> | undefined,
   pronouns: NarrativePronouns,
@@ -248,23 +299,25 @@ export function describeIdeology(
       `Asked what ${pronouns.subject} ${conjugate('believe', pronouns)}, ${pronouns.subject} would describe something ${lowerFirst(description)}.`,
     ]);
   }
-  if (/^(?:values|seeks|believes|emphasizes|pursues|prioritizes|champions|renounces|rejects|idealizes|bridges|sees|focuses)\b/i.test(description)) {
+  // "About finding meaning through skilled creation" is a predicate, not a noun
+  // phrase, and fell through to the noun branch below as "the About finding
+  // meaning through skilled creation".
+  const aboutMatch = /^about\s+(.+)$/i.exec(description);
+  if (aboutMatch) {
+    const rest = lowerFirst(aboutMatch[1]);
+    const subjectCap = pronouns.subject.charAt(0).toUpperCase() + pronouns.subject.slice(1);
+    return choose([
+      `${pronouns.possessiveCap} outlook ${pronouns.be} about ${rest}.`,
+      `For ${pronouns.object}, it comes down to ${rest}.`,
+      `${subjectCap} ${conjugate('care', pronouns)} about ${rest}.`,
+    ]);
+  }
+
+  const firstWord = description.split(/\s+/)[0] ?? '';
+  if (isVerbHead(firstWord)) {
     const subjectCap = pronouns.subject.charAt(0).toUpperCase() + pronouns.subject.slice(1);
     const phrase = pronouns.subject === 'they'
-      ? lowerFirst(description)
-        .replace(/^values\b/i, 'value')
-        .replace(/^seeks\b/i, 'seek')
-        .replace(/^believes\b/i, 'believe')
-        .replace(/^emphasizes\b/i, 'emphasize')
-        .replace(/^pursues\b/i, 'pursue')
-        .replace(/^prioritizes\b/i, 'prioritize')
-        .replace(/^champions\b/i, 'champion')
-        .replace(/^renounces\b/i, 'renounce')
-        .replace(/^rejects\b/i, 'reject')
-        .replace(/^idealizes\b/i, 'idealize')
-        .replace(/^bridges\b/i, 'bridge')
-        .replace(/^sees\b/i, 'see')
-        .replace(/^focuses\b/i, 'focus')
+      ? `${toPluralAgreement(firstWord)}${lowerFirst(description).slice(firstWord.length)}`
       : lowerFirst(description);
     return choose([
       `${subjectCap} ${phrase}.`,
@@ -277,7 +330,6 @@ export function describeIdeology(
   // Noun-initial descriptions ("Buddhist path emphasizing liberation…") used to
   // fall through to `reflects ${lowerFirst(description)}`, which destroyed the
   // proper noun and left the phrase without its article.
-  const firstWord = description.split(/\s+/)[0] ?? '';
   const isProperNoun = /^[A-Z][a-z]/.test(firstWord) && !/^(?:A|An|The)$/.test(firstWord);
   const body = isProperNoun ? description : lowerFirst(description);
   const article = /^(?:a|an|the)\b/i.test(body) ? '' : 'the ';
@@ -334,6 +386,17 @@ export function findNarrativeFailureModes(text: string): string[] {
     [/\b(?:Success came, eventually|Recognition found you|Family can be both burden|Blood ties run deep|You(?:'ve| have) proven yourself|spiritual journey has been)\b/i, 'generic life-event aphorism'],
     [/\breflects [a-z]+ (?:path|way|tradition|school|doctrine|creed)\b/, 'proper noun lowercased in an ideology description'],
     [/\breflects (?!a\b|an\b|the\b)[a-z]+ing\b/, 'ideology description missing its article'],
+    // An article in front of a capitalised word is almost always a verb-initial
+    // ideology description that was mistaken for a noun phrase — "the Holds
+    // that history moves by class struggle". Proper nouns reach the prose
+    // through their own frames and never behind a bare "the ".
+    [/\b(?:the|a|an) (?:About|Holds|Looks|Reads|Values|Seeks|Believes|Emphasizes|Treats|Denies|Insists|Asserts|Maintains|Regards|Teaches|Takes|Places)\b/, 'verb-initial ideology description given an article'],
+    // No generic form of the rule above: proper nouns ending in -s are far too
+    // common in this corpus ("the Ganges", "the Narrows", "Sakhmakh the
+    // Fatherless") for a shape test to separate them from a verb. The
+    // generalization lives in `isVerbHead`, which decides how the sentence is
+    // built; this list is the regression guard for the four that shipped.
+    [/\ba (?:[AEIOU][a-z]+|[Hh]our)\b/, 'indefinite article does not agree with a vowel-initial proper noun'],
     [/\b(?:as|of) (?:a|an|the) [A-Z][a-z]+ (?:Hand|Worker|Maker|Seller|Keeper|Driver|Guard|Doctor|Wallah)\b/, 'profession left in Title Case mid-sentence'],
     [/\bNow,?\s[^.]*\bat the age of \d+\b/i, 'doubled temporal marker around the profession clause'],
     // Only an actual doubled age marker, not the adverb "now" appearing later

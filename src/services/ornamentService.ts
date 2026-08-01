@@ -59,6 +59,16 @@ export interface OrnamentPiece {
   style: OrnamentStyle;
   scale?: OrnamentScale;
   gems?: string[];
+  /**
+   * Which practice in `TRADITIONS` this came from.
+   *
+   * The table knows a persona is wearing a rosary, a torc, a faience broad
+   * collar or a rudraksha strand — 79 researched practices — and none of that
+   * reached the card, because `describeOrnament` composed a name out of the
+   * style and the material alone and printed "simple wood". Carrying the id
+   * lets the description say what the object actually is.
+   */
+  traditionId?: string;
 }
 
 export interface OrnamentContext {
@@ -156,6 +166,77 @@ export function stoneMaterialForHex(hex: string | undefined): RenderMaterial | u
  * because "heavy copper collar" and "small copper collar" are different objects
  * and the card was calling both of them the same thing.
  */
+/**
+ * Zone prefixes on tradition ids, stripped before the id is read as a name.
+ */
+const TRADITION_PREFIX = /^(?:eu|mena|sa|ea|sea|ssa|am|sam|oc|modern|colonial)-/;
+
+/**
+ * Where de-hyphenating the id does not produce a usable object name. Most of
+ * the table does — `eu-rosary`, `eu-bronze-torc`, `mena-faience-collar` — so
+ * only the terse or elliptical ones are listed.
+ */
+const TRADITION_LABELS: Record<string, string> = {
+  'pierced-tooth': 'pierced-tooth pendant',
+  'stone-bead': 'stone bead strand',
+  'shell-strand': 'shell bead strand',
+  'eu-jet-mourning': 'jet mourning brooch',
+  'eu-fibula': 'bronze fibula',
+  'mena-hoop': 'gold hoop earrings',
+  'mena-amulet': 'protective amulet',
+  'mena-signet': 'carved signet ring',
+  'sa-rudraksha': 'rudraksha bead strand',
+  'sa-jhumka': 'jhumka bell earrings',
+  'sa-nose-ring': 'gold nose ring',
+  'sa-toe-ring': 'silver toe rings',
+  'ea-magatama': 'magatama bead',
+  'ea-kingfisher': 'kingfisher-feather ornament',
+  'ea-cash-string': 'string of cash coins',
+  'ea-hairpin': 'carved hairpin',
+  'ea-lacquer-pin': 'lacquered hairpin',
+  'sea-carnelian-trade': 'traded carnelian beads',
+  'sea-glass-bead': 'glass bead strand',
+  'sea-gold-earflare': 'gold ear flares',
+  'ssa-cowrie': 'cowrie shell strand',
+  'ssa-gold-ornament': 'worked gold ornament',
+  'am-turquoise': 'turquoise bead necklace',
+  'am-abalone': 'abalone shell pendant',
+  'am-trade-silver': 'trade silver brooch',
+  'sam-tupu': 'tupu shawl pin',
+  'sam-spondylus': 'spondylus shell ornament',
+  'oc-shell-valuable': 'shell valuable',
+  'oc-greenstone': 'greenstone pendant',
+  'modern-studs': 'stud earrings',
+  'modern-crucifix': 'crucifix pendant',
+  'colonial-glass-bead': 'trade glass beads',
+  'colonial-hoop': 'silver hoop earrings',
+  // Proper nouns: sentence-casing the whole phrase leaves these lowercase.
+  'eu-viking-armring': 'Viking arm ring',
+  'eu-roman-signet': 'Roman signet ring',
+  'mena-berber-fibula': 'Berber fibula',
+  // Bare materials that need to name the object they were made into.
+  'sa-etched-carnelian': 'etched carnelian beads',
+  'mena-carnelian-strand': 'carnelian bead strand',
+  'ssa-ostrich-eggshell': 'ostrich eggshell beads',
+  'sea-hornbill-feather': 'hornbill feather ornament',
+  'am-turkey-feather': 'turkey feather ornament',
+  'oc-boar-tusk': 'boar-tusk pendant',
+  'oc-whale-tooth': 'whale-tooth pendant',
+  'sam-copper-disc': 'copper disc pendant',
+  'am-copper-plate': 'copper plate ornament',
+  'sam-seed-strand': 'seed bead strand',
+  'ssa-amber-strand': 'amber bead strand',
+  'eu-amber-strand': 'amber bead strand',
+  'ea-jade-pendant': 'jade pendant',
+  'ssa-ivory-band': 'carved ivory band',
+};
+
+/** The object's own name, where the table has one. */
+function traditionLabel(id: string | undefined): string | undefined {
+  if (!id) return undefined;
+  return TRADITION_LABELS[id] ?? id.replace(TRADITION_PREFIX, '').replace(/-/g, ' ');
+}
+
 export function describeOrnament(piece: OrnamentPiece): string {
   const stone = piece.gems?.length ? STONE_BY_HEX.get(piece.gems[0]) : undefined;
   const noun =
@@ -169,7 +250,21 @@ export function describeOrnament(piece: OrnamentPiece): string {
     ? `${noun} set with ${stone}`
     : noun;
   const size = piece.scale === 'large' ? 'heavy ' : piece.scale === 'small' ? 'small ' : '';
-  return `${size}${piece.style} ${withStone}`;
+
+  // The named object where the tradition has one; the style-and-material
+  // composition only where it does not. "Simple wood" was what an Indian
+  // persona's rudraksha strand had been reduced to.
+  const named = traditionLabel(piece.traditionId);
+  const body = named
+    ? (stone && piece.material !== 'gems' && stone !== 'shell' && !named.includes(stone)
+      ? `${named} set with ${stone}`
+      : named)
+    : `${piece.style} ${withStone}`;
+
+  // Sentence case: this sits in a value column beside "Tan Fedora" and
+  // "Barefoot", and a bare lowercase phrase read like a placeholder.
+  const text = `${size}${body}`;
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 interface Tradition {
@@ -482,7 +577,8 @@ export function generateOrnament(ctx: OrnamentContext, rng: () => number): Ornam
   if (ids.has('monastic') || ids.has('ascetic') || ids.has('enslaved') || ids.has('serf_born')) {
     const plain = TRADITIONS.filter(t => eligible(t, ctx, 0.1) && !METALS.has(t.piece.material));
     if (plain.length === 0 || rng() < 0.5) return [];
-    return [plain[Math.floor(rng() * plain.length)].piece];
+    const pick = plain[Math.floor(rng() * plain.length)];
+    return [{ ...pick.piece, traditionId: pick.id }];
   }
 
   const pool = TRADITIONS.filter(t => eligible(t, ctx, privilege));
@@ -508,7 +604,7 @@ export function generateOrnament(ctx: OrnamentContext, rng: () => number): Ornam
     const pick = remaining[Math.min(index, remaining.length - 1)];
     remaining.splice(remaining.indexOf(pick), 1);
     used.add(pick.piece.type);
-    chosen.push({ ...pick.piece, ...(pick.piece.gems ? { gems: [...pick.piece.gems] } : {}) });
+    chosen.push({ ...pick.piece, traditionId: pick.id, ...(pick.piece.gems ? { gems: [...pick.piece.gems] } : {}) });
   }
 
   return chosen;

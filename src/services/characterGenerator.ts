@@ -803,7 +803,10 @@ function generateProceduralFamily(
             relation: 'spouse',
             age: spouseAge,
             profession: spouseProfession,
-            birthYear: spouseBirthYear
+            birthYear: spouseBirthYear,
+            // The biography says how long the marriage has lasted, which is not
+            // recoverable from the ages alone.
+            marriedSince: currentYear - (age - marriageAge),
         });
 
         // ===== CHILDREN =====
@@ -1286,7 +1289,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
     });
     
     // Generate appearance with palette
-    let palette = generateClothingPalette(baseProfile.wealthLevel, generationContext.era, culturalZone, baseProfile.gender, noise);
+    let palette = generateClothingPalette(baseProfile.wealthLevel, generationContext.era, culturalZone, baseProfile.gender, noise, role);
     const centralAsianModern =
         culturalZone === 'EAST_ASIAN' &&
         generationContext.era === HistoricalEra.MODERN_ERA &&
@@ -1322,6 +1325,15 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         if (isMaterialColor(item.material)) return item;
 
         const colorName = getColorName(colorHex);
+
+        // The resolved colour itself, before the COLOR_WORDS sweep. That list
+        // is a fixed vocabulary and does not contain every name `nameForHex`
+        // can return, so a garment already named for its dye — "Indigo Work
+        // Jacket" — could still be handed the same word again and come out as
+        // "Indigo Indigo Work Jacket".
+        if (colorName && item.name.toLowerCase().includes(colorName.toLowerCase())) {
+            return { ...item, color: colorName };
+        }
 
         // Check if color is already in the name
         for (const color of COLOR_WORDS) {

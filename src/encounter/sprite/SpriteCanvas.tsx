@@ -53,6 +53,7 @@ function makeSheets(compiled: CompiledSprite) {
   const cache = new Map<FrameId, HTMLCanvasElement>();
   return {
     seed: compiled.seed,
+    contentTop: compiled.contentTop,
     sheet(id: FrameId): HTMLCanvasElement {
       const hit = cache.get(id);
       if (hit) return hit;
@@ -182,7 +183,7 @@ export default function SpriteCanvas({
     let raf = 0;
     let last = 0;
     const w = SPRITE_W * scale;
-    const h = SPRITE_H * scale;
+    const h = (SPRITE_H - sheets.contentTop) * scale;
     const breathePeriod = 2800 + unit(sheets.seed, 'breath') * 1000;
     const swayPeriod = 5200 + unit(sheets.seed, 'sway') * 1800;
 
@@ -211,11 +212,17 @@ export default function SpriteCanvas({
       } else if (koSettled) {
         pose = 'fallen';
       } else {
-        const inhale = Math.sin((now / breathePeriod) * Math.PI * 2) > 0.1;
+        // Four idle frames, not two: the pair carry the chest, and the
+        // quarter-phases between them carry the drape's swing. Long cloth
+        // moves through a full pendulum over one breath; short cloth has zero
+        // wind amplitude, so its four frames are identical pictures and the
+        // cycle is invisible.
+        const cycle = ((now / breathePeriod) % 1 + 1) % 1;
+        const IDLE: FrameId[] = ['stand', 'stand2', 'standBreathe', 'standBreathe2'];
         if (talking && Math.floor(now / 130) % 2 === 0) pose = 'talk';
         else if (blinkNow(now, sheets.seed)) pose = 'blink';
         else if (!talking && glanceNow(now, sheets.seed)) pose = 'glance';
-        else pose = inhale ? 'standBreathe' : 'stand';
+        else pose = IDLE[Math.floor(cycle * 4) % 4];
       }
 
       // A slow, one-pixel weight shift keeps the stance alive without
@@ -243,7 +250,8 @@ export default function SpriteCanvas({
           SPRITE_H * scale, SPRITE_W * scale
         );
       } else {
-        ctx.drawImage(sheet, dx, dy, w, h);
+        // Shifted up by the crop, so the empty rows fall outside the canvas.
+        ctx.drawImage(sheet, dx, dy - sheets.contentTop * scale, w, SPRITE_H * scale);
       }
       if (frame && frame.flash > 0) {
         ctx.globalCompositeOperation = 'source-atop';
@@ -263,7 +271,7 @@ export default function SpriteCanvas({
       ref={canvasRef}
       className="encounter-sprite"
       width={SPRITE_W * scale}
-      height={SPRITE_H * scale}
+      height={(SPRITE_H - sheets.contentTop) * scale}
       style={{ imageRendering: 'pixelated' }}
     />
   );

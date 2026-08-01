@@ -47,6 +47,8 @@ export interface FamilyMember {
     birthYear?: number;
     deathYear?: number;
     isDeceased?: boolean;
+    /** Spouses only: the year the marriage began, for "married these twenty years". */
+    marriedSince?: number;
 }
 
 /**
