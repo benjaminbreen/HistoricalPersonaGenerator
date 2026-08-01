@@ -29,11 +29,33 @@ import { MAT } from '../../components/portraitLab/core/raster';
 import { Ramp, RGB } from '../../components/portraitLab/core/color';
 import { RampBook } from '../../components/portraitLab/core/raster';
 
-/** Steps in a dense ramp. Two of these to one of the portrait's, less the shared end. */
-export const DENSE_LEN = 13;
+/**
+ * Steps in a dense ramp — **four** of these to one of the portrait's, less the
+ * shared ends.
+ *
+ * Thirteen was two-to-one, and measuring against the style reference showed
+ * why that is not enough: across a skirt, adjacent pixels in the mockup differ
+ * by about 8.9 in luminance, and here by 15.1 over a comparable range. The
+ * range itself is now close (160 against 219); what is missing is the
+ * *intermediate* values, so a fold's shoulder steps to its valley in two jumps
+ * where the reference takes four. That is the difference between a surface
+ * turning and a surface terraced.
+ *
+ * There is nothing to lose by it. The palette is generated, not hand-authored,
+ * so more steps cost only interpolation, and the endpoints and the material's
+ * own base value still land exactly on a step.
+ */
+export const DENSE_LEN = 25;
 
-/** How many dense steps one authored bias step is worth. */
-export const BIAS_SCALE = 2;
+/**
+ * How many dense steps one authored bias step is worth.
+ *
+ * Every `addBias` call in the renderer was written against the portrait's
+ * 7-step ladder, so this converts. It has to track `DENSE_LEN`: at 13 steps a
+ * bias of one meant two, and at 25 it means four — otherwise every crease,
+ * seam and fold in the figure quietly shallows out when the ramp is refined.
+ */
+export const BIAS_SCALE = 4;
 
 function mix(a: RGB, b: RGB, t: number): RGB {
   return {
@@ -44,14 +66,15 @@ function mix(a: RGB, b: RGB, t: number): RGB {
 }
 
 /**
- * Interpolate a 7-step ramp to 13. Even indices are the originals, odd ones
- * the midpoints, so the endpoints and the base value are untouched and a
- * material's own colour still lands exactly on a step.
+ * Interpolate a 7-step ramp to `DENSE_LEN`. Every fourth index is an original,
+ * the rest are interpolated, so the endpoints and the base value are untouched
+ * and a material's own colour still lands exactly on a step.
  */
 export function densify(ramp: Ramp): Ramp {
   const steps: RGB[] = [];
+  const per = (DENSE_LEN - 1) / (ramp.steps.length - 1);
   for (let i = 0; i < DENSE_LEN; i += 1) {
-    const src = i / 2;
+    const src = i / per;
     const lo = Math.floor(src);
     const hi = Math.min(ramp.steps.length - 1, lo + 1);
     steps.push(src === lo ? { ...ramp.steps[lo] } : mix(ramp.steps[lo], ramp.steps[hi], src - lo));

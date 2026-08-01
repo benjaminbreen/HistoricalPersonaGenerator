@@ -61,8 +61,19 @@ export class FormBuffer {
   /** 0 far … 1 near. Drives occlusion and which edge gets the rim. */
   readonly depth = new Float32Array(N);
   readonly written = new Uint8Array(N);
-  /** Per-pixel shade bias, in ramp steps: folds, seams, weave. */
-  readonly bias = new Int8Array(N);
+  /**
+   * Per-pixel shade bias, in *authored* ramp steps: folds, seams, weave.
+   *
+   * Deliberately floating point. As an `Int8Array` the smallest expressible
+   * change was one authored step — four dense steps, about 26 luminance on a
+   * widened cloth ramp — so any bias difference between neighbouring pixels
+   * forced a jump that large. Measured across a skirt, 28% of adjacent pairs
+   * differed by 44 luminance against the reference's 8.9 overall, while the
+   * lighting gradient either side sat at a smooth 3.9: the terracing was
+   * entirely the creases, and it was a quantisation artefact rather than a
+   * choice. A cosine shoulder can now actually be a cosine.
+   */
+  readonly bias = new Float32Array(N);
 
   clear(): void {
     this.written.fill(0);
@@ -389,9 +400,12 @@ export function resolveLight(
       // rather than being reinterpreted — a crease worth one step still darkens
       // by one step's worth of value.
       let step = denseBandOf(lit, rig.strength, rig.ambient);
+      // Bias is fractional; the ramp index is not. Rounding happens once,
+      // here, after every contribution is summed — rounding each one on the
+      // way in is what quantised the fold shoulders in the first place.
       step += (form.bias[i] + (MATERIAL_BIAS[mat] ?? 0)) * BIAS_SCALE;
-      step += Math.round(occlusionAt(form, x, y, occStrength)) * BIAS_SCALE;
-      step = Math.max(0, Math.min(DENSE_LEN - 1, step));
+      step += occlusionAt(form, x, y, occStrength) * BIAS_SCALE;
+      step = Math.max(0, Math.min(DENSE_LEN - 1, Math.round(step)));
       raster.set(x, y, ramp.steps[step], mat, step);
     }
   }

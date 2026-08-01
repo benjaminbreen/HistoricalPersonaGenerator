@@ -918,7 +918,16 @@ function drawFolds(form: FormBuffer, m: Mask, s: Skeleton, plan: GarmentPlan): v
       // simply stops leaves a visible tick across the cloth.
       const fade = tt > 0.8 ? (1 - tt) / 0.2 : 1;
       xs.push(x);
-      deep.push(Math.max(1, Math.round((f.depth + (tt > 0.55 ? 1 : 0)) * fade)));
+      // Fold depth is in ramp *steps*, but a step is not a fixed amount of
+      // luminance — widening `clothContrast` stretches the ramp, so the same
+      // depth becomes a deeper crease. Measured, that put 28% of adjacent
+      // pixel pairs across a skirt jumping 44 luminance in one column, against
+      // the reference's 8.9 overall; the lighting gradient either side was
+      // smooth (3.9), so the terraced look was entirely the creases. Dividing
+      // by the stretch keeps a fold the same *visual* weight whatever range
+      // the cloth is spanning.
+      const weight = Math.max(1, s.t.clothContrast);
+      deep.push(Math.max(1, Math.round(((f.depth + (tt > 0.55 ? 1 : 0)) * fade) / weight)));
     }
     if (!xs.length) continue;
     // Sorted, so "the next crease along" is meaningful.
@@ -929,9 +938,15 @@ function drawFolds(form: FormBuffer, m: Mask, s: Skeleton, plan: GarmentPlan): v
     for (const i of order) {
       const x = xs[i];
       form.addBias(x, y, deep[i]);
+      // Shoulders at 55% and 22% of the valley, so a crease rolls into the
+      // cloth over three columns instead of dropping into it in one.
       for (const dx of [-1, 1] as const) {
-        const px = x + dx;
-        if (px > 0 && px < SPRITE_W && m[y * SPRITE_W + px]) form.addBias(px, y, deep[i] - 1);
+        for (const [k, frac] of [[1, 0.55], [2, 0.22]] as const) {
+          const px = x + dx * k;
+          if (px > 0 && px < SPRITE_W && m[y * SPRITE_W + px]) {
+            form.addBias(px, y, deep[i] * frac);
+          }
+        }
       }
     }
 
@@ -954,8 +969,9 @@ function drawFolds(form: FormBuffer, m: Mask, s: Skeleton, plan: GarmentPlan): v
         const facing = facingAt(d, x, y);
         const room = facing > 0.72 ? 0 : facing > 0.44 ? 1 : 2;
         if (room === 0) continue;
-        const lift = Math.round(hump * room + 0.15);
-        if (lift > 0) form.addBias(x, y, -lift);
+        // No rounding: the hump is a curve and the buffer can now hold one.
+        const lift = hump * room;
+        if (lift > 0.05) form.addBias(x, y, -lift);
       }
     }
   }
