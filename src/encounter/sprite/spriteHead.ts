@@ -66,6 +66,10 @@ export interface HeadLayout {
   turnAmt: number;
   /** How far the hat sits down over the crown. */
   hatY: number;
+  /** How far the hair mass sits down over the skull. */
+  hairY: number;
+  /** Forced cheekbone level 0…4, or −1 to read it from the spec. */
+  cheekOverride: number;
 }
 
 /**
@@ -116,6 +120,8 @@ export function headLayout(spec: PortraitSpec, s: Skeleton): HeadLayout {
     turn,
     turnAmt,
     hatY: t.hatY,
+    hairY: t.hairY,
+    cheekOverride: t.cheekLine,
   };
 }
 
@@ -198,9 +204,11 @@ export function headMask(spec: PortraitSpec, L: HeadLayout): Mask {
 }
 
 /** The skull as a lit ellipsoid, with the jaw reading as a slightly flatter plane. */
-export function headSurface(form: FormBuffer, mask: Mask, L: HeadLayout, depth: number): void {
+export function headSurface(
+  form: FormBuffer, mask: Mask, L: HeadLayout, depth: number, spec: PortraitSpec
+): void {
   ellipsoidSurface(form, mask, L.hx + L.turn, L.hy, L.rx + 1, L.ry + 1, depth, 0.72);
-  faceOcclusion(form, mask, L);
+  faceOcclusion(form, mask, L, spec);
 }
 
 /**
@@ -217,7 +225,9 @@ export function headSurface(form: FormBuffer, mask: Mask, L: HeadLayout, depth: 
  * Every one is placed off the layout's own feature positions, so they follow
  * the head wherever it is and whatever size it is.
  */
-function faceOcclusion(form: FormBuffer, mask: Mask, L: HeadLayout): void {
+function faceOcclusion(
+  form: FormBuffer, mask: Mask, L: HeadLayout, spec: PortraitSpec
+): void {
   const on = (x: number, y: number) =>
     x >= 0 && x < SPRITE_W && y >= 0 && y < SPRITE_H && mask[y * SPRITE_W + x] === 1;
   const cut = (x: number, y: number, by = 1) => { if (on(x, y)) form.addBias(x, y, by); };
@@ -227,6 +237,7 @@ function faceOcclusion(form: FormBuffer, mask: Mask, L: HeadLayout): void {
   for (const side of [-1, 1] as const) {
     const cx = L.fx + side * L.eyeDX;
     for (let dx = -eyeHalf; dx <= eyeHalf; dx += 1) {
+      // The socket sits one level above the nose flank, not level with it.
       cut(cx + dx, L.eyeY - 1, Math.abs(dx) < eyeHalf - 1 ? 2 : 1);
       cut(cx + dx, L.eyeY - 2, 1);
     }
@@ -236,26 +247,51 @@ function faceOcclusion(form: FormBuffer, mask: Mask, L: HeadLayout): void {
   // terminator's straight run more than any other.
   const noseSide = L.turn;
   for (let y = L.browY + 1; y <= L.noseY; y += 1) {
-    // The deepest interior mark on the face. The nose casts hard onto the
-    // cheek beside it and this line is most of what reads as a nose at all —
-    // pitched level with the socket shadows it disappeared into them.
-    cut(L.fx + noseSide * 2, y, 4);
-    cut(L.fx + noseSide * 3, y, 2);
+    // The deepest interior mark on the face — but *deepest* is relative, and
+    // there is less room than the authored numbers assume. Biases are scaled
+    // by `BIAS_SCALE` (2) onto the dense ramp, so a depth of 4 lands eight
+    // steps below a base of about six: past the end. Measured over three
+    // faces, **18.7% of all facial skin was pinned at the darkest step** —
+    // socket, nose flank, cheekbone and jaw all bottoming out at the same
+    // value with no hierarchy between them, which is exactly what makes a
+    // face read as marked rather than modelled. Occlusion adds to this too,
+    // so the marks have to leave it room.
+    cut(L.fx + noseSide * 2, y, 3);
+    cut(L.fx + noseSide * 3, y, 1);
   }
   // …and the ball of the nose throws a short shadow onto the lip below it.
-  cut(L.fx + noseSide, L.noseY + 1, 3);
-  cut(L.fx, L.noseY + 1, 2);
-  // --- Under the cheekbone: a shallow diagonal easing back toward the jaw.
+  cut(L.fx + noseSide, L.noseY + 1, 2);
+  cut(L.fx, L.noseY + 1, 1);
+  // --- Under the cheekbone.
   //
-  // It starts high and *wide* — level with the nose's bridge, out near the
-  // ear — and runs down and in. Begun at the nose's tip and only a third of
-  // the head out, it sat right beside the mouth and read as a pair of jowls
-  // rather than as the plane under a cheekbone.
-  for (const side of [-1, 1] as const) {
-    const from = Math.round(L.W * 0.42);
-    const top = L.noseY - Math.round(L.H * 0.09);
-    for (let i = 0; i < 5; i += 1) {
-      cut(L.fx + side * (from - i), top + i, i < 3 ? 2 : 1);
+  // Five authored levels, not one mark on every face. The bust shows some
+  // faces with pronounced cheekbones and leaves others smooth; the sprite drew
+  // the same diagonal on everyone, which made every persona look gaunt and
+  // lost a real distinguishing feature. The level comes from the spec's own
+  // `cheekbones` and can be forced from the tuning panel.
+  //
+  //   0  none — a smooth cheek
+  //   1  subtle and short
+  //   2  subtle and long
+  //   3  strong and short
+  //   4  strong and long
+  const cheek = cheekLevel(spec, L);
+  if (cheek > 0) {
+    const strong = cheek >= 3;
+    const long = cheek === 2 || cheek === 4;
+    const len = long ? 6 : 3;
+    for (const side of [-1, 1] as const) {
+      const from = Math.round(L.W * 0.42);
+      const top = L.noseY - Math.round(L.H * 0.09);
+      for (let i = 0; i < len; i += 1) {
+        // A strong bone carries two steps at its head and one as it fades; a
+        // subtle one never exceeds one, so it reads as a plane change rather
+        // than as a drawn line.
+        const depth = strong ? (i < Math.ceil(len / 2) ? 2 : 1) : 1;
+        cut(L.fx + side * (from - i), top + i, depth);
+      }
+      // The lit ridge above it — what makes it a bone rather than a smudge.
+      if (strong) form.addBias(L.fx + side * (from + 1), L.noseY - Math.round(L.H * 0.12), -1);
     }
   }
   // --- Under the lower lip, and the chin's own shelf.
@@ -396,20 +432,46 @@ function drawEyes(
       put(x0 + i, L.eyeY - (atOuter ? lift : 0), lash, MAT.BROW, 5);
     }
     if (!hooded) {
-      for (let i = 0; i < ew; i += 1) {
-        put(x0 + i, L.eyeY + 1, ramps.sclera.steps[3], MAT.SCLERA, 3);
+      // A **two-row aperture**, which is what the larger head finally affords.
+      //
+      // One row can hold a white, an iris and a corner but it cannot hold a
+      // lid: the iris has nothing to be tucked under, no catchlight has
+      // anywhere to sit that is not also the pupil, and the result reads as a
+      // correctly-placed mark rather than as an eye. Two rows buy an iris that
+      // meets the lash above it — which is what real eyes do, the upper lid
+      // always cuts the iris — a lower rim of white beneath it, and room for a
+      // single specular pixel.
+      const aperture = ew >= 5 ? 2 : 1;
+      for (let row = 0; row < aperture; row += 1) {
+        for (let i = 0; i < ew; i += 1) {
+          put(x0 + i, L.eyeY + 1 + row, ramps.sclera.steps[row === 0 ? 3 : 4], MAT.SCLERA, row === 0 ? 3 : 4);
+        }
       }
       const gaze = Math.max(-1, Math.min(1, opts.gaze));
-      // The iris: two pixels on a wide eye, one on a narrow one, and it
-      // tracks the gaze without ever leaving the aperture.
-      const irisW = ew >= 5 ? 2 : 1;
+      // The iris is a *mass*, not a dot: three pixels across on a wide eye and
+      // the full depth of the aperture, so it reads as a disc partly hidden
+      // under the lid.
+      const irisW = ew >= 7 ? 3 : ew >= 5 ? 2 : 1;
       const irisX = Math.max(x0, Math.min(x0 + ew - irisW, cx - Math.floor(irisW / 2) + gaze));
-      for (let i = 0; i < irisW; i += 1) {
-        put(irisX + i, L.eyeY + 1, ramps.iris.steps[4], MAT.IRIS, 4);
+      for (let row = 0; row < aperture; row += 1) {
+        for (let i = 0; i < irisW; i += 1) {
+          // Darker at the top where the lid shades it, as an eye actually is.
+          put(irisX + i, L.eyeY + 1 + row, ramps.iris.steps[row === 0 ? 5 : 4], MAT.IRIS, row === 0 ? 5 : 4);
+        }
+      }
+      // The catchlight. One pixel, on the light side of the iris and hard
+      // against the lash line — it is the single mark that makes an eye look
+      // wet, and it costs nothing.
+      if (irisW >= 2) {
+        const lightSide = L.turn > 0 ? 0 : irisW - 1;
+        put(irisX + lightSide, L.eyeY + 1, ramps.sclera.steps[0], MAT.SCLERA, 0);
       }
       // The lacrimal caruncle — the warm fleck at the inner corner. It is one
       // pixel, and it is the difference between an eye and a bead.
       put(innerX, L.eyeY + 1, ramps.skinWarm.steps[4], MAT.SKIN, 4);
+      // The lower lid: a lit rim under the aperture, which is what gives the
+      // eye a floor and stops it reading as a hole.
+      for (let i = 1; i < ew - 1; i += 1) form.addBias(x0 + i, L.eyeY + 1 + aperture, -2);
       // The lower lid catches light along its rim.
       for (let i = 1; i < ew - 1; i += 1) form.addBias(x0 + i, L.eyeY + 2, 1);
     } else {
@@ -492,21 +554,51 @@ function drawNose(
   for (let y = top; y <= bottom; y += 1) {
     carve(L.fx + shadowSide, y, 1);
   }
-  // Aquiline and roman noses carry a ridge highlight against that plane —
-  // the one mark that distinguishes them at this size.
+
+  // **The bridge.** A lit column down the ridge, on the light side of the
+  // midline and opposite the shadow plane.
+  //
+  // Every nose had a shadow and nothing to cast it: a dark stripe beside a
+  // flat cheek reads as a smudge, not as a form standing off the face. The
+  // pair is what makes it a nose — one plane turned to the light, one turned
+  // away, meeting along the ridge. Only aquiline and roman noses used to get
+  // this, which is why every other face looked as though its nose had been
+  // pressed flat.
+  const litSide = L.turn;
+  for (let y = top; y <= bottom - 1; y += 1) {
+    // Faintest at the root between the brows, strongest over the ball.
+    const k = (y - top) / Math.max(1, bottom - 1 - top);
+    if (raster.matAt(L.fx, y) === MAT.SKIN) form.addBias(L.fx, y, k > 0.5 ? -2 : -1);
+  }
   if (long) {
+    // A high bridge catches a second column and casts harder at the root.
     for (let y = top; y <= bottom - 1; y += 1) {
-      if (raster.matAt(L.fx, y) === MAT.SKIN) form.addBias(L.fx, y, -1);
+      if (raster.matAt(L.fx + litSide, y) === MAT.SKIN) form.addBias(L.fx + litSide, y, -1);
     }
     if (spec.noseShape === 'aquiline') carve(L.fx + shadowSide, top, 2);
   }
-  // The base: nostrils and the shadow under the tip.
+
+  // **The ball.** The tip is a small sphere and it takes the brightest mark on
+  // the nose, with the underside turning away directly beneath it.
   const wide = spec.noseShape === 'broad';
+  if (raster.matAt(L.fx, bottom) === MAT.SKIN) form.addBias(L.fx, bottom, -3);
+  if (wide && raster.matAt(L.fx + litSide, bottom) === MAT.SKIN) {
+    form.addBias(L.fx + litSide, bottom, -2);
+  }
+
+  // The base: nostrils, and the shadow the ball throws under itself. The
+  // nostril is a *hole* — the darkest single mark on the face after the lash
+  // line — and it is what stops the base reading as a lip.
   const half = wide ? 2 : 1;
   for (let dx = -half; dx <= half; dx += 1) {
-    carve(L.fx + dx, bottom + 1, dx === 0 && !wide ? 1 : 2);
+    carve(L.fx + dx, bottom + 1, dx === 0 ? 2 : 3);
   }
   if (spec.noseShape === 'button') carve(L.fx, bottom, -1);
+  // The wings flare either side of the base on a broad nose.
+  if (wide) {
+    carve(L.fx - half - 1, bottom, 1);
+    carve(L.fx + half + 1, bottom, 1);
+  }
 }
 
 /** The mouth: a line, its corners, and — for full lips — one lit pixel below. */
@@ -544,12 +636,19 @@ function drawMouth(
     const dy = corner ? -ex.mouth : 0;
     raster.set(x0 + i, y + dy, line, MAT.LIP, 5);
   }
-  // Upper lip: a body of colour above the seam, narrower than the seam and
-  // peaked at the philtrum on a bow mouth.
+  // Upper lip: a body of colour above the seam, with a **cupid's bow** — two
+  // peaks either side of the philtrum rather than one flat band. At this size
+  // that is a single raised pixel on each side of centre, and it is the
+  // difference between a mouth and a horizontal mark.
   if (full || shape === 'medium') {
     for (let i = 1; i < w - 1; i += 1) {
-      const peak = shape === 'bow' && Math.abs(x0 + i - L.fx) <= 1 ? 1 : 0;
+      const off = x0 + i - L.fx;
+      // The bow peaks one pixel either side of the midline and dips at it.
+      const peak = Math.abs(off) === 1 ? 1 : 0;
       raster.set(x0 + i, y - 1 - peak, ramps.lip.steps[4], MAT.LIP, 4);
+      // The upper lip turns *under* toward the mouth, so it sits in its own
+      // shadow — always darker than the lower one, whatever the light does.
+      form.addBias(x0 + i, y - 1 - peak, 1);
     }
   }
   // Lower lip: lit, and one pixel narrower again, with its own cast beneath.
@@ -560,6 +659,10 @@ function drawMouth(
   } else {
     for (let i = 1; i < w - 1; i += 1) {
       raster.set(x0 + i, y + 1, ramps.lip.steps[full ? 2 : 3], MAT.LIP, full ? 2 : 3);
+      // The lower lip is a roll facing up and out: it catches the light, and
+      // its centre catches most of it.
+      const off = Math.abs(x0 + i - L.fx);
+      form.addBias(x0 + i, y + 1, off <= 1 ? -2 : -1);
     }
   }
   // The philtrum above, and the shadow under the lower lip that seats the
@@ -622,6 +725,28 @@ function drapeVeil(
 ): void {
   const inMask = (x: number, y: number) =>
     x >= 0 && x < SPRITE_W && y >= 0 && y < SPRITE_H && m[y * SPRITE_W + x] === 1;
+
+  // --- Sky light on the crown. ---------------------------------------------
+  //
+  // The key lamp is near-horizontal, so on a dome its lambert barely changes
+  // with height: three rows down the centre of the veil resolved to the same
+  // value, which is why the crown read as a flat plate. Cloth lying over a
+  // skull outdoors is lit from *above* as well, and that vertical term is what
+  // rounds it — brightest at the top, falling away toward the ear line.
+  const domeTop = L.crownY;
+  const domeBot = L.eyeY;
+  for (let y = domeTop; y <= domeBot; y += 1) {
+    const k = (y - domeTop) / Math.max(1, domeBot - domeTop);
+    // Darkening only. The crown already resolves at the top of its ramp, so
+    // *lifting* it — which is what the first version of this did — drove a
+    // rust veil to #d6b89e, paler than the salmon it was meant to fix. The
+    // crown holds its own colour and the cloth falls away from it into shade.
+    const lift = k < 0.25 ? 0 : k < 0.55 ? 1 : k < 0.85 ? 2 : 3;
+    if (lift === 0) continue;
+    for (let x = L.hx - L.rx - 3; x <= L.hx + L.rx + 3; x += 1) {
+      if (inMask(x, y)) form.addBias(x, y, lift);
+    }
+  }
 
   // --- The fold-back edge along the face opening. -------------------------
   // Walk each row inward from both sides; the first cloth pixel bordering the
@@ -697,6 +822,32 @@ function drapeVeil(
     }
   }
 
+  // --- The fall's own folds, below the ear. --------------------------------
+  //
+  // The radiating creases above start at the crown and are largely spent by
+  // the time the cloth clears the jaw, which left the two panels hanging past
+  // the shoulders as flat sheets — the single most obviously unmodelled area
+  // on a veiled figure. Cloth hanging free creases along its length, and the
+  // creases are closer together near the edge where it is gathered.
+  const fallTop = L.eyeY + Math.round(L.H * 0.15);
+  for (const side of [-1, 1] as const) {
+    for (let f = 0; f < 3; f += 1) {
+      // Bunched toward the outer edge, spread toward the face.
+      const u = 0.30 + f * 0.26;
+      for (let y = fallTop; y <= bottom; y += 1) {
+        const t = (y - fallTop) / Math.max(1, bottom - fallTop);
+        // The panel widens as it falls, so the creases splay with it.
+        const reach = L.rx * (0.55 + t * 0.75);
+        const sway = Math.round(Math.sin(t * Math.PI * 1.3 + f * 1.7) * 1.2);
+        const x = Math.round(L.hx + side * u * reach) + sway;
+        if (!inMask(x, y)) continue;
+        form.addBias(x, y, f === 1 ? 3 : 2);
+        // Its lit shoulder, on the side facing the lamp.
+        if (inMask(x + 1, y)) form.addBias(x + 1, y, -1);
+      }
+    }
+  }
+
   // --- The hem, and the shadow the cloth throws on the shoulder. ----------
   for (let x = 0; x < SPRITE_W; x += 1) {
     for (let y = bottom - 1; y <= bottom; y += 1) {
@@ -709,6 +860,26 @@ function drapeVeil(
       if (inMask(x, y)) form.addBias(x, y, 2);
     }
   }
+}
+
+/**
+ * How pronounced this face's cheekbones are, 0…4.
+ *
+ * Read from the spec so the sprite agrees with the bust about whether this
+ * person has visible cheekbones at all, with the tuning able to override for
+ * eyeballing the range. Gauntness and age both sharpen them — a thin or old
+ * face shows bone the same full young one hides.
+ */
+function cheekLevel(spec: PortraitSpec, L: HeadLayout): number {
+  if (L.cheekOverride >= 0) return L.cheekOverride;
+  const named = String(spec.cheekbones ?? '').toLowerCase();
+  let level = /high|sharp|prominent|angular/.test(named) ? 3
+    : /soft|full|round|low/.test(named) ? 0
+    : 1;
+  if (spec.traits?.gaunt) level += 1;
+  if (spec.age >= 60) level += 1;
+  if (spec.build === 'heavy' || spec.build === 'stocky') level -= 1;
+  return Math.max(0, Math.min(4, level));
 }
 
 /** Age lives in three places at this scale, and nowhere else fits. */
@@ -769,6 +940,29 @@ function drawFacialHair(
   const chinTop = Math.max(1, Math.round(L.H * 0.06));
   const top = L.mouthY - stache;
 
+  // How far below the jaw the beard hangs.
+  //
+  // Every style used to stop two rows under the chin, so a full beard's mass
+  // centred *above* the jawline — measured, −3.3px — and read as shading on
+  // the face rather than as hair hanging off it. A full beard is the longest
+  // thing on a head after the hair itself; the mass below the jaw is most of
+  // what it is.
+  const hang =
+    fh.style === 'full_beard' || fh.style === 'verdi' ? Math.round(L.H * 0.30)
+    : fh.style === 'chin_curtain' || fh.style === 'forked_beard' ? Math.round(L.H * 0.22)
+    : fh.style === 'goatee' || fh.style === 'van_dyke' ? Math.round(L.H * 0.14)
+    : fh.style === 'mutton_chops' ? Math.round(L.H * 0.06)
+    : 0;
+  const bottomY = L.chinY + 2 + hang;
+  // Below the jaw the beard is no longer bounded by the face, so it needs its
+  // own silhouette: widest at the jaw, tapering to a rounded or forked end.
+  const hangHalf = (y: number): number => {
+    if (y <= L.chinY) return 99;
+    const k = (y - L.chinY) / Math.max(1, bottomY - L.chinY);
+    const taper = fh.style === 'forked_beard' ? 0.9 : 0.62;
+    return Math.max(1, Math.round(L.rx * (0.82 - k * taper)));
+  };
+
   const belongs = (x: number, y: number): boolean => {
     const dx = x - L.fx;
     const dy = y - L.mouthY;
@@ -812,11 +1006,28 @@ function drawFacialHair(
     else if (dy > 0 && dy < chinTop + 2) form.addBias(x, y, 2); // under the lip
     else if (dy >= chinTop + 2) form.addBias(x, y, 1);          // the mass below
   };
-  for (let y = top; y <= L.chinY + 2; y += 1) {
+  for (let y = top; y <= bottomY; y += 1) {
     for (let x = L.hx - L.rx - 1; x <= L.hx + L.rx + 1; x += 1) {
-      if (!headM[y * SPRITE_W + x]) continue;
-      if (raster.matAt(x, y) !== MAT.SKIN) continue;
-      if (!belongs(x, y)) continue;
+      // Below the jaw the head mask has ended and there is no skin to test —
+      // so the beard's own outline takes over. Testing the head mask first, as
+      // this did, made the hang impossible: every candidate row under the chin
+      // was rejected before the silhouette code could run, which is why
+      // extending `bottomY` changed nothing at all.
+      const below = y > L.chinY;
+      if (below) {
+        if (Math.abs(x - L.fx) > hangHalf(y)) continue;
+        // Only over the neck and the collar — never over a raised arm.
+        const under = raster.matAt(x, y);
+        if (under !== MAT.SKIN && under !== MAT.CLOTH_A
+            && under !== MAT.CLOTH_B && under !== MAT.EMPTY) continue;
+        // A forked beard splits into two tails over its lower half.
+        if (fh.style === 'forked_beard' && y > L.chinY + hang * 0.4
+            && Math.abs(x - L.fx) < 2) continue;
+      } else {
+        if (!headM[y * SPRITE_W + x]) continue;
+        if (raster.matAt(x, y) !== MAT.SKIN) continue;
+        if (!belongs(x, y)) continue;
+      }
       // The mouth keeps its own aperture. Drawing the beard across it and
       // then laying the lips back on top gave a lip-coloured line inside a
       // beard-coloured mass at almost the same value — a brown smear where
@@ -937,7 +1148,9 @@ export function buildHair(spec: PortraitSpec, L: HeadLayout): HairResult {
   // crown to chin — rather than relative to the brows, which put it one pixel
   // above them and left every figure with no forehead at all.
   const recede = Math.round(spec.recession * 3);
-  const browLine = L.crownY + Math.round((L.chinY - L.crownY) * 0.3) - recede;
+  // `hairY` slides the whole mass down over the skull — the slider existed and
+  // did nothing, because the hairline was computed purely from the head box.
+  const browLine = L.crownY + Math.round((L.chinY - L.crownY) * 0.3) - recede + L.hairY;
   const fringe = sil === 'bangs' || sil === 'bowl';
 
   // The cap itself.
@@ -960,8 +1173,15 @@ export function buildHair(spec: PortraitSpec, L: HeadLayout): HairResult {
       if (insideFace && !(fringe && y <= browLine + 1)) continue;
       if (sil === 'tonsure' && y < L.crownY + 3 && Math.abs(x - L.hx) < L.rx - 2) continue;
       if (sil === 'shaved_sides' && y > L.crownY + 2 && Math.abs(x - L.hx) > 2) continue;
-      put(y <= L.crownY + 1 ? back : front, x, y);
-      if (y > L.crownY + 1) put(back, x, y);
+      // The crown belongs to the **front** layer.
+      //
+      // These two rows used to go to `back` only — and `back` is painted
+      // before the skull, so the head was drawn straight over its own hair and
+      // every figure came out with a bald patch on top that the bust does not
+      // have. Hair lying on the crown is in front of the skull from any angle
+      // the sprite is seen at; only the mass falling *behind* the head is not.
+      put(front, x, y);
+      put(back, x, y);
     }
   }
 
@@ -1360,7 +1580,12 @@ export function drawHeadwear(
     // The skull it wraps is a tight dome; the fall below is a much broader,
     // flatter one. Lighting the whole thing as a single big ellipsoid — which
     // is what it used to do — averages the two and models neither.
-    ellipsoidSurface(form, m, L.hx + L.turn, L.hy, L.rx + 4, L.ry + 10, 0.56, 0.55);
+    // A tighter dome than the fall it sits on. Given the whole veil's bounding
+    // box as its radii the curvature over the skull was almost nil, so every
+    // pixel of the crown resolved to the same band — a flat plate of colour
+    // where the head should be roundest. The skull is what the cloth is lying
+    // on, so the skull's radii are what it should be shaded against.
+    ellipsoidSurface(form, m, L.hx + L.turn, L.hy, L.rx + 2, L.ry + 3, 0.56, 0.85);
     drapeVeil(raster, form, ramps, L, m);
   } else if (hw.kind === 'coronet' || hw.kind === 'band') {
     planeSurface(form, m, L.turn * 0.3, -0.2, 0.58);

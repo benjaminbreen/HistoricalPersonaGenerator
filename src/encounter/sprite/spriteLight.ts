@@ -228,24 +228,34 @@ const DENSE_BANDS: ReadonlyArray<number> = Array.from(
   (_, i) => 0.96 - (i * 0.92) / (DENSE_LEN - 1),
 );
 
-function denseBandOf(lit: number, strength: number): number {
-  const spread = 0.62 + strength * 0.34;
-  const v = 0.5 + (lit - 0.5) * spread * 2;
+/**
+ * Map lighting onto the ramp across the range the lighting can actually reach.
+ *
+ * `lit` is `ambient + (1 - ambient) * lambert`, so with an ambient fill of
+ * 0.32 it lives in 0.32…1.0 and never approaches zero. Contrasting it about
+ * **0.5** — which is what this did — therefore threw away the entire lower
+ * half of the mapping and pushed everything above half-light off the top:
+ * measured over three garments, *55% of every one* landed on step 0 and
+ * another 11% on step 12, with almost nothing in between. That is not a
+ * shading problem that better normals or deeper folds could fix; the surface
+ * was being posterised to two values before any of that reached it.
+ *
+ * Normalising to the achievable range first, then contrasting about *its*
+ * midpoint, spends the whole ramp on the part of the signal that varies.
+ */
+function normLit(lit: number, strength: number, ambient: number): number {
+  const u = (lit - ambient) / Math.max(0.01, 1 - ambient);
+  return 0.5 + (u - 0.5) * (0.6 + strength * 0.14);
+}
+
+function denseBandOf(lit: number, strength: number, ambient: number): number {
+  const v = normLit(lit, strength, ambient);
   for (let i = 0; i < DENSE_BANDS.length; i += 1) if (v > DENSE_BANDS[i]) return i;
   return DENSE_LEN - 1;
 }
 
-function bandOf(lit: number, strength: number): number {
-  // The old spread topped out near 1.0, which mapped almost every lit pixel
-  // into steps 2–4 and left the ramp's ends unused. The reference garments
-  // run from a near-white specular on the ridge down to a value close to the
-  // outline in the deepest fold; a figure that only ever uses the middle
-  // three steps of a seven-step ramp cannot look like that however correct
-  // its normals are.
-  const spread = 0.62 + strength * 0.34;
-  // Centre the bands on the material's base value so an unlit-but-unshadowed
-  // surface renders as its own colour rather than as a tint of it.
-  const v = 0.5 + (lit - 0.5) * spread * 2;
+function bandOf(lit: number, strength: number, ambient: number): number {
+  const v = normLit(lit, strength, ambient);
   if (v > 0.88) return 1;
   if (v > 0.66) return 2;
   if (v > 0.42) return 3;
@@ -270,10 +280,11 @@ function bandOf(lit: number, strength: number): number {
  * Only the *transition* is dithered — a pixel well inside a band is left
  * alone, so flat areas stay clean and only the terminator breaks up.
  */
-function ditheredBand(lit: number, strength: number, x: number, y: number): number {
-  const spread = 0.62 + strength * 0.34;
-  const v = 0.5 + (lit - 0.5) * spread * 2;
-  const hard = bandOf(lit, strength);
+function ditheredBand(
+  lit: number, strength: number, x: number, y: number, ambient: number
+): number {
+  const v = normLit(lit, strength, ambient);
+  const hard = bandOf(lit, strength, ambient);
   // How near is the closest boundary, as a fraction of the local band's width?
   let nearest = -1;
   let dist = 1;
@@ -352,6 +363,11 @@ const MATERIAL_BIAS: Record<number, number> = {
   [MAT.SKIN]: 1,
   [MAT.HAIR]: 1,
   [MAT.BEARD]: 1,
+  // A veil is a dome facing the sky and it was resolving two full steps above
+  // its own colour: a rust #9c5230 headscarf rendering #bf9376, a flat salmon
+  // block. Same fault skin and hair had, and worse here because the area is
+  // large and unbroken, so there is nothing to distract from it.
+  [MAT.HEADWEAR]: 2,
 };
 
 export function resolveLight(
@@ -372,7 +388,7 @@ export function resolveLight(
       // Biases were all authored against the coarse ladder, so they scale up
       // rather than being reinterpreted — a crease worth one step still darkens
       // by one step's worth of value.
-      let step = denseBandOf(lit, rig.strength);
+      let step = denseBandOf(lit, rig.strength, rig.ambient);
       step += (form.bias[i] + (MATERIAL_BIAS[mat] ?? 0)) * BIAS_SCALE;
       step += Math.round(occlusionAt(form, x, y, occStrength)) * BIAS_SCALE;
       step = Math.max(0, Math.min(DENSE_LEN - 1, step));

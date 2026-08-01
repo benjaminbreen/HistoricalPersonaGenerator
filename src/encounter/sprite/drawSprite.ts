@@ -28,10 +28,10 @@ import { Ramp } from '../../components/portraitLab/core/color';
 import { unit } from '../../components/portraitLab/core/rng';
 import { PortraitSpec } from '../../components/portraitLab/spec/types';
 import { restingExpression } from '../../components/portraitLab/spec/buildSpec';
-import { FootwearKind, RestStance, SpriteExtras, SpriteSource } from './spriteSource';
+import { ArmWear, FootwearKind, RestStance, SpriteExtras, SpriteSource } from './spriteSource';
 import {
   ArmPose, buildSkeleton, getTuning, HandShape, Posture, Skeleton,
-  SPRITE_H, SPRITE_HEADROOM, SPRITE_W,
+  SPRITE_H, SPRITE_HEADROOM, SPRITE_W, SpriteTuning,
 } from './skeleton';
 import {
   applyRim, buildRig, cylinderSurface, ellipsoidSurface, FormBuffer,
@@ -204,7 +204,7 @@ function planGarment(spec: PortraitSpec, s: Skeleton, wind: number, extrasName: 
   const floorLen = con === 'robe' || con === 'gown' || con === 'skirted' || con === 'crop_top';
   const hemY = con === 'bare'
     ? s.hipY + 2
-    : s.hipY + Math.round(legSpan * hemFraction(con, spec));
+    : s.hipY + Math.round(legSpan * hemFraction(con, spec, t));
 
   // Where the *upper* covering ends. For most garments that is the hem; a
   // cropped blouse stops under the ribs, and a wrapped lower garment has no
@@ -285,7 +285,12 @@ function trunkEdge(s: Skeleton, half: number, side: -1 | 1, skew: number): { axi
   const axis = s.cx + skew + Math.round(s.turn * half * 0.10) * -s.nearSide;
   const foreshorten = 1 - 0.07 * s.turn;
   const near = side === s.nearSide;
-  const h = Math.round(half * foreshorten * (1 + (near ? 0.17 : -0.19) * s.turn));
+  // `shoulderAsym` is a manual thumb on the scale the turn already sets: the
+  // turn decides the asymmetry, this widens or narrows the near side against
+  // it. Superseded controls are better re-aimed than deleted — the slider was
+  // there and inert, which reads as a broken panel rather than a tidy one.
+  const manual = (near ? 1 : -1) * s.t.shoulderAsym * 0.5;
+  const h = Math.max(2, Math.round(half * foreshorten * (1 + (near ? 0.17 : -0.19) * s.turn) + manual));
   return { axis, half: h, x: axis + side * h };
 }
 
@@ -299,15 +304,21 @@ function trunkEdge(s: Skeleton, half: number, side: -1 | 1, skew: number): { axi
 function armChain(s: Skeleton, side: -1 | 1, arm: ArmPose, spineBend: number): ArmChain {
   // Shoulder to elbow, as a fraction of the trunk. 0.72 put the fingertips
   // near the knee; a resting hand belongs at mid-thigh.
-  const upperLen = Math.round((s.waistY - s.shoulderY) * 0.63) + 2;
-  const foreLen = upperLen - 2;
+  // Limb ratios are tunable now. They were fixed constants, which meant every
+  // pose in the frame table was authored against one arm and there was no way
+  // to say "the forearm is too long" without editing the poses themselves.
+  const upperLen = Math.round((s.waistY - s.shoulderY) * s.t.upperArmLen) + 2;
+  const foreLen = Math.max(4, Math.round(upperLen * s.t.foreArmRatio));
   // The arm hangs from the shoulder, so a folding spine carries it forward.
-  const carry = spineBend * 0.2;
+  const carry = spineBend * s.t.spineCarry;
   // The joint sits just inside the silhouette; the deltoid cap drawn over it
   // is what closes the gap out to the garment's edge.
   // Rooted on the torso's *actual* turned edge, so the deltoid cap always
   // closes against cloth instead of hanging off the silhouette.
-  const rootX = trunkEdge(s, s.shoulderHalf, side, s.t.torsoSkew + s.stoopTopSkew).x - side * 2;
+  // `farArmTuck` pulls the far arm further behind the ribs than the turn alone
+  // puts it — the other half of the pair with `shoulderAsym`.
+  const tuck = side === s.nearSide ? 0 : s.t.farArmTuck;
+  const rootX = trunkEdge(s, s.shoulderHalf, side, s.t.torsoSkew + s.stoopTopSkew).x - side * (2 + tuck);
   // The near shoulder drops — foreshortening, not a tilt.
   // The joint sits *below* the shoulder line, never level with it. Rooted at
   // +2 the cap's upper half rose above the trapezius and left a few orphaned
@@ -317,17 +328,29 @@ function armChain(s: Skeleton, side: -1 | 1, arm: ArmPose, spineBend: number): A
   const upper = upperLen * (1 - arm.forward * 0.42);
   const fore = foreLen * (1 - arm.forward * 0.46);
 
-  const a1 = (arm.swing + carry) * RAD;
+  // `motionScale` rides every authored angle, and `armSwing` sets how far a
+  // *resting* arm hangs clear — the two knobs most likely to fix "the
+  // animation looks off" without re-authoring a single frame.
+  const swing = (arm.swing <= 12 ? s.t.armSwing : arm.swing * s.t.motionScale);
+  const a1 = (swing + carry) * RAD;
   const ex = rootX + Math.round(Math.sin(a1) * upper * side);
   const ey = rootY + Math.round(Math.cos(a1) * upper);
   // Flexion shows in-plane only to the extent the arm is *not* pointing at
   // the viewer; a fully forward forearm folds toward the camera instead.
-  const a2 = a1 - arm.elbow * RAD * (1 - arm.forward * 0.55);
+  // An arm is never straight: `elbowRest` is the flexion that is always there.
+  const elbow = Math.max(arm.elbow * s.t.motionScale, s.t.elbowRest);
+  const a2 = a1 - elbow * RAD * (1 - arm.forward * 0.55);
   const wx = ex + Math.round(Math.sin(a2) * fore * side);
   const wy = ey + Math.round(Math.cos(a2) * fore);
   // The hand continues the forearm's direction.
-  const dx = wx - ex;
-  const dy = wy - ey;
+  // The wrist is a joint, not a weld: `wristBend` rotates the hand off the
+  // forearm's line, which is most of what stops a hanging hand reading as the
+  // end of a stick.
+  const wr = s.t.wristBend * RAD;
+  const rdx = wx - ex;
+  const rdy = wy - ey;
+  const dx = rdx * Math.cos(wr) - rdy * Math.sin(wr) * side;
+  const dy = rdx * Math.sin(wr) * side + rdy * Math.cos(wr);
   const dl = Math.hypot(dx, dy) || 1;
   return {
     shoulder: [rootX, rootY],
@@ -380,9 +403,29 @@ function capsuleMask(
  */
 function drawArmWear(
   raster: Raster, form: FormBuffer, ramps: PortraitRamps, extras: SpriteExtras,
-  chain: ArmChain, w: number, plan: GarmentPlan
+  chain: ArmChain, w: number, plan: GarmentPlan, spec: PortraitSpec
 ): void {
-  const aw = extras.armWear;
+  // Bracelets come from `spec.jewelry`, not `equippedItems`.
+  //
+  // This read the inventory's accessory slot, and measuring it showed why
+  // nothing ever appeared: across 3000 personas that slot holds no arm
+  // ornament at all — the only arm-ish items are torcs, in the necklace slot.
+  // The generator puts bracelets in the spec's jewelry list, 93 of them per
+  // 1500 people, and every one was being dropped. The inventory is still
+  // honoured when it does carry something.
+  const jewel = spec.jewelry?.find(j => j.type === 'bracelet');
+  const aw = extras.armWear && extras.armWear.kind !== 'none'
+    ? extras.armWear
+    : jewel
+      ? {
+          // A stack of thin rings is the common form; a single broad band is
+          // what 'chunky' means here.
+          kind: (jewel.style === 'chunky' || jewel.style === 'ornate'
+            ? 'bracelet' : 'bangles') as ArmWear,
+          name: jewel.material ?? '',
+          metal: /gold|silver|bronze|brass|copper|iron/i.test(jewel.material ?? ''),
+        }
+      : null;
   if (!aw || aw.kind === 'none') return;
   // Long sleeves hide the wrist entirely.
   if (plan.sleeveT > 0.82 && aw.kind !== 'armlet') return;
@@ -507,9 +550,23 @@ function drawArm(
       form.addBias(Math.round(cutX) + dx, Math.round(cutY), 1);
     }
   }
+  // `armGap` carves daylight between the sleeve and the body below the waist.
+  // The gap is most of what reads as three dimensions on a hanging arm, and
+  // the slider for it had been doing nothing at all.
+  if (s.t.armGap > 0 && arm.swing < 20) {
+    const inner = side === s.nearSide ? -1 : 1;
+    for (let y = s.waistY; y <= Math.min(SPRITE_H - 1, chain.wrist[1]); y += 1) {
+      for (let g = 0; g < s.t.armGap; g += 1) {
+        const x = chain.shoulder[0] - side * 0 + inner * (w / 2 + 1 + g) * -side;
+        const px = Math.round(x);
+        if (px < 0 || px >= SPRITE_W) continue;
+        if (raster.matAt(px, y) === MAT.CLOTH_A) form.addBias(px, y, 3);
+      }
+    }
+  }
   drawCuff(raster, form, spec, ramps, s, plan, chain, w);
-  drawArmWear(raster, form, ramps, extras, chain, w, plan);
-  drawHand(raster, form, ramps, chain.hand[0], chain.hand[1], side, arm.hand, w, s.headH);
+  drawArmWear(raster, form, ramps, extras, chain, w, plan, spec);
+  drawHand(raster, form, ramps, chain.hand[0], chain.hand[1], side, arm.hand, w, s.headH, s.t);
 }
 
 // ---------------------------------------------------------------------------
@@ -596,7 +653,8 @@ const HANDS: Record<Exclude<HandShape, 'hidden'>, number[][]> = {
 
 function drawHand(
   raster: Raster, form: FormBuffer, ramps: PortraitRamps,
-  x: number, y: number, side: -1 | 1, shape: HandShape, armW: number, headH: number
+  x: number, y: number, side: -1 | 1, shape: HandShape, armW: number, headH: number,
+  tune: SpriteTuning
 ): void {
   if (shape === 'hidden') return;
   const grid = HANDS[shape];
@@ -609,8 +667,8 @@ function drawHand(
   // neither of them. A third of a head-height is the stylised length these
   // sprites want — anatomically a hand is nearer a full face, but drawn that
   // long at this scale it reads as a paddle.
-  const tw = Math.max(5, Math.round(headH * 0.31));
-  const th = Math.max(6, Math.round(headH * 0.41));
+  const tw = Math.max(4, Math.round(headH * tune.handSize));
+  const th = Math.max(5, Math.round(tw * tune.handLong));
   const cellAt = (tx: number, ty: number): number => {
     const gx = Math.min(gw - 1, Math.floor((tx * gw) / tw));
     const gy = Math.min(gh - 1, Math.floor((ty * gh) / th));
@@ -638,7 +696,7 @@ function drawHand(
       if (cell !== 2 && cell !== 3) continue;
       const px = px0 + tx;
       const py = y + ty;
-      form.addBias(px, py, cell === 2 ? -1 : 2);
+      form.addBias(px, py, cell === 2 ? -1 : tune.fingerSplit);
     }
   }
   // The sleeve above casts onto the wrist.
@@ -700,9 +758,13 @@ function torsoMask(s: Skeleton, plan: GarmentPlan): Mask {
     } else {
       // Below the hip the garment is drape, flaring toward its own hem.
       const tt = (y - s.hipY) / Math.max(1, plan.hemY - s.hipY);
-      // Gently, and late. A hem 1.7× the shoulder width is a traffic cone;
-      // the reference robe falls near-vertical and only breaks near the floor.
-      half = Math.round(s.hipHalf + (plan.hemHalf - s.hipHalf) * Math.pow(tt, 1.7));
+      // Gradually. `pow(tt, 1.7)` held the skirt near hip-width and then
+      // flared it over the last third, and because the barrel's shading
+      // depends on its width the value shifted across the whole garment inside
+      // one or two rows — a horizontal band at knee height that no amount of
+      // fold work could hide. A gentler exponent spreads the same total flare
+      // over the whole fall, so the shading changes as gradually as the shape.
+      half = Math.round(s.hipHalf + (plan.hemHalf - s.hipHalf) * Math.pow(tt, 1.15));
       skew = t.hipSkew;
     }
     // The turn, applied where it actually lives: the two halves of the trunk
@@ -758,6 +820,31 @@ function drawTorso(
   const ramp = plan.bare ? ramps.skin : ramps.clothA;
   const mat = plan.bare ? MAT.SKIN : MAT.CLOTH_A;
   fillMask(raster, m, ramp, mat, () => 3);
+
+  // A skirted construction is **two garments**, and the eye reads the join.
+  //
+  // A blouse tucked into a skirt is the single most common way clothing is put
+  // together and it was rendering as one unbroken column of cloth from
+  // shoulder to hem — 11% of everyone wearing what looked like a robe. The
+  // upper takes the secondary colour, the skirt keeps the primary, and the
+  // waistband between them is what says they are separate things rather than
+  // one thing in two tones.
+  if (plan.construction === 'skirted' && !plan.bare) {
+    const bandTop = s.waistY - 1;
+    const bandBot = s.waistY + 1;
+    for (let y = s.shoulderY - t.shoulderSlope; y <= bandBot; y += 1) {
+      for (let x = 0; x < SPRITE_W; x += 1) {
+        if (!m[y * SPRITE_W + x]) continue;
+        if (y >= bandTop) {
+          // The waistband itself: a darker band the skirt gathers into.
+          raster.set(x, y, ramps.clothC.steps[4], MAT.CLOTH_C, 4);
+          form.addBias(x, y, y === bandBot ? 2 : 1);
+        } else {
+          raster.set(x, y, ramps.clothB.steps[3], MAT.CLOTH_B, 3);
+        }
+      }
+    }
+  }
 
   // The trunk is one cylinder from the shoulders to the hem, so the light
   // crosses it continuously instead of restarting at the waist.
@@ -897,7 +984,15 @@ function drawFolds(form: FormBuffer, m: Mask, s: Skeleton, plan: GarmentPlan): v
     }
     if (hem < 0) continue;
     if (t.hemLine > 0) {
-      for (let i = 0; i < 2; i += 1) form.addBias(x, hem - i, t.hemLine + (i === 0 ? 2 : 0));
+      // Graded over four rows rather than slammed into two.
+      //
+      // Bisecting the passes put the garment's single largest row-to-row value
+      // jump right here — 2.55 ramp steps in one row, which is a hard dark
+      // stripe across the whole hem and reads as the skirt being cut off
+      // rather than as cloth gathering. The gather is real, but it eases in.
+      for (let i = 0; i < 4; i += 1) {
+        form.addBias(x, hem - i, Math.max(0, Math.round(t.hemLine * (1 - i / 4))));
+      }
     }
     // The cast, falling off over three rows onto the leg below.
     for (let i = 1; i <= 3; i += 1) form.addBias(x, hem + i, 4 - i);
@@ -1007,8 +1102,23 @@ function drawOverLayer(
   const d = plan.drape;
   // The over-layer is its own cloth: a second colour, or the same one a step
   // apart when the palette gives only one.
-  const ramp = ramps.clothC ?? ramps.clothB;
-  const mat = MAT.CLOTH_C;
+  // The *secondary*, never the accent.
+  //
+  // `clothC` is `garment.colors.accent` — a saturated thread colour chosen to
+  // sit against the cloth in buttons and embroidery, and it is picked for
+  // contrast. On this persona it is #49c3db: perfect as a stitch on charcoal,
+  // and a neon cyan sheet when it covers half the figure. A shawl is cloth
+  // from the same wardrobe as the robe, so it takes the secondary; the accent
+  // is left where it belongs, on the drape's border.
+  const ramp = ramps.clothB ?? ramps.clothA;
+  const borderRamp = ramps.clothC ?? ramps.clothB;
+  // The **material**, not just the fill ramp, has to change.
+  //
+  // `resolveLight` looks the ramp up from `raster.mat` when it recomputes, so
+  // filling with `clothB` while tagging the pixels `CLOTH_C` left every one of
+  // them resolving back to the accent — 2247 pixels of #49c3db across the
+  // figure, unchanged by the fill. The same trap the shoe bands fell into.
+  const mat = MAT.CLOTH_B;
   const m = makeMask(SPRITE_W, SPRITE_H);
   const lay = (x: number, y: number) => {
     if (x < 0 || y < 0 || x >= SPRITE_W || y >= SPRITE_H) return;
@@ -1029,17 +1139,59 @@ function drawOverLayer(
     for (let i = 0; i <= span; i += 1) {
       const t = i / span;
       const cx = Math.round(topX + from * t * s.shoulderHalf * 1.5);
-      // A hand's breadth at the shoulder opening to twice that at the hip.
-      const w = Math.round(s.shoulderHalf * (0.34 + t * 0.36));
+      // Narrower than it was. At 0.34–0.70 of the shoulder half-width the band
+      // covered most of the chest and read as a bib; a pallu is a length of
+      // the sari thrown over one shoulder, and it is the *diagonal* that says
+      // so, not the area.
+      // Tapering to a point over the last fifth, so the cloth ends in a
+      // hanging corner rather than a cut edge. A drape that stops at full
+      // width draws a horizontal line across the skirt.
+      const taper = t > 0.8 ? 1 - (t - 0.8) / 0.2 : 1;
+      const w = Math.max(0, Math.round(s.shoulderHalf * (0.22 + t * 0.20) * taper));
       for (let k = -w; k <= w; k += 1) lay(cx + k, topY + i);
     }
-    // The free edge catches light; the fold behind it goes dark.
+
+    // Folds down its length. A drape hung flat is a painted panel; the whole
+    // reason the reference's pallu reads as cloth is that it creases along the
+    // line of the fall, and those creases run with the diagonal rather than
+    // straight down.
+    const nFolds = 3;
+    for (let f = 0; f < nFolds; f += 1) {
+      const u = (f + 1) / (nFolds + 1);
+      const phase = unit(spec.seed, `pallu-${f}`) * 2 - 1;
+      for (let i = 2; i <= span - 2; i += 1) {
+        const t = i / span;
+        const cx = Math.round(topX + from * t * s.shoulderHalf * 1.5);
+        const w = Math.round(s.shoulderHalf * (0.22 + t * 0.20));
+        const wobble = Math.round(Math.sin(t * Math.PI * 1.6 + phase * 2) * 1.4);
+        const x = Math.round(cx + (u - 0.5) * 2 * w) + wobble;
+        const y = topY + i;
+        if (!m[y * SPRITE_W + x]) continue;
+        form.addBias(x, y, 2);
+        if (m[y * SPRITE_W + x + from]) form.addBias(x + from, y, -1);
+      }
+    }
+    // The free edge catches light; the fold behind it goes dark. And the
+    // accent finally gets its proper job: a border thread along the free edge,
+    // which is where a sari's zari actually runs and what the reference's gold
+    // band is doing.
+    const trimmed = spec.garment.ornament > 0.2;
     for (let i = 0; i <= span; i += 1) {
       const t = i / span;
       const cx = Math.round(topX + from * t * s.shoulderHalf * 1.5);
       const w = Math.round(s.shoulderHalf * (0.34 + t * 0.36));
-      form.addBias(cx + from * w, topY + i, -2);
-      form.addBias(cx - from * w, topY + i, 2);
+      // Both edge marks stay *inside* the drape's own mask. Spilled onto the
+      // skirt beside it they darkened a band that stopped dead where the drape
+      // did, and the seam between the two read as a horizontal step across the
+      // whole garment.
+      const ex = cx + from * w;
+      const ix = cx - from * w;
+      if (m[(topY + i) * SPRITE_W + ex]) form.addBias(ex, topY + i, -2);
+      if (m[(topY + i) * SPRITE_W + ix]) form.addBias(ix, topY + i, 2);
+      if (trimmed && m[(topY + i) * SPRITE_W + ex]) {
+        const step = (i % 3) === 0 ? 4 : 2;
+        raster.set(ex, topY + i, borderRamp.steps[step], MAT.CLOTH_B, step);
+      }
     }
   } else if (plan.over === 'apron') {
     // A panel hung from the waist over the front of the skirt, narrower than
@@ -1251,9 +1403,20 @@ function drawTrim(
   s: Skeleton, plan: GarmentPlan, m: Mask
 ): void {
   const orn = spec.garment.ornament;
-  if (orn < 0.25 || plan.bare) return;
+  // Ornament is quantised in practice — measured over 600 personas it is
+  // almost always 0.00, 0.15, 0.35 or 1.00, with a median of 0.15. A gate at
+  // 0.25 therefore excluded *84%* of everyone from having any trim at all,
+  // which is most of why the figures read as plainer than the reference: not
+  // because the trim was drawn badly but because it was almost never drawn.
+  //
+  // So this scales rather than gates. Genuinely unornamented cloth — a
+  // labourer's smock at 0.00 — stays plain, which it should; everything above
+  // that gets trim proportionate to how much it has.
+  if (orn < 0.05 || plan.bare) return;
   const d = plan.drape;
-  const rich = orn > 0.6;
+  const rich = orn > 0.55;
+  /** Hem band only at the bottom of the range; placket and cuffs come later. */
+  const hasPlacket = orn >= 0.3;
   const trim = ramps.clothB;
 
   const lay = (x: number, y: number, alt: boolean) => {
@@ -1265,7 +1428,7 @@ function drawTrim(
   };
 
   // --- The hem border, riding the rim's ellipse. --------------------------
-  const bandH = rich ? 3 : 2;
+  const bandH = rich ? 3 : orn >= 0.3 ? 2 : 1;
   for (let x = 0; x < SPRITE_W; x += 1) {
     // Find the garment's actual lowest row in this column — the hem is a
     // curve plus a scallop, so it has to be read, not assumed.
@@ -1282,6 +1445,8 @@ function drawTrim(
     // A thread of shadow above the band, so it sits *on* the cloth.
     if (hem - bandH >= 0 && m[(hem - bandH) * SPRITE_W + x]) form.addBias(x, hem - bandH, 1);
   }
+
+  if (!hasPlacket) return;
 
   // --- The placket, down the front of the fall. ---------------------------
   // It follows the barrel's front, which the turn has swung off the axis — a
@@ -1313,7 +1478,9 @@ function drawCuff(
   raster: Raster, form: FormBuffer, spec: PortraitSpec, ramps: PortraitRamps,
   s: Skeleton, plan: GarmentPlan, chain: ArmChain, w: number
 ): void {
-  if (spec.garment.ornament < 0.45 || plan.bare || plan.sleeveT < 0.5) return;
+  // 0.45 reached 3% of personas. A cuff is the most ordinary garment finish
+  // there is — most sleeves that reach the wrist have one.
+  if (spec.garment.ornament < 0.28 || plan.bare || plan.sleeveT < 0.5) return;
   void s;
   const [ex, ey] = chain.elbow;
   const [wx, wy] = chain.wrist;
@@ -1680,7 +1847,8 @@ function drawFeet(
     // half-width it ran back almost as far as the toe ran forward, which put
     // the ankle in the middle of the foot instead of over its back third —
     // a foot is a lever with a short heel arm and a long toe arm.
-    const heel = Math.max(2, Math.round(s.legW * 0.34) + (near ? 1 : 0));
+    const lenScale = t.shoeLen / 23;
+    const heel = Math.max(2, Math.round(s.legW * 0.34 * lenScale) + (near ? 1 + t.footSplay : 0));
     // The near foot is closer to the camera: longer, and its sole reads thicker.
     // Foreshortening, the right way round: the NEAR foot is the short one,
     // because it is the one pointing at the camera. The far foot is seen
@@ -1690,8 +1858,11 @@ function drawFeet(
     // it is on the side that swung forward, so it is more foreshortened along
     // the ground and reads more end-on. 0.62 was still too side-on; at 0.46 it
     // is unmistakably a foot coming at you next to one seen in profile.
+    // `shoeLen` scales the whole foot, `footToe` its reach, `footSplay` the
+    // extra width the near foot gains from being closer. All three were
+    // stranded when the two-perspective feet went in.
     const toe = Math.max(3, Math.round(
-      t.footToe * (near ? 0.46 : 1.1) * (0.6 + s.turn * 0.5),
+      t.footToe * lenScale * (near ? 0.46 : 1.1) * (0.6 + s.turn * 0.5),
     ));
     // Each construction has its own proportions. A clog is mostly sole; a
     // sandal is almost none; a boot's upper is the whole thing. Running them
@@ -2037,12 +2208,19 @@ function drawHeldItem(
  */
 function foldSpine(s: Skeleton, posture: Posture): Skeleton {
   if (posture.spineBend === 0 && posture.lean === 0 && posture.bob === 0) return s;
-  const a = posture.spineBend * RAD;
+  // Every authored angle rides `motionScale`, so the whole animation set can be
+  // damped or exaggerated from one slider without re-authoring a frame.
+  const a = posture.spineBend * s.t.motionScale * RAD;
   const spineLen = s.waistY - s.crownY;
   // Rotate everything above the waist about the waist.
   const carry = Math.round(Math.sin(a) * spineLen * 0.42);
   const settle = Math.round((1 - Math.cos(a)) * spineLen * 0.5);
-  const headCarry = carry + Math.round(posture.headNod);
+  // The head does not simply ride the spine: a person bowing keeps their gaze
+  // up a little, so the neck counter-rotates. Without it a bow looks like the
+  // figure has been folded in half by something rather than performed by them,
+  // which is most of why the deep bow reads as wrong.
+  const counter = Math.round(carry * s.t.headCounter);
+  const headCarry = carry - counter + Math.round(posture.headNod * s.t.motionScale);
   return {
     ...s,
     headCx: s.headCx + headCarry + posture.lean,
@@ -2199,7 +2377,7 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
 
   const headM = headMask(spec, L);
   fillMask(raster, headM, ramps.skin, MAT.SKIN, () => 3);
-  headSurface(form, headM, L, DEPTH.head);
+  headSurface(form, headM, L, DEPTH.head, spec);
   // The face's calibration against the bust lives in `MATERIAL_BIAS`, applied
   // to all skin at once — biasing only the head left the hands and neck a
   // different colour from it.
@@ -2232,17 +2410,13 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
   // (13 steps), so every pass after `resolveLight` has to be handed the same
   // book — handing one of them the coarse ramp would index a 13-value shade
   // into a 7-value array and read off the end.
-  // Skin and head-cloth carry more contrast here than the bust gives them:
-  // the portrait tunes those ramps for a face that fills the frame, and at a
-  // 32px head the same values collapse into one pale shape.
-  const dense = densifyBook(ramps.book, {
-    // Enough to model a 32px head, not so much that the lit side reads paler
-    // than the same person's bust. 1.35 on skin was visibly lightening people.
-    [MAT.SKIN]: 1.1,
-    [MAT.HEADWEAR]: 1.2,
-    [MAT.BEARD]: 1.1,
-    [MAT.HAIR]: 1.05,
-  });
+  // Contrast widening lives in `denseRamp`'s own table, not here.
+  //
+  // Passing an inline object *replaced* that table rather than adding to it,
+  // so every entry added there was silently ignored — cloth was widened in one
+  // file and the widening discarded in another, and the measured tonal range
+  // did not move. One source of truth, and the call site takes the default.
+  const dense = densifyBook(ramps.book, t.clothContrast);
   resolveLight(raster, form, dense, rig, t.contactShade / 3);
   applyRim(raster, form, dense, rig);
   if (t.outline >= 2) inkInterior(raster, form, dense);

@@ -25,6 +25,7 @@
  * crease worth one step still reads as one step's worth of darkening.
  */
 
+import { MAT } from '../../components/portraitLab/core/raster';
 import { Ramp, RGB } from '../../components/portraitLab/core/color';
 import { RampBook } from '../../components/portraitLab/core/raster';
 
@@ -80,11 +81,45 @@ function stretch(ramp: Ramp, amount: number): Ramp {
   };
 }
 
-/** Materials whose portrait ramp is too gentle once the head is this small. */
-const STRETCH: Record<number, number> = {};
+/**
+ * Materials whose portrait ramp is too gentle for a whole figure.
+ *
+ * Measured against the style reference: the mockup's skirt spans luminance
+ * **1…220** — near-black core shadow to near-white specular — while the same
+ * garment here spanned only **32…135**, never reaching either end of the
+ * scale. Less than half the tonal range, which is most of what reads as
+ * "painterly" versus "flat" and is the one part of that quality that turns out
+ * to be measurable at all.
+ *
+ * The cause is upstream and deliberate: `buildRamp` caps its shadow at 0.46 of
+ * the base and its highlight at 0.50 toward the light, which is right for a
+ * bust that fills the frame — a face overshaded at that size reads as grime.
+ * A figure competing with a whole scene needs the range the reference uses, so
+ * cloth and leather are widened here rather than in the shared builder, which
+ * would drag the portrait along with them.
+ */
+function stretchTable(cloth: number): Record<number, number> {
+  return {
+    // Enough to model a 32px head, not so much that the lit side reads paler
+    // than the same person's bust.
+    [MAT.SKIN]: 1.1,
+    [MAT.HEADWEAR]: 1.2,
+    [MAT.BEARD]: 1.1,
+    [MAT.HAIR]: 1.05,
+    // Cloth needs far more: see the measurement above. The trim and accent
+    // ramps move with it but less, since they are small areas where a wide
+    // range reads as noise rather than as form.
+    [MAT.CLOTH_A]: cloth,
+    [MAT.CLOTH_B]: 1 + (cloth - 1) * 0.9,
+    [MAT.CLOTH_C]: 1 + (cloth - 1) * 0.75,
+    [MAT.LEATHER]: 1 + (cloth - 1) * 0.75,
+    [MAT.WOOD]: 1 + (cloth - 1) * 0.55,
+  };
+}
 
 /** The same book, every ramp densified. Built once per compiled sprite. */
-export function densifyBook(book: RampBook, stretchBy: Record<number, number> = STRETCH): RampBook {
+export function densifyBook(book: RampBook, clothContrast = 1.55): RampBook {
+  const stretchBy = stretchTable(clothContrast);
   return book.map((r, mat) => {
     if (!r) return null;
     const k = stretchBy[mat];

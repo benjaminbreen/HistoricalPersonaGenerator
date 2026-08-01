@@ -22,80 +22,108 @@ type NumericKey = keyof SpriteTuning;
 
 type SliderDef = [NumericKey, string, number, number, number];
 
-// Ranges are for the 128×160 grid. Face-shape sliders (eye size, brow length,
-// nose length, jaw and cheek shading) are gone: at an 18px head those are not
-// continuous quantities but whole-pixel decisions, and spriteHead.ts derives
-// every one of them from the persona's own spec instead.
+/**
+ * Ranges are for the current 220×330 grid.
+ *
+ * They matter more than they look. Several sliders previously topped out *at*
+ * their own default — `legLen` maxed at 88 with a default of 88 — so dragging
+ * them did nothing in one direction and the panel appeared broken. A range
+ * that cannot straddle its default is a bug, not a preference, so every one
+ * here brackets its value with room on both sides.
+ *
+ * Face-shape sliders (eye size, brow length, nose length, jaw and cheek
+ * shading) are deliberately absent: at this head size those are whole-pixel
+ * decisions rather than continuous quantities, and `spriteHead.ts` derives
+ * each from the persona's own spec.
+ */
 const SLIDER_GROUPS: Array<[string, SliderDef[]]> = [
-  ['Perspective — the 3/4 turn', [
-    ['shoulderAsym', 'Shoulder asym', -6, 8, 1],
-    ['shoulderDrop', 'Near shldr drop', 0, 5, 1],
-    ['torsoSkew', 'Torso skew', -6, 8, 1],
-    ['hipSkew', 'Hip skew', -6, 8, 1],
-    ['farArmTuck', 'Far arm tuck', 0, 8, 1],
-    ['strideX', 'Stride lead', 0, 8, 1],
-    ['footStagger', 'Foot depth', 0, 6, 1],
-    ['footToe', 'Foot angle (toe)', 0, 12, 1],
-    ['footSplay', 'Near foot width', 0, 5, 1],
-    ['faceShift', 'Face turn', -3, 3, 1],
-    ['lean', 'Figure lean', -3, 6, 1],
-    ['stoop', 'Posture (stoop)', -5, 10, 1],
+  ['Joints & motion — the animation lives here', [
+    ['upperArmLen', 'Upper arm length', 0.4, 0.9, 0.01],
+    ['foreArmRatio', 'Forearm : upper', 0.6, 1.3, 0.01],
+    ['elbowRest', 'Resting elbow bend', 0, 25, 1],
+    ['armSwing', 'Arm clearance', 0, 25, 1],
+    ['wristBend', 'Wrist bend', -35, 35, 1],
+    ['spineCarry', 'Spine carry', 0, 0.6, 0.02],
+    ['headCounter', 'Head counter-turn', 0, 1, 0.05],
+    ['motionScale', 'Motion amplitude', 0, 2, 0.05],
+    ['stoop', 'Posture (stoop)', -6, 12, 1],
+    ['lean', 'Figure lean', -6, 6, 1],
   ]],
-  ['Structure', [
-    ['figureTop', 'Crown Y', 0, 30, 1],
-    ['headW', 'Head width', 9, 22, 1],
-    ['headH', 'Head height', 12, 30, 1],
-    ['neckH', 'Neck height', 2, 10, 1],
-    ['neckW', 'Neck width', 4, 12, 1],
-    ['shoulderHalf', 'Shoulder ½', 10, 28, 1],
-    ['waistHalf', 'Waist ½', 7, 22, 1],
-    ['hipHalf', 'Hip ½', 8, 24, 1],
-    ['torsoLen', 'Torso length', 20, 46, 1],
-    ['hipDrop', 'Waist→hip', 4, 20, 1],
-    ['legLen', 'Leg length', 40, 88, 1],
-    ['shoulderSlope', 'Trapezius slope', 0, 8, 1],
-    ['legW', 'Leg width', 4, 14, 1],
-    ['legGap', 'Leg gap', 0, 8, 1],
-    ['armW', 'Arm width', 4, 12, 1],
+  ['Hands', [
+    ['handSize', 'Hand size', 0.15, 0.5, 0.01],
+    ['handLong', 'Hand length : width', 0.8, 2, 0.05],
+    ['fingerSplit', 'Finger separation', 0, 4, 1],
     ['handDrop', 'Hand drop', 0, 0.6, 0.01],
   ]],
+  ['Perspective — the 3/4 turn', [
+    ['shoulderAsym', 'Shoulder asym', -10, 10, 1],
+    ['shoulderDrop', 'Near shldr drop', 0, 8, 1],
+    ['torsoSkew', 'Torso skew', -8, 8, 1],
+    ['hipSkew', 'Hip skew', -8, 8, 1],
+    ['farArmTuck', 'Far arm tuck', 0, 10, 1],
+    ['strideX', 'Stride lead', 0, 14, 1],
+    ['footStagger', 'Foot depth', 0, 8, 1],
+    ['footToe', 'Foot angle (toe)', 0, 20, 1],
+    ['footSplay', 'Near foot width', 0, 6, 1],
+    ['faceShift', 'Face turn', -4, 4, 1],
+  ]],
+  ['Structure', [
+    ['figureTop', 'Crown nudge', -20, 20, 1],
+    ['headW', 'Head width', 14, 34, 1],
+    ['headH', 'Head height', 20, 46, 1],
+    ['neckH', 'Neck height', 3, 16, 1],
+    ['neckW', 'Neck width', 6, 20, 1],
+    ['shoulderHalf', 'Shoulder ½', 16, 40, 1],
+    ['waistHalf', 'Waist ½', 10, 30, 1],
+    ['hipHalf', 'Hip ½', 12, 34, 1],
+    ['torsoLen', 'Torso length', 26, 66, 1],
+    ['hipDrop', 'Waist→hip', 4, 30, 1],
+    ['legLen', 'Leg length', 55, 130, 1],
+    ['shoulderSlope', 'Trapezius slope', 0, 16, 1],
+    ['legW', 'Leg width', 7, 26, 1],
+    ['legGap', 'Leg gap', 0, 10, 1],
+    ['armW', 'Arm width', 5, 20, 1],
+  ]],
   ['Head furniture', [
-    ['hairY', 'Hair Y', -6, 6, 1],
-    ['hatY', 'Hat Y', -6, 6, 1],
+    ['hairY', 'Hair Y', -8, 8, 1],
+    ['hatY', 'Hat Y', -8, 8, 1],
   ]],
   ['Face placement', [
-    ['eyeDy', 'Eyes Y', -4, 4, 1],
-    ['eyeGap', 'Eye gap', -3, 4, 1],
-    ['browDy', 'Brows Y', -3, 3, 1],
-    ['mouthDy', 'Mouth Y', -3, 4, 1],
+    ['cheekLine', 'Cheekbone (-1 auto)', -1, 4, 1],
+    ['eyeDy', 'Eyes Y', -5, 5, 1],
+    ['eyeGap', 'Eye gap', -4, 5, 1],
+    ['browDy', 'Brows Y', -4, 4, 1],
+    ['mouthDy', 'Mouth Y', -4, 5, 1],
   ]],
   ['Lighting — one lamp for the figure', [
     ['lightDir', 'Light azimuth', -3, 3, 1],
     ['lightHeight', 'Light height', 0, 3, 1],
-    ['lightStrength', 'Shading gain', 0, 3, 1],
+    ['lightStrength', 'Shading gain', 0, 5, 1],
     ['ambient', 'Ambient fill', 0, 3, 1],
     ['rim', 'Rim light', 0, 3, 1],
   ]],
   ['Ink & shadow', [
+    ['clothContrast', 'Cloth tonal range', 1, 2, 0.05],
     ['outline', 'Outline (0-2)', 0, 2, 1],
-    ['inkWeight', 'Shadow-side weight', 0, 2, 1],
+    ['inkWeight', 'Interior shade line', 0, 5, 1],
     ['contactShade', 'Occlusion', 0, 6, 1],
     ['groundShadow', 'Ground shadow', 0, 3, 1],
   ]],
   ['Garment & feet', [
-    ['tunicHem', 'Tunic hem', 0.1, 0.9, 0.01],
-    ['coatHem', 'Coat hem', 0.1, 0.9, 0.01],
-    ['robeLift', 'Robe lift', 0, 14, 1],
-    ['robeHemHalf', 'Robe hem ½', 14, 40, 1],
+    ['tunicHem', 'Tunic hem', 0.1, 0.95, 0.01],
+    ['coatHem', 'Coat hem', 0.1, 0.95, 0.01],
+    ['robeLift', 'Robe lift', 0, 20, 1],
+    ['robeHemHalf', 'Robe hem ½', 18, 56, 1],
     ['textureAmt', 'Fabric weave', 0, 3, 1],
     ['foldStrength', 'Fold depth', 0, 3, 1],
-    ['foldCount', 'Fold count', 1, 5, 1],
+    ['foldCount', 'Fold count', 0, 6, 1],
     ['drapeSway', 'Drape sway', 0, 3, 1],
     ['clothWeight', 'Cloth weight', 0, 3, 1],
     ['hemBreak', 'Hem break', 0, 3, 1],
-    ['hemLine', 'Hem weight', 0, 2, 1],
-    ['shoeH', 'Shoe height', 3, 14, 1],
-    ['shoeLen', 'Shoe length', 8, 24, 1],
+    ['hemLine', 'Hem weight', 0, 3, 1],
+    ['shoeH', 'Shoe height', 4, 20, 1],
+    ['shoeLen', 'Shoe length', 12, 36, 1],
+    ['armGap', 'Sleeve/body gap', 0, 4, 1],
   ]],
 ];
 

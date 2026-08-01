@@ -204,6 +204,64 @@ export interface SpriteTuning {
   hemBreak: number;
   /** Hem gather-line and shadow weight: 0 none … 2 strong. */
   hemLine: number;
+
+  // --- Hands. ------------------------------------------------------------
+  //
+  // A hand is roughly forty pixels of the figure and it is the part the eye
+  // checks after the face, so it deserves its own controls rather than
+  // inheriting everything from the head's size.
+  /** Overall hand size, as a fraction of head height. */
+  handSize: number;
+  /** How much longer than wide — low is a paw, high is a spider. */
+  handLong: number;
+  /** Depth of the shadow between fingers: 0 a mitten … 3 fully separated. */
+  fingerSplit: number;
+  /** How far the wrist bends from the forearm's line, in degrees. */
+  wristBend: number;
+
+  // --- Joints and motion. -------------------------------------------------
+  //
+  // The animations read as wrong more than anything else in the sprite, and
+  // the joint geometry is not currently adjustable at all — every pose was
+  // authored against fixed limb ratios. These expose the ratios themselves.
+  /** Upper-arm length as a fraction of the shoulder-to-waist span. */
+  upperArmLen: number;
+  /** Forearm length relative to the upper arm. 1 is equal. */
+  foreArmRatio: number;
+  /** Extra bend always present at the elbow, in degrees — arms are never straight. */
+  elbowRest: number;
+  /** How far a hanging arm swings clear of the ribs, in degrees. */
+  armSwing: number;
+  /** How much a folding spine carries the shoulders forward, 0…1. */
+  spineCarry: number;
+  /** How far the head counter-rotates against a bending spine, 0…1. */
+  headCounter: number;
+  /** Global amplitude on every animated pose: 0 still … 2 exaggerated. */
+  motionScale: number;
+
+  /**
+   * Cheekbone prominence: −1 reads it from the persona, 0…4 forces a level.
+   *
+   * 0 none · 1 subtle short · 2 subtle long · 3 strong short · 4 strong long.
+   * Left at −1 the range comes from the spec, so a crowd carries a mix the way
+   * the bust does; forcing a level is for judging the five against each other.
+   */
+  cheekLine: number;
+
+  /**
+   * How far cloth's tonal range is widened beyond the portrait's, ×1 … ×2.
+   *
+   * The bust tunes its ramps for a face that fills the frame; a whole figure
+   * competing with a scene needs more. Measured against the style reference,
+   * the mockup's skirt spans luminance 1…220 while this renderer's spanned
+   * 32…135 — under half the range, which is most of what reads as flat.
+   *
+   * A slider rather than a constant, because the right value is a judgement:
+   * too little and garments wash out, too much and a white dress grows a
+   * near-black shadow side. The measurement says which direction is wrong; it
+   * cannot say how far to go.
+   */
+  clothContrast: number;
 }
 
 /**
@@ -212,11 +270,14 @@ export interface SpriteTuning {
  * carried both. Level-scale fields (0–3 knobs) are unitless and carry over.
  */
 export const DEFAULT_TUNING: SpriteTuning = {
-  // The *average* adult: ~218px tall over a 40px head, about 5.4 heads —
-  // the mockup pair's ratio. The absolute numbers grew a quarter over the
-  // previous grid purely so the encounter could show the figures at a usable
-  // size on an integer display scale; every ratio here is unchanged, and the
-  // face gained rows rather than losing them. Every other
+  // Hand-tuned against the encounter mockups in the Shift+1 panel (2026-08),
+  // then read back out of it — these are not derived numbers and should not be
+  // "corrected" toward any canon. A human eye converged them on the reference
+  // and that is the only authority they need.
+  //
+  // The average adult they describe: about 175px tall over a 30px head, a
+  // shade under six heads. Every other build is this figure through the
+  // stature multipliers below. Every other
   // build is this figure through the stature multipliers below.
   //
   // Head size has been the hardest number to settle and it went too far in
@@ -227,49 +288,49 @@ export const DEFAULT_TUNING: SpriteTuning = {
   // and it is a *stylisation*: real adults are 7–7.5 heads, and this figure is
   // six. The reference art is AI-generated and its pixel grid is not real, so
   // it is a target for proportion and value structure, never for measurement.
-  figureTop: 0,
-  headW: 28,
-  headH: 40,
-  neckH: 10,
-  neckW: 14,
-  shoulderHalf: 28,
-  waistHalf: 19,
-  hipHalf: 23,
-  torsoLen: 53,
-  hipDrop: 19,
-  legLen: 98,
-  shoulderSlope: 10,
+  figureTop: -2,
+  headW: 22,
+  headH: 30,
+  neckH: 8,
+  neckW: 11,
+  shoulderHalf: 27,
+  waistHalf: 18,
+  hipHalf: 20,
+  torsoLen: 42,
+  hipDrop: 11,
+  legLen: 84,
+  shoulderSlope: 8,
   tunicHem: 0.34,
   coatHem: 0.24,
-  robeLift: 6,
-  robeHemHalf: 38,
-  legW: 18,
-  legGap: 1,
+  robeLift: 7,
+  robeHemHalf: 37,
+  legW: 12,
+  legGap: 2,
   shoeLen: 23,
-  shoeH: 10,
-  armW: 14,
+  shoeH: 8,
+  armW: 10,
   armGap: 1,
-  handDrop: 0.2,
+  handDrop: 0.12,
   // Zero: the face is frontal, and the three-quarter read comes from the
   // lighting and the single visible ear instead. A one-pixel shift is enough
   // to push the near eye against the silhouette edge on a 16px head, and a
   // face with one eye crowding its own outline reads as a mistake, not as
   // perspective. Feet and torso still carry the turn.
-  faceShift: 0,
-  lean: -1,
+  faceShift: 1,
+  lean: 0,
   // Perspective.
   shoulderAsym: -1,
-  shoulderDrop: 1,
-  torsoSkew: 0,
-  hipSkew: 0,
-  farArmTuck: 2,
-  strideX: 6,
-  footStagger: 3,
-  footToe: 9,
-  footSplay: 1,
+  shoulderDrop: 0,
+  torsoSkew: 1,
+  hipSkew: 1,
+  farArmTuck: 3,
+  strideX: 8,
+  footStagger: 1,
+  footToe: 12,
+  footSplay: 0,
   stoop: 1,
   // Head furniture.
-  hairY: -1,
+  hairY: 0,
   hatY: 1,
   // Face.
   eyeDy: 0,
@@ -277,24 +338,40 @@ export const DEFAULT_TUNING: SpriteTuning = {
   browDy: 0,
   mouthDy: 0,
   // Ink.
-  outline: 2,
+  outline: 0,
   inkWeight: 3,
   contactShade: 3,
   groundShadow: 2,
   // Light.
-  lightDir: -1,
+  lightDir: 0,
   lightHeight: 2,
   lightStrength: 3,
   ambient: 1,
   rim: 1,
   // Cloth.
-  textureAmt: 2,
+  textureAmt: 1,
   foldStrength: 2,
   foldCount: 2,
   drapeSway: 1,
   clothWeight: 2,
   hemBreak: 1,
   hemLine: 1,
+  // Hands.
+  handSize: 0.31,
+  handLong: 1.45,
+  fingerSplit: 2,
+  wristBend: -11,
+  // Joints. `upperArmLen` and `foreArmRatio` reproduce the previous fixed
+  // geometry exactly at these values, so the defaults are a no-op change.
+  upperArmLen: 0.63,
+  foreArmRatio: 0.94,
+  elbowRest: 4,
+  armSwing: 8,
+  spineCarry: 0.2,
+  headCounter: 0.35,
+  motionScale: 0.95,
+  cheekLine: -1,
+  clothContrast: 1.55,
 };
 
 // v3 is the 128×160 grid. v1 (96×176) and v2 (192×352) tunings are not
@@ -557,6 +634,11 @@ export function buildSkeleton(spec: PortraitSpec, tuning: SpriteTuning = active)
     total = headH + neckH - 2 + torsoLen + hipDrop + legLen;
   }
   const cx = Math.round(SPRITE_W / 2);
+  // `lean` carries the upper body off the plumb line. It used to be applied as
+  // a shear over the finished raster — removed when poses became joint angles,
+  // which left the slider inert. It belongs here: the shoulders and head
+  // offset, the feet stay planted, and every part inherits it for free.
+  const leanTop = t.lean;
   const floorY = GROUND_Y;
   const stoopDrop = Math.max(0, Math.round(t.stoop * 0.4));
   const crownBase = floorY - total + t.figureTop + hunch;
@@ -581,9 +663,9 @@ export function buildSkeleton(spec: PortraitSpec, tuning: SpriteTuning = active)
     cx,
     turn,
     nearSide: -1,
-    headCx: cx + t.stoop,
-    faceCx: cx + t.stoop + t.faceShift,
-    stoopTopSkew: Math.round(t.stoop * 0.5),
+    headCx: cx + t.stoop + leanTop,
+    faceCx: cx + t.stoop + t.faceShift + leanTop,
+    stoopTopSkew: Math.round(t.stoop * 0.5) + Math.round(leanTop * 0.6),
     crownY,
     // The eye line sits just above the head's vertical midpoint — the
     // schoolroom rule, and the reference obeys it.
@@ -604,9 +686,18 @@ export function buildSkeleton(spec: PortraitSpec, tuning: SpriteTuning = active)
     headRy,
     // Shoulders carry the build; hips carry it too but women's carry more of
     // it, which is most of what distinguishes the two silhouettes at a glance.
-    shoulderHalf: px(t.shoulderHalf, g * (female ? 0.93 : 1)),
-    waistHalf: px(t.waistHalf, g * (female ? 0.95 : 1)),
-    hipHalf: px(t.hipHalf, g * (female ? 1.08 : 1)),
+    // The waist is the *silhouette*, and the silhouette is what reads first.
+    //
+    // At 0.95 of an already-modest base the trunk narrowed by about five pixels
+    // out of twenty-four between shoulder and waist — a taper the eye does not
+    // register, so every figure fell as a straight tube from shoulder to hem
+    // whatever the folds inside it were doing. A woman's waist is the narrowest
+    // part of the trunk by a clear margin and her hips the widest; stating that
+    // properly costs nothing and is most of what distinguishes the two
+    // silhouettes at a glance.
+    shoulderHalf: px(t.shoulderHalf, g * (female ? 0.92 : 1)),
+    waistHalf: px(t.waistHalf, g * (female ? 0.80 : 0.94)),
+    hipHalf: px(t.hipHalf, g * (female ? 1.14 : 1)),
     // The base width is the *men's*; women take a narrower leg on top of the
     // girth factor. Sharing one width made every woman read as heavier-limbed
     // than she should from the knee down, which is the part of the silhouette

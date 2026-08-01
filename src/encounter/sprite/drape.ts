@@ -128,8 +128,12 @@ export function planDrape(spec: PortraitSpec, s: Skeleton, input: DrapeInput): D
   // columns, so packing six of them into a 60px skirt leaves no undisturbed
   // cloth between them and the modelling turns to interference.
   const base = heavy ? 3 : 4;
-  const count = Math.max(2, Math.min(6,
-    base + Math.round((hemHalf - 26) / 11) + Math.round(rnd('n') * 2 - 0.5)));
+  // `foldCount` biases the computed count rather than replacing it — the
+  // drape knows how many folds a hem of this width can carry without turning
+  // into a grating, and the slider says "more" or "fewer" against that.
+  const count = Math.max(2, Math.min(8,
+    base + Math.round((hemHalf - 26) / 11) + Math.round(rnd('n') * 2 - 0.5)
+    + (t.foldCount - 2)));
 
   const folds: Fold[] = [];
   for (let i = 0; i < count; i += 1) {
@@ -149,7 +153,8 @@ export function planDrape(spec: PortraitSpec, s: Skeleton, input: DrapeInput): D
       // folds die out where the fabric finds room.
       endT: 0.72 + rnd(`e${i}`) * 0.28,
       // A slow lateral wander, so no fold is a ruled vertical.
-      wander: (rnd(`v${i}`) - 0.5) * 2.2,
+      // `drapeSway` scales how far each fold drifts across the cloth.
+      wander: (rnd(`v${i}`) - 0.5) * 1.1 * Math.max(0.2, t.drapeSway),
       wanderPhase: rnd(`vp${i}`) * Math.PI * 2,
       depth: Math.max(1, Math.min(3, (heavy ? 2 : 1) + (rnd(`d${i}`) > 0.66 ? 1 : 0) + (t.foldStrength >= 3 ? 1 : 0))),
       wide: heavy && rnd(`w${i}`) > 0.45,

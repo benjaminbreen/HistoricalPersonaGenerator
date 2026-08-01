@@ -127,24 +127,43 @@ export function readShape(spec: PortraitSpec, accessoryName = ''): GarmentShape 
   };
 }
 
-/** Where each construction's main hem falls, 0 at the hip … 1 at the ankle. */
-export function hemFraction(c: Construction, spec: PortraitSpec): number {
+/**
+ * Where each construction's main hem falls, 0 at the hip … 1 at the ankle.
+ *
+ * The tunable hems come back in here. `tunicHem`, `coatHem` and `robeLift`
+ * were left stranded when constructions took over hem placement — their
+ * sliders moved and nothing happened, which is worse than not having them.
+ * Constructions decide the *kind* of hem; these decide where that kind sits.
+ */
+export function hemFraction(c: Construction, spec: PortraitSpec, t: HemTuning): number {
+  // A floor-length garment stops `robeLift` px above the ankle, expressed as a
+  // fraction so it survives the figure being any height.
+  const floorLen = Math.max(0.6, 1 - t.robeLift / 40);
   switch (c) {
     case 'robe':
     case 'gown':
     case 'skirted':
-      return 0.97;
+      return floorLen;
     case 'crop_top':
-      return 0.92;          // the skirt below it, not the blouse
+      return floorLen - 0.05;   // the skirt below it, not the blouse
     case 'wrapped_lower':
       // Knee-length by default; the long-wrapped names reach the ankle.
-      return /lungi|sarong|veshti|dhoti/.test(spec.garment.name.toLowerCase()) ? 0.9 : 0.42;
+      return /lungi|sarong|veshti|dhoti/.test(spec.garment.name.toLowerCase())
+        ? floorLen - 0.07
+        : t.tunicHem + 0.08;
     case 'jacket':
-      return 0.24;
+      return t.coatHem;
     case 'trousered':
-      return 0.3;
+      return t.coatHem + 0.06;
     case 'tunic':
     default:
-      return 0.36;
+      return t.tunicHem;
   }
+}
+
+/** The hem-placement slice of the tuning, so this file need not import it all. */
+export interface HemTuning {
+  tunicHem: number;
+  coatHem: number;
+  robeLift: number;
 }
