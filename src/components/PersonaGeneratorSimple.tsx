@@ -190,6 +190,7 @@ import { PERSONAL_BELIEFS, IDEOLOGIES, getProfessionEmoji } from '../constants';
 import { getLanguageForCharacter } from '../constants/gameData/languages';
 import { confidenceBlurb } from '../services/languageAttributionService';
 import { describeOrnament } from '../services/ornamentService';
+import { principalCity, cityAllegiance } from '../services/birthplaceService';
 import { WikipediaPanel } from './WikipediaPanel';
 import { getWikipediaArticle } from '../constants/gameData/wikipediaTitles';
 import {
@@ -4014,10 +4015,22 @@ export default function PersonaGenerator() {
   };
 
   // Helper function to make religion, location, and disease names clickable in biography HTML
-  const makeTermsClickable = (html: string, religion: string, location: string, disease?: string): string => {
+  const makeTermsClickable = (html: string, religion: string, location: string, disease?: string, city?: string): string => {
     if (!html) return html;
 
     let result = html;
+
+    // The city the birth clause names — "a hamlet outside Ankara". It is the
+    // most specific place the biography knows, so it should be as reachable as
+    // the region. Done before the location pass: a city whose name contains
+    // the area name would otherwise be half-wrapped by it. Skipped when the
+    // two are the same word, which would wrap the same text twice.
+    if (city && city !== location) {
+      const cityArticle = getWikipediaArticle(city);
+      const cityRegex = new RegExp(city.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+      result = result.replace(cityRegex, match =>
+        `<span class="wiki-link" data-article="${cityArticle}">${match}</span>`);
+    }
 
     // Make religion name clickable
     if (religion && religion !== 'Local Beliefs' && religion !== 'Agnostic') {
@@ -4057,7 +4070,13 @@ export default function PersonaGenerator() {
       generateNarrativeBiography(persona),
       persona.character.religion,
       persona.location,
-      diseaseName
+      diseaseName,
+      principalCity({
+        year: persona.year - persona.character.age,
+        culturalZone: persona.historicalContext?.culturalZone ?? persona.character.culturalZone,
+        region: persona.region,
+        location: persona.location,
+      })?.name
     );
   }, [persona]);
 
@@ -4151,7 +4170,16 @@ export default function PersonaGenerator() {
         paragraph,
         persona.character.religion,
         persona.location,
-        diseaseName
+        diseaseName,
+        // At the BIRTH year, not the present one: the birth clause is where
+        // the city is named, and a persona born in Saigon may be living in Ho
+        // Chi Minh City by the year on the card.
+        principalCity({
+          year: persona.year - persona.character.age,
+          culturalZone: persona.historicalContext?.culturalZone ?? persona.character.culturalZone,
+          region: persona.region,
+          location: persona.location,
+        })?.name
       );
       return (
         <p key={index}>
@@ -5039,6 +5067,39 @@ export default function PersonaGenerator() {
                         </span>
                       );
                     })()}
+                    {/* The city standing in this map area in this year, from
+                        the same lookup the biography uses — so the badge and
+                        the prose never name two different places. A small
+                        settlement is labelled as one: "Konya" implies a city,
+                        and for most of history most of these were market
+                        towns. The tooltip carries the description already
+                        written in cities.ts, plus who governed it that year,
+                        which is the fact that changes inside a lifetime. */}
+                    {(() => {
+                      const city = principalCity({
+                        year: persona.year,
+                        culturalZone: persona.historicalContext?.culturalZone ?? persona.character.culturalZone,
+                        region: persona.region,
+                        location: persona.location,
+                        localeType: persona.historicalContext?.localeType,
+                      });
+                      if (!city) return null;
+                      const era = persona.year >= 1900 ? city.eraSpecificDensity?.modern : undefined;
+                      const density = era ?? city.urbanDensity;
+                      const polity = cityAllegiance(city, persona.year);
+                      return (
+                        <span
+                          className="location-pill city-pill wiki-link"
+                          title={[city.description, polity && `Under ${polity} in ${formatYear(persona.year)}.`]
+                            .filter(Boolean).join(' ')}
+                          onClick={() => setWikipediaArticle(getWikipediaArticle(city.name))}
+                        >
+                          {city.name}
+                          {density === 'small' && <span className="city-pill-note"> · town</span>}
+                          {polity && <span className="city-pill-polity">{polity}</span>}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
                 <div className="season-narrative">
@@ -5097,6 +5158,12 @@ export default function PersonaGenerator() {
                   <MiniLocationMap
                     continent={persona.culturalZone}
                     region={persona.region}
+                    cityLabel={principalCity({
+                      year: persona.year,
+                      culturalZone: persona.historicalContext?.culturalZone ?? persona.character.culturalZone,
+                      region: persona.region,
+                      location: persona.location,
+                    })?.name}
                   />
                 </div>
               </div>
@@ -6419,7 +6486,7 @@ export default function PersonaGenerator() {
 
     {showSpriteTuner && (
       <React.Suspense fallback={null}>
-        <SpriteTunerPanel onClose={() => setShowSpriteTuner(false)} />
+        <SpriteTunerPanel onClose={() => setShowSpriteTuner(false)} featured={persona} />
       </React.Suspense>
     )}
 
@@ -7352,6 +7419,15 @@ export default function PersonaGenerator() {
                         <span className="label">Garment</span>
                         <span className="value">
                           {persona.character.appearance.garment.adjectives?.join(', ')} {persona.character.appearance.garment.material} {persona.character.appearance.garment.name}
+                        </span>
+                      </div>
+                    )}
+                    {persona.character.appearance.legwear
+                      && !/^(none|bare)$/i.test(persona.character.appearance.legwear.name) && (
+                      <div className="appearance-item">
+                        <span className="label">Legwear</span>
+                        <span className="value">
+                          {persona.character.appearance.legwear.adjectives?.join(', ')} {persona.character.appearance.legwear.material} {persona.character.appearance.legwear.name}
                         </span>
                       </div>
                     )}

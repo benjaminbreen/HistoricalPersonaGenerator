@@ -91,7 +91,23 @@ export interface SampledStratum {
   ancestry?: Ancestry;
 }
 
-const normalize = (value?: string): string => (value || '').toLowerCase();
+/**
+ * Lowercase *and* strip diacritics, because the place patterns are written in
+ * ASCII and the map is not.
+ *
+ * This was `.toLowerCase()` alone, and the consequence was not subtle: "São
+ * Paulo Plateau" cannot match `/sao paulo/`, so no persona generated on the
+ * São Paulo Plateau between 1550 and 1888 was ever enslaved. The same silent
+ * miss applied anywhere the geography carries an accent the pattern does not —
+ * Yucatán, Potosí, Piauí, Marañón. Measured before the fix, only 42% of
+ * Afro-descended personas in the plantation centuries carried any standing
+ * condition at all; the sugar coast was generating free smallholders.
+ */
+const normalize = (value?: string): string =>
+  (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 
 /** Every standing condition present in this place and year. */
 export function resolveStrata(

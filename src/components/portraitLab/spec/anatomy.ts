@@ -12,6 +12,10 @@
  */
 
 import { unit } from '../core/rng';
+import {
+  CHEEK_WIDTH, crownFor, FACE_SHAPE_BASE_HEIGHT, FACE_SHAPE_CURVES,
+  FACE_SHAPE_METRICS, JAW_WIDTH, roundCrown, shapeCurve, SKULL_PROFILE, smoothstep,
+} from './faceShape';
 import { PortraitSpec, PoseSpec, SkullShape } from './types';
 
 /** The figure's own module. Every measurement below is in these pixels. */
@@ -141,18 +145,12 @@ export interface Anatomy {
   };
 }
 
-const BASE_PROFILE: ProfileKeys = [
-  [0.00, 13.2],
-  [0.06, 18.6],
-  [0.14, 21.8],
-  [0.26, 23.5],
-  [0.40, 24.0],
-  [0.52, 23.7],
-  [0.64, 22.1],
-  [0.78, 18.7],
-  [0.90, 13.8],
-  [1.00, 8.2],
-];
+/**
+ * Moved to `faceShape.ts`, where the sprite can read it too. Same numbers,
+ * same order; see the note there for why one renderer's idea of what a head
+ * is has no business living where the other cannot reach it.
+ */
+const BASE_PROFILE: ProfileKeys = SKULL_PROFILE;
 
 function scaleKeys(keys: ProfileKeys, fn: (t: number, half: number) => number): ProfileKeys {
   return keys.map(([t, half]) => [t, Math.max(2, fn(t, half))]);
@@ -186,99 +184,12 @@ function scaleKeys(keys: ProfileKeys, fn: (t: number, half: number) => number): 
  * Halving that key is what turns the plateau into something short enough for the
  * spline's shoulder to read as a curve, and anything gentler just produces a
  * slightly narrower flat top.
- */
-const CROWN_KEYS: Array<[number, number]> = [
-  [0.00, 0.48],
-  [0.06, 0.22],
-  [0.14, 0.08],
-];
-
-function roundCrown(keys: ProfileKeys, crown: number): ProfileKeys {
-  if (crown <= 0) return keys;
-  return keys.map(([t, half], i) => {
-    const rule = CROWN_KEYS[i];
-    // Matched by index rather than by t, because every earlier pass preserves
-    // the control points' t values and only touches their widths.
-    if (!rule || rule[0] !== t) return [t, half] as [number, number];
-    return [t, half * (1 - rule[1] * crown)] as [number, number];
-  });
-}
-
-/**
- * Where on that axis this persona sits.
  *
- * Mostly seeded, because the shape of a vault is not something the app records
- * anywhere and inventing a data source for it would be worse than admitting it
- * is arbitrary. Two things do bear on it and both are cheap:
- *
- * A `round` face and a `square` one are already claims about the outline, and a
- * skull that is round through the cheeks and flat across the top is a
- * contradiction the viewer can see. And children genuinely are domed — the vault
- * reaches most of its adult size years before the face does, which is most of
- * what makes a child's head read as a child's.
+ * `CROWN_KEYS` and `roundCrown` themselves now live in `faceShape.ts`, next to
+ * the profile they modify, so the sprite's cap can be domed by the same numbers.
  */
-function crownFor(spec: PortraitSpec): number {
-  let crown = unit(spec.seed, 'crown');
-  if (spec.faceShape === 'round') crown = Math.min(1, crown + 0.3);
-  if (spec.faceShape === 'square') crown = Math.max(0, crown - 0.3);
-  if (spec.age < 14) crown = Math.min(1, crown + 0.35);
-  return crown;
-}
 
 const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
-
-/**
- * A width multiplier that varies smoothly down the skull.
- *
- * The face shapes used to be written as step functions — `t < 0.3 ? 0.82 :
- * t < 0.62 ? 1.11 : 0.76` for a diamond, and similar for the rest. That is
- * fine while the steps are small, and catastrophic once they are not: the
- * profile's control points sit at t = 0.26 and t = 0.40, so that particular
- * ternary asked two *adjacent* points to differ by 35%, about seven pixels.
- * `sampleProfile` runs Catmull-Rom through them, Catmull-Rom overshoots a step
- * it cannot fit, and the result was a hard angular flare at the temples and a
- * pinched cranium above it. Amplifying the axes did not create that bug; it
- * only made an existing discontinuity big enough to see.
- *
- * Interpolating between anchors with a smoothstep removes the class of problem
- * rather than the instance: there is no way to express a step here, so no
- * future edit to these numbers can reintroduce a corner.
- */
-function shapeCurve(anchors: Array<[number, number]>): (t: number) => number {
-  return (t: number) => {
-    if (t <= anchors[0][0]) return anchors[0][1];
-    const last = anchors[anchors.length - 1];
-    if (t >= last[0]) return last[1];
-    let i = 0;
-    while (i < anchors.length - 2 && anchors[i + 1][0] < t) i += 1;
-    const [t0, v0] = anchors[i];
-    const [t1, v1] = anchors[i + 1];
-    const u = (t - t0) / (t1 - t0 || 1);
-    return v0 + (v1 - v0) * (u * u * (3 - 2 * u));
-  };
-}
-
-/**
- * The width profiles, as multipliers on the base skull.
- *
- * Read down each list: crown, temple, cheek, jaw, chin. No two neighbouring
- * anchors differ by more than about a tenth, which is the working limit for
- * staying clear of spline overshoot — `limitDeviation` enforces it afterwards
- * regardless, but keeping the authored numbers inside it means the shape you
- * write is the shape you get.
- */
-const FACE_SHAPE_CURVES: Record<string, Array<[number, number]>> = {
-  // Full through the jaw and a touch narrower at the crown.
-  round: [[0, 0.98], [0.5, 1.02], [1, 1.08]],
-  // Straight sides carried down to a broad, flat jaw.
-  square: [[0, 1.0], [0.5, 1.01], [0.8, 1.09], [1, 1.13]],
-  // Tall already, from `headHeight`; the outline's job is to narrow downward.
-  long: [[0, 1.0], [0.5, 0.99], [1, 0.90]],
-  // Broad at the temples, tapering to a small chin.
-  heart: [[0, 1.05], [0.3, 1.04], [0.65, 0.95], [1, 0.82]],
-  // Narrow above and below, widest across the cheekbones.
-  diamond: [[0, 0.90], [0.28, 0.96], [0.5, 1.06], [0.75, 0.95], [1, 0.85]],
-};
 
 /**
  * Stop the accumulated modifiers from varying faster than the spline can draw.
@@ -371,16 +282,9 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
   // 46-pixel-wide head is under a pixel, so it rounds away entirely. An axis
   // that cannot move a whole pixel is not an axis. Anything meant to be visible
   // here has to be worth at least two.
-  let headHeight = 58;
-  let widthScale = 1;
-  switch (spec.faceShape) {
-    case 'long': headHeight += 8; widthScale = 0.90; break;
-    case 'round': headHeight -= 6; widthScale = 1.08; break;
-    case 'square': headHeight -= 2; widthScale = 1.04; break;
-    case 'heart': headHeight += 2; widthScale = 1.02; break;
-    case 'diamond': headHeight += 3; widthScale = 1.0; break;
-    default: break;
-  }
+  const shapeMetrics = FACE_SHAPE_METRICS[spec.faceShape] ?? FACE_SHAPE_METRICS.oval;
+  let headHeight = FACE_SHAPE_BASE_HEIGHT + shapeMetrics.heightDelta;
+  let widthScale = shapeMetrics.widthScale;
   if (female) widthScale *= 0.955;
   if (spec.build === 'imposing' || spec.build === 'heavy') widthScale *= 1.06;
   if (spec.build === 'slight') widthScale *= 0.95;
@@ -400,18 +304,15 @@ export function buildAnatomy(spec: PortraitSpec): Anatomy {
   // with a smoothstep rather than a linear ramp — a linear ramp leaves a corner
   // in the derivative where it starts, and at this size a kink in the outline
   // is as visible as a step in it.
-  const jawFactor: Record<string, number> = {
-    sharp: 0.80, soft: 1.0, square: 1.20, round: 1.12, oval: 0.92,
-  };
-  const jaw = jawFactor[spec.jawline] ?? 1;
+  const jaw = JAW_WIDTH[spec.jawline] ?? 1;
   keys = scaleKeys(keys, (t, half) => {
     const u = clamp((t - 0.56) / 0.44, 0, 1);
-    return half * (1 + (jaw - 1) * u * u * (3 - 2 * u));
+    return half * (1 + (jaw - 1) * smoothstep(u));
   });
 
   // Cheekbones are a bump, not a plateau: a Gaussian centred on the zygomatic
   // arch falls off to nothing in both directions on its own.
-  const cheekFactor = spec.cheekbones === 'high' ? 1.09 : spec.cheekbones === 'low' ? 0.93 : 1;
+  const cheekFactor = CHEEK_WIDTH[spec.cheekbones] ?? 1;
   if (cheekFactor !== 1) {
     keys = scaleKeys(keys, (t, half) =>
       half * (1 + (cheekFactor - 1) * Math.exp(-Math.pow((t - 0.5) / 0.19, 2))));

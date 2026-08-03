@@ -17,6 +17,12 @@ export interface NameGenerationOptions {
     historicalPeriod?: 'antiquity' | 'early_medieval' | 'high_medieval' | 'late_medieval' | 'renaissance' | 'early_modern' | 'industrial' | 'modern';
 }
 
+/** Family names that hardened out of chiefly, matai and hapū names after 1814. */
+const SURNAME_POLYNESIAN = ['Tupou', 'Taufa', 'Vaea', 'Fifita', 'Latu', 'Havili', 'Mahe', 'Maʻafu', 'Tuilagi', 'Tuiasosopo', 'Faleolo', 'Solomona', 'Ioane', 'Aiono', 'Malietoa', 'Mataʻafa', 'Ngata', 'Te Heuheu', 'Rātana', 'Pomare', 'Heke', 'Kereopa', 'Waititi', 'Kaa', 'Teariki', 'Tangaroa', 'Marsters', 'Temaru', '(No Surname)', '(No Surname)'];
+
+/** Fijian, Papuan, Solomon and ni-Vanuatu family names, post-1840. */
+const SURNAME_MELANESIAN = ['Rabuka', 'Bainimarama', 'Naivalu', 'Tabua', 'Seruilagi', 'Vosa', 'Cakobau', 'Ganilau', 'Mara', 'Tuisawau', 'Somare', 'Namaliu', 'Wingti', 'Diro', 'Morauta', 'Kaputin', 'Sogavare', 'Kemakeza', 'Kabui', 'Maenuʻu', 'Lini', 'Kalpokas', 'Sope', 'Natapei', '(No Surname)', '(No Surname)'];
+
 export const CHARACTER_NAMES: Record<string, NameList> = {
     // === PREHISTORIC UNIVERSAL ===
     // Proto-Indo-European and Early European (3500-500 BCE)
@@ -562,6 +568,40 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         surname: ['dos Santos', 'da Conceição', 'de Jesus', 'do Espírito Santo', 'da Silva', 'do Rosário', 'de Nazaré', 'da Cruz', 'Angola', 'Benguela', 'Mina', 'Congo', 'Nagô', 'Crioulo', 'Cabinda', '(No Surname)', '(No Surname)']
     },
 
+    /**
+     * The Caribbean, where `AFRICAN_AMERICAN` was standing in for everybody.
+     *
+     * The same error a previous pass fixed for Brazil, and for the same
+     * reason: `AFRICAN_AMERICAN` is a United States list, and it was naming
+     * the enslaved and free Black populations of Cuba, Saint-Domingue,
+     * Jamaica and Barbados — so an Afro-Cuban woman in 1780 Havana came out
+     * as "Shirley Jackson". Caribbean naming follows the colonial power that
+     * did the baptising, which is why this set is trilingual: Spanish in the
+     * Greater Antilles, French in Saint-Domingue, Guadeloupe and Martinique,
+     * English in Jamaica and the eastern islands.
+     *
+     * The surnames carry the same history the given names do. Saints' and
+     * devotional names predominate under Catholic baptism; the English islands
+     * left plainer English surnames, very often the estate's. Day-names —
+     * Cudjoe, Quashie, Phibbah, Abba — are Akan retentions that survived in
+     * the English Caribbean well into the nineteenth century and are among the
+     * most strongly attested African survivals anywhere in the Americas.
+     */
+    AFRO_CARIBBEAN: {
+        male: ['José', 'Juan', 'Francisco', 'Manuel', 'Pedro', 'Domingo', 'Santiago', 'Tomás',
+               'Jean', 'Pierre', 'Louis', 'Joseph', 'Baptiste', 'Toussaint', 'Dessalines', 'Henri',
+               'John', 'Thomas', 'William', 'Samuel', 'Moses', 'Isaac',
+               'Cudjoe', 'Quashie', 'Quaco', 'Cuffee', 'Mingo', 'Juba'],
+        female: ['María', 'Juana', 'Josefa', 'Dolores', 'Caridad', 'Mercedes', 'Altagracia',
+                 'Marie', 'Rose', 'Louise', 'Céline', 'Toussainte', 'Adélaïde',
+                 'Mary', 'Sarah', 'Nancy', 'Betsy', 'Grace', 'Hagar',
+                 'Phibbah', 'Abba', 'Quasheba', 'Cubah', 'Yaba'],
+        surname: ['de la Caridad', 'de los Santos', 'Valdés', 'Congo', 'Carabalí', 'Lucumí', 'Mandinga',
+                  'Baptiste', 'Toussaint', 'Pierre-Louis', 'Jean-Baptiste', 'Désir', 'Sylvain',
+                  'Brown', 'Campbell', 'Clarke', 'Grant', 'Reid', 'Bailey',
+                  '(No Surname)', '(No Surname)', '(No Surname)']
+    },
+
     PORTUGUESE_BRAZIL: {
         male: ['Miguel', 'Arthur', 'Heitor', 'Bernardo', 'Davi', 'Gabriel', 'Pedro', 'Lucas', 'Matheus', 'Enzo', 'Guilherme', 'Samuel', 'Felipe', 'Gustavo', 'Rafael', 'João', 'Daniel', 'Vitor', 'Leonardo', 'Henrique'],
         female: ['Alice', 'Sophia', 'Helena', 'Valentina', 'Laura', 'Isabella', 'Manuela', 'Júlia', 'Heloísa', 'Luiza', 'Maria', 'Lívia', 'Giovanna', 'Beatriz', 'Mariana', 'Yasmin', 'Gabriela', 'Rafaela', 'Larissa', 'Beatriz'],
@@ -987,15 +1027,26 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
     },
 
     // === OCEANIA SUB-GROUPS ===
+    /**
+     * The post-missionisation set — it begins in 1814, and everything before it
+     * is `POLYNESIAN_PRECONTACT`, which is mononymic and should stay so.
+     *
+     * The surnames were simply `[]`, which produced a mononym every time, and
+     * the `post-1700-surnames` invariant could never see it because Oceania was
+     * 0.3% of draws and never accumulated enough personas to fail on. Pacific
+     * naming did become binomial through the nineteenth century: chiefly and
+     * matai titles hardened into family names in Samoa and Tonga, Māori took
+     * hapū and ancestor names, and mission registers fixed both.
+     */
     POLYNESIAN: {
         male: ['Manaia', 'Hemi', 'Tane', 'Rangi', 'Kai', 'Aroha', 'Wiremu', 'Te Koha', 'Mahina', 'Teiva', 'Koa', 'Keoni', 'Nalani', 'Kawika', 'Ikaika', 'Akamu', 'Keanu', 'Makoa', 'Anaru', 'Rawiri', 'Tamati', 'Hoani', 'Pita', 'Rewi', 'Tawhiri', 'Rongo', 'Tama', 'Koru', 'Whai', 'Turi'],
         female: ['Moana', 'Hina', 'Leilani', 'Malia', 'Aroha', 'Kiri', 'Anahera', 'Mere', 'Ngaire', 'Roimata', 'Ataahua', 'Marama', 'Kaia', 'Lani', 'Nalani', 'Mahina', 'Naia', 'Lehua', 'Pua', 'Kalani', 'Noelani', 'Kalea', 'Mele', 'Pikake', 'Tiaré', 'Tiare', 'Raina', 'Moea', 'Haumea', 'Nayeli'],
-        surname: []
+        surname: SURNAME_POLYNESIAN
     },
     MELANESIAN: {
         male: ['Bani', 'Tavu', 'Kem', 'Wani', 'Nalu', 'Kila', 'Mendi', 'Vanua', 'Tiko', 'Ratu', 'Seru', 'Jone', 'Viliame', 'Epeli', 'Tomasi', 'Aisea', 'Manoa', 'Tevita', 'Salote', 'Rusiate', 'Simione', 'Peni', 'Waisea', 'Iowane', 'Mosese', 'Lasaro', 'Filipe', 'Petero', 'Apisai', 'Isikeli'],
         female: ['Salote', 'Ana', 'Mere', 'Mele', 'Litia', 'Vika', 'Sala', 'Adi', 'Bulou', 'Lavenia', 'Serena', 'Talei', 'Nanise', 'Alanieta', 'Makereta', 'Veniana', 'Arieta', 'Kelera', 'Melaia', 'Raijeli', 'Timoci', 'Vasiti', 'Akanisi', 'Salanieta', 'Laisani', 'Taraivini', 'Vulimila', 'Wainikiti', 'Salome', 'Eta'],
-        surname: []
+        surname: SURNAME_MELANESIAN
     },
     ABORIGINAL_AUSTRALIAN: {
         male: ['Birrani', 'Darel', 'Jarrah', 'Koori', 'Mandawuy', 'Nullah', 'Tjandrawati', 'Warwick', 'Yurrampi', 'Kirra', 'Bindi', 'Boori', 'Budgeree', 'Cooinda', 'Daku', 'Gidgee', 'Jannali', 'Kiah', 'Lachlan', 'Miro', 'Namatjira', 'Oodgeroo', 'Poolamacca', 'Quandong', 'Tarkine', 'Uluru', 'Wagga', 'Yamba', 'Yarrawarra', 'Bidjigal'],
@@ -1865,16 +1916,35 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1600, before: 1783, keys: ['NORTH_AMERICAN_COLONIAL', 'ENGLISH', 'DUTCH', 'FRENCH', 'IROQUOIS_HAUDENOSAUNEE'] },
             { after: 1783, keys: ['ENGLISH', 'GERMAN', 'CELTIC_IRISH', 'ITALIAN', 'JEWISH_ASHKENAZI', 'FRENCH'] }
         ],
+        // Colonial South Carolina had a Black majority from about 1708 and held
+        // it for most of the eighteenth century; by 1860 the enslaved were
+        // roughly forty percent of the whole South. Neither of these regions
+        // carried an African-descended name set before 1783 at all, so the
+        // entire colonial period — the Chesapeake from 1619, the Lowcountry
+        // rice plantations, the Middle Passage itself — generated nobody.
+        // Free people of colour before 1865, the whole Black population after —
+        // see the note on the Caribbean above for why these two are different
+        // numbers. Free Black people were about six percent of the American
+        // Black population in 1860 and a much larger share of it in the upper
+        // South, where manumission was commoner; `slavery-lowcountry`,
+        // `slavery-chesapeake` and `slavery-deep-south` carry the rest.
         "Southeast": [
             { before: 1550, keys: ['CHEROKEE', 'CREEK_MUSKOGEE'] },
-            { after: 1550, before: 1783, keys: ['SPANISH_CASTILIAN', 'ENGLISH', 'FRENCH', 'CHEROKEE'] },
-            { after: 1783, keys: ['NORTH_AMERICAN_COLONIAL', 'AFRICAN_AMERICAN', 'ENGLISH', 'SCOTTISH'] }
+            { after: 1550, before: 1670, keys: ['SPANISH_CASTILIAN', 'ENGLISH', 'FRENCH', 'CHEROKEE'] },
+            { after: 1670, before: 1865, keys: ['AFRICAN_AMERICAN', 'ENGLISH', 'SPANISH_CASTILIAN', 'FRENCH', 'CHEROKEE'],
+              weights: { AFRICAN_AMERICAN: 0.05, ENGLISH: 0.45, SPANISH_CASTILIAN: 0.14, FRENCH: 0.12, CHEROKEE: 0.24 } },
+            { after: 1865, keys: ['AFRICAN_AMERICAN', 'NORTH_AMERICAN_COLONIAL', 'ENGLISH', 'SCOTTISH'],
+              weights: { AFRICAN_AMERICAN: 0.40, NORTH_AMERICAN_COLONIAL: 0.24, ENGLISH: 0.24, SCOTTISH: 0.12 } }
         ],
         "Atlantic Coast": [
             { before: 1607, keys: ['ALGONQUIAN'] },
-            { after: 1607, before: 1783, keys: ['NORTH_AMERICAN_COLONIAL', 'ENGLISH', 'DUTCH'] },
-            { after: 1783, before: 1900, keys: ['ENGLISH', 'AFRICAN_AMERICAN', 'CELTIC_IRISH', 'GERMAN'] },
-            { after: 1900, keys: ['ENGLISH', 'AFRICAN_AMERICAN', 'JEWISH_ASHKENAZI', 'ITALIAN', 'PUERTO_RICAN'] }
+            { after: 1607, before: 1640, keys: ['NORTH_AMERICAN_COLONIAL', 'ENGLISH', 'DUTCH'] },
+            { after: 1640, before: 1865, keys: ['AFRICAN_AMERICAN', 'NORTH_AMERICAN_COLONIAL', 'ENGLISH', 'DUTCH'],
+              weights: { AFRICAN_AMERICAN: 0.05, NORTH_AMERICAN_COLONIAL: 0.33, ENGLISH: 0.48, DUTCH: 0.14 } },
+            { after: 1865, before: 1900, keys: ['AFRICAN_AMERICAN', 'ENGLISH', 'CELTIC_IRISH', 'GERMAN'],
+              weights: { AFRICAN_AMERICAN: 0.30, ENGLISH: 0.34, CELTIC_IRISH: 0.20, GERMAN: 0.16 } },
+            { after: 1900, keys: ['AFRICAN_AMERICAN', 'ENGLISH', 'JEWISH_ASHKENAZI', 'ITALIAN', 'PUERTO_RICAN'],
+              weights: { AFRICAN_AMERICAN: 0.26, ENGLISH: 0.30, JEWISH_ASHKENAZI: 0.14, ITALIAN: 0.16, PUERTO_RICAN: 0.14 } }
         ],
         // North
         "Arctic and Subarctic": [
@@ -1926,20 +1996,53 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1510, before: 1821, keys: ['SPANISH_CASTILIAN', 'AFRICAN_AMERICAN'] },
             { after: 1821, keys: ['SPANISH_LATIN_AMERICAN', 'AFRICAN_AMERICAN', 'CHINESE_CANTONESE'] }
         ],
+        // These weights are the **free** population of colour, not the whole
+        // Afro-descended population — and the distinction is the whole reason
+        // the numbers look low beside the demography.
+        //
+        // `populationStrata.ts` already produces the enslaved, and it produces
+        // them properly: the stratum sets the legal status, the trade, the
+        // wealth and the ancestry, and the ancestry then *chooses the name
+        // set*. So an enslaved woman in 1780 Saint-Domingue is named
+        // `AFRO_CARIBBEAN` by that path before this table is ever consulted.
+        // Weighting this table to the enslaved share as well double-counted:
+        // it added a second, parallel Afro-descended population who were free
+        // by construction, because nothing on this path ever asks about
+        // bondage. Measured, only 46% of Afro-descended personas in the
+        // plantation centuries carried any condition at all.
+        //
+        // So before abolition these carry the gens de couleur libres and the
+        // free coloured of the British islands — a real and important group,
+        // and a small one: five to ten percent of the Afro-descended
+        // population in most of the Caribbean. After abolition the strata stop
+        // applying and this table becomes the whole mechanism, so the weights
+        // rise to the actual population share.
+        //
+        // Abolition: British 1834, French 1848, Puerto Rico 1873, Cuba 1886.
         "The Caribbean": [
             { before: 1492, keys: ['TAINO', 'CARIB'] },
-            { after: 1492, before: 1898, keys: ['SPANISH_CASTILIAN', 'AFRICAN_AMERICAN', 'FRENCH', 'ENGLISH', 'DUTCH', 'TAINO'] },
-            { after: 1898, keys: ['PUERTO_RICAN', 'SPANISH_LATIN_AMERICAN', 'AFRICAN_AMERICAN', 'ENGLISH', 'FRENCH'] }
+            { after: 1492, before: 1848, keys: ['AFRO_CARIBBEAN', 'SPANISH_CASTILIAN', 'FRENCH', 'ENGLISH', 'DUTCH', 'TAINO'],
+              weights: { AFRO_CARIBBEAN: 0.10, SPANISH_CASTILIAN: 0.30, FRENCH: 0.18, ENGLISH: 0.20, DUTCH: 0.07, TAINO: 0.15 } },
+            { after: 1848, before: 1898, keys: ['AFRO_CARIBBEAN', 'SPANISH_CASTILIAN', 'FRENCH', 'ENGLISH', 'DUTCH'],
+              weights: { AFRO_CARIBBEAN: 0.55, SPANISH_CASTILIAN: 0.17, FRENCH: 0.11, ENGLISH: 0.13, DUTCH: 0.04 } },
+            { after: 1898, keys: ['AFRO_CARIBBEAN', 'PUERTO_RICAN', 'SPANISH_LATIN_AMERICAN', 'ENGLISH', 'FRENCH'],
+              weights: { AFRO_CARIBBEAN: 0.55, PUERTO_RICAN: 0.14, SPANISH_LATIN_AMERICAN: 0.16, ENGLISH: 0.09, FRENCH: 0.06 } }
         ],
         "Greater Antilles": [
             { before: 1492, keys: ['TAINO'] },
-            { after: 1492, before: 1898, keys: ['SPANISH_CASTILIAN', 'AFRICAN_AMERICAN', 'TAINO'] },
-            { after: 1898, keys: ['PUERTO_RICAN', 'SPANISH_LATIN_AMERICAN', 'AFRICAN_AMERICAN'] }
+            { after: 1492, before: 1886, keys: ['AFRO_CARIBBEAN', 'SPANISH_CASTILIAN', 'TAINO'],
+              weights: { AFRO_CARIBBEAN: 0.12, SPANISH_CASTILIAN: 0.72, TAINO: 0.16 } },
+            { after: 1886, before: 1898, keys: ['AFRO_CARIBBEAN', 'SPANISH_CASTILIAN'],
+              weights: { AFRO_CARIBBEAN: 0.45, SPANISH_CASTILIAN: 0.55 } },
+            { after: 1898, keys: ['AFRO_CARIBBEAN', 'PUERTO_RICAN', 'SPANISH_LATIN_AMERICAN'],
+              weights: { AFRO_CARIBBEAN: 0.42, PUERTO_RICAN: 0.28, SPANISH_LATIN_AMERICAN: 0.30 } }
         ],
         "Lesser Antilles": [
             { before: 1492, keys: ['CARIB'] },
-            { after: 1492, before: 1800, keys: ['FRENCH', 'ENGLISH', 'DUTCH', 'CARIB', 'AFRICAN_AMERICAN'] },
-            { after: 1800, keys: ['ENGLISH', 'FRENCH', 'AFRICAN_AMERICAN', 'SPANISH_LATIN_AMERICAN'] }
+            { after: 1492, before: 1834, keys: ['AFRO_CARIBBEAN', 'FRENCH', 'ENGLISH', 'DUTCH', 'CARIB'],
+              weights: { AFRO_CARIBBEAN: 0.08, FRENCH: 0.28, ENGLISH: 0.36, DUTCH: 0.12, CARIB: 0.16 } },
+            { after: 1834, keys: ['AFRO_CARIBBEAN', 'ENGLISH', 'FRENCH', 'SPANISH_LATIN_AMERICAN'],
+              weights: { AFRO_CARIBBEAN: 0.76, ENGLISH: 0.12, FRENCH: 0.08, SPANISH_LATIN_AMERICAN: 0.04 } }
         ]
     },
     "SOUTH_AMERICAN": {
@@ -2003,15 +2106,27 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         // three centuries of the whole coast.
         "Atlantic Coast": [
             { before: 1500, keys: ['TUPI', 'GUARANI'] },
-            { after: 1500, before: 1822, keys: ['PORTUGUESE', 'AFRO_BRAZILIAN', 'TUPI', 'GUARANI'] },
-            { after: 1822, keys: ['PORTUGUESE_BRAZIL', 'AFRO_BRAZILIAN', 'ITALIAN', 'GERMAN', 'JAPANESE'] }
+            // Free people of colour were a far larger share in Brazil than
+            // anywhere else in the Americas — manumission was commoner and
+            // cheaper, and by the 1872 census the free coloured outnumbered
+            // the enslaved. So this weight is higher than the Caribbean's
+            // while still being the *free* population; `brazilian-slavery`
+            // and its sugar-coast and mining variants carry the rest.
+            { after: 1500, before: 1888, keys: ['AFRO_BRAZILIAN', 'PORTUGUESE', 'TUPI', 'GUARANI'],
+              weights: { AFRO_BRAZILIAN: 0.18, PORTUGUESE: 0.46, TUPI: 0.20, GUARANI: 0.16 } },
+            { after: 1888, keys: ['AFRO_BRAZILIAN', 'PORTUGUESE_BRAZIL', 'ITALIAN', 'GERMAN', 'JAPANESE'],
+              weights: { AFRO_BRAZILIAN: 0.48, PORTUGUESE_BRAZIL: 0.28, ITALIAN: 0.12, GERMAN: 0.07, JAPANESE: 0.05 } }
         ],
         "Pernambuco Highlands": [
             { before: 1500, keys: ['TUPI'] },
-            { after: 1500, before: 1630, keys: ['PORTUGUESE', 'AFRO_BRAZILIAN', 'TUPI'] },
-            { after: 1630, before: 1654, keys: ['PORTUGUESE', 'AFRO_BRAZILIAN', 'DUTCH', 'TUPI'] },
-            { after: 1654, before: 1822, keys: ['PORTUGUESE', 'AFRO_BRAZILIAN', 'TUPI'] },
-            { after: 1822, keys: ['PORTUGUESE_BRAZIL', 'AFRO_BRAZILIAN'] }
+            { after: 1500, before: 1630, keys: ['AFRO_BRAZILIAN', 'PORTUGUESE', 'TUPI'],
+              weights: { AFRO_BRAZILIAN: 0.16, PORTUGUESE: 0.54, TUPI: 0.30 } },
+            { after: 1630, before: 1654, keys: ['AFRO_BRAZILIAN', 'PORTUGUESE', 'DUTCH', 'TUPI'],
+              weights: { AFRO_BRAZILIAN: 0.16, PORTUGUESE: 0.42, DUTCH: 0.18, TUPI: 0.24 } },
+            { after: 1654, before: 1888, keys: ['AFRO_BRAZILIAN', 'PORTUGUESE', 'TUPI'],
+              weights: { AFRO_BRAZILIAN: 0.20, PORTUGUESE: 0.56, TUPI: 0.24 } },
+            { after: 1888, keys: ['AFRO_BRAZILIAN', 'PORTUGUESE_BRAZIL'],
+              weights: { AFRO_BRAZILIAN: 0.58, PORTUGUESE_BRAZIL: 0.42 } }
         ],
         "Guiana Shield": [
             { before: 1600, keys: ['CARIB', 'TUPI', 'GUARANI'] },
@@ -2133,11 +2248,21 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         "Upper Guinea": [
             { before: 1500, keys: ['YORUBA_TRADITIONAL', 'WEST_AFRICAN_SAHEL'] },
             {
+                // Before the settlements. The rule below used to start at 1500,
+                // which put anglophone Americo-Liberian names on this coast a
+                // century and a half before the Province of Freedom existed —
+                // a 1648 persona from the Ivory Coast came out called Annie.
+                after: 1500, before: 1787,
+                keys: ['YORUBA_TRADITIONAL', 'WEST_AFRICAN_SAHEL', 'PORTUGUESE'],
+                weights: { YORUBA_TRADITIONAL: 12, WEST_AFRICAN_SAHEL: 9, PORTUGUESE: 2 },
+            },
+            {
                 // AFRICAN_AMERICAN covers the Americo-Liberian and Sierra
                 // Leone Krio settlements — freed and recaptured people landed
-                // on this coast from the 1790s, carrying anglophone names. A
-                // real population, and a small one against the interior.
-                after: 1500, before: 1960,
+                // on this coast from 1787 (Granville Town) and 1822 (Cape
+                // Mesurado), carrying anglophone names. A real population, and
+                // a small one against the interior.
+                after: 1787, before: 1960,
                 keys: ['YORUBA_TRADITIONAL', 'YORUBA_MODERN', 'WEST_AFRICAN_SAHEL', 'AFRICAN_AMERICAN', 'PORTUGUESE', 'ENGLISH', 'FRENCH'],
                 weights: { YORUBA_TRADITIONAL: 10, YORUBA_MODERN: 6, WEST_AFRICAN_SAHEL: 8, AFRICAN_AMERICAN: 2, PORTUGUESE: 1, ENGLISH: 1, FRENCH: 1 },
             },
@@ -2503,9 +2628,36 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1644, before: 1912, keys: ['CHINESE_MANDARIN'] }, // Qing Dynasty (Manchu)
             { after: 1912, keys: ['CHINESE_MANDARIN'] }
         ],
+        /**
+         * The colonial enclaves were written into the rule for the whole
+         * region: an undated `['CHINESE_CANTONESE', 'ENGLISH', 'PORTUGUESE']`
+         * drawn uniformly, so two out of every three personas anywhere in
+         * South China after 1900 were named as though Hong Kong and Macau had
+         * annexed the Yangtze — a kitchen porter in the Yangtze Delta in 1951
+         * called Jane Scott, married to George Walker.
+         *
+         * The enclaves belong to the Pearl River Delta locale, and even there
+         * they were a small minority: Hong Kong was overwhelmingly Chinese
+         * under British rule, and an English *surname* was rarer still than an
+         * English given name. So the region keeps its own traditions and the
+         * locale carries the colonial sets at a weight that matches how many
+         * people actually bore them.
+         */
         "South China": [
-            { before: 1900, keys: ['CHINESE_CANTONESE', 'VIETNAMESE'] },
-            { after: 1900, keys: ['CHINESE_CANTONESE', 'ENGLISH', 'PORTUGUESE'] }
+            { before: 1900, keys: ['CHINESE_CANTONESE', 'VIETNAMESE'], weights: { CHINESE_CANTONESE: 9, VIETNAMESE: 1 } },
+            { after: 1900, keys: ['CHINESE_CANTONESE', 'CHINESE_MANDARIN'], weights: { CHINESE_CANTONESE: 3, CHINESE_MANDARIN: 2 } }
+        ],
+        // Wu-speaking, and Mandarin in every official register since. Cantonese
+        // names here are the region rule reaching a place it does not describe.
+        "Yangtze Delta": [
+            { before: 1900, keys: ['CHINESE_MANDARIN'] },
+            { after: 1900, keys: ['CHINESE_MANDARIN'] }
+        ],
+        // Canton, Hong Kong, Macau.
+        "Pearl River Delta": [
+            { before: 1557, keys: ['CHINESE_CANTONESE'] },
+            { after: 1557, before: 1841, keys: ['CHINESE_CANTONESE', 'PORTUGUESE'], weights: { CHINESE_CANTONESE: 24, PORTUGUESE: 1 } },
+            { after: 1841, keys: ['CHINESE_CANTONESE', 'ENGLISH', 'PORTUGUESE'], weights: { CHINESE_CANTONESE: 24, ENGLISH: 1, PORTUGUESE: 1 } }
         ],
         /**
          * One undated rule of `['CHINESE_MANDARIN', 'PREHISTORIC_ASIAN']` for

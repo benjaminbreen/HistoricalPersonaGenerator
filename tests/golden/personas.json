@@ -10,13 +10,14 @@
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in East Asia",
     "head": "Henna Cotton Headscarf [Linen]",
-    "torso": "Charcoal Short Cotton Jacket And Wrap Skirt [Wool]",
+    "torso": "Charcoal Short Cotton Jacket [Wool]",
     "feet": "Henna Straw Sandals [Wool]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#b5502e",
       "garmentKind": "jacket",
       "garmentColor": "#3a3a38",
+      "legwear": "Wrap Skirt [wool] skirt",
       "backgroundBase": "#3f5a55",
       "pose": null
     },
@@ -58,6 +59,7 @@
       "headwearColor": "#d8cdb6",
       "garmentKind": "work_shirt",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#3f5a55",
       "pose": null
     },
@@ -96,6 +98,7 @@
       "headwearColor": "#c2a463",
       "garmentKind": "jacket",
       "garmentColor": "#8e2436",
+      "legwear": null,
       "backgroundBase": "#3f5a55",
       "pose": "build:broad"
     },
@@ -130,6 +133,7 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "jacket",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#3f5a55",
       "pose": null
     },
@@ -168,6 +172,7 @@
       "headwearColor": "#d8cdb6",
       "garmentKind": "jacket",
       "garmentColor": "#dfa62c",
+      "legwear": null,
       "backgroundBase": "#3f5a55",
       "pose": null
     },
@@ -203,6 +208,7 @@
       "headwearColor": "#5a6b3b",
       "garmentKind": "jacket",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#3f5a55",
       "pose": "build:broad"
     },
@@ -237,6 +243,7 @@
       "headwearColor": "#b1803c",
       "garmentKind": "jacket",
       "garmentColor": "#2e3f5c",
+      "legwear": "Trousers [fine wool] trousers",
       "backgroundBase": "#655359",
       "pose": null
     },
@@ -273,6 +280,7 @@
       "headwearColor": null,
       "garmentKind": "work_shirt",
       "garmentColor": "#6e6b3a",
+      "legwear": "Olive Cotton Coveralls [wool] trousers",
       "backgroundBase": "#535c65",
       "pose": null
     },
@@ -312,6 +320,7 @@
       "headwearColor": "#8a5a3b",
       "garmentKind": "jacket",
       "garmentColor": "#e8e4d9",
+      "legwear": "Trousers [cotton twill] trousers",
       "backgroundBase": "#525c66",
       "pose": "build:broad+brave"
     },
@@ -346,6 +355,7 @@
       "headwearColor": null,
       "garmentKind": "gown",
       "garmentColor": "#4f3c2b",
+      "legwear": null,
       "backgroundBase": "#4a5a6a",
       "pose": null
     },
@@ -383,6 +393,7 @@
       "headwearColor": "#c2a463",
       "garmentKind": "work_shirt",
       "garmentColor": "#d9a441",
+      "legwear": null,
       "backgroundBase": "#4a5a6a",
       "pose": null
     },
@@ -421,6 +432,7 @@
       "headwearColor": "#8a8781",
       "garmentKind": "gown",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#4a5a6a",
       "pose": "build:broad"
     },
@@ -455,6 +467,7 @@
       "headwearColor": null,
       "garmentKind": "gown",
       "garmentColor": "#b5502e",
+      "legwear": null,
       "backgroundBase": "#535865",
       "pose": null
     },
@@ -495,6 +508,7 @@
       "headwearColor": null,
       "garmentKind": "work_shirt",
       "garmentColor": "#6e6b3a",
+      "legwear": "Lungi [cotton check] wrapped",
       "backgroundBase": "#5d6271",
       "pose": null
     },
@@ -532,6 +546,7 @@
       "headwearColor": null,
       "garmentKind": "work_shirt",
       "garmentColor": "#6e6b3a",
+      "legwear": "Lungi [cotton check] wrapped",
       "backgroundBase": "#5d6271",
       "pose": "build:broad+brave"
     },
@@ -566,6 +581,7 @@
       "headwearColor": null,
       "garmentKind": "robe",
       "garmentColor": "#b5502e",
+      "legwear": null,
       "backgroundBase": "#373a44",
       "pose": null
     },
@@ -605,6 +621,7 @@
       "headwearColor": "#5b4229",
       "garmentKind": "robe",
       "garmentColor": "#dfa62c",
+      "legwear": null,
       "backgroundBase": "#373a44",
       "pose": null
     },
@@ -641,6 +658,7 @@
       "headwearColor": "#5b4229",
       "garmentKind": "robe",
       "garmentColor": "#a33327",
+      "legwear": null,
       "backgroundBase": "#373a44",
       "pose": "build:broad+brave"
     },
@@ -675,6 +693,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#9b704c",
+      "legwear": null,
       "backgroundBase": "#587f67",
       "pose": null
     },
@@ -716,6 +735,7 @@
       "headwearColor": "#a98258",
       "garmentKind": "tunic",
       "garmentColor": "#9b704c",
+      "legwear": null,
       "backgroundBase": "#587f6b",
       "pose": "taciturn"
     },
@@ -753,6 +773,7 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#9b704c",
+      "legwear": null,
       "backgroundBase": "#587f6a",
       "pose": "build:broad"
     },
@@ -787,6 +808,7 @@
       "headwearColor": "#ddd5c3",
       "garmentKind": "gown",
       "garmentColor": "#67584b",
+      "legwear": null,
       "backgroundBase": "#3b403e",
       "pose": null
     },
@@ -823,6 +845,7 @@
       "headwearColor": "#584d43",
       "garmentKind": "work_shirt",
       "garmentColor": "#5d5548",
+      "legwear": null,
       "backgroundBase": "#3b403d",
       "pose": null
     },
@@ -860,6 +883,7 @@
       "headwearColor": null,
       "garmentKind": "doublet",
       "garmentColor": "#5d5548",
+      "legwear": null,
       "backgroundBase": "#3b403d",
       "pose": "build:broad+brave"
     },
@@ -892,6 +916,7 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#565a5f",
       "pose": null
     },
@@ -927,6 +952,7 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "tunic",
       "garmentColor": "#6f5237",
+      "legwear": "Worker Trousers [coarse wool] trousers",
       "backgroundBase": "#565a5f",
       "pose": null
     },
@@ -957,13 +983,14 @@
     "languageConfidence": "attested",
     "odds": "the industrial era in Europe",
     "head": "Ivory Flat Cap [Tweed]",
-    "torso": "Black Labor Breeches [Patched Canvas]",
+    "torso": "Black Mill Smock [Canvas]",
     "feet": "Work Boots [Thick Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
       "garmentColor": "#1f1f22",
+      "legwear": "Labor Breeches [patched canvas] trousers",
       "backgroundBase": "#565a5f",
       "pose": "build:broad"
     },
@@ -997,6 +1024,7 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "tunic",
       "garmentColor": "#2e3f5c",
+      "legwear": null,
       "backgroundBase": "#5d4b52",
       "pose": null
     },
@@ -1036,6 +1064,7 @@
       "headwearColor": "#ddd3ba",
       "garmentKind": "work_shirt",
       "garmentColor": "#a8763f",
+      "legwear": null,
       "backgroundBase": "#5c6272",
       "pose": "loner"
     },
@@ -1072,6 +1101,7 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
       "garmentColor": "#3a3a38",
+      "legwear": null,
       "backgroundBase": "#5c6272",
       "pose": "build:broad"
     },
@@ -1106,6 +1136,7 @@
       "headwearColor": null,
       "garmentKind": "doublet",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#504c6c",
       "pose": null
     },
@@ -1144,6 +1175,7 @@
       "headwearColor": "#b5502e",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#494663",
       "pose": null
     },
@@ -1179,6 +1211,7 @@
       "headwearColor": "#5a6b3b",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#8884a8",
       "pose": "build:broad"
     },
@@ -1213,6 +1246,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#927454",
+      "legwear": null,
       "backgroundBase": "#53836b",
       "pose": null
     },
@@ -1254,6 +1288,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#927454",
+      "legwear": null,
       "backgroundBase": "#426757",
       "pose": null
     },
@@ -1292,6 +1327,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#927454",
+      "legwear": null,
       "backgroundBase": "#53826e",
       "pose": "build:broad+curious"
     },
@@ -1329,6 +1365,7 @@
       "headwearColor": null,
       "garmentKind": "gown",
       "garmentColor": "#2e3f5c",
+      "legwear": null,
       "backgroundBase": "#a15e77",
       "pose": null
     },
@@ -1366,6 +1403,7 @@
       "headwearColor": "#b5502e",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
+      "legwear": null,
       "backgroundBase": "#3c5c67",
       "pose": null
     },
@@ -1400,6 +1438,7 @@
       "headwearColor": "#3a4f6d",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
+      "legwear": null,
       "backgroundBase": "#3c5c67",
       "pose": "build:broad"
     },
@@ -1419,34 +1458,32 @@
     ]
   },
   "andes-1500#1": {
-    "name": "Phuyupatamanta",
+    "name": "Killa Flores",
     "gender": "Female",
     "age": 75,
     "profession": "Farm Worker",
     "religion": "Roman Catholicism",
-    "language": "Quechuan (reconstructed)",
+    "language": "Aymaran (reconstructed)",
     "languageBasis": "sam-andes",
     "languageConfidence": "reconstructed",
     "odds": "the early modern period in South America",
     "head": null,
-    "torso": "Walnut Wool Wrap Dress [Wool]",
+    "torso": "Charcoal Wool Wrap Dress [Wool]",
     "feet": "Leather Sandals [Leather]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "gown",
-      "garmentColor": "#5b4229",
-      "backgroundBase": "#455e4f",
+      "garmentColor": "#3a3a38",
+      "legwear": null,
+      "backgroundBase": "#34463b",
       "pose": null
     },
     "family": [
-      "father: Huascar",
-      "mother: Quispe",
-      "brother: Illapa",
-      "sister: Achik",
-      "spouse: Illapa",
-      "daughter: Sumaq",
-      "son: Sumaq Alanoca"
+      "father: Thupa Flores",
+      "mother: Chaska Inca",
+      "brother: Sayri Flores",
+      "sister: Achik Flores"
     ],
     "events": [
       "1425: Born in a small settlement to a Commoner family",
@@ -1458,14 +1495,14 @@
     ]
   },
   "andes-1500#2": {
-    "name": "Sumaq the Condor",
+    "name": "Huanca Soncco",
     "gender": "Male",
     "age": 40,
     "profession": "Potato Farmer",
     "religion": "Roman Catholicism",
-    "language": "Puquina or Mochica (attested)",
+    "language": "Aymaran (reconstructed)",
     "languageBasis": "sam-andes",
-    "languageConfidence": "inferred",
+    "languageConfidence": "reconstructed",
     "odds": "the early modern period in South America",
     "head": "Madder Woven Wool Cap [Wool]",
     "torso": "Indigo Wool Tunic (Uncu) [Wool]",
@@ -1475,14 +1512,15 @@
       "headwearColor": "#a63a2b",
       "garmentKind": "tunic",
       "garmentColor": "#2e3f5c",
+      "legwear": null,
       "backgroundBase": "#34463b",
       "pose": null
     },
     "family": [
-      "father: Kuntur",
+      "father: Kuntur Soncco",
       "mother: Phaway",
-      "sister: Urpi",
-      "brother: Qhapaq Marca",
+      "sister: Urpi Soncco",
+      "brother: Qhapaq Soncco",
       "spouse: Chakana",
       "son: Tupaq",
       "daughter: Hanan Ramos"
@@ -1498,23 +1536,24 @@
     ]
   },
   "andes-1500#3": {
-    "name": "Manco",
+    "name": "Atawallpa",
     "gender": "Male",
     "age": 20,
     "profession": "Maize Cultivator",
     "religion": "Roman Catholicism",
-    "language": "Quechuan (reconstructed)",
+    "language": "Aymaran (reconstructed)",
     "languageBasis": "sam-andes",
     "languageConfidence": "reconstructed",
     "odds": "the early modern period in South America",
     "head": null,
-    "torso": "Cream Wool Pants [Coarse Wool]",
+    "torso": "Turmeric Wool Pants [Coarse Wool]",
     "feet": "Leather Sandals [Raw Leather]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#ddd3ba",
+      "garmentColor": "#dfa62c",
+      "legwear": null,
       "backgroundBase": "#34463b",
       "pose": "build:broad"
     },
@@ -1549,6 +1588,7 @@
       "headwearColor": "#c2a463",
       "garmentKind": "gown",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#748b79",
       "pose": null
     },
@@ -1590,6 +1630,7 @@
       "headwearColor": "#c2a463",
       "garmentKind": "bare",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#4b5a4e",
       "pose": null
     },
@@ -1627,6 +1668,7 @@
       "headwearColor": "#c2a463",
       "garmentKind": "bare",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#4b5a4e",
       "pose": "build:broad"
     },
@@ -1650,7 +1692,7 @@
     ]
   },
   "newengland-1780#1": {
-    "name": "Hope Hernandez",
+    "name": "Lydia",
     "gender": "Female",
     "age": 75,
     "profession": "Laundress",
@@ -1660,21 +1702,25 @@
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
     "head": "Ivory Mob Cap [Wool]",
-    "torso": "Saffron Servant'S Calico Dress [Wool]",
+    "torso": "Walnut Servant'S Calico Dress [Wool]",
     "feet": "Simple Leather Shoes [Treated Hide]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
-      "garmentColor": "#d9a441",
+      "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#4c5354",
       "pose": null
     },
     "family": [
-      "father: Edward Hernandez",
-      "mother: Abigail Martinez",
-      "brother: Gideon Hernandez",
-      "sister: Rachel Hernandez"
+      "father: Jacob Jones",
+      "mother: Deborah Moore",
+      "brother: John Young",
+      "sister: Elizabeth Martinez",
+      "spouse: Caleb Allen",
+      "son: Jeremiah Martin",
+      "daughter: Deborah Martin"
     ],
     "events": [
       "1705: Born in a small settlement to a Gentry family",
@@ -1687,7 +1733,7 @@
     ]
   },
   "newengland-1780#2": {
-    "name": "Gideon Lewis",
+    "name": "Jonathan King",
     "gender": "Male",
     "age": 40,
     "profession": "Publican",
@@ -1696,22 +1742,23 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "White Phrygian Cap [Red Wool]",
-    "torso": "Brown Workshop Bottoms [Coarse Wool]",
+    "head": "Ivory Phrygian Cap [Red Wool]",
+    "torso": "Black Workshop Bottoms [Coarse Wool]",
     "feet": "Work Boots [Thick Leather]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#e8e4d9",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "tunic",
-      "garmentColor": "#6f5237",
+      "garmentColor": "#1f1f22",
+      "legwear": "Worker Trousers [coarse wool] trousers",
       "backgroundBase": "#4c5354",
       "pose": null
     },
     "family": [
-      "father: Cornelius Lewis",
-      "mother: Charity Smith",
-      "brother: Isaac Lewis",
-      "sister: Mary Lewis"
+      "father: Caleb King",
+      "mother: Susanna Hernandez",
+      "brother: Isaac King",
+      "sister: Silence King"
     ],
     "events": [
       "1740: Born in a small settlement to a Laboring Poor family",
@@ -1724,7 +1771,7 @@
     ]
   },
   "newengland-1780#3": {
-    "name": "Isaac Brown",
+    "name": "James Johnson",
     "gender": "Male",
     "age": 20,
     "profession": "Fuller",
@@ -1733,22 +1780,23 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "White Phrygian Cap [Red Wool]",
-    "torso": "Marigold Labor Breeches [Patched Canvas]",
+    "head": "Ivory Phrygian Cap [Red Wool]",
+    "torso": "Saffron Shirt [Cotton]",
     "feet": "Work Boots [Thick Leather]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#e8e4d9",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
-      "garmentColor": "#d9822f",
+      "garmentColor": "#d9a441",
+      "legwear": "Labor Breeches [patched canvas] trousers",
       "backgroundBase": "#4c5354",
       "pose": "build:broad"
     },
     "family": [
-      "father: Elijah Brown",
-      "mother: Thankful Walker",
-      "sister: Priscilla Brown",
-      "brother: Gideon Brown"
+      "father: Benjamin Johnson",
+      "mother: Thankful Taylor",
+      "brother: Jacob Johnson",
+      "sister: Priscilla Johnson"
     ],
     "events": [
       "1760: Born in a small settlement to a Middling Sort family",
@@ -1776,6 +1824,7 @@
       "headwearColor": null,
       "garmentKind": "robe",
       "garmentColor": "#59645d",
+      "legwear": null,
       "backgroundBase": "#3b403a",
       "pose": null
     },
@@ -1817,6 +1866,7 @@
       "headwearColor": "#4b463d",
       "garmentKind": "robe",
       "garmentColor": "#59645d",
+      "legwear": null,
       "backgroundBase": "#3b403a",
       "pose": "cunning"
     },
@@ -1856,6 +1906,7 @@
       "headwearColor": "#4b463d",
       "garmentKind": "robe",
       "garmentColor": "#59645d",
+      "legwear": null,
       "backgroundBase": "#3b403a",
       "pose": "build:broad"
     },
@@ -1890,6 +1941,7 @@
       "headwearColor": null,
       "garmentKind": "work_shirt",
       "garmentColor": "#5b4229",
+      "legwear": "Walnut Cotton Coveralls [wool] trousers",
       "backgroundBase": "#555365",
       "pose": null
     },
@@ -1930,6 +1982,7 @@
       "headwearColor": null,
       "garmentKind": "work_shirt",
       "garmentColor": "#2e3f5c",
+      "legwear": "Lungi [cotton check] wrapped",
       "backgroundBase": "#655359",
       "pose": null
     },
@@ -1968,6 +2021,7 @@
       "headwearColor": null,
       "garmentKind": "work_shirt",
       "garmentColor": "#dfa62c",
+      "legwear": "Trousers [cotton] trousers",
       "backgroundBase": "#8e8ba0",
       "pose": "build:broad"
     },
@@ -2008,6 +2062,7 @@
       "headwearColor": null,
       "garmentKind": "jacket",
       "garmentColor": "#566370",
+      "legwear": "Slate Skirt Suit And Blouse [fine linen] trousers",
       "backgroundBase": "#535c65",
       "pose": "corpulent+build:broad"
     },
@@ -2045,6 +2100,7 @@
       "headwearColor": "#b1803c",
       "garmentKind": "work_shirt",
       "garmentColor": "#6e6b3a",
+      "legwear": "Trousers [cotton twill] trousers",
       "backgroundBase": "#535c65",
       "pose": null
     },
@@ -2084,6 +2140,7 @@
       "headwearColor": "#8a5a3b",
       "garmentKind": "jacket",
       "garmentColor": "#3a3a38",
+      "legwear": "Trousers [cotton] trousers",
       "backgroundBase": "#535c65",
       "pose": "build:broad"
     },
@@ -2117,6 +2174,7 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "tunic",
       "garmentColor": "#2e3f5c",
+      "legwear": "Skirt [cotton twill] skirt",
       "backgroundBase": "#5f5659",
       "pose": null
     },
@@ -2155,6 +2213,7 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "doublet",
       "garmentColor": "#1f1f22",
+      "legwear": "Trousers [cotton twill] trousers",
       "backgroundBase": "#565a5f",
       "pose": null
     },
@@ -2187,13 +2246,14 @@
     "languageConfidence": "attested",
     "odds": "the industrial era in Europe",
     "head": "Ivory Flat Cap [Tweed]",
-    "torso": "Madder Labor Breeches [Patched Canvas]",
+    "torso": "Madder Mill Smock [Canvas]",
     "feet": "Work Boots [Thick Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
       "garmentColor": "#a63a2b",
+      "legwear": "Labor Breeches [patched canvas] trousers",
       "backgroundBase": "#555a5f",
       "pose": "build:broad"
     },
@@ -2229,6 +2289,7 @@
       "headwearColor": "#41608c",
       "garmentKind": "gown",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#535c65",
       "pose": null
     },
@@ -2265,6 +2326,7 @@
       "headwearColor": "#a98a63",
       "garmentKind": "jacket",
       "garmentColor": "#3a3a38",
+      "legwear": "Trousers [cotton twill] trousers",
       "backgroundBase": "#535c65",
       "pose": null
     },
@@ -2301,6 +2363,7 @@
       "headwearColor": "#a98a63",
       "garmentKind": "jacket",
       "garmentColor": "#1f1f22",
+      "legwear": "Trousers [cotton twill] trousers",
       "backgroundBase": "#525c66",
       "pose": "build:broad+brave"
     },
@@ -2328,13 +2391,14 @@
     "languageConfidence": "reconstructed",
     "odds": "the modern era in South America",
     "head": null,
-    "torso": "Charcoal Skirt [Cotton Blend]",
+    "torso": "Charcoal Blouse [Polyester]",
     "feet": "Blue Canvas Shoes [Canvas]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "wrapped_garment",
+      "garmentKind": "work_shirt",
       "garmentColor": "#3a3a38",
+      "legwear": "Skirt [cotton blend] skirt",
       "backgroundBase": "#53655a",
       "pose": null
     },
@@ -2374,6 +2438,7 @@
       "headwearColor": "#6f5237",
       "garmentKind": "work_shirt",
       "garmentColor": "#e8e4d9",
+      "legwear": "Jeans [denim] trousers",
       "backgroundBase": "#708979",
       "pose": null
     },
@@ -2409,6 +2474,7 @@
       "headwearColor": "#a98a63",
       "garmentKind": "work_shirt",
       "garmentColor": "#e8e4d9",
+      "legwear": "Jeans [denim] trousers",
       "backgroundBase": "#53655a",
       "pose": "build:broad+proud"
     },
@@ -2444,6 +2510,7 @@
       "headwearColor": null,
       "garmentKind": "work_shirt",
       "garmentColor": "#5b4229",
+      "legwear": "Skirt [cotton] skirt",
       "backgroundBase": "#708389",
       "pose": null
     },
@@ -2479,6 +2546,7 @@
       "headwearColor": "#41608c",
       "garmentKind": "work_shirt",
       "garmentColor": "#dfa62c",
+      "legwear": "Board Shorts [polyester] shorts",
       "backgroundBase": "#536065",
       "pose": null
     },
@@ -2497,7 +2565,7 @@
     ]
   },
   "newzealand-2010#3": {
-    "name": "Rongo",
+    "name": "Rongo Tuilagi",
     "gender": "Male",
     "age": 21,
     "profession": "Opal Miner",
@@ -2507,21 +2575,22 @@
     "languageConfidence": "reconstructed",
     "odds": "the modern era in Oceania",
     "head": "Russet Baseball Cap [Cotton]",
-    "torso": "Charcoal T-Shirt [Cotton]",
+    "torso": "Olive T-Shirt [Cotton]",
     "feet": "Russet Flip Flops [Rubber]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#8a5a3b",
       "garmentKind": "work_shirt",
-      "garmentColor": "#3a3a38",
+      "garmentColor": "#6e6b3a",
+      "legwear": "Board Shorts [polyester] shorts",
       "backgroundBase": "#536065",
       "pose": "build:broad"
     },
     "family": [
-      "father: Te Koha",
-      "mother: Lehua",
-      "sister: Marama",
-      "brother: Hemi"
+      "father: Kawika Tuilagi",
+      "mother: Raina Taufa",
+      "sister: Marama Tuilagi",
+      "brother: Tane Tuilagi"
     ],
     "events": [
       "1989: Born in a small settlement to a Peasant family",
@@ -2548,6 +2617,7 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "jacket",
       "garmentColor": "#d9a441",
+      "legwear": null,
       "backgroundBase": "#445f5a",
       "pose": null
     },
@@ -2587,6 +2657,7 @@
       "headwearColor": "#d8cdb6",
       "garmentKind": "jacket",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#445f5a",
       "pose": null
     },
@@ -2626,6 +2697,7 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "work_shirt",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#445f5a",
       "pose": "build:broad+shy"
     },
@@ -2660,6 +2732,7 @@
       "headwearColor": "#c2a463",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#435653",
       "pose": null
     },
@@ -2700,6 +2773,7 @@
       "headwearColor": "#c0a566",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#435653",
       "pose": null
     },
@@ -2738,6 +2812,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#435653",
       "pose": "build:broad"
     },
@@ -2768,13 +2843,14 @@
     "languageConfidence": "attested",
     "odds": "the medieval period in East Asia",
     "head": "White Cotton Headscarf [Burlap]",
-    "torso": "Walnut Short Cotton Jacket And Wrap Skirt [Burlap]",
+    "torso": "Walnut Short Cotton Jacket [Burlap]",
     "feet": "White Straw Sandals [Rough Wool]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#e8e4d9",
       "garmentKind": "jacket",
       "garmentColor": "#5b4229",
+      "legwear": "Wrap Skirt [burlap] skirt",
       "backgroundBase": "#3f5a55",
       "pose": null
     },
@@ -2816,6 +2892,7 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
       "garmentColor": "#a8763f",
+      "legwear": null,
       "backgroundBase": "#3f5a55",
       "pose": "cunning"
     },
@@ -2855,6 +2932,7 @@
       "headwearColor": null,
       "garmentKind": "robe",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#3f5a55",
       "pose": "build:broad"
     },
@@ -2888,6 +2966,7 @@
       "headwearColor": "#d8cdb6",
       "garmentKind": "jacket",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#3f5a55",
       "pose": null
     },
@@ -2924,6 +3003,7 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "work_shirt",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#3f5a55",
       "pose": "humble"
     },
@@ -2960,6 +3040,7 @@
       "headwearColor": "#b5502e",
       "garmentKind": "work_shirt",
       "garmentColor": "#3a3a38",
+      "legwear": null,
       "backgroundBase": "#3f5a55",
       "pose": "build:broad"
     },
@@ -2994,6 +3075,7 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#49504f",
       "pose": null
     },
@@ -3027,13 +3109,14 @@
     "languageConfidence": "attested",
     "odds": "the industrial era in East Asia",
     "head": "Ivory Conical Bamboo Hat [Linen]",
-    "torso": "Olive Cropped Trousers [Wool]",
+    "torso": "Olive Short Hemp Jacket [Wool]",
     "feet": "Ivory Straw Sandals [Cotton]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#e5ddd0",
-      "garmentKind": "work_shirt",
+      "garmentKind": "jacket",
       "garmentColor": "#6e6b3a",
+      "legwear": "Cropped Trousers [wool] trousers",
       "backgroundBase": "#49504f",
       "pose": null
     },
@@ -3072,6 +3155,7 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "jacket",
       "garmentColor": "#3a3a38",
+      "legwear": "Trousers [cotton] trousers",
       "backgroundBase": "#49504f",
       "pose": "build:broad"
     },
@@ -3107,6 +3191,7 @@
       "headwearColor": "#8b7358",
       "garmentKind": "jacket",
       "garmentColor": "#8b7358",
+      "legwear": null,
       "backgroundBase": "#4b5762",
       "pose": null
     },
@@ -3146,6 +3231,7 @@
       "headwearColor": "#d8cdb6",
       "garmentKind": "jacket",
       "garmentColor": "#8b7358",
+      "legwear": null,
       "backgroundBase": "#4b5762",
       "pose": null
     },
@@ -3183,6 +3269,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#4b5762",
       "pose": "build:broad"
     },
@@ -3221,6 +3308,7 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#9b805e",
+      "legwear": null,
       "backgroundBase": "#729b89",
       "pose": null
     },
@@ -3260,6 +3348,7 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#9b805e",
+      "legwear": null,
       "backgroundBase": "#769e8a",
       "pose": null
     },
@@ -3296,6 +3385,7 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#9b805e",
+      "legwear": null,
       "backgroundBase": "#769e8a",
       "pose": "build:broad+proud"
     },
@@ -3331,6 +3421,7 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#9b805e",
+      "legwear": null,
       "backgroundBase": "#729b89",
       "pose": null
     },
@@ -3366,6 +3457,7 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#9b805e",
+      "legwear": null,
       "backgroundBase": "#769e8a",
       "pose": null
     },
@@ -3403,6 +3495,7 @@
       "headwearColor": null,
       "garmentKind": "tunic",
       "garmentColor": "#9b805e",
+      "legwear": null,
       "backgroundBase": "#769e8a",
       "pose": "build:broad"
     },
@@ -3437,6 +3530,7 @@
       "headwearColor": "#8a8781",
       "garmentKind": "gown",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#4a5a6a",
       "pose": null
     },
@@ -3475,6 +3569,7 @@
       "headwearColor": "#d8cdb6",
       "garmentKind": "work_shirt",
       "garmentColor": "#a8763f",
+      "legwear": null,
       "backgroundBase": "#4a5a6a",
       "pose": null
     },
@@ -3514,6 +3609,7 @@
       "headwearColor": "#8a8781",
       "garmentKind": "tunic",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#4a5a6a",
       "pose": "build:broad"
     },
@@ -3549,6 +3645,7 @@
       "headwearColor": "#dfa62c",
       "garmentKind": "work_shirt",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#343d46",
       "pose": null
     },
@@ -3590,6 +3687,7 @@
       "headwearColor": "#dfa62c",
       "garmentKind": "work_shirt",
       "garmentColor": "#6a2450",
+      "legwear": null,
       "backgroundBase": "#343d46",
       "pose": null
     },
@@ -3626,6 +3724,7 @@
       "headwearColor": "#b9bcc2",
       "garmentKind": "work_shirt",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#343d46",
       "pose": "build:broad"
     },
@@ -3653,13 +3752,14 @@
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
     "head": "Turmeric Linen Cap [Linen]",
-    "torso": "Walnut Wool Bodice And Petticoat [Wool]",
+    "torso": "Walnut Wool Bodice [Wool]",
     "feet": "Leather Shoes [Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#dfa62c",
       "garmentKind": "doublet",
       "garmentColor": "#5b4229",
+      "legwear": "Petticoat [wool] skirt",
       "backgroundBase": "#343d46",
       "pose": null
     },
@@ -3699,6 +3799,7 @@
       "headwearColor": "#dfa62c",
       "garmentKind": "work_shirt",
       "garmentColor": "#a8763f",
+      "legwear": null,
       "backgroundBase": "#343d46",
       "pose": "consumptive"
     },
@@ -3738,6 +3839,7 @@
       "headwearColor": "#ddd3ba",
       "garmentKind": "work_shirt",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#343d46",
       "pose": "build:broad"
     },
@@ -3766,13 +3868,14 @@
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
     "head": "Cream Linen Cap [Wool]",
-    "torso": "Olive Wool Bodice And Petticoat [Linen]",
+    "torso": "Olive Wool Bodice [Linen]",
     "feet": "Leather Shoes [Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#ddd3ba",
       "garmentKind": "doublet",
       "garmentColor": "#6e6b3a",
+      "legwear": "Petticoat [linen] skirt",
       "backgroundBase": "#343d46",
       "pose": null
     },
@@ -3813,6 +3916,7 @@
       "headwearColor": "#ddd3ba",
       "garmentKind": "work_shirt",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#343d46",
       "pose": null
     },
@@ -3852,6 +3956,7 @@
       "headwearColor": "#d8cdb6",
       "garmentKind": "work_shirt",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#343d46",
       "pose": "build:broad"
     },
@@ -3887,6 +3992,7 @@
       "headwearColor": "#a98a63",
       "garmentKind": "gown",
       "garmentColor": "#2e3f5c",
+      "legwear": null,
       "backgroundBase": "#655359",
       "pose": null
     },
@@ -3928,6 +4034,7 @@
       "headwearColor": "#8a5a3b",
       "garmentKind": "work_shirt",
       "garmentColor": "#5b4229",
+      "legwear": "Trousers [cotton twill] trousers",
       "backgroundBase": "#535c65",
       "pose": null
     },
@@ -3964,6 +4071,7 @@
       "headwearColor": "#b1803c",
       "garmentKind": "jacket",
       "garmentColor": "#3c8f7f",
+      "legwear": "Trousers [cotton twill] trousers",
       "backgroundBase": "#615365",
       "pose": "build:broad"
     },
@@ -3999,6 +4107,7 @@
       "headwearColor": "#c2a463",
       "garmentKind": "gown",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#4b505d",
       "pose": null
     },
@@ -4037,6 +4146,7 @@
       "headwearColor": "#5a6b3b",
       "garmentKind": "tunic",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#5c6272",
       "pose": null
     },
@@ -4074,6 +4184,7 @@
       "headwearColor": "#a98a63",
       "garmentKind": "bare",
       "garmentColor": "#3a3a38",
+      "legwear": null,
       "backgroundBase": "#4b505d",
       "pose": "build:broad"
     },
@@ -4109,6 +4220,7 @@
       "headwearColor": "#c2a463",
       "garmentKind": "gown",
       "garmentColor": "#3a3a38",
+      "legwear": null,
       "backgroundBase": "#4b505d",
       "pose": null
     },
@@ -4150,6 +4262,7 @@
       "headwearColor": "#a98a63",
       "garmentKind": "tunic",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#5c6272",
       "pose": null
     },
@@ -4187,6 +4300,7 @@
       "headwearColor": "#2e3f5c",
       "garmentKind": "bare",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#5c6272",
       "pose": "build:broad"
     },
@@ -4221,6 +4335,7 @@
       "headwearColor": "#c2a463",
       "garmentKind": "gown",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#4b505d",
       "pose": null
     },
@@ -4259,6 +4374,7 @@
       "headwearColor": "#dfa62c",
       "garmentKind": "tunic",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#5c6272",
       "pose": null
     },
@@ -4293,6 +4409,7 @@
       "headwearColor": "#6b482f",
       "garmentKind": "tunic",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#5c6272",
       "pose": "build:broad"
     },
@@ -4327,6 +4444,7 @@
       "headwearColor": "#c2a463",
       "garmentKind": "gown",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#4b505d",
       "pose": null
     },
@@ -4368,6 +4486,7 @@
       "headwearColor": "#8e2436",
       "garmentKind": "tunic",
       "garmentColor": "#2e3f5c",
+      "legwear": null,
       "backgroundBase": "#725c64",
       "pose": null
     },
@@ -4402,6 +4521,7 @@
       "headwearColor": "#6b482f",
       "garmentKind": "tunic",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#5c6272",
       "pose": "build:broad"
     },
@@ -4436,6 +4556,7 @@
       "headwearColor": "#c2a463",
       "garmentKind": "gown",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#4b505d",
       "pose": null
     },
@@ -4477,6 +4598,7 @@
       "headwearColor": "#a98a63",
       "garmentKind": "tunic",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#5c6272",
       "pose": null
     },
@@ -4511,6 +4633,7 @@
       "headwearColor": "#2e3f5c",
       "garmentKind": "bare",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#5c6272",
       "pose": "build:broad"
     },
@@ -4545,6 +4668,7 @@
       "headwearColor": null,
       "garmentKind": "gown",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#535865",
       "pose": null
     },
@@ -4583,6 +4707,7 @@
       "headwearColor": null,
       "garmentKind": "work_shirt",
       "garmentColor": "#a8763f",
+      "legwear": "Lungi [cotton check] wrapped",
       "backgroundBase": "#5d6271",
       "pose": null
     },
@@ -4620,6 +4745,7 @@
       "headwearColor": null,
       "garmentKind": "work_shirt",
       "garmentColor": "#566370",
+      "legwear": "Lungi [cotton check] wrapped",
       "backgroundBase": "#535865",
       "pose": "build:broad"
     },
@@ -4654,6 +4780,7 @@
       "headwearColor": "#a63a2b",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#5a6b3b",
+      "legwear": null,
       "backgroundBase": "#3e4d51",
       "pose": null
     },
@@ -4695,6 +4822,7 @@
       "headwearColor": null,
       "garmentKind": "bare",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#5d7379",
       "pose": null
     },
@@ -4734,6 +4862,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#4a5b60",
       "pose": "build:broad"
     },
@@ -4772,6 +4901,7 @@
       "headwearColor": "#3a4f6d",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#e8e4d9",
+      "legwear": null,
       "backgroundBase": "#3e4d51",
       "pose": null
     },
@@ -4810,6 +4940,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a8763f",
+      "legwear": null,
       "backgroundBase": "#5d7379",
       "pose": null
     },
@@ -4851,6 +4982,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#4a5b60",
       "pose": "build:broad"
     },
@@ -4889,6 +5021,7 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#35525a",
       "pose": null
     },
@@ -4930,6 +5063,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a8763f",
+      "legwear": null,
       "backgroundBase": "#4c7581",
       "pose": null
     },
@@ -4968,6 +5102,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#3f616b",
       "pose": "build:broad"
     },
@@ -5001,6 +5136,7 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#35525a",
       "pose": null
     },
@@ -5042,6 +5178,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a8763f",
+      "legwear": null,
       "backgroundBase": "#4c7581",
       "pose": null
     },
@@ -5077,6 +5214,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#3f616b",
       "pose": "build:broad"
     },
@@ -5114,6 +5252,7 @@
       "headwearColor": "#e5ddd0",
       "garmentKind": "tunic",
       "garmentColor": "#b5502e",
+      "legwear": null,
       "backgroundBase": "#44494b",
       "pose": null
     },
@@ -5151,6 +5290,7 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
       "garmentColor": "#3a3a38",
+      "legwear": "Khaki Shorts [canvas] shorts",
       "backgroundBase": "#626a6c",
       "pose": null
     },
@@ -5188,6 +5328,7 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
       "garmentColor": "#6e6b3a",
+      "legwear": "Khaki Shorts [canvas] shorts",
       "backgroundBase": "#505759",
       "pose": "build:broad"
     },
@@ -5222,6 +5363,7 @@
       "headwearColor": "#b49a78",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#8a7157",
+      "legwear": null,
       "backgroundBase": "#34463e",
       "pose": null
     },
@@ -5263,6 +5405,7 @@
       "headwearColor": null,
       "garmentKind": "robe",
       "garmentColor": "#83705a",
+      "legwear": null,
       "backgroundBase": "#344640",
       "pose": null
     },
@@ -5302,6 +5445,7 @@
       "headwearColor": "#a68a68",
       "garmentKind": "robe",
       "garmentColor": "#83705a",
+      "legwear": null,
       "backgroundBase": "#455e51",
       "pose": "build:broad"
     },
@@ -5343,6 +5487,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#4d4870",
       "pose": null
     },
@@ -5383,6 +5528,7 @@
       "headwearColor": "#e8e4d9",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#464267",
       "pose": null
     },
@@ -5421,6 +5567,7 @@
       "headwearColor": "#ddd3ba",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#6b649b",
       "pose": "build:broad"
     },
@@ -5457,6 +5604,7 @@
       "headwearColor": "#a63a2b",
       "garmentKind": "jacket",
       "garmentColor": "#8b7358",
+      "legwear": null,
       "backgroundBase": "#4e4b62",
       "pose": null
     },
@@ -5498,6 +5646,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#4c495f",
       "pose": null
     },
@@ -5536,6 +5685,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#cf7288",
+      "legwear": null,
       "backgroundBase": "#615d79",
       "pose": "build:broad"
     },
@@ -5574,6 +5724,7 @@
       "headwearColor": "#c2a463",
       "garmentKind": "gown",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#748b79",
       "pose": null
     },
@@ -5612,6 +5763,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#2e3f5c",
+      "legwear": null,
       "backgroundBase": "#4b5a4e",
       "pose": null
     },
@@ -5647,6 +5799,7 @@
       "headwearColor": "#c2a463",
       "garmentKind": "bare",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#4b5a4e",
       "pose": "build:broad"
     },
@@ -5685,6 +5838,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#4a594d",
       "pose": null
     },
@@ -5721,6 +5875,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a33327",
+      "legwear": null,
       "backgroundBase": "#38433a",
       "pose": null
     },
@@ -5758,6 +5913,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#38433a",
       "pose": "build:broad"
     },
@@ -5794,6 +5950,7 @@
       "headwearColor": null,
       "garmentKind": "bare",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#748b79",
       "pose": null
     },
@@ -5831,6 +5988,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#2e3f5c",
+      "legwear": null,
       "backgroundBase": "#4b5a4e",
       "pose": null
     },
@@ -5869,6 +6027,7 @@
       "headwearColor": null,
       "garmentKind": "bare",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#4b5a4e",
       "pose": "build:broad"
     },
@@ -5910,6 +6069,7 @@
       "headwearColor": null,
       "garmentKind": "gown",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#748b79",
       "pose": null
     },
@@ -5951,6 +6111,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#6f5237",
+      "legwear": null,
       "backgroundBase": "#4b5a4e",
       "pose": null
     },
@@ -5992,6 +6153,7 @@
       "headwearColor": null,
       "garmentKind": "bare",
       "garmentColor": "#6b482f",
+      "legwear": null,
       "backgroundBase": "#4b5a4e",
       "pose": "build:broad"
     },
@@ -6016,34 +6178,32 @@
     ]
   },
   "newengland-1870#1": {
-    "name": "Grace Larsen",
+    "name": "Gladys",
     "gender": "Female",
     "age": 80,
     "profession": "Servant",
     "religion": "Protestantism",
-    "language": "Spanish (attested)",
+    "language": "English (attested)",
     "languageBasis": "nac-modern",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
     "head": "Ivory Mob Cap [Rough Wool]",
-    "torso": "Olive Servant'S Calico Dress [Burlap]",
+    "torso": "Walnut Servant'S Calico Dress [Burlap]",
     "feet": "Simple Leather Shoes [Rough Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
-      "garmentColor": "#6e6b3a",
+      "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#4c5354",
       "pose": null
     },
     "family": [
-      "father: Walking Black Bear Larsen",
+      "father: Spotted Black Bear",
       "mother: Swimming Bobcat",
-      "brother: Hiding at the Wide Water Larsen",
-      "sister: Bright Sycamore Larsen",
-      "spouse: Watching at the Ridge",
-      "son: Circling Crow",
-      "daughter: Sleeping at the Ash Hill"
+      "brother: Went Alone",
+      "sister: Turning Passenger Pigeon"
     ],
     "events": [
       "1790: Born in a small settlement to a Working Class family",
@@ -6055,31 +6215,33 @@
     ]
   },
   "newengland-1870#2": {
-    "name": "Thomas",
+    "name": "Russell Nowak",
     "gender": "Male",
     "age": 44,
     "profession": "Stonemason",
     "religion": "Protestantism",
-    "language": "English (attested)",
+    "language": "Spanish (attested)",
     "languageBasis": "nac-modern",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "Ivory Slouch Hat [Cotton]",
-    "torso": "Saffron Duck Canvas Jumper [Wool]",
+    "head": "White Slouch Hat [Cotton]",
+    "torso": "Charcoal Duck Canvas Jumper [Wool]",
     "feet": "Lace-Up Work Boots [Treated Hide]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#e5ddd0",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
-      "garmentColor": "#d9a441",
+      "garmentColor": "#3a3a38",
+      "legwear": "Trousers [cotton] trousers",
       "backgroundBase": "#4c5354",
       "pose": null
     },
     "family": [
-      "father: Whitefish of the Cave",
-      "mother: Swift River Cane",
-      "brother: Drifting Turkey",
-      "sister: Many Deer"
+      "father: Crossing at the Ash Hill Nowak",
+      "mother: Slow Black Bear",
+      "brother: Walked the Ice Nowak",
+      "sister: Lone Sycamore Nowak",
+      "spouse: Chasing Whitefish"
     ],
     "events": [
       "1826: Born in a small settlement to a Middle Class family",
@@ -6092,31 +6254,32 @@
     ]
   },
   "newengland-1870#3": {
-    "name": "Howard Williams",
+    "name": "Robert Miller",
     "gender": "Male",
     "age": 21,
     "profession": "Chapman",
     "religion": "Protestantism",
-    "language": "French (attested)",
+    "language": "English (attested)",
     "languageBasis": "nac-modern",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "White Flat Cap [Tweed]",
-    "torso": "Marigold Labor Breeches [Patched Canvas]",
+    "head": "Ivory Flat Cap [Tweed]",
+    "torso": "Saffron Mill Smock [Canvas]",
     "feet": "Work Boots [Thick Leather]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#e8e4d9",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
-      "garmentColor": "#d9822f",
+      "garmentColor": "#d9a441",
+      "legwear": "Labor Breeches [patched canvas] trousers",
       "backgroundBase": "#4c5354",
       "pose": "build:broad"
     },
     "family": [
-      "father: Found at the Ford Williams",
-      "mother: Leaping Whitefish",
-      "sister: Agnes Williams",
-      "brother: Clarence Williams"
+      "father: Great Whitefish Miller",
+      "mother: Found at the Ford",
+      "brother: Ernest Miller",
+      "sister: Edna Miller"
     ],
     "events": [
       "1849: Born in a small settlement to a Working Class family",
@@ -6127,7 +6290,7 @@
     ]
   },
   "louisiana-1820#1": {
-    "name": "Silence Smith",
+    "name": "Charity Wilson",
     "gender": "Female",
     "age": 79,
     "profession": "Shepherd",
@@ -6137,21 +6300,22 @@
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
     "head": "White Poke Bonnet [Linen]",
-    "torso": "Indigo Calico Work Dress [Linen]",
+    "torso": "Bronze Calico Work Dress [Linen]",
     "feet": "Simple Leather Shoes [Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e8e4d9",
       "garmentKind": "gown",
-      "garmentColor": "#2e3f5c",
-      "backgroundBase": "#544c4f",
+      "garmentColor": "#a8763f",
+      "legwear": null,
+      "backgroundBase": "#4c5354",
       "pose": null
     },
     "family": [
-      "father: William Smith",
-      "mother: Charity White",
-      "brother: Thomas Smith",
-      "sister: Deborah Smith"
+      "father: Richard Wilson",
+      "mother: Faith Taylor",
+      "sister: Prudence Wilson",
+      "brother: Benjamin Wilson"
     ],
     "events": [
       "1741: Born in a small settlement to a Merchant family",
@@ -6164,7 +6328,7 @@
     ]
   },
   "louisiana-1820#2": {
-    "name": "Jonathan King",
+    "name": "Barnabas",
     "gender": "Male",
     "age": 42,
     "profession": "Farm Hand",
@@ -6174,21 +6338,22 @@
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
     "head": "Ivory Straw Field Hat [Linen]",
-    "torso": "Bronze Broadfall Trousers [Wool]",
+    "torso": "Bronze Homespun Shirt [Wool]",
     "feet": "Brogans [Leather]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
       "garmentColor": "#a8763f",
+      "legwear": "Broadfall Trousers [wool] trousers",
       "backgroundBase": "#4c5354",
       "pose": null
     },
     "family": [
-      "father: Caleb King",
-      "mother: Susanna Hernandez",
-      "brother: Richard King",
-      "sister: Silence King"
+      "father: Hezekiah Rodriguez",
+      "mother: Experience Harris",
+      "brother: Joshua Martinez",
+      "sister: Thankful Jones"
     ],
     "events": [
       "1778: Born in a small settlement to a Laboring Poor family",
@@ -6201,7 +6366,7 @@
     ]
   },
   "louisiana-1820#3": {
-    "name": "Ezekiel Lee",
+    "name": "Richard Miller",
     "gender": "Male",
     "age": 21,
     "profession": "Farmer",
@@ -6210,22 +6375,23 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "Ivory Straw Field Hat [Cotton]",
-    "torso": "Indigo Homespun Shirt [Wool]",
+    "head": "White Straw Field Hat [Cotton]",
+    "torso": "Charcoal Homespun Shirt [Wool]",
     "feet": "Brogans [Treated Hide]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#e5ddd0",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
-      "garmentColor": "#2e3f5c",
-      "backgroundBase": "#544c4f",
+      "garmentColor": "#3a3a38",
+      "legwear": "Trousers [cotton] trousers",
+      "backgroundBase": "#4c5354",
       "pose": "build:broad"
     },
     "family": [
-      "father: Gideon Lee",
-      "mother: Keturah Hall",
-      "sister: Lydia Lee",
-      "brother: Richard Lee"
+      "father: Ezekiel Miller",
+      "mother: Priscilla White",
+      "brother: Thomas Miller",
+      "sister: Prudence Miller"
     ],
     "events": [
       "1799: Born in a small settlement to a Middling Sort family",
@@ -6254,6 +6420,7 @@
       "headwearColor": "#cfa044",
       "garmentKind": "jacket",
       "garmentColor": "#a8763f",
+      "legwear": null,
       "backgroundBase": "#67987a",
       "pose": null
     },
@@ -6291,6 +6458,7 @@
       "headwearColor": "#b5502e",
       "garmentKind": "jacket",
       "garmentColor": "#5a6b3b",
+      "legwear": null,
       "backgroundBase": "#3d5a48",
       "pose": null
     },
@@ -6329,6 +6497,7 @@
       "headwearColor": "#3a4f6d",
       "garmentKind": "jacket",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#3d5a48",
       "pose": "build:broad+brave"
     },
@@ -6363,6 +6532,7 @@
       "headwearColor": null,
       "garmentKind": "work_shirt",
       "garmentColor": "#2e3f5c",
+      "legwear": null,
       "backgroundBase": "#455e4f",
       "pose": "brave"
     },
@@ -6404,6 +6574,7 @@
       "headwearColor": "#a98a63",
       "garmentKind": "tunic",
       "garmentColor": "#a8763f",
+      "legwear": null,
       "backgroundBase": "#34463b",
       "pose": null
     },
@@ -6445,6 +6616,7 @@
       "headwearColor": "#a63a2b",
       "garmentKind": "tunic",
       "garmentColor": "#6e6b3a",
+      "legwear": null,
       "backgroundBase": "#34463b",
       "pose": "build:broad"
     },
@@ -6466,7 +6638,7 @@
     ]
   },
   "brazil-1880#1": {
-    "name": "Phuyupatamanta Llanos",
+    "name": "Killa Flores",
     "gender": "Female",
     "age": 81,
     "profession": "Landowner",
@@ -6476,21 +6648,25 @@
     "languageConfidence": "attested",
     "odds": "the industrial era in South America",
     "head": null,
-    "torso": "Slate Work Apron [Canvas]",
+    "torso": "Charcoal Work Apron [Canvas]",
     "feet": "Ivory Cloth Shoes [Canvas]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#566370",
-      "backgroundBase": "#849088",
+      "garmentColor": "#3a3a38",
+      "legwear": "Skirt [cotton] skirt",
+      "backgroundBase": "#484f4b",
       "pose": null
     },
     "family": [
-      "father: Apu Llanos",
-      "mother: Qori",
-      "sister: Raymi Llanos",
-      "brother: Challwa Llanos"
+      "father: Kuntur Flores",
+      "mother: Quispe Marca",
+      "sister: Inti Flores",
+      "brother: Rumi Flores",
+      "spouse: Illapa Flores",
+      "daughter: Sumaq Pacco",
+      "son: Cosme da Cruz"
     ],
     "events": [
       "1799: Born in a small settlement to an Upper Class family",
@@ -6503,7 +6679,7 @@
     ]
   },
   "brazil-1880#2": {
-    "name": "Lloque",
+    "name": "Damião da Cruz",
     "gender": "Male",
     "age": 45,
     "profession": "Farm Worker",
@@ -6513,24 +6689,22 @@
     "languageConfidence": "attested",
     "odds": "the industrial era in South America",
     "head": "Ivory Panama Hat [Toquilla Palm]",
-    "torso": "Olive Work Shirt [Rough Cotton]",
+    "torso": "Walnut Work Shirt [Rough Cotton]",
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
-      "garmentColor": "#6e6b3a",
+      "garmentColor": "#5b4229",
+      "legwear": "Canvas Pants [heavy canvas] trousers",
       "backgroundBase": "#484f4b",
       "pose": null
     },
     "family": [
-      "father: Inti Vargas",
-      "mother: Killa Cusipaucar",
-      "brother: Wiraqocha Inca",
-      "sister: Phaway Pacco",
-      "spouse: Achik Inca",
-      "son: Tayta Pacco",
-      "daughter: Warmi Quiso"
+      "father: Apu da Cruz",
+      "mother: Warmi Yabar",
+      "sister: Sarita da Cruz",
+      "brother: Illapa da Cruz"
     ],
     "events": [
       "1835: Born in a small settlement to a Working Class family",
@@ -6542,7 +6716,7 @@
     ]
   },
   "brazil-1880#3": {
-    "name": "Illapa Wankár",
+    "name": "Tupaq Quespi",
     "gender": "Male",
     "age": 21,
     "profession": "Chapman",
@@ -6551,22 +6725,23 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in South America",
-    "head": "White Panama Hat [Toquilla Palm]",
+    "head": "Ivory Panama Hat [Toquilla Palm]",
     "torso": "Black Work Shirt [Rough Cotton]",
-    "feet": "White Sandals [Tire Rubber]",
+    "feet": "Ivory Sandals [Tire Rubber]",
     "portrait": {
       "headwearKind": "brimmed_hat",
-      "headwearColor": "#e8e4d9",
+      "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
       "garmentColor": "#1f1f22",
+      "legwear": "Canvas Pants [heavy canvas] trousers",
       "backgroundBase": "#484f4b",
       "pose": "build:broad+brave"
     },
     "family": [
-      "father: Waman Wankár",
-      "mother: Chakana Mamani",
-      "brother: Challwa Wankár",
-      "sister: Chuya Wankár"
+      "father: Yakana Quespi",
+      "mother: Sisa Alanoca",
+      "brother: Benedito Quespi",
+      "sister: Ñusta Quespi"
     ],
     "events": [
       "1859: Born in a small settlement to a Middle Class family",
@@ -6594,6 +6769,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
+      "legwear": null,
       "backgroundBase": "#4b584b",
       "pose": null
     },
@@ -6632,6 +6808,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
+      "legwear": null,
       "backgroundBase": "#394239",
       "pose": null
     },
@@ -6669,6 +6846,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
+      "legwear": null,
       "backgroundBase": "#394239",
       "pose": "build:broad"
     },
@@ -6703,6 +6881,7 @@
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
+      "legwear": null,
       "backgroundBase": "#45585e",
       "pose": null
     },
@@ -6741,6 +6920,7 @@
       "headwearColor": "#c0a566",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
+      "legwear": null,
       "backgroundBase": "#344246",
       "pose": null
     },
@@ -6776,6 +6956,7 @@
       "headwearColor": "#c0a566",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#a98a63",
+      "legwear": null,
       "backgroundBase": "#344246",
       "pose": "build:broad"
     },
@@ -6814,6 +6995,7 @@
       "headwearColor": null,
       "garmentKind": "jacket",
       "garmentColor": "#8b7358",
+      "legwear": null,
       "backgroundBase": "#5d7279",
       "pose": null
     },
@@ -6855,6 +7037,7 @@
       "headwearColor": "#a98a63",
       "garmentKind": "bare",
       "garmentColor": "#6f5237",
+      "legwear": null,
       "backgroundBase": "#47575c",
       "pose": null
     },
@@ -6893,6 +7076,7 @@
       "headwearColor": "#8b7358",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#5b4229",
+      "legwear": null,
       "backgroundBase": "#47575c",
       "pose": "build:broad"
     },

@@ -1,17 +1,37 @@
 /**
  * encounter/sprite/SpriteTunerPanel.tsx
  *
- * The proportion workbench (Shift+1). Renders a live sprite from the app's
- * real generator and exposes every skeleton measurement as a slider, so a
- * human eye can converge the figure on the mockup faster than any amount of
- * unsupervised iteration. "Copy JSON" exports the tuned numbers.
+ * The proportion workbench (Shift+1), in three modes.
+ *
+ *  · **Single** — one figure, every measurement on a slider, so a human eye can
+ *    converge the proportions on the mockup faster than any amount of
+ *    unsupervised iteration.
+ *  · **Play** — the same figure running the real animation timeline from
+ *    `anim.ts`, which is the only way to judge a joint. A pose sheet shows
+ *    where a limb *is*; whether a bend reads as a bend is a question about
+ *    motion and cannot be answered from a still.
+ *  · **Grid** — up to twenty-five figures at once, drawn from the whole
+ *    generator or filtered to one category. Almost every fault worth fixing
+ *    here is a fault of *variety*: forty personas that each look fine alone
+ *    and identical together. One sprite at a time cannot show that, and it was
+ *    all this panel could show.
+ *
+ * The subject is either the persona the app is currently displaying — so a
+ * figure that looks wrong on the card can be opened and taken apart directly,
+ * which previously meant re-rolling random seeds until a similar one turned up
+ * — or a random draw. "Copy JSON" exports the tuned numbers.
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { generateHistoricalPersona } from '../../services/personaGenerator';
+import { generateHistoricalPersona, HistoricalPersona } from '../../services/personaGenerator';
 import type { GarmentKind } from '../../components/portraitLab/spec/types';
-import { buildSpriteSource } from './spriteSource';
-import { compileSprite, FrameId } from './drawSprite';
+import { Raster } from '../../components/portraitLab/core/raster';
+import { buildSpriteSource, SpriteSource } from './spriteSource';
+import { compileSprite, CompiledSprite, FrameId } from './drawSprite';
+import { readShape } from './construction';
+import {
+  ALL_ANIMS, animFrame, ANIM_MS, idleClock, idlePose, idleSway, SpriteAnim,
+} from './anim';
 import {
   DEFAULT_TUNING, getTuning, resetTuning, setTuning, SpriteTuning, subscribeTuning,
   SPRITE_H, SPRITE_W,
@@ -43,6 +63,8 @@ const SLIDER_GROUPS: Array<[string, SliderDef[]]> = [
     ['elbowRest', 'Resting elbow bend', 0, 25, 1],
     ['armSwing', 'Arm clearance', 0, 25, 1],
     ['wristBend', 'Wrist bend', -35, 35, 1],
+    ['kneeHigh', 'Knee height', 0.35, 0.65, 0.01],
+    ['kneeLead', 'Knee lead', 0, 2, 0.05],
     ['spineCarry', 'Spine carry', 0, 0.6, 0.02],
     ['headCounter', 'Head counter-turn', 0, 1, 0.05],
     ['motionScale', 'Motion amplitude', 0, 2, 0.05],
@@ -130,22 +152,88 @@ const SLIDER_GROUPS: Array<[string, SliderDef[]]> = [
 const POSES: FrameId[] = [
   'stand', 'standBreathe', 'talk', 'blink', 'glance',
   'bowLight', 'bowDeep', 'reach', 'raise', 'offer',
+  'stepFwd', 'stepBack', 'lunge', 'recoil', 'crouch', 'shrug', 'fallen',
 ];
 const GARMENTS: Array<GarmentKind | 'auto'> = [
   'auto', 'tunic', 'robe', 'gown', 'doublet', 'work_shirt', 'wrapped_garment', 'jacket', 'bare',
 ];
 
-export default function SpriteTunerPanel({ onClose }: { onClose: () => void }) {
+/**
+ * The categories the grid can be filtered to.
+ *
+ * Chosen for what actually goes wrong rather than for completeness: bare
+ * chests and midriffs because that is where the renderer has the least cloth
+ * to hide behind, the two genders because their silhouettes are built from
+ * different numbers, and the extremes of build because the stature system is
+ * where a crowd stops looking like one body at three sizes. Every value is
+ * matched against the same haystack the pose sheet uses.
+ */
+const CATEGORIES: Array<[string, string]> = [
+  ['any', 'Everyone'],
+  ['barechest', 'Bare chest'],
+  ['baremidriff', 'Bare midriff'],
+  ['female', 'Women'],
+  ['male', 'Men'],
+  ['robe', 'Robes'],
+  ['tunic', 'Tunics'],
+  ['trousered', 'Trousers'],
+  ['heavy', 'Heavy build'],
+  ['slight', 'Slight build'],
+  ['boot', 'Booted'],
+  ['foot-bare', 'Barefoot'],
+];
+
+type Mode = 'single' | 'grid';
+type Subject = 'featured' | 'random';
+
+/** Everything the grid filter may match on, as one lower-case string. */
+function haystack(source: SpriteSource): string {
+  const g = source.spec.garment;
+  const shape = readShape(source.spec, source.extras.worn?.name ?? '');
+  return [
+    g.kind, g.name, g.material, source.spec.gender, source.spec.build,
+    `foot-${source.extras.footwear}`, shape.construction,
+    shape.bareChest ? 'barechest' : '', shape.bareMidriff ? 'baremidriff' : '',
+  ].join(' ').toLowerCase();
+}
+
+/** Paints one raster into a 2D context at (x, y), via an offscreen canvas. */
+function blit(ctx: CanvasRenderingContext2D, raster: Raster, x: number, y: number): void {
+  const off = document.createElement('canvas');
+  off.width = raster.width;
+  off.height = raster.height;
+  off.getContext('2d')!.putImageData(
+    new ImageData(new Uint8ClampedArray(raster.data), raster.width, raster.height), 0, 0,
+  );
+  ctx.drawImage(off, x, y);
+}
+
+export default function SpriteTunerPanel(
+  { onClose, featured }: { onClose: () => void; featured?: HistoricalPersona | null }
+) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const gridRef = useRef<HTMLCanvasElement | null>(null);
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 1e6));
+  const [subject, setSubject] = useState<Subject>(featured ? 'featured' : 'random');
+  const [mode, setMode] = useState<Mode>('single');
   const [pose, setPose] = useState<FrameId>('stand');
   const [garment, setGarment] = useState<GarmentKind | 'auto'>('auto');
   const [flip, setFlip] = useState(false);
+  const [playing, setPlaying] = useState<SpriteAnim | 'idle' | null>(null);
+  const [gridSide, setGridSide] = useState(4);
+  const [category, setCategory] = useState('any');
+  const [gridSeed, setGridSeed] = useState(() => Math.floor(Math.random() * 1e6));
   const [, bump] = useState(0);
 
   useEffect(() => subscribeTuning(() => bump((v) => v + 1)), []);
 
-  const persona = useMemo(() => generateHistoricalPersona({ seed }), [seed]);
+  // The featured persona is only available when the app is showing one; the
+  // selector falls back rather than rendering an empty stage.
+  const usingFeatured = subject === 'featured' && !!featured;
+  const persona = useMemo(
+    () => (usingFeatured ? featured! : generateHistoricalPersona({ seed })),
+    [usingFeatured, featured, seed],
+  );
 
   const compiled = useMemo(() => {
     const source = buildSpriteSource(persona.character);
@@ -154,27 +242,120 @@ export default function SpriteTunerPanel({ onClose }: { onClose: () => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [persona, garment, getTuning()]);
 
+  // --- The grid. -----------------------------------------------------------
+  //
+  // Compiled eagerly on a filter change, which costs a beat at 5×5 and is
+  // still the cheapest way to see twenty-five figures. The seed walk is
+  // bounded: a category with no members returns what it found rather than
+  // spinning.
+  const gridCells = useMemo(() => {
+    if (mode !== 'grid') return [];
+    const want = gridSide * gridSide;
+    // The *generator* seed is carried alongside, not the spec's: clicking a
+    // cell has to be able to reproduce that exact persona, and only the seed
+    // it was generated from will do that.
+    const out: Array<{ persona: HistoricalPersona; compiled: CompiledSprite; seed: number }> = [];
+    for (let i = 0; i < want * 60 && out.length < want; i += 1) {
+      const cellSeed = gridSeed + i * 7919;
+      const p = generateHistoricalPersona({ seed: cellSeed });
+      const source = buildSpriteSource(p.character);
+      if (category !== 'any' && !haystack(source).includes(category)) continue;
+      out.push({ persona: p, compiled: compileSprite(source), seed: cellSeed });
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, gridSide, category, gridSeed, getTuning()]);
+
+  /**
+   * One crop for the whole grid, taken from the tallest figure in it.
+   *
+   * Per-figure crops would let each cell shrink to its own contents, and that
+   * is the wrong trade: cropping each separately puts them on *different*
+   * ground lines, and a grid whose whole purpose is comparing builds must
+   * stand them all on the same floor. So the shortest common sky is trimmed
+   * and the rest is left, which is also what keeps the click-to-open maths a
+   * single division.
+   */
+  const gridTop = gridCells.length
+    ? Math.min(...gridCells.map((c) => c.compiled.contentTop))
+    : 0;
+  const gridCellH = SPRITE_H - gridTop;
+
   useEffect(() => {
+    const canvas = gridRef.current;
+    if (!canvas || mode !== 'grid') return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    gridCells.forEach((cell, i) => {
+      const col = i % gridSide;
+      const row = Math.floor(i / gridSide);
+      blit(ctx, cell.compiled.frame('stand'), col * SPRITE_W, row * gridCellH - gridTop);
+    });
+  }, [gridCells, gridSide, mode, gridTop, gridCellH]);
+
+  /** Clicking a grid cell opens that persona in the single view. */
+  const pickFromGrid = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = gridRef.current;
+    if (!canvas) return;
+    const box = canvas.getBoundingClientRect();
+    const col = Math.floor(((e.clientX - box.left) / box.width) * gridSide);
+    const row = Math.floor(((e.clientY - box.top) / box.height) * gridSide);
+    const cell = gridCells[row * gridSide + col];
+    if (!cell) return;
+    setSeed(cell.seed);
+    setSubject('random');
+    setMode('single');
+  }, [gridCells, gridSide]);
+
+  // --- The single stage, still or playing. ---------------------------------
+  useEffect(() => {
+    if (mode !== 'single') return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.imageSmoothingEnabled = false;
-    const raster = compiled.frame(pose);
-    const image = new ImageData(new Uint8ClampedArray(raster.data), raster.width, raster.height);
-    const off = document.createElement('canvas');
-    off.width = raster.width;
-    off.height = raster.height;
-    off.getContext('2d')!.putImageData(image, 0, 0);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.save();
-    if (flip) {
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
+
+    const paint = (raster: Raster, dx: number, dy: number) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      if (flip) {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.scale(canvas.width / SPRITE_W, canvas.height / SPRITE_H);
+      blit(ctx, raster, dx, dy);
+      ctx.restore();
+    };
+
+    if (!playing) {
+      paint(compiled.frame(pose), 0, 0);
+      return;
     }
-    ctx.drawImage(off, 0, 0, canvas.width, canvas.height);
-    ctx.restore();
-  }, [compiled, pose, flip]);
+
+    // Playback runs the *same* envelope the encounter plays — importing the
+    // timeline rather than approximating it is the only way this stage is
+    // evidence about anything.
+    const clock = idleClock(compiled.seed);
+    const started = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = now - started;
+      if (playing === 'idle') {
+        const p = idlePose(clock, t, false);
+        paint(compiled.frame(p), idleSway(clock, t, p), 0);
+      } else {
+        const cycle = t % (ANIM_MS[playing] + 500);
+        const f = animFrame(playing, cycle);
+        paint(compiled.frame(f?.pose ?? 'stand'), f?.dx ?? 0, f?.dy ?? 0);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [compiled, pose, flip, playing, mode]);
 
   const copyJson = useCallback(() => {
     const current = getTuning();
@@ -189,40 +370,121 @@ export default function SpriteTunerPanel({ onClose }: { onClose: () => void }) {
   const t = getTuning();
 
   return (
-    <aside className="sprite-tuner" role="dialog" aria-label="Sprite tuner">
+    <aside
+      className={`sprite-tuner${mode === 'grid' ? ' sprite-tuner--wide' : ''}`}
+      role="dialog"
+      aria-label="Sprite tuner"
+    >
       <header className="sprite-tuner-head">
         <strong>Sprite Tuner</strong>
         <span className="sprite-tuner-hint">Shift+1 to close</span>
         <button onClick={onClose} aria-label="Close tuner">✕</button>
       </header>
 
-      <div className="sprite-tuner-stage">
-        <canvas
-          ref={canvasRef}
-          width={SPRITE_W * 1.25}
-          height={SPRITE_H * 1.25}
-          style={{ imageRendering: 'pixelated' }}
-        />
-        <div className="sprite-tuner-meta">
-          <div><strong>{persona.character.name}</strong></div>
-          <div>{persona.character.profession} · {persona.location}</div>
-          <div>{persona.character.gender} · {persona.character.age} · {persona.character.wealthLevel}</div>
-          <div className="sprite-tuner-garment">{persona.character.equippedItems?.torso?.name ?? 'no torso item'}</div>
-        </div>
+      <div className="sprite-tuner-modes">
+        <button
+          className={mode === 'single' ? 'is-on' : ''}
+          onClick={() => setMode('single')}
+        >Single</button>
+        <button
+          className={mode === 'grid' ? 'is-on' : ''}
+          onClick={() => { setMode('grid'); setPlaying(null); }}
+        >Grid</button>
+        {mode === 'single' && (
+          <>
+            <button
+              className={subject === 'featured' ? 'is-on' : ''}
+              disabled={!featured}
+              title={featured ? 'The persona the app is showing' : 'No persona on screen'}
+              onClick={() => setSubject('featured')}
+            >Featured</button>
+            <button
+              className={subject === 'random' ? 'is-on' : ''}
+              onClick={() => setSubject('random')}
+            >Random</button>
+          </>
+        )}
       </div>
 
-      <div className="sprite-tuner-controls">
-        <button onClick={() => setSeed(Math.floor(Math.random() * 1e6))}>⟳ New persona</button>
-        <select value={pose} onChange={(e) => setPose(e.target.value as FrameId)}>
-          {POSES.map((p) => <option key={p} value={p}>{p}</option>)}
-        </select>
-        <select value={garment} onChange={(e) => setGarment(e.target.value as GarmentKind | 'auto')}>
-          {GARMENTS.map((g) => <option key={g} value={g}>{g}</option>)}
-        </select>
-        <label className="sprite-tuner-flip">
-          <input type="checkbox" checked={flip} onChange={(e) => setFlip(e.target.checked)} /> flip
-        </label>
-      </div>
+      {mode === 'single' ? (
+        <>
+          <div className="sprite-tuner-stage">
+            <canvas
+              ref={canvasRef}
+              width={SPRITE_W * 1.25}
+              height={SPRITE_H * 1.25}
+              style={{ imageRendering: 'pixelated' }}
+            />
+            <div className="sprite-tuner-meta">
+              <div><strong>{persona.character.name}</strong></div>
+              <div>{persona.character.profession} · {persona.location}</div>
+              <div>{persona.character.gender} · {persona.character.age} · {persona.character.wealthLevel}</div>
+              <div className="sprite-tuner-garment">
+                {persona.character.equippedItems?.torso?.name ?? 'no torso item'}
+              </div>
+              {usingFeatured && <div className="sprite-tuner-garment">shown on the card</div>}
+            </div>
+          </div>
+
+          <div className="sprite-tuner-controls">
+            <button onClick={() => { setSubject('random'); setSeed(Math.floor(Math.random() * 1e6)); }}>
+              ⟳ New persona
+            </button>
+            <select
+              value={pose}
+              disabled={!!playing}
+              onChange={(e) => setPose(e.target.value as FrameId)}
+            >
+              {POSES.map((p) => <option key={p} value={p}>{p}</option>)}
+            </select>
+            <select value={garment} onChange={(e) => setGarment(e.target.value as GarmentKind | 'auto')}>
+              {GARMENTS.map((g) => <option key={g} value={g}>{g}</option>)}
+            </select>
+            <label className="sprite-tuner-flip">
+              <input type="checkbox" checked={flip} onChange={(e) => setFlip(e.target.checked)} /> flip
+            </label>
+          </div>
+
+          <div className="sprite-tuner-controls">
+            <button onClick={() => setPlaying(playing ? null : 'idle')}>
+              {playing ? '■ Stop' : '▶ Play'}
+            </button>
+            <select
+              value={playing ?? 'idle'}
+              disabled={!playing}
+              onChange={(e) => setPlaying(e.target.value as SpriteAnim | 'idle')}
+            >
+              <option value="idle">idle</option>
+              {ALL_ANIMS.map((a) => <option key={a} value={a}>{a}</option>)}
+            </select>
+            <span className="sprite-tuner-hint">loops with a half-second rest</span>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="sprite-tuner-controls">
+            <select value={category} onChange={(e) => setCategory(e.target.value)}>
+              {CATEGORIES.map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+            <select value={gridSide} onChange={(e) => setGridSide(Number(e.target.value))}>
+              {[2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}×{n}</option>)}
+            </select>
+            <button onClick={() => setGridSeed(Math.floor(Math.random() * 1e6))}>⟳ Re-draw</button>
+            <span className="sprite-tuner-hint">{gridCells.length} shown · click one to open it</span>
+          </div>
+          <div className="sprite-tuner-grid">
+            <canvas
+              ref={gridRef}
+              width={gridSide * SPRITE_W}
+              height={gridSide * gridCellH}
+              onClick={pickFromGrid}
+              style={{ imageRendering: 'pixelated', width: '100%', height: 'auto', cursor: 'pointer' }}
+            />
+          </div>
+        </>
+      )}
 
       <div className="sprite-tuner-sliders">
         {SLIDER_GROUPS.map(([groupLabel, sliders]) => (

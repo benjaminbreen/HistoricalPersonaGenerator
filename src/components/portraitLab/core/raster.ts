@@ -46,6 +46,16 @@ export const MAT = {
   HEADWEAR_ACCENT: 20,
   /** Living plant matter: the leaves of a wreath, the greens of a garland. */
   FOLIAGE: 21,
+  /**
+   * The lower garment, where the outfit names one of its own.
+   *
+   * A separate material for the same reason `HEADWEAR_ACCENT` is: every pass
+   * after the fill shades a pixel along the ramp its material names, so a pair
+   * of jeans painted in the shirt's cloth and then shaded would be shaded as
+   * that shirt. It also lets denim be indigo and khaki be khaki without those
+   * colours leaking onto anything else the figure is wearing.
+   */
+  LEGWEAR: 22,
 } as const;
 
 export const MAT_COUNT = 24;
@@ -57,8 +67,8 @@ export type RampBook = Array<Ramp | null>;
 /** Materials that participate in the silhouette outline. */
 export const BODY_MATS = new Set<number>([
   MAT.SKIN, MAT.HAIR, MAT.BEARD, MAT.CLOTH_A, MAT.CLOTH_B, MAT.CLOTH_C,
-  MAT.HEADWEAR, MAT.HEADWEAR_ACCENT, MAT.FOLIAGE, MAT.METAL, MAT.LEATHER,
-  MAT.WOOD, MAT.GEM, MAT.PAINT, MAT.GLASS,
+  MAT.LEGWEAR, MAT.HEADWEAR, MAT.HEADWEAR_ACCENT, MAT.FOLIAGE, MAT.METAL,
+  MAT.LEATHER, MAT.WOOD, MAT.GEM, MAT.PAINT, MAT.GLASS,
 ]);
 
 export type Mask = Uint8Array;

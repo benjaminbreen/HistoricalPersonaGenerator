@@ -12,6 +12,7 @@
 
 import type { CulturalZone } from '../types/characterData';
 import { settlementRegister, hasCapability } from '../constants/societyCapabilities';
+import { CITIES_DATA, type CityDefinition } from '../constants/gameData/cities';
 
 export interface BirthplaceContext {
   year: number;
@@ -99,14 +100,81 @@ const NAMED_SETTLEMENTS: Array<{
   { match: /aegean|ionia|smyrna/i, from: -1000, name: 'Smyrna' },
 ];
 
-function namedSettlement(ctx: BirthplaceContext): string | undefined {
-  const place = `${ctx.location ?? ''} ${ctx.region ?? ''}`;
+/**
+ * `scope: 'location'` matches the map area alone. A region-wide pattern is a
+ * coarse instrument — /south china/ names Guangzhou for the Yangtze Delta,
+ * eight hundred miles away — so the caller tries the locale first and only
+ * falls back to the region when nothing more local is known.
+ */
+function namedSettlement(ctx: BirthplaceContext, scope: 'location' | 'any' = 'any'): string | undefined {
+  const place = scope === 'location' ? `${ctx.location ?? ''}` : `${ctx.location ?? ''} ${ctx.region ?? ''}`;
   const matches = NAMED_SETTLEMENTS.filter(entry =>
     entry.match.test(place)
     && ctx.year >= entry.from
     && (entry.until === undefined || ctx.year < entry.until)
     && (!entry.zones || !ctx.culturalZone || entry.zones.includes(ctx.culturalZone)));
   return matches.length > 0 ? matches[matches.length - 1].name : undefined;
+}
+
+const DENSITY_RANK: Record<string, number> = { massive: 4, large: 3, moderate: 2, small: 1 };
+
+/**
+ * The city the map itself puts in this locale, if one was standing this year.
+ *
+ * `CITIES_DATA` is keyed by map area and carries a founding year and often a
+ * decline year, which is exactly the question being asked here — so the
+ * hand-written `NAMED_SETTLEMENTS` list above only needs to cover the cases
+ * where it disagrees (Tenochtitlan before 1521 and Mexico City after, Edo
+ * rather than Tokyo) and the regions the city data does not reach.
+ *
+ * The largest cities are preferred, because a persona born near both a capital
+ * and a market town is more likely to say the capital.
+ *
+ * Ties are broken by hashing the locale and year rather than by a caller's
+ * random stream, so that two callers asking the same question get the same
+ * answer. The header badge and the biography name the same city — which they
+ * would not if this drew from the biography's own noise — while personas born
+ * in different years still see the area's several cities.
+ */
+export function principalCity(ctx: BirthplaceContext): CityDefinition | undefined {
+  const area = ctx.location ? CITIES_DATA[ctx.location] : undefined;
+  const standing = (area ?? []).filter(city =>
+    ctx.year >= city.foundingYear && (city.declineYear === undefined || ctx.year <= city.declineYear));
+  if (standing.length === 0) return undefined;
+
+  const densityOf = (city: CityDefinition): number => {
+    const era = ctx.year >= 1900 ? city.eraSpecificDensity?.modern : undefined;
+    return DENSITY_RANK[era ?? city.urbanDensity ?? 'moderate'] ?? 2;
+  };
+  // Some map areas bundle a city with a distant one — Palermo sits under "Bay
+  // of Naples" — so a city the area is named for wins outright.
+  const eponymous = standing.filter(city => ctx.location!.includes(city.name));
+  if (eponymous.length > 0) return eponymous[0];
+
+  const best = Math.max(...standing.map(densityOf));
+  const equals = standing.filter(city => densityOf(city) === best);
+  if (equals.length === 1) return equals[0];
+
+  const key = `${ctx.location ?? ''}|${ctx.year}`;
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) | 0;
+  return equals[Math.abs(hash) % equals.length];
+}
+
+/**
+ * Who governed a city in a given year, from its `allegianceHistory` — the last
+ * entry whose start year has arrived. Undefined before the first entry.
+ */
+export function cityAllegiance(city: CityDefinition, year: number): string | undefined {
+  const entries = Object.entries(city.allegianceHistory)
+    .map(([from, polity]) => [Number(from), polity] as const)
+    .filter(([from]) => Number.isFinite(from))
+    .sort((a, b) => a[0] - b[0]);
+  let current: string | undefined;
+  for (const [from, polity] of entries) {
+    if (year >= from) current = polity; else break;
+  }
+  return current;
 }
 
 const rich = (ctx: BirthplaceContext): boolean =>
@@ -179,8 +247,17 @@ export function describeBirthplace(
   // If there is a city of this name here in this year, this is a city — not
   // least because `inferLocaleType`'s own list of cities is incomplete and had
   // been calling the Moscow Basin rural.
-  const candidate = namedSettlement(ctx);
-  if (candidate && register !== 'band') register = 'district';
+  //
+  // Order of authority: a curated name for this exact locale (which is where
+  // the era-correct forms live — Tenochtitlan before 1521, Edo before 1868),
+  // then the city data for the locale, then a curated region-wide match.
+  const nearby = principalCity(ctx)?.name;
+  const candidate = namedSettlement(ctx, 'location') ?? nearby ?? namedSettlement(ctx);
+  // A city in the map area no longer makes every persona in it urban. It used
+  // to, because the curated list only named places that were essentially
+  // metropolitan regions; the city data covers ordinary market towns too, and
+  // most people near one lived outside it.
+  if (candidate && register !== 'band' && ctx.localeType !== 'rural') register = 'district';
 
   const city = register === 'district' ? candidate : undefined;
   const place = dwelling(ctx, register, !!city, pick);
@@ -189,6 +266,22 @@ export function describeBirthplace(
     // Naming both the city and the region reads as a postal address; the city
     // is the more useful of the two.
     return `${place} in ${city}`;
+  }
+
+  // Rural, but with a city over the horizon. "A hamlet in the Central Plateau"
+  // places nobody; "a hamlet outside Ankara" does, and it is the way people
+  // actually say where they are from. Only `nearby` will do here — it is the
+  // one that is certainly in this same map area, where the region-matched
+  // NAMED_SETTLEMENTS entries can be several hundred miles off.
+  if (nearby && register === 'village') {
+    // The region still earns its place after a short dwelling phrase, and
+    // turns into a postal address after a long one — or into "outside
+    // Varanasi, in the Varanasi Basin" when the region is named for the city.
+    const worthNaming = place.split(/\s+/).length <= 3
+      && !regionLabel.toLowerCase().includes(nearby.toLowerCase());
+    return worthNaming
+      ? `${place} outside ${nearby}, ${regionPhrase(regionLabel)}`
+      : `${place} outside ${nearby}`;
   }
   return `${place} ${regionPhrase(regionLabel)}`;
 }

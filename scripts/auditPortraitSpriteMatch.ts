@@ -27,8 +27,10 @@ import { compileSprite, SPRITE_W } from '../src/encounter/sprite/drawSprite';
 import { buildSkeleton } from '../src/encounter/sprite/skeleton';
 import { headLayout } from '../src/encounter/sprite/spriteHead';
 import { compilePortrait, renderFrame, RESTING_FRAME } from '../src/components/portraitLab/render/pipeline';
+import { buildAnatomy } from '../src/components/portraitLab/spec/anatomy';
 import { MAT, Raster } from '../src/components/portraitLab/core/raster';
 import { RGB } from '../src/components/portraitLab/core/color';
+import { PortraitSpec } from '../src/components/portraitLab/spec/types';
 
 const args = process.argv.slice(2).filter(a => a !== '--');
 const COUNT = Number(args.find(a => /^\d+$/.test(a))) || 120;
@@ -123,9 +125,73 @@ function dist(a: RGB | null, b: RGB | null): number {
   return Math.abs(a.r - b.r) + Math.abs(a.g - b.g) + Math.abs(a.b - b.b);
 }
 
+/**
+ * Form, as distinct from colour.
+ *
+ * Everything above this line samples materials: is the skin the same hue, is
+ * there hair, is there a hat. None of it can see *shape*, and the only shape
+ * check the audit had was `proportion` — heads-tall between 4.6 and 6.4 — which
+ * passed on 100% of personas while `faceShape` was moving the bust's skull by
+ * 44% and the sprite's by nothing at all. A round-faced woman was drawn round
+ * in her portrait and long in her sprite, on one card, and this file reported
+ * no mismatch.
+ */
+
+/** Materials that make up the head's outline in either view. */
+const HEAD_MATS = new Set<number>([
+  MAT.SKIN, MAT.HAIR, MAT.BEARD, MAT.HEADWEAR, MAT.HEADWEAR_ACCENT,
+  MAT.METAL, MAT.FOLIAGE, MAT.GEM,
+]);
+
+/** Width of the head silhouette per row, crown to chin, resampled to 20. */
+function headProfile(r: Raster, topY: number, botY: number): number[] {
+  const rows: number[] = [];
+  for (let y = Math.max(0, topY); y <= Math.min(r.height - 1, botY); y += 1) {
+    let lo = -1; let hi = -1;
+    for (let x = 0; x < r.width; x += 1) {
+      const i = y * r.width + x;
+      if (r.data[i * 4 + 3] === 0 || !HEAD_MATS.has(r.mat[i])) continue;
+      if (lo < 0) lo = x;
+      hi = x;
+    }
+    rows.push(lo < 0 ? 0 : hi - lo + 1);
+  }
+  let s = 0;
+  while (s < rows.length && rows[s] === 0) s += 1;
+  const live = rows.slice(s);
+  if (live.length < 8) return [];
+  const out: number[] = [];
+  for (let i = 0; i < 20; i += 1) {
+    out.push(live[Math.min(live.length - 1, Math.round((i / 19) * (live.length - 1)))]);
+  }
+  return out;
+}
+
+/**
+ * How far this persona's skull departs from the same persona's *oval* skull,
+ * in the renderer's own units.
+ *
+ * Compared as a ratio rather than an absolute aspect because the two views do
+ * not share a base proportion and are not meant to: the bust is a head that
+ * fills a frame and the sprite is a head on a five-heads-tall figure. What has
+ * to agree is the *departure* — if the card says `round`, both views should be
+ * proportionally as much wider-and-shorter than their own oval.
+ */
+function shapeDeparture(
+  spec: PortraitSpec,
+  aspectOf: (s: PortraitSpec) => number
+): number {
+  const base = aspectOf({ ...spec, faceShape: 'oval' });
+  return base > 0 ? aspectOf(spec) / base : 1;
+}
+
 interface Row { name: string; kind: string; detail: string }
 const rows: Row[] = [];
 const valueSum: number[] = [];
+/** [bust, sprite] departure from that renderer's own oval skull. */
+const shapeSpread: Array<[number, number]> = [];
+/** [bust, sprite] crown flatness, 1.0 being a flat slab. */
+const crownFlat: Array<[number, number]> = [];
 const counts = new Map<string, number>();
 const bump = (k: string) => counts.set(k, (counts.get(k) ?? 0) + 1);
 
@@ -227,6 +293,55 @@ for (let i = 0; i < COUNT; i += 1) {
   if (heads < 4.6 || heads > 6.4) {
     bump('proportion'); rows.push({ name, kind: 'proportion', detail: `${heads.toFixed(2)} heads · ${spec.build}` });
   }
+
+  // --- Does `faceShape` reach both skulls, by the same proportion?
+  const spriteDep = shapeDeparture(spec, (s) => {
+    const l = headLayout(s, buildSkeleton(s));
+    return l.W / Math.max(1, l.H);
+  });
+  const bustDep = shapeDeparture(spec, (s) => {
+    const a = buildAnatomy(s);
+    return (a.headHalfWidth * 2) / Math.max(1, a.headHeight);
+  });
+  shapeSpread.push([bustDep, spriteDep]);
+  if (Math.abs(bustDep - spriteDep) > 0.12) {
+    bump('skull-shape');
+    rows.push({
+      name, kind: 'skull-shape',
+      detail: `${spec.faceShape}: bust ${bustDep.toFixed(2)}× oval, sprite ${spriteDep.toFixed(2)}×`,
+    });
+  }
+
+  // --- The vault. A flat-topped crown reads as a moulded cap in either view,
+  // and the two should be flat or domed together.
+  const sProf = headProfile(sprite, sk.crownY - 26, sk.chinY);
+  const pProf = headProfile(portrait, 0, Math.round(compiled.anatomy.chinY));
+  if (sProf.length && pProf.length) {
+    const flat = (p: number[]) => p[0] / Math.max(1, Math.max(...p));
+    const sf = flat(sProf); const pf = flat(pProf);
+    crownFlat.push([pf, sf]);
+    if (Math.abs(sf - pf) > 0.38) {
+      bump('crown-flatness');
+      rows.push({
+        name, kind: 'crown-flatness',
+        detail: `bust ${pf.toFixed(2)}, sprite ${sf.toFixed(2)} (1.0 is a flat slab)`,
+      });
+    }
+    // --- Headgear form. A cone and a cylinder are the same material and the
+    // same colour, so nothing above this line can tell them apart.
+    if (wants && inSprite && inPortrait) {
+      const widest = (p: number[]) => Math.max(...p);
+      const sRel = widest(sProf) / Math.max(1, L.W);
+      const pRel = widest(pProf) / Math.max(1, buildAnatomy(spec).headHalfWidth * 2);
+      if (Math.abs(sRel - pRel) > 0.42) {
+        bump('headwear-form');
+        rows.push({
+          name, kind: 'headwear-form',
+          detail: `${spec.headwear?.kind} "${spec.headwear?.name}" · bust ${pRel.toFixed(2)}× head, sprite ${sRel.toFixed(2)}×`,
+        });
+      }
+    }
+  }
   void SPRITE_W;
 }
 
@@ -234,6 +349,7 @@ const ORDER = [
   'skin-hue', 'skin-value', 'garment-hue', 'hair-hue', 'hair-value', 'hair-presence',
   'headwear-disagree', 'headwear-sprite', 'headwear-portrait',
   'beard-sprite', 'beard-portrait', 'proportion',
+  'skull-shape', 'crown-flatness', 'headwear-form',
 ];
 
 console.log(`\nPortrait ↔ sprite agreement, ${COUNT} personas\n`);
@@ -254,6 +370,23 @@ if (VERBOSE) {
 const mean = valueSum.reduce((a, b) => a + b, 0) / Math.max(1, valueSum.length);
 console.log(`\n  garment value offset: portrait is ${mean > 0 ? '+' : ''}${mean.toFixed(0)} lighter on average`);
 console.log('  (a value offset is lighting, not a mismatch — hue is what says "different clothes")');
+
+// Form, reported as spreads rather than as pass/fail. A rate says how often the
+// two views disagree; these say how much of the axis each one is using at all,
+// which is the thing that was silently zero.
+const span = (xs: number[]) => Math.max(...xs) - Math.min(...xs);
+if (shapeSpread.length) {
+  console.log(`\n  faceShape reach (skull aspect ÷ same persona's oval):`);
+  console.log(`    bust   ${span(shapeSpread.map(p => p[0])).toFixed(3)} spread`);
+  console.log(`    sprite ${span(shapeSpread.map(p => p[1])).toFixed(3)} spread`);
+  console.log('    (a spread near zero means the axis is not reaching that renderer)');
+}
+if (crownFlat.length) {
+  const avg = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
+  console.log(`\n  crown flatness (1.0 is a flat slab, low is a dome):`);
+  console.log(`    bust   ${avg(crownFlat.map(p => p[0])).toFixed(3)} mean`);
+  console.log(`    sprite ${avg(crownFlat.map(p => p[1])).toFixed(3)} mean`);
+}
 void dist;
 
 const total = [...counts.values()].reduce((a, b) => a + b, 0);

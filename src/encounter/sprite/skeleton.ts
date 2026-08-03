@@ -3,15 +3,19 @@
  *
  * The figure's measurements, in one tunable object.
  *
- * Proportioned against the encounter mockup (2026-07): about six heads tall,
- * shoulders a little over two head-widths, legs half the standing height. The
- * reference art is AI-generated, so its own pixel grid is not real and is not
- * something to measure against — it is a target for *proportion, value
- * structure and posture*, nothing finer.
+ * Proportioned against the encounter mockup (2026-07) and then re-converged by
+ * eye in the panel: about five heads tall, shoulders a little over two
+ * head-widths, legs half the standing height. The reference art is
+ * AI-generated, so its own pixel grid is not real and is not something to
+ * measure against — it is a target for *proportion, value structure and
+ * posture*, nothing finer.
  *
- * The grid before this was 192×352 and the figure on it was **4.7 heads** —
- * the single biggest reason it read as a doll rather than a person. Detail was
- * never the problem; proportion was.
+ * The heads-tall figure has been round the houses: 4.7 on the old 192×352
+ * grid (which read as a doll), then close to six once the head came down to
+ * 30px, and now back to about five with a 36px head. What changed between the
+ * first 4.7 and this one is not the ratio but everything around it — the head
+ * carries a real face, the limbs carry joints, and the torso carries anatomy —
+ * so the same number no longer buys the same doll.
  *
  * Two things are load-bearing here:
  *
@@ -29,6 +33,7 @@
  */
 
 import { unit } from '../../components/portraitLab/core/rng';
+import { faceShapeScale } from '../../components/portraitLab/spec/faceShape';
 import { Build, PortraitSpec } from '../../components/portraitLab/spec/types';
 
 export const SPRITE_W = 220;
@@ -236,6 +241,18 @@ export interface SpriteTuning {
   spineCarry: number;
   /** How far the head counter-rotates against a bending spine, 0…1. */
   headCounter: number;
+  /** Where the knee sits between hip (0) and ankle (1). Sets thigh : shin. */
+  kneeHigh: number;
+  /**
+   * How far forward the knee leads when the leg folds, ×0…×2.
+   *
+   * The IK puts the knee wherever the two bones can reach; this pushes it
+   * further out along that same perpendicular. Anatomically it is the
+   * difference between a knee that tracks over the toe and one that stays
+   * tucked — and visually it is the difference between a stride that reads and
+   * one where the leg looks broken at the middle.
+   */
+  kneeLead: number;
   /** Global amplitude on every animated pose: 0 still … 2 exaggerated. */
   motionScale: number;
 
@@ -275,42 +292,49 @@ export const DEFAULT_TUNING: SpriteTuning = {
   // "corrected" toward any canon. A human eye converged them on the reference
   // and that is the only authority they need.
   //
-  // The average adult they describe: about 175px tall over a 30px head, a
-  // shade under six heads. Every other build is this figure through the
-  // stature multipliers below. Every other
-  // build is this figure through the stature multipliers below.
+  // The average adult they describe: about 176px tall over a 36px head, a
+  // shade under five heads. Every other build is this figure through the
+  // stature multipliers below.
   //
-  // Head size has been the hardest number to settle and it went too far in
-  // both directions before landing here. 18px could not afford the rows a
-  // face needs — no lower lip, no inner eye corner, no separable fingers. 23
-  // bought those back but left the head small against the body, which read as
-  // a figure standing too far away. 30 is the encounter mockup's own ratio,
-  // and it is a *stylisation*: real adults are 7–7.5 heads, and this figure is
-  // six. The reference art is AI-generated and its pixel grid is not real, so
-  // it is a target for proportion and value structure, never for measurement.
+  // Head size has been the hardest number to settle and it has moved further
+  // than anything else here. 18px could not afford the rows a face needs — no
+  // lower lip, no inner eye corner, no separable fingers. 23 bought those back
+  // but left the head small against the body. 30 matched the encounter
+  // mockup's ratio; 36 is a further step in the same direction and takes the
+  // figure to roughly five heads, which is squarely a *stylisation* — real
+  // adults are 7–7.5. The reference art is AI-generated and its pixel grid is
+  // not real, so it is a target for proportion and value structure, never for
+  // measurement.
+  //
+  // NOTE: at this head size the heads-tall band in `buildSkeleton` is no
+  // longer the rare safety net it was written as — see the measurement there.
   figureTop: -2,
-  headW: 22,
-  headH: 30,
+  headW: 23,
+  headH: 36,
   neckH: 8,
   neckW: 11,
   shoulderHalf: 27,
-  waistHalf: 18,
+  waistHalf: 17,
   hipHalf: 20,
   torsoLen: 42,
-  hipDrop: 11,
-  legLen: 84,
+  hipDrop: 12,
+  legLen: 80,
   shoulderSlope: 8,
-  tunicHem: 0.34,
-  coatHem: 0.24,
-  robeLift: 7,
-  robeHemHalf: 37,
+  // Both hems moved a long way down. A tunic to 0.34 of the leg is a tabard
+  // over bare thighs; at 0.76 it reaches the shin, which is what most of the
+  // periods this generator covers actually wore, and it puts cloth over the
+  // part of the leg the renderer models least well.
+  tunicHem: 0.76,
+  coatHem: 0.37,
+  robeLift: 10,
+  robeHemHalf: 40,
   legW: 12,
   legGap: 2,
   shoeLen: 23,
   shoeH: 8,
   armW: 10,
   armGap: 1,
-  handDrop: 0.12,
+  handDrop: 0.14,
   // Zero: the face is frontal, and the three-quarter read comes from the
   // lighting and the single visible ear instead. A one-pixel shift is enough
   // to push the near eye against the silhouette edge on a 16px head, and a
@@ -319,7 +343,7 @@ export const DEFAULT_TUNING: SpriteTuning = {
   faceShift: 1,
   lean: 0,
   // Perspective.
-  shoulderAsym: -1,
+  shoulderAsym: -2,
   shoulderDrop: 0,
   torsoSkew: 1,
   hipSkew: 1,
@@ -328,7 +352,7 @@ export const DEFAULT_TUNING: SpriteTuning = {
   footStagger: 1,
   footToe: 12,
   footSplay: 0,
-  stoop: 1,
+  stoop: 2,
   // Head furniture.
   hairY: 0,
   hatY: 1,
@@ -339,39 +363,45 @@ export const DEFAULT_TUNING: SpriteTuning = {
   mouthDy: 0,
   // Ink.
   outline: 0,
-  inkWeight: 3,
+  inkWeight: 4,
   contactShade: 3,
   groundShadow: 2,
-  // Light.
+  // Light. The lamp came down a step and the fill came up two: less carving,
+  // more air. Paired with the softer ramp below, the figure now reads by its
+  // silhouette and its big masses rather than by the depth of its shadows.
   lightDir: 0,
   lightHeight: 2,
-  lightStrength: 3,
-  ambient: 1,
-  rim: 1,
-  // Cloth.
+  lightStrength: 2,
+  ambient: 2,
+  rim: 2,
+  // Cloth. Falling folds off entirely, and the sway that remains lives in the
+  // drape's own swing — the fold lines were competing with the modelling for
+  // the same few ramp steps and losing to it, so a garment read as creased
+  // paper rather than as cloth over a body.
   textureAmt: 1,
-  foldStrength: 2,
+  foldStrength: 0,
   foldCount: 2,
-  drapeSway: 1,
+  drapeSway: 2,
   clothWeight: 2,
   hemBreak: 1,
   hemLine: 1,
   // Hands.
-  handSize: 0.31,
+  handSize: 0.27,
   handLong: 1.45,
   fingerSplit: 2,
-  wristBend: -11,
-  // Joints. `upperArmLen` and `foreArmRatio` reproduce the previous fixed
-  // geometry exactly at these values, so the defaults are a no-op change.
-  upperArmLen: 0.63,
-  foreArmRatio: 0.94,
+  wristBend: -5,
+  // Joints.
+  upperArmLen: 0.62,
+  foreArmRatio: 0.96,
   elbowRest: 4,
   armSwing: 8,
-  spineCarry: 0.2,
+  spineCarry: 0.22,
   headCounter: 0.35,
-  motionScale: 0.95,
+  kneeHigh: 0.54,
+  kneeLead: 0.95,
+  motionScale: 1.05,
   cheekLine: -1,
-  clothContrast: 1.55,
+  clothContrast: 1.2,
 };
 
 // v3 is the 128×160 grid. v1 (96×176) and v2 (192×352) tunings are not
@@ -431,8 +461,40 @@ export interface Posture {
   headNod: number;
   /** Per-arm joint angles, in degrees clockwise from straight-down. */
   arms: Record<'near' | 'far', ArmPose>;
+  /** Per-leg foot placement. The knee is solved from it — see `LegPose`. */
+  legs: Record<'near' | 'far', LegPose>;
   /** Vertical bob of the whole figure — breathing. */
   bob: number;
+  /**
+   * Squat: the hips drop this many px while the feet stay where they are, so
+   * the knees fold to take up the difference. This is what a crouch, a landing
+   * and the weighted half of a stride are all made of.
+   */
+  drop: number;
+  /** Shoulders rise toward the ears, px. A shrug is this and nothing else. */
+  shoulderLift: number;
+}
+
+/**
+ * A leg says **where its foot is**, and the knee is solved from that.
+ *
+ * The arms are authored as joint angles because an arm's business is its
+ * *shape* — a raised fist reads by the angle of the forearm. A leg's business
+ * is the opposite: nobody looks at a walking figure's knee, they look at
+ * whether its feet are on the ground. Authored as angles, every stride needed
+ * a hip and a knee number chosen together to keep the sole on the floor, and
+ * the first wrong guess put the foot through it.
+ *
+ * So legs are placed and the knee follows, by two-bone inverse kinematics. A
+ * step is one number. A crouch is `Posture.drop` and no leg numbers at all.
+ * The knee cannot end up anywhere but where the anatomy allows, because it is
+ * never stated.
+ */
+export interface LegPose {
+  /** Foot placement along the ground, px from rest. Positive is the way the figure faces. */
+  step: number;
+  /** Foot height above the ground line, px. */
+  lift: number;
 }
 
 /**
@@ -602,8 +664,19 @@ export function buildSkeleton(spec: PortraitSpec, tuning: SpriteTuning = active)
   // Limbs lengthen faster than the trunk as stature rises, and the trunk
   // slower — the long-legged look of tall people, and the compact one of
   // short people, are both in this pair of exponents.
-  const headH = px(t.headH, st.head);
-  const headW = px(t.headW, st.head * (b === 'heavy' || b === 'stocky' ? 1.06 : 1));
+  //
+  // The head takes a second factor the body does not: what shape the face is.
+  // `statureOf` says how *big* someone is, and size is all this used to know,
+  // so every sprite head came out the same 23 × 36 box — an aspect of 0.64,
+  // which is very nearly the bust's `long` face (0.631). Measured over 200
+  // personas the bust spread 44.2% between `round` and `long` and the sprite
+  // spread 1.4%, and that 1.4% was the ±1px jitter above, not the face shape.
+  // Every figure in the encounter was a long-faced person whatever their card
+  // said. `faceShapeScale` is the bust's own table, so a round face is short
+  // and broad in both views for the same reason and by the same proportion.
+  const fs = faceShapeScale(spec.faceShape);
+  const headH = px(t.headH * fs.height, st.head);
+  const headW = px(t.headW * fs.width, st.head * (b === 'heavy' || b === 'stocky' ? 1.06 : 1));
   const neckH = px(t.neckH, st.body);
   const torsoLen = px(t.torsoLen, Math.pow(st.body, 0.88));
   const hipDrop = px(t.hipDrop, st.body);
@@ -621,8 +694,22 @@ export function buildSkeleton(spec: PortraitSpec, tuning: SpriteTuning = active)
   // exponent *and* the small-head factor *and* the seeded jitter all in the
   // same direction — and the result was a figure near seven heads with thin
   // elongated limbs that read as stretched rather than as tall. The band below
-  // is the observed acceptable range: 6.3 is a genuinely lanky person and is
-  // as far as this should ever go.
+  // is the observed acceptable range.
+  //
+  // **This band was calibrated against a 30px head and the head is now 36.**
+  // Measured over 600 personas at the current tuning, the floor fires on 79%
+  // of them, and it is not firing evenly: `average` builds gain about 4px of
+  // leg, `slight` 7px, and `short` and `stocky` gain 13px — which is most of
+  // what was supposed to make them short and stocky in the first place. A
+  // clamp that fires four times in five is not a safety net, it is the primary
+  // determinant of height, and it is currently working against the stature
+  // system directly above it.
+  //
+  // It is left alone deliberately: the proportions in `DEFAULT_TUNING` were
+  // converged by eye *with this clamp active*, so lowering the floor would
+  // shorten the legs of the very figure that was approved. Rebasing it is a
+  // judgement about how the crowd should look, not a bug fix, and wants to be
+  // made against the grid view rather than inferred here.
   const HEADS_MIN = 4.9;
   const HEADS_MAX = 5.9;
   const heads = total / headH;
@@ -676,7 +763,7 @@ export function buildSkeleton(spec: PortraitSpec, tuning: SpriteTuning = active)
     chestY: shoulderY + Math.round(torsoLen * 0.32),
     waistY,
     hipY,
-    kneeY: hipY + Math.round((ankleY - hipY) * 0.5),
+    kneeY: hipY + Math.round((ankleY - hipY) * t.kneeHigh),
     ankleY,
     floorY,
     handY: hipY + Math.round((ankleY - hipY) * t.handDrop),

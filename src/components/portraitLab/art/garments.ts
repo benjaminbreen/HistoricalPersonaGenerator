@@ -272,7 +272,17 @@ export function drawGarment(context: RenderContext): BodyMasks {
   }
 
   // Cloth over shoulders is a broad cylinder falling away at the arms.
-  fillMask(raster, body, ramps.clothA, MAT.CLOTH_A, (x, y) => {
+  //
+  // Which cloth depends on what the garment is. A bust crops at the chest, so
+  // for a skirt or a lehenga every pixel of garment the viewer ever sees is
+  // the *blouse* — and painting it in the skirt's colour is how a persona came
+  // out wearing one colour here and another in the sprite, which shows both
+  // halves and had it right. `bodice` is null for the large majority, who wear
+  // one piece of cloth.
+  const separateBodice = spec.garment.bodice === 'separate';
+  const bodyRamp = separateBodice ? ramps.clothB : ramps.clothA;
+  const bodyMat = separateBodice ? MAT.CLOTH_B : MAT.CLOTH_A;
+  fillMask(raster, body, bodyRamp, bodyMat, (x, y) => {
     const dx = (x + 0.5 - centerX) / (anatomy.shoulderHalf * 1.02);
     const nz = Math.sqrt(Math.max(0.05, 1 - Math.min(1, dx * dx)));
     const drop = Math.max(0, (y - anatomy.shoulderTop) / 34) * 0.9;

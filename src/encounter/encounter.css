@@ -1278,7 +1278,44 @@
   border-bottom: 1px solid rgba(232, 224, 212, 0.15);
 }
 
+/* The grid needs room for five figures abreast; the single view does not. */
+.sprite-tuner--wide { width: 640px; }
+
 .sprite-tuner-head strong { font-family: var(--font-serif, Georgia, serif); font-size: 1rem; }
+
+.sprite-tuner-modes {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.5rem 0.8rem;
+  border-bottom: 1px solid rgba(232, 224, 212, 0.12);
+}
+
+.sprite-tuner-modes button {
+  padding: 0.28rem 0.7rem;
+  border: 1px solid rgba(232, 224, 212, 0.25);
+  border-radius: 5px;
+  background: transparent;
+  color: #cfc5b4;
+  cursor: pointer;
+  font-size: 0.74rem;
+}
+
+.sprite-tuner-modes button.is-on {
+  background: #d97757;
+  border-color: #d97757;
+  color: #1d1712;
+}
+
+.sprite-tuner-modes button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.sprite-tuner-grid {
+  padding: 0.5rem 0.8rem;
+  background:
+    radial-gradient(ellipse 120% 40% at 50% 100%, rgba(122, 92, 60, 0.3), transparent 70%),
+    #141009;
+  max-height: 46vh;
+  overflow-y: auto;
+}
 .sprite-tuner-hint { color: #93887a; font-size: 0.68rem; font-style: italic; margin-left: auto; }
 
 .sprite-tuner-head button {

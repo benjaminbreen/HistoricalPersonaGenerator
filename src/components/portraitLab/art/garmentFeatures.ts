@@ -57,15 +57,23 @@ const FEATURES: Array<[RegExp, string, boolean]> = [
   [/ruff|elizabethan|court doublet|spanish jacket/i, 'ruff', false],
   [/smoking jacket|dinner jacket|tuxedo|opera/i, 'shawl_lapel', true],
   [/suit|blazer|tailcoat|frock coat|morning coat|business|savile|dinner/i, 'lapels', true],
-  [/nehru|zhongshan|mao|bandhgala|sherwani|achkan|jodhpuri/i, 'mandarin', true],
+  [/nehru|zhongshan|mao|bandhgala|sherwani|achkan|jodhpuri|kurta|kurti|dashiki|agbada/i, 'mandarin', true],
   [/qipao|cheongsam|changshan|magua|frog/i, 'frogs', true],
+  // Knitwear, which has no seams and no facings and is therefore the one modern
+  // garment that cannot be described by any of the above. Before this a
+  // cardigan was drawn as an undifferentiated field of colour with a hemmed
+  // neck — the same picture a peasant smock got.
+  [/cardigan|sweater|jumper|pullover|gansey|guernsey|knitwear|jersey\b|fleece|sweatshirt|hoodie|union suit/i, 'knit', true],
   [/kente|aso oke|aso ebi|ankara|adire|strip.?weav/i, 'strip_weave', false],
   [/feather|plume/i, 'feathered', false],
   [/fur|pelt|leopard|jaguar|lion mane|buffalo robe|ermine|sable|mink/i, 'fur_collar', false],
   [/shawl|stole|mantilla|fichu/i, 'shawl', false],
   [/poncho|ruana/i, 'poncho', true],
-  [/guayabera|polo|aloha|formal shirt|designer shirt|dress shirt/i, 'placket', true],
-  [/t-shirt|tank top|tee shirt|singlet|board short|resort wear/i, 'tee', true],
+  [/guayabera|polo|aloha|formal shirt|designer shirt|dress shirt|silk shirt|work shirt|flannel shirt|chambray|denim jacket|work jacket|oxford shirt|bush shirt|shirtwaist/i, 'placket', true],
+  // Cut away at the shoulder, which is the one thing about it: a tank top drawn
+  // with a crew rib is a t-shirt.
+  [/tank top|singlet|camisole|vest top|bandeau/i, 'tank', true],
+  [/t-shirt|tee shirt|board short|resort wear/i, 'tee', true],
   [/embroider|zardozi|kundan|brocade|zari|beaded|jeweled|jewelled/i, 'yoke', false],
 ];
 
@@ -117,6 +125,8 @@ export function drawGarmentFeature(
     case 'poncho': return drawPoncho(context, shoulders);
     case 'placket': return drawPlacket(context, shoulders);
     case 'tee': return drawTee(context, shoulders);
+    case 'tank': return drawTank(context, shoulders);
+    case 'knit': return drawKnit(context, shoulders);
     case 'yoke': return drawYoke(context, body);
     default: return;
   }
@@ -276,17 +286,38 @@ function drawLapels(context: RenderContext, body: Mask, style: 'notch' | 'shawl'
 
   // A tie, cravat or stock. Two pixels wide is all there is room for, so the
   // knot is what carries it — a wider block of three rows at the throat.
+  //
+  // Not on everything with lapels, though, which is what this used to do: a
+  // woman's tailored walking suit and a linen blazer both came out wearing a
+  // necktie, and a necktie is a specific and quite narrow claim. Where the name
+  // says so it is drawn regardless; otherwise it needs formal male tailoring.
+  const name = spec.garment.name.toLowerCase();
+  const tie = /tie|cravat|stock\b|necktie|bow ?tie/.test(name)
+    || (spec.gender === 'Male'
+      && /suit|business|savile|tailcoat|frock coat|morning coat|dinner|tuxedo|lounge|evening/.test(name));
   const tieTop = top + 1;
-  for (let dy = 0; dy < 3; dy += 1) {
-    for (let dx = -2; dx <= 2; dx += 1) {
-      put(centerX + dx, tieTop + dy, ramps.clothC, MAT.CLOTH_C, dy === 0 ? 1 : 2.5 + Math.abs(dx) * 0.6);
+  if (tie) {
+    for (let dy = 0; dy < 3; dy += 1) {
+      for (let dx = -2; dx <= 2; dx += 1) {
+        put(centerX + dx, tieTop + dy, ramps.clothC, MAT.CLOTH_C, dy === 0 ? 1 : 2.5 + Math.abs(dx) * 0.6);
+      }
     }
-  }
-  for (let y = tieTop + 3; y < size; y += 1) {
-    const t = (y - tieTop) / 14;
-    const w = Math.min(2, 1 + Math.round(t * 2));
-    for (let dx = -w; dx <= w; dx += 1) {
-      put(centerX + dx, y, ramps.clothC, MAT.CLOTH_C, dx < 0 ? 1.8 : dx === w ? 5 : 3);
+    for (let y = tieTop + 3; y < size; y += 1) {
+      const t = (y - tieTop) / 14;
+      const w = Math.min(2, 1 + Math.round(t * 2));
+      for (let dx = -w; dx <= w; dx += 1) {
+        put(centerX + dx, y, ramps.clothC, MAT.CLOTH_C, dx < 0 ? 1.8 : dx === w ? 5 : 3);
+      }
+    }
+  } else {
+    // Without one, the shirt needs a collar of its own or the V reads as a
+    // wound. Two points turned down over the lapel break.
+    for (const side of [-1, 1] as const) {
+      for (let i = 0; i < 6; i += 1) {
+        const x = centerX + side * (anatomy.neckHalf + 1 + i * 0.7);
+        put(x, tieTop + i, ramps.clothB, MAT.CLOTH_B, i === 0 ? 0.4 : 4.6);
+        put(x, tieTop + i - 1, ramps.clothB, MAT.CLOTH_B, 0.5);
+      }
     }
   }
 
@@ -738,6 +769,125 @@ function drawTee(context: RenderContext, body: Mask): void {
     }
   }
   void size;
+}
+
+/**
+ * A tank top or camisole: cut away at the shoulder, so the garment is two
+ * straps and the collarbones are bare between them.
+ *
+ * Drawn inside out, the way the bib is: the straps and the body keep the
+ * garment's colour and everything else is repainted as skin, because what
+ * makes this garment recognisable is not what it covers but what it does not.
+ */
+function drawTank(context: RenderContext, body: Mask): void {
+  const { raster, anatomy, ramps, book, spec } = context;
+  const { size, centerX } = anatomy;
+  const strapHalf = spec.gender === 'Female' ? 2 : 3;
+  const strapAt = anatomy.neckHalf + 5;
+  // Where the body of the garment begins, below the collarbones.
+  const bodyTop = anatomy.collarY + 6;
+
+  for (let y = anatomy.shoulderTop - 2; y < bodyTop; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (!body[y * size + x]) continue;
+      const dx = Math.abs(x + 0.5 - centerX);
+      if (Math.abs(dx - strapAt) <= strapHalf) continue;
+      // Skin, shaded by whatever the cloth's own modelling had put here, so the
+      // chest keeps the light it was already carrying.
+      const shade = raster.shadeAt(x, y);
+      const step = Math.max(0, Math.min(6, (shade === 255 ? 3 : shade) + 1));
+      raster.set(x, y, ramps.skin.steps[step], MAT.SKIN, step);
+    }
+  }
+
+  // The neck's own shadow onto the bare chest, and the collarbones under it —
+  // without them the exposed area reads as a hole rather than a body.
+  for (const side of [-1, 1] as const) {
+    for (let i = 3; i < 12; i += 1) {
+      const x = Math.round(centerX + side * i);
+      const y = anatomy.shoulderTop + 6 + Math.round(Math.pow(i / 12, 2) * 2);
+      if (raster.matAt(x, y) !== MAT.SKIN) continue;
+      raster.shift(x, y, 1, book);
+      raster.shift(x, y - 1, -1, book);
+    }
+  }
+  // The garment's own top edge, hemmed.
+  for (let x = 0; x < size; x += 1) {
+    if (!body[bodyTop * size + x]) continue;
+    if (raster.matAt(x, bodyTop) !== MAT.CLOTH_A) continue;
+    raster.shift(x, bodyTop, -1, book);
+    if (raster.matAt(x, bodyTop + 1) === MAT.CLOTH_A) raster.shift(x, bodyTop + 1, 1, book);
+  }
+  applyContactShadow(raster, body, book, { dx: 0, dy: 1, strength: 1, depth: 1 });
+}
+
+/**
+ * Knitwear: a cardigan, a jumper, a gansey.
+ *
+ * Knitted cloth has no seams, no facings and no plackets, so every construction
+ * cue the other features draw is wrong for it — which is why a cardigan came
+ * out as a plain field of colour with a hemmed neck, exactly the picture a
+ * peasant smock got. What it has instead is **rib**: a band of alternating
+ * columns at the neck, and, on a cardigan, a button band down the front worked
+ * in the same rib. That is the whole recognition, and it is two loops.
+ */
+function drawKnit(context: RenderContext, body: Mask): void {
+  const { raster, anatomy, ramps, spec, book } = context;
+  const { size, centerX } = anatomy;
+  const put = painter(context, body);
+  const name = spec.garment.name.toLowerCase();
+  const opens = /cardigan|sweatshirt|hoodie|zip/.test(name);
+  const top = anatomy.neckBottom - 3;
+
+  // The neck rib: four rows of alternating columns, dipping at the sides the
+  // way a knitted band does when it is stretched over a shoulder.
+  const deep = opens ? 7 : 4;
+  for (let dy = 0; dy < 4; dy += 1) {
+    const half = anatomy.neckHalf + 4 + dy * 0.7;
+    for (let x = Math.round(centerX - half); x <= Math.round(centerX + half); x += 1) {
+      const dip = Math.round(Math.pow(Math.abs(x - centerX) / half, 2) * 3);
+      const y = top + dy - dip + 3;
+      // A V on a cardigan or a pullover, a crew on everything else.
+      if (opens && Math.abs(x - centerX) < deep - dy * 1.6) continue;
+      put(x, y, ramps.clothA, MAT.CLOTH_A, dy === 0 ? 0.7 : dy === 3 ? 6 : x % 2 === 0 ? 1.9 : 3.7);
+    }
+  }
+
+  if (opens) {
+    // The button band: two ribbed columns either side of the opening, with the
+    // shirt under it showing in the V between them.
+    for (let y = top + 2; y < size; y += 1) {
+      const t = Math.max(0, (y - top - 2) / 12);
+      const gap = Math.max(1, Math.round(deep * (1 - t)));
+      for (let dx = -gap + 1; dx <= gap - 1; dx += 1) {
+        put(centerX + dx, y, ramps.clothB, MAT.CLOTH_B, 1.4 + t * 1.2);
+      }
+      for (const side of [-1, 1] as const) {
+        put(centerX + side * gap, y, ramps.clothA, MAT.CLOTH_A, side < 0 ? 0.9 : 5.6);
+        put(centerX + side * (gap + 1), y, ramps.clothA, MAT.CLOTH_A, y % 2 === 0 ? 2.2 : 4);
+      }
+    }
+    // Buttons down the near band.
+    for (let i = 0; i < 4; i += 1) {
+      const y = top + 6 + i * 5;
+      if (y >= anatomy.viewHeight - 1) break;
+      const t = Math.max(0, (y - top - 2) / 12);
+      const gap = Math.max(1, Math.round(deep * (1 - t)));
+      put(centerX + gap + 1, y, ramps.clothC, MAT.CLOTH_C, 1.6);
+    }
+  }
+
+  // The knit itself: a coarse vertical grain across the whole chest. Two
+  // columns in nine, or it stops being texture and becomes a stripe.
+  for (let y = anatomy.shoulderTop; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (!body[y * size + x]) continue;
+      if (raster.matAt(x, y) !== MAT.CLOTH_A) continue;
+      const rib = (x - centerX + 900) % 5;
+      if (rib === 0) raster.shift(x, y, 1, book);
+      else if (rib === 2 && y % 3 !== 0) raster.shift(x, y, -1, book);
+    }
+  }
 }
 
 /** A decorated band across the upper chest — embroidery, zari, bead work. */

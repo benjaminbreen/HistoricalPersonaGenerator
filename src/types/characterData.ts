@@ -85,7 +85,7 @@ export interface Appearance {
     
     // Facial characteristics from portrait
     faceShape: 'oval' | 'round' | 'square' | 'long' | 'heart' | 'diamond';
-    eyeShape: 'almond' | 'round' | 'narrow' | 'wide' | 'hooded';
+    eyeShape: 'almond' | 'round' | 'narrow' | 'wide' | 'hooded' | 'large';
     noseShape: 'straight' | 'aquiline' | 'broad' | 'button' | 'roman';
     cheekbones: 'high' | 'average' | 'low';
     jawline: 'sharp' | 'soft' | 'square' | 'round' | 'oval';
@@ -117,6 +117,17 @@ export interface Appearance {
 
     // From the NEW generateClothing
     garment: ClothingPiece;
+    /**
+     * What is on the legs, where that is a separate named garment.
+     *
+     * Optional because it is meaningless for most of the app's range: a robe, a
+     * sari, a kalasiris and a tunic are one garment for the whole figure, and
+     * only from about the nineteenth century does the lower half become a named
+     * thing of its own. `generateCompleteOutfit` sets it — from the item's own
+     * name where that already says both halves, from the same clothing pool
+     * where it does not — and leaves it `None` otherwise.
+     */
+    legwear?: ClothingPiece;
     headgear: ClothingPiece;
     footwear: ClothingPiece;
     belt: ClothingPiece;

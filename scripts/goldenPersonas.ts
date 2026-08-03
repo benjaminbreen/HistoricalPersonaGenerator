@@ -168,6 +168,15 @@ function snapshot(persona: any): Record<string, unknown> {
       headwearColor: (spec as any).headwear?.color ?? null,
       garmentKind: (spec as any).garment?.kind ?? null,
       garmentColor: (spec as any).garment?.colors?.primary ?? null,
+      // The lower half, which the sprite draws and the bust does not. Taken off
+      // the spec rather than off `equippedItems.legs`, because the item tables
+      // have a base id for almost no trousers and the slot is empty for nearly
+      // everyone the generator now dresses in two pieces — snapshotting the
+      // slot would have recorded null for the whole population and guarded
+      // nothing.
+      legwear: (spec as any).legwear
+        ? `${(spec as any).legwear.name} [${(spec as any).legwear.material}] ${(spec as any).legwear.form}`
+        : null,
       backgroundBase: (spec as any).background?.base ?? null,
       // Which outlier, if any, claimed this persona's pose. The snapshot holds
       // no pixels, so this is the only thing standing between a change in the

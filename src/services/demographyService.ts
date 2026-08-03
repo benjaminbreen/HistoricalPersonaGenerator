@@ -37,7 +37,32 @@ export type BirthSex = 'Male' | 'Female';
  */
 export type SamplingMode = 'explore' | 'true-frequency';
 
-export const DEFAULT_SAMPLING_MODE: SamplingMode = 'true-frequency';
+/**
+ * `explore`, deliberately, and the choice is worth stating plainly.
+ *
+ * True frequency is the demographically honest draw and it was the default for
+ * a long time. The problem is what it does to a tool people actually use:
+ * measured over three thousand draws it put 39% of personas in antiquity, 2%
+ * anywhere in the Americas after 1500, and the entire African diaspora — every
+ * enslaved and free Black person in the whole hemisphere across five centuries
+ * — at **0.3%**, about one persona in three hundred. Those numbers are not a
+ * bug. Roughly 12.5 million people were carried across the Atlantic against a
+ * species total near 100 billion births, and antiquity really did have birth
+ * rates of sixty to eighty per thousand. The arithmetic is right.
+ *
+ * But a generator whose honest answer is that you will almost never meet these
+ * people is not teaching the history, it is reproducing the erasure with a
+ * citation attached. `explore` raises every weight to a fractional power, which
+ * keeps the *ordering* — antiquity still comes up more often than the
+ * industrial era — while pulling the extremes in far enough that the whole
+ * span is reachable in a sitting.
+ *
+ * The honesty is preserved where it belongs: `describeOdds` still prints the
+ * true probability on the card, so a persona from 1750 Barbados says what
+ * fraction of human lives actually looked like that. The sampling is a choice
+ * about what the tool shows you; the number beside it stays true.
+ */
+export const DEFAULT_SAMPLING_MODE: SamplingMode = 'explore';
 
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
@@ -117,6 +142,28 @@ function birthsAt(year: number): number {
   return worldPopulationAt(year) * (birthRateAt(year) / 1000);
 }
 
+/**
+ * Lives per year that reached adulthood — which is the population this
+ * generator actually depicts.
+ *
+ * Era weights used to be raw births, and births are the wrong denominator for
+ * a tool that never shows anyone under eighteen. The high birth rates the
+ * benchmark table carries — eighty per thousand in prehistory, sixty at the
+ * start of the common era — are high *because* mortality was catastrophic;
+ * they are the rate a population needs just to hold steady when roughly half
+ * of every cohort dies before it grows up. Counting those births as though
+ * each were a person you might meet double-counts the ancient world against
+ * the modern one, where about ninety-five percent of a cohort now reaches
+ * eighteen.
+ *
+ * `survivorshipAt` is the same curve `sampleAdultAge` already uses to decide
+ * how old a persona is, so the era weighting and the age draw now rest on one
+ * model of mortality rather than disagreeing about it.
+ */
+function adultsAt(year: number): number {
+  return birthsAt(year) * survivorshipAt(MIN_ADULT_AGE, year);
+}
+
 // ---------------------------------------------------------------------------
 // Eras
 // ---------------------------------------------------------------------------
@@ -162,7 +209,7 @@ const SELECTABLE_ERAS: HistoricalEra[] = [
   HistoricalEra.MODERN_ERA,
 ];
 
-/** Total births within a year range, by numeric integration. */
+/** Lives reaching adulthood within a year range, by numeric integration. */
 function birthsBetween(from: number, to: number): number {
   const steps = 240;
   const width = (to - from) / steps;
@@ -170,7 +217,7 @@ function birthsBetween(from: number, to: number): number {
   for (let i = 0; i < steps; i += 1) {
     const a = from + i * width;
     const b = a + width;
-    total += ((birthsAt(a) + birthsAt(b)) / 2) * width;
+    total += ((adultsAt(a) + adultsAt(b)) / 2) * width;
   }
   return total;
 }
@@ -630,12 +677,47 @@ export function isMaterialAvailable(description: string, year: number): boolean 
  * Britain did.
  */
 const ZONE_SHARES: Array<{ year: number; shares: Partial<Record<CulturalZone, number>> }> = [
+  /**
+   * The forager world, before agriculture redistributed everybody.
+   *
+   * The table used to begin at -3000 and `zoneShareAt` clamps below its first
+   * row, so every persona from the whole of PREHISTORY — 10,000 to 3000 BCE,
+   * and a real share of all births — was drawn against Bronze Age shares. That
+   * is the wrong table for the period in two specific ways, and both of them
+   * cut the same way.
+   *
+   * MENA at a quarter of humanity is an *agricultural* share. The Fertile
+   * Crescent's demographic weight arrived with farming and the cities that
+   * followed it; in 10,000 BCE the Natufian Levant and the Nile were
+   * significant but nothing like dominant.
+   *
+   * Sub-Saharan Africa is the mirror image. It has the longest continuous
+   * human occupation anywhere and, before farming spread elsewhere, the
+   * largest forager population — its share falls over the following millennia
+   * not because Africa shrank but because everywhere else grew.
+   *
+   * Oceania is the sharpest case of the same effect. Sahul had been settled
+   * for some fifty thousand years and held perhaps half a million to a million
+   * people out of a world of four million. Australia's population then stayed
+   * roughly flat while the farming world multiplied a thousandfold, which is
+   * how a zone at three percent of humanity ends at two-tenths of one percent
+   * by 1800. That collapse is real history and the table should show it
+   * happening rather than start after it.
+   */
+  {
+    year: -10000,
+    shares: {
+      SUB_SAHARAN_AFRICAN: 0.30, SOUTH_ASIAN: 0.15, EAST_ASIAN: 0.15,
+      MENA: 0.12, EUROPEAN: 0.10, SOUTHEAST_ASIAN: 0.07, OCEANIA: 0.03,
+      NORTH_AMERICAN_PRE_COLUMBIAN: 0.04, SOUTH_AMERICAN: 0.04,
+    },
+  },
   {
     year: -3000,
     shares: {
-      MENA: 0.25, SOUTH_ASIAN: 0.20, EAST_ASIAN: 0.20, EUROPEAN: 0.10,
-      SUB_SAHARAN_AFRICAN: 0.15, SOUTHEAST_ASIAN: 0.03, SOUTH_AMERICAN: 0.05,
-      NORTH_AMERICAN_PRE_COLUMBIAN: 0.04, OCEANIA: 0.01,
+      MENA: 0.24, SOUTH_ASIAN: 0.20, EAST_ASIAN: 0.20, EUROPEAN: 0.10,
+      SUB_SAHARAN_AFRICAN: 0.15, SOUTHEAST_ASIAN: 0.03, SOUTH_AMERICAN: 0.045,
+      NORTH_AMERICAN_PRE_COLUMBIAN: 0.035, OCEANIA: 0.015,
     },
   },
   {

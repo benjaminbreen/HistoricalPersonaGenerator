@@ -441,7 +441,13 @@ export function applyRim(raster: Raster, form: FormBuffer, book: RampBook, rig: 
 // Ink.
 // ---------------------------------------------------------------------------
 
-const INK: RGB = { r: 22, g: 17, b: 20 };
+/**
+ * The darkest value on the figure. The outline resolves to it, and nothing
+ * drawn *on* the figure may go below it — a pixel blacker than the silhouette
+ * reads as a hole punched through the sprite rather than as pigment, which is
+ * what a marking whose colour is literally `#000000` would otherwise be.
+ */
+export const INK: RGB = { r: 22, g: 17, b: 20 };
 
 function mix(a: RGB, b: RGB, t: number): RGB {
   return {

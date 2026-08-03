@@ -17,6 +17,14 @@ interface MiniLocationMapProps {
   region: string;
   coordinates?: { x: number; y: number };
   mapSeed?: string;
+  /**
+   * The city standing in this locale, if there is one. Drawn as a label beside
+   * the marker rather than as its own dot: `CITIES_DATA` carries founding
+   * years and densities but no coordinates, so the map knows the region a city
+   * is in and not where in it. A label says "this dot is near Ayutthaya",
+   * which is true; a second dot would claim a position the data does not have.
+   */
+  cityLabel?: string;
 }
 
 // Map regions to approximate coordinates
@@ -222,7 +230,7 @@ const CONTINENT_QUALIFIED_COORDINATES: Array<{
   { zone: /south american/, region: 'atlantic coast', coords: [-45, -20] },
 ];
 
-const MiniLocationMap: React.FC<MiniLocationMapProps> = ({ continent, region }) => {
+const MiniLocationMap: React.FC<MiniLocationMapProps> = ({ continent, region, cityLabel }) => {
   const playerCoords = useMemo(() => {
     const normalizedRegion = normalizeRegionKey(region);
     const normalizedContinent = normalizeRegionKey(continent);
@@ -493,6 +501,25 @@ const MiniLocationMap: React.FC<MiniLocationMapProps> = ({ continent, region }) 
 
                 {/* Center bright spot */}
                 <circle r="1" fill="#ffffff" fillOpacity="0.8" />
+
+                {/* The city name, offset clear of the pulsing rings. Painted
+                    with a dark halo so it stays legible over both ocean and
+                    landmass fills. */}
+                {cityLabel && (
+                  <text
+                    x="10"
+                    y="4"
+                    fontSize="9"
+                    fontWeight="600"
+                    fill="#fde68a"
+                    stroke="#0f172a"
+                    strokeWidth="2.5"
+                    paintOrder="stroke"
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    {cityLabel}
+                  </text>
+                )}
               </g>
             </Marker>
           </ZoomableGroup>

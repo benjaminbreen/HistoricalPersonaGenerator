@@ -25,6 +25,10 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             "Thames Estuary": { name: "Thames Estuary", climate: ClimateType.TEMPERATE, archetype: MapArchetype.DELTA, deltaOutlet: 'east' },
             "Oxfordshire": { name: "Oxfordshire", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ALL_LAND, hasLakes: false },
             "Cliffs of Dover": { name: "Cliffs of Dover", climate: ClimateType.TEMPERATE, archetype: MapArchetype.BAY },
+            // The industrial north-west had no area, so Manchester and
+            // Liverpool — the two cities that most define a nineteenth-century
+            // British persona — had nowhere to live but "York".
+            "Mersey Basin": { name: "Mersey Basin", climate: ClimateType.TEMPERATE, archetype: MapArchetype.RIVER_PORT, riverDirection: 'east-west' },
         },
         "France": {
             "Paris Basin": { name: "Paris Basin", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ALL_LAND, altitude: 'low', hasLakes: false },
@@ -65,7 +69,11 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             "Carpathian Foothills": { name: "Carpathian Foothills", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false },
             "Vienna Basin": { name: "Vienna Basin", climate: ClimateType.TEMPERATE, archetype: MapArchetype.RIVER_PORT },
             "Moravian Gate": { name: "Moravian Gate", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ALL_LAND, hasLakes: false },
-            "Tatra Mountains": { name: "Tatra Mountains", climate: ClimateType.COLD, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false }
+            "Tatra Mountains": { name: "Tatra Mountains", climate: ClimateType.COLD, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false },
+            // Poland's heartland was missing entirely: Krakow was filed under
+            // the Carpathian foothills and Warsaw had no area at all, so the
+            // most populous country in the region could not be drawn.
+            "Vistula Plain": { name: "Vistula Plain", climate: ClimateType.TEMPERATE, archetype: MapArchetype.RIVER_PORT, riverDirection: 'north-south' }
         },
         "Balkans": {
             "Dinaric Alps": { name: "Dinaric Alps", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false },
@@ -111,6 +119,10 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             "Sicily": { name: "Sicily", climate: ClimateType.MEDITERRANEAN, archetype: MapArchetype.ISLAND, economicActivityLevel: 3, isVolcanic: true },
             "Cyprus": { name: "Cyprus", climate: ClimateType.MEDITERRANEAN, archetype: MapArchetype.ISLAND, economicActivityLevel: 3 },
             "Delos Archipelago": { name: "Delos Archipelago", climate: ClimateType.MEDITERRANEAN, archetype: MapArchetype.ISLAND },
+            // Rhodes is its own island and its own history — Hellenistic
+            // maritime power, Hospitaller seat, Ottoman province. Filing its
+            // cities under the Cyclades put them three hundred miles west.
+            "Dodecanese": { name: "Dodecanese", climate: ClimateType.MEDITERRANEAN, archetype: MapArchetype.ISLAND, economicActivityLevel: 3 },
             "Mount Olympus": { name: "Mount Olympus", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false },
             "Thessalian Plain": { name: "Thessalian Plain", climate: ClimateType.MEDITERRANEAN, archetype: MapArchetype.ALL_LAND, hasLakes: false }
         },
@@ -724,6 +736,11 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             "Tohoku Hills": { name: "Tohoku Hills", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ALL_LAND, hasLakes: false },
             "Nara Uplands": { name: "Nara Uplands", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ALL_LAND, hasLakes: false },
              "Hokkaido": { name: "Hokkaido", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ISLAND },
+            // Every other Japanese area is on Honshu or Hokkaido, so the third
+            // largest island — and the country's window on the mainland for
+            // most of its history — was unreachable. Nagasaki, Fukuoka and
+            // Kumamoto belong here.
+            "Kyushu": { name: "Kyushu", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.ISLAND },
         },
         "Korea": {
             "Han River Valley": { name: "Han River Valley", climate: ClimateType.TEMPERATE, archetype: MapArchetype.RIVER_PORT },
@@ -731,7 +748,11 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             "Gyeongju Basin": { name: "Gyeongju Basin", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ALL_LAND, hasLakes: false },
             "Jeolla Highlands": { name: "Jeolla Highlands", climate: ClimateType.TEMPERATE, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false },
             "Baekdu Mountain Zone": { name: "Baekdu Mountain Zone", climate: ClimateType.COLD, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false },
-            "Busan Coast": { name: "Busan Coast", climate: ClimateType.TEMPERATE, archetype: MapArchetype.BAY }
+            "Busan Coast": { name: "Busan Coast", climate: ClimateType.TEMPERATE, archetype: MapArchetype.BAY },
+            // The north-west: Goguryeo's capital and Korea's oldest
+            // continuously occupied city. Kaesong is 150km away and was
+            // standing in for it.
+            "Taedong Basin": { name: "Taedong Basin", climate: ClimateType.TEMPERATE, archetype: MapArchetype.RIVER_PORT }
         },
         "Taiwan and Ryukyu": {
             "Central Mountains": { name: "Central Mountains", climate: ClimateType.SEMITROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false },
@@ -790,7 +811,11 @@ export const GEOGRAPHICAL_DATA: { [zoneName: string]: ZoneDefinition } = {
             "Bismarck Archipelago": { name: "Bismarck Archipelago", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
             "Solomon Islands Chain": { name: "Solomon Islands Chain", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND },
             "Coral Sea Coast": { name: "Coral Sea Coast", climate: ClimateType.TROPICAL, archetype: MapArchetype.BAY },
-            "Kokoda Plateau": { name: "Kokoda Plateau", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false }
+            "Kokoda Plateau": { name: "Kokoda Plateau", climate: ClimateType.TROPICAL, archetype: MapArchetype.ALL_LAND, altitude: 'high', hasLakes: false },
+            // Fiji had no area under any name, which left the largest
+            // population centre in island Melanesia — and the Lapita hearth —
+            // off the map.
+            "Fiji Islands": { name: "Fiji Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND }
         },
         "Polynesia": {
             "Society Islands": { name: "Society Islands", climate: ClimateType.TROPICAL, archetype: MapArchetype.ISLAND, minYear: 1000 },

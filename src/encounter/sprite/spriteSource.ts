@@ -40,8 +40,6 @@ export type HeldKind = 'pole' | 'blade' | 'tool' | 'book' | 'bag' | 'staff' | nu
 export type FootwearKind = 'bare' | 'sandal' | 'boot' | 'clog' | 'wrap' | 'straw' | 'shoe';
 
 export interface SpriteExtras {
-  /** Trousers/hose under a short garment; null under a floor-length one. */
-  hasLegwear: boolean;
   /** Barefoot is common and should read as such. */
   footwear: FootwearKind;
   held: { kind: HeldKind; name: string } | null;
@@ -137,7 +135,6 @@ export function buildSpriteSource(c: SpriteCharacter): SpriteSource {
   const spec = buildPortraitSpec(c);
 
   const feet = c.equippedItems?.feet;
-  const legs = c.equippedItems?.legs;
   const main = c.equippedItems?.main_hand;
   const belt = c.equippedItems?.belt;
   const acc = c.equippedItems?.accessory;
@@ -152,7 +149,6 @@ export function buildSpriteSource(c: SpriteCharacter): SpriteSource {
   return {
     spec,
     extras: {
-      hasLegwear: !!legs && !/bare/i.test(legs.name),
       footwear: classifyFootwear(feet?.name, (feet as { material?: string } | undefined)?.material),
       held: main && !/bare|empty|none/i.test(main.name)
         ? { kind: classifyHeld(main.name), name: main.name }

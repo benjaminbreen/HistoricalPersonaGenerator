@@ -82,6 +82,26 @@ export function widenStamp(art: Stamp, extraColumns: number): Stamp {
   };
 }
 
+/**
+ * Narrow a stamp by dropping centre columns — the inverse of `widenStamp`.
+ *
+ * A small mouth is not a wide one drawn faintly, it is a shorter one, and the
+ * only honest way to say so at this size is to take the columns out.
+ */
+export function narrowStamp(art: Stamp, columns: number): Stamp {
+  if (columns <= 0 || art.width - columns < 3) return art;
+  const mid = Math.floor(art.width / 2);
+  const start = Math.max(0, mid - Math.floor(columns / 2));
+  const rows = art.rows.map(row => row.slice(0, start) + row.slice(start + columns));
+  return {
+    width: art.width - columns,
+    height: art.height,
+    rows,
+    anchorX: art.anchorX > start ? Math.max(start, art.anchorX - columns) : art.anchorX,
+    anchorY: art.anchorY,
+  };
+}
+
 /** Duplicate a row — a fuller lower lip, a taller crown, a deeper brim. */
 export function insertRows(art: Stamp, atIndex: number, times: number): Stamp {
   if (times <= 0) return art;

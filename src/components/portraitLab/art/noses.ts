@@ -12,6 +12,15 @@
  *
  * The light comes from the upper left, so the lit edge of the bridge is always
  * on the left and the cast shadow on the right.
+ *
+ * The five shapes differ in *proportion*, not in shading. An earlier set drew
+ * them all nine pixels wide and twelve rows tall and distinguished them by
+ * moving a couple of `+` and `=` cells around the bridge; measured against each
+ * other, straight and roman came out fourteen pixels apart on a 14,400-pixel
+ * canvas, which is to say identical. A frontal view cannot show a profile, so
+ * what it has to show instead is how long the nose is, how wide it is at the
+ * base, and how much shadow the tip throws. Those are the numbers that vary
+ * here — 7 to 13 pixels of width, and 5 to 12 rows above the nostril line.
  */
 
 import { MAT, RampBook, Raster } from '../core/raster';
@@ -36,72 +45,99 @@ const STRAIGHT = stamp(
   { anchor: { x: 4, y: 10 } }
 );
 
+/**
+ * Long and narrow, with the bridge starting up between the eyes and a tip that
+ * hangs. The narrow nostril line is as much of the read as the length is: an
+ * aquiline nose is the only one here whose base is *narrower* than its bridge
+ * is long.
+ */
 const AQUILINE = stamp(
   `
-  ....-....
+  ...+-....
+  ...+-....
   ...+-....
   ...+=....
+  ..+^=....
   ..+^=....
   ..+^=-...
   ..+^=-...
   ..+^==...
   ..+^.=-..
   .-+^^==..
-  .=-+^-==.
-  .~~-+-~~.
-  ..-===-..
+  .=-+^-=-.
+  ..~-+-~..
+  ...===...
+  ....-....
   `,
-  { anchor: { x: 4, y: 10 } }
+  { anchor: { x: 4, y: 12 } }
 );
 
+/**
+ * The hump. A dorsal bump has no outline to show from the front, so it reads as
+ * the lit column of the bridge swelling to two pixels across the middle third
+ * and the shadow beside it stepping out to make room.
+ */
 const ROMAN = stamp(
   `
   ...+-....
   ...+-....
   ...+.-...
-  ...+.-...
-  ...+.=...
-  ...+.=...
+  ..+^.-...
+  ..^^.=...
+  .+^^.=-..
+  ..+^.=-..
+  ..+^.=...
   ..+^.=...
   ..+^.=-..
-  ..^^.==..
-  .-+^^-=-.
-  .~==-=~~.
-  ..-----..
+  .-+^^==..
+  .~~-+-~~.
+  ..-===-..
   `,
-  { anchor: { x: 4, y: 10 } }
+  { anchor: { x: 4, y: 11 } }
 );
 
+/** Wide at the base, with the nostrils flaring clear of the bridge above them. */
 const BROAD = stamp(
   `
-  .....-.....
-  .....-.....
-  ....+.-....
-  ....+.-....
-  ....+.-....
-  ...+..=....
-  ...+..=....
-  ..+^..=-...
-  .-+^^.==-..
-  .=-+^+-=-..
-  .~~=-+-=~~.
-  ..-------..
+  .....+.-.....
+  .....+.-.....
+  ....+..-.....
+  ....+..=.....
+  ....+..=.....
+  ...+^..=-....
+  ...+^..==....
+  ..-+^..==-...
+  .=-+^^+-==-..
+  .~~==-+-==~~.
+  ..---------..
   `,
-  { anchor: { x: 5, y: 10 } }
+  { anchor: { x: 6, y: 9 } }
 );
 
+/**
+ * Small and tipped up, which is what puts the nostrils on show — on a button
+ * nose they are a larger share of the whole than on any other shape, and that
+ * ratio is most of what makes it read as one.
+ *
+ * The *bridge* still runs up between the eyes. An earlier version of this took
+ * the shortness literally and stopped the whole nose five rows above the
+ * nostrils, which on a long face left a bare inch of cheek between the eyes and
+ * a small mark floating below them. What is short on a button nose is the part
+ * that projects, not the part that joins it to the skull.
+ */
 const BUTTON = stamp(
   `
   ...-...
-  ...-...
   ..+.-..
   ..+.-..
-  .-+^=..
+  ..+.-..
+  ..+.=..
+  .-^^=..
   .-^^=-.
-  .~=+=~.
-  ..---..
+  .~~+~~.
+  ..===..
   `,
-  { anchor: { x: 3, y: 6 } }
+  { anchor: { x: 3, y: 7 } }
 );
 
 const NOSES: Record<NoseShape, Stamp> = {

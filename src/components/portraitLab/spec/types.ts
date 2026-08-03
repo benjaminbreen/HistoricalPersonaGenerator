@@ -9,10 +9,12 @@
  * the existing renderer instead of fighting it.
  */
 
+import { LegwearForm } from './garmentLayers';
+
 export type Gender = 'Male' | 'Female' | 'Non-binary';
 
 export type FaceShape = 'oval' | 'round' | 'square' | 'long' | 'heart' | 'diamond';
-export type EyeShape = 'almond' | 'round' | 'narrow' | 'wide' | 'hooded';
+export type EyeShape = 'almond' | 'round' | 'narrow' | 'wide' | 'hooded' | 'large';
 export type NoseShape = 'straight' | 'aquiline' | 'broad' | 'button' | 'roman';
 export type LipShape = 'thin' | 'medium' | 'full' | 'bow' | 'wide';
 export type Jawline = 'sharp' | 'soft' | 'square' | 'round' | 'oval';
@@ -109,6 +111,18 @@ export const CONICAL_HAT_PATTERN =
 export const WOVEN_HAT_PATTERN =
   /straw|bamboo|rattan|reed|sedge|grass|palm|raffia|pandanus|cane|fibre|fiber|wicker/;
 
+/**
+ * Where a hat named only for its fibre is a cone anyway.
+ *
+ * The other half of the rule above, and it lives here for exactly the reason
+ * the patterns do: both renderers have to reach the same verdict about the
+ * same hat, and while this sat privately in `art/headwear.ts` only one of them
+ * could. The sprite tested the name alone, so a Gangetic Plain rice farmer's
+ * straw hat was a shallow sunhat in her portrait and a flat-topped cylinder in
+ * her sprite — the two pictures beside each other on one card, disagreeing.
+ */
+export const CONICAL_ZONES = new Set(['EAST_ASIAN', 'SOUTH_ASIAN', 'OCEANIA']);
+
 export type FacialHairStyle =
   | 'full_beard' | 'goatee' | 'mustache' | 'stubble' | 'van_dyke' | 'soul_patch'
   | 'mutton_chops' | 'imperial' | 'handlebar' | 'forked_beard' | 'chin_curtain' | 'verdi';
@@ -195,17 +209,67 @@ export interface GarmentWearSpec {
   intensity: number;
 }
 
+/**
+ * What is on the chest, when the lower body is a skirt.
+ *
+ * A skirted construction is two garments and the eye reads the join, which is
+ * why the sprite draws them in two colours. But *which* colour goes on the
+ * chest is not a drawing decision, it is a fact about the item — and with the
+ * two renderers deciding it separately they disagreed on every persona who
+ * wore one. The sprite painted the chest in the palette's secondary while the
+ * bust painted it in the garment's own colour, so a walnut sari came out
+ * walnut to the collar in the portrait and cream in the sprite, side by side
+ * on one card.
+ *
+ * The split is real and the item's name carries it. A sari, wrapper or shawl
+ * takes its own cloth over the shoulder, so the chest is the named garment.
+ * A skirt, petticoat or lehenga names only the lower half and the bodice above
+ * it is a separate blouse the item never mentions.
+ */
+export type BodiceSource =
+  /** The named cloth covers the chest too — a drape over the shoulder. */
+  | 'self'
+  /** The name is the lower garment; the chest is an unnamed blouse. */
+  | 'separate';
+
 export interface GarmentSpec {
   kind: GarmentKind;
   name: string;
   material: string;
   colors: SpecColorSet;
+  /**
+   * Set only for skirted constructions, where the chest and the lower body are
+   * different garments. Null means one piece of cloth, and both views draw the
+   * whole thing in `colors.primary`.
+   */
+  bodice: BodiceSource | null;
   /** Trim, embroidery, and metal fittings scale with this. */
   ornament: number;
   /** Decoration read out of the item's own name. */
   surfaces: GarmentSurfaceSpec[];
   /** What the item's own adjectives say has happened to it. */
   wear: GarmentWearSpec[];
+}
+
+/**
+ * The lower garment, where the outfit names one of its own.
+ *
+ * Null for most of the range this app covers, and that is the honest answer: a
+ * robe, a sari, a kalasiris and a tunic are one garment for the whole figure,
+ * and whatever is under them is neither named nor visible. From about the
+ * nineteenth century the lower half becomes a named thing — jeans, chinos, a
+ * skirt, churidar — and until this existed the renderers had nowhere to put it.
+ * The bust never draws it, but it is here rather than in the sprite's own
+ * source because the *colour* has to be resolved once: both views build their
+ * ramps off the spec, and a persona whose card says denim should not be indigo
+ * in one picture and oatmeal in the other.
+ */
+export interface LegwearSpec {
+  name: string;
+  material: string;
+  color: string;
+  /** Resolved once here so the two renderers cannot disagree about the shape. */
+  form: LegwearForm;
 }
 
 export interface HeadwearSpec {
@@ -555,6 +619,7 @@ export interface PortraitSpec {
   weathering: number;
 
   garment: GarmentSpec;
+  legwear: LegwearSpec | null;
   headwear: HeadwearSpec | null;
   jewelry: JewelrySpec[];
   markings: MarkingSpec[];

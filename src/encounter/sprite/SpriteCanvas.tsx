@@ -1,24 +1,23 @@
 /**
  * encounter/sprite/SpriteCanvas.tsx
  *
- * The living figure. Idle behaviour is seeded and clock-derived like the
- * portraits — real breathing (the chest rises, the waist holds), blinking
- * off-beat, sidelong glances, a talk flap while their line types out —
- * and the battle animations are short envelopes over compiled pose frames:
- * anticipate, thrust, return. Frames compile lazily, so an idle figure
- * costs four rasters and a bow only pays for itself when someone bows.
+ * The living figure — a player for the timeline in `anim.ts`, and nothing
+ * more. Idle behaviour is seeded and clock-derived like the portraits (real
+ * breathing, blinking off-beat, sidelong glances, a talk flap while their line
+ * types out) and the battle animations are short envelopes over compiled pose
+ * frames. Both live in `anim.ts` so the contact sheet can render exactly what
+ * this component plays; frames compile lazily, so an idle figure costs four
+ * rasters and a bow only pays for itself when someone bows.
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Raster } from '../../components/portraitLab/core/raster';
-import { unit } from '../../components/portraitLab/core/rng';
 import { HistoricalPersona } from '../../services/personaGenerator';
 import { buildSpriteSource } from './spriteSource';
 import { compileSprite, CompiledSprite, FrameId, SPRITE_H, SPRITE_W } from './drawSprite';
+import { AnimFrame, animFrame, idleClock, idlePose, idleSway, SpriteAnim } from './anim';
 
-export type SpriteAnim =
-  | 'lunge' | 'flinch' | 'dodge' | 'ko' | 'celebrate' | 'step'
-  | 'reach' | 'shrug' | 'bow' | 'gesture';
+export type { SpriteAnim };
 
 export interface SpriteCommand {
   anim: SpriteAnim;
@@ -66,96 +65,6 @@ function makeSheets(compiled: CompiledSprite) {
 
 type Sheets = ReturnType<typeof makeSheets>;
 
-interface AnimFrame {
-  dx: number;
-  dy: number;
-  pose: FrameId;
-  flash: number;
-}
-
-/**
- * t is ms since the command started. Returns null when the envelope is over.
- * Distances are in sprite pixels on the 192×352 grid.
- */
-function animFrame(anim: SpriteAnim, t: number): AnimFrame | null {
-  const ease = (v: number) => 1 - (1 - v) * (1 - v);
-  switch (anim) {
-    case 'lunge': {
-      if (t < 140) return { dx: -Math.round(8 * (t / 140)), dy: 0, pose: 'stand', flash: 0 };
-      if (t < 320) return { dx: Math.round(-8 + 44 * ease((t - 140) / 180)), dy: -2, pose: 'reach', flash: 0 };
-      if (t < 560) return { dx: Math.round(36 * (1 - (t - 320) / 240)), dy: 0, pose: 'stand', flash: 0 };
-      return null;
-    }
-    case 'flinch': {
-      if (t >= 420) return null;
-      const shake = Math.round(Math.sin(t / 26) * 6 * (1 - t / 420));
-      return { dx: shake - 6, dy: 0, pose: 'stand', flash: t < 110 ? 0.75 * (1 - t / 110) : 0 };
-    }
-    case 'dodge': {
-      if (t < 120) return { dx: -Math.round(24 * ease(t / 120)), dy: 0, pose: 'stand', flash: 0 };
-      if (t < 380) return { dx: -Math.round(24 * (1 - (t - 120) / 260)), dy: 0, pose: 'stand', flash: 0 };
-      return null;
-    }
-    case 'ko': {
-      if (t < 260) return { dx: 0, dy: 0, pose: 'stand', flash: t < 120 ? 0.6 : 0 };
-      if (t < 700) {
-        const drop = ease((t - 260) / 440);
-        return { dx: Math.round(12 * drop), dy: Math.round(-20 * (1 - drop)), pose: 'fallen', flash: 0 };
-      }
-      return { dx: 12, dy: 0, pose: 'fallen', flash: 0 };
-    }
-    case 'celebrate': {
-      if (t >= 900) return null;
-      const hop = Math.abs(Math.sin(t / 145));
-      return { dx: 0, dy: -Math.round(hop * 16), pose: 'raise', flash: 0 };
-    }
-    case 'step': {
-      if (t < 160) return { dx: Math.round(14 * ease(t / 160)), dy: 0, pose: 'stand', flash: 0 };
-      if (t < 420) return { dx: Math.round(14 * (1 - (t - 160) / 260)), dy: 0, pose: 'stand', flash: 0 };
-      return null;
-    }
-    case 'reach': {
-      if (t >= 700) return null;
-      return { dx: t < 100 ? Math.round(6 * (t / 100)) : 6, dy: 0, pose: 'reach', flash: 0 };
-    }
-    case 'shrug': {
-      if (t >= 360) return null;
-      return { dx: 0, dy: -Math.round(Math.abs(Math.sin(t / 115)) * 4), pose: 'stand', flash: 0 };
-    }
-    case 'bow': {
-      // Dip in, hold the deep bow (eyes closed), rise back through the
-      // light bend — a real bend at the waist, not a translated sprite.
-      if (t < 200) return { dx: 0, dy: 0, pose: 'bowLight', flash: 0 };
-      if (t < 1050) return { dx: 2, dy: 0, pose: 'bowDeep', flash: 0 };
-      if (t < 1350) return { dx: 0, dy: 0, pose: 'bowLight', flash: 0 };
-      return null;
-    }
-    case 'gesture': {
-      // The open-handed offer, held through a beat of speech.
-      if (t >= 1100) return null;
-      return { dx: t < 120 ? Math.round(3 * (t / 120)) : 3, dy: 0, pose: 'offer', flash: 0 };
-    }
-  }
-}
-
-function blinkNow(time: number, seed: number): boolean {
-  const period = 3400 + unit(seed, 'blink-period') * 1600;
-  const index = Math.floor(time / period);
-  const offset = unit(seed, `blink-${index}`) * period * 0.7;
-  const elapsed = time - (index * period + offset);
-  return elapsed >= 0 && elapsed < 150;
-}
-
-/** A sidelong glance every so often, held for most of a second. */
-function glanceNow(time: number, seed: number): boolean {
-  const period = 6800 + unit(seed, 'glance-period') * 4200;
-  const index = Math.floor(time / period);
-  if (unit(seed, `glance-${index}`) < 0.45) return false;
-  const offset = unit(seed, `glance-at-${index}`) * period * 0.6;
-  const elapsed = time - (index * period + offset);
-  return elapsed >= 0 && elapsed < 850;
-}
-
 export default function SpriteCanvas({
   persona, facing, scale = 1, talking = false, ko = false, command = null, onCommandDone,
 }: Props) {
@@ -184,8 +93,7 @@ export default function SpriteCanvas({
     let last = 0;
     const w = SPRITE_W * scale;
     const h = (SPRITE_H - sheets.contentTop) * scale;
-    const breathePeriod = 2800 + unit(sheets.seed, 'breath') * 1000;
-    const swayPeriod = 5200 + unit(sheets.seed, 'sway') * 1800;
+    const clock = idleClock(sheets.seed);
 
     const draw = (now: number) => {
       raf = requestAnimationFrame(draw);
@@ -206,31 +114,11 @@ export default function SpriteCanvas({
 
       // The idle brain: breathing is the base layer; blinks, glances, and
       // the talk flap override the face while the chest keeps its rhythm.
-      let pose: FrameId;
-      if (frame) {
-        pose = frame.pose;
-      } else if (koSettled) {
-        pose = 'fallen';
-      } else {
-        // Four idle frames, not two: the pair carry the chest, and the
-        // quarter-phases between them carry the drape's swing. Long cloth
-        // moves through a full pendulum over one breath; short cloth has zero
-        // wind amplitude, so its four frames are identical pictures and the
-        // cycle is invisible.
-        const cycle = ((now / breathePeriod) % 1 + 1) % 1;
-        const IDLE: FrameId[] = ['stand', 'stand2', 'standBreathe', 'standBreathe2'];
-        if (talking && Math.floor(now / 130) % 2 === 0) pose = 'talk';
-        else if (blinkNow(now, sheets.seed)) pose = 'blink';
-        else if (!talking && glanceNow(now, sheets.seed)) pose = 'glance';
-        else pose = IDLE[Math.floor(cycle * 4) % 4];
-      }
+      const pose: FrameId = frame ? frame.pose
+        : koSettled ? 'fallen'
+        : idlePose(clock, now, talking);
 
-      // A slow, one-pixel weight shift keeps the stance alive without
-      // reading as movement.
-      const sway = pose === 'stand' || pose === 'standBreathe' || pose === 'glance'
-        ? Math.round(Math.sin((now / swayPeriod) * Math.PI * 2) * 1)
-        : 0;
-      const dx = ((frame?.dx ?? 0) + sway) * scale;
+      const dx = ((frame?.dx ?? 0) + idleSway(clock, now, pose)) * scale;
       const dy = (frame?.dy ?? 0) * scale;
 
       const sheet = sheets.sheet(pose);

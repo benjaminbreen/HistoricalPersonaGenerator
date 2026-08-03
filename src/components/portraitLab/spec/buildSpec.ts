@@ -15,9 +15,11 @@
 import { hashString, unit } from '../core/rng';
 import { hexToRgb, hslToRgb, luminance, mixRgb, rgbToHex, rgbToHsl } from '../core/color';
 import { hasIntrinsicColor, hexForName } from '../../../constants/gameData/colorNames';
+import { impliesMatchingLegs, legwearFormFor } from './garmentLayers';
 import { stoneMaterialForHex } from '../../../services/ornamentService';
 import {
   BackgroundSpec,
+  BodiceSource,
   Build,
   ConditionSpec,
   DentalWork,
@@ -28,9 +30,11 @@ import {
   GarmentWearSpec,
   HairLength,
   HairSilhouette,
+  HairTexture,
   HeadwearKind,
   HeadwearSpec,
   JewelrySpec,
+  LegwearSpec,
   FaceTraits,
   MarkingSpec,
   MoodSpec,
@@ -291,6 +295,65 @@ export function classifyHairstyleName(name: string): { silhouette: HairSilhouett
     if (pattern.test(name)) return { silhouette, matched: true };
   }
   return { silhouette: 'loose', matched: false };
+}
+
+/**
+ * What hair does when nobody has named a style for it.
+ *
+ * Two facts drive this and both are already on the spec.
+ *
+ * **An afro is not a style, it is what coily hair does.** Worn out and
+ * unstraightened at any real length, tightly coiled hair stands away from the
+ * skull in a halo — that is the default state, not an arrangement someone
+ * chose, and it needs no name because for most of history nobody thought of it
+ * as one. Making it wait for the word "afro" to appear in a table meant 8% of
+ * the population had the texture and 0% had the silhouette. Locs and cornrows
+ * *are* arrangements, and ancient ones — cornrows appear in African rock art
+ * millennia before any of the periods this generator covers — so they take a
+ * share of the same group rather than needing their own vocabulary.
+ *
+ * **Long hair gets tied back by anyone with work to do.** Gathering it into a
+ * hanging tail is close to a human universal and it was entirely missing;
+ * `weathering` already measures how much of this life was spent outdoors in
+ * the weather, which is as good a proxy for "needs it out of the way" as the
+ * spec has.
+ *
+ * Seeded on its own labels, so adding this cannot shift any other decision.
+ */
+function looseHairFallback(
+  length: HairLength,
+  texture: HairTexture,
+  zone: string | undefined,
+  weathering: number,
+  seed: number
+): HairSilhouette {
+  const longEnough = length === 'medium' || length === 'long' || length === 'very_long';
+
+  if (texture === 'coily' || texture === 'kinky') {
+    // Below shoulder length coiled hair is nearly always worked into
+    // something; at shorter lengths it is simply worn out.
+    const roll = unit(seed, 'coiled-arrangement');
+    const african = zone === 'SUB_SAHARAN_AFRICAN';
+    if (length === 'very_short') return roll < 0.25 ? 'cornrows' : 'afro';
+    if (!longEnough) return roll < 0.18 && african ? 'cornrows' : 'afro';
+    // Medium and above: worked as often as worn out.
+    if (roll < (african ? 0.26 : 0.16)) return 'cornrows';
+    if (roll < (african ? 0.46 : 0.30)) return 'locs';
+    if (roll < 0.58) return 'braid_twin';
+    return 'afro';
+  }
+
+  if (longEnough) {
+    // Hands-on outdoor work is what actually decides this. A tail is the
+    // simplest answer and the commonest; a plain knot is next.
+    const roll = unit(seed, 'gather-for-work');
+    const needsItBack = 0.30 + weathering * 0.42;
+    if (roll < needsItBack) {
+      return roll < needsItBack * 0.62 ? 'ponytail' : 'tied_back';
+    }
+  }
+
+  return 'loose';
 }
 
 // ---------------------------------------------------------------------------
@@ -866,6 +929,9 @@ const MATERIAL_COLORS: Array<[RegExp, string]> = [
   [/leather|hide/i, '#6b482f'],
   [/fur|sheepskin/i, '#8b7358'],
   [/straw|reed|grass|raffia/i, '#c2a463'],
+  // Warp-dyed indigo, faded by wear on the crests — the colour denim *is*.
+  [/denim|dungaree/i, '#43597c'],
+  [/khaki/i, '#b09a6f'],
   // Bamboo and its relatives were falling through to the generic garment
   // palette, which is why a woven bamboo hat came out the same grey as a felt
   // one. Split bamboo weathers to a warmer, slightly greener straw than reed.
@@ -1053,6 +1119,23 @@ function contrastingTrim(accent: string, primary: string, secondary: string, see
     // a legible distance from both grounds, and rotating hue does not undo it.
     l: a.l,
   }));
+}
+
+/**
+ * Whether a skirted garment brings its own bodice.
+ *
+ * Both patterns are the ones `encounter/sprite/construction.ts` already sorts
+ * silhouettes with; the answer has to be reached here rather than there so the
+ * bust can reach it too. Anything that is not skirted is one piece of cloth and
+ * gets `null` — the overwhelming majority.
+ */
+const SKIRTED_NAME = /\bskirt|petticoat|wrapper|lehenga|sari\b|saree/i;
+/** Cloth that goes over the shoulder as part of the same garment. */
+const DRAPED_NAME = /sari\b|saree|odhani|dupatta|shawl|pallu|stole|himation|toga|wrap\b/i;
+
+function bodiceFor(name: string): BodiceSource | null {
+  if (!SKIRTED_NAME.test(name)) return null;
+  return DRAPED_NAME.test(name) ? 'self' : 'separate';
 }
 
 function separateGarmentColors(
@@ -1877,6 +1960,46 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     }
   }
 
+  // What the hair *does* when the name does not say.
+  //
+  // The classifier reads the style's name and nothing else, so a silhouette
+  // only ever appeared if some table happened to name it. Measured over 500
+  // personas that left `afro`, `locs`, `cornrows` and `ponytail` at exactly
+  // zero — not rare, absent — while `loose` took 44.6% and became the bucket
+  // everything unnamed fell into. No table says "afro" because no period
+  // source calls it that, and "ponytail" is a modern word for one of the
+  // oldest things anyone has ever done with long hair.
+  //
+  // So where the name has told us nothing, the persona's own hair does. This
+  // fires only on `loose` — an explicit `gathered_bun` is still a bun — and it
+  // reads fields the spec already carries.
+  const hairTexture: HairTexture = appearance.hairTexture || 'straight';
+  const weathering = weatheringFor(source.profession, appearance.skinTexture, age);
+  if (hairSilhouette === 'loose' && rawHairLength !== 'bald') {
+    hairSilhouette = looseHairFallback(
+      hairLength, hairTexture, source.culturalZone, weathering, seed);
+  }
+
+  // A cut is an intent, and the same intent gives a different shape on
+  // different hair.
+  //
+  // The style tables name arrangements — a bob, a bowl cut, a fringe, hair
+  // parted and swept — without knowing what the hair they are describing
+  // actually does. Those four all mean *worn out, cut to a shape*, and on
+  // tightly coiled hair worn out to a shape is a halo standing off the skull:
+  // it is an afro, whatever the table called it. Rendering it as a blunt
+  // jaw-length curtain instead is drawing the intent on the wrong head.
+  //
+  // Bound arrangements are left alone, because binding does the same thing to
+  // any hair: a bun is a bun and cornrows are cornrows.
+  const CUT_TO_SHAPE = new Set<HairSilhouette>(['bob', 'bowl', 'bangs', 'swept']);
+  if ((hairTexture === 'coily' || hairTexture === 'kinky')
+      && CUT_TO_SHAPE.has(hairSilhouette)
+      && rawHairLength !== 'bald'
+      && rawHairLength !== 'very_short') {
+    hairSilhouette = 'afro';
+  }
+
   // A heavily receded hairline cannot support anything that gathers at the
   // front or frames the face; it can still carry a knot at the back.
   if (recession > 0.55 && (hairSilhouette === 'bangs' || hairSilhouette === 'bowl' || hairSilhouette === 'braid_twin')) {
@@ -1915,6 +2038,7 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
       resolveColor(palette.accent) || '#a8834f',
       seed
     ),
+    bodice: bodiceFor(garmentPiece.name || ''),
     ornament: ornamentBase,
     surfaces: garmentSurfacesFor(
       garmentPiece.name || '', garmentPiece.material || '', ornamentBase,
@@ -1922,6 +2046,39 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     wear: garmentWearFor(
       garmentPiece.name || '', garmentPiece.adjectives || [], wealth, age, seed),
   };
+
+  // --- legwear --------------------------------------------------------------
+  // Same precedence as everything else: what the persona is actually wearing
+  // first, the procedural appearance behind it. The fallback carries most of
+  // the traffic — `createItemInstance` only knows the base ids in the item
+  // tables and most trousers are not among them — so a persona whose card says
+  // "Denim Jeans" would otherwise be drawn bare-legged.
+  const legPiece: Piece | null =
+    (overrides?.legwear as Piece) ||
+    (source.equippedItems?.legs as Piece) ||
+    (appearance.legwear as Piece) ||
+    null;
+  const legwear: LegwearSpec | null = !isEmptyPiece(legPiece) ? {
+    name: legPiece!.name || 'Trousers',
+    material: (legPiece!.material || 'cloth').toLowerCase(),
+    // Denim is indigo and khaki is khaki, whatever the persona's palette says —
+    // the same rule that keeps a sedge hat the colour of sedge. Everything that
+    // does take dye falls through to the outfit's second colour, which is what
+    // the second garment in a two-piece outfit has always been painted in.
+    color: intrinsicColorFor(legPiece!.material)
+      || resolveColor(legPiece!.color) || colorFromName(legPiece!.name)
+      || resolveColor(palette.secondary) || garment.colors.secondary,
+    form: legwearFormFor(`${legPiece!.name ?? ''} ${legPiece!.material ?? ''}`),
+  } : impliesMatchingLegs(garment.name) ? {
+    // A suit brings its own trousers, in its own cloth. Nothing names them
+    // because nobody would: "Designer Suit" already said it. Without this the
+    // sprite drew the jacket to the knee and left the shins bare, which is the
+    // failure the whole two-piece pass exists to remove.
+    name: garment.name,
+    material: garment.material,
+    color: garment.colors.primary,
+    form: 'trousers',
+  } : null;
 
   // --- headwear -------------------------------------------------------------
   const headPiece: Piece | null =
@@ -2015,7 +2172,7 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     eyelashes: appearance.eyelashes || 'medium',
 
     hairLength: hairLength,
-    hairTexture: appearance.hairTexture || 'straight',
+    hairTexture,
     hairstyle: appearance.hairstyle || 'short',
     hairSilhouette,
     grayAmount,
@@ -2038,9 +2195,10 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     build: (appearance.build || 'average') as Build,
     ageLines: clamp01((age - 26) / 46),
     lidDroop: clamp01((age - 44) / 32),
-    weathering: weatheringFor(source.profession, appearance.skinTexture, age),
+    weathering,
 
     garment,
+    legwear,
     headwear,
     jewelry: withAccessory(
       normalizeJewelry((appearance.jewelry || []) as Parameters<typeof normalizeJewelry>[0]),

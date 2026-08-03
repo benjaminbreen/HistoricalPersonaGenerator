@@ -60,6 +60,12 @@ export interface PortraitRamps {
   clothA: Ramp;
   clothB: Ramp;
   clothC: Ramp;
+  /**
+   * The lower garment's own cloth, where the outfit names one. Falls back to
+   * the second cloth, which is what a two-piece outfit was always painted in —
+   * so this only ever *adds* information, never removes any.
+   */
+  legwear: Ramp;
   headwear: Ramp;
   headwearAccent: Ramp;
   foliage: Ramp;
@@ -251,6 +257,17 @@ export function buildPortraitRamps(spec: PortraitSpec): PortraitRamps {
     saturation: 1.1 * richness.saturation,
   });
 
+  // Legwear answers to its own fibre. Denim behaves nothing like the linen
+  // shirt above it — it is heavier, holds a harder crease and sits in a much
+  // narrower range — and taking the shirt's material response for it was how a
+  // pair of jeans came out reading as pyjama cloth.
+  const legwear = spec.legwear
+    ? buildRamp(spec.legwear.color, {
+      ...materialOptions(spec.legwear.material),
+      saturation: pool(materialOptions(spec.legwear.material).saturation ?? 1, richness.saturation),
+    })
+    : clothB;
+
   const headwear = spec.headwear
     ? buildRamp(spec.headwear.color, materialOptions(spec.headwear.material))
     : buildRamp(spec.garment.colors.secondary, { contrast: 1 });
@@ -303,6 +320,7 @@ export function buildPortraitRamps(spec: PortraitSpec): PortraitRamps {
   book[MAT.CLOTH_A] = clothA;
   book[MAT.CLOTH_B] = clothB;
   book[MAT.CLOTH_C] = clothC;
+  book[MAT.LEGWEAR] = legwear;
   book[MAT.HEADWEAR] = headwear;
   book[MAT.HEADWEAR_ACCENT] = headwearAccent;
   book[MAT.FOLIAGE] = foliage;
@@ -329,6 +347,7 @@ export function buildPortraitRamps(spec: PortraitSpec): PortraitRamps {
     clothA,
     clothB,
     clothC,
+    legwear,
     headwear,
     headwearAccent,
     foliage,

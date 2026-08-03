@@ -3237,6 +3237,44 @@ body.dark-mode .card-header {
   text-transform: capitalize;
 }
 
+/* The city pill: third in the place sequence, and the most specific of the
+   three — zone, area, city. An outline rather than a fill, because
+   solid / tint / solid would read as three competing claims; the outline
+   says "inside the one before it".
+
+   The polity rides along inside the pill, smaller and uppercase. It is the
+   one thing in the header that changes underneath a person during their own
+   lifetime, and it earns the room. */
+.city-pill {
+  background: transparent;
+  color: var(--zone-tint-fg);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--zone-accent) 45%, transparent);
+  text-transform: capitalize;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+}
+
+.city-pill-polity {
+  font-size: 0.72em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+/* "Konya" implies a city; for most of history most of these were market
+   towns, and the badge should not overclaim. */
+.city-pill-note {
+  font-weight: 500;
+  opacity: 0.6;
+  text-transform: lowercase;
+}
+
+body.dark-mode .city-pill {
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--zone-accent) 55%, transparent);
+}
+
 .season-narrative {
   font-size: 1.25rem;
   font-family: var(--font-serif);

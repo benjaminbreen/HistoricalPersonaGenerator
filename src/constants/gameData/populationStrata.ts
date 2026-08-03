@@ -299,8 +299,12 @@ export const POPULATION_STRATA: PopulationStratum[] = [
     label: 'chattel slavery in Brazil',
     zones: ['SOUTH_AMERICAN'],
     yearRange: [1550, 1888],
-    places: /\b(brazil|bahia|pernambuco|minas gerais|rio de janeiro|sao paulo|recife|salvador|amazon|para|maranhao)\b/,
-    share: 0.4,
+    // The map's own names, which the pattern did not previously carry:
+    // "Reconcavo Basin", "Sao Paulo Plateau", "Bahia Coast", "Amazon Delta".
+    places: /\b(brazil|bahia|reconcavo|pernambuco|minas gerais|rio de janeiro|sao paulo|recife|salvador|amazon|para|maranhao|piaui|goias|mato grosso)\b/,
+    // Brazil outside the sugar and gold zones, which have their own entries
+    // below. Held enslaved people everywhere, but not at the coast's rate.
+    share: 0.3,
     legalStatus: 'enslaved',
     statusLabel: 'Enslaved',
     ancestry: {
@@ -328,6 +332,89 @@ export const POPULATION_STRATA: PopulationStratum[] = [
       { role: 'Midwife', weight: 3, gender: 'Female' },
     ],
     clause: 'Some of the enslaved in this city hire themselves out and hand over a fixed sum each week, keeping whatever is left.',
+  },
+  {
+    /**
+     * The engenho zone — the Reconcavo behind Salvador and the Pernambucan
+     * varzea — where the Atlantic sugar economy actually was.
+     *
+     * A single 0.4 across the whole of Brazil for three centuries flattened the
+     * thing most worth showing. These captaincies ran two-thirds to three
+     * quarters enslaved through the seventeenth and eighteenth centuries; the
+     * mill districts were denser still, and Salvador was for a long stretch the
+     * second city of the Portuguese empire and majority African.
+     */
+    id: 'brazilian-slavery-sugar-coast',
+    label: 'the engenhos of the Brazilian sugar coast',
+    zones: ['SOUTH_AMERICAN'],
+    yearRange: [1570, 1888],
+    places: /\b(reconcavo|bahia|salvador|pernambuco|recife|olinda|alagoas|sergipe)\b/,
+    share: 0.68,
+    legalStatus: 'enslaved',
+    statusLabel: 'Enslaved',
+    ancestry: {
+      originZone: 'SUB_SAHARAN_AFRICAN',
+      originLabel: 'Kongo-Angolan and Mina',
+      originRegions: ['Lower Guinea and Congo Basin', 'Bight of Benin'],
+      originNameKeys: ['SUB_SAHARAN_AFRICAN', 'YORUBA_TRADITIONAL', 'AKAN'],
+      localNameKeys: ['AFRO_BRAZILIAN'],
+    },
+    firstGenerationRate: 0.5,
+    wealthLevel: 'poor',
+    roles: [
+      { role: 'Cane Cutter', weight: 30 },
+      { role: 'Mill Hand', weight: 12 },
+      { role: 'Cauldron Tender', weight: 8 },
+      { role: 'Field Hand', weight: 14 },
+      { role: 'Cart Driver', weight: 5, gender: 'Male' },
+      { role: 'House Servant', weight: 7 },
+      { role: 'Cook', weight: 4, gender: 'Female' },
+      { role: 'Wet Nurse', weight: 3, gender: 'Female' },
+      { role: 'Cooper', weight: 4, gender: 'Male' },
+      { role: 'Carpenter', weight: 4, gender: 'Male' },
+      { role: 'Boatman', weight: 4, gender: 'Male' },
+      { role: 'Midwife', weight: 3, gender: 'Female' },
+      { role: 'Sugar Master', weight: 2, gender: 'Male' },
+    ],
+    clause: 'The mill runs day and night through the harvest, and the cane must reach it within a day of cutting or the juice sours.',
+  },
+  {
+    /**
+     * Minas Gerais during the gold century. A rush economy worked almost
+     * entirely by enslaved labour, and unusually urban — Vila Rica was one of
+     * the largest cities in the Americas at its peak.
+     */
+    id: 'brazilian-slavery-mining',
+    label: 'the gold and diamond workings of Minas Gerais',
+    zones: ['SOUTH_AMERICAN'],
+    yearRange: [1695, 1888],
+    places: /\b(minas gerais|vila rica|ouro preto|diamantina|serro|goias|mato grosso|espinhaco)\b/,
+    share: 0.55,
+    legalStatus: 'enslaved',
+    statusLabel: 'Enslaved',
+    ancestry: {
+      originZone: 'SUB_SAHARAN_AFRICAN',
+      originLabel: 'Mina and Kongo-Angolan',
+      originRegions: ['Bight of Benin', 'Lower Guinea and Congo Basin'],
+      originNameKeys: ['SUB_SAHARAN_AFRICAN', 'AKAN', 'YORUBA_TRADITIONAL'],
+      localNameKeys: ['AFRO_BRAZILIAN'],
+    },
+    firstGenerationRate: 0.5,
+    wealthLevel: 'poor',
+    roles: [
+      { role: 'Gold Washer', weight: 26 },
+      { role: 'Pit Digger', weight: 14, gender: 'Male' },
+      { role: 'Sluice Hand', weight: 10 },
+      { role: 'Ore Carrier', weight: 9 },
+      { role: 'Street Vendor', weight: 9, gender: 'Female' },
+      { role: 'House Servant', weight: 8 },
+      { role: 'Blacksmith', weight: 5, gender: 'Male' },
+      { role: 'Cook', weight: 5, gender: 'Female' },
+      { role: 'Muleteer', weight: 6, gender: 'Male' },
+      { role: 'Stonemason', weight: 4, gender: 'Male' },
+      { role: 'Midwife', weight: 4, gender: 'Female' },
+    ],
+    clause: 'Every pan of gravel is watched, and what the washings yield is counted against a daily quota before anything else.',
   },
   {
     id: 'spanish-america-encomienda',

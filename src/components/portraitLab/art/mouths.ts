@@ -14,8 +14,8 @@
 import { MAT, RampBook, Raster } from '../core/raster';
 import { hexToRgb } from '../core/color';
 import {
-  drawStamp, endCurve, insertRows, PaintTable, rampPaint, relativePaints,
-  removeRow, rgbPaint, Stamp, stamp, widenStamp,
+  drawStamp, endCurve, insertRows, narrowStamp, PaintTable, rampPaint,
+  relativePaints, removeRow, rgbPaint, Stamp, stamp, widenStamp,
 } from '../core/stamp';
 import { DentalWork, Expression, LipShape } from '../spec/types';
 import { PortraitRamps } from './palette';
@@ -157,7 +157,19 @@ function poseFor(expression: Expression): MouthPose {
   }
 }
 
-/** Lip fullness and width, applied to whichever base the expression picked. */
+/**
+ * Lip fullness and width, applied to whichever base the expression picked.
+ *
+ * Every shape here has to change the outline. `bow` used to return the stamp
+ * untouched, on the reasoning that the base drawing already carries a cupid's
+ * bow — which is true, and which meant `bow` and `medium` rendered the same
+ * pixels. A row of the card that names a shape the picture does not draw is
+ * worse than no row at all, because the reader checks it.
+ *
+ * The four that do vary are kept on separate axes so no two collide: `thin` and
+ * `full` move the lower lip, `bow` moves the upper one and takes width out,
+ * `wide` only adds width.
+ */
 function shapeMouth(art: Stamp, lipShape: LipShape, ageThinning = 0): Stamp {
   // The vermillion of the lip shrinks steadily with age, so an old mouth is a
   // narrower band no matter what shape it started as.
@@ -166,16 +178,26 @@ function shapeMouth(art: Stamp, lipShape: LipShape, ageThinning = 0): Stamp {
       ? (lipShape === 'full' ? 'medium' : 'thin')
       : lipShape;
   const lowerLipRow = art.rows.findIndex(row => row.includes('D'));
+  const upperLipRow = art.rows.findIndex(row => row.includes('u') || row.includes('U'));
   switch (shape) {
     case 'thin':
       return lowerLipRow >= 0 ? removeRow(art, lowerLipRow + 1) : art;
-    case 'full':
-      return lowerLipRow >= 0 ? insertRows(art, lowerLipRow, 1) : art;
+    case 'full': {
+      // Both lips, and the lower first so inserting above it does not move the
+      // index the second insert is measured from.
+      const fuller = lowerLipRow >= 0 ? insertRows(art, lowerLipRow, 1) : art;
+      return upperLipRow >= 0 ? insertRows(fuller, upperLipRow, 1) : fuller;
+    }
     case 'wide':
-      return widenStamp(art, 3);
-    case 'bow':
-      // The base drawing already carries a cupid's bow at its centre.
-      return art;
+      return widenStamp(art, 4);
+    case 'bow': {
+      // Small and short, with the upper lip carrying the height — which is what
+      // a bow mouth is. Widening the *upper* lip while taking columns out of
+      // the whole makes it unmistakable against `full`, which grows both.
+      const narrowed = narrowStamp(art, 2);
+      const upper = narrowed.rows.findIndex(row => row.includes('u') || row.includes('U'));
+      return upper >= 0 ? insertRows(narrowed, upper, 1) : narrowed;
+    }
     default:
       return art;
   }

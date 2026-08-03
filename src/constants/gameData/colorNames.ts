@@ -159,9 +159,14 @@ export const TIER_RANK: Record<DyeTier, number> = { everyday: 0, costly: 1, prec
  * Materials whose colour is not a choice. A sedge hat is the colour of sedge.
  * Cloth fibres are deliberately absent — linen, hemp, wool and cotton all take
  * dye, so naming their colour is meaningful.
+ *
+ * Denim is the exception among the fibres and earns its place the same way the
+ * plant fibres do: it is a cotton twill *defined* by being warp-dyed indigo,
+ * and a persona's palette assigning it oatmeal or olive is exactly the error
+ * this list exists to prevent. Khaki is likewise a colour that became a cloth.
  */
 const INTRINSIC_COLOR_MATERIALS =
-  /\b(sedge|grass|straw|reed|rattan|cane|bamboo|palm leaf|pandanus|raffia|bark ?cloth|leather|hide|rawhide|pelt|fur|sheepskin|shearling|wood|oak|pine|cedar|iron|steel|bronze|copper|brass|gold|silver|pewter|bone|horn|shell|jade|stone|clay)\b/i;
+  /\b(sedge|grass|straw|reed|rattan|cane|bamboo|palm leaf|pandanus|raffia|bark ?cloth|denim|khaki|leather|hide|rawhide|pelt|fur|sheepskin|shearling|wood|oak|pine|cedar|iron|steel|bronze|copper|brass|gold|silver|pewter|bone|horn|shell|jade|stone|clay)\b/i;
 
 export function hasIntrinsicColor(material: string | undefined): boolean {
   return Boolean(material) && INTRINSIC_COLOR_MATERIALS.test(material as string);

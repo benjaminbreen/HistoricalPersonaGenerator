@@ -30,7 +30,7 @@ import { PortraitSpec } from '../../components/portraitLab/spec/types';
 import { restingExpression } from '../../components/portraitLab/spec/buildSpec';
 import { ArmWear, FootwearKind, RestStance, SpriteExtras, SpriteSource } from './spriteSource';
 import {
-  ArmPose, buildSkeleton, getTuning, HandShape, Posture, Skeleton,
+  ArmPose, buildSkeleton, getTuning, HandShape, LegPose, Posture, Skeleton,
   SPRITE_H, SPRITE_HEADROOM, SPRITE_W, SpriteTuning,
 } from './skeleton';
 import {
@@ -39,8 +39,8 @@ import {
   planeSurface, resolveLight, weaveBias,
 } from './spriteLight';
 import {
-  buildHair, drawFace, drawHeadwear, FaceFrame, headLayout, HeadLayout,
-  headMask, headSurface, paintHair,
+  applyHairOchre, buildHair, drawFace, drawHeadwear, drawLimbMarkings, FaceFrame,
+  headLayout, HeadLayout, headMask, headSurface, paintHair,
 } from './spriteHead';
 import { Drape, facingAt, foldX, planDrape } from './drape';
 import { Construction, GarmentShape, hemFraction, OverLayer, readShape } from './construction';
@@ -82,7 +82,11 @@ const DEPTH = {
 export type FrameId =
   | 'stand' | 'standBreathe' | 'stand2' | 'standBreathe2'
   | 'blink' | 'talk' | 'glance'
-  | 'bowLight' | 'bowDeep' | 'reach' | 'raise' | 'offer' | 'fallen';
+  | 'bowLight' | 'bowDeep' | 'reach' | 'raise' | 'offer' | 'fallen'
+  // Weight-bearing frames. Every one of these exists because an animation was
+  // translating the whole raster across the ground with both soles nailed to
+  // it, which is skating, not walking.
+  | 'stepFwd' | 'stepBack' | 'lunge' | 'recoil' | 'crouch' | 'shrug';
 
 export interface FramePose {
   face: FaceFrame;
@@ -101,13 +105,17 @@ export interface FramePose {
 // daylight between sleeve and body below the waist is most of what reads as
 // three dimensions in the reference, and an arm at 0° never opens it.
 const rest = (hand: HandShape = 'rest'): ArmPose => ({ swing: 7, elbow: 6, forward: 0.1, hand });
+const planted: LegPose = { step: 0, lift: 0 };
 
 interface PoseOverride {
   spineBend?: number;
   lean?: number;
   headNod?: number;
   bob?: number;
+  drop?: number;
+  shoulderLift?: number;
   arms?: Partial<Record<'near' | 'far', ArmPose>>;
+  legs?: Partial<Record<'near' | 'far', LegPose>>;
 }
 
 function pose(over: PoseOverride = {}): Posture {
@@ -116,7 +124,10 @@ function pose(over: PoseOverride = {}): Posture {
     lean: over.lean ?? 0,
     headNod: over.headNod ?? 0,
     bob: over.bob ?? 0,
+    drop: over.drop ?? 0,
+    shoulderLift: over.shoulderLift ?? 0,
     arms: { near: over.arms?.near ?? rest(), far: over.arms?.far ?? rest() },
+    legs: { near: over.legs?.near ?? planted, far: over.legs?.far ?? planted },
   };
 }
 
@@ -157,6 +168,85 @@ const FRAME_POSES: Record<Exclude<FrameId, 'fallen'>, FramePose> = {
     face: 'talk', gazeX: 1, wind: 0,
     posture: pose({ arms: { far: { swing: 26, elbow: 62, forward: 0.7, hand: 'present' } } }),
   },
+
+  // --- Weight-bearing frames. ---------------------------------------------
+  //
+  // A step is a foot placement and a hip drop; the knees are solved. The arms
+  // counter-swing, because they do — a figure whose arms hang plumb while its
+  // legs stride reads as being pushed on a trolley.
+  // Step values are in ground distance, not screen pixels — `legChain`
+  // projects them, so these read larger than the travel they produce.
+  //
+  // The **far** leg leads every forward move and the near leg every retreat,
+  // for the reason given in `legChain`: each is the one with open ground on
+  // the side it is travelling toward. Authored the other way round the two
+  // feet converge on one column at a middling step and `planLegs` has to prise
+  // them apart, which caps the stride and wastes the pose.
+  stepFwd: {
+    face: 'open', gazeX: 0, wind: 0.3,
+    posture: pose({
+      drop: 2,
+      legs: { near: { step: -5, lift: 2 }, far: { step: 14, lift: 0 } },
+      arms: { near: { swing: -6, elbow: 12, forward: 0.1, hand: 'rest' }, far: { swing: 17, elbow: 16, forward: 0.15, hand: 'rest' } },
+    }),
+  },
+  stepBack: {
+    face: 'open', gazeX: 0, wind: 0.6,
+    posture: pose({
+      drop: 3, spineBend: -3,
+      legs: { near: { step: -17, lift: 0 }, far: { step: -2, lift: 0 } },
+      arms: { near: { swing: 15, elbow: 20, forward: 0.15, hand: 'rest' }, far: { swing: 4, elbow: 14, forward: 0.1, hand: 'rest' } },
+    }),
+  },
+  // The full extension: back leg straight and driving, front knee deep over
+  // the toe, the whole trunk carried forward after the leading arm.
+  lunge: {
+    face: 'talk', gazeX: 1, wind: 0.5,
+    posture: pose({
+      drop: 7, spineBend: 12,
+      legs: { near: { step: -13, lift: 2 }, far: { step: 24, lift: 0 } },
+      arms: {
+        near: { swing: 62, elbow: 12, forward: 0.7, hand: 'fist' },
+        far: { swing: -18, elbow: 34, forward: 0.1, hand: 'rest' },
+      },
+    }),
+  },
+  // Struck: the weight goes back onto the heels, the chest opens, the arms
+  // come up short. Not a shake — a shake is the canvas's job.
+  recoil: {
+    face: 'blink', gazeX: 0, wind: 0.5,
+    posture: pose({
+      drop: 2, spineBend: -9, headNod: -2, shoulderLift: 2,
+      legs: { near: { step: -14, lift: 0 }, far: { step: -6, lift: 0 } },
+      arms: {
+        near: { swing: 24, elbow: 54, forward: 0.4, hand: 'open' },
+        far: { swing: 20, elbow: 46, forward: 0.35, hand: 'open' },
+      },
+    }),
+  },
+  // The gather before a jump, and the landing after it.
+  crouch: {
+    face: 'open', gazeX: 0, wind: 0.2,
+    posture: pose({
+      drop: 11, spineBend: 9,
+      arms: {
+        near: { swing: -14, elbow: 26, forward: 0.1, hand: 'fist' },
+        far: { swing: -12, elbow: 24, forward: 0.1, hand: 'fist' },
+      },
+    }),
+  },
+  // A shrug is shoulders, not a hop: they rise toward the ears, the neck
+  // shortens, and the hands turn out.
+  shrug: {
+    face: 'talk', gazeX: 0, wind: 0,
+    posture: pose({
+      shoulderLift: 4, headNod: 1,
+      arms: {
+        near: { swing: 22, elbow: 58, forward: 0.5, hand: 'present' },
+        far: { swing: 20, elbow: 54, forward: 0.45, hand: 'present' },
+      },
+    }),
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -190,7 +280,9 @@ interface GarmentPlan {
  * portrait reads its own trim: off the item's name first, and off the
  * garment kind when the name is silent.
  */
-function planGarment(spec: PortraitSpec, s: Skeleton, wind: number, extrasName: string): GarmentPlan {
+function planGarment(
+  spec: PortraitSpec, s: Skeleton, wind: number, extrasName: string
+): GarmentPlan {
   const kind = spec.garment.kind;
   const t = s.t;
   const name = `${spec.garment.name} ${spec.garment.material}`.toLowerCase();
@@ -204,7 +296,7 @@ function planGarment(spec: PortraitSpec, s: Skeleton, wind: number, extrasName: 
   const floorLen = con === 'robe' || con === 'gown' || con === 'skirted' || con === 'crop_top';
   const hemY = con === 'bare'
     ? s.hipY + 2
-    : s.hipY + Math.round(legSpan * hemFraction(con, spec, t));
+    : s.hipY + Math.round(legSpan * hemFraction(con, spec, t, shape.legs));
 
   // Where the *upper* covering ends. For most garments that is the hem; a
   // cropped blouse stops under the ribs, and a wrapped lower garment has no
@@ -217,16 +309,23 @@ function planGarment(spec: PortraitSpec, s: Skeleton, wind: number, extrasName: 
   // How far down the arm the sleeve reaches, 0 shoulder … 1 wrist.
   const sleeveT = con === 'bare' || con === 'wrapped_lower' ? 0
     : con === 'crop_top' ? 0.34
-    : /sleeveless|vest|tabard|singlet|toga|himation|chiton/.test(name) ? 0.12
-    : /short.sleeve|tee|shift/.test(name) ? 0.44
+    : /sleeveless|vest|tabard|singlet|tank top|toga|himation|chiton/.test(name) ? 0.12
+    // Modern casual shirts are cut short in the sleeve, and at this size that
+    // is most of what separates a polo from a dress shirt in silhouette.
+    : /short.sleeve|t-?shirt|\btee\b|shift|polo|aloha|guayabera|bush shirt/.test(name) ? 0.44
     : con === 'robe' || con === 'gown' || con === 'jacket' ? 0.95
     : 0.86;
 
   const hemHalf = floorLen ? t.robeHemHalf
     : con === 'wrapped_lower' ? s.hipHalf + 2
     : Math.min(s.shoulderHalf, s.hipHalf + 1);
+  // A garment worn over separate legwear takes its belt from the *lower*
+  // garment, and that waistband is under the hem. Drawing one at the waist
+  // regardless put a leather band across the middle of every t-shirt in the
+  // app, and buckled a suit jacket shut over its own trousers.
   const belted = kind !== 'bare' && (/belt|sash|girdle|obi|cinch/.test(name)
-    || kind === 'tunic' || kind === 'jacket' || kind === 'doublet' || kind === 'work_shirt');
+    || ((shape.legs === null || shape.construction === 'skirted')
+      && (kind === 'tunic' || kind === 'jacket' || kind === 'doublet' || kind === 'work_shirt')));
   const drape = planDrape(spec, s, {
     // Cloth falls from wherever it is last supported: the belt if there is
     // one, the shoulders if there is not.
@@ -272,7 +371,116 @@ interface ArmChain {
   hand: [number, number];
 }
 
+interface LegChain {
+  hip: [number, number];
+  knee: [number, number];
+  ankle: [number, number];
+  /** How far this foot is off the ground, px — the foot draws shorter when lifted. */
+  lift: number;
+}
+
 const RAD = Math.PI / 180;
+
+/**
+ * Hip → knee → ankle, solved from where the foot is.
+ *
+ * Two-bone IK, and the reason for it is in `LegPose`: the constraint that
+ * actually matters on a walking figure is that the sole meets the floor. State
+ * the foot, solve the knee, and it cannot be violated. State the joint angles
+ * instead — which is how the arms work, correctly, for their own reasons — and
+ * every stride is a pair of numbers that have to be re-guessed together each
+ * time the leg length changes, which on this figure it does per persona.
+ */
+function legChain(
+  s: Skeleton, base: Skeleton, side: -1 | 1, leg: LegPose, nudge = 0
+): LegChain {
+  const t = s.t;
+  const near = side === s.nearSide;
+  // The way the figure faces, which is away from the shoulder swung toward the
+  // viewer — the same inversion the feet already make.
+  const fwd = -s.nearSide;
+  const legX = s.cx + t.hipSkew + side * (Math.round(s.legW / 2) + s.legGap);
+  const restAnkleY = base.ankleY - (near ? 0 : t.footStagger);
+  // Bone lengths come off the *unfolded* skeleton. `foldSpine` lowers the hip
+  // for a crouch and leaves the floor alone — read the thigh from the folded
+  // one and the bone would shorten by exactly the amount the knee is supposed
+  // to be taking up, so the squat would solve to a straight leg and go
+  // nowhere.
+  const thigh = Math.max(4, base.kneeY - base.hipY);
+  const shin = Math.max(4, restAnkleY - base.kneeY);
+
+  const m = t.motionScale;
+  const hx = legX;
+  const hy = s.hipY;
+  const lift = Math.max(0, Math.round(leg.lift * m));
+  /**
+   * A stride is a distance along the **ground**, and this figure is seen
+   * almost square-on — so most of that distance is depth, and only a fraction
+   * of it can show as horizontal travel.
+   *
+   * Two things come out of that:
+   *
+   *  · **Projection.** Stated at full width the legs simply swap sides: a 24px
+   *    lunge on a stance 16px wide put the near foot well past the far one and
+   *    the figure scissored itself. The factor rises with `turn`, because a
+   *    figure seen more side-on genuinely shows more of its stride.
+   *
+   *  · **The back foot recedes.** The distance that is *not* horizontal is
+   *    depth, and depth on this ground plane is height in the frame — so the
+   *    retreating foot rides up, the same cue `footStagger` already uses to
+   *    seat the resting far foot behind the near one.
+   *
+   * Which leg may lead is not a free choice, and getting it wrong is what made
+   * the first version of this scissor. The figure faces `fwd`, the far leg is
+   * the one standing on that side, and so **the far leg is the only one with
+   * room to step forward**: a near leg striding forward walks straight into
+   * its partner, and no amount of projection fixes that — it is the stance's
+   * own 16px of width being spent. See `planLegs`, which enforces it.
+   */
+  const project = 0.34 + s.turn * 0.30;
+  const recede = Math.round(Math.max(0, -leg.step) * m * 0.20);
+  // `nudge` is `planLegs` separating a pair that would have merged.
+  const ax = legX + fwd * Math.round(leg.step * m * project) + nudge;
+  const ay = restAnkleY - lift - recede;
+
+  let dx = ax - hx;
+  let dy = ay - hy;
+  let d = Math.hypot(dx, dy) || 1;
+  // A leg cannot reach further than it is long, nor fold past its own shin.
+  // Clamping the *foot* rather than failing the solve means an over-ambitious
+  // pose degrades into the nearest possible one instead of producing NaNs.
+  //
+  // The reach is the bones' exact sum, with **no safety margin**. A margin
+  // here is not conservative, it is a permanent bug: a standing leg's hip and
+  // ankle are exactly `thigh + shin` apart, so shortening the reach by even
+  // half a percent folds every standing knee a little — which measured as a
+  // 4px forward kick on the most-used frame in the game. At d exactly equal to
+  // the sum the law of cosines gives h = 0 and the leg comes out plumb, which
+  // is the whole point.
+  const reach = thigh + shin;
+  const fold = Math.abs(thigh - shin) + 2;
+  if (d > reach) { const k = reach / d; dx *= k; dy *= k; d = reach; }
+  if (d < fold) { const k = fold / d; dx *= k; dy *= k; d = fold; }
+
+  const ux = dx / d;
+  const uy = dy / d;
+  // Where along the hip→foot line the knee's perpendicular drops, and how far
+  // out it stands. Straight leg → h is 0, so a standing figure's knee lands
+  // exactly where it did before any of this existed.
+  const a = (d * d + thigh * thigh - shin * shin) / (2 * d);
+  const h = Math.sqrt(Math.max(0, thigh * thigh - a * a)) * t.kneeLead;
+  // The perpendicular, pointed the way the figure faces: a knee bends forward.
+  let px = -uy;
+  let py = ux;
+  if (px * fwd < 0) { px = -px; py = -py; }
+
+  return {
+    hip: [Math.round(hx), Math.round(hy)],
+    knee: [Math.round(hx + ux * a + px * h), Math.round(hy + uy * a + py * h)],
+    ankle: [Math.round(hx + dx), Math.round(hy + dy)],
+    lift,
+  };
+}
 
 /**
  * The trunk's half-width on one side at one height, and the axis it is
@@ -339,7 +547,24 @@ function armChain(s: Skeleton, side: -1 | 1, arm: ArmPose, spineBend: number): A
   // the viewer; a fully forward forearm folds toward the camera instead.
   // An arm is never straight: `elbowRest` is the flexion that is always there.
   const elbow = Math.max(arm.elbow * s.t.motionScale, s.t.elbowRest);
-  const a2 = a1 - elbow * RAD * (1 - arm.forward * 0.55);
+  /**
+   * Which way the elbow folds. This was a fixed minus sign, and it was wrong
+   * for every arm raised past horizontal.
+   *
+   * The elbow always brings the hand *toward the shoulder*. With `swing`
+   * measured from straight-down, that means decreasing the angle while the arm
+   * hangs below the shoulder — and increasing it once the arm is above, where
+   * the hand is already overhead and folding brings it back down. Subtracting
+   * unconditionally made the raised fist bend outward and away, which drew the
+   * arm as a rainbow with a hand dangling off the end of it: the single most
+   * conspicuously broken joint in the animation set.
+   *
+   * `-cos(a1)` is that sign, smoothly: −1 straight down, 0 at horizontal —
+   * where flexion genuinely has no in-plane component and folds toward the
+   * camera — and +1 straight up.
+   */
+  const fold = -Math.cos(a1);
+  const a2 = a1 + fold * elbow * RAD * (1 - arm.forward * 0.55);
   const wx = ex + Math.round(Math.sin(a2) * fore * side);
   const wy = ey + Math.round(Math.cos(a2) * fore);
   // The hand continues the forearm's direction.
@@ -359,6 +584,43 @@ function armChain(s: Skeleton, side: -1 | 1, arm: ArmPose, spineBend: number): A
     // Seated *on* the wrist, not two pixels past it: the gap that left read
     // as a severed hand floating below the sleeve.
     hand: [wx + Math.round((dx / dl)), wy + Math.round((dy / dl))],
+  };
+}
+
+/**
+ * Both legs at once, because the constraint that matters is between them.
+ *
+ * `legChain` can only see one leg, and the fault it cannot see is the pair
+ * landing on the same column — which at this near-frontal angle is not a
+ * near-miss but the difference between a figure striding and a figure with one
+ * thick post under it. So the feet are placed together and a minimum seam is
+ * enforced: the near leg stays on the near side of the far one by at least a
+ * leg's width, and an over-ambitious pose degrades into the nearest possible
+ * one rather than crossing.
+ *
+ * Legs crossing is a real thing that real walking does. It is left out on
+ * purpose: seen this close to square-on it reads as a mistake every time, and
+ * the honest way to sell a long stride here is the hip drop and the arm, not
+ * horizontal travel the camera angle cannot show.
+ */
+function planLegs(
+  s: Skeleton, base: Skeleton, posture: Posture
+): Record<'near' | 'far', LegChain> {
+  const nearSide = s.nearSide;
+  const farSide = -nearSide as -1 | 1;
+  const near = legChain(s, base, nearSide, posture.legs.near);
+  const far = legChain(s, base, farSide, posture.legs.far);
+  // `nearSide` is which side of the body faces the viewer, and it is also the
+  // side the near leg stands on — so the seam runs in that direction.
+  const gap = (far.ankle[0] - near.ankle[0]) * -nearSide;
+  const want = s.legW;
+  if (gap >= want) return { near, far };
+  // Push the pair apart about their midpoint and re-solve, so the knees follow
+  // the corrected feet instead of pointing at where they were asked to go.
+  const push = Math.ceil((want - gap) / 2);
+  return {
+    near: legChain(s, base, nearSide, posture.legs.near, nearSide * push),
+    far: legChain(s, base, farSide, posture.legs.far, -nearSide * push),
   };
 }
 
@@ -489,6 +751,13 @@ function drawArm(
   // The forearm tapers hard into the wrist. Held at near-constant width it
   // met the hand as a step, and the hand read as a mitten pinned on.
   const foreM = capsuleMask(ex, ey, wx, wy, w, Math.max(3, w - 3));
+  // The elbow itself. Two capsules meeting at a point cover the joint but
+  // leave a concave notch on the *outside* of a sharp bend, and the eye reads
+  // that notch as a break in the limb rather than as a fold. A small disc over
+  // the junction fills it, exactly as the deltoid does at the shoulder — and
+  // like the deltoid it is sized to the limb, not larger, so a straight arm
+  // gains nothing visible from it.
+  const elbowM = capsuleMask(ex, ey - 1, ex, ey + 1, w, w);
 
   // Where the cloth stops along the whole chain.
   const sleeveEndsInUpper = plan.sleeveT < 0.5;
@@ -504,7 +773,7 @@ function drawArm(
     const dc = Math.hypot(cutX - sx, cutY - sy);
     return d1 <= dc ? 0 : 1;
   };
-  for (const m of [upperM, foreM]) {
+  for (const m of [upperM, foreM, elbowM]) {
     for (let y = 0; y < SPRITE_H; y += 1) {
       for (let x = 0; x < SPRITE_W; x += 1) {
         if (!m[y * SPRITE_W + x]) continue;
@@ -540,8 +809,16 @@ function drawArm(
   // shoulder; sized w+2 it stood proud of both. This is the middle.
   const capM = capsuleMask(sx, sy - 2, sx, sy + 1, w + 1, w + 1);
   ellipsoidSurface(form, maskSubtract(capM, skinM), sx, sy - 1, (w + 1) / 2, (w + 1) / 2, depth);
-  // And the elbow, one step down in its crook.
-  form.addBias(ex, ey + 1, 1);
+  // The elbow gets the same treatment: a rounded mass over the junction, at
+  // the forearm's depth so it sits in front of the upper arm on a fold.
+  ellipsoidSurface(form, elbowM, ex, ey, w / 2, w / 2, depth + 0.03);
+  // And a shadow in its crook — the inside of the bend, which is the side the
+  // light cannot reach. Which side that is depends on which way it folded, so
+  // it is read off the geometry rather than assumed.
+  const crookX = Math.sign((sx - ex) + (wx - ex)) || 0;
+  const crookY = Math.sign((sy - ey) + (wy - ey)) || 1;
+  form.addBias(ex + crookX, ey + crookY, 2);
+  form.addBias(ex, ey + crookY, 1);
 
   if (!plan.bare && clothM.some((v) => v)) {
     weaveBias(form, clothM, spec.garment.material, spec.seed + side, s.t.textureAmt);
@@ -821,27 +1098,53 @@ function drawTorso(
   const mat = plan.bare ? MAT.SKIN : MAT.CLOTH_A;
   fillMask(raster, m, ramp, mat, () => 3);
 
-  // A skirted construction is **two garments**, and the eye reads the join.
+  // Two garments, and the eye reads the join.
   //
   // A blouse tucked into a skirt is the single most common way clothing is put
   // together and it was rendering as one unbroken column of cloth from
-  // shoulder to hem — 11% of everyone wearing what looked like a robe. The
-  // upper takes the secondary colour, the skirt keeps the primary, and the
+  // shoulder to hem — 11% of everyone wearing what looked like a robe. One
+  // half takes the secondary colour, the other keeps the primary, and the
   // waistband between them is what says they are separate things rather than
   // one thing in two tones.
-  if (plan.construction === 'skirted' && !plan.bare) {
+  //
+  // A skirted trunk holds both garments, so the recolouring stops at the waist
+  // and the band between them is drawn. Which half keeps the garment's own
+  // cloth depends on which one the card names: `bodice === 'separate'` is the
+  // sari-and-lehenga case, where the *skirt* was named and the blouse above it
+  // is the unnamed one; a separately named skirt is the other way round.
+  // Getting that backwards is what put a cream chest on a walnut sari while the
+  // bust beside it drew walnut to the collar.
+  const namedSkirt = plan.shape.legs === 'skirt' || plan.shape.legs === 'wrapped';
+  const skirtedTrunk = plan.construction === 'skirted'
+    && (spec.garment.bodice === 'separate' || namedSkirt);
+  if (!plan.bare && skirtedTrunk) {
     const bandTop = s.waistY - 1;
     const bandBot = s.waistY + 1;
-    for (let y = s.shoulderY - t.shoulderSlope; y <= bandBot; y += 1) {
+    const secondHalfIsUpper = spec.garment.bodice === 'separate';
+    const second = namedSkirt && !secondHalfIsUpper ? ramps.legwear : ramps.clothB;
+    const secondMat = namedSkirt && !secondHalfIsUpper ? MAT.LEGWEAR : MAT.CLOTH_B;
+    for (let y = s.shoulderY - t.shoulderSlope; y <= plan.hemY; y += 1) {
       for (let x = 0; x < SPRITE_W; x += 1) {
         if (!m[y * SPRITE_W + x]) continue;
-        if (y >= bandTop) {
+        if (y >= bandTop && y <= bandBot) {
           // The waistband itself: a darker band the skirt gathers into.
           raster.set(x, y, ramps.clothC.steps[4], MAT.CLOTH_C, 4);
           form.addBias(x, y, y === bandBot ? 2 : 1);
-        } else {
-          raster.set(x, y, ramps.clothB.steps[3], MAT.CLOTH_B, 3);
+        } else if ((y < bandTop) === secondHalfIsUpper) {
+          raster.set(x, y, second.steps[3], secondMat, 3);
         }
+      }
+    }
+  }
+
+  // A shirt over named trousers: the trunk is *all* the unnamed garment, so it
+  // is repainted whole rather than split. Leaving it in the primary painted the
+  // shirt in the trousers' colour and the trousers in it too, which is a
+  // tracksuit and rarely what the card said.
+  if (!plan.bare && plan.shape.lowerNamed && plan.construction === 'shirt') {
+    for (let y = 0; y < SPRITE_H; y += 1) {
+      for (let x = 0; x < SPRITE_W; x += 1) {
+        if (m[y * SPRITE_W + x]) raster.set(x, y, ramps.clothB.steps[3], MAT.CLOTH_B, 3);
       }
     }
   }
@@ -1264,9 +1567,25 @@ function drawOverLayer(
  * A narrower barrel than the clothed torso — cloth stands off the body — and
  * it carries the same cylinder light so the lit side agrees with the arms and
  * the neck either side of it.
+ *
+ * **Everything below the barrel is anatomy, and it is not optional.** The
+ * previous version drew the cylinder, one collarbone row and a five-pixel
+ * sternum tick, which is to say: a bare-chested man was a blank plane of skin
+ * with a head on it. A dressed figure gets away with an unmodelled trunk
+ * because folds, a hem and a belt are doing the work; strip the cloth off and
+ * there is nothing left carrying the form at all, so the figure reads as
+ * unfinished exactly where the eye goes first.
+ *
+ * The marks below are the ones a life-drawing puts down in its first minute,
+ * and no more than that — at ~44px across the chest, anything finer than a
+ * pectoral is below the threshold where it reads as anatomy rather than as
+ * noise. Every one goes through `form.addBias`, never `raster.set`: the lamp
+ * recomputes each pixel that carries a normal, so a painted highlight here
+ * would simply be discarded (see the note in `drawFeet`).
  */
 function drawBareTorso(
-  raster: Raster, form: FormBuffer, ramps: PortraitRamps, s: Skeleton, plan: GarmentPlan
+  raster: Raster, form: FormBuffer, ramps: PortraitRamps, s: Skeleton, plan: GarmentPlan,
+  spec: PortraitSpec
 ): void {
   const t = s.t;
   const from = plan.shape.bareChest ? s.shoulderY - 1 : s.chestY;
@@ -1287,14 +1606,233 @@ function drawBareTorso(
   }
   cylinderSurface(form, m, s.cx + Math.round(s.turn * s.shoulderHalf * 0.22) * s.nearSide,
     s.shoulderHalf + 1, DEPTH.torso - 0.02);
-  // The collarbones, and the shadow the ribs sit in — two marks, and a bare
-  // chest stops being a plain cylinder.
+
+  const inside = (x: number, y: number) =>
+    x >= 0 && x < SPRITE_W && y >= 0 && y < SPRITE_H && m[y * SPRITE_W + x] === 1;
+  const bias = (x: number, y: number, d: number) => { if (inside(x, y)) form.addBias(x, y, d); };
+
+  // The body's midline, which is not the canvas's. Every landmark below hangs
+  // off it, so a turned figure's chest turns with it instead of sliding out
+  // from under its own shoulders.
+  const mid = s.cx + t.torsoSkew + Math.round(s.turn * s.shoulderHalf * 0.10) * -s.nearSide;
+  // Which side is lit, so the softer half of each paired mass goes to the
+  // shadow side rather than both being stated equally.
+  const litSide: -1 | 1 = t.lightDir >= 0 ? 1 : -1;
+
+  /**
+   * How the trunk is built, in two numbers off the persona.
+   *
+   * `soft` is fat over the muscle: it swallows the abdominal blocks and the
+   * rib arch, and turns the chest's lower border from a hard line into a
+   * curve. `slack` is age: the same landmarks, lower and less certain. A
+   * seventy-year-old labourer and a twenty-year-old one have the same
+   * anatomy and it does not read the same way, and drawing them identically
+   * is the sort of thing that makes a crowd look procedural.
+   */
+  const soft = Math.max(0, Math.min(1, (s.stature.girth - 0.95) * 2.6));
+  const slack = spec.age >= 60 ? 0.8 : spec.age >= 45 ? 0.45 : spec.age <= 22 ? 0.1 : 0.25;
+  const female = spec.gender === 'Female';
+
   if (plan.shape.bareChest) {
-    for (let dx = -Math.round(s.shoulderHalf * 0.5); dx <= Math.round(s.shoulderHalf * 0.5); dx += 1) {
-      form.addBias(s.cx + dx, s.shoulderY + 3, Math.abs(dx) > 2 ? 2 : 0);
+    const halfAt = (y: number) => {
+      const tt = Math.max(0, Math.min(1, (y - s.shoulderY) / Math.max(1, s.waistY - s.shoulderY)));
+      return Math.round((s.shoulderHalf + (s.waistHalf - s.shoulderHalf) * tt) * 0.86);
+    };
+    const chestTop = s.shoulderY + 2;
+    const chestBot = s.chestY + Math.round((s.waistY - s.chestY) * 0.30) + Math.round(slack * 2);
+    const chestH = Math.max(4, chestBot - chestTop);
+    const halfW = halfAt(s.chestY);
+
+    // --- The clavicles. -----------------------------------------------------
+    //
+    // A shallow V from the pit of the throat out to each shoulder, sitting a
+    // little proud of the chest below. This is the mark that separates the
+    // neck from the trunk; without it the head grows straight out of a slab.
+    const clavSpan = Math.round(halfW * 0.78);
+    for (let dx = -clavSpan; dx <= clavSpan; dx += 1) {
+      const u = Math.abs(dx) / Math.max(1, clavSpan);
+      // Rises toward the shoulder, dips at the throat.
+      const y = chestTop + Math.round((1 - u) * 2);
+      bias(mid + dx, y, u > 0.25 ? 2 : 3);
+      bias(mid + dx, y + 1, -1);
     }
-    for (let dx = -2; dx <= 2; dx += 1) form.addBias(s.cx + dx, s.chestY + 4, 1);
+
+    // --- The chest masses. --------------------------------------------------
+    //
+    // Two of them, either side of the sternum. On a man they are pectorals:
+    // wide, flat-topped, and defined almost entirely by the hard shadow along
+    // their lower border. On a woman they are lower, rounder and set closer
+    // in, and the border is a soft crease rather than a line. Same three
+    // marks, different proportions — which is the point of doing it with
+    // geometry instead of two hand-drawn bitmaps.
+    const massW = female ? Math.round(halfW * 0.52) : Math.round(halfW * 0.72);
+    const massH = female ? Math.round(chestH * 0.62) : Math.round(chestH * 0.52);
+    const massY = chestTop + Math.round(chestH * (female ? 0.52 : 0.40)) + Math.round(slack * 2);
+    const massX = Math.round(halfW * (female ? 0.42 : 0.46));
+    for (const side of [-1, 1] as const) {
+      const cx0 = mid + side * massX;
+      const mass = makeMask(SPRITE_W, SPRITE_H);
+      for (let y = massY - massH; y <= massY + massH; y += 1) {
+        for (let x = cx0 - massW; x <= cx0 + massW; x += 1) {
+          if (!inside(x, y)) continue;
+          const u = (x - cx0) / Math.max(1, massW);
+          const v = (y - massY) / Math.max(1, massH);
+          if (u * u + v * v <= 1) mass[y * SPRITE_W + x] = 1;
+        }
+      }
+      // Its own dome, in front of the barrel — so it catches the key light on
+      // its crown and turns away at its edges independently of the ribcage.
+      ellipsoidSurface(form, mass, cx0, massY - Math.round(massH * 0.2),
+        massW, massH, DEPTH.torso - 0.01, female ? 0.7 : 0.5);
+      // The lower border. On a man this is the single most legible line on the
+      // whole trunk and it should be stated hard; fat softens it, and so does
+      // age. The shadow side of the body takes it a step deeper.
+      const edge = Math.max(1, Math.round((female ? 2.4 : 3.4) - soft * 1.6));
+      const deeper = side === litSide ? 0 : 1;
+      for (let dx = -massW; dx <= massW; dx += 1) {
+        const u = Math.abs(dx) / Math.max(1, massW);
+        if (u > 0.94) continue;
+        const y = massY + Math.round(massH * Math.sqrt(Math.max(0, 1 - u * u)));
+        bias(cx0 + dx, y, edge + deeper);
+        bias(cx0 + dx, y + 1, Math.max(1, edge - 1));
+        // …and a lit lip just above it, which is what makes the mass sit *on*
+        // the ribs rather than being a smudge drawn across them.
+        bias(cx0 + dx, y - 1, -1);
+      }
+      // The armpit's hollow, where the mass tucks under the arm.
+      bias(cx0 + side * massW, massY - Math.round(massH * 0.5), 2);
+      // The nipple: one pixel, on the mass's lower-outer quarter. Below the
+      // pectoral line it reads as dirt; on it, it reads as a body.
+      if (!female) {
+        const nx = cx0 + side * Math.round(massW * 0.28);
+        const ny = massY + Math.round(massH * 0.34);
+        bias(nx, ny, 3);
+        bias(nx, ny - 1, -1);
+      }
+    }
+
+    // --- The sternum. -------------------------------------------------------
+    //
+    // The groove between the two masses, from the throat's pit down to where
+    // the ribs part. Narrow — two pixels of shadow with a lit ridge is a
+    // breastbone; four is a canyon.
+    for (let y = chestTop + 2; y <= massY + Math.round(massH * 0.6); y += 1) {
+      bias(mid, y, 2);
+      bias(mid + 1, y, 1);
+    }
   }
+
+  // --- The abdomen. ---------------------------------------------------------
+  //
+  // Drawn whenever the midriff is on show, which is the choli case as well as
+  // the bare-chested one.
+  if (plan.shape.bareMidriff || plan.shape.bareChest) {
+    const top = plan.shape.bareChest
+      ? s.chestY + Math.round((s.waistY - s.chestY) * 0.42)
+      : Math.max(from, plan.topHemY);
+    const bot = Math.min(to, s.hipY);
+    const span = Math.max(3, bot - top);
+    const waistHalf = Math.round(s.waistHalf * 0.86);
+    // The navel sits above the hip line, not at the waist's narrowest point —
+    // a common enough error that it is worth being explicit about.
+    const navelY = top + Math.round(span * 0.66);
+
+    // The rib arch: a shallow inverted V where the ribcage ends, which is the
+    // landmark that stops the trunk being one tube from armpit to hip. Fat
+    // buries it entirely, and on a heavy figure drawing it anyway is worse
+    // than leaving it out.
+    if (soft < 0.55 && plan.shape.bareChest) {
+      const archW = Math.round(waistHalf * 0.66);
+      for (let dx = -archW; dx <= archW; dx += 1) {
+        const u = Math.abs(dx) / Math.max(1, archW);
+        bias(mid + dx, top + Math.round(u * 3), 1 + (u > 0.5 ? 1 : 0));
+      }
+    }
+
+    // The linea alba, from the ribs to the navel. One pixel, and it does more
+    // for a bare trunk than any amount of shading either side of it.
+    for (let y = top + 2; y < navelY; y += 1) bias(mid, y, 1);
+
+    if (soft > 0.5) {
+      // A soft belly is a *mass*, not a set of blocks: one dome standing
+      // proud below the ribs, with the fold under it taking the shadow.
+      const belly = makeMask(SPRITE_W, SPRITE_H);
+      const bw = Math.round(waistHalf * 0.86);
+      const bh = Math.round(span * 0.46);
+      const by = navelY - 1;
+      for (let y = by - bh; y <= by + bh; y += 1) {
+        for (let x = mid - bw; x <= mid + bw; x += 1) {
+          if (!inside(x, y)) continue;
+          const u = (x - mid) / Math.max(1, bw);
+          const v = (y - by) / Math.max(1, bh);
+          if (u * u + v * v <= 1) belly[y * SPRITE_W + x] = 1;
+        }
+      }
+      ellipsoidSurface(form, belly, mid, by, bw, bh, DEPTH.torso - 0.01, 0.8);
+      for (let dx = -bw + 1; dx <= bw - 1; dx += 1) {
+        const u = Math.abs(dx) / Math.max(1, bw);
+        bias(mid + dx, by + Math.round(bh * Math.sqrt(Math.max(0, 1 - u * u))), 2);
+      }
+    } else {
+      // Lean: paired blocks either side of the midline, separated by the
+      // tendinous bands.
+      //
+      // The bands are drawn as **short, broken, per-side segments that stop
+      // clear of the linea alba**, and that is the whole difference between
+      // abdominal muscle and a striped jumper. Run each row edge to edge and
+      // the two halves meet across the midline into one unbroken horizontal
+      // rule; three of those stacked up read as ribs on a xylophone. Real
+      // ones are interrupted at the centre, shorter than the belly is wide,
+      // and fainter as they descend — which is what these are.
+      const rows = span > 26 && slack < 0.5 ? 3 : 2;
+      const bw = Math.round(waistHalf * 0.42);
+      for (let r = 0; r < rows; r += 1) {
+        const y = top + 4 + Math.round((navelY - top - 5) * ((r + 0.5) / rows));
+        // Lower bands are shorter — the blocks narrow toward the navel — and
+        // quieter, so the eye reads a sequence rather than a grating.
+        const half = Math.max(1, Math.round(bw * (0.62 - r * 0.10)));
+        const depth = Math.max(1, 2 - Math.round(r * 0.5) - Math.round(slack));
+        for (const side of [-1, 1] as const) {
+          const cx0 = mid + side * Math.round(bw * 0.66);
+          for (let dx = -half; dx <= half; dx += 1) {
+            // Stop short of the midline: the groove there is its own mark and
+            // the bands must not run into it.
+            if (Math.abs(cx0 + dx - mid) < 2) continue;
+            bias(cx0 + dx, y, depth + (side === litSide ? 0 : 1));
+          }
+          // The block below catches the light on its crown.
+          bias(cx0, y + 2, -1);
+        }
+      }
+    }
+
+    // The navel, and the lit skin under it.
+    bias(mid, navelY, 3);
+    bias(mid, navelY + 1, -1);
+
+    // The iliac crest: the diagonal raking down and in from each flank toward
+    // the groin. This is what makes a trunk end in *hips* instead of running
+    // straight into the garment as a tube, and it is the mark most often
+    // missing from a figure that reads as "unfinished below the ribs".
+    const crestLen = Math.max(3, Math.round(span * 0.42));
+    for (const side of [-1, 1] as const) {
+      for (let i = 0; i < crestLen; i += 1) {
+        const u = i / Math.max(1, crestLen - 1);
+        const x = mid + side * (waistHalf - Math.round(u * waistHalf * 0.52));
+        const y = navelY - 1 + Math.round(u * crestLen * 0.9);
+        bias(x, y, side === litSide ? 2 : 3);
+        bias(x - side, y, 1);
+      }
+    }
+
+    // The flank, below the ribs and above the hip: the softest turn on the
+    // whole trunk, and it wants a step of shadow on the shadow side to keep
+    // the cylinder from flattening out where the mask is widest.
+    for (let y = top; y <= bot; y += 1) {
+      bias(mid - litSide * waistHalf, y, 1);
+    }
+  }
+
   // Where cloth meets skin the cloth casts, exactly as the hem does on legs.
   const edgeY = plan.shape.bareChest ? s.waistY - 2 : plan.topHemY;
   for (let x = 0; x < SPRITE_W; x += 1) {
@@ -1429,6 +1967,26 @@ function drawTrim(
   // labourer's smock at 0.00 — stays plain, which it should; everything above
   // that gets trim proportionate to how much it has.
   if (orn < 0.05 || plan.bare) return;
+  // A shirt or a coat worn over trousers is not trimmed along the bottom. The
+  // hem band below is a two-tone repeat in the *second* cloth, which on a
+  // two-piece outfit is the colour of the legwear — so every modern shirt in
+  // the app came out with a contrasting frill along its hem in the colour of
+  // its own trousers, and every suit jacket wore a lace edge. What those hems
+  // actually have is a turn: one row of shadow under one row of light.
+  const overTrousers = plan.shape.legs === 'trousers' || plan.shape.legs === 'shorts'
+    || plan.shape.legs === 'hose';
+  if (plan.construction === 'shirt' || (overTrousers && plan.construction === 'jacket')) {
+    for (let x = 0; x < SPRITE_W; x += 1) {
+      let hem = -1;
+      for (let y = plan.hemY + 2; y >= plan.hemY - 10; y -= 1) {
+        if (y >= 0 && y < SPRITE_H && m[y * SPRITE_W + x]) { hem = y; break; }
+      }
+      if (hem < 1) continue;
+      form.addBias(x, hem, 1.6);
+      form.addBias(x, hem - 1, -0.8);
+    }
+    return;
+  }
   const d = plan.drape;
   const rich = orn > 0.55;
   /** Hem band only at the bottom of the range; placket and cuffs come later. */
@@ -1536,10 +2094,17 @@ function drawCuff(
  * so the same persona always wears the same collar, and a named garment is
  * never contradicted.
  */
-type Neckline = 'round' | 'vee' | 'stand' | 'cross' | 'square' | 'boat' | 'keyhole';
+type Neckline = 'round' | 'vee' | 'stand' | 'cross' | 'square' | 'boat' | 'keyhole' | 'lapel' | 'collar';
 
 function readNeckline(spec: PortraitSpec, kind: string): Neckline {
   const n = `${spec.garment.name} ${spec.garment.material}`.toLowerCase();
+  // A tailored jacket is entirely its lapels at any scale, and the sprite had
+  // no case for them: every suit in the app came out as a plain buttoned coat,
+  // while the bust beside it drew a shirt front and a tie. The two pictures
+  // were of different garments.
+  if (/suit|blazer|tuxedo|dinner jacket|tailcoat|frock coat|morning coat|sport coat|sack coat|savile|lounge/.test(n)) return 'lapel';
+  // A turned collar with points — the shirt of the last two centuries.
+  if (/formal shirt|dress shirt|designer shirt|polo|guayabera|aloha|work shirt|flannel|chambray|shirtwaist|collar/.test(n)) return 'collar';
   if (/mandarin|stand|band collar|kurta|achkan|sherwani|cheongsam|changshan/.test(n)) return 'stand';
   if (/kaftan|caftan|kimono|hanbok|wrap|cross|angarkha|dhoti|toga|himation/.test(n)) return 'cross';
   if (/cotehardie|houppelande|doublet|jerkin/.test(n)) return 'vee';
@@ -1557,7 +2122,7 @@ function readNeckline(spec: PortraitSpec, kind: string): Neckline {
 function drawNeckline(
   raster: Raster, form: FormBuffer, spec: PortraitSpec, ramps: PortraitRamps,
   s: Skeleton, plan: GarmentPlan, m: Mask
-): void {
+): Neckline {
   const t = s.t;
   const style = readNeckline(spec, plan.kind);
   const hx = s.headCx;
@@ -1581,6 +2146,66 @@ function drawNeckline(
         lay(hx + dx, top, 1);
         lay(hx + dx, top + 1, 2);
       }
+      break;
+    }
+    case 'lapel': {
+      // A tailored jacket: the facings turned back from the front edges, the
+      // shirt showing in the V between them, and something knotted at the
+      // throat. The same three parts the bust draws, at a third the size, so
+      // the two pictures of one suit agree.
+      const depth = Math.max(6, Math.round((s.waistY - s.shoulderY) * 0.44));
+      const spread = half + 3;
+      const cx = s.cx + t.torsoSkew + 1;
+      const shirt = (x: number, y: number, step: number) => {
+        if (x < 0 || y < 0 || x >= SPRITE_W || y >= SPRITE_H) return;
+        if (!m[y * SPRITE_W + x]) return;
+        raster.set(x, y, ramps.clothB.steps[step], MAT.CLOTH_B, step);
+        form.addBias(x, y, 0.6);
+      };
+      for (let i = 0; i <= depth; i += 1) {
+        const w = Math.max(0, Math.round(spread * (1 - i / depth)));
+        for (let dx = -w; dx <= w; dx += 1) shirt(cx + dx, top + i, 2);
+        // The facing itself: a lit fold along the inner edge, falling away
+        // toward the break. One flat value there reads as a painted stripe.
+        for (const side of [-1, 1] as const) {
+          for (let k = 0; k <= 2; k += 1) {
+            const x = cx + side * (w + k);
+            if (x < 0 || x >= SPRITE_W || !m[(top + i) * SPRITE_W + x]) continue;
+            form.addBias(x, top + i, k === 0 ? -1.6 : 1);
+          }
+        }
+      }
+      // The tie: two rows of knot at the throat and a narrow blade down the V.
+      for (let dx = -1; dx <= 1; dx += 1) {
+        for (let dy = 1; dy <= 2; dy += 1) {
+          const x = cx + dx;
+          const y = top + dy;
+          if (x < 0 || y < 0 || x >= SPRITE_W || y >= SPRITE_H || !m[y * SPRITE_W + x]) continue;
+          raster.set(x, y, ramps.clothC.steps[dy === 1 ? 2 : 3], MAT.CLOTH_C, dy === 1 ? 2 : 3);
+        }
+      }
+      for (let i = 3; i <= depth; i += 1) {
+        const y = top + i;
+        if (y < 0 || y >= SPRITE_H) continue;
+        for (const dx of [0, 1] as const) {
+          const x = cx + dx;
+          if (!m[y * SPRITE_W + x]) continue;
+          raster.set(x, y, ramps.clothC.steps[dx === 0 ? 2 : 4], MAT.CLOTH_C, dx === 0 ? 2 : 4);
+        }
+      }
+      break;
+    }
+    case 'collar': {
+      // Two points angled down and out from the neck opening, and a short
+      // buttoned placket under them.
+      for (const side of [-1, 1] as const) {
+        for (let i = 0; i < 5; i += 1) {
+          const x = hx + side * (half - 1 + Math.round(i * 0.6));
+          lay(x, top + i, i === 0 ? 1 : 2);
+          if (i > 0) form.addBias(x, top + i - 1, -0.8);
+        }
+      }
+      for (let dx = -half; dx <= half; dx += 1) lay(hx + dx, top, 1);
       break;
     }
     case 'vee': {
@@ -1635,6 +2260,7 @@ function drawNeckline(
       break;
     }
   }
+  return style;
 }
 
 function drawClosure(
@@ -1646,7 +2272,13 @@ function drawClosure(
     || plan.kind === 'gown' || plan.kind === 'wrapped_garment';
   const cx = s.cx + t.torsoSkew + 1;
 
-  drawNeckline(raster, form, spec, ramps, s, plan, m);
+  const neckline = drawNeckline(raster, form, spec, ramps, s, plan, m);
+  // A lapel *is* the front of the garment down as far as it reaches, so the
+  // opening picks up below it. Run from the shoulder as usual and the coat gets
+  // a second front edge straight through its own shirt and tie.
+  const openTop = neckline === 'lapel'
+    ? s.shoulderY + Math.round((s.waistY - s.shoulderY) * 0.5)
+    : s.shoulderY + 1;
 
   // The collar's cast onto the throat. Cloth standing in front of the neck
   // shades what is behind it for the same reason the hem shades the legs, and
@@ -1673,8 +2305,12 @@ function drawClosure(
     return;
   }
   // An open garment shows the overlap: one edge in front of the other, with
-  // the far panel a step down.
-  for (let y = s.shoulderY + 1; y <= plan.hemY - 1; y += 1) {
+  // the far panel a step down. It stops at the waist where the lower half is a
+  // skirt of its own — a jacket's front edge carried on down through the skirt
+  // under it, drawing one continuous opening through two garments.
+  const frontBottom = plan.shape.legs === 'skirt' || plan.shape.legs === 'wrapped'
+    ? s.waistY - 2 : plan.hemY - 1;
+  for (let y = openTop; y <= frontBottom; y += 1) {
     const lean = Math.round((y - s.shoulderY) * 0.08);
     const x = cx + lean;
     if (!m[y * SPRITE_W + x]) continue;
@@ -1683,7 +2319,7 @@ function drawClosure(
     for (let k = 1; k <= 3; k += 1) if (m[y * SPRITE_W + x + k]) form.addBias(x + k, y, 1);
   }
   if (spec.garment.ornament > 0.4) {
-    for (let y = s.shoulderY + 2; y <= plan.hemY - 2; y += 1) {
+    for (let y = openTop + 1; y <= frontBottom - 1; y += 1) {
       const x = cx + Math.round((y - s.shoulderY) * 0.08) + 1;
       if (m[y * SPRITE_W + x]) raster.set(x, y, ramps.clothC.steps[2], MAT.CLOTH_C, 2);
     }
@@ -1720,54 +2356,268 @@ function drawBelt(
 
 function drawLegs(
   raster: Raster, form: FormBuffer, ramps: PortraitRamps, s: Skeleton,
-  extras: SpriteExtras, plan: GarmentPlan
+  extras: SpriteExtras, plan: GarmentPlan, chains: Record<'near' | 'far', LegChain>
 ): void {
   if (plan.hemY >= s.ankleY - 1) return;
-  const t = s.t;
-  // A trousered construction *is* legwear, whatever the inventory says — the
-  // garment named in the spec is the thing on the legs.
-  const legged = extras.hasLegwear || plan.construction === 'trousered';
-  const ramp = legged ? ramps.clothB : ramps.skin;
-  const mat = legged ? MAT.CLOTH_B : MAT.SKIN;
+  // What is actually on the legs. `skirt` and `wrapped` are drawn by the trunk
+  // — they are a fall of cloth from the waist, not a covering of the limbs —
+  // so as far as this function is concerned those legs are bare below the hem.
+  const wear = plan.shape.legs === 'skirt' || plan.shape.legs === 'wrapped'
+    ? null : plan.shape.legs;
+  const legged = wear !== null;
+  // Named legwear brings its own cloth — denim is indigo whatever the shirt
+  // above it is. Where the *torso* garment turned out to be the trousers there
+  // is no second item to read, so they keep the primary and the shirt above was
+  // repainted in the secondary.
+  const clothed = plan.shape.lowerNamed ? ramps.clothA : ramps.legwear;
+  const clothMat = plan.shape.lowerNamed ? MAT.CLOTH_A : MAT.LEGWEAR;
+  const ramp = legged ? clothed : ramps.skin;
+  const mat = legged ? clothMat : MAT.SKIN;
 
-  for (const side of [-1, 1] as const) {
+  // Trousers hang off the hip and clear the leg; hose and bare skin follow it.
+  // That difference is most of what tells them apart at this size, and it is
+  // why a pair of jeans drawn on the bare-leg capsules read as long johns.
+  const slack = wear === 'trousers' || wear === 'shorts' ? 3 : 0;
+  // Where the cloth stops. Shorts break above the knee, trousers over the shoe.
+  const legSpan = s.ankleY - s.hipY;
+  const clothStop = wear === 'shorts'
+    ? s.hipY + Math.round(legSpan * 0.42)
+    : SPRITE_H;
+  const seat = slack > 0 ? makeMask(SPRITE_W, SPRITE_H) : null;
+
+  // Far leg first, so the near one paints over it where they overlap. This ran
+  // left-to-right, which on a figure whose near side is the viewer's left meant
+  // the *far* leg was drawn last and covered the near one — invisible while
+  // both legs stood plumb in the same column, and unmistakable the moment a
+  // stride put one in front of the other. `drawFeet` had already been fixed
+  // for exactly this and the legs above them had not.
+  for (const side of [-s.nearSide, s.nearSide] as const) {
     const near = side === s.nearSide;
-    // Legs stand plumb. An earlier version angled them toward each other by
-    // half the stride and they crossed at the knee — at a near-frontal view a
-    // stride is *depth*, which the foot stagger and the depth buffer carry,
-    // not a horizontal splay.
-    const legX = s.cx + t.hipSkew + side * (Math.round(s.legW / 2) + s.legGap);
-    const top = plan.hemY - 4;
-    const bottom = s.ankleY - (near ? 0 : t.footStagger);
+    const chain = near ? chains.near : chains.far;
+    const [hx, hy] = chain.hip;
+    const [kx, ky] = chain.knee;
+    const [ax, ay] = chain.ankle;
     // The thigh is fuller than the calf, and the calf tapers into the ankle.
-    const m = maskUnion(
-      capsuleMask(legX, top, legX, s.kneeY, s.legW + 1, s.legW),
-      capsuleMask(legX, s.kneeY, legX, bottom, s.legW, s.legW - 3)
+    // Both segments now run along the solved chain, so a stride bends them
+    // instead of leaving two dowels under a moving body.
+    const bare = maskUnion(
+      capsuleMask(hx, hy, kx, ky, s.legW + 1, s.legW),
+      capsuleMask(kx, ky, ax, ay, s.legW, s.legW - 3)
     );
+    // Cloth that hangs rather than clings: a wider, near-parallel tube over the
+    // same bones, drawn from the hip down to wherever this garment stops. A
+    // trouser leg does not taper the way a calf does — that lack of taper is
+    // most of the silhouette, and drawing jeans on the bare-leg capsules is why
+    // they read as long johns.
+    const cloth = slack > 0
+      ? maskUnion(
+        capsuleMask(hx, hy, kx, ky, s.legW + 1 + slack, s.legW + slack),
+        capsuleMask(kx, ky, ax, ay, s.legW + slack, s.legW + slack - 1)
+      )
+      : null;
+    // The garment covers the top of the leg: rows above the hem belong to the
+    // skirt, not the thigh. Clipping the mask rather than starting the capsule
+    // at the hem keeps the *taper* anchored to the hip, so a short tunic and a
+    // long one show the same leg at the same width where they overlap.
+    const top = Math.max(0, (cloth ? Math.min(plan.hemY, s.hipY + 2) : plan.hemY) - 4);
+    const clip = (mask: Mask, from: number, to: number) => {
+      for (let y = 0; y < SPRITE_H; y += 1) {
+        if (y >= from && y < to) continue;
+        for (let x = 0; x < SPRITE_W; x += 1) mask[y * SPRITE_W + x] = 0;
+      }
+    };
+    clip(bare, cloth ? clothStop : top, SPRITE_H);
+    if (cloth) clip(cloth, top, clothStop);
+    if (cloth && seat) for (let i = 0; i < seat.length; i += 1) if (cloth[i]) seat[i] = 1;
+
+    const m = cloth ? maskUnion(bare, cloth) : bare;
     for (let y = 0; y < SPRITE_H; y += 1) {
       for (let x = 0; x < SPRITE_W; x += 1) {
-        if (m[y * SPRITE_W + x]) raster.set(x, y, ramp.steps[3], mat, 3);
+        if (!m[y * SPRITE_W + x]) continue;
+        const covered = cloth ? cloth[y * SPRITE_W + x] === 1 : legged;
+        if (covered) raster.set(x, y, clothed.steps[3], clothMat, 3);
+        else raster.set(x, y, ramp.steps[3], mat, 3);
       }
     }
-    limbSurface(form, m, legX, top, legX, bottom, s.legW / 2, near ? DEPTH.legNear : DEPTH.legFar);
+    const depth = near ? DEPTH.legNear : DEPTH.legFar;
+    // Per segment, so the knee reads as a bend rather than one long cylinder
+    // lit as though it were straight. A clothed segment is modelled at the
+    // cloth's radius, not the limb's, or the shading rolls off before it
+    // reaches the trouser's edge and the leg comes out with a flat rim.
+    const shinClothed = clothStop > ky;
+    limbSurface(form, m, hx, hy, kx, ky, (s.legW + slack) / 2, depth);
+    limbSurface(form, m, kx, ky, ax, ay, (s.legW + (shinClothed ? slack : 0)) / 2, depth + 0.01);
     // The knee: a lit cap, a hollow behind it, and a darkened edge either
     // side so the joint reads as a swelling rather than a change of tone. A
     // bare leg without this is a dowel — the knee is the only landmark it has.
+    // Under cloth it is a *bag* rather than a bone, so the same construction
+    // runs at a fraction of the depth: enough to say there is a joint there,
+    // not enough to draw a kneecap through a pair of flannels.
+    const cover = shinClothed ? 0.4 : 1;
     const kw = Math.max(1, Math.round(s.legW * 0.28));
     for (let dx = -kw; dx <= kw; dx += 1) {
       const near0 = Math.abs(dx) <= Math.max(1, kw - 1);
-      form.addBias(legX + dx, s.kneeY - 1, near0 ? -2 : 0);
-      form.addBias(legX + dx, s.kneeY, near0 ? -1 : 1);
-      form.addBias(legX + dx, s.kneeY + 2, near0 ? 2 : 1);
+      form.addBias(kx + dx, ky - 1, (near0 ? -2 : 0) * cover);
+      form.addBias(kx + dx, ky, (near0 ? -1 : 1) * cover);
+      form.addBias(kx + dx, ky + 2, (near0 ? 2 : 1) * cover);
     }
-    // The calf swells below it and the shin stays flat — one more landmark.
-    for (let y = s.kneeY + 4; y < s.ankleY - 4; y += 1) {
-      const t = (y - s.kneeY - 4) / Math.max(1, s.ankleY - 8 - s.kneeY);
-      if (t < 0.45) form.addBias(legX - side * Math.round(s.legW * 0.3), y, -1);
+    // The calf swells on the back of the shin — which is behind the *chain*,
+    // not at a fixed x, so it follows the leg when it folds. A trouser leg has
+    // no calf, so this is skipped where the cloth reaches.
+    if (!shinClothed) {
+      const shinLen = Math.max(1, Math.hypot(ax - kx, ay - ky));
+      const backX = -(ay - ky) / shinLen;
+      const backY = (ax - kx) / shinLen;
+      const heel = -(-s.nearSide);
+      for (let i = 4; i < shinLen - 4; i += 1) {
+        const u = (i - 4) / Math.max(1, shinLen - 8);
+        if (u >= 0.45) continue;
+        const px = Math.round(kx + (ax - kx) * (i / shinLen) + backX * heel * s.legW * 0.3);
+        const py = Math.round(ky + (ay - ky) * (i / shinLen) + backY * heel * s.legW * 0.3);
+        form.addBias(px, py, -1);
+      }
     }
-    // The gap between the legs takes the deepest occlusion.
+    if (cloth) drawTrouserLeg(form, s, plan, cloth, chain, near, slack, clothStop);
+    // The gap between the legs takes the deepest occlusion — down the *inner*
+    // edge of the near leg, which follows the chain rather than hanging at the
+    // hip's x. Pinned there it drew a line of shadow through open air the
+    // moment the leg strode out from under the hip.
     if (near) {
-      for (let y = top; y <= bottom; y += 1) form.addBias(legX - side * (s.legW / 2), y, 1);
+      for (let y = top; y <= Math.max(ky, ay); y += 1) {
+        const u = Math.max(0, Math.min(1, (y - hy) / Math.max(1, ay - hy)));
+        const axis = u < 0.5
+          ? hx + (kx - hx) * (u / 0.5)
+          : kx + (ax - kx) * ((u - 0.5) / 0.5);
+        const px = Math.round(axis - side * ((s.legW + slack) / 2));
+        if (px >= 0 && px < SPRITE_W && m[y * SPRITE_W + px]) form.addBias(px, y, 1);
+      }
+    }
+  }
+
+  if (seat) closeFork(raster, form, s, plan, seat, clothed, clothMat);
+}
+
+/**
+ * The seat of a pair of trousers: the part that is not a leg.
+ *
+ * Two capsules struck from the hip joints leave a wedge of nothing between them
+ * above the crotch, because the legs only become separate down there. On a bare
+ * figure that wedge is where the garment's hem hangs and nothing is missing; on
+ * a trousered one it is a hole straight through the figure.
+ *
+ * The fix is only to *close* that wedge — fill from the outer edge of one
+ * trouser leg to the outer edge of the other, row by row, and no further. An
+ * earlier version drew the seat as its own block spanning the hips, which
+ * introduced a width neither leg had and gave every figure in trousers a
+ * squared-off box below the shirt. The silhouette has to stay the union of the
+ * two legs; the fork is a gap being filled, not a part being added.
+ */
+function closeFork(
+  raster: Raster, form: FormBuffer, s: Skeleton, plan: GarmentPlan,
+  cloth: Mask, ramp: Ramp, mat: number
+): void {
+  const legSpan = s.ankleY - s.hipY;
+  const crotchY = s.hipY + Math.round(legSpan * 0.15);
+  const axis = s.cx + s.t.hipSkew;
+  const filled = makeMask(SPRITE_W, SPRITE_H);
+  let top = SPRITE_H;
+
+  for (let y = 0; y <= crotchY; y += 1) {
+    let lo = -1;
+    let hi = -1;
+    for (let x = 0; x < SPRITE_W; x += 1) {
+      if (!cloth[y * SPRITE_W + x]) continue;
+      if (lo < 0) lo = x;
+      hi = x;
+    }
+    if (lo < 0 || hi - lo < 2) continue;
+    if (y < top) top = y;
+    for (let x = lo; x <= hi; x += 1) {
+      const i = y * SPRITE_W + x;
+      if (cloth[i]) continue;
+      filled[i] = 1;
+      raster.set(x, y, ramp.steps[3], mat, 3);
+    }
+  }
+  if (top >= crotchY) return;
+  // Shaded as one barrel with the legs it joins, so the seat is not a flat
+  // panel between two modelled tubes.
+  cylinderSurface(form, filled, axis, s.hipHalf + 1, DEPTH.legNear - 0.02);
+
+  // The fly, and the two creases running from it into the fork. At this size
+  // that is the whole of what says "trousers" rather than "a tube of cloth",
+  // and it costs about a dozen pixels.
+  for (let y = top + 3; y < crotchY - 1; y += 1) {
+    form.addBias(axis + 1, y, 1.2);
+    form.addBias(axis, y, -0.7);
+  }
+  for (let i = 0; i < 5; i += 1) {
+    const y = crotchY - i;
+    form.addBias(axis + 1 - i, y, 0.9);
+    form.addBias(axis + 2 + i, y, 0.9);
+  }
+}
+
+/**
+ * What a trouser leg has that a bare one does not.
+ *
+ * Three things, in the order they matter: the **break** where the cloth lands
+ * on the shoe and buckles, the **cuff** or turn-up that ends it, and a
+ * **crease** down the front where the cloth has been pressed. The crease is the
+ * one that separates tailored wool from denim, so it is drawn only where the
+ * cloth would hold one.
+ */
+function drawTrouserLeg(
+  form: FormBuffer, s: Skeleton, plan: GarmentPlan, cloth: Mask,
+  chain: LegChain, near: boolean, slack: number, clothStop: number
+): void {
+  const [kx, ky] = chain.knee;
+  const [ax, ay] = chain.ankle;
+  const on = (x: number, y: number) =>
+    x >= 0 && y >= 0 && x < SPRITE_W && y < SPRITE_H && cloth[y * SPRITE_W + x] === 1;
+
+  const shorts = clothStop < SPRITE_H;
+  const hemY = shorts ? clothStop - 1 : Math.min(SPRITE_H - 1, ay + 1);
+  const half = Math.round((s.legW + slack) / 2) + 1;
+  const hemX = shorts
+    ? Math.round(kx + (ax - kx) * ((clothStop - ky) / Math.max(1, ay - ky)))
+    : ax;
+
+  // The hem: a lit lip over a shadowed turn-under, which is the same
+  // construction the garment hems use and for the same reason — one dark row
+  // on its own is a line ruled across the leg, not cloth stopping. Written as
+  // bias rather than colour: the light pass resolves cloth from its ramp and
+  // whatever `raster.set` puts there is discarded.
+  for (let dx = -half; dx <= half; dx += 1) {
+    const x = hemX + dx;
+    if (on(x, hemY)) form.addBias(x, hemY, 1.3);
+    if (on(x, hemY - 1)) form.addBias(x, hemY - 1, -0.7);
+  }
+
+  // The break: the cloth is longer than the leg and gathers where it lands, so
+  // the last few rows above the hem take a fold. Only long trousers break —
+  // shorts have nothing to land on.
+  if (!shorts) {
+    for (let i = 2; i < 7; i += 1) {
+      const y = hemY - i;
+      const x = hemX + (i % 2 === 0 ? -1 : 1);
+      form.addBias(x, y, 1.2 - i * 0.12);
+      form.addBias(x - 1, y, -0.7);
+    }
+  }
+
+  // The crease, on the near leg only: the far one is turned away and a second
+  // vertical highlight on it reads as a seam rather than a press.
+  if (near && !shorts) {
+    const creaseAt = (y: number) => {
+      const u = Math.max(0, Math.min(1, (y - ky) / Math.max(1, ay - ky)));
+      return Math.round(kx + (ax - kx) * u) - 1;
+    };
+    for (let y = Math.max(0, plan.hemY); y < hemY - 4; y += 1) {
+      const x = creaseAt(y);
+      if (!on(x, y)) continue;
+      form.addBias(x, y, -1.1);
+      if (on(x + 1, y)) form.addBias(x + 1, y, 0.7);
     }
   }
 }
@@ -1790,7 +2640,8 @@ function drawLegs(
  * Bare feet get the same skeleton minus the sole and vamp, plus toes.
  */
 function drawFeet(
-  raster: Raster, form: FormBuffer, ramps: PortraitRamps, s: Skeleton, extras: SpriteExtras
+  raster: Raster, form: FormBuffer, ramps: PortraitRamps, s: Skeleton, extras: SpriteExtras,
+  chains: Record<'near' | 'far', LegChain>
 ): void {
   const t = s.t;
   const kind: FootwearKind = extras.footwear;
@@ -1857,8 +2708,16 @@ function drawFeet(
   // top of the near one wherever they met.
   for (const side of [-s.nearSide, s.nearSide] as const) {
     const near = side === s.nearSide;
-    const cx = s.cx + t.hipSkew + side * (Math.round(s.legW / 2) + s.legGap);
-    const soleY = s.floorY - (near ? 0 : t.footStagger);
+    // The foot goes where the leg's ankle ended up. Standing, that is exactly
+    // where it was drawn before; striding, it is under the leg rather than
+    // under the hip, which is the whole point.
+    const chain = near ? chains.near : chains.far;
+    const cx = chain.ankle[0];
+    const soleY = chain.ankle[1] + s.shoeH;
+    // A foot off the ground is a foot rolling onto its toe, so it presents
+    // less of its length to the camera. Without this a lifted foot reads as
+    // the whole shoe being levitated flat, which is worse than not lifting it.
+    const liftShorten = chain.lift > 0 ? 0.62 : 1;
     // The heel projects *barely* behind the ankle. Given the leg's full
     // half-width it ran back almost as far as the toe ran forward, which put
     // the ankle in the middle of the foot instead of over its back third —
@@ -1878,7 +2737,7 @@ function drawFeet(
     // extra width the near foot gains from being closer. All three were
     // stranded when the two-perspective feet went in.
     const toe = Math.max(3, Math.round(
-      t.footToe * lenScale * (near ? 0.46 : 1.1) * (0.6 + s.turn * 0.5),
+      t.footToe * lenScale * (near ? 0.46 : 1.1) * (0.6 + s.turn * 0.5) * liftShorten,
     ));
     // Each construction has its own proportions. A clog is mostly sole; a
     // sandal is almost none; a boot's upper is the whole thing. Running them
@@ -2218,12 +3077,64 @@ function drawHeldItem(
 // ---------------------------------------------------------------------------
 
 /**
+ * The character's own way of standing, from their personality vector.
+ *
+ * Only applied when the frame is a *resting* one — a bow or a reach has
+ * already said what the arms are doing and must not be overridden by
+ * temperament. Shared with `poseLandmarks`, which would otherwise report the
+ * frame's nominal arms while the renderer drew the stance's, and quietly
+ * mislead exactly the diagnostic it exists to serve.
+ */
+const STANCES: Record<Exclude<RestStance, 'hang'>, { near: ArmPose; far: ArmPose }> = {
+  // Guarded: forearms across the chest, the near one laid over the far.
+  fold: {
+    near: { swing: 16, elbow: 112, forward: 0.42, hand: 'clasp' },
+    far: { swing: 14, elbow: 104, forward: 0.30, hand: 'hidden' },
+  },
+  // Composed: hands together at the waist.
+  clasp: {
+    near: { swing: 11, elbow: 96, forward: 0.35, hand: 'clasp' },
+    far: { swing: 11, elbow: 96, forward: 0.35, hand: 'clasp' },
+  },
+  // Formal: both hands behind the back, so neither reads in front.
+  behind: {
+    near: { swing: -6, elbow: 84, forward: -0.35, hand: 'hidden' },
+    far: { swing: -5, elbow: 80, forward: -0.35, hand: 'hidden' },
+  },
+  // Confident: one hand on the hip, the other hanging.
+  hip: {
+    near: { swing: 26, elbow: 88, forward: 0.15, hand: 'grip' },
+    far: rest(),
+  },
+};
+
+function restingArms(
+  fp: FramePose, extras: SpriteExtras, clasped: boolean
+): { near: ArmPose; far: ArmPose } {
+  const isRest = (a: ArmPose) => a.swing < 20 && a.forward < 0.3;
+  const idle = isRest(fp.posture.arms.near) && isRest(fp.posture.arms.far)
+    // A frame that places its feet is doing something, whatever its arms say —
+    // a stride with its hands folded across the chest is a person being wheeled
+    // about. Temperament yields to action.
+    && fp.posture.legs.near.step === 0 && fp.posture.legs.far.step === 0
+    && fp.posture.drop === 0 && fp.posture.shoulderLift === 0;
+  // The garment can still insist: a clasped-rest robe overrides a hanging one.
+  const stance: RestStance = !idle ? 'hang'
+    : extras.stance !== 'hang' ? extras.stance
+    : clasped ? 'clasp' : 'hang';
+  if (stance === 'hang') return { near: fp.posture.arms.near, far: fp.posture.arms.far };
+  return STANCES[stance];
+}
+
+/**
  * The spine fold. Unlike the old raster shear this runs *before* anything is
  * drawn: it moves the skeleton's own landmarks, so limbs and head are built
  * in their folded positions and the silhouette stays a body.
  */
 function foldSpine(s: Skeleton, posture: Posture): Skeleton {
-  if (posture.spineBend === 0 && posture.lean === 0 && posture.bob === 0) return s;
+  const still = posture.spineBend === 0 && posture.lean === 0 && posture.bob === 0
+    && posture.drop === 0 && posture.shoulderLift === 0;
+  if (still) return s;
   // Every authored angle rides `motionScale`, so the whole animation set can be
   // damped or exaggerated from one slider without re-authoring a frame.
   const a = posture.spineBend * s.t.motionScale * RAD;
@@ -2237,17 +3148,28 @@ function foldSpine(s: Skeleton, posture: Posture): Skeleton {
   // which is most of why the deep bow reads as wrong.
   const counter = Math.round(carry * s.t.headCounter);
   const headCarry = carry - counter + Math.round(posture.headNod * s.t.motionScale);
+  // The squat. Everything from the hips up comes down together and the feet
+  // stay where they are — `legChain` folds the knees to make up the
+  // difference, which is why a crouch needs no leg numbers at all.
+  const drop = Math.round(posture.drop * s.t.motionScale);
+  // A shrug raises the shoulders toward a head that does not move, so the neck
+  // shortens. Applied *after* the drop, because a person can shrug while
+  // crouching and the two are independent.
+  const lift = Math.round(posture.shoulderLift * s.t.motionScale);
+  const upper = settle + posture.bob + drop;
   return {
     ...s,
     headCx: s.headCx + headCarry + posture.lean,
     faceCx: s.faceCx + headCarry + posture.lean,
     cx: s.cx + Math.round(posture.lean * 0.3),
-    crownY: s.crownY + settle + posture.bob,
-    eyeY: s.eyeY + settle + posture.bob,
-    chinY: s.chinY + settle + posture.bob,
-    neckTopY: s.neckTopY + settle + posture.bob,
-    shoulderY: s.shoulderY + Math.round(settle * 0.7) + posture.bob,
-    chestY: s.chestY + Math.round(settle * 0.5) + posture.bob,
+    crownY: s.crownY + upper,
+    eyeY: s.eyeY + upper,
+    chinY: s.chinY + upper,
+    neckTopY: s.neckTopY + upper,
+    shoulderY: s.shoulderY + Math.round(settle * 0.7) + posture.bob + drop - lift,
+    chestY: s.chestY + Math.round(settle * 0.5) + posture.bob + drop - Math.round(lift * 0.5),
+    waistY: s.waistY + drop,
+    hipY: s.hipY + drop,
     stoopTopSkew: s.stoopTopSkew + Math.round(carry * 0.8),
   };
 }
@@ -2263,8 +3185,22 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
   const rig = buildRig(t);
   const L = headLayout(spec, s);
 
+  // Legs are solved once, up front, and shared: the leg, the shoe on it and
+  // the shadow under it must all agree about where the ankle is, and the only
+  // way to guarantee that is for each to read the same chain rather than
+  // recomputing a foot position of its own.
+  const legs = planLegs(s, base, fp.posture);
+
   // The ground first: it lives behind everything and never touches the figure.
-  groundShadow(raster, s.cx, base.floorY + 2, s.hipHalf + t.strideX, t.groundShadow);
+  // It spans the *feet*, so a figure mid-stride casts a long shadow and one
+  // standing casts a compact one — a stride whose shadow does not move is the
+  // cue that gives away a translated sprite even when the legs are right.
+  const footL = Math.min(legs.near.ankle[0], legs.far.ankle[0]);
+  const footR = Math.max(legs.near.ankle[0], legs.far.ankle[0]);
+  groundShadow(
+    raster, Math.round((footL + footR) / 2), base.floorY + 2,
+    s.hipHalf + t.strideX + Math.round((footR - footL) / 2), t.groundShadow,
+  );
 
   // Hair behind the skull.
   const hair = buildHair(spec, L);
@@ -2305,37 +3241,7 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
   // The character's own way of standing, from their personality vector. Only
   // applied when the frame is a *resting* one — a bow or a reach has already
   // said what the arms are doing and must not be overridden by temperament.
-  const STANCES: Record<Exclude<RestStance, 'hang'>, { near: ArmPose; far: ArmPose }> = {
-    // Guarded: forearms across the chest, the near one laid over the far.
-    fold: {
-      near: { swing: 16, elbow: 112, forward: 0.42, hand: 'clasp' },
-      far: { swing: 14, elbow: 104, forward: 0.30, hand: 'hidden' },
-    },
-    // Composed: hands together at the waist.
-    clasp: {
-      near: { swing: 11, elbow: 96, forward: 0.35, hand: 'clasp' },
-      far: { swing: 11, elbow: 96, forward: 0.35, hand: 'clasp' },
-    },
-    // Formal: both hands behind the back, so neither reads in front.
-    behind: {
-      near: { swing: -6, elbow: 84, forward: -0.35, hand: 'hidden' },
-      far: { swing: -5, elbow: 80, forward: -0.35, hand: 'hidden' },
-    },
-    // Confident: one hand on the hip, the other hanging.
-    hip: {
-      near: { swing: 26, elbow: 88, forward: 0.15, hand: 'grip' },
-      far: rest(),
-    },
-  };
-  const resting = (a: ArmPose) => a.swing < 20 && a.forward < 0.3;
-  const idle = resting(fp.posture.arms.near) && resting(fp.posture.arms.far);
-  // The garment can still insist: a clasped-rest robe overrides a hanging one.
-  const stance: RestStance = !idle ? 'hang'
-    : extras.stance !== 'hang' ? extras.stance
-    : plan.clasped ? 'clasp' : 'hang';
-  const chosen = stance === 'hang' ? null : STANCES[stance];
-  const nearArm = chosen ? chosen.near : fp.posture.arms.near;
-  const farArm = chosen ? chosen.far : fp.posture.arms.far;
+  const { near: nearArm, far: farArm } = restingArms(fp, extras, plan.clasped);
   // Which arm is which is the skeleton's call, not a literal — the figure's
   // orientation lives in one place and everything else asks it.
   const nearSide = s.nearSide;
@@ -2346,11 +3252,11 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
   // A resting far arm lives behind the torso; an acting one crosses in front
   // of it — so the draw order follows the pose, and a reaching arm shows its
   // whole length instead of a forearm sprouting from the coat.
-  const farActs = !resting(farArm);
+  const farActs = !(farArm.swing < 20 && farArm.forward < 0.3);
   if (!farActs) drawArm(raster, form, spec, ramps, s, plan, farSide, farArm, farChain, DEPTH.farArm, extras);
 
-  drawLegs(raster, form, ramps, s, extras, plan);
-  drawFeet(raster, form, ramps, s, extras);
+  drawLegs(raster, form, ramps, s, extras, plan, legs);
+  drawFeet(raster, form, ramps, s, extras, legs);
   // The body under the clothes.
   //
   // Only drawn where a construction actually leaves skin — a bare chest above
@@ -2359,7 +3265,7 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
   // a cropped blouse cut a window straight through the figure to the
   // background, because the torso mask and the garment were the same mask.
   if (plan.shape.bareChest || plan.shape.bareMidriff) {
-    drawBareTorso(raster, form, ramps, s, plan);
+    drawBareTorso(raster, form, ramps, s, plan, spec);
   }
   const bodyM = drawTorso(raster, form, spec, ramps, s, plan);
   drawOverLayer(raster, form, spec, ramps, s, plan, bodyM);
@@ -2369,10 +3275,40 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
   drawArm(raster, form, spec, ramps, s, plan, nearSide, nearArm, nearChain, DEPTH.nearArm, extras);
 
   // Neck, then head, then the face on it.
+  //
+  // The head mask is built first because the neck has to be measured against
+  // it. Drawn as a straight column — which is what this was — the neck is wider
+  // than the jaw it meets: eleven pixels against a chin of eight. So the
+  // outline of the lower face is the neck's own parallel sides, the skull's
+  // taper never appears, and every figure ends in a box. That, and not the
+  // shape of the jaw, is why sprite chins read as flat and square; the jaw
+  // itself has been the bust's for as long as the two have shared a profile.
+  const headM = headMask(spec, L);
+  const headHalfAt = (y: number): number => {
+    if (y < L.crownY || y > L.chinY) return -1;
+    let n = 0;
+    for (let x = 0; x < SPRITE_W; x += 1) if (headM[y * SPRITE_W + x]) n += 1;
+    return n > 0 ? Math.floor((n - 1) / 2) : -1;
+  };
+
   const neckM = makeMask(SPRITE_W, SPRITE_H);
   const neckHalf = Math.floor(t.neckW / 2);
+  const chinHalf = Math.max(1, headHalfAt(L.chinY));
+  // `t.neckW` stays the neck's width — it is just no longer its width
+  // everywhere. Under the jaw the throat is bounded by the jaw; below the chin
+  // it eases back out to full over four rows, which is a throat widening into
+  // a collar rather than a step.
+  const neckHalfAt = (y: number): number => {
+    const jaw = headHalfAt(y);
+    if (jaw >= 0) return Math.max(1, Math.min(neckHalf, jaw));
+    const u = Math.min(1, Math.max(0, (y - L.chinY) / 4));
+    const eased = u * u * (3 - 2 * u);
+    return Math.max(1, Math.round(chinHalf + (neckHalf - chinHalf) * eased));
+  };
+
   for (let y = s.neckTopY; y <= s.shoulderY + 1; y += 1) {
-    for (let x = s.headCx - neckHalf; x <= s.headCx + neckHalf; x += 1) {
+    const half = neckHalfAt(y);
+    for (let x = s.headCx - half; x <= s.headCx + half; x += 1) {
       if (x < 0 || x >= SPRITE_W) continue;
       neckM[y * SPRITE_W + x] = 1;
       raster.set(x, y, ramps.skin.steps[3], MAT.SKIN, 3);
@@ -2386,12 +3322,12 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
   for (let y = s.neckTopY; y <= s.shoulderY + 1; y += 1) {
     const k = (y - s.neckTopY) / Math.max(1, s.shoulderY + 1 - s.neckTopY);
     const cast = k < 0.35 ? 3 : k < 0.7 ? 2 : 1;
-    for (let x = s.headCx - neckHalf; x <= s.headCx + neckHalf; x += 1) {
+    const half = neckHalfAt(y);
+    for (let x = s.headCx - half; x <= s.headCx + half; x += 1) {
       form.addBias(x, y, cast);
     }
   }
 
-  const headM = headMask(spec, L);
   fillMask(raster, headM, ramps.skin, MAT.SKIN, () => 3);
   headSurface(form, headM, L, DEPTH.head, spec);
   // The face's calibration against the bust lives in `MATERIAL_BIAS`, applied
@@ -2417,6 +3353,9 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
   }
 
   drawJewelry(raster, form, spec, s, L);
+  // Mehndi and arm work, after the arms and hands are on the raster and before
+  // anything is put in them.
+  drawLimbMarkings(raster, spec, ramps, farActs ? [nearChain, farChain] : [nearChain]);
 
   drawHeldItem(raster, form, ramps, extras, s, farActs ? farChain.hand : nearChain.hand);
 
@@ -2476,6 +3415,10 @@ function rotateFallen(stand: Raster): Raster {
 
 export function compileSprite(source: SpriteSource): CompiledSprite {
   const ramps = buildPortraitRamps(source.spec);
+  // Ochre worked through the hair dyes the material, so it belongs to the
+  // palette rather than to a drawing pass — the light resolves hair off the
+  // ramp book, and anything painted onto the pixels is resolved back off.
+  applyHairOchre(source.spec, ramps);
   const cache = new Map<FrameId, Raster>();
   const frame = (id: FrameId): Raster => {
     const hit = cache.get(id);
@@ -2496,3 +3439,44 @@ export function compileSprite(source: SpriteSource): CompiledSprite {
 
 // Kept for the tuner panel, which lists poses by name.
 export const ALL_FRAMES: FrameId[] = [...Object.keys(FRAME_POSES) as FrameId[], 'fallen'];
+
+/**
+ * Where the joints ended up, for a frame that has already been drawn.
+ *
+ * Purely diagnostic — nothing in the app calls it. A rendered figure tells you
+ * *that* an elbow looks wrong and never *where* the renderer thinks the elbow
+ * is, and those are different questions: an arm can read as broken because the
+ * chain is wrong, or because the chain is right and the capsule around it is
+ * not. Overlaying these on a contact sheet separates the two in one glance,
+ * which is worth the small surface of re-running the solve.
+ */
+export interface PoseLandmarks {
+  crown: [number, number];
+  shoulder: [number, number];
+  hipCentre: [number, number];
+  arms: Record<'near' | 'far', ArmChain>;
+  legs: Record<'near' | 'far', LegChain>;
+  floorY: number;
+}
+
+export function poseLandmarks(source: SpriteSource, id: FrameId): PoseLandmarks {
+  const fp = FRAME_POSES[id === 'fallen' ? 'stand' : id];
+  const base = buildSkeleton(source.spec, getTuning());
+  const s = foldSpine(base, fp.posture);
+  const plan = planGarment(source.spec, s, fp.wind, source.extras.worn?.name ?? '');
+  const arms = restingArms(fp, source.extras, plan.clasped);
+  const nearSide = s.nearSide;
+  const farSide = -nearSide as -1 | 1;
+  const legs = planLegs(s, base, fp.posture);
+  return {
+    crown: [s.headCx, s.crownY],
+    shoulder: [s.cx + s.t.torsoSkew + s.stoopTopSkew, s.shoulderY],
+    hipCentre: [s.cx + s.t.hipSkew, s.hipY],
+    arms: {
+      near: armChain(s, nearSide, arms.near, fp.posture.spineBend),
+      far: armChain(s, farSide, arms.far, fp.posture.spineBend),
+    },
+    legs,
+    floorY: base.floorY,
+  };
+}

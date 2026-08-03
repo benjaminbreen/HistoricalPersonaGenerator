@@ -199,6 +199,32 @@ function hairlineAt(context: RenderContext, dx: number, style: StyleProfile): nu
   return withFringe + sweepTilt;
 }
 
+/**
+ * What is left on a balding head: a band round the sides and the back, widest
+ * at the ear and thinning as it climbs toward the temple. Drawn off the
+ * anatomy's own ear line so it follows a small skull and a large one alike.
+ */
+function baldHorseshoe(context: RenderContext): Mask {
+  const { anatomy } = context;
+  const { size, centerX } = anatomy;
+  const m = makeMask(size, size);
+  const top = anatomy.earTopY - 2;
+  const bottom = anatomy.earBottomY;
+  for (let y = top; y <= bottom; y += 1) {
+    if (y < 0 || y >= size) continue;
+    const t = (y - top) / Math.max(1, bottom - top);
+    const half = anatomy.headHalfWidth * (0.99 - t * 0.06);
+    // Only the flanks. The crown is bare, which is the whole point.
+    const inner = half * (0.60 + t * 0.22);
+    for (let x = Math.round(centerX - half); x <= Math.round(centerX + half); x += 1) {
+      if (x < 0 || x >= size) continue;
+      if (Math.abs(x + 0.5 - centerX) < inner) continue;
+      m[y * size + x] = 1;
+    }
+  }
+  return m;
+}
+
 export function computeHairMasks(context: RenderContext): HairMasks {
   const { spec, anatomy } = context;
   const { size, centerX } = anatomy;
@@ -206,16 +232,25 @@ export function computeHairMasks(context: RenderContext): HairMasks {
   const style = styleProfile(spec.hairSilhouette, spec.seed);
   const hairlineY = Math.round(hairlineAt(context, 0, style));
 
-  if (spec.hairLength === 'bald' && spec.recession > 0.85 && spec.hairSilhouette !== 'tonsure') {
-    const empty = makeMask(size, size);
-    return {
-      back: empty,
-      front: makeMask(size, size),
-      overShoulder: makeMask(size, size),
-      braids: makeMask(size, size),
-      knots: makeMask(size, size),
-      hairlineY,
+  if (spec.hairLength === 'bald') {
+    const empty = () => makeMask(size, size);
+    const nothing = {
+      back: empty(), front: empty(), overShoulder: empty(),
+      braids: empty(), knots: empty(), hairlineY,
     };
+    // The one case with genuinely nothing left.
+    if (spec.recession > 0.85 && spec.hairSilhouette !== 'tonsure') return nothing;
+    // Everything else: bald is a **pattern**, not an absence. The horseshoe
+    // above the ears and round the back survives, and a tonsure is that shape
+    // on purpose.
+    //
+    // This used to fall through to the ordinary hair path, where
+    // `LENGTHS.bald` has `crown: 0` and stops at `earTopY` and so produced
+    // almost no pixels at all. The sprite drew the fringe and said in its own
+    // comment that the bust drew it too; the bust did not, and one persona in
+    // eleven came out bald in one picture and haired in the other — the single
+    // largest disagreement between the two views.
+    return { ...nothing, back: baldHorseshoe(context) };
   }
 
   // A gathered arrangement pulls the mass in against the skull and shortens
@@ -315,7 +350,8 @@ export function computeHairMasks(context: RenderContext): HairMasks {
       // Hair that has been gathered back keeps almost none of it, which is what
       // exposes the ears and the line of the jaw — half of why a bound style
       // reads as bound at all.
-      const sideburn = spec.hairLength === 'bald' ? 1 : style.tight ? 0.98 : 0.9;
+      // (`bald` no longer reaches here — it returns its horseshoe above.)
+      const sideburn = style.tight ? 0.98 : 0.9;
       if (t > sideburn) continue;
       if (y > anatomy.chinY) continue;
       faceOpening[y * size + x] = 1;
@@ -813,21 +849,24 @@ function drawStrands(context: RenderContext, mask: Mask): void {
  * around its own centre gives it a lit top-left, a turned edge, and a dark
  * underside, and it detaches from the head immediately.
  */
-function shadeKnots(context: RenderContext, knots: Mask): void {
-  const { raster, ramps, anatomy, spec, book } = context;
-  const { size } = anatomy;
-  if (!knots.some(v => v === 1)) return;
+interface KnotBlob {
+  cells: number[];
+  minX: number; maxX: number; minY: number; maxY: number;
+}
 
-  // Find each knot's own bounding box so several buns each light correctly.
+/**
+ * The separate gathered masses in a knot layer, each with its own extent — a
+ * pair of buns has to light and coil around two centres, not one.
+ */
+function knotBlobs(knots: Mask, size: number, minimumCells = 12): KnotBlob[] {
   const seen = new Uint8Array(knots.length);
-  const noise = makeNoise1D(spec.seed ^ 0x33af);
+  const blobs: KnotBlob[] = [];
 
   for (let sy = 0; sy < size; sy += 1) {
     for (let sx = 0; sx < size; sx += 1) {
       const start = sy * size + sx;
       if (!knots[start] || seen[start]) continue;
 
-      // Flood the connected blob.
       const cells: number[] = [start];
       seen[start] = 1;
       let minX = sx; let maxX = sx; let minY = sy; let maxY = sy;
@@ -850,30 +889,108 @@ function shadeKnots(context: RenderContext, knots: Mask): void {
           cells.push(ni);
         }
       }
-      if (cells.length < 12) continue;
+      if (cells.length < minimumCells) continue;
+      blobs.push({ cells, minX, maxX, minY, maxY });
+    }
+  }
 
-      const cx = (minX + maxX) / 2;
-      const cy = (minY + maxY) / 2;
-      const rx = Math.max(2, (maxX - minX) / 2);
-      const ry = Math.max(2, (maxY - minY) / 2);
-      const shader = ellipsoidShader(cx - rx * 0.28, cy - ry * 0.3, rx * 1.15, ry * 1.15, 1, {
-        base: 3, gain: 6.4, bounce: 0.2, neutral: 0.82,
-      });
+  return blobs;
+}
 
-      for (const i of cells) {
-        const y = Math.floor(i / size);
-        const x = i - y * size;
-        if (raster.matAt(x, y) !== MAT.HAIR) continue;
-        // A wound knot is not smooth: coils catch the light unevenly around it.
-        const coil = noise((x * 0.9 + y * 1.7) * 0.4) * 0.55;
-        const index = Math.max(0, Math.min(6, Math.round(shader(x, y) + coil)));
-        raster.set(x, y, ramps.hair.steps[index], MAT.HAIR, index);
-      }
+function shadeKnots(context: RenderContext, knots: Mask): void {
+  const { raster, ramps, anatomy, spec, book } = context;
+  const { size } = anatomy;
+  if (!knots.some(v => v === 1)) return;
+
+  const noise = makeNoise1D(spec.seed ^ 0x33af);
+
+  for (const blob of knotBlobs(knots, size)) {
+    const { cells, minX, maxX, minY, maxY } = blob;
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    const rx = Math.max(2, (maxX - minX) / 2);
+    const ry = Math.max(2, (maxY - minY) / 2);
+    const shader = ellipsoidShader(cx - rx * 0.28, cy - ry * 0.3, rx * 1.15, ry * 1.15, 1, {
+      base: 3, gain: 6.4, bounce: 0.2, neutral: 0.82,
+    });
+
+    for (const i of cells) {
+      const y = Math.floor(i / size);
+      const x = i - y * size;
+      if (raster.matAt(x, y) !== MAT.HAIR) continue;
+      // A wound knot is not smooth: coils catch the light unevenly around it.
+      const coil = noise((x * 0.9 + y * 1.7) * 0.4) * 0.55;
+      const index = Math.max(0, Math.min(6, Math.round(shader(x, y) + coil)));
+      raster.set(x, y, ramps.hair.steps[index], MAT.HAIR, index);
     }
   }
 
   // The knot sits against the head, so it throws onto whatever is behind it.
   applyContactShadow(raster, knots, book, { dx: 1, dy: 1, strength: 1, depth: 1 });
+}
+
+/**
+ * The seams between the coils of a gathered mass.
+ *
+ * A bun, a top-knot and a piled updo were all one smooth ellipsoid with a
+ * little noise on it, which at this size is a bead of lacquer rather than hair.
+ * They needed exactly what a plait needed and got: the interior has to say what
+ * the outline cannot. A braid gets an alternating diagonal; a wound knot gets
+ * seams running *across* the roll, because that is the direction hair travels
+ * when it is wound rather than crossed.
+ *
+ * Each seam is a trough with a lit ridge on the near side of it — the same rule
+ * the drapery follows, and for the same reason. A dark line on its own is a
+ * scratch on a bun; a dark line with a highlight beside it is two coils.
+ */
+function drawKnotCoils(context: RenderContext, knots: Mask): void {
+  const { raster, anatomy, spec, book } = context;
+  const { size } = anatomy;
+  if (!knots.some(v => v === 1)) return;
+
+  // Its own stream, so adding this does not renumber every later draw.
+  const noise = makeNoise1D(spec.seed ^ 0x5c0d);
+
+  for (const blob of knotBlobs(knots, size, 20)) {
+    const { minX, maxX, minY, maxY } = blob;
+    const width = maxX - minX;
+    const height = maxY - minY;
+    // Seams run across the roll's length: a wide roll is wound left to right,
+    // so its coils stand vertically, and a tall one the other way about.
+    const acrossX = width >= height;
+    const along = acrossX ? width : height;
+    const through = acrossX ? height : width;
+    if (along < 6 || through < 3) continue;
+
+    const count = Math.max(2, Math.min(5, Math.round(along / 4.5)));
+    for (let n = 1; n <= count; n += 1) {
+      // Spaced across the interior, never on the outer edge — a seam on the
+      // silhouette reads as a bite taken out of it.
+      const t = n / (count + 1);
+      const jitter = noise(n * 3.1 + blob.minX * 0.2) * 1.2;
+      const seat = (acrossX ? minX : minY) + t * along + jitter;
+
+      for (let step = 0; step <= through; step += 1) {
+        // Bowed, so the coil wraps the roll instead of cutting it square.
+        const u = through === 0 ? 0 : step / through;
+        const bow = Math.sin(u * Math.PI) * 1.4;
+        const cross = (acrossX ? minY : minX) + step;
+        const line = Math.round(seat + bow);
+        const x = acrossX ? line : cross;
+        const y = acrossX ? cross : line;
+        if (x < 0 || y < 0 || x >= size || y >= size) continue;
+        if (!knots[y * size + x] || raster.matAt(x, y) !== MAT.HAIR) continue;
+
+        raster.shift(x, y, 2, book);
+        // The lit ridge goes on the side the key light is on — up and left.
+        const rx = acrossX ? x - 1 : x;
+        const ry = acrossX ? y : y - 1;
+        if (rx < 0 || ry < 0) continue;
+        if (!knots[ry * size + rx] || raster.matAt(rx, ry) !== MAT.HAIR) continue;
+        raster.shift(rx, ry, -1, book);
+      }
+    }
+  }
 }
 
 /**
@@ -1215,6 +1332,7 @@ export function drawHairFront(context: RenderContext, masks: HairMasks): void {
   // Knots are shaded after the cap, not before it: the cap is drawn over
   // anything they share, so shading them any earlier gets painted away.
   shadeKnots(context, masks.knots);
+  drawKnotCoils(context, masks.knots);
   seatKnots(context, masks);
   drawShavedStubble(context);
 

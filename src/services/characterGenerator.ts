@@ -8,6 +8,7 @@ import { parseDateString } from '../utils/dateUtils';
 import { createItemInstance, addItemToInventory, assembleStartingPackage } from '../utils/inventoryUtils';
 import { ValueNoise } from '../utils/noise';
 import { generateBaseProfile, determineSocialRole, generateNpcName, generateNpcNameDetailed, assignBeliefs, generateClothingPalette, generateCompleteOutfit, generateCulturalAppearance, adjustPersonalityForProfession, validateCharacterCoherence, hashSeed } from '../generation/common/npcUtils';
+import { featuresFor, hasAncestryOverride } from '../constants/characterData/ancestryAppearance';
 import { mapLocationToCulture } from '../utils/mapUtils';
 import { hexToColorName } from '../utils/colorUtils';
 import { COLOR_WORDS, hasIntrinsicColor, nameForHex } from '../constants/gameData/colorNames';
@@ -1420,7 +1421,28 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             }
         }
     }
-    
+
+    // The lower half, where the outfit has one of its own.
+    //
+    // `createItemInstance` only knows the base ids that exist in the item
+    // tables, and most trousers do not — so this quietly does nothing for the
+    // majority and the renderers read `appearance.legwear` instead, the same
+    // way they fall back to `appearance.garment` when there is no torso item.
+    // Equipping it where the id *does* exist keeps the equipment panel and the
+    // picture telling the same story.
+    if (!equippedItems.legs && baseProfile.appearance.legwear
+        && !/^(none|bare)$/i.test(baseProfile.appearance.legwear.name)) {
+        const legwearBaseId = baseProfile.appearance.legwear.name.toUpperCase().replace(/ /g, '_');
+        const legItem = createItemInstance(legwearBaseId);
+        if (legItem && legItem.equipmentSlot === 'legs') {
+            if (baseProfile.appearance.legwear.material) {
+                legItem.material = baseProfile.appearance.legwear.material;
+            }
+            equippedItems.legs = legItem;
+            devLog('[CharGen] Created legs item from appearance:', legwearBaseId, '→', legItem.name);
+        }
+    }
+
     if (!equippedItems.feet && baseProfile.appearance.footwear && 
         baseProfile.appearance.footwear.name !== 'None' && 
         baseProfile.appearance.footwear.name !== 'none' &&
@@ -1560,7 +1582,14 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
                 adjectives: baseProfile.appearance.garment?.adjectives,
             }
             : baseProfile.appearance.garment,
-        headgear: equippedItems.head 
+        legwear: equippedItems.legs
+            ? {
+                name: equippedItems.legs.name,
+                material: equippedItems.legs.material || 'cloth',
+                adjectives: baseProfile.appearance.legwear?.adjectives,
+            }
+            : baseProfile.appearance.legwear,
+        headgear: equippedItems.head
             ? { name: equippedItems.head.name, material: equippedItems.head.material || 'cloth' } 
             : professionHeadgear,
         footwear: equippedItems.feet 
@@ -1687,6 +1716,41 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
           jewelry: ornament,
         };
       }
+    }
+
+    // --- Ancestry, where it differs from the place. ------------------------
+    //
+    // The naming layer has known about the African diaspora for a long time —
+    // `AFRICAN_AMERICAN` is dated from 1619, `AFRO_BRAZILIAN` from 1540, and
+    // both are wired into the Chesapeake, the Carolinas, Louisiana, Cuba,
+    // Haiti, Puerto Rico and the Brazilian coast with the right date bounds.
+    // Appearance never heard about any of it: `generateFacialFeatures` takes a
+    // cultural zone, and the zone for every one of those places is
+    // `NORTH_AMERICAN_COLONIAL` or `SOUTH_AMERICAN`. So the generator would
+    // name a woman from the African American set, put her on a Virginia
+    // plantation in 1750, and draw her with straight hair and fair skin.
+    //
+    // It runs here rather than inside `generateBaseProfile` because that is
+    // where the name is: the profile is built at the top of this function and
+    // the name several hundred lines later, and the two must not disagree
+    // about who the persona is. Deriving the features *from* the resolved name
+    // key makes them agree by construction. Its own noise stream, so nothing
+    // upstream shifts.
+    const ancestryKey = generatedName.nameKey || contextualNameKey;
+    if (hasAncestryOverride(ancestryKey)) {
+        const feat = featuresFor(culturalZone, ancestryKey);
+        const aNoise = new ValueNoise(hashSeed(
+            `ancestry|${ancestryKey}|${name}|${dateInfo.year}|${culturalZone}`
+        ));
+        const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(aNoise.random() * arr.length)];
+        (partialCharacter as any).appearance = {
+            ...(partialCharacter as any).appearance,
+            hairTexture: pick(feat.hairTexture),
+            noseShape: pick(feat.noseShape),
+            eyeShape: pick(feat.eyeShape),
+            cheekbones: pick(feat.cheekbones),
+            skinTone: pick(feat.skinTone),
+        };
     }
 
     const characterWithAttributes = { ...partialCharacter, attributes };

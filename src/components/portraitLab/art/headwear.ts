@@ -17,7 +17,10 @@ import {
 import { makeNoise1D, makeNoise2D, makeRng } from '../core/rng';
 import { RenderContext, withRaster } from '../render/context';
 import { drawOrnaments } from './ornaments';
-import { CONICAL_HAT_PATTERN, HeadwearKind, WOVEN_HAT_PATTERN } from '../spec/types';
+import {
+  CONICAL_HAT_PATTERN, CONICAL_ZONES, HeadwearKind, WOVEN_HAT_PATTERN,
+} from '../spec/types';
+import { PEAKED_CAP, PeakedForm, peakedFormFor, veilFormFor, wrapFormFor } from '../spec/headwearForm';
 
 /**
  * The part of the face a covering must leave clear. A coif, a veil, or a
@@ -371,9 +374,6 @@ function applyFur(context: RenderContext, mask: Mask): Mask {
  * jutting forward, a disc slumped to one side, a flat truncated top, a curved
  * bill. Those moves are cheap and they are the entire recognition.
  */
-// Gandhi's cap is deliberately absent: it is a brimless boat-shaped khadi cap
-// and giving it a peak turns a piece of political dress into a workman's cap.
-const PEAKED_CAP = /newsboy|flat cap|cheese-cutter|baker ?boy|baseball|ball cap|snapback|trucker|mao cap|zhongshan cap|visor|official cap|guan cap|service cap|peaked cap|kepi|conductor|engineer cap/i;
 const BERET = /beret|tam|balmoral/i;
 const FEZ = /fez|tarboosh|kufi|taqiyah|kofia|topi|songkok/i;
 const PILLBOX = /pillbox|toque/i;
@@ -393,15 +393,8 @@ const PILLBOX = /pillbox|toque/i;
  * and a short flat visor. A **visor** has no crown at all, which is why it used
  * to be the worst of them: routed through the brimmed hat it came out a bowler.
  */
-type PeakedForm = 'newsboy' | 'flat' | 'ball' | 'service' | 'visor';
-
-function peakedFormFor(name: string): PeakedForm {
-  if (/visor/i.test(name)) return 'visor';
-  if (/baseball|ball cap|snapback|trucker/i.test(name)) return 'ball';
-  if (/mao|zhongshan|official|guan|service|kepi|conductor|engineer|peaked cap/i.test(name)) return 'service';
-  if (/newsboy|baker ?boy|cheese-cutter|eight.?panel/i.test(name)) return 'newsboy';
-  return 'flat';
-}
+// `PeakedForm` and its classifier live in `spec/headwearForm.ts`, so the sprite
+// reaches the same verdict about the same hat. See the note there.
 
 /**
  * The peak itself: a stiff shelf thrown forward over the brow.
@@ -1184,7 +1177,8 @@ interface WovenHatProfile {
   frayed: boolean;
 }
 
-const CONICAL_ZONES = new Set(['EAST_ASIAN', 'SOUTH_ASIAN', 'OCEANIA']);
+// `CONICAL_ZONES` now lives in `spec/types.ts` beside the two patterns it is
+// always used with, so the sprite can reach the same verdict about the same hat.
 
 /** Broad and low, or steep and narrow — the local answer. */
 function wovenHatProfile(context: RenderContext, conical: boolean): WovenHatProfile {
@@ -1612,16 +1606,8 @@ function drawBrimmedHat(context: RenderContext): Mask {
  * keffiyeh is not tied at all but laid square over the head and held by a cord.
  * Drawing the act is what tells them apart.
  */
-type WrapForm = 'turban' | 'safa' | 'gele' | 'keffiyeh' | 'kerchief' | 'headcloth';
-
-function wrapFormFor(text: string): WrapForm {
-  if (/safa|peta|kalgi|pagri/i.test(text)) return 'safa';
-  if (/turban/i.test(text)) return 'turban';
-  if (/gele|aso ?oke|ankara|duku|doek|dhuku/i.test(text)) return 'gele';
-  if (/keffiyeh|shemagh|kufiya|ghutra|agal/i.test(text)) return 'keffiyeh';
-  if (/kerchief|scarf|babushka|tignon|head tie|fichu/i.test(text)) return 'kerchief';
-  return 'headcloth';
-}
+// `WrapForm` and `wrapFormFor` now live in `spec/headwearForm.ts`, so the
+// sprite reaches the same verdict about the same wrap.
 
 function drawWrappedCloth(context: RenderContext): Mask {
   const { spec } = context;
@@ -1966,14 +1952,7 @@ function drawHeadcloth(context: RenderContext): Mask {
  * hole than thread. Only the last of them — the wimple, the chador, the nun's
  * veil — is the enclosing sheet that all four used to be drawn as.
  */
-type VeilForm = 'draped' | 'wrapped' | 'mantilla' | 'enveloping';
-
-function veilFormFor(text: string): VeilForm {
-  if (/dupatta|odhani|orna|chunni|chunari|bridal veil/i.test(text)) return 'draped';
-  if (/mantilla|lace/i.test(text)) return 'mantilla';
-  if (/hijab|khimar|shayla|amira|head ?scarf/i.test(text)) return 'wrapped';
-  return 'enveloping';
-}
+// `VeilForm` and `veilFormFor` now live in `spec/headwearForm.ts`.
 
 /** Cloth thin enough to read what is behind it, named as such in the fibre. */
 function isSheerCloth(text: string): boolean {

@@ -10,14 +10,15 @@ export const ADJACENCIES: Record<string, AdjacencyData> = {
   "London": { N: "York", S: "Cliffs of Dover", E: "Thames Estuary", W: "Oxfordshire" },
   "Edinburgh": { N: "LIMINAL_NORTH_ATLANTIC_CROSSING", S: "Hadrian's Wall", E: "North Sea", W: "Irish Sea" },
   "Leinster Plain": { N: "Irish Sea", S: "Irish Sea", E: "Irish Sea", W: "LIMINAL_ATLANTIC_TO_AMERICAS" },
-  "York": { N: "Hadrian's Wall", S: "London", E: "Thames Estuary", W: "Irish Sea" },
+  "York": { N: "Hadrian's Wall", S: "London", E: "Thames Estuary", W: "Mersey Basin" },
+  "Mersey Basin": { N: "Hadrian's Wall", S: "Oxfordshire", E: "York", W: "Irish Sea" },
   "Hadrian's Wall": { N: "Edinburgh", S: "York", E: "North Sea", W: "Irish Sea" },
   "Thames Estuary": { N: "York", S: "English Channel", E: "North Sea", W: "London" },
   "Oxfordshire": { N: "York", S: "London", E: "London", W: "Irish Sea" },
    "Cliffs of Dover": { N: "London", E: "Thames Estuary", S: "English Channel", W: "English Channel"  },
   
   // British Waters
-  "Irish Sea": { N: "Edinburgh", S: "Leinster Plain", E: "York", W: "LIMINAL_ATLANTIC_TO_AMERICAS" },
+  "Irish Sea": { N: "Edinburgh", S: "Leinster Plain", E: "Mersey Basin", W: "LIMINAL_ATLANTIC_TO_AMERICAS" },
   "North Sea": { N: "Norwegian Fjords", S: "English Channel", E: "Hamburg Coast", W: "Thames Estuary" },
   "English Channel": { N: "Cliffs of Dover", S: "Normandy", E: "Rhine-Meuse Delta", W: "Bay of Biscay" },
 
@@ -69,7 +70,8 @@ export const ADJACENCIES: Record<string, AdjacencyData> = {
 "Carpathian Foothills": { N: "Danube Bend", S: "Thracian Plain", E: "Dnieper River Valley", W: "Moravian Gate" },
 "Vienna Basin": { N: "Bohemian Plateau", S: "Danube Bend", E: "Carpathian Ridge", W: "Bavarian Highlands" },
 "Moravian Gate": { N: "Tatra Mountains", S: "Vienna Basin", E: "Carpathian Foothills", W: "Bohemian Plateau" },
-"Tatra Mountains": { N: "Novgorod Woods", S: "Carpathian Foothills", W: "Moravian Gate", E: "Carpathian Ridge" },
+"Tatra Mountains": { N: "Vistula Plain", S: "Carpathian Foothills", W: "Moravian Gate", E: "Carpathian Ridge" },
+"Vistula Plain": { N: "Baltic Sea", S: "Tatra Mountains", E: "Dnieper River Valley", W: "Brandenburg Plain" },
 
 // Balkans
 "Dinaric Alps": { N: "Danube Bend", S: "Pindus Mountains", E: "Vardar Valley", W: "Dalmatian Coast" },
@@ -113,7 +115,8 @@ export const ADJACENCIES: Record<string, AdjacencyData> = {
   "Crete": { N: "Peloponnesian Hills", E: "Cyprus", S: "Alexandria Coast", W: "Aegean Sea" },
   "Cyprus": { N: "Cilician Plain", S: "Levantine Coast", E: "Levantine Coast", W: "Crete" },
   "Sicily": { N: "Tyrrhenian Sea", S: "Tunisian Sahel", E: "Eastern Mediterranean", W: "Western Mediterranean" },
-  "Delos Archipelago": { W: "Athens Basin", E: "Cilician Plain", N: "Thessalian Plain", S: "Aegean Sea" },
+  "Delos Archipelago": { W: "Athens Basin", E: "Dodecanese", N: "Thessalian Plain", S: "Aegean Sea" },
+  "Dodecanese": { W: "Delos Archipelago", E: "Cilician Plain", N: "Aegean Sea", S: "Crete" },
   "Mount Olympus": { S: "Thessalian Plain", N: "Thracian Plain", E: "Vardar Valley", W: "Pindus Mountains" },
   "Thessalian Plain": { N: "Mount Olympus", S: "Athens Basin", E: "Delos Archipelago", W: "Pindus Mountains" },
 
@@ -193,14 +196,16 @@ export const ADJACENCIES: Record<string, AdjacencyData> = {
   // === EAST ASIA - JAPAN ===
   "Kyoto Basin": { N: "Tohoku Hills", S: "Nara Uplands", E: "Edo Plain", W: "Sea of Japan" },
   "Edo Plain": { N: "Tohoku Hills", S: "Mount Fuji Region", W: "Kyoto Basin", E: "LIMINAL_PACIFIC_TO_NORTH_AMERICA" },
-  "Inland Sea Coast": { N: "Tohoku Hills", S: "Nara Uplands", E: "Kyoto Basin", W: "East China Sea" },
+  "Inland Sea Coast": { N: "Tohoku Hills", S: "Nara Uplands", E: "Kyoto Basin", W: "Kyushu" },
+  "Kyushu": { N: "Yellow Sea", S: "East China Sea", E: "Inland Sea Coast", W: "East China Sea" },
   "Mount Fuji Region": { N: "Edo Plain", S: "Nara Uplands", E: "LIMINAL_PACIFIC_TO_NORTH_AMERICA", W: "Inland Sea Coast" },
   "Tohoku Hills": { N: "Sakhalin Island", S: "Kyoto Basin", E: "LIMINAL_PACIFIC_TO_NORTH_AMERICA", W: "Sea of Japan" },
   "Nara Uplands": { N: "Kyoto Basin", S: "Ryukyu Islands", E: "Mount Fuji Region", W: "Inland Sea Coast" },
 
   // === EAST ASIA - KOREA ===
   "Han River Valley": { N: "Baekdu Mountain Zone", S: "Busan Coast", E: "Sea of Japan", W: "Yellow Sea" },
-  "Kaesong Foothills": { N: "Baekdu Mountain Zone", S: "Gyeongju Basin", E: "Han River Valley", W: "Manchurian Plain" },
+  "Kaesong Foothills": { N: "Taedong Basin", S: "Gyeongju Basin", E: "Han River Valley", W: "Yellow Sea" },
+  "Taedong Basin": { N: "Baekdu Mountain Zone", S: "Kaesong Foothills", E: "Baekdu Mountain Zone", W: "Yellow Sea" },
   "Gyeongju Basin": { N: "Kaesong Foothills", S: "Jeolla Highlands", E: "Busan Coast", W: "Yellow Sea" },
   "Jeolla Highlands": { N: "Gyeongju Basin", S: "Busan Coast", E: "Busan Coast", W: "Yellow Sea" },
   "Baekdu Mountain Zone": { N: "Manchurian Plain", S: "Han River Valley", E: "Sea of Japan", W: "Beijing Basin" },
@@ -798,7 +803,8 @@ export const ADJACENCIES: Record<string, AdjacencyData> = {
   "Sepik River Basin": { S: "Highlands of Papua", E: "Coral Sea Coast", W: "Spice Islands", N: "Caroline Islands" },
   "Highlands of Papua": { N: "Sepik River Basin", S: "Kokoda Plateau", E: "Coral Sea Coast", W: "Spice Islands" },
   "Bismarck Archipelago": { S: "Highlands of Papua", E: "Solomon Islands Chain", W: "Sepik River Basin" },
-  "Solomon Islands Chain": { W: "Bismarck Archipelago", S: "Coral Sea Coast", E: "Society Islands" },
+  "Solomon Islands Chain": { W: "Bismarck Archipelago", S: "Coral Sea Coast", E: "Fiji Islands" },
+  "Fiji Islands": { W: "Solomon Islands Chain", E: "Tonga Ridge", N: "Gilbert Islands", S: "New Caledonia" },
   "Coral Sea Coast": { N: "Sepik River Basin", S: "Great Barrier Reef Coast", W: "Highlands of Papua", E: "Solomon Islands Chain" },
   "Kokoda Plateau": { N: "Highlands of Papua", S: "Torres Strait", E: "Coral Sea Coast" },
 

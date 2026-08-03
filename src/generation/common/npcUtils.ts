@@ -26,12 +26,16 @@ import { createHistoricalContext } from '../../services/historicalContextService
 import { getProfessionSelectionWeight, isProfessionHistoricallyAvailable, textureBudget } from '../../services/professionAvailabilityService';
 import { isMaterialAvailable } from '../../services/demographyService';
 import { filterNameKeys, resolveNameKey } from '../../constants/characterData/nameSetEras';
+import { featuresFor } from '../../constants/characterData/ancestryAppearance';
 import { FormattedName, formatPersonalName } from '../../constants/characterData/nameConventions';
 import { generateDeepTimeAmericanName } from '../../constants/characterData/deepTimeAmericanNames';
 import { genderAccessWeight } from '../../services/genderedLaborService';
 import { COLD_WEATHER_FALLBACK, ThermalNeed, thermalScore } from '../../services/climateService';
 import { getZoneReligionFallback, isReligionHistoricallyAvailable } from '../../services/religionFallbackService';
 import { filterByCulture, resolveCulture } from '../../services/cultureResolution';
+import {
+    garmentLayerFor, leavesChestBare, readGarmentPair, TWO_PIECE_ERAS,
+} from '../../components/portraitLab/spec/garmentLayers';
 import type { HistoricalContext } from '../../types/historicalContext';
 import { random as seededRandom } from '../../utils/seededRandom';
 import { devLog } from '../../utils/devLog';
@@ -216,6 +220,55 @@ function pickWeightedNameKey(
 }
 
 // Enhanced name generation with fallbacks and region/year specificity
+/**
+ * Who is actually in the Americas, for the regions the name mapping does not
+ * name individually.
+ *
+ * Weighted to the modern populations these zones mostly draw from — the United
+ * States is about 13% Black and Brazil, which is over half of South America's
+ * population, is more than half Afro-descended. The zone key is kept in the mix
+ * rather than replaced, so this shifts the odds without excluding anybody.
+ */
+const ZONE_ANCESTRY_MIX: Record<string, Array<{ from: number; mix: Record<string, number> }>> = {
+    // Two eras, because the mechanism changes at abolition. While slavery is
+    // legal `populationStrata.ts` produces the enslaved and names them through
+    // their ancestry, so this path carries only the free population of colour;
+    // once it is over the strata stop applying and this becomes the whole
+    // mechanism. Ignoring that split double-counted, and left 54% of
+    // Afro-descended personas in the plantation centuries generated as free.
+    NORTH_AMERICAN_COLONIAL: [
+        { from: 1500, mix: { NORTH_AMERICAN_COLONIAL: 0.96, AFRICAN_AMERICAN: 0.04 } },
+        { from: 1865, mix: { NORTH_AMERICAN_COLONIAL: 0.86, AFRICAN_AMERICAN: 0.14 } },
+    ],
+    SOUTH_AMERICAN: [
+        { from: 1500, mix: { SOUTH_AMERICAN: 0.88, AFRO_BRAZILIAN: 0.12 } },
+        { from: 1888, mix: { SOUTH_AMERICAN: 0.72, AFRO_BRAZILIAN: 0.28 } },
+    ],
+};
+
+/**
+ * Hispanic North America, which is in the `NORTH_AMERICAN_COLONIAL` zone and
+ * has nothing to do with the anglophone diaspora.
+ *
+ * Mexico's Afro-descended population is real and was substantial — the Costa
+ * Chica and the Veracruz lowlands especially — but they were baptised into
+ * Spanish names, and this mix would have handed them `AFRICAN_AMERICAN`. A
+ * persona in the Valley of Mexico in 1876 came out called John Jackson.
+ */
+const HISPANIC_NORTH_AMERICA =
+    /\b(mexico|texcoco|yucatan|oaxaca|chiapas|guatemala|honduras|nicaragua|costa rica|panama|salvador|central america|new spain|sonora|sinaloa|zacatecas|michoacan|puebla|veracruz)\b/;
+
+/** The latest mix whose start year this persona is past. */
+function zoneAncestryMix(zone: string, year: number, place = ''): Record<string, number> | undefined {
+    const normalized = place.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (HISPANIC_NORTH_AMERICA.test(normalized)) return undefined;
+    const rules = ZONE_ANCESTRY_MIX[zone];
+    if (!rules) return undefined;
+    let chosen: Record<string, number> | undefined;
+    for (const rule of rules) if (year >= rule.from) chosen = rule.mix;
+    return chosen;
+}
+
 export function generateNpcName(
     gender: Gender,
     culturalZone: CulturalZone,
@@ -409,6 +462,22 @@ export function generateNpcNameDetailed(
                     // Default to generic East Asian if no specific match
                     nameKeyToUse = culturalZone;
                 }
+            } else if (zoneAncestryMix(culturalZone, year, `${region ?? ''} ${options.location ?? ''}`)) {
+                // The settler societies, where the zone key alone erases people.
+                //
+                // Most local areas are not in `REGION_NAME_MAPPING` — Cape Cod,
+                // Puget Sound, the Ozark Plateau — so they land here, and here
+                // used to hand back the bare zone key. For North America that
+                // key lapses at 1840 and falls forward to
+                // `NORTH_AMERICAN_MODERN`, whose given names are white US
+                // census names of about 1900. The result was that every
+                // unmapped place in the Americas after 1840 generated nobody of
+                // African descent at all, in countries that are 13% and 50%
+                // African-descended respectively. Measured, it was 47% of every
+                // post-1500 Americas persona routing through that one set.
+                const mix = zoneAncestryMix(culturalZone, year, `${region ?? ''} ${options.location ?? ''}`)!;
+                nameKeyToUse = pickWeightedNameKey(Object.keys(mix), mix, noise);
+                devLog(`[NameGen] Americas zone mix chose: ${nameKeyToUse}`);
             } else {
                 devLog(`[NameGen] Using cultural zone as fallback: ${culturalZone}`);
                 nameKeyToUse = culturalZone;
@@ -693,17 +762,27 @@ export function generateFacialFeatures(
     culturalZone: CulturalZone,
     age: number,
     /** Year and place, so facial hair can follow the fashion of the period. */
-    styleContext?: { year?: number; region?: string; location?: string },
+    styleContext?: { year?: number; region?: string; location?: string; ancestryKey?: string },
 ) {
     const rand = noise.random;
 
     const select = <T,>(arr: readonly T[]): T => arr[Math.floor(rand() * arr.length)];
-    
-    // Some very basic cultural tendencies
+    const ancestryKey = styleContext?.ancestryKey;
+
+    // Cultural tendencies, from `ancestryAppearance.ts`.
+    //
+    // This block used to be four one-off binaries — "East Asian?" for face and
+    // eyes, "MENA?" for nose, "Sub-Saharan African?" for hair — with everyone
+    // outside the named zone drawing from one undifferentiated pool. That made
+    // a West African no likelier to have a broad nose than a Norwegian, and
+    // gave a third of East Asians curly hair. `ancestry` is the persona's
+    // descent where the generator knows it, which after 1500 in the Americas
+    // is not the same question as where they live.
+    const feat = featuresFor(culturalZone, ancestryKey);
     const faceShapes: ('oval' | 'round' | 'square' | 'long' | 'heart' | 'diamond')[] = culturalZone === 'EAST_ASIAN' ? ['round', 'oval', 'heart'] : ['oval', 'square', 'long', 'round', 'diamond'];
-    const eyeShapes: ('almond' | 'round' | 'narrow' | 'wide' | 'hooded')[] = culturalZone === 'EAST_ASIAN' ? ['narrow', 'almond'] : ['almond', 'round', 'wide', 'hooded'];
-    const noseShapes: ('straight' | 'aquiline' | 'broad' | 'button' | 'roman')[] = culturalZone === 'MENA' ? ['aquiline', 'roman', 'straight'] : ['straight', 'broad', 'button', 'roman'];
-    const hairTextures: ('straight' | 'wavy' | 'curly' | 'coily' | 'kinky')[] = culturalZone === 'SUB_SAHARAN_AFRICAN' ? ['coily', 'kinky'] : ['straight', 'wavy', 'curly'];
+    const eyeShapes = feat.eyeShape;
+    const noseShapes = feat.noseShape;
+    const hairTextures = feat.hairTexture;
     const facialHairCtx: FacialHairContext = {
         year: styleContext?.year ?? 1500,
         culturalZone,
@@ -714,11 +793,11 @@ export function generateFacialFeatures(
         faceShape: select(faceShapes),
         eyeShape: select(eyeShapes),
         noseShape: select(noseShapes),
-        cheekbones: select(['average', 'high', 'low'] as const),
+        cheekbones: select(feat.cheekbones),
         jawline: select(gender === 'Male' ? ['sharp', 'square', 'round'] as const : ['soft', 'round', 'oval'] as const),
         hairTexture: select(hairTextures),
         hairLength: generateRealisticHairLength(gender, age, rand),
-        skinTone: select(SKIN_TONE_LABELS[culturalZone] ?? SKIN_TONE_LABELS.DEFAULT),
+        skinTone: select(feat.skinTone),
         skinTexture: select(['smooth', 'freckled', 'weathered', 'rough', 'scarred'] as const),
         eyebrowShape: select(['straight', 'arched', 'rounded', 'angular'] as const),
         eyebrowThickness: select(['thin', 'medium', 'thick', 'bushy'] as const),
@@ -959,6 +1038,8 @@ export function generateCompleteOutfit(
     thermal?: ThermalNeed
 ): {
     garment: ClothingPiece;
+    /** What is on the legs, where that is a separate named garment. */
+    legwear: ClothingPiece;
     headgear: ClothingPiece;
     footwear: ClothingPiece;
     belt: ClothingPiece;
@@ -1332,12 +1413,119 @@ export function generateCompleteOutfit(
         return { name: 'None', material: 'None' };
     };
 
+    const picked = safeGetRandom(filteredGarments, clothingSet.garments, 'garment');
+    const { garment, legwear } = dressBothHalves(picked, filteredGarments, era, gender, wealthLevel);
+
     return {
-        garment: safeGetRandom(filteredGarments, clothingSet.garments, 'garment'),
+        garment,
+        legwear,
         headgear: safeGetRandom(filteredHeadgear, clothingSet.headgear, 'headgear'),
         footwear: safeGetRandom(filteredFootwear, clothingSet.footwear, 'footwear'),
         belt: safeGetRandom(filteredBelts, clothingSet.belts, 'belt'),
         accessory: safeGetRandom(filteredAccessories, clothingSet.accessories, 'accessory'),
+    };
+}
+
+const NO_PIECE: ClothingPiece = { name: 'None', material: 'None' };
+
+/**
+ * Everyday cloth for an invented garment, by how well-off the wearer is.
+ *
+ * Only reached when the pool genuinely has no partner in it — a modern European
+ * wealthy man is offered a designer suit and a silk shirt, and if he draws the
+ * shirt there is nothing in the table to put on his legs. Naming the cloth
+ * rather than the cut keeps the invention as small as it can be: the claim is
+ * "trousers, in the sort of cloth this person's clothes are made of", which is
+ * about as safe as a claim about the twentieth century gets.
+ */
+const PLAIN_CLOTH: Record<string, string> = {
+    poor: 'Coarse Cotton',
+    modest: 'Cotton',
+    comfortable: 'Cotton Twill',
+    wealthy: 'Fine Wool',
+    noble: 'Fine Wool',
+};
+
+/**
+ * One garment, two halves of a body.
+ *
+ * The clothing tables write a modern outfit as two entries side by side —
+ * `[T-shirt, Jeans]`, `[Polo Shirt, Chinos]`, `[Blouse, Skirt]` — and the
+ * picker took one and called it dressed. So half the modern population was
+ * generated wearing jeans and no shirt, and the renderers, having one name to
+ * work with, drew it from the shoulders down: a persona whose card read
+ * "Charcoal Chinos" was pictured in a charcoal smock to the calf.
+ *
+ * Three things can happen here, and which one depends on the name:
+ *
+ *   · the name already says both halves — "Frock Coat and Trousers", "Cotton
+ *     Tunic and Trousers", "Western Coat over Dhoti" — and nothing is invented;
+ *   · the name is one half, and the *other half is sitting in the same pool*,
+ *     which is the common case and also invents nothing;
+ *   · the name is one half and the pool has no partner, and only then is a
+ *     plain garment named for the missing one.
+ *
+ * A whole-body garment — a sari, a dress, a suit, an agbada, a hide cloak —
+ * takes none of these branches, so this can never put trousers under a robe.
+ */
+function dressBothHalves(
+    picked: ClothingPiece,
+    pool: ClothingPiece[],
+    era: HistoricalEra,
+    gender: Gender,
+    wealthLevel: WealthLevel,
+): { garment: ClothingPiece; legwear: ClothingPiece } {
+    const pair = readGarmentPair(picked.name);
+
+    // The name carries both halves already: split it, and keep the material.
+    if (pair.top && pair.bottom) {
+        return {
+            garment: { ...picked, name: pair.top },
+            legwear: { name: pair.bottom, material: picked.material },
+        };
+    }
+
+    if (!TWO_PIECE_ERAS.has(String(era))) return { garment: picked, legwear: NO_PIECE };
+    // One garment dresses the whole figure. Nothing to pair it with.
+    if (pair.whole) return { garment: picked, legwear: NO_PIECE };
+
+    // Which partner, when the pool offers more than one, is chosen by hashing
+    // the item that is already settled rather than by drawing from the shared
+    // random stream — see the note on `skirted` below.
+    const partnerIn = (want: 'top' | 'bottom'): ClothingPiece | null => {
+        const found = pool.filter(item => item !== picked && garmentLayerFor(item.name) === want);
+        if (!found.length) return null;
+        return found[hashSeed(`${picked.name}|${want}`) % found.length];
+    };
+
+    const plainCloth = PLAIN_CLOTH[wealthLevel] ?? 'Cotton';
+
+    if (pair.bottom) {
+        // A dhoti, a lungi, a kilt: the chest above it is bare or carries a
+        // loose cloth, and the sprite already draws that figure. Asking for a
+        // shirt here is how a Tamil farmer ends up in a polo neck.
+        if (leavesChestBare(picked.name)) return { garment: picked, legwear: NO_PIECE };
+        return {
+            garment: partnerIn('top')
+                ?? { name: gender === 'Female' ? 'Blouse' : 'Shirt', material: plainCloth },
+            legwear: picked,
+        };
+    }
+
+    const bottom = partnerIn('bottom');
+    if (bottom) return { garment: picked, legwear: bottom };
+
+    // Nothing in the table covers the legs, so name the plainest thing that
+    // could. Which one is not a coin toss taken from the shared random stream —
+    // that would shift every draw downstream of it and fill the golden diffs
+    // with unrelated churn — but a hash of the garment itself, so the same
+    // blouse always comes with the same lower half.
+    const skirted = gender === 'Female'
+        && (era === HistoricalEra.INDUSTRIAL_ERA
+            || (era === HistoricalEra.MODERN_ERA && hashSeed(`${picked.name}${picked.material}`) % 100 < 45));
+    return {
+        garment: picked,
+        legwear: { name: skirted ? 'Skirt' : 'Trousers', material: plainCloth },
     };
 }
 

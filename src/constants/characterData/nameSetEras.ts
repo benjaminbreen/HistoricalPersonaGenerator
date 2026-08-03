@@ -189,6 +189,8 @@ const NAME_SET_EARLIEST: Record<string, number> = {
   JEWISH_ASHKENAZI: 900,
   AFRICAN_AMERICAN: 1619,
   AFRO_BRAZILIAN: 1540,
+  // Africans were being landed in the Spanish Caribbean from the 1510s.
+  AFRO_CARIBBEAN: 1515,
   PUERTO_RICAN: 1500,
   PORTUGUESE_BRAZIL: 1500,
   SPANISH_LATIN_AMERICAN: 1500,
