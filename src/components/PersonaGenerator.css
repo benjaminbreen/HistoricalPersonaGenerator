@@ -977,6 +977,7 @@ body.dark-mode .top-bar {
 .ai-support-overlay {
   background: rgba(30, 22, 18, 0.72);
   backdrop-filter: blur(5px);
+  z-index: 11000;
 }
 
 .ai-support-modal {
@@ -989,12 +990,33 @@ body.dark-mode .top-bar {
 }
 
 .ai-support-hero {
+  position: relative;
   padding: 1.8rem 1.7rem 1.5rem;
   color: white;
   text-align: center;
   background:
     radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.2), transparent 38%),
     linear-gradient(135deg, var(--color-accent-primary), #9c4d38);
+}
+
+.ai-support-close {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  width: 2.15rem;
+  height: 2.15rem;
+  padding: 0;
+  justify-content: center;
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(28, 17, 13, 0.14);
+  color: white;
+}
+
+.ai-support-close:hover,
+.ai-support-close:focus-visible {
+  border-color: white;
+  background: rgba(28, 17, 13, 0.28);
+  color: white;
 }
 
 .ai-support-modal-required .ai-support-hero {
@@ -2089,6 +2111,10 @@ body.dark-mode .top-bar {
 }
 
 /* Donate Modal */
+.donate-support-overlay {
+  z-index: 11000;
+}
+
 .donate-modal {
   max-width: 600px;
 }

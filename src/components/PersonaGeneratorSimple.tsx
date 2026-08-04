@@ -7338,28 +7338,28 @@ export default function PersonaGenerator() {
         </motion.div>
       )}
 
-      {aiGate && !showDonate && (
-        <motion.div
+      {aiGate && !showDonate && createPortal(
+        <div
           className="modal-overlay ai-support-overlay"
           onClick={() => setAiGate(null)}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18 }}
           role="dialog"
           aria-modal="true"
           aria-labelledby="ai-support-modal-title"
           aria-describedby="ai-support-modal-description"
         >
-          <motion.div
+          <div
             className="modal ai-support-modal ai-support-modal-required"
             onClick={(event) => event.stopPropagation()}
-            initial={{ opacity: 0, scale: 0.93, y: 18 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.93, y: 18 }}
-            transition={{ duration: 0.22, ease: [0.2, 0.75, 0.2, 1] }}
           >
             <div className="ai-support-hero">
+              <button
+                type="button"
+                className="modal-close ai-support-close"
+                onClick={() => setAiGate(null)}
+                aria-label="Close supporter access dialog"
+              >
+                <IoClose aria-hidden="true" />
+              </button>
               <span className="ai-support-heart" aria-hidden="true"><IoHeart /></span>
               <span className="ai-support-kicker">Supporter access</span>
               <h2 id="ai-support-modal-title">
@@ -7397,8 +7397,9 @@ export default function PersonaGenerator() {
                 Already donated? Check supporter access
               </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>,
+        document.body
       )}
 
       {costConfirm && !showDonate && (
@@ -7451,25 +7452,17 @@ export default function PersonaGenerator() {
         </motion.div>
       )}
 
-      {showDonate && (
-        <motion.div
-          className="modal-overlay"
+      {showDonate && createPortal(
+        <div
+          className="modal-overlay donate-support-overlay"
           onClick={() => setShowDonate(false)}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
           role="dialog"
           aria-modal="true"
           aria-labelledby="donate-modal-title"
         >
-          <motion.div
+          <div
             className="modal donate-modal"
             onClick={(e) => e.stopPropagation()}
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
           >
           <div className="donate-banner">
             <img
@@ -7545,8 +7538,9 @@ export default function PersonaGenerator() {
               Thank you for your support! Every contribution helps make historical education more accessible.
             </p>
           </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* Family Tree Modal */}
