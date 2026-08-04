@@ -61,143 +61,160 @@ export const buildAnnotationPrompt = (source, options, annotationSchema) => {
   ].filter(Boolean).join('\n');
 };
 
-// A sketch written from the same instructions every time comes out in the same
-// shape every time: a date or an age, the name, a present-tense verb. These
-// helpers turn the record's own temperament and trait fields into register
-// directives, so a terse guarded sitter and a voluble hopeful one do not get
-// the same prose.
-
-const has = (value, ...needles) => {
-  const text = String(value || '').toLowerCase();
-  return needles.some(needle => text.includes(needle));
+const compactText = (value, maxLength = 180) => {
+  if (value === undefined || value === null) return '';
+  const text = String(value).replaceAll('_', ' ').replace(/\s+/g, ' ').trim();
+  if (!text) return '';
+  return text.length <= maxLength ? text : `${text.slice(0, maxLength - 1).trimEnd()}…`;
 };
 
-const pick = list => list[Math.floor(Math.random() * list.length)];
+const compactList = (value, limit = 5) => Array.isArray(value)
+  ? value.slice(0, limit).map(item => compactText(item, 100)).filter(Boolean)
+  : [];
 
-const OPENING_ANGLES = [
-  'a task or object in this person\'s hands',
-  'an obligation to another named person in the household or trade',
-  'a detail of the room, street, workshop, or field at close range',
-  'a constraint they live under: a rule, tax, debt, season, or authority',
-  'an exchange, payment, or bargain',
-  'a habit that structures the day',
-  'something recently lost, changed, or newly required of them',
-];
-
-/**
- * Register directives derived from temperament_and_voice and the Big Five.
- * These govern sentence length, rhythm, and what the prose notices; they are
- * never to be stated outright.
- */
-const voiceDirectives = record => {
-  const voice = record?.persona_seed?.temperament_and_voice || {};
-  const traits = voice.personality_traits || {};
-  const stress = record?.persona_seed?.interaction_style?.under_stress;
-  const directives = [];
-
-  const terse = has(voice.speech_style, 'terse', 'concrete', 'direct', 'earthy')
-    || has(voice.abstraction_level, 'very_concrete')
-    || (typeof traits.extraversion === 'number' && traits.extraversion < 0.4);
-  const voluble = has(voice.speech_style, 'elaborate', 'formal', 'ornate', 'discursive')
-    || (typeof traits.extraversion === 'number' && traits.extraversion > 0.65)
-    || (typeof traits.openness === 'number' && traits.openness > 0.7);
-
-  if (terse && !voluble) {
-    directives.push('Sentences run short and declarative — most under fourteen words, never over twenty, rarely more than one subordinate clause. Plain nouns. No accumulating lyrical lists.');
-  } else if (voluble) {
-    directives.push('Sentences run longer and accumulate clauses, the way a person who likes talking builds an account, with asides folded in. Average around twenty-five words and never exceed forty; still end some sentences early. Because these sentences are long, write no more than six or seven in total across both paragraphs.');
-  } else {
-    directives.push('Vary sentence length deliberately: a sentence of twenty-five or thirty words, then a short one that lands. Nothing over forty; eight to eleven sentences in total.');
-  }
-
-  if (has(voice.dominant_temperament, 'anxious') || (typeof traits.neuroticism === 'number' && traits.neuroticism > 0.65)) {
-    directives.push('The prose keeps checking for what could go wrong: costs, weather, the next demand. Unease sits in what gets noticed, never in the word "anxious".');
-  }
-  if (has(voice.dominant_temperament, 'hopeful')) {
-    directives.push('The prose leans forward — toward what is being built or waited for — without becoming sentimental.');
-  }
-  if (has(voice.dominant_temperament, 'guarded', 'suspicious') || has(voice.how_they_react_to_strangers, 'cautious', 'strategic')) {
-    directives.push('The prose withholds. It states what is done, not what is felt, and treats outsiders as facts to be managed.');
-  }
-  if (has(voice.dominant_temperament, 'dutiful') || (typeof traits.conscientiousness === 'number' && traits.conscientiousness > 0.7)) {
-    directives.push('The prose keeps accounts: what is owed, what is finished, what is due next.');
-  }
-  if (has(voice.dominant_temperament, 'patient') || has(stress, 'enduring')) {
-    directives.push('The rhythm is unhurried. Time is measured in seasons and repetitions rather than events.');
-  }
-  if (typeof traits.agreeableness === 'number' && traits.agreeableness > 0.7) {
-    directives.push('Other people are present in nearly every sentence, named and attended to.');
-  }
-  if (typeof traits.openness === 'number' && traits.openness < 0.35) {
-    directives.push('Stay with the concrete and the local. No speculation about wider worlds or abstract ideas.');
-  }
-
-  if (has(voice.self_narration_style, 'relational')) {
-    directives.push('This person understands their life through who they are to others; let the prose foreground those ties.');
-  } else if (has(voice.self_narration_style, 'fatalistic')) {
-    directives.push('Outcomes arrive from outside — weather, authority, God, luck. The prose does not credit them to planning.');
-  } else if (has(voice.self_narration_style, 'duty_focused')) {
-    directives.push('Obligation, not preference, is the organizing logic of the sketch.');
-  } else if (has(voice.self_narration_style, 'practical')) {
-    directives.push('Method and means come first: how the work is actually done.');
-  }
-
-  return directives;
+const joinDetails = (...values) => {
+  const details = values
+    .flatMap(value => Array.isArray(value) ? value : [value])
+    .map(value => compactText(value))
+    .filter(Boolean);
+  return [...new Set(details)].join('; ');
 };
 
-/**
- * The part of the record a 120–180 word sketch can actually use.
- *
- * The whole record used to go into the prompt, which meant every call paid for
- * the pipeline's own bookkeeping — record and persona uuids, the annotator id
- * and timestamps, the export-target flags, the source's filename and
- * repository. None of it can appear in two paragraphs of prose.
- *
- * What is *kept* is deliberate. `evidence` and `field_evidence` are the largest
- * things here and both survive, because the sketch is asked to distinguish
- * direct evidence from plausible inference, and those two fields are the only
- * places the record says which is which. Cutting them would be the bigger
- * saving and would quietly cost the thing the instruction is asking for.
- */
-export const sketchRecordView = record => {
-  if (!record || typeof record !== 'object') return record;
+export const formatHistoricalYear = value => {
+  const year = Number(value);
+  if (!Number.isFinite(year)) return '';
+  if (year < 0) return `${Math.abs(Math.trunc(year))} BCE`;
+  if (year === 0) return 'the turn of the common era';
+  return String(Math.trunc(year));
+};
+
+/** A small human-readable dossier for the prose model, not a schema dump. */
+export const buildSketchDossier = record => {
+  if (!record || typeof record !== 'object') return '';
+  const seed = record.persona_seed || {};
   const source = record.source || {};
-  return {
-    source: {
-      source_basis: source.source_basis,
-      title: source.title,
-      citation_label: source.citation_label,
-      creator_or_author: source.creator_or_author,
-      source_date: source.source_date,
-      document_genre: source.document_genre,
-    },
-    persona_seed: record.persona_seed,
-    evidence: record.evidence,
-    field_evidence: record.field_evidence,
+  const identity = seed.identity_name || {};
+  const social = seed.social_identity || {};
+  const position = seed.social_position || {};
+  const place = seed.place || {};
+  const work = seed.work || {};
+  const household = seed.household_economy || {};
+  const material = seed.material_life || {};
+  const horizon = seed.mobility_and_horizon || {};
+  const voice = seed.temperament_and_voice || {};
+  const lines = [];
+  const add = (label, ...values) => {
+    const detail = joinDetails(...values);
+    if (detail) lines.push(`${label}: ${detail}`);
   };
+
+  add(
+    'Person',
+    identity.full_name,
+    social.estimated_age !== undefined && social.estimated_age !== null
+      && Number.isFinite(Number(social.estimated_age))
+      ? `${social.estimated_age} years old`
+      : '',
+    social.gender_role,
+    formatHistoricalYear(seed.temporal?.specific_year)
+  );
+  add(
+    'Place',
+    place.settlement_or_locality,
+    place.region,
+    place.polity,
+    place.residence_locale,
+    compactList(place.environment, 3)
+  );
+  add(
+    'Position',
+    position.local_status_detail || social.status_detail || social.status_group,
+    social.legal_condition,
+    social.household_role,
+    position.autonomy,
+    position.economic_security
+  );
+  add(
+    'Work',
+    work.primary_occupation,
+    work.work_rhythm,
+    compactList(work.tools_materials_techniques, 6),
+    work.work_notes
+  );
+  add(
+    'Household and exchange',
+    household.household_composition,
+    household.dependents,
+    compactList(household.income_sources, 4),
+    compactList(household.debts_dues_taxes_or_rents, 4),
+    household.property_relation,
+    household.cash_position,
+    household.economic_notes
+  );
+  add(
+    'Material life',
+    material.dwelling_detail || material.dwelling_type,
+    compactList(material.possessions, 6),
+    material.clothing_detail || material.clothing_level,
+    compactList(material.foods_or_consumables, 5),
+    material.food_security,
+    compactList(material.body_conditions, 4),
+    material.material_notes
+  );
+  add(
+    'Pressures',
+    compactList(place.historical_pressures, 4),
+    (seed.constraint_regimes || []).slice(0, 3).map(item => compactText(item?.detail, 120))
+  );
+  add(
+    'Known world',
+    horizon.knowledge_horizon,
+    horizon.mobility_notes || horizon.mobility,
+    seed.public_world?.detail || seed.public_world?.scale
+  );
+  add(
+    'Belief and obligation',
+    seed.religious_practice?.specific_label,
+    seed.religious_practice?.practice_context,
+    horizon.religious_or_moral_world,
+    seed.normative_world?.detail || seed.normative_world?.primary_frame
+  );
+  add(
+    'Immediate stakes',
+    compactList(voice.public_concerns, 3),
+    compactList(voice.private_concerns, 3),
+    compactList(voice.hopes, 3),
+    compactList(voice.small_pleasures, 3),
+    seed.interaction_style?.detail
+  );
+  add('Do not introduce', compactList(voice.anachronism_guards, 6));
+
+  if (source.source_basis === 'synthetic_composite') {
+    add('Grounding', 'synthetic seed; keep identity, date, place, work, household, and status fixed; add only conservative mundane connective detail');
+  } else {
+    add('Source', source.title, source.document_genre, record.evidence?.basis_summary);
+    add(
+      'Direct traces',
+      (record.evidence?.source_snippets || [])
+        .slice(0, 2)
+        .map(item => compactText(item?.snippet, 180))
+    );
+  }
+
+  return lines.join('\n');
 };
 
-export const buildSketchPrompt = record => [
-  'Write a historically grounded persona sketch from this annotation record.',
-  'Write exactly two compact paragraphs, totaling 120-180 words.',
-  'Each paragraph should earn its place: prioritize source-specific circumstances, work, stakes, and voice over general historical atmosphere.',
-  'Do not write a generic encyclopedia biography. Write a vivid but sober character sheet sketch anchored to the selected year, social position, work, household economy, material life, concerns, and worldview.',
-  'Distinguish direct evidence from plausible inference in natural prose without footnotes.',
-  'Avoid modern hindsight and anachronistic vocabulary.',
-  [
-    'Register — write in close third person, past or present tense, staying inside this person\'s frame of reference: their words for things, their sense of what matters. Never switch to first person ("I", "my") and never address the reader.',
-    'The sketch should read as this particular person, not as a historical narrator describing them. Apply the following as sentence rhythm and choice of detail; never name a trait, temperament, or personality term outright:',
-    'The 120-180 word budget still governs. Where the register calls for long sentences, write fewer of them rather than a longer sketch.',
-    ...voiceDirectives(record).map(directive => `- ${directive}`),
-  ].join('\n'),
-  [
-    'Opening — do not begin with the year, a date, a season, or the person\'s age. Do not begin with a phrase of the form "In 1788," or "At twenty-four,".',
-    `Begin instead from ${pick(OPENING_ANGLES)}, and let the year and age arrive later, where they matter.`,
-    'Avoid the words "navigates", "precarious", "weathered", and "a testament to".',
-  ].join('\n'),
-  record?.source?.source_basis === 'synthetic_composite'
-    ? 'This is a synthetic procedural seed, not a real archival source. Do not use phrases like "the historical record", "the archive", "evidence shows", or "thin trace". Present it as a plausible generated persona, with uncertainty kept modest and unobtrusive.'
-    : '',
-  'Return plain text only.',
-  JSON.stringify(sketchRecordView(record)),
-].filter(Boolean).join('\n\n');
+export const buildSketchPrompt = record => {
+  const synthetic = record?.source?.source_basis === 'synthetic_composite';
+  return [
+    'Write exactly two paragraphs, 160-210 words total, of vivid close-third historical fiction grounded in the dossier.',
+    'Begin mid-action in ordinary work or household life. Make the physical world perceptible through at least three concrete details of tools, materials, food, clothing, shelter, weather, sound, smell, touch, heat, cold, fatigue, or hunger. Show status, dependence, belief, and danger through choices and gestures rather than naming categories.',
+    'Use flowing, varied sentence lengths, precise concrete verbs, and unsentimental psychological intimacy. Stay inside this person\'s period knowledge. Never use modern analysis, schema language, a raw negative year, or an encyclopedia-summary voice. Do not begin with a date or age.',
+    synthetic
+      ? 'This is a synthetic seed. Add only unnamed mundane connective details that are highly plausible consequences of the listed work and material conditions. Do not invent named people, events, prices, possessions, technologies, or beliefs.'
+      : 'Treat source facts as fixed. Where evidence is silent, omit specificity rather than inventing names, events, prices, possessions, technologies, or beliefs.',
+    'Do not mention sources, evidence, uncertainty, personality labels, or the dossier. Avoid “navigates”, “precarious”, “weathered”, and “a testament to”. Return plain text only.',
+    'DOSSIER',
+    buildSketchDossier(record),
+  ].filter(Boolean).join('\n\n');
+};
