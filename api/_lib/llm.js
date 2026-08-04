@@ -161,22 +161,47 @@ async function callOpenAI({ model, prompt, json, temperature, maxOutput, effort,
   const key = env.OPENAI_API_KEY;
   if (!key) throw new Error('Missing OPENAI_API_KEY.');
 
-  const response = await fetch('https://api.openai.com/v1/responses', {
+  const send = body => fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-    body: JSON.stringify({
-      model,
-      input: prompt,
-      max_output_tokens: maxOutput,
-      temperature,
-      reasoning: { effort },
-      ...(json ? { text: { format: { type: 'json_object' } } } : {}),
-    }),
+    body: JSON.stringify(body),
   });
+
+  const base = {
+    model,
+    input: prompt,
+    max_output_tokens: maxOutput,
+    ...(json ? { text: { format: { type: 'json_object' } } } : {}),
+  };
+
+  let response = await send({ ...base, temperature, reasoning: { effort } });
+
+  // Reasoning models reject temperature, and which knobs a given model takes is
+  // not knowable ahead of time. Drop whatever the 400 names and retry once.
+  if (response.status === 400) {
+    const complaint = await response.text().catch(() => '');
+    const dropTemperature = /temperature/i.test(complaint);
+    const dropEffort = /reasoning|effort/i.test(complaint);
+    if (dropTemperature || dropEffort) {
+      console.warn(`[llm] retrying without a rejected parameter: ${complaint.slice(0, 200)}`);
+      response = await send({
+        ...base,
+        ...(dropTemperature ? {} : { temperature }),
+        ...(dropEffort ? {} : { reasoning: { effort } }),
+      });
+    } else {
+      response = { ok: false, status: 400, text: async () => complaint };
+    }
+  }
 
   if (!response.ok) {
     const body = await response.text().catch(() => '');
-    throw new Error(`OpenAI returned ${response.status}${body ? `: ${body.slice(0, 240)}` : ''}`);
+    const error = new Error(`OpenAI returned ${response.status}${body ? `: ${body.slice(0, 240)}` : ''}`);
+    // Tagged so the route shows it. These are API errors, not secrets, and
+    // hiding them costs a redeploy every time we need to read one.
+    error.code = 'MODEL_CALL_FAILED';
+    error.statusCode = 502;
+    throw error;
   }
 
   const data = await response.json();
