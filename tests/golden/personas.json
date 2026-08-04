@@ -91,22 +91,22 @@
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in East Asia",
     "head": "Woven Sun Hat [Straw]",
-    "torso": "Crimson Cotton Jacket [Coarse Cotton]",
+    "torso": "Woad Cotton Jacket [Coarse Cotton]",
     "feet": "Straw Sandals [Woven Straw]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "jacket",
-      "garmentColor": "#8e2436",
+      "garmentColor": "#3a4f6d",
       "legwear": null,
-      "backgroundBase": "#3f5a55",
+      "backgroundBase": "#5a5a3f",
       "pose": "build:broad"
     },
     "family": [
-      "father: Hon",
-      "mother: Mei the Frugal",
-      "brother: Wai Cheung",
-      "sister: Yee the Second Daughter"
+      "father: Kwok the Barren",
+      "mother: Ling Pang",
+      "sister: Yee the Second Daughter",
+      "brother: Pak the Fair"
     ],
     "events": [
       "1286: Born in a small settlement to a Laboring Poor family",
@@ -178,9 +178,9 @@
     },
     "family": [
       "father: Naoki Sasaki",
-      "mother: Junko the JAPANESE",
-      "sister: Nana Sasaki",
-      "brother: Takumi Sasaki"
+      "mother: Junko Suzuki",
+      "sister: Kaori Sasaki",
+      "brother: Satoshi Sasaki"
     ],
     "events": [
       "1266: Born in a small settlement to a Middling Sort family",
@@ -319,7 +319,7 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#8a5a3b",
       "garmentKind": "jacket",
-      "garmentColor": "#e8e4d9",
+      "garmentColor": "#efede5",
       "legwear": "Trousers [cotton twill] trousers",
       "backgroundBase": "#525c66",
       "pose": "build:broad+brave"
@@ -450,7 +450,7 @@
     ]
   },
   "anatolia-1952#1": {
-    "name": "Selin bint İbrahim",
+    "name": "Selin Yıldırım",
     "gender": "Female",
     "age": 81,
     "profession": "Bartender",
@@ -459,26 +459,26 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in the Middle East and North Africa",
-    "head": null,
-    "torso": "Henna Cotton Sari [Printed Cotton]",
-    "feet": "White Plastic Sandals [PVC]",
+    "head": "Crimson Hijab [Cotton]",
+    "torso": "Henna Blouse [Cotton]",
+    "feet": "Sandals [Leather]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
-      "garmentKind": "gown",
+      "headwearKind": "veil",
+      "headwearColor": "#8e2436",
+      "garmentKind": "work_shirt",
       "garmentColor": "#b5502e",
-      "legwear": null,
+      "legwear": "Long Skirt [cotton] skirt",
       "backgroundBase": "#535865",
       "pose": null
     },
     "family": [
-      "father: İbrahim Koç",
-      "mother: Umm Ayşe (Merve)",
-      "brother: Tolga ibn İbrahim",
-      "sister: Umm Gizem (Hülya)",
-      "spouse: Ali ibn Osman",
-      "son: Ömer Kara",
-      "daughter: Çiğdem Kurt"
+      "father: Hüseyin Yıldırım",
+      "mother: Merve",
+      "sister: Leyla Yıldırım",
+      "brother: Emre Yıldırım",
+      "spouse: Ali Osman oğlu",
+      "son: Ömer Burak oğlu",
+      "daughter: Filiz Doğan"
     ],
     "events": [
       "1871: Born in a small settlement to a Working Class family",
@@ -500,21 +500,21 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in the Middle East and North Africa",
-    "head": null,
-    "torso": "Olive T-Shirt [Cotton]",
-    "feet": "Rust Barefoot [None]",
+    "head": "Tan Keffiyeh [Cotton]",
+    "torso": "Olive Work Shirt [Cotton]",
+    "feet": "Barefoot [None]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#a98a63",
       "garmentKind": "work_shirt",
       "garmentColor": "#6e6b3a",
-      "legwear": "Lungi [cotton check] wrapped",
+      "legwear": "Work Trousers [cotton drill] trousers",
       "backgroundBase": "#5d6271",
       "pose": null
     },
     "family": [
       "father: Kemal Aslan",
-      "mother: Selin",
+      "mother: Esra Volkan kızı",
       "brother: Yusuf Aslan"
     ],
     "events": [
@@ -538,21 +538,21 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in the Middle East and North Africa",
-    "head": null,
-    "torso": "Olive T-Shirt [Cotton]",
-    "feet": "Barefoot [None]",
+    "head": "Turmeric Taqiyah [White Cotton]",
+    "torso": "Olive Work Shirt [Cotton]",
+    "feet": "Sandals [Leather]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "cap",
+      "headwearColor": "#dfa62c",
       "garmentKind": "work_shirt",
       "garmentColor": "#6e6b3a",
-      "legwear": "Lungi [cotton check] wrapped",
+      "legwear": "Work Trousers [cotton drill] trousers",
       "backgroundBase": "#5d6271",
       "pose": "build:broad+brave"
     },
     "family": [
       "father: Süleyman Çakır",
-      "mother: Yasemin bint Osman",
+      "mother: Yasemin Özdemir",
       "brother: Emre Çakır",
       "sister: Fatma Çakır"
     ],
@@ -564,7 +564,7 @@
     ]
   },
   "anatolia-1650#1": {
-    "name": "Umm Georgia (Paraskevi)",
+    "name": "Selin",
     "gender": "Female",
     "age": 75,
     "profession": "Coffeehouse Keeper",
@@ -586,13 +586,13 @@
       "pose": null
     },
     "family": [
-      "father: Ioannis ibn Evangelos",
-      "mother: Aphrodite bint Eleftherios",
-      "brother: Eleftherios ibn Dimitrios",
-      "sister: Umm Alexandra (Anastasia)",
-      "spouse: Antonios Stavrou",
-      "son: Odysseus",
-      "daughter: Ioanna bint Stefanos"
+      "father: Ahmet Süleyman oğlu",
+      "mother: Kübra Doğan",
+      "brother: Tolga Mehmet oğlu",
+      "sister: Elif",
+      "spouse: Selim",
+      "son: Erkan Aksu",
+      "daughter: Elif"
     ],
     "events": [
       "1575: Born in a small settlement to a Merchant family",
@@ -604,7 +604,7 @@
     ]
   },
   "anatolia-1650#2": {
-    "name": "Parsegh",
+    "name": "Gökhan Erdem",
     "gender": "Male",
     "age": 40,
     "profession": "Drover",
@@ -614,22 +614,22 @@
     "languageConfidence": "attested",
     "odds": "the early modern period in the Middle East and North Africa",
     "head": "Walnut Cotton Turban [Hemp]",
-    "torso": "Turmeric Cotton Entari Robe [Rough Wool]",
+    "torso": "Olive Cotton Entari Robe [Rough Wool]",
     "feet": "Walnut Barefoot [Hemp]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#5b4229",
       "garmentKind": "robe",
-      "garmentColor": "#dfa62c",
+      "garmentColor": "#6e6b3a",
       "legwear": null,
       "backgroundBase": "#373a44",
       "pose": null
     },
     "family": [
-      "father: Vahram ibn Ohan",
-      "mother: Vartanoush bint Krikor",
-      "brother: Levon",
-      "sister: Taline Tavitian"
+      "father: Ahmet Aksu",
+      "mother: Sevgi",
+      "sister: Kübra Tolga kızı",
+      "brother: Burak Duman"
     ],
     "events": [
       "1610: Born in a small settlement to a Laboring Poor family",
@@ -641,7 +641,7 @@
     ]
   },
   "anatolia-1650#3": {
-    "name": "Moses ibn Reuben",
+    "name": "Antonios Kostas",
     "gender": "Male",
     "age": 20,
     "profession": "Brewer",
@@ -663,10 +663,10 @@
       "pose": "build:broad+brave"
     },
     "family": [
-      "father: Reuben ibn Michael",
-      "mother: Hannah bint Samuel",
-      "sister: Leah bint Reuben",
-      "brother: Abu Jacob (Isaac)"
+      "father: Petros Kostas",
+      "mother: Sophia Andreou",
+      "sister: Anastasia Kostas",
+      "brother: Konstantinos Kostas"
     ],
     "events": [
       "1630: Born in a small settlement to a Laboring Poor family",
@@ -1007,7 +1007,7 @@
     ]
   },
   "arabia-500#1": {
-    "name": "Rivka",
+    "name": "Rivka bat Menashe",
     "gender": "Female",
     "age": 75,
     "profession": "Fisher",
@@ -1016,34 +1016,33 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in the Middle East and North Africa",
-    "head": "Silver Cotton Skullcap [Rough Wool]",
-    "torso": "Indigo Cotton Tunic [Burlap]",
-    "feet": "Barefoot [Rough Linen]",
+    "head": "Turmeric Cotton Skullcap [Rough Wool]",
+    "torso": "Walnut Cotton Tunic [Burlap]",
+    "feet": "Turmeric Barefoot [Rough Linen]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#b9bcc2",
+      "headwearColor": "#dfa62c",
       "garmentKind": "tunic",
-      "garmentColor": "#2e3f5c",
+      "garmentColor": "#5b4229",
       "legwear": null,
-      "backgroundBase": "#5d4b52",
+      "backgroundBase": "#4b505d",
       "pose": null
     },
     "family": [
-      "father: Shlomo",
-      "mother: Sarah daughter of Menashe",
-      "brother: Yaakov",
-      "sister: Michal daughter of Gamaliel",
-      "spouse: Shlomo the Guest-Feeder",
-      "son: Ephraim son of Yaakov",
-      "daughter: Yael daughter of Yosef"
+      "father: Menashe ben Yitzhak",
+      "mother: Devorah bat Simeon",
+      "sister: Elisheva bat Menashe",
+      "brother: Yaakov ben Menashe",
+      "spouse: Baruch ben Menashe",
+      "daughter: Yehudit bat Menashe",
+      "son: Netanel"
     ],
     "events": [
       "425: Born in a small settlement to a Laboring Poor family",
       "440: Went out with the adults for the first time and came back carrying a share",
-      "447: A sister married into a well-connected merchant caravan, improving the family's social standing",
-      "466: Took over the family business after a parent retired from active work",
-      "468: Mother died from cholera despite efforts to save her",
-      "499: Studied at Al-Azhar for three years"
+      "462: Studied at Al-Azhar for three years",
+      "463: A brother's marriage brought valuable new trade connections and opportunities",
+      "466: Took over the family business after a parent retired from active work"
     ]
   },
   "arabia-500#2": {
@@ -1063,7 +1062,7 @@
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#ddd3ba",
       "garmentKind": "work_shirt",
-      "garmentColor": "#a8763f",
+      "garmentColor": "#9e6f3b",
       "legwear": null,
       "backgroundBase": "#5c6272",
       "pose": "loner"
@@ -1106,10 +1105,10 @@
       "pose": "build:broad"
     },
     "family": [
-      "father: Simeon",
-      "mother: Ada",
-      "brother: Yehoshua",
-      "sister: Miriam"
+      "father: Simeon ben Obadiah",
+      "mother: Serah bat Uriel",
+      "brother: Eliyahu ben Yonatan",
+      "sister: Huldah bat Hananiah"
     ],
     "events": [
       "480: Born in a small settlement to a Laboring Poor family",
@@ -1210,7 +1209,7 @@
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#5a6b3b",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#5b4229",
+      "garmentColor": "#45321f",
       "legwear": null,
       "backgroundBase": "#8884a8",
       "pose": "build:broad"
@@ -1287,7 +1286,7 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#927454",
+      "garmentColor": "#6e583f",
       "legwear": null,
       "backgroundBase": "#426757",
       "pose": null
@@ -1326,7 +1325,7 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#927454",
+      "garmentColor": "#8a6e4f",
       "legwear": null,
       "backgroundBase": "#53826e",
       "pose": "build:broad+curious"
@@ -1402,7 +1401,7 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#b5502e",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#a98a63",
+      "garmentColor": "#bea689",
       "legwear": null,
       "backgroundBase": "#3c5c67",
       "pose": null
@@ -1437,7 +1436,7 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#3a4f6d",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#a98a63",
+      "garmentColor": "#8c704d",
       "legwear": null,
       "backgroundBase": "#3c5c67",
       "pose": "build:broad"
@@ -1587,7 +1586,7 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "gown",
-      "garmentColor": "#6b482f",
+      "garmentColor": "#462f1f",
       "legwear": null,
       "backgroundBase": "#748b79",
       "pose": null
@@ -1613,12 +1612,12 @@
     ]
   },
   "southwest-1200#2": {
-    "name": "Isleta",
+    "name": "Okuwa",
     "gender": "Male",
     "age": 61,
     "profession": "Corn Farmer",
     "religion": "Pueblo Religion",
-    "language": "Uto-Aztecan (reconstructed)",
+    "language": "Na-Dene (reconstructed)",
     "languageBasis": "na-southwest",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in pre-Columbian North America",
@@ -1635,10 +1634,13 @@
       "pose": null
     },
     "family": [
-      "father: Tiwa the One Who Came Back",
-      "mother: Kaya the Red",
-      "sister: Nova the Left-Handed",
-      "brother: Pojoaque the Bald"
+      "father: Catiti the One Who Came Back",
+      "mother: Tsipiya the Red",
+      "sister: Okuwatsire the Left-Handed",
+      "brother: Kwatoko the Bald",
+      "spouse: Povika",
+      "daughter: Blue-Corn the Left-Behind",
+      "son: Aiyaye"
     ],
     "events": [
       "1139: Born in a small settlement to a Commoner family",
@@ -1651,7 +1653,7 @@
     ]
   },
   "southwest-1200#3": {
-    "name": "Tewa",
+    "name": "Tupatú",
     "gender": "Male",
     "age": 52,
     "profession": "Corn Farmer",
@@ -1673,13 +1675,10 @@
       "pose": "build:broad"
     },
     "family": [
-      "father: Masewa",
-      "mother: Kaya Earth-Clan",
-      "brother: Popé the Good Host",
-      "sister: Blue-Corn the Dream-Teller",
-      "spouse: Hopi",
-      "son: Masewa",
-      "daughter: Nova the Upland"
+      "father: Tsehpo",
+      "mother: Tsipiya",
+      "sister: Kotcimanyako the Good Host",
+      "brother: Hemish"
     ],
     "events": [
       "1148: Born in a small settlement to a Peasant family",
@@ -1692,7 +1691,7 @@
     ]
   },
   "newengland-1780#1": {
-    "name": "Lydia",
+    "name": "Agnes",
     "gender": "Female",
     "age": 75,
     "profession": "Laundress",
@@ -1702,25 +1701,22 @@
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
     "head": "Ivory Mob Cap [Wool]",
-    "torso": "Walnut Servant'S Calico Dress [Wool]",
+    "torso": "Saffron Servant'S Calico Dress [Wool]",
     "feet": "Simple Leather Shoes [Treated Hide]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
-      "garmentColor": "#5b4229",
+      "garmentColor": "#d9a441",
       "legwear": null,
       "backgroundBase": "#4c5354",
       "pose": null
     },
     "family": [
-      "father: Jacob Jones",
-      "mother: Deborah Moore",
-      "brother: John Young",
-      "sister: Elizabeth Martinez",
-      "spouse: Caleb Allen",
-      "son: Jeremiah Martin",
-      "daughter: Deborah Martin"
+      "father: Edward Cooper",
+      "mother: Catherine Clark",
+      "brother: Frederick Smith",
+      "sister: Isabella"
     ],
     "events": [
       "1705: Born in a small settlement to a Gentry family",
@@ -1733,7 +1729,7 @@
     ]
   },
   "newengland-1780#2": {
-    "name": "Jonathan King",
+    "name": "Edmund Evans",
     "gender": "Male",
     "age": 40,
     "profession": "Publican",
@@ -1755,10 +1751,10 @@
       "pose": null
     },
     "family": [
-      "father: Caleb King",
-      "mother: Susanna Hernandez",
-      "brother: Isaac King",
-      "sister: Silence King"
+      "father: George Evans",
+      "mother: Sarah Roberts",
+      "brother: Christopher Evans",
+      "sister: Rebecca Evans"
     ],
     "events": [
       "1740: Born in a small settlement to a Laboring Poor family",
@@ -1771,7 +1767,7 @@
     ]
   },
   "newengland-1780#3": {
-    "name": "James Johnson",
+    "name": "James Taylor",
     "gender": "Male",
     "age": 20,
     "profession": "Fuller",
@@ -1793,10 +1789,10 @@
       "pose": "build:broad"
     },
     "family": [
-      "father: Benjamin Johnson",
-      "mother: Thankful Taylor",
-      "brother: Jacob Johnson",
-      "sister: Priscilla Johnson"
+      "father: Bartholomew Taylor",
+      "mother: Judith Turner",
+      "brother: Alexander Taylor",
+      "sister: Jane Taylor"
     ],
     "events": [
       "1760: Born in a small settlement to a Middling Sort family",
@@ -1898,12 +1894,12 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in East Asia",
-    "head": "Silver Cloth Headband [Hemp]",
-    "torso": "Olive Servant'S Cotton Dress [Rough Wool]",
-    "feet": "Silver Cloth Shoes [Rough Wool]",
+    "head": "Bamboo Hat [Woven Bamboo]",
+    "torso": "Olive Hemp Jacket [Rough Hemp]",
+    "feet": "Straw Sandals [Rice Straw]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#4b463d",
+      "headwearKind": null,
+      "headwearColor": null,
       "garmentKind": "robe",
       "garmentColor": "#59645d",
       "legwear": null,
@@ -1918,9 +1914,9 @@
     ],
     "events": [
       "1480: Born in a small settlement to a Laboring Poor family",
-      "1494: Began learning the trade of servant from an experienced practitioner",
-      "1498: The family pooled their resources to purchase a new plow, a significant investment",
-      "1499: A brother's marriage brought valuable new trade connections and opportunities"
+      "1495: Began learning the trade of servant from an experienced practitioner",
+      "1498: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1499: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "bengal-1900#1": {
@@ -2404,11 +2400,11 @@
     },
     "family": [
       "father: Javier Sanchez",
-      "mother: Valentina Vasquez",
+      "mother: Bernardina Layme",
       "sister: Renata Sanchez",
-      "brother: Fernando Sanchez",
+      "brother: Nicanor Sanchez",
       "spouse: Ricardo",
-      "son: Ricardo Hernandez",
+      "son: Fortunato Quispe",
       "daughter: Veronica Ramirez"
     ],
     "events": [
@@ -2421,14 +2417,14 @@
     ]
   },
   "andes-1990#2": {
-    "name": "Ivan Vargas",
+    "name": "Juan Choquehuanca",
     "gender": "Male",
     "age": 47,
     "profession": "Electrician",
     "religion": "Roman Catholicism",
-    "language": "Puquina or Mochica (attested)",
+    "language": "Quechuan (reconstructed)",
     "languageBasis": "sam-andes",
-    "languageConfidence": "inferred",
+    "languageConfidence": "reconstructed",
     "odds": "the modern era in South America",
     "head": "Brown Baseball Cap [Cotton]",
     "torso": "White T-Shirt [Cotton]",
@@ -2443,10 +2439,10 @@
       "pose": null
     },
     "family": [
-      "father: Javier Vargas",
-      "mother: Isabella Sanchez",
-      "brother: Ricardo Vargas",
-      "sister: Sofía Vargas"
+      "father: Javier Choquehuanca",
+      "mother: Felipa Chambi",
+      "brother: Ricardo Choquehuanca",
+      "sister: Santusa Choquehuanca"
     ],
     "events": [
       "1943: Born in a small settlement to a Middle Class family",
@@ -2467,22 +2463,22 @@
     "languageConfidence": "reconstructed",
     "odds": "the modern era in South America",
     "head": "Tan Baseball Cap [Cotton]",
-    "torso": "White T-Shirt [Cotton]",
+    "torso": "Black T-Shirt [Cotton]",
     "feet": "Tan Canvas Sneakers [Canvas and Rubber]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#a98a63",
       "garmentKind": "work_shirt",
-      "garmentColor": "#e8e4d9",
+      "garmentColor": "#1f1f22",
       "legwear": "Jeans [denim] trousers",
       "backgroundBase": "#53655a",
       "pose": "build:broad+proud"
     },
     "family": [
-      "father: Diego Lopez",
-      "mother: Andrea Flores",
-      "brother: Joaquín Lopez",
-      "sister: Camila Lopez"
+      "father: Fortunato Lopez",
+      "mother: Nieves Tarqui",
+      "brother: Javier Lopez",
+      "sister: Valeria Lopez"
     ],
     "events": [
       "1969: Born in a small settlement to a Working Class family",
@@ -2493,7 +2489,7 @@
     ]
   },
   "newzealand-2010#1": {
-    "name": "Jane Garcia",
+    "name": "Kaia Mataʻafa",
     "gender": "Female",
     "age": 82,
     "profession": "Textile Worker",
@@ -2503,22 +2499,25 @@
     "languageConfidence": "reconstructed",
     "odds": "the modern era in Oceania",
     "head": null,
-    "torso": "Walnut Tank Top [Cotton]",
-    "feet": "Blue Sandals [Rubber]",
+    "torso": "Olive Tank Top [Cotton]",
+    "feet": "Ochre Sandals [Rubber]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#5b4229",
+      "garmentColor": "#8a8649",
       "legwear": "Skirt [cotton] skirt",
-      "backgroundBase": "#708389",
+      "backgroundBase": "#5c6c71",
       "pose": null
     },
     "family": [
-      "father: Thomas Garcia",
-      "mother: Rebecca Wright",
-      "sister: Judith Garcia",
-      "brother: William Garcia"
+      "father: Mahina Mataʻafa",
+      "mother: Lehua Faleolo",
+      "sister: Tiare Mataʻafa",
+      "brother: Hemi Mataʻafa",
+      "spouse: Akamu Faleolo",
+      "daughter: Leilani",
+      "son: Tane Rātana"
     ],
     "events": [
       "1928: Born in a small settlement to a Peasant family",
@@ -2529,43 +2528,44 @@
     ]
   },
   "newzealand-2010#2": {
-    "name": "Cameron",
+    "name": "Pita",
     "gender": "Male",
     "age": 47,
     "profession": "Electrician",
     "religion": "Atheism",
-    "language": "Eastern Polynesian (reconstructed)",
+    "language": "Proto-Polynesian (reconstructed)",
     "languageBasis": "oc-east-polynesia",
     "languageConfidence": "reconstructed",
     "odds": "the modern era in Oceania",
-    "head": "Blue Baseball Cap [Cotton]",
-    "torso": "Turmeric T-Shirt [Cotton]",
-    "feet": "Blue Flip Flops [Rubber]",
+    "head": "Russet Baseball Cap [Cotton]",
+    "torso": "Grey T-Shirt [Cotton]",
+    "feet": "Russet Flip Flops [Rubber]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#41608c",
+      "headwearColor": "#8a5a3b",
       "garmentKind": "work_shirt",
-      "garmentColor": "#dfa62c",
+      "garmentColor": "#a7a4a0",
       "legwear": "Board Shorts [polyester] shorts",
       "backgroundBase": "#536065",
       "pose": null
     },
     "family": [
-      "father: Fergus MacGillivray",
-      "mother: Elspeth MacArthur",
-      "sister: Fenella MacFarlane",
-      "spouse: Nairne MacBride"
+      "father: Turi Pomare",
+      "mother: Tiaré Aiono",
+      "sister: Mele Mataʻafa",
+      "brother: Tamati Vaea",
+      "spouse: Pikake Malietoa"
     ],
     "events": [
       "1963: Born in a small settlement to a Commoner family",
       "1978: Went to work straight from school, as everyone in the household had",
-      "2002: The family pooled what they had for a deposit on a tractor",
-      "2006: Exchanged gifts with neighboring tribe, preventing conflict",
-      "2008: A brother married young, and the wedding cost more than the family had"
+      "1981: Stood as witness at a sibling's wedding, and understood that the household had changed shape",
+      "1985: Inherited responsibility for family fishing grounds",
+      "1993: Moved into the room a grandparent had left, which settled the question of rent for years"
     ]
   },
   "newzealand-2010#3": {
-    "name": "Rongo Tuilagi",
+    "name": "Harold Turner",
     "gender": "Male",
     "age": 21,
     "profession": "Opal Miner",
@@ -2574,23 +2574,23 @@
     "languageBasis": "oc-east-polynesia",
     "languageConfidence": "reconstructed",
     "odds": "the modern era in Oceania",
-    "head": "Russet Baseball Cap [Cotton]",
-    "torso": "Olive T-Shirt [Cotton]",
-    "feet": "Russet Flip Flops [Rubber]",
+    "head": "Tan Baseball Cap [Cotton]",
+    "torso": "Charcoal T-Shirt [Cotton]",
+    "feet": "Tan Flip Flops [Rubber]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#8a5a3b",
+      "headwearColor": "#a98a63",
       "garmentKind": "work_shirt",
-      "garmentColor": "#6e6b3a",
+      "garmentColor": "#1d1d1c",
       "legwear": "Board Shorts [polyester] shorts",
-      "backgroundBase": "#536065",
+      "backgroundBase": "#5c6c71",
       "pose": "build:broad"
     },
     "family": [
-      "father: Kawika Tuilagi",
-      "mother: Raina Taufa",
-      "sister: Marama Tuilagi",
-      "brother: Tane Tuilagi"
+      "father: Stephen Turner",
+      "mother: Caroline Cook",
+      "sister: Agnes Turner",
+      "brother: Thomas Turner"
     ],
     "events": [
       "1989: Born in a small settlement to a Peasant family",
@@ -2817,10 +2817,10 @@
       "pose": "build:broad"
     },
     "family": [
-      "father: Tang",
-      "mother: Gui",
-      "brother: Jie",
-      "sister: Nüwa the Late-Born"
+      "father: Jie",
+      "mother: Leizu the Diligent",
+      "brother: Yao the Late-Born",
+      "sister: Gui"
     ],
     "events": [
       "-7020: Born to the band that ranged this country",
@@ -3081,12 +3081,12 @@
     },
     "family": [
       "father: Takumi Suzuki",
-      "mother: Fumiko the JAPANESE",
-      "sister: Emi Suzuki",
-      "brother: Satoshi Suzuki",
-      "spouse: Kazuo",
-      "son: Yuuki Shimizu",
-      "daughter: Noriko Yamamoto"
+      "mother: Fumiko Sato",
+      "brother: Nobu Suzuki",
+      "sister: Rin Suzuki",
+      "spouse: Yuma Suzuki",
+      "daughter: Yoko",
+      "son: Masato Kimura"
     ],
     "events": [
       "1790: Born in a small settlement to a Working Class family",
@@ -3577,10 +3577,10 @@
       "father: Gruffydd son of Steffan",
       "mother: Megan daughter of Ieuan",
       "brother: Mabyn son of Neirin",
-      "sister: Cerys",
-      "spouse: Ffion daughter of Llyr",
-      "daughter: Elen daughter of Mabyn",
-      "son: Tudur the Mild"
+      "sister: Non daughter of Dafydd",
+      "spouse: Tegan daughter of Cai",
+      "son: Rhodri the Swift",
+      "daughter: Eira the Black"
     ],
     "events": [
       "860: Born in a small settlement to a Middling Sort family",
@@ -3653,10 +3653,10 @@
       "father: Xulio son of Francisco",
       "mother: Leonor daughter of Ramón",
       "sister: Jimena daughter of Xulio",
-      "brother: Francisco López",
-      "spouse: Nuno son of Carlos",
-      "daughter: Carmen daughter of Fernando",
-      "son: Mendo"
+      "brother: Manuel Ponte",
+      "spouse: Afonso Gómez",
+      "daughter: Lucía daughter of Carlos",
+      "son: Mendo González"
     ],
     "events": [
       "1405: Born in a small settlement to a Laboring Poor family",
@@ -3695,8 +3695,10 @@
       "father: Slimane Mekhloufi",
       "mother: Zohra Belhadj",
       "brother: Rachid the Southerner",
-      "sister: Soraya the Restless",
-      "spouse: Djamila daughter of Noureddine"
+      "sister: Imane Bensaid",
+      "spouse: Hakima Bendjelloul",
+      "son: Azzedine son of Malik",
+      "daughter: Radia Belhadj"
     ],
     "events": [
       "1440: Born in a small settlement to a Middling Sort family",
@@ -3732,7 +3734,7 @@
       "father: Paio González",
       "mother: Jimena Lemos",
       "sister: Elvira González",
-      "brother: Fernando González"
+      "brother: Luis González"
     ],
     "events": [
       "1460: Born in a small settlement to a Laboring Poor family",
@@ -4504,7 +4506,7 @@
     ]
   },
   "levant-30#3": {
-    "name": "Natan son of Baruch",
+    "name": "Natan ben Baruch",
     "gender": "Male",
     "age": 20,
     "profession": "Smith",
@@ -4526,10 +4528,11 @@
       "pose": "build:broad"
     },
     "family": [
-      "father: Baruch son of Obadiah",
-      "mother: Tzipporah daughter of Amram",
-      "brother: Moshe",
-      "sister: Keturah"
+      "father: Baruch ben Obadiah",
+      "mother: Tzipporah bat Amram",
+      "brother: Moshe ben Baruch",
+      "sister: Esther bat Baruch",
+      "spouse: Channah bat Yonatan"
     ],
     "events": [
       "10: Born in a small settlement to a Laboring Poor family",
@@ -4660,15 +4663,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in the Middle East and North Africa",
-    "head": null,
-    "torso": "Olive Cotton Sari [Printed Cotton]",
-    "feet": "Ivory Plastic Sandals [PVC]",
+    "head": "Green Hijab [Cotton]",
+    "torso": "Olive Blouse [Cotton]",
+    "feet": "Sandals [Leather]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
-      "garmentKind": "gown",
+      "headwearKind": "veil",
+      "headwearColor": "#5a6b3b",
+      "garmentKind": "work_shirt",
       "garmentColor": "#6e6b3a",
-      "legwear": null,
+      "legwear": "Long Skirt [cotton] skirt",
       "backgroundBase": "#535865",
       "pose": null
     },
@@ -4690,7 +4693,7 @@
     ]
   },
   "baghdad-1924#2": {
-    "name": "Kamran ibn Sohrab",
+    "name": "Tareq ibn Emad",
     "gender": "Male",
     "age": 46,
     "profession": "Motor Mechanic",
@@ -4699,26 +4702,26 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in the Middle East and North Africa",
-    "head": null,
-    "torso": "Bronze T-Shirt [Cotton]",
-    "feet": "Rust Barefoot [None]",
+    "head": "Turmeric Keffiyeh [Cotton]",
+    "torso": "Bronze Work Shirt [Cotton]",
+    "feet": "Turmeric Barefoot [None]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#dfa62c",
       "garmentKind": "work_shirt",
       "garmentColor": "#a8763f",
-      "legwear": "Lungi [cotton check] wrapped",
+      "legwear": "Work Trousers [cotton drill] trousers",
       "backgroundBase": "#5d6271",
       "pose": null
     },
     "family": [
-      "father: Sohrab ibn Parviz",
-      "mother: Irana bint Hooman",
-      "brother: Cyrus ibn Sohrab",
-      "sister: Umm Samira (Parisa)",
-      "spouse: Yasmin bint Touraj",
-      "daughter: Goli bint Masoud",
-      "son: Kian Ilami"
+      "father: Emad ibn Nabil",
+      "mother: Iman bint Ziad",
+      "brother: Yusuf ibn Emad",
+      "sister: Umm Nadia (Noor)",
+      "spouse: Aisha bint Samir",
+      "daughter: Ghada bint Karim",
+      "son: Mohammed Jarrar"
     ],
     "events": [
       "1878: Born in a small settlement to a Middle Class family",
@@ -4737,15 +4740,15 @@
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in the Middle East and North Africa",
-    "head": null,
-    "torso": "Slate T-Shirt [Cotton]",
-    "feet": "Barefoot [None]",
+    "head": "Indigo Taqiyah [White Cotton]",
+    "torso": "Brown Work Shirt [Cotton]",
+    "feet": "Sandals [Leather]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "cap",
+      "headwearColor": "#2e3f5c",
       "garmentKind": "work_shirt",
-      "garmentColor": "#566370",
-      "legwear": "Lungi [cotton check] wrapped",
+      "garmentColor": "#6f5237",
+      "legwear": "Work Trousers [cotton drill] trousers",
       "backgroundBase": "#535865",
       "pose": "build:broad"
     },
@@ -4821,7 +4824,7 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "bare",
-      "garmentColor": "#6b482f",
+      "garmentColor": "#926240",
       "legwear": null,
       "backgroundBase": "#5d7379",
       "pose": null
@@ -4861,7 +4864,7 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#6b482f",
+      "garmentColor": "#795235",
       "legwear": null,
       "backgroundBase": "#4a5b60",
       "pose": "build:broad"
@@ -4981,7 +4984,7 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#6b482f",
+      "garmentColor": "#795235",
       "legwear": null,
       "backgroundBase": "#4a5b60",
       "pose": "build:broad"
@@ -5020,7 +5023,7 @@
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
-      "garmentColor": "#5b4229",
+      "garmentColor": "#5e442a",
       "legwear": null,
       "backgroundBase": "#35525a",
       "pose": null
@@ -5101,7 +5104,7 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#6e6b3a",
+      "garmentColor": "#726f3c",
       "legwear": null,
       "backgroundBase": "#3f616b",
       "pose": "build:broad"
@@ -5213,7 +5216,7 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#5b4229",
+      "garmentColor": "#785736",
       "legwear": null,
       "backgroundBase": "#3f616b",
       "pose": "build:broad"
@@ -5289,7 +5292,7 @@
       "headwearKind": "cap",
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
-      "garmentColor": "#3a3a38",
+      "garmentColor": "#1d1d1c",
       "legwear": "Khaki Shorts [canvas] shorts",
       "backgroundBase": "#626a6c",
       "pose": null
@@ -5327,7 +5330,7 @@
       "headwearKind": "cap",
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
-      "garmentColor": "#6e6b3a",
+      "garmentColor": "#726f3c",
       "legwear": "Khaki Shorts [canvas] shorts",
       "backgroundBase": "#505759",
       "pose": "build:broad"
@@ -5444,7 +5447,7 @@
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#a68a68",
       "garmentKind": "robe",
-      "garmentColor": "#83705a",
+      "garmentColor": "#968067",
       "legwear": null,
       "backgroundBase": "#455e51",
       "pose": "build:broad"
@@ -5566,7 +5569,7 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#ddd3ba",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#6e6b3a",
+      "garmentColor": "#424023",
       "legwear": null,
       "backgroundBase": "#6b649b",
       "pose": "build:broad"
@@ -5723,7 +5726,7 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c2a463",
       "garmentKind": "gown",
-      "garmentColor": "#6b482f",
+      "garmentColor": "#462f1f",
       "legwear": null,
       "backgroundBase": "#748b79",
       "pose": null
@@ -5837,7 +5840,7 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#5b4229",
+      "garmentColor": "#45321f",
       "legwear": null,
       "backgroundBase": "#4a594d",
       "pose": null
@@ -5949,7 +5952,7 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "bare",
-      "garmentColor": "#6b482f",
+      "garmentColor": "#462f1f",
       "legwear": null,
       "backgroundBase": "#748b79",
       "pose": null
@@ -6068,7 +6071,7 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "gown",
-      "garmentColor": "#6b482f",
+      "garmentColor": "#462f1f",
       "legwear": null,
       "backgroundBase": "#748b79",
       "pose": null
@@ -6178,32 +6181,33 @@
     ]
   },
   "newengland-1870#1": {
-    "name": "Gladys",
+    "name": "Greta",
     "gender": "Female",
     "age": 80,
     "profession": "Servant",
     "religion": "Protestantism",
-    "language": "English (attested)",
+    "language": "Spanish (attested)",
     "languageBasis": "nac-modern",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
     "head": "Ivory Mob Cap [Rough Wool]",
-    "torso": "Walnut Servant'S Calico Dress [Burlap]",
+    "torso": "Olive Servant'S Calico Dress [Burlap]",
     "feet": "Simple Leather Shoes [Rough Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e5ddd0",
       "garmentKind": "gown",
-      "garmentColor": "#5b4229",
+      "garmentColor": "#6e6b3a",
       "legwear": null,
       "backgroundBase": "#4c5354",
       "pose": null
     },
     "family": [
-      "father: Spotted Black Bear",
-      "mother: Swimming Bobcat",
-      "brother: Went Alone",
-      "sister: Turning Passenger Pigeon"
+      "father: Matteo Marino",
+      "mother: Sara Lombardi",
+      "brother: Fabio",
+      "sister: Roberta Mariani",
+      "spouse: Enrico Lombardi"
     ],
     "events": [
       "1790: Born in a small settlement to a Working Class family",
@@ -6215,12 +6219,12 @@
     ]
   },
   "newengland-1870#2": {
-    "name": "Russell Nowak",
+    "name": "Maximilian Schmitz",
     "gender": "Male",
     "age": 44,
     "profession": "Stonemason",
     "religion": "Protestantism",
-    "language": "Spanish (attested)",
+    "language": "English (attested)",
     "languageBasis": "nac-modern",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
@@ -6237,11 +6241,13 @@
       "pose": null
     },
     "family": [
-      "father: Crossing at the Ash Hill Nowak",
-      "mother: Slow Black Bear",
-      "brother: Walked the Ice Nowak",
-      "sister: Lone Sycamore Nowak",
-      "spouse: Chasing Whitefish"
+      "father: Peter Schmitz",
+      "mother: Ingrid Schröder",
+      "brother: Johann Schmitz",
+      "sister: Nicole Schmitz",
+      "spouse: Julia Wolf",
+      "daughter: Margarete Braun",
+      "son: Ludwig Hofmann"
     ],
     "events": [
       "1826: Born in a small settlement to a Middle Class family",
@@ -6254,7 +6260,7 @@
     ]
   },
   "newengland-1870#3": {
-    "name": "Robert Miller",
+    "name": "Leonardo Ferrari",
     "gender": "Male",
     "age": 21,
     "profession": "Chapman",
@@ -6276,10 +6282,10 @@
       "pose": "build:broad"
     },
     "family": [
-      "father: Great Whitefish Miller",
-      "mother: Found at the Ford",
-      "brother: Ernest Miller",
-      "sister: Edna Miller"
+      "father: Stefano Ferrari",
+      "mother: Monica Greco",
+      "brother: Luca Ferrari",
+      "sister: Vittoria Ferrari"
     ],
     "events": [
       "1849: Born in a small settlement to a Working Class family",
@@ -6290,7 +6296,7 @@
     ]
   },
   "louisiana-1820#1": {
-    "name": "Charity Wilson",
+    "name": "Muirenn Ryan",
     "gender": "Female",
     "age": 79,
     "profession": "Shepherd",
@@ -6312,10 +6318,10 @@
       "pose": null
     },
     "family": [
-      "father: Richard Wilson",
-      "mother: Faith Taylor",
-      "sister: Prudence Wilson",
-      "brother: Benjamin Wilson"
+      "father: Niall Ryan",
+      "mother: Brigid McCarthy",
+      "sister: Maeve Ryan",
+      "brother: Cillian Ryan"
     ],
     "events": [
       "1741: Born in a small settlement to a Merchant family",
@@ -6328,7 +6334,7 @@
     ]
   },
   "louisiana-1820#2": {
-    "name": "Barnabas",
+    "name": "Louis",
     "gender": "Male",
     "age": 42,
     "profession": "Farm Hand",
@@ -6350,10 +6356,13 @@
       "pose": null
     },
     "family": [
-      "father: Hezekiah Rodriguez",
-      "mother: Experience Harris",
-      "brother: Joshua Martinez",
-      "sister: Thankful Jones"
+      "father: Charlie Martin",
+      "mother: Barbara Hill",
+      "brother: Robert Green",
+      "sister: Rosa Thompson",
+      "spouse: Barbara Wright",
+      "son: Louis Walker",
+      "daughter: Helen Robinson"
     ],
     "events": [
       "1778: Born in a small settlement to a Laboring Poor family",
@@ -6366,7 +6375,7 @@
     ]
   },
   "louisiana-1820#3": {
-    "name": "Richard Miller",
+    "name": "Ludwig Meyer",
     "gender": "Male",
     "age": 21,
     "profession": "Farmer",
@@ -6388,10 +6397,10 @@
       "pose": "build:broad"
     },
     "family": [
-      "father: Ezekiel Miller",
-      "mother: Priscilla White",
-      "brother: Thomas Miller",
-      "sister: Prudence Miller"
+      "father: Wolfgang Meyer",
+      "mother: Ursula Richter",
+      "brother: Friedrich Meyer",
+      "sister: Andrea Meyer"
     ],
     "events": [
       "1799: Born in a small settlement to a Middling Sort family",
@@ -6419,7 +6428,7 @@
       "headwearKind": "coronet",
       "headwearColor": "#cfa044",
       "garmentKind": "jacket",
-      "garmentColor": "#a8763f",
+      "garmentColor": "#b88145",
       "legwear": null,
       "backgroundBase": "#67987a",
       "pose": null
@@ -6573,7 +6582,7 @@
       "headwearKind": "cap",
       "headwearColor": "#a98a63",
       "garmentKind": "tunic",
-      "garmentColor": "#a8763f",
+      "garmentColor": "#7e592f",
       "legwear": null,
       "backgroundBase": "#34463b",
       "pose": null
@@ -6807,7 +6816,7 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#a98a63",
+      "garmentColor": "#bea689",
       "legwear": null,
       "backgroundBase": "#394239",
       "pose": null
@@ -6845,7 +6854,7 @@
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#a98a63",
+      "garmentColor": "#8c704d",
       "legwear": null,
       "backgroundBase": "#394239",
       "pose": "build:broad"
@@ -6919,7 +6928,7 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c0a566",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#a98a63",
+      "garmentColor": "#bea689",
       "legwear": null,
       "backgroundBase": "#344246",
       "pose": null
@@ -6955,7 +6964,7 @@
       "headwearKind": "brimmed_hat",
       "headwearColor": "#c0a566",
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#a98a63",
+      "garmentColor": "#8c704d",
       "legwear": null,
       "backgroundBase": "#344246",
       "pose": "build:broad"

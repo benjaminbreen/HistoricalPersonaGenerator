@@ -41,12 +41,16 @@ export function drawHeadAndNeck(context: RenderContext): HeadMasks {
     centerX: anatomy.centerX,
   });
 
-  // The neck is a cylinder that lives mostly in the head's shadow.
+  // The neck is a cylinder that lives mostly in the head's shadow. The `dx`
+  // term is what makes it a cylinder rather than a post: the shading used to be
+  // symmetric about the centre line, which is the one lighting the rest of the
+  // portrait never uses, and a symmetrically lit neck under a key-lit head is
+  // the single clearest tell that the two were drawn by different code.
   fillMask(raster, neck, ramps.skin, MAT.SKIN, (x, y) => {
     const dx = (x + 0.5 - anatomy.centerX) / anatomy.neckHalf;
     const nz = Math.sqrt(Math.max(0.05, 1 - Math.min(1, dx * dx)));
     const depth = Math.max(0, 1 - (y - anatomy.neckTop) / 14);
-    return 4.9 - nz * 0.8 + depth * 0.7;
+    return 4.9 - nz * 0.8 + depth * 0.5 + dx * 0.85;
   });
 
   // --- head ----------------------------------------------------------------
@@ -78,6 +82,31 @@ export function drawHeadAndNeck(context: RenderContext): HeadMasks {
   // Chin onto neck. Without this the head reads as a sticker on a post.
   applyContactShadow(raster, head, book, { dx: 0, dy: 1, strength: 2, depth: 3 });
   applyContactShadow(raster, head, book, { dx: 1, dy: 1, strength: 1, depth: 1 });
+
+  // And the jaw's own shadow, thrown down the throat.
+  //
+  // A contact shadow is a hard line one to three pixels under the silhouette,
+  // which is right for where two forms touch and wrong for what actually
+  // happens under a chin: the whole upper throat is in shade, deepest right
+  // under the jaw and running out somewhere above the collarbone. Dithered
+  // rather than stepped, because a graded shadow laid down in whole ramp steps
+  // arrives as two visible bands across the front of the neck.
+  const throwDepth = 8;
+  for (let y = anatomy.chinY; y <= Math.min(size - 1, anatomy.chinY + throwDepth); y += 1) {
+    const down = (y - anatomy.chinY) / throwDepth;
+    for (let x = 0; x < size; x += 1) {
+      const i = y * size + x;
+      if (!neck[i] || head[i]) continue;
+      if (raster.matAt(x, y) !== MAT.SKIN) continue;
+      // The sides of the neck are already turning away from the light; giving
+      // them the cast shadow as well stacks up into a black collar.
+      const across = Math.abs(x + 0.5 - anatomy.centerX) / Math.max(1, anatomy.neckHalf);
+      const amount = (1 - down) * (1 - across * 0.5) * 2.2;
+      const whole = Math.floor(amount);
+      const step = whole + (bayer(x, y) < amount - whole ? 1 : 0);
+      if (step > 0) raster.shift(x, y, Math.min(2, step), book);
+    }
+  }
 
   const ears = drawFacialModelling(context, head);
 
@@ -163,9 +192,51 @@ function drawFacialModelling(context: RenderContext, head: Mask): Mask {
     }
   }
 
-  // Chin: a small lit plane with the shadow of the lower lip above it.
-  const chinMask = maskEllipse(size, size, centerX - 1, anatomy.chinY - 5, 5, 3.5);
+  // Ears are hung on the silhouette row by row rather than at one fixed
+  // half-width: the skull narrows through the jaw, and an ear pinned to the
+  // widest point floats clear of the cheek at the bottom.
+  const edgeAt = (y: number) => {
+    const t = (y + 0.5 - anatomy.headTop) / Math.max(1, anatomy.headHeight);
+    return sampleProfile(anatomy.headProfile, Math.max(0, Math.min(1, t)));
+  };
+
+  // The mandible: a margin of shadow just inside the silhouette from below the
+  // ear to the corner of the chin. The jawline setting only ever changed the
+  // outline, so a square jaw and a sharp one differed by a pixel of width and
+  // by nothing at all in the modelling; this is the plane change that makes the
+  // difference read as bone.
+  const mandible = spec.jawline === 'sharp' || spec.jawline === 'square' ? 2 : 1;
+  for (const side of [-1, 1] as const) {
+    // Deeper on the shadow side. The lit side keeps a thin margin so the jaw
+    // still turns, rather than ending at the outline.
+    const depth = side === 1 ? mandible : Math.max(1, mandible - 1);
+    for (let y = anatomy.cheekY + 1; y <= anatomy.chinY - 2; y += 1) {
+      const half = edgeAt(y);
+      for (let d = 0; d < depth; d += 1) {
+        const x = Math.round(centerX + side * (half - 1 - d));
+        if (head[y * size + x]) raster.shift(x, y, 1, book);
+      }
+    }
+  }
+
+  // Chin: a small lit plane, shaped by the jaw it belongs to — broad and blunt
+  // under a square jaw, narrow under a sharp one.
+  const chinHalf = spec.jawline === 'square' ? 6.5 : spec.jawline === 'sharp' ? 4 : 5;
+  const chinMask = maskEllipse(size, size, centerX - 1, anatomy.chinY - 5, chinHalf, 3.5);
   shiftInside(chinMask, -1);
+
+  // The mental crease, between the lower lip and the ball of the chin. One row
+  // of shadow, and it is the whole difference between a chin and the place the
+  // mouth happens to stop. It dips at the ends the way the real crease does.
+  for (let dx = -4; dx <= 4; dx += 1) {
+    const taper = 1 - Math.abs(dx) / 5.5;
+    if (taper <= 0.25) continue;
+    const x = centerX + dx;
+    const y = anatomy.mouthY + 3 + (Math.abs(dx) > 2 ? 1 : 0);
+    if (x >= 0 && y >= 0 && x < size && y < size && head[y * size + x]) {
+      raster.shift(x, y, 1, book);
+    }
+  }
 
   // Jowls and a slacker jawline with age.
   if (spec.ageLines > 0.55) {
@@ -179,14 +250,6 @@ function drawFacialModelling(context: RenderContext, head: Mask): Mask {
       shiftInside(jowl, 1);
     }
   }
-
-  // Ears are hung on the silhouette row by row rather than at one fixed
-  // half-width: the skull narrows through the jaw, and an ear pinned to the
-  // widest point floats clear of the cheek at the bottom.
-  const edgeAt = (y: number) => {
-    const t = (y + 0.5 - anatomy.headTop) / Math.max(1, anatomy.headHeight);
-    return sampleProfile(anatomy.headProfile, Math.max(0, Math.min(1, t)));
-  };
 
   let ears = makeMask(size, size);
   for (const side of [-1, 1] as const) {

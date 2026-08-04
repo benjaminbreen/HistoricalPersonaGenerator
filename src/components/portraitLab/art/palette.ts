@@ -328,6 +328,20 @@ export function buildPortraitRamps(spec: PortraitSpec): PortraitRamps {
   book[MAT.GEM] = gem;
   book[MAT.LEATHER] = leather;
   book[MAT.WOOD] = buildRamp('#7a5a3c', { contrast: 1.15 });
+  // Undyed twine, sun-bleached. Wants real contrast rather than the flat ramp
+  // it started with: a net is drawn as strands one and two pixels wide, and at
+  // that size the knots can only be told from the cord by value.
+  book[MAT.CORD] = buildRamp('#b8a679', { contrast: 1.3, shift: 0.26, saturation: 0.85 });
+  // Bone is warm and never white — the moment it reads as white it reads as
+  // porcelain. Ivory, antler and shell all sit close enough to share this.
+  book[MAT.BONE] = buildRamp('#ded0b4', { contrast: 1.05, shift: 0.28, saturation: 0.7 });
+  // Flint and obsidian: cool, dense, and higher contrast than anything else in
+  // the set, because a struck edge catches light in a way wood never does.
+  book[MAT.STONE] = buildRamp('#6d6f72', { contrast: 1.45, shift: 0.34, saturation: 0.55 });
+  // Wrought iron: darker and cooler than any ornament metal, so a tool head
+  // reads as work rather than as jewellery, and so the ground edge has
+  // somewhere bright to go.
+  book[MAT.IRON] = buildRamp('#5f6266', { contrast: 1.5, shift: 0.32, saturation: 0.5 });
   book[MAT.PAINT] = buildRamp('#c8563c', { contrast: 1.1, saturation: 1.2 });
   book[MAT.GLASS] = buildRamp('#9fb2bd', { contrast: 1.3 });
   book[MAT.BG] = background;

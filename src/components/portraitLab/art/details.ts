@@ -743,16 +743,23 @@ interface PieceScale {
   spread: number;
 }
 
+/**
+ * `drop` is earring-only, and it was set for a piece that reads at 256px and
+ * disappears at 96. Doubled: an earring is the one ornament that hangs against
+ * open background rather than against cloth, so it can afford the length, and
+ * at the old scale a "large" ear ornament was five pixels of jaw-coloured
+ * jewellery beside a jaw.
+ */
 const PIECE_SCALE: Record<JewelrySpec['scale'], PieceScale> = {
-  small: { bead: 1, rows: 1, drop: 2, boss: 2, spread: 0.85 },
+  small: { bead: 1, rows: 1, drop: 4, boss: 2, spread: 0.85 },
   // Two strands. The middle of a three-step gradient has to be visibly the
   // middle: at one strand it was indistinguishable from `small` and the scale
   // had two values pretending to be three.
-  medium: { bead: 1, rows: 2, drop: 3, boss: 3, spread: 1 },
+  medium: { bead: 1, rows: 2, drop: 6, boss: 3, spread: 1 },
   // Three strands, wider beads and a real pendant. At 120px this is the
   // difference between "is that person wearing something?" and "that person is
   // wearing a collar".
-  large: { bead: 2, rows: 3, drop: 5, boss: 5, spread: 1.22 },
+  large: { bead: 2, rows: 3, drop: 9, boss: 5, spread: 1.22 },
 };
 
 export function drawJewelry(context: RenderContext, glints?: GlintSite[]): void {
@@ -791,8 +798,15 @@ export function drawJewelry(context: RenderContext, glints?: GlintSite[]): void 
         for (const side of [-1, 1] as const) {
           const x = centerX + side * (anatomy.earX + 1);
           const y = anatomy.earBottomY;
-          jewel(context, x, y, 2, ramp, mat);
-          bodyGlint?.(x, y);
+          // The stud, which was a single pixel and read as a speck of dust on
+          // the ear. A bead of two or three carries its own highlight and its
+          // own shadow, which is what makes it an object hanging in front of
+          // the background rather than a lit pixel.
+          const stud = delicate || item.scale === 'small' ? 2 : 3;
+          // `bead` at size 2 grows down and to the right, so on the sitter's
+          // right ear it has to start a pixel further out or it grows inward
+          // over the lobe.
+          bead(context, stud === 2 && side < 0 ? x - 1 : x, y, stud, ramp, mat, bodyGlint);
 
           if (item.scale === 'large') {
             /**
@@ -805,7 +819,7 @@ export function drawJewelry(context: RenderContext, glints?: GlintSite[]): void 
              * empty background, so the piece silhouettes there, while length
              * alone runs it into the shoulder.
              */
-            const w = 2;
+            const w = 3;
             for (let dy = 0; dy <= size.drop; dy += 1) {
               const t = dy / size.drop;
               // Widest a third of the way down, tapering to a rounded base.
@@ -816,15 +830,17 @@ export function drawJewelry(context: RenderContext, glints?: GlintSite[]): void 
               }
               if (dy % 2 === 0) bodyGlint?.(x - 1, y + dy);
             }
-            bead(context, x, y + size.drop + 1, size.boss - 1, stoneRamp, MAT.GEM, stoneGlint);
+            bead(context, x, y + size.drop + 1, size.boss, stoneRamp, MAT.GEM, stoneGlint);
           } else if (chunky || ornate) {
             // A hoop: two verticals and a rounded bottom.
             const drop = size.drop;
+            const span = chunky ? 3 : 2;
             for (let i = 1; i <= drop; i += 1) {
               jewel(context, x, y + i, i < drop ? 1.5 : 3, ramp, mat, false);
-              jewel(context, x + side * 2, y + i, i < drop ? 4 : 5, ramp, mat, false);
+              jewel(context, x + side * span, y + i, i < drop ? 4 : 5, ramp, mat, false);
             }
-            jewel(context, x + side, y + drop + 1, 4.5, ramp, mat);
+            for (let d = 1; d < span; d += 1) jewel(context, x + side * d, y + drop + 1, 4.5, ramp, mat);
+            jewel(context, x + side * span, y + drop + 1, 5, ramp, mat);
             if (ornate) {
               bead(context, x + (side < 0 ? -1 : 0), y + drop + 2, 2,
                 stoneRamp, MAT.GEM, stoneGlint);
@@ -836,7 +852,10 @@ export function drawJewelry(context: RenderContext, glints?: GlintSite[]): void 
             jewel(context, x, y + 2, 4, ramp, mat);
           } else {
             // A plain drop.
-            for (let i = 1; i <= 2; i += 1) jewel(context, x, y + i, 2 + i, ramp, mat, i === 2);
+            const drop = Math.max(2, Math.round(size.drop * 0.5));
+            for (let i = 1; i <= drop; i += 1) {
+              jewel(context, x, y + i, 2 + Math.min(2, i), ramp, mat, i === drop);
+            }
           }
         }
         break;

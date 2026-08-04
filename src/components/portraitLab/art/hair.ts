@@ -1473,7 +1473,9 @@ export function drawFacialHair(context: RenderContext, headMask: Mask): void {
   }
 
   if (regions.mustache) {
-    const top = anatomy.mouthY - 6;
+    // Sits on the upper lip, not the septum: starting any higher rides the
+    // moustache up over the base of the nose.
+    const top = Math.max(anatomy.noseBaseY + 1, anatomy.mouthY - 4);
     const rows = spec.facialHair.thickness === 'thick' ? 4 : 3;
     for (let i = 0; i < rows; i += 1) {
       const y = top + i;

@@ -11,12 +11,6 @@ export interface NameList {
     surname: string[];
 }
 
-export interface NameGenerationOptions {
-    allowNoSurname?: boolean;
-    preferCommonNames?: boolean;
-    historicalPeriod?: 'antiquity' | 'early_medieval' | 'high_medieval' | 'late_medieval' | 'renaissance' | 'early_modern' | 'industrial' | 'modern';
-}
-
 /** Family names that hardened out of chiefly, matai and hapū names after 1814. */
 const SURNAME_POLYNESIAN = ['Tupou', 'Taufa', 'Vaea', 'Fifita', 'Latu', 'Havili', 'Mahe', 'Maʻafu', 'Tuilagi', 'Tuiasosopo', 'Faleolo', 'Solomona', 'Ioane', 'Aiono', 'Malietoa', 'Mataʻafa', 'Ngata', 'Te Heuheu', 'Rātana', 'Pomare', 'Heke', 'Kereopa', 'Waititi', 'Kaa', 'Teariki', 'Tangaroa', 'Marsters', 'Temaru', '(No Surname)', '(No Surname)'];
 
@@ -460,7 +454,59 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         female: ['Ocllo', 'Huaco', 'Anahuarque', 'Chimpu', 'Cusi Chimbo', 'Rahua Ocllo', 'Añas Colque', 'Quispe Sisa', 'Cura Ocllo', 'Asarpay', 'Chuqui Huipa', 'Mama Runtu', 'Ipa Huaco', 'Tocto', 'Sisa', 'Tika', 'Qoyllur', 'Chaska', 'Wara', 'Sumaq', 'Rimay', 'Pallay'],
         surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
-    
+
+    // === INDIGENOUS AMERICA AFTER THE CONQUEST ===
+    /**
+     * The three sets below exist because the sets above them stop at the
+     * conquest, and the region rules went on naming them anyway. `MAYA` ends in
+     * 1600, `ZAPOTEC` and `MIXTEC` in 1600, `INCA` in 1580 — correctly, since
+     * they are precontact registers and the `INCA` list is literally the Sapa
+     * Inca succession — so the era gate dropped them from every rule covering
+     * the years since independence, and the whole share went to the Spanish set
+     * beside them. Yucatán, Oaxaca and the Andes generated no Indigenous person
+     * at all in any year after 1821, in three of the most heavily Indigenous
+     * regions on earth.
+     *
+     * The shape they take is the one the conquest actually produced, and it is
+     * the same shape in all three: baptism gave a Spanish given name, and the
+     * Indigenous name survived as the surname. A Yucatec farmer in 1950 is
+     * Domingo Canul; an Aymara one on the altiplano is Justo Mamani. Neither is
+     * "a Spanish name", and neither is a precontact one.
+     */
+    /** Yucatec and highland Maya. The surnames are the ordinary ones in Yucatán, Campeche and the Guatemalan highlands today. */
+    MAYA_MODERN: {
+        male: ['Domingo', 'Juan', 'José', 'Manuel', 'Santiago', 'Bernardo', 'Feliciano', 'Eusebio', 'Anastasio', 'Gaspar', 'Marcelino', 'Pedro', 'Diego', 'Sebastián', 'Nicolás', 'Andrés', 'Cornelio', 'Bonifacio', 'Fulgencio', 'Hilario'],
+        female: ['María', 'Juana', 'Petrona', 'Candelaria', 'Dominga', 'Marcelina', 'Eulalia', 'Concepción', 'Rosalía', 'Felipa', 'Andrea', 'Manuela', 'Teodora', 'Bartola', 'Genoveva', 'Prudencia', 'Silveria', 'Angelina', 'Nicolasa', 'Simona'],
+        surname: ['Pech', 'Canul', 'Chan', 'Dzul', 'Ek', 'Poot', 'Uc', 'Cauich', 'Kumul', 'Tzuc', 'May', 'Balam', 'Cocom', 'Xiu', 'Chi', 'Ku', 'Noh', 'Pat', 'Yam', 'Batz', 'Coj', 'Tzoc']
+    },
+    /**
+     * Zapotec and Mixtec Oaxaca.
+     *
+     * Deliberately not a list of Zapotec surnames, because there is no such
+     * list to draw on honestly: Oaxaca's Indigenous families carry Spanish
+     * surnames, and the naming is distinguished from creole naming by *which*
+     * Spanish names — saints' and feast-day names, and the toponymic and
+     * baptismal surnames given wholesale in the missions — rather than by
+     * being in another language. Writing invented Zapotec surnames here would
+     * look more Indigenous and be less true.
+     */
+    ZAPOTEC_MODERN: {
+        male: ['Isidro', 'Cirilo', 'Macario', 'Fidencio', 'Zenón', 'Aurelio', 'Melquiades', 'Bartolo', 'Crescencio', 'Timoteo', 'Baltazar', 'Wenceslao', 'Prócoro', 'Herminio', 'Gaudencio', 'Anselmo', 'Leoncio', 'Refugio', 'Casimiro', 'Nazario'],
+        female: ['Soledad', 'Crescencia', 'Herlinda', 'Eufemia', 'Perfecta', 'Bartola', 'Filomena', 'Saturnina', 'Aurora', 'Epifania', 'Modesta', 'Rufina', 'Bernardina', 'Reyna', 'Anastasia', 'Cleotilde', 'Práxedis', 'Emiliana', 'Zeferina', 'Gregoria'],
+        surname: ['Santiago', 'Bautista', 'De la Cruz', 'San Juan', 'Matus', 'Chagoya', 'Nolasco', 'Zárate', 'Toledo', 'Vásquez', 'Jiménez', 'Martínez', 'López', 'Luna', 'Mendoza', 'Ramírez', 'Hernández', 'Pacheco', 'Regalado', 'Sarabia']
+    },
+    /**
+     * Quechua and Aymara, from the conquest to now. Quispe and Mamani are among
+     * the commonest surnames in Peru and Bolivia; the given names are the older
+     * saint-day register that the modern urban `SPANISH_LATIN_AMERICAN` list —
+     * Camila, Valentina, Ximena — is wrong for outside the cities.
+     */
+    ANDEAN_MODERN: {
+        male: ['Justo', 'Feliciano', 'Eusebio', 'Mariano', 'Gregorio', 'Pastor', 'Basilio', 'Fermín', 'Cirilo', 'Anacleto', 'Zenón', 'Hipólito', 'Nicanor', 'Fortunato', 'Serapio', 'Bonifacio', 'Teodoro', 'Julián', 'Máximo', 'Juan'],
+        female: ['Julia', 'Santusa', 'Bernardina', 'Felipa', 'Gregoria', 'Marcelina', 'Toribia', 'Sabina', 'Paulina', 'Eusebia', 'Hilaria', 'Basilia', 'Prudencia', 'Celestina', 'Máxima', 'Fortunata', 'Asunta', 'Justina', 'Rosalía', 'Nieves'],
+        surname: ['Quispe', 'Mamani', 'Condori', 'Huamán', 'Apaza', 'Ticona', 'Chambi', 'Choque', 'Yupanqui', 'Poma', 'Cusi', 'Layme', 'Ccama', 'Sucari', 'Callisaya', 'Colque', 'Tarqui', 'Vilca', 'Choquehuanca', 'Anccasi']
+    },
+
     /**
      * Tupinambá and related Tupi-Guarani speakers of the Brazilian coast.
      *
@@ -1301,6 +1347,57 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         female: ['Mere', 'Salote', 'Ana', 'Litia', 'Maria', 'Sala', 'Teresia', 'Adi', 'Bulou', 'Episalote', 'Kesaia', 'Makereta', 'Salanieta', 'Talei', 'Vasiti', 'Alisi', 'Fulori', 'Kelera', 'Lusi', 'Naomi', 'Salote', 'Tokasa', 'Varanisese', 'Asenaca', 'Ilisapeci', 'Loloma', 'Milika', 'Raijeli', 'Sera', 'Una'],
         surname: ['Bose', 'Dakuwaqa', 'Leweniqila', 'Mataitoga', 'Nailatikau', 'Ratunabuabua', 'Seniloli', 'Tavatavanawai', 'Vuanirewa', 'Waqa', 'Cakobau', 'Ganilau', 'Koroilavesau', 'Mara', 'Qarase', 'Roko', 'Tui', 'Vuki', 'Bolabola', 'Cavuilati']
     },
+    /**
+     * Guam and the Marianas after the Spanish mission of 1668.
+     *
+     * Micronesia had no name set at all, so its region rule listed four
+     * colonial ones — Spanish, German, Japanese, English — and every persona
+     * born in the islands from 1668 onwards was one of the administrators. In
+     * 1900 Guam that gave Otto Krause and Midori Abe on an island that was
+     * overwhelmingly Chamorro.
+     *
+     * Given names are Spanish because the mission made them so; the surnames
+     * are the Chamorro ones borne on Guam and Saipan today, several of which
+     * (Taitano, Quitugua, Pangelinan, Chargualaf) are Chamorro rather than
+     * Spanish and none of which are the administrators'.
+     */
+    CHAMORRO: {
+        male: ['Juan', 'Jose', 'Vicente', 'Francisco', 'Antonio', 'Pedro', 'Ignacio', 'Ramon', 'Joaquin', 'Manuel', 'Luis', 'Jesus', 'Felix', 'Tomas', 'Mariano', 'Eduardo', 'Benigno', 'Carlos', 'Rafael', 'Gregorio'],
+        female: ['Maria', 'Rosa', 'Ana', 'Josefa', 'Carmen', 'Dolores', 'Concepcion', 'Rita', 'Isabel', 'Teresita', 'Juana', 'Antonia', 'Soledad', 'Consuelo', 'Remedios', 'Asuncion', 'Magdalena', 'Vicenta', 'Francisca', 'Encarnacion'],
+        surname: ['Cruz', 'Santos', 'Camacho', 'Taitano', 'Quitugua', 'Pangelinan', 'Sablan', 'Guerrero', 'Borja', 'Aguon', 'Tenorio', 'Babauta', 'Blas', 'Cepeda', 'Chargualaf', 'Duenas', 'Manglona', 'Muna', 'Salas', 'Mendiola']
+    },
+    /**
+     * The Carolines, the Marshalls and the Gilberts — Chuuk, Pohnpei, Kosrae,
+     * Yap, Majuro, Tarawa. A different naming world from the Marianas, and
+     * mission-influenced from the 1850s rather than the 1660s, so the given
+     * names are a genuine mixture of Indigenous and biblical.
+     *
+     * Approximate rather than exhaustive: these are five language families in
+     * one set, kept together because the map region does not distinguish them.
+     */
+    MICRONESIAN: {
+        male: ['Kessai', 'Litokwa', 'Amata', 'Anote', 'Teburoro', 'Taneti', 'Ieremia', 'Manny', 'Redley', 'Sebastian', 'Wesley', 'Jurelang', 'Ruben', 'Tarcisius', 'Bailey', 'Emanuel', 'Peter', 'Halvorsen', 'Kaiko', 'Berman'],
+        female: ['Hilda', 'Lijon', 'Neijon', 'Teuru', 'Tekarei', 'Rosalia', 'Mariana', 'Emi', 'Kiluwe', 'Sisilia', 'Marlene', 'Doreen', 'Anna', 'Teresia', 'Nariko', 'Loeak', 'Betwel', 'Elina', 'Tiare', 'Nahnken'],
+        surname: ['Kabua', 'Loeak', 'Heine', 'Note', 'Zackhras', 'Tong', 'Tito', 'Teannaki', 'Tabai', 'Nakayama', 'Mori', 'Christian', 'Falcam', 'Panuelo', 'Silk', 'Elimo', 'Mailo', 'Sigrah', 'Tosie', 'Weilbacher']
+    },
+    /**
+     * Sakha (Yakut), Buryat and Evenk, for the Siberia region.
+     *
+     * Its rule was `['RUSSIAN']` and nothing else from 1600 onwards, so the
+     * peoples the conquest found there stopped existing in the generator on
+     * the year the first Cossack fort went up. Russians did become the large
+     * majority of Siberia — this set is weighted as the minority it is, not
+     * removed as the absence it was.
+     *
+     * Surnames are Russified because they are: civil registration in the
+     * Russian Empire and then the USSR gave Sakha and Buryat families
+     * -ov/-ev names, and those are what people carry.
+     */
+    SIBERIAN_INDIGENOUS: {
+        male: ['Ayaal', 'Aisen', 'Uyguun', 'Nyurgun', 'Erchim', 'Dokhsun', 'Sargylan', 'Bair', 'Bator', 'Zorigto', 'Dorzho', 'Ayuur', 'Batu', 'Gomboyn', 'Rinchin', 'Tumen', 'Damdin', 'Sanzhi', 'Chimit', 'Bulat'],
+        female: ['Sardaana', 'Kyunnei', 'Aiyyna', 'Tuyaara', 'Nariyana', 'Keskil', 'Michiye', 'Sesegma', 'Dulma', 'Erzhena', 'Namjilma', 'Tuyana', 'Oyuuna', 'Handa', 'Darima', 'Bairma', 'Sajaana', 'Solongo', 'Aryuna', 'Zhargalma'],
+        surname: ['Nikolaev', 'Sleptsov', 'Gogolev', 'Struchkov', 'Ivanov', 'Popov', 'Sivtsev', 'Alekseev', 'Dashiev', 'Tsydenov', 'Badmaev', 'Ochirov', 'Rinchinov', 'Zhamsuev', 'Bazarov', 'Dorzhiev', 'Budaev', 'Garmaev', '(No Surname)', '(No Surname)']
+    },
 
     // === OCEANIA BEFORE THE MISSIONS ===
     /**
@@ -1436,7 +1533,10 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
     APACHE: {
         male: ['Bidziil', 'Cochise', 'Dahkeya', 'Elan', 'Goyahkla', 'Hastiin', 'Illanipi', 'Jacy', 'Klah', 'Kuruk', 'Naiche', 'Nayati', 'Nantan', 'Mangas', 'Chato', 'Taza', 'Nana', 'Loco', 'Juh', 'Alchise', 'Tsela', 'Bodaway', 'Delshay', 'Eskiminzin', 'Nahiossi', 'Naalnish', 'Tsintah', 'Itza-chu', 'Kas-tziden', 'Tse-ne-gat'],
         female: ['Aiyana', 'Chosposi', 'Dezba', 'Gouyen', 'Huera', 'Ipa', 'Jacali', 'Kachina', 'Lozen', 'Nalin', 'Ooljee', 'Paloma', 'Sonseeahray', 'Tala', 'Unega', 'Dahteste', 'Ishton', 'Siki', 'Zi-yeh', 'Beshad-e', 'Ih-tedda', 'She-gha', 'Ih-na-tah', 'Nah-dos-te', 'Shtsha-she', 'E-clah-heh', 'Dilth-cleyhen', 'Bi-ya-neta', 'Tzoe-ay', 'Nah-de-yole'],
-        surname: ['Chiricahua', 'Mescalero', 'Jicarilla', 'Lipan', 'Western-Apache', 'Plains-Apache', 'White-Mountain', 'San-Carlos', 'Cibecue', 'Tonto']
+        // Chiricahua, Mescalero, Jicarilla and Lipan are bands, not families —
+        // nobody is surnamed "Western-Apache" any more than a Yorkshireman is
+        // surnamed Yorkshire. Apache naming in this register is a single name.
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
     },
     CHEROKEE: {
         male: ['Atsila', 'Danuwoa', 'Gola', 'Kanuna', 'Mohe', 'Onacona', 'Salali', 'Tsiyi', 'Waya', 'Yona', 'Aganvdisi', 'Adahy', 'Ahanu', 'Degotoga', 'Gawonii', 'Kanoska', 'Oconostota', 'Ostenaco', 'Attakullakulla', 'Doublehead', 'Pathkiller', 'Tahchee', 'Utsidihi', 'Wohali', 'Yonaguska', 'Tsunu', 'Ganundalegi', 'Sequoyah', 'Junaluska', 'Oosahwee'],
@@ -1458,10 +1558,40 @@ export const CHARACTER_NAMES: Record<string, NameList> = {
         female: ['Pocahontas', 'Wetamoo', 'Awashonks', 'Weetamoo', 'Mononotto', 'Cockacoeske', 'Totopotomoi', 'Nicketti', 'Wunne', 'Askook', 'Namumpum', 'Quaiapen', 'Magnus', 'Matantuck', 'Wootonekanuske', 'Oppussoquionuske', 'Aspenquid', 'Mamanuette', 'Sunksquaw', 'Winema'],
         surname: ['Wampanoag', 'Narragansett', 'Pequot', 'Mohegan', 'Nipmuc', 'Pocumtuck', 'Pennacook', 'Abenaki', 'Passamaquoddy', 'Micmac', 'Maliseet', 'Lenape', 'Shawnee', 'Ojibwe', 'Potawatomi', 'Menominee', 'Sauk', 'Fox', 'Kickapoo', 'Miami']
     },
+    /**
+     * The Rio Grande and Western pueblos before the entrada.
+     *
+     * Rewritten because almost none of it was names. The male list was mostly
+     * *pueblos* — Acoma, Taos, Cochiti, Nambé, Picurís, Pojoaque, Sandia,
+     * Tesuque, Isleta, Laguna are places, and Tewa, Tiwa and Keres are language
+     * groups; the female list included Hopi (a people), Kokopelli and Kachina
+     * (not personal names, and the second not a thing a person is called at
+     * all). What remains is the handful the historical record actually carries,
+     * with figures from Pueblo oral tradition beside them.
+     *
+     * The surnames were fifteen invented English clan-glosses — "Antelope-Clan",
+     * "Badger-Clan", "Sun-Clan". Clan membership is real and matters; it is not
+     * and was not a surname, and rendering it as one produced personas called
+     * Richard Antelope-Clan. Pueblo naming before the missions was a single
+     * name, so that is what this set now carries. See [PUEBLO_MODERN] for the
+     * names Pueblo people have borne since.
+     */
     PUEBLO: {
-        male: ['Popé', 'Tewa', 'Keres', 'Tiwa', 'Acoma', 'Taos', 'Cochiti', 'Nambe', 'Ohkay', 'Picuris', 'Pojoaque', 'Sandia', 'Tesuque', 'Isleta', 'Laguna', 'Masewa', 'Oyoyewa', 'Poseyemu', 'Montezuma', 'Payatamu'],
-        female: ['Aiyana', 'Kaya', 'Mika', 'Nova', 'Sora', 'Tiva', 'Yara', 'Kiva', 'Mesa', 'Hopi', 'Keres', 'Tewa', 'Butterfly', 'Kachina', 'Kokopelli', 'Selu', 'Corn-Mother', 'Blue-Corn', 'White-Shell', 'Turquoise'],
-        surname: ['Sun-Clan', 'Cloud-Clan', 'Corn-Clan', 'Water-Clan', 'Sky-Clan', 'Earth-Clan', 'Turquoise-Clan', 'Eagle-Clan', 'Bear-Clan', 'Antelope-Clan', 'Coyote-Clan', 'Snake-Clan', 'Badger-Clan', 'Butterfly-Clan', 'Parrot-Clan']
+        male: ['Popé', 'Tupatú', 'Malacate', 'Catiti', 'Jaca', 'Masewa', 'Oyoyewa', 'Poseyemu', 'Payatamu', 'Ahayuta', 'Kwatoko', 'Sowitu', 'Tsiping', 'Okuwa', 'Povi', 'Tsehpo', 'Kanyi', 'Shruwi', 'Aiyaye', 'Hemish'],
+        female: ['Kotcimanyako', 'Tsipiya', 'Povika', 'Okuwatsire', 'Yellow-Corn', 'Blue-Corn', 'White-Shell', 'Turquoise', 'Tsiwema', 'Kayemo', 'Shiwana', 'Nampeyo', 'Kotyiti', 'Aiyana', 'Tiva', 'Kiva', 'Sowi', 'Poviyemo', 'Tsapu', 'Hanoma'],
+        surname: ['(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)', '(No Surname)']
+    },
+    /**
+     * Pueblo people from the missions to now: a Spanish given name over a
+     * Pueblo or Hispanicised surname, the same form the conquest produced in
+     * Yucatán and the Andes. Suina, Naranjo, Tafoya, Yepa, Toya, Waquie, Pecos,
+     * Cheromiah and Sarracino are ordinary surnames at Jemez, Cochiti, Santa
+     * Clara, Laguna and Acoma today.
+     */
+    PUEBLO_MODERN: {
+        male: ['Juan', 'José', 'Antonio', 'Manuel', 'Diego', 'Santiago', 'Felipe', 'Ramón', 'Alfonso', 'Emilio', 'Reyes', 'Vicente', 'Andrés', 'Benito', 'Cipriano', 'Domingo', 'Estevan', 'Lorenzo', 'Pablo', 'Refugio'],
+        female: ['María', 'Josefa', 'Lupita', 'Dolores', 'Ramona', 'Isabel', 'Juanita', 'Rosita', 'Carmelita', 'Anita', 'Petra', 'Crucita', 'Eloisa', 'Filomena', 'Guadalupe', 'Manuelita', 'Reyecita', 'Serafina', 'Teresita', 'Ursula'],
+        surname: ['Suina', 'Naranjo', 'Tafoya', 'Lucero', 'Cata', 'Yepa', 'Toya', 'Waquie', 'Pecos', 'Analla', 'Chino', 'Shije', 'Sarracino', 'Cheromiah', 'Tenorio', 'Quintana', 'Trujillo', 'Romero', 'Vigil', 'Sandoval', 'Loretto', 'Tosa']
     },
     INUIT: {
         male: ['Nanook', 'Amarok', 'Atka', 'Nukka', 'Tulugaq', 'Qimmiq', 'Siku', 'Akiak', 'Desna', 'Iluq', 'Kallik', 'Malik', 'Nuka', 'Pakak', 'Sesi', 'Taqtu', 'Ukiuk', 'Yuka', 'Toklo', 'Nayuk'],
@@ -1560,7 +1690,12 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         { after: -800, before: -218, keys: ['PREHISTORIC_PROTO_CELTIC', 'CELTIC_ANCIENT'] }, // Celtiberian Iron Age
         { after: -218, before: 410, keys: ['ANCIENT_ROMAN'] }, // Roman Hispania
         { after: 410, before: 711, keys: ['ANCIENT_ROMAN', 'GERMAN'] }, // Visigothic period
-        { after: 711, before: 1200, keys: ['SPANISH_CASTILIAN', 'PORTUGUESE', 'GALICIAN', 'MAGHREBI', 'ARABIAN_HEJAZ', 'JEWISH_ASHKENAZI'] },
+        // al-Andalus. ARABIAN_HEJAZ ends in 700 — it is a Companions-era
+        // register — so the Arab-Andalusi share of this rule was dropped on
+        // every draw. MOORISH_ANDALUS is the set written for exactly this
+        // place and period, and had never been used anywhere.
+        { after: 711, before: 1200, keys: ['SPANISH_CASTILIAN', 'PORTUGUESE', 'GALICIAN', 'MOORISH_ANDALUS', 'MAGHREBI', 'JEWISH_ASHKENAZI'],
+          weights: { SPANISH_CASTILIAN: 6, PORTUGUESE: 4, GALICIAN: 3, MOORISH_ANDALUS: 8, MAGHREBI: 5, JEWISH_ASHKENAZI: 2 } },
         { after: 1200, before: 1492, keys: ['SPANISH_CASTILIAN', 'PORTUGUESE', 'GALICIAN', 'MAGHREBI'] },
         { after: 1492, keys: ['SPANISH_CASTILIAN', 'PORTUGUESE', 'GALICIAN'] }
     ],
@@ -1612,14 +1747,72 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         { after: 1918, keys: ['ROMANIAN', 'HUNGARIAN_MODERN', 'GERMAN'] }
     ],
     // Balkans
+    /**
+     * The Balkans as a *map region*, which reaches further than the word does:
+     * its areas include the Bosporus and the Thracian Plain — Istanbul and
+     * Turkish Thrace — and those two hold more people than any other part of
+     * it. The rule below dropped `TURKISH` at 1912, correctly for Ottoman
+     * Europe and disastrously for the fifteen million people still living on
+     * the European side of Turkey, who were left with a 0% share of the region
+     * they live in. A persona born in Istanbul in 1952 came out as Emilija
+     * Petrovic, Serbian-named, Orthodox, and a native speaker of Turkish.
+     *
+     * The two Turkish areas now have their own entries below, which the locale
+     * lookup prefers; this rule is what remains of the region, and is weighted
+     * to it. Romania is the largest of those populations and was drawing a
+     * sixth; Croatia is among the smaller and was drawing a quarter.
+     */
     "Balkans": [
         { before: -400, keys: ['PREHISTORIC_PROTO_INDO_EUROPEAN'] }, // Paleo-Balkan tribes (Illyrians, Thracians)
         { after: -400, before: 146, keys: ['ANCIENT_GREEK'] }, // Hellenistic influence
         { after: 146, before: 600, keys: ['ANCIENT_ROMAN', 'ANCIENT_GREEK'] },
         { after: 600, before: 1453, keys: ['BYZANTINE', 'SLAVIC_MEDIEVAL', 'SERBIAN', 'BULGARIAN', 'CROATIAN'] },
-        { after: 1453, before: 1912, keys: ['TURKISH', 'GREEK', 'SERBIAN', 'BULGARIAN', 'CROATIAN', 'ROMANIAN'] },
-        { after: 1912, before: 1991, keys: ['YUGOSLAV', 'GREEK', 'BULGARIAN', 'ROMANIAN'] },
-        { after: 1991, keys: ['SERBIAN', 'CROATIAN', 'BULGARIAN', 'GREEK', 'ROMANIAN'] }
+        {
+            after: 1453, before: 1912, keys: ['TURKISH', 'GREEK', 'SERBIAN', 'BULGARIAN', 'CROATIAN', 'ROMANIAN'],
+            weights: { GREEK: 8, SERBIAN: 8, ROMANIAN: 8, BULGARIAN: 6, TURKISH: 5, CROATIAN: 4 },
+        },
+        {
+            // The Yugoslav set is Serbo-Croat, so listing it *instead of*
+            // Serbian and Croatian is right — but Greece and Romania were never
+            // in Yugoslavia and are the two largest populations here.
+            after: 1912, before: 1991, keys: ['YUGOSLAV', 'ROMANIAN', 'GREEK', 'BULGARIAN'],
+            weights: { YUGOSLAV: 9, ROMANIAN: 8, GREEK: 6, BULGARIAN: 4 },
+        },
+        {
+            after: 1991, keys: ['ROMANIAN', 'GREEK', 'SERBIAN', 'BULGARIAN', 'CROATIAN'],
+            weights: { ROMANIAN: 9, GREEK: 6, SERBIAN: 5, BULGARIAN: 4, CROATIAN: 3 },
+        }
+    ],
+    /**
+     * Istanbul and its straits. A locale entry, so it wins over the Balkans
+     * rule above for the one area of the region that has been Turkish-speaking
+     * since 1453 and is now a city of sixteen million.
+     *
+     * The Rum, Armenian and Jewish communities of the city were large into the
+     * twentieth century and are tiny now, so they are bounded rather than
+     * carried forward: the 1955 pogrom and the 1964 expulsions ended them.
+     */
+    "Bosporus": [
+        { before: 330, keys: ['ANCIENT_GREEK', 'ANCIENT_ROMAN'] },
+        { after: 330, before: 1453, keys: ['BYZANTINE', 'GREEK', 'ARMENIAN'], weights: { BYZANTINE: 10, GREEK: 6, ARMENIAN: 2 } },
+        {
+            after: 1453, before: 1923, keys: ['TURKISH', 'GREEK', 'ARMENIAN', 'JEWISH_ASHKENAZI'],
+            weights: { TURKISH: 20, GREEK: 7, ARMENIAN: 4, JEWISH_ASHKENAZI: 1 },
+        },
+        { after: 1923, keys: ['TURKISH', 'GREEK', 'ARMENIAN'], weights: { TURKISH: 40, GREEK: 1, ARMENIAN: 1 } }
+    ],
+    /**
+     * Thrace, which the map region splits between three countries — Turkish
+     * Eastern Thrace, Greek Western Thrace and Bulgarian Northern Thrace. The
+     * population exchange of 1923 is what sorted them, and is the date here.
+     */
+    "Thracian Plain": [
+        { before: 1453, keys: ['BYZANTINE', 'GREEK', 'BULGARIAN'], weights: { BYZANTINE: 6, GREEK: 6, BULGARIAN: 5 } },
+        {
+            after: 1453, before: 1923, keys: ['TURKISH', 'GREEK', 'BULGARIAN'],
+            weights: { TURKISH: 8, GREEK: 6, BULGARIAN: 6 },
+        },
+        { after: 1923, keys: ['TURKISH', 'BULGARIAN', 'GREEK'], weights: { TURKISH: 9, BULGARIAN: 6, GREEK: 4 } }
     ],
     "Croatia and Environs": [
         { before: -400, keys: ['PREHISTORIC_PROTO_INDO_EUROPEAN'] },
@@ -1886,14 +2079,37 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         ],
         "Southern California": [
             { before: 1769, keys: ['CALIFORNIA_NATIVE'] },
-            { after: 1769, before: 1848, keys: ['SPANISH_CASTILIAN', 'AZTEC', 'CALIFORNIA_NATIVE'] },
+            // The pobladores came up from Sonora and Sinaloa and were mostly
+            // mestizo and mulatto, not Castilian and not Mexica: `AZTEC` had
+            // lapsed in 1600 and was dropped on every draw regardless.
+            { after: 1769, before: 1848, keys: ['CALIFORNIA_NATIVE', 'TEXAS_SPANISH_COLONIAL', 'SPANISH_CASTILIAN'],
+              weights: { CALIFORNIA_NATIVE: 10, TEXAS_SPANISH_COLONIAL: 6, SPANISH_CASTILIAN: 3 } },
             { after: 1848, keys: ['TEXAS_ANGLO', 'SPANISH_LATIN_AMERICAN', 'AFRICAN_AMERICAN', 'CHINESE_CANTONESE', 'JAPANESE', 'KOREAN'] }
         ],
         // Southwest & Great Plains
         "Southwest": [
-            { before: 1540, keys: ['PUEBLO', 'SOUTHWEST_NATIVE', 'APACHE'] },
-            { after: 1540, before: 1848, keys: ['TEXAS_SPANISH_COLONIAL', 'SPANISH_CASTILIAN', 'PUEBLO', 'APACHE'] },
-            { after: 1848, keys: ['TEXAS_ANGLO', 'SPANISH_LATIN_AMERICAN', 'PUEBLO', 'APACHE'] }
+            {
+                // The farming pueblos held most of the people; the Apache and
+                // Diné bands ranged over most of the ground.
+                before: 1540, keys: ['PUEBLO', 'SOUTHWEST_NATIVE', 'APACHE'],
+                weights: { PUEBLO: 10, SOUTHWEST_NATIVE: 6, APACHE: 5 },
+            },
+            {
+                // New Mexico under Spain and Mexico stayed overwhelmingly
+                // Pueblo and Hispano-genízaro; peninsular Castilians were a
+                // governor and his household.
+                after: 1540, before: 1848, keys: ['PUEBLO', 'PUEBLO_MODERN', 'TEXAS_SPANISH_COLONIAL', 'APACHE', 'NAVAJO', 'SPANISH_CASTILIAN'],
+                weights: { PUEBLO: 7, PUEBLO_MODERN: 7, TEXAS_SPANISH_COLONIAL: 8, APACHE: 4, NAVAJO: 3, SPANISH_CASTILIAN: 2 },
+            },
+            {
+                // After the Mexican Cession. A uniform draw put two Indigenous
+                // sets against two settler ones and made the modern Southwest
+                // half Native American, in states that are around a tenth —
+                // which is still the largest Indigenous share in the country,
+                // and is why all three nations stay in the rule.
+                after: 1848, keys: ['TEXAS_ANGLO', 'SPANISH_LATIN_AMERICAN', 'NAVAJO', 'PUEBLO_MODERN', 'APACHE'],
+                weights: { TEXAS_ANGLO: 40, SPANISH_LATIN_AMERICAN: 38, NAVAJO: 6, PUEBLO_MODERN: 5, APACHE: 2 },
+            }
         ],
         "Great Plains": [
             { before: 1700, keys: ['PLAINS_NATIVE', 'LAKOTA_SIOUX', 'APACHE'] },
@@ -1933,8 +2149,12 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1550, before: 1670, keys: ['SPANISH_CASTILIAN', 'ENGLISH', 'FRENCH', 'CHEROKEE'] },
             { after: 1670, before: 1865, keys: ['AFRICAN_AMERICAN', 'ENGLISH', 'SPANISH_CASTILIAN', 'FRENCH', 'CHEROKEE'],
               weights: { AFRICAN_AMERICAN: 0.05, ENGLISH: 0.45, SPANISH_CASTILIAN: 0.14, FRENCH: 0.12, CHEROKEE: 0.24 } },
-            { after: 1865, keys: ['AFRICAN_AMERICAN', 'NORTH_AMERICAN_COLONIAL', 'ENGLISH', 'SCOTTISH'],
-              weights: { AFRICAN_AMERICAN: 0.40, NORTH_AMERICAN_COLONIAL: 0.24, ENGLISH: 0.24, SCOTTISH: 0.12 } }
+            // NORTH_AMERICAN_COLONIAL ends in 1840, so its 24% was being
+            // silently redistributed here; NORTH_AMERICAN_MODERN is the same
+            // population a generation on, and is what that ceiling exists to
+            // hand over to.
+            { after: 1865, keys: ['AFRICAN_AMERICAN', 'NORTH_AMERICAN_MODERN', 'ENGLISH', 'SCOTTISH'],
+              weights: { AFRICAN_AMERICAN: 0.40, NORTH_AMERICAN_MODERN: 0.24, ENGLISH: 0.24, SCOTTISH: 0.12 } }
         ],
         "Atlantic Coast": [
             { before: 1607, keys: ['ALGONQUIAN'] },
@@ -1961,6 +2181,21 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1521, before: 1821, keys: ['SPANISH_CASTILIAN', 'AZTEC'] },
             { after: 1821, keys: ['SPANISH_LATIN_AMERICAN'] }
         ],
+        /**
+         * Mexico and Central America after independence.
+         *
+         * Every rule in this block named its Indigenous set beside the Spanish
+         * one and meant it — and every one of those keys had lapsed by 1600, so
+         * the era gate dropped it and the Spanish set took the whole draw. The
+         * intent was in the table the entire time; only the mechanism was
+         * missing. The modern sets below carry it out.
+         *
+         * The weights are census orders of magnitude, not precision: Yucatán
+         * was around a third Maya-speaking in the mid-twentieth century and
+         * Maya-surnamed far beyond that, Oaxaca about half Indigenous,
+         * Guatemala's highlands a clear majority, and the Valley of Mexico a
+         * small but real Nahua minority in a mostly mestizo city.
+         */
         "Valley of Mexico": [
             { before: 1521, keys: ['AZTEC'] },
             { after: 1521, before: 1821, keys: ['SPANISH_CASTILIAN', 'AZTEC'] },
@@ -1968,28 +2203,41 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         ],
         "Central America": [
             { before: 1520, keys: ['MAYA', 'MIXTEC', 'ZAPOTEC'] },
-            { after: 1520, before: 1821, keys: ['SPANISH_CASTILIAN', 'MAYA'] },
-            { after: 1821, keys: ['SPANISH_LATIN_AMERICAN', 'MAYA', 'AFRICAN_AMERICAN'] }
+            { after: 1520, before: 1821, keys: ['SPANISH_CASTILIAN', 'MAYA', 'MAYA_MODERN'], weights: { MAYA_MODERN: 10, MAYA: 6, SPANISH_CASTILIAN: 4 } },
+            {
+                after: 1821, keys: ['MAYA_MODERN', 'SPANISH_LATIN_AMERICAN', 'AFRICAN_AMERICAN'],
+                weights: { MAYA_MODERN: 10, SPANISH_LATIN_AMERICAN: 9, AFRICAN_AMERICAN: 1 },
+            }
         ],
         "Mayan Lowlands": [
             { before: 1520, keys: ['MAYA'] },
-            { after: 1520, before: 1821, keys: ['SPANISH_CASTILIAN', 'MAYA'] },
-            { after: 1821, keys: ['SPANISH_LATIN_AMERICAN', 'MAYA'] }
+            { after: 1520, before: 1821, keys: ['MAYA', 'MAYA_MODERN', 'SPANISH_CASTILIAN'], weights: { MAYA: 8, MAYA_MODERN: 9, SPANISH_CASTILIAN: 2 } },
+            { after: 1821, keys: ['MAYA_MODERN', 'SPANISH_LATIN_AMERICAN'], weights: { MAYA_MODERN: 12, SPANISH_LATIN_AMERICAN: 6 } }
         ],
         "Yucatán Peninsula": [
             { before: 1520, keys: ['MAYA'] },
-            { after: 1520, before: 1821, keys: ['SPANISH_CASTILIAN', 'MAYA'] },
-            { after: 1821, keys: ['SPANISH_LATIN_AMERICAN', 'MAYA'] }
+            { after: 1520, before: 1821, keys: ['MAYA', 'MAYA_MODERN', 'SPANISH_CASTILIAN'], weights: { MAYA: 8, MAYA_MODERN: 9, SPANISH_CASTILIAN: 2 } },
+            { after: 1821, keys: ['MAYA_MODERN', 'SPANISH_LATIN_AMERICAN'], weights: { MAYA_MODERN: 11, SPANISH_LATIN_AMERICAN: 7 } }
         ],
         "Oaxaca Highlands": [
             { before: 1521, keys: ['ZAPOTEC', 'MIXTEC'] },
-            { after: 1521, before: 1821, keys: ['SPANISH_CASTILIAN', 'ZAPOTEC', 'MIXTEC'] },
-            { after: 1821, keys: ['SPANISH_LATIN_AMERICAN', 'ZAPOTEC', 'MIXTEC'] }
+            { after: 1521, before: 1821, keys: ['ZAPOTEC', 'MIXTEC', 'ZAPOTEC_MODERN', 'SPANISH_CASTILIAN'], weights: { ZAPOTEC: 5, MIXTEC: 4, ZAPOTEC_MODERN: 8, SPANISH_CASTILIAN: 2 } },
+            { after: 1821, keys: ['ZAPOTEC_MODERN', 'SPANISH_LATIN_AMERICAN'], weights: { ZAPOTEC_MODERN: 10, SPANISH_LATIN_AMERICAN: 8 } }
         ],
         "Mosquito Coast": [
             { before: 1630, keys: ['MAYA', 'CARIB'] },
-            { after: 1630, before: 1860, keys: ['ENGLISH', 'CARIB', 'MAYA', 'AFRICAN_AMERICAN'] },
-            { after: 1860, keys: ['SPANISH_LATIN_AMERICAN', 'ENGLISH', 'CARIB', 'AFRICAN_AMERICAN'] }
+            {
+                // The Miskito kingdom under British protection, and the Black
+                // Carib deported to the bay islands in 1797. `CARIB` lapses at
+                // 1700 and `MAYA` at 1600, which left this window British and
+                // African-American — the two smallest populations on the coast.
+                after: 1630, before: 1860, keys: ['CARIB', 'MAYA_MODERN', 'AFRO_CARIBBEAN', 'AFRICAN_AMERICAN', 'ENGLISH'],
+                weights: { CARIB: 8, MAYA_MODERN: 5, AFRO_CARIBBEAN: 5, AFRICAN_AMERICAN: 2, ENGLISH: 2 },
+            },
+            {
+                after: 1860, keys: ['MAYA_MODERN', 'AFRO_CARIBBEAN', 'SPANISH_LATIN_AMERICAN', 'AFRICAN_AMERICAN', 'ENGLISH'],
+                weights: { MAYA_MODERN: 7, AFRO_CARIBBEAN: 6, SPANISH_LATIN_AMERICAN: 6, AFRICAN_AMERICAN: 2, ENGLISH: 1 },
+            }
         ],
         "Panama Isthmus": [
             { before: 1510, keys: ['MUISCA', 'CARIB'] },
@@ -2075,15 +2323,39 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         ]
     },
     "SOUTH_AMERICAN_COLONIAL": {
+        /**
+         * The Andes, where the same lapse did the most damage. `INCA` ends in
+         * 1580 and every post-independence rule here named it, so the Quechua
+         * and Aymara majorities of Peru and Bolivia were unreachable in any
+         * year after 1820 — while the German and Italian immigration to the
+         * southern cone, listed beside them, drew at full strength. Measured
+         * before this change, the southern Andes in 1950 came out 30% Italian
+         * and 20% German and 0% Andean.
+         *
+         * `ANDEAN_MODERN` is the same people the `INCA` set is about, named the
+         * way they were named after the conquest rather than before it.
+         */
         "Andes North": [
             { before: 1533, keys: ['INCA', 'MUISCA'] },
-            { after: 1533, before: 1820, keys: ['SPANISH_CASTILIAN', 'INCA', 'MUISCA'] },
-            { after: 1820, keys: ['SPANISH_LATIN_AMERICAN', 'INCA', 'MUISCA'] }
+            { after: 1533, before: 1820, keys: ['INCA', 'MUISCA', 'ANDEAN_MODERN', 'SPANISH_CASTILIAN'], weights: { INCA: 6, MUISCA: 4, ANDEAN_MODERN: 8, SPANISH_CASTILIAN: 3 } },
+            {
+                // Ecuador and highland Colombia: Indigenous, and mestizo in a
+                // way that keeps the surnames.
+                after: 1820, keys: ['ANDEAN_MODERN', 'SPANISH_LATIN_AMERICAN'],
+                weights: { ANDEAN_MODERN: 8, SPANISH_LATIN_AMERICAN: 10 },
+            }
         ],
         "Andes South": [
             { before: 1533, keys: ['INCA', 'MAPUCHE'] },
-            { after: 1533, before: 1820, keys: ['SPANISH_CASTILIAN', 'INCA', 'MAPUCHE'] },
-            { after: 1820, keys: ['SPANISH_LATIN_AMERICAN', 'GERMAN', 'ITALIAN', 'MAPUCHE', 'INCA'] }
+            { after: 1533, before: 1820, keys: ['INCA', 'MAPUCHE', 'ANDEAN_MODERN', 'SPANISH_CASTILIAN'], weights: { INCA: 6, MAPUCHE: 5, ANDEAN_MODERN: 8, SPANISH_CASTILIAN: 3 } },
+            {
+                // Peru, Bolivia and northern Chile. The German colonisation of
+                // Valdivia and the Italian arrival in the southern cone were
+                // real and are kept, at something nearer their size against an
+                // Andean population that is a plurality of both republics.
+                after: 1820, keys: ['ANDEAN_MODERN', 'SPANISH_LATIN_AMERICAN', 'MAPUCHE', 'ITALIAN', 'GERMAN'],
+                weights: { ANDEAN_MODERN: 14, SPANISH_LATIN_AMERICAN: 12, MAPUCHE: 4, ITALIAN: 2, GERMAN: 1 },
+            }
         ],
         "Amazon Basin": [
             { before: 1541, keys: ['TUPI', 'GUARANI', 'INCA'] },
@@ -2138,8 +2410,10 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         ],
         "Southern Highlands": [
             { before: 1538, keys: ['INCA'] },
-            { after: 1538, before: 1825, keys: ['SPANISH_CASTILIAN', 'INCA'] },
-            { after: 1825, keys: ['SPANISH_LATIN_AMERICAN', 'INCA'] }
+            { after: 1538, before: 1825, keys: ['INCA', 'ANDEAN_MODERN', 'SPANISH_CASTILIAN'], weights: { INCA: 7, ANDEAN_MODERN: 9, SPANISH_CASTILIAN: 3 } },
+            // Highland Bolivia: Quechua and Aymara are the majority, not the
+            // footnote this rule made them by naming a set that had lapsed.
+            { after: 1825, keys: ['ANDEAN_MODERN', 'SPANISH_LATIN_AMERICAN'], weights: { ANDEAN_MODERN: 13, SPANISH_LATIN_AMERICAN: 7 } }
         ],
         "Llanos and Orinoco": [
             { before: 1531, keys: ['MUISCA', 'CARIB'] },
@@ -2147,73 +2421,195 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { after: 1811, keys: ['SPANISH_LATIN_AMERICAN'] }
         ]
     },
+    /**
+     * MENA. The weighting pass that went through Africa, South Asia and
+     * Southeast Asia never reached this zone, and it had the same defect in the
+     * same place: every rule that named a ruling or a settler tradition beside
+     * the local one drew from them uniformly. Ottoman Egypt came out half
+     * Turkish; British-and-French-period Egypt came out two-thirds European, so
+     * a dock worker in Cairo in 1950 was called Nicholas Mason. Ottoman Anatolia
+     * gave a quarter of its personas Ashkenazi names, in a province where Jews —
+     * Sephardi ones — were about one percent.
+     *
+     * The numbers below are shares of population, not of political weight. An
+     * imperial language is not a demography: Ottoman Turkish administrators in
+     * Cairo, French colons in Algiers and Latin knights in Crusader Acre were
+     * all small minorities of the people living there.
+     */
     "MENA": {
         "Nile Valley": [
             { before: -3100, keys: ['PREHISTORIC_MENA'] }, // Predynastic Egypt
             { after: -3100, before: 332, keys: ['PREHISTORIC_MENA'] }, // Dynastic Egypt (Pharaonic)
-            { after: 332, before: 641, keys: ['ANCIENT_GREEK', 'ANCIENT_ROMAN', 'EGYPTIAN_COPTIC'] },
-            { after: 641, before: 1517, keys: ['ARABIC_LEVANT', 'EGYPTIAN_COPTIC'] },
-            { after: 1517, before: 1882, keys: ['TURKISH', 'ARABIC_LEVANT', 'EGYPTIAN_COPTIC'] },
-            { after: 1882, keys: ['ARABIC_LEVANT', 'EGYPTIAN_COPTIC', 'ENGLISH', 'FRENCH'] }
+            {
+                // Ptolemaic and Roman Egypt. Greeks held the cities and the
+                // administration and were perhaps a tenth of the country;
+                // Romans were a garrison.
+                after: 332, before: 641, keys: ['EGYPTIAN_COPTIC', 'ANCIENT_GREEK', 'ANCIENT_ROMAN'],
+                weights: { EGYPTIAN_COPTIC: 15, ANCIENT_GREEK: 4, ANCIENT_ROMAN: 1 },
+            },
+            {
+                // Conquest to roughly the Fatimid period: Egypt is ruled in
+                // Arabic and still overwhelmingly Christian on the ground.
+                after: 641, before: 1100, keys: ['EGYPTIAN_COPTIC', 'ARABIC_LEVANT'],
+                weights: { EGYPTIAN_COPTIC: 11, ARABIC_LEVANT: 8 },
+            },
+            {
+                // The long conversion. By the Mamluk period the balance has
+                // turned over.
+                after: 1100, before: 1517, keys: ['ARABIC_LEVANT', 'EGYPTIAN_COPTIC'],
+                weights: { ARABIC_LEVANT: 13, EGYPTIAN_COPTIC: 6 },
+            },
+            {
+                after: 1517, before: 1882, keys: ['ARABIC_LEVANT', 'EGYPTIAN_COPTIC', 'TURKISH'],
+                weights: { ARABIC_LEVANT: 26, EGYPTIAN_COPTIC: 3, TURKISH: 1 },
+            },
+            {
+                // Occupation and the Kingdom. Alexandria's Greek and Italian
+                // houses and the British administration were real and are
+                // reachable; together they were a percent or two of Egypt.
+                after: 1882, keys: ['ARABIC_LEVANT', 'EGYPTIAN_COPTIC', 'GREEK', 'ENGLISH', 'FRENCH'],
+                weights: { ARABIC_LEVANT: 44, EGYPTIAN_COPTIC: 5, GREEK: 1, ENGLISH: 1, FRENCH: 1 },
+            }
         ],
         "Nubian Corridor": [
             { before: -3000, keys: ['PREHISTORIC_MENA'] },
             { after: -3000, before: 785, keys: ['NUBIAN', 'EGYPTIAN_COPTIC', 'PREHISTORIC_MENA'] },
-            { after: 785, keys: ['NUBIAN', 'ARABIAN_HEJAZ'] }
+            { after: 785, keys: ['NUBIAN', 'ARABIC_TRADITIONAL'], weights: { NUBIAN: 3, ARABIC_TRADITIONAL: 2 } }
         ],
         "Levant": [
             { before: -3000, keys: ['PREHISTORIC_MENA'] }, // Early Bronze Age
             { after: -3000, before: 332, keys: ['MESOPOTAMIAN_ANCIENT', 'HEBREW'] },
             { after: 332, before: 636, keys: ['ANCIENT_GREEK', 'ANCIENT_ROMAN', 'BYZANTINE', 'HEBREW'] },
-            { after: 636, before: 1099, keys: ['ARABIC_LEVANT', 'LEVANTINE', 'BYZANTINE'] },
-            { after: 1099, before: 1291, keys: ['LEVANTINE', 'ARABIC_LEVANT', 'FRENCH_MEDIEVAL', 'ITALIAN'] }, // Crusader period
-            { after: 1291, before: 1918, keys: ['LEVANTINE', 'ARABIC_LEVANT', 'TURKISH',] },
-            { after: 1918, keys: ['LEVANTINE', 'HEBREW', 'ARABIC_LEVANT'] }
+            {
+                after: 636, before: 1099, keys: ['ARABIC_LEVANT', 'LEVANTINE', 'BYZANTINE'],
+                weights: { ARABIC_LEVANT: 10, LEVANTINE: 8, BYZANTINE: 3 },
+            },
+            {
+                // Crusader period. The Latin states were a thin ruling layer in
+                // the coastal towns — a uniform draw made half the Levant
+                // Frankish for two centuries.
+                after: 1099, before: 1291, keys: ['ARABIC_LEVANT', 'LEVANTINE', 'FRENCH_MEDIEVAL', 'ITALIAN'],
+                weights: { ARABIC_LEVANT: 11, LEVANTINE: 8, FRENCH_MEDIEVAL: 2, ITALIAN: 1 },
+            },
+            {
+                after: 1291, before: 1918, keys: ['ARABIC_LEVANT', 'LEVANTINE', 'TURKISH'],
+                weights: { ARABIC_LEVANT: 14, LEVANTINE: 10, TURKISH: 1 },
+            },
+            {
+                // The Mandate. The Yishuv was roughly a tenth of Palestine in
+                // 1918 and Palestine is a fraction of this map region.
+                after: 1918, before: 1948, keys: ['ARABIC_LEVANT', 'LEVANTINE', 'HEBREW'],
+                weights: { ARABIC_LEVANT: 13, LEVANTINE: 8, HEBREW: 1 },
+            },
+            {
+                after: 1948, keys: ['ARABIC_LEVANT', 'LEVANTINE', 'HEBREW'],
+                weights: { ARABIC_LEVANT: 12, LEVANTINE: 7, HEBREW: 3 },
+            }
         ],
         "Anatolia": [
             { before: -2000, keys: ['PREHISTORIC_MENA'] }, // Hattian period
             { after: -2000, before: 334, keys: ['PERSIAN_ANCIENT', 'ANCIENT_GREEK'] }, // Hittite, Phrygian, Lydian, Persian periods
-            { after: 334, before: 1071, keys: ['BYZANTINE', 'ARMENIAN', 'GEORGIAN'] },
-            { after: 1071, before: 1453, keys: ['TURKIC_STEPPE', 'BYZANTINE', 'ARMENIAN', 'GREEK'] },
-            { after: 1453, before: 1922, keys: ['TURKISH', 'ARMENIAN', 'GREEK', 'JEWISH_ASHKENAZI'] },
+            {
+                after: 334, before: 1071, keys: ['BYZANTINE', 'ARMENIAN', 'GEORGIAN'],
+                // Georgians are on the far northeastern edge of this region, not
+                // a third of it.
+                weights: { BYZANTINE: 14, ARMENIAN: 5, GEORGIAN: 1 },
+            },
+            {
+                // Seljuk to Ottoman: the Turkification of the plateau is in
+                // progress and the Greek and Armenian populations are still
+                // large.
+                after: 1071, before: 1453, keys: ['TURKIC_STEPPE', 'BYZANTINE', 'ARMENIAN', 'GREEK'],
+                weights: { TURKIC_STEPPE: 9, BYZANTINE: 7, GREEK: 5, ARMENIAN: 4 },
+            },
+            {
+                // Ottoman Anatolia was around four-fifths Muslim. The Rum and
+                // Armenian millets were each roughly a tenth before 1915; the
+                // Jewish communities were about one percent, and Sephardi
+                // rather than Ashkenazi — the set named here is the closest one
+                // that exists, so it is kept and made rare.
+                after: 1453, before: 1922, keys: ['TURKISH', 'GREEK', 'ARMENIAN', 'JEWISH_ASHKENAZI'],
+                weights: { TURKISH: 32, GREEK: 4, ARMENIAN: 4, JEWISH_ASHKENAZI: 1 },
+            },
             { after: 1922, keys: ['TURKISH'] }
         ],
         "Mesopotamia": [
             { before: -3000, keys: ['PREHISTORIC_MENA'] }, // Prehistoric/Ubaid period
             { after: -3000, before: 539, keys: ['MESOPOTAMIAN_ANCIENT'] }, // Sumerian, Akkadian, Babylonian, Assyrian
-            { after: 539, before: 633, keys: ['PERSIAN_ANCIENT', 'ANCIENT_GREEK'] },
-            { after: 633, before: 1258, keys: ['ARABIAN_HEJAZ', 'PERSIAN_FARSI'] },
-            { after: 1258, before: 1534, keys: ['MONGOLIAN_TRADITIONAL', 'TURKIC_STEPPE', 'PERSIAN_FARSI'] },
-            { after: 1534, before: 1918, keys: ['TURKISH', 'ARABIC_LEVANT', 'PERSIAN_FARSI'] },
-            { after: 1918, keys: ['ARABIC_LEVANT', 'PERSIAN_FARSI'] }
+            // Sasanian Mesopotamia — Aramaic-speaking under Persian rule. The
+            // Greek set named here ends in 400 and was dropped on every draw,
+            // which was right by accident: Seleucid Greek naming was long gone.
+            { after: 539, before: 633, keys: ['PERSIAN_ANCIENT', 'LEVANTINE'], weights: { PERSIAN_ANCIENT: 4, LEVANTINE: 5 } },
+            { after: 633, before: 1258, keys: ['ARABIAN_HEJAZ', 'ARABIC_TRADITIONAL', 'PERSIAN_FARSI'], weights: { ARABIAN_HEJAZ: 6, ARABIC_TRADITIONAL: 6, PERSIAN_FARSI: 4 } },
+            {
+                // The Ilkhanate and its successors ruled Iraq; they did not
+                // repopulate it. This rule named no Arabic set at all, so for
+                // three centuries nobody in Basra or Mosul had an Arabic name.
+                after: 1258, before: 1534, keys: ['ARABIC_LEVANT', 'PERSIAN_FARSI', 'TURKIC_STEPPE', 'MONGOLIAN_TRADITIONAL'],
+                weights: { ARABIC_LEVANT: 16, PERSIAN_FARSI: 5, TURKIC_STEPPE: 3, MONGOLIAN_TRADITIONAL: 1 },
+            },
+            {
+                after: 1534, before: 1918, keys: ['ARABIC_LEVANT', 'PERSIAN_FARSI', 'TURKISH'],
+                weights: { ARABIC_LEVANT: 16, PERSIAN_FARSI: 4, TURKISH: 2 },
+            },
+            {
+                after: 1918, keys: ['ARABIC_LEVANT', 'PERSIAN_FARSI'],
+                weights: { ARABIC_LEVANT: 16, PERSIAN_FARSI: 3 },
+            }
         ],
         "Maghreb": [
             { before: 146, keys: ['BERBER_AMAZIGH'] },
             { after: 146, before: 647, keys: ['ANCIENT_ROMAN', 'BERBER_AMAZIGH'] },
-            { after: 647, before: 1500, keys: ['MAGHREBI', 'BERBER_AMAZIGH', 'ARABIAN_HEJAZ'] },
-            { after: 1500, before: 1962, keys: ['MAGHREBI', 'BERBER_AMAZIGH', 'TURKISH', 'FRENCH', 'SPANISH_CASTILIAN'] },
-            { after: 1962, keys: ['MAGHREBI', 'BERBER_AMAZIGH', 'FRENCH'] }
+            { after: 647, before: 1500, keys: ['MAGHREBI', 'BERBER_AMAZIGH', 'ARABIAN_HEJAZ', 'ARABIC_TRADITIONAL'], weights: { MAGHREBI: 10, BERBER_AMAZIGH: 9, ARABIAN_HEJAZ: 2, ARABIC_TRADITIONAL: 2 } },
+            {
+                // The regencies and then Algérie française. The pieds-noirs were
+                // the largest settler population anywhere in Africa and still
+                // only about a tenth of Algeria at their height; the Ottoman
+                // corps in Algiers and Tunis numbered in the thousands.
+                after: 1500, before: 1962, keys: ['MAGHREBI', 'BERBER_AMAZIGH', 'FRENCH', 'SPANISH_CASTILIAN', 'TURKISH'],
+                weights: { MAGHREBI: 20, BERBER_AMAZIGH: 13, FRENCH: 2, SPANISH_CASTILIAN: 1, TURKISH: 1 },
+            },
+            {
+                after: 1962, keys: ['MAGHREBI', 'BERBER_AMAZIGH', 'FRENCH'],
+                weights: { MAGHREBI: 22, BERBER_AMAZIGH: 14, FRENCH: 1 },
+            }
         ],
         "Arabian Peninsula": [
             { before: 622, keys: ['ARABIAN_HEJAZ', 'HEBREW'] },
-            { after: 622, before: 1517, keys: ['ARABIAN_HEJAZ'] },
-            { after: 1517, before: 1918, keys: ['ARABIAN_HEJAZ', 'TURKISH'] },
-            { after: 1918, keys: ['ARABIAN_HEJAZ'] }
+            { after: 622, before: 1517, keys: ['ARABIAN_HEJAZ', 'ARABIC_TRADITIONAL'] },
+            {
+                // Ottoman authority over the Hejaz was a garrison and a
+                // railway, not a settlement.
+                // Written as ARABIAN_HEJAZ, which ends in 700, so this rule
+                // was handing every persona in Ottoman Arabia a Turkish name.
+                after: 1517, before: 1918, keys: ['ARABIC_TRADITIONAL', 'TURKISH'],
+                weights: { ARABIC_TRADITIONAL: 24, TURKISH: 1 },
+            },
+            { after: 1918, keys: ['ARABIC_TRADITIONAL'] }
         ],
         "Hejaz Mountains": [
-            { before: 1918, keys: ['ARABIAN_HEJAZ', 'TURKISH'] },
-            { after: 1918, keys: ['ARABIAN_HEJAZ'] }
+            { before: 1918, keys: ['ARABIAN_HEJAZ', 'ARABIC_TRADITIONAL', 'TURKISH'], weights: { ARABIAN_HEJAZ: 12, ARABIC_TRADITIONAL: 12, TURKISH: 1 } },
+            { after: 1918, keys: ['ARABIC_TRADITIONAL'] }
         ],
         "Persian Plateau": [
             { before: 651, keys: ['PERSIAN_ANCIENT', 'SOGDIAN'] },
-            { after: 651, before: 1220, keys: ['PERSIAN_FARSI', 'PERSIAN_KHORASAN', 'ARABIAN_HEJAZ'] },
+            { after: 651, before: 1220, keys: ['PERSIAN_FARSI', 'PERSIAN_KHORASAN', 'ARABIAN_HEJAZ', 'ARABIC_TRADITIONAL'], weights: { PERSIAN_FARSI: 9, PERSIAN_KHORASAN: 7, ARABIAN_HEJAZ: 2, ARABIC_TRADITIONAL: 2 } },
             { after: 1220, before: 1501, keys: ['PERSIAN_FARSI', 'MONGOLIAN_TRADITIONAL', 'TURKIC_STEPPE'] },
             { after: 1501, keys: ['PERSIAN_FARSI'] }
         ],
         "Caucasus": [
             { before: 600, keys: ['ARMENIAN', 'GEORGIAN', 'PERSIAN_ANCIENT', 'ANCIENT_ROMAN'] },
-            { after: 600, before: 1800, keys: ['ARMENIAN', 'GEORGIAN', 'PERSIAN_FARSI', 'TURKISH'] },
-            { after: 1800, keys: ['ARMENIAN', 'GEORGIAN', 'RUSSIAN'] }
+            {
+                after: 600, before: 1800, keys: ['ARMENIAN', 'GEORGIAN', 'PERSIAN_FARSI', 'TURKISH'],
+                weights: { ARMENIAN: 8, GEORGIAN: 8, PERSIAN_FARSI: 4, TURKISH: 3 },
+            },
+            {
+                // Russian rule brought soldiers, officials and a Cossack
+                // frontier, and Russians are a real minority in the North
+                // Caucasus — but the mountains stayed Caucasian.
+                after: 1800, keys: ['ARMENIAN', 'GEORGIAN', 'RUSSIAN'],
+                weights: { ARMENIAN: 8, GEORGIAN: 8, RUSSIAN: 3 },
+            }
         ]
     },
     /**
@@ -2331,10 +2727,10 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         "East African Rift": [
             { before: 700, keys: ['PREHISTORIC_AFRICAN'] },
             {
-                after: 700, before: 1880, keys: ['SWAHILI_INTERIOR', 'RWANDA_BURUNDI', 'ARABIAN_HEJAZ'],
+                after: 700, before: 1880, keys: ['SWAHILI_INTERIOR', 'RWANDA_BURUNDI', 'ARABIC_TRADITIONAL'],
                 // Arab names reach the interior along the caravan roads, and
                 // then only near them.
-                weights: { SWAHILI_INTERIOR: 12, RWANDA_BURUNDI: 8, ARABIAN_HEJAZ: 2 },
+                weights: { SWAHILI_INTERIOR: 12, RWANDA_BURUNDI: 8, ARABIC_TRADITIONAL: 2 },
             },
             {
                 // Tanganyika, Kenya and Uganda under British and (to 1919)
@@ -2349,15 +2745,15 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         "Swahili Coast": [
             { before: 700, keys: ['SWAHILI_COASTAL'] },
             {
-                after: 700, before: 1500, keys: ['SWAHILI_COASTAL', 'ARABIAN_HEJAZ', 'PERSIAN_FARSI'],
+                after: 700, before: 1500, keys: ['SWAHILI_COASTAL', 'ARABIC_TRADITIONAL', 'PERSIAN_FARSI'],
                 // The Shirazi and Omani presence on the coast is real and old,
                 // and the Swahili towns were Muslim, but the population was
                 // overwhelmingly local.
-                weights: { SWAHILI_COASTAL: 14, ARABIAN_HEJAZ: 4, PERSIAN_FARSI: 2 },
+                weights: { SWAHILI_COASTAL: 14, ARABIC_TRADITIONAL: 4, PERSIAN_FARSI: 2 },
             },
             {
-                after: 1500, before: 1960, keys: ['SWAHILI_COASTAL', 'ARABIAN_HEJAZ', 'PORTUGUESE', 'ENGLISH'],
-                weights: { SWAHILI_COASTAL: 20, ARABIAN_HEJAZ: 5, PORTUGUESE: 1, ENGLISH: 1 },
+                after: 1500, before: 1960, keys: ['SWAHILI_COASTAL', 'ARABIC_TRADITIONAL', 'PORTUGUESE', 'ENGLISH'],
+                weights: { SWAHILI_COASTAL: 20, ARABIC_TRADITIONAL: 5, PORTUGUESE: 1, ENGLISH: 1 },
             },
             { after: 1960, keys: ['SWAHILI_COASTAL'] }
         ],
@@ -2585,20 +2981,38 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         // Southeast Asia
         "Taiwan and East China Sea": [
             { before: 1624, keys: ['CHINESE_CANTONESE', 'POLYNESIAN'] },
-            { after: 1624, before: 1895, keys: ['CHINESE_CANTONESE', 'DUTCH'] },
+            // The Dutch held Formosa from 1624 to 1662 with a garrison and a
+            // few hundred civilians; this window runs to 1895, so half of two
+            // and a half centuries of Taiwanese were coming out Dutch.
+            { after: 1624, before: 1895, keys: ['CHINESE_CANTONESE', 'DUTCH'], weights: { CHINESE_CANTONESE: 30, DUTCH: 1 } },
             { after: 1895, before: 1945, keys: ['JAPANESE', 'CHINESE_MANDARIN'] },
             { after: 1945, keys: ['CHINESE_MANDARIN'] }
         ]
     },
     "EAST_ASIAN": {
         "Siberia": [
-            { before: 1600, keys: ['PREHISTORIC_ASIAN', 'TURKIC_STEPPE'] },
-            { after: 1600, keys: ['RUSSIAN'] }
+            { before: 1600, keys: ['SIBERIAN_INDIGENOUS', 'PREHISTORIC_ASIAN', 'TURKIC_STEPPE'], weights: { SIBERIAN_INDIGENOUS: 6, PREHISTORIC_ASIAN: 1, TURKIC_STEPPE: 3 } },
+            {
+                // This rule was `['RUSSIAN']`, full stop, so the Sakha, Buryat,
+                // Evenk, Khanty and Nenets stopped existing in 1600 — the year
+                // of the conquest, not of their disappearance. Russians did
+                // become the great majority of Siberia and the weights say so;
+                // the point is that the minority is now reachable at all.
+                after: 1600, keys: ['RUSSIAN', 'SIBERIAN_INDIGENOUS'],
+                weights: { RUSSIAN: 4, SIBERIAN_INDIGENOUS: 1 },
+            }
         ],
         "Kazakh Steppes": [
             { before: 1200, keys: ['TURKIC_STEPPE', 'SOGDIAN', 'PERSIAN_KHORASAN'] },
             { after: 1200, before: 1850, keys: ['MONGOLIAN_TRADITIONAL', 'KAZAKH', 'TURKIC_STEPPE'] },
-            { after: 1850, keys: ['KAZAKH', 'RUSSIAN'] }
+            {
+                // The one Russian-frontier rule that was close to right on a
+                // uniform draw: Russians and Ukrainians were about two-fifths
+                // of the Kazakh SSR after the Virgin Lands campaign, and
+                // briefly outnumbered Kazakhs outright.
+                after: 1850, keys: ['KAZAKH', 'RUSSIAN'],
+                weights: { KAZAKH: 3, RUSSIAN: 2 },
+            }
         ],
         "Khorasan": [
             { before: 651, keys: ['PERSIAN_ANCIENT', 'SOGDIAN'] },
@@ -2609,12 +3023,21 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { before: 712, keys: ['SOGDIAN', 'PERSIAN_ANCIENT'] },
             { after: 712, before: 1220, keys: ['PERSIAN_KHORASAN', 'SOGDIAN', 'TURKIC_STEPPE'] },
             { after: 1220, before: 1873, keys: ['UZBEK', 'MONGOLIAN_TRADITIONAL', 'PERSIAN_FARSI'] },
-            { after: 1873, keys: ['UZBEK', 'KYRGYZ', 'RUSSIAN'] }
+            {
+                // Russian settlement in Transoxiana was urban and thin — a
+                // tenth of Uzbekistan at the Soviet peak, concentrated in
+                // Tashkent — not a third of everybody.
+                after: 1873, keys: ['UZBEK', 'KYRGYZ', 'RUSSIAN'],
+                weights: { UZBEK: 12, KYRGYZ: 6, RUSSIAN: 2 },
+            }
         ],
         "Central Asian Oases": [
             { before: 1220, keys: ['SOGDIAN', 'PERSIAN_KHORASAN', 'TURKIC_STEPPE'] },
             { after: 1220, before: 1873, keys: ['UZBEK', 'TURKMEN', 'MONGOLIAN_TRADITIONAL'] },
-            { after: 1873, keys: ['UZBEK', 'TURKMEN', 'KYRGYZ', 'RUSSIAN'] }
+            {
+                after: 1873, keys: ['UZBEK', 'TURKMEN', 'KYRGYZ', 'RUSSIAN'],
+                weights: { UZBEK: 10, TURKMEN: 8, KYRGYZ: 5, RUSSIAN: 2 },
+            }
         ],
         "Mongolia and Manchuria": [
             { before: 1206, keys: ['MONGOLIAN', 'TURKIC_STEPPE'] },
@@ -2728,7 +3151,12 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         ],
         "Taiwan and Ryukyu": [
             { before: 1600, keys: ['CHINESE_CANTONESE', 'POLYNESIAN', 'PREHISTORIC_ASIAN'] }, // Indigenous Austronesian + early Chinese contact
-            { after: 1600, before: 1895, keys: ['CHINESE_CANTONESE', 'DUTCH', 'JAPANESE'] }, // Dutch colonial + Ryukyu Kingdom
+            {
+                // Dutch Formosa and the Ryukyu Kingdom. As above: the Dutch
+                // were here for 38 of these 295 years.
+                after: 1600, before: 1895, keys: ['CHINESE_CANTONESE', 'JAPANESE', 'DUTCH'],
+                weights: { CHINESE_CANTONESE: 20, JAPANESE: 10, DUTCH: 1 },
+            },
             { after: 1895, keys: ['JAPANESE', 'CHINESE_MANDARIN'] } // Japanese colonial period
         ]
     },
@@ -2739,23 +3167,50 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
         // wholesale. Irish settlers in Australia used anglicised names, so the
         // Gaelic set — which carries Irish-language patronymics — does not
         // belong here at all.
+        //
+        // The ratios here are deliberately *not* the Australian census, and
+        // that is the one place in this table where population share is not
+        // the measure. Settler Australians are generated through the EUROPEAN
+        // zone; a persona who has been placed in OCEANIA is an Aboriginal one,
+        // and the English share below is intermarriage and mission naming
+        // rather than the settler population. Three of these four rules used
+        // to say this by repeating the key two or three times in the list,
+        // which is the same claim written where nobody could adjust it.
         "Australia – Southeast": [
             { before: 1788, keys: ['ABORIGINAL_AUSTRALIAN'] },
-            { after: 1788, keys: ['ENGLISH', 'ABORIGINAL_AUSTRALIAN'] }
+            {
+                after: 1788, keys: ['ABORIGINAL_AUSTRALIAN', 'ENGLISH'],
+                // The southeast is where mission and Protection Board naming
+                // reached furthest, so the English share is the highest of the
+                // four — but it was never half, which is what this rule said.
+                weights: { ABORIGINAL_AUSTRALIAN: 5, ENGLISH: 2 },
+            }
         ],
         "Australia – Outback and Center": [
             { before: 1870, keys: ['ABORIGINAL_AUSTRALIAN'] },
             // The interior remained overwhelmingly Aboriginal long after the
             // pastoral frontier reached it.
-            { after: 1870, keys: ['ABORIGINAL_AUSTRALIAN', 'ABORIGINAL_AUSTRALIAN', 'ABORIGINAL_AUSTRALIAN', 'ENGLISH'] }
+            {
+                after: 1870, keys: ['ABORIGINAL_AUSTRALIAN', 'ENGLISH'],
+                weights: { ABORIGINAL_AUSTRALIAN: 3, ENGLISH: 1 },
+            }
         ],
         "Australia – North and Queensland": [
             { before: 1824, keys: ['ABORIGINAL_AUSTRALIAN'] },
-            { after: 1824, keys: ['ABORIGINAL_AUSTRALIAN', 'ENGLISH', 'CHINESE_CANTONESE', 'MELANESIAN'] }
+            {
+                // The Queensland canefields brought Melanesian labourers and
+                // the goldfields brought Cantonese miners; both were real and
+                // both were small beside the people already there.
+                after: 1824, keys: ['ABORIGINAL_AUSTRALIAN', 'ENGLISH', 'MELANESIAN', 'CHINESE_CANTONESE'],
+                weights: { ABORIGINAL_AUSTRALIAN: 12, ENGLISH: 4, MELANESIAN: 2, CHINESE_CANTONESE: 2 },
+            }
         ],
         "Australia – West and Desert": [
             { before: 1829, keys: ['ABORIGINAL_AUSTRALIAN'] },
-            { after: 1829, keys: ['ABORIGINAL_AUSTRALIAN', 'ABORIGINAL_AUSTRALIAN', 'ENGLISH'] }
+            {
+                after: 1829, keys: ['ABORIGINAL_AUSTRALIAN', 'ENGLISH'],
+                weights: { ABORIGINAL_AUSTRALIAN: 4, ENGLISH: 1 },
+            }
         ],
         // Pacific Islands
         //
@@ -2769,8 +3224,15 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             { before: 1814, keys: ['MAORI_PRECONTACT'] },
             // Marsden's mission, 1814, and the printed transliterations that
             // followed it. Māori naming did not stop; it gained a second layer.
-            { after: 1814, before: 1840, keys: ['MAORI_PRECONTACT', 'MAORI_PRECONTACT', 'POLYNESIAN'] },
-            { after: 1840, keys: ['ENGLISH', 'SCOTTISH', 'POLYNESIAN'] }
+            { after: 1814, before: 1840, keys: ['MAORI_PRECONTACT', 'POLYNESIAN'], weights: { MAORI_PRECONTACT: 2, POLYNESIAN: 1 } },
+            {
+                // Same reasoning as Australia: Pākehā New Zealanders come
+                // through the EUROPEAN zone, so a persona routed here is
+                // Māori. Two settler sets against one Polynesian made this
+                // rule two-thirds British in a zone that means the opposite.
+                after: 1840, keys: ['POLYNESIAN', 'ENGLISH', 'SCOTTISH'],
+                weights: { POLYNESIAN: 6, ENGLISH: 2, SCOTTISH: 1 },
+            }
         ],
         "New Guinea and Melanesia": [
             { before: 1840, keys: ['MELANESIAN_PRECONTACT'] },
@@ -2785,156 +3247,72 @@ export const REGION_NAME_MAPPING: Record<string, Record<string, Array<{
             // middle window is genuinely mixed and weighted towards the older
             // names, which is what the mission rolls themselves show.
             { after: 1797, before: 1830, keys: ['TAHITIAN_PRECONTACT', 'TONGAN_PRECONTACT', 'SAMOAN_PRECONTACT', 'POLYNESIAN_PRECONTACT', 'TAHITIAN'] },
-            { after: 1830, keys: ['TAHITIAN', 'SAMOAN', 'TONGAN', 'FRENCH', 'ENGLISH', 'GERMAN'] }
+            {
+                // Three European sets against three Polynesian ones made half
+                // of post-mission Polynesia European. The planters, traders
+                // and missionaries of Papeete and Apia were a few thousand
+                // people across an ocean of islands.
+                after: 1830, keys: ['TAHITIAN', 'SAMOAN', 'TONGAN', 'FRENCH', 'ENGLISH', 'GERMAN'],
+                weights: { TAHITIAN: 10, SAMOAN: 10, TONGAN: 8, FRENCH: 1, ENGLISH: 1, GERMAN: 1 },
+            }
         ],
         "Micronesia": [
-            { before: 1668, keys: ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT'] },
-            { after: 1668, keys: ['SPANISH_CASTILIAN', 'GERMAN', 'JAPANESE', 'ENGLISH'] }
+            // The Marianas were settled from island Southeast Asia some three
+            // thousand years ago and the Carolines and Marshalls after them;
+            // the precontact Polynesian and Melanesian sets are the wrong
+            // peoples, but they are the right register and the closest thing
+            // the table has for the era before CHAMORRO begins.
+            { before: 1668, keys: ['MICRONESIAN', 'POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT'], weights: { MICRONESIAN: 6, POLYNESIAN_PRECONTACT: 1, MELANESIAN_PRECONTACT: 1 } },
+            {
+                // Spain, then Germany, then Japan, then the United States —
+                // four administrations in three centuries, and the rule named
+                // all four and nobody who lived there. Guam was Chamorro and
+                // the Carolines and Marshalls were and are Micronesian; the
+                // Japanese share is the largest of the colonial ones because
+                // Nan'yō settlement genuinely was, reaching a majority on
+                // Saipan by the 1930s.
+                after: 1668, keys: ['CHAMORRO', 'MICRONESIAN', 'JAPANESE', 'SPANISH_CASTILIAN', 'GERMAN', 'ENGLISH'],
+                weights: { CHAMORRO: 14, MICRONESIAN: 14, JAPANESE: 4, SPANISH_CASTILIAN: 1, GERMAN: 1, ENGLISH: 1 },
+            }
         ],
         "Hawaii and Central Pacific": [
             { before: 1820, keys: ['HAWAIIAN_PRECONTACT'] },
-            { after: 1820, keys: ['HAWAIIAN', 'HAWAIIAN_PRECONTACT', 'ENGLISH', 'CHINESE_CANTONESE', 'JAPANESE', 'PORTUGUESE', 'FILIPINO'] }
+            {
+                // The one rule in this block where a near-uniform draw is
+                // roughly right: plantation Hawaiʻi really was that mixed. The
+                // weights are the 1900 territorial census — about two-fifths
+                // Japanese, a sixth Native Hawaiian or part-Hawaiian, an
+                // eighth Chinese, a sixth Portuguese and other European, with
+                // Filipino recruitment beginning after 1906.
+                after: 1820, keys: ['HAWAIIAN', 'JAPANESE', 'CHINESE_CANTONESE', 'PORTUGUESE', 'ENGLISH', 'FILIPINO'],
+                weights: { HAWAIIAN: 10, JAPANESE: 9, CHINESE_CANTONESE: 4, PORTUGUESE: 4, ENGLISH: 3, FILIPINO: 3 },
+            }
         ],
         "Indonesian and Melanesian Islands": [
             { before: 1512, keys: ['INDONESIAN', 'MALAY', 'MELANESIAN_PRECONTACT'] },
-            { after: 1512, before: 1949, keys: ['INDONESIAN', 'MALAY', 'MELANESIAN', 'PORTUGUESE', 'DUTCH'] },
+            {
+                // Europeans in the Netherlands East Indies never reached one
+                // percent of it. At two keys in five they were forty.
+                after: 1512, before: 1949, keys: ['INDONESIAN', 'MALAY', 'MELANESIAN', 'DUTCH', 'PORTUGUESE'],
+                weights: { INDONESIAN: 14, MALAY: 10, MELANESIAN: 8, DUTCH: 1, PORTUGUESE: 1 },
+            },
             { after: 1949, keys: ['INDONESIAN', 'MALAY'] }
         ],
         "Major Seas and Oceans": [
             { before: 1500, keys: ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT', 'SWAHILI_COASTAL', 'ARABIAN_HEJAZ', 'CHINESE_CANTONESE'] },
-            { after: 1500, keys: ['ENGLISH', 'SPANISH_CASTILIAN', 'PORTUGUESE', 'DUTCH', 'FRENCH', 'POLYNESIAN'] }
+            {
+                // A deep-water crew after 1500 is genuinely mixed and often
+                // European-officered, so this rule keeps a real European
+                // share — but five European sets against one Polynesian put it
+                // at five in six, and the Atlantic and Indian Ocean crews that
+                // sailed under those flags were substantially Lascar, Kru,
+                // Manila-men and Pacific islanders.
+                after: 1500, keys: ['ENGLISH', 'PORTUGUESE', 'SPANISH_CASTILIAN', 'DUTCH', 'FRENCH', 'POLYNESIAN', 'MALAY', 'SWAHILI_COASTAL', 'CHINESE_CANTONESE'],
+                weights: { ENGLISH: 6, PORTUGUESE: 4, SPANISH_CASTILIAN: 3, DUTCH: 3, FRENCH: 3, POLYNESIAN: 4, MALAY: 4, SWAHILI_COASTAL: 3, CHINESE_CANTONESE: 3 },
+            }
         ]
     }
 };
-
-/**
- * Helper function to get available cultural groups for a region and time period
- */
-export function getCulturalGroupsForRegion(
-    continent: string, 
-    region: string, 
-    year?: number
-): string[] {
-    const continentData = REGION_NAME_MAPPING[continent];
-    if (!continentData) return [];
-    
-    const regionData = continentData[region];
-    if (!regionData) return [];
-    
-    const currentYear = year || new Date().getFullYear();
-    
-    for (const period of regionData) {
-        const beforeMatch = !period.before || currentYear < period.before;
-        const afterMatch = !period.after || currentYear >= period.after;
-        
-        if (beforeMatch && afterMatch) {
-            return period.keys;
-        }
-    }
-    
-    return [];
-}
-
-/**
- * Mapping of continents to period-appropriate name groups
- */
-const PERIOD_NAME_MAPPING: Record<string, Record<string, string[]>> = {
-    'EUROPEAN': {
-        'antiquity': ['ANCIENT_ROMAN', 'ANCIENT_GREEK', 'CELTIC_ANCIENT'],
-        'early_medieval': ['ENGLISH_ANGLO_SAXON', 'FRANKISH_MEROVINGIAN', 'SCANDINAVIAN'],
-        'high_medieval': ['ENGLISH_MEDIEVAL', 'FRENCH_MEDIEVAL', 'GERMAN', 'SCANDINAVIAN'],
-        'late_medieval': ['ENGLISH_MEDIEVAL', 'FRENCH_MEDIEVAL', 'ITALIAN', 'SPANISH_CASTILIAN'],
-        'renaissance': ['ITALIAN', 'FRENCH', 'ENGLISH', 'SPANISH_CASTILIAN'],
-        'early_modern': ['ENGLISH', 'FRENCH', 'SPANISH_CASTILIAN', 'GERMAN'],
-        'industrial': ['ENGLISH', 'FRENCH', 'GERMAN', 'ITALIAN'],
-        'modern': ['ENGLISH', 'FRENCH', 'GERMAN', 'ITALIAN', 'SPANISH_CASTILIAN']
-    },
-    'EAST_ASIAN': {
-        'antiquity': ['CHINESE_MANDARIN', 'JAPANESE'],
-        'early_medieval': ['CHINESE_MANDARIN', 'JAPANESE'],
-        'high_medieval': ['CHINESE_MANDARIN', 'JAPANESE'],
-        'late_medieval': ['CHINESE_MANDARIN', 'JAPANESE'],
-        'renaissance': ['CHINESE_MANDARIN', 'JAPANESE'],
-        'early_modern': ['CHINESE_MANDARIN', 'JAPANESE'],
-        'industrial': ['CHINESE_MANDARIN', 'JAPANESE'],
-        'modern': ['CHINESE_MANDARIN', 'JAPANESE', 'KOREAN']
-    },
-    'MENA': {
-        'antiquity': ['EGYPTIAN_COPTIC', 'PERSIAN_ANCIENT', 'HEBREW'],
-        'early_medieval': ['ARABIAN_HEJAZ', 'PERSIAN_FARSI', 'HEBREW'],
-        'high_medieval': ['ARABIAN_HEJAZ', 'PERSIAN_FARSI', 'TURKISH'],
-        'late_medieval': ['ARABIAN_HEJAZ', 'PERSIAN_FARSI', 'TURKISH', 'MAGHREBI'],
-        'renaissance': ['TURKISH', 'PERSIAN_FARSI', 'ARABIAN_HEJAZ'],
-        'early_modern': ['TURKISH', 'PERSIAN_FARSI', 'ARABIAN_HEJAZ'],
-        'industrial': ['TURKISH', 'PERSIAN_FARSI', 'ARABIAN_HEJAZ'],
-        'modern': ['ARABIAN_HEJAZ', 'PERSIAN_FARSI', 'TURKISH']
-    },
-    'SOUTH_ASIAN': {
-        'antiquity': ['SANSKRIT_CLASSICAL', 'TAMIL'],
-        'early_medieval': ['SANSKRIT_CLASSICAL', 'TAMIL', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN'],
-        'high_medieval': ['SANSKRIT_CLASSICAL', 'TAMIL', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'HINDI'],
-        'late_medieval': ['PERSIAN_FARSI', 'SANSKRIT_CLASSICAL', 'TAMIL', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN'],
-        'renaissance': ['PERSIAN_FARSI', 'SANSKRIT_CLASSICAL', 'HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN'],
-        'early_modern': ['PERSIAN_FARSI', 'HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'TAMIL'],
-        'industrial': ['ENGLISH', 'HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'TAMIL'],
-        'modern': ['HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'TAMIL', 'PUNJABI']
-    },
-    'SUB_SAHARAN_AFRICAN': {
-        'antiquity': ['NUBIAN', 'ETHIOPIAN_HIGHLAND'],
-        'early_medieval': ['NUBIAN', 'ETHIOPIAN_HIGHLAND', 'SWAHILI_COASTAL'],
-        'high_medieval': ['WEST_AFRICAN_SAHEL', 'SWAHILI_COASTAL', 'ETHIOPIAN_HIGHLAND'],
-        'late_medieval': ['WEST_AFRICAN_SAHEL', 'SWAHILI_COASTAL', 'ETHIOPIAN_HIGHLAND'],
-        'renaissance': ['WEST_AFRICAN_SAHEL', 'SWAHILI_COASTAL', 'ETHIOPIAN_HIGHLAND'],
-        'early_modern': ['WEST_AFRICAN_SAHEL', 'SWAHILI_COASTAL', 'ETHIOPIAN_HIGHLAND'],
-        'industrial': ['WEST_AFRICAN_SAHEL', 'SWAHILI_COASTAL', 'ETHIOPIAN_HIGHLAND'],
-        'modern': ['WEST_AFRICAN_SAHEL', 'SWAHILI_COASTAL', 'ETHIOPIAN_HIGHLAND', 'ENGLISH', 'FRENCH']
-    },
-    'NORTH_AMERICAN_PRE_COLUMBIAN': {
-        'antiquity': ['AZTEC', 'INUIT'],
-        'early_medieval': ['AZTEC', 'INUIT', 'ALGONQUIAN'],
-        'high_medieval': ['AZTEC', 'INUIT', 'ALGONQUIAN'],
-        'late_medieval': ['AZTEC', 'INUIT', 'ALGONQUIAN'],
-        'renaissance': ['AZTEC', 'INUIT', 'ALGONQUIAN'],
-        'early_modern': ['AZTEC', 'INUIT', 'ALGONQUIAN', 'ENGLISH', 'FRENCH'],
-        'industrial': ['ENGLISH', 'FRENCH', 'SPANISH_CASTILIAN'],
-        'modern': ['ENGLISH', 'FRENCH', 'SPANISH_CASTILIAN']
-    },
-    'SOUTH_AMERICAN': {
-        'antiquity': ['ANDEAN_QUECHUA', 'TUPI'],
-        'early_medieval': ['ANDEAN_QUECHUA', 'TUPI'],
-        'high_medieval': ['ANDEAN_QUECHUA', 'TUPI'],
-        'late_medieval': ['ANDEAN_QUECHUA', 'TUPI'],
-        'renaissance': ['ANDEAN_QUECHUA', 'TUPI', 'SPANISH_CASTILIAN', 'PORTUGUESE'],
-        'early_modern': ['SPANISH_CASTILIAN', 'PORTUGUESE', 'ANDEAN_QUECHUA'],
-        'industrial': ['SPANISH_CASTILIAN', 'PORTUGUESE'],
-        'modern': ['SPANISH_CASTILIAN', 'PORTUGUESE']
-    },
-    'OCEANIA': {
-        // Everything before the industrial period predates the missions that
-        // produced the unsuffixed sets, so it takes the pre-contact ones.
-        'antiquity': ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT'],
-        'early_medieval': ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT'],
-        'high_medieval': ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT'],
-        'late_medieval': ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT'],
-        'renaissance': ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT'],
-        'early_modern': ['POLYNESIAN_PRECONTACT', 'MELANESIAN_PRECONTACT', 'ENGLISH'],
-        'industrial': ['ENGLISH', 'POLYNESIAN', 'MELANESIAN'],
-        'modern': ['ENGLISH', 'POLYNESIAN', 'MELANESIAN']
-    }
-};
-
-/**
- * Helper function to get cultural groups by historical period
- */
-export function getCulturalGroupsByPeriod(
-    continent: string,
-    period: 'antiquity' | 'early_medieval' | 'high_medieval' | 'late_medieval' | 'renaissance' | 'early_modern' | 'industrial' | 'modern'
-): string[] {
-    const periodData = PERIOD_NAME_MAPPING[continent];
-    if (!periodData) return [];
-    
-    return periodData[period] || [];
-}
 
 // ============================================================================
 // ERA-SPECIFIC FALLBACK NAME GENERATION
@@ -3122,179 +3500,57 @@ export function getEraSpecificFallback(zone: CulturalZone, year: number): Fallba
 }
 
 /**
- * Helper function to generate a random name from available cultural groups
+ * Naming traditions that carry a European naming world with them.
+ *
+ * Listed rather than inferred, because "is this name European" cannot be
+ * answered from the name: Jean is French and Jeanne d'Arc is not the point —
+ * "Marie" is a Vietnamese Catholic's name too, "Mason" is a Yoruba surname
+ * nowhere and an English one everywhere, and any spelling test built out of
+ * such examples is a list of the cases somebody happened to think of.
  */
-export function generateRandomName(
-    culturalGroups: string[],
-    gender: 'male' | 'female',
-    options: NameGenerationOptions = {},
-    culturalZone?: CulturalZone,
-    year?: number
-): { firstName: string; surname: string; culturalGroup: string } {
-    // If no groups available, use era-specific fallback
-    if (culturalGroups.length === 0 && culturalZone && year !== undefined) {
-        const fallback = getEraSpecificFallback(culturalZone, year);
+const EUROPEAN_DIASPORA_SETS = new Set([
+    'ENGLISH', 'ENGLISH_MEDIEVAL', 'ENGLISH_ANGLO_SAXON', 'SCOTTISH', 'WELSH', 'CELTIC_IRISH',
+    'FRENCH', 'FRENCH_MEDIEVAL', 'NORMAN_FRENCH', 'GERMAN', 'EAST_GERMAN', 'DUTCH', 'ITALIAN',
+    'SPANISH_CASTILIAN', 'PORTUGUESE', 'RUSSIAN', 'SCANDINAVIAN', 'ICELANDIC', 'GALICIAN',
+    'EUROPEAN', 'NORTH_AMERICAN_COLONIAL', 'NORTH_AMERICAN_MODERN',
+]);
 
-        if (fallback.generator) {
-            // Use custom generator for compound names
-            return {
-                firstName: fallback.generator(gender, undefined, year),
-                surname: '',
-                culturalGroup: `${culturalZone}_GENERATED`
-            };
-        } else if (fallback.groups) {
-            culturalGroups = fallback.groups;
-        }
-    }
-
-    // Still no groups? Last resort fallback based on provided zone
-    if (culturalGroups.length === 0) {
-        if (culturalZone) {
-            const fallback = getEraSpecificFallback(culturalZone, year || 1500);
-            culturalGroups = fallback.groups || ['EUROPEAN'];
-        } else {
-            culturalGroups = ['EUROPEAN'];
-        }
-    }
-    
-    const randomGroup = culturalGroups[Math.floor(seededRandom() * culturalGroups.length)];
-    const nameList = CHARACTER_NAMES[randomGroup];
-    
-    if (!nameList) {
-        throw new Error(`Cultural group "${randomGroup}" not found in CHARACTER_NAMES`);
-    }
-    
-    const firstNames = nameList[gender];
-    const surnames = nameList.surname;
-    
-    // Filter by historical period preference if specified
-    let filteredFirstNames = firstNames;
-    if (options.historicalPeriod && options.preferCommonNames) {
-        // For historical accuracy, prefer names from earlier in the list for earlier periods
-        const nameCount = Math.floor(firstNames.length * 0.6); // Use first 60% for historical periods
-        filteredFirstNames = firstNames.slice(0, nameCount);
-    }
-    
-    const firstName = filteredFirstNames[Math.floor(seededRandom() * filteredFirstNames.length)];
-    let surname = surnames[Math.floor(seededRandom() * surnames.length)];
-    
-    // Handle cultures without traditional surnames
-    if (surname === '(No Surname)' && !options.allowNoSurname) {
-        surname = '';
-    }
-    
-    return {
-        firstName,
-        surname,
-        culturalGroup: randomGroup
-    };
+export function isEuropeanNameSet(key?: string): boolean {
+    return Boolean(key && EUROPEAN_DIASPORA_SETS.has(key));
 }
 
 /**
- * Helper function to get historically appropriate name based on year and location
+ * Does this region's own table actually offer this naming tradition, in this
+ * year?
+ *
+ * The question a "wrong name" check has to ask. A French surname in Algiers is
+ * correct — the Maghreb rule lists `FRENCH`, deliberately and at low weight,
+ * because that population existed. The same surname in 1400 Kyoto is a
+ * generator failure. The two are indistinguishable by inspection of the name
+ * and trivially distinguishable by looking at the rule the name should have
+ * come from, which is what this does.
+ *
+ * Returns false when the region has no rules at all, so a caller can treat "not
+ * offered here" and "nothing is offered here" alike.
  */
-export function generateHistoricalName(
-    continent: string,
-    region: string,
+export function nameKeyOfferedByRegion(
+    culturalZone: string,
+    region: string | undefined,
     year: number,
-    gender: 'male' | 'female',
-    options: NameGenerationOptions = {},
-    culturalZone?: CulturalZone
-): { firstName: string; surname: string; culturalGroup: string } {
-    // Get period-appropriate cultural groups
-    const regionGroups = getCulturalGroupsForRegion(continent, region, year);
-
-    // Enhance with period-specific groups if available
-    const period = getHistoricalPeriod(year);
-    const periodGroups = getCulturalGroupsByPeriod(continent, period);
-
-    // Combine and deduplicate
-    const allGroups = [...new Set([...regionGroups, ...periodGroups])];
-
-    // Determine the cultural zone if not provided
-    const zone = culturalZone || (continent as CulturalZone);
-
-    if (allGroups.length === 0) {
-        // Fallback to era-specific names for this cultural zone
-        // This avoids English names appearing in pre-Columbian North America, etc.
-        return generateRandomName([], gender, { ...options, historicalPeriod: period }, zone, year);
+    key: string | undefined,
+    location?: string,
+): boolean {
+    if (!key || !region) return false;
+    const zoneRules = REGION_NAME_MAPPING[culturalZone];
+    if (!zoneRules) return false;
+    // The locale first, then the region it sits in — the same precedence the
+    // generator itself uses.
+    const rules = (location ? zoneRules[location] : undefined) ?? zoneRules[region];
+    if (!rules) return false;
+    for (const rule of rules) {
+        const afterMatch = rule.after === undefined || year >= rule.after;
+        const beforeMatch = rule.before === undefined || year < rule.before;
+        if (afterMatch && beforeMatch) return rule.keys.includes(key);
     }
-
-    return generateRandomName(allGroups, gender, { ...options, historicalPeriod: period }, zone, year);
-}
-
-/**
- * Helper function to determine historical period from year
- */
-export function getHistoricalPeriod(year: number): 'antiquity' | 'early_medieval' | 'high_medieval' | 'late_medieval' | 'renaissance' | 'early_modern' | 'industrial' | 'modern' {
-    if (year < 500) return 'antiquity';
-    if (year < 1000) return 'early_medieval';
-    if (year < 1300) return 'high_medieval';
-    if (year < 1450) return 'late_medieval';
-    if (year < 1600) return 'renaissance';
-    if (year < 1800) return 'early_modern';
-    if (year < 1900) return 'industrial';
-    return 'modern';
-}
-
-/**
- * Helper function to get all available cultural groups
- */
-export function getAllCulturalGroups(): string[] {
-    return Object.keys(CHARACTER_NAMES);
-}
-
-/**
- * Helper function to get cultural groups by zone
- */
-export function getCulturalGroupsByZone(zone: CulturalZone): string[] {
-    const groups = Object.keys(CHARACTER_NAMES);
-    
-    switch (zone) {
-        case 'EUROPEAN':
-            return groups.filter(g => 
-                ['ANCIENT_GREEK', 'ANCIENT_ROMAN', 'FRANKISH_MEROVINGIAN', 'FRANKISH_CAROLINGIAN', 'SAXON_EARLY_MEDIEVAL', 'NORMAN_FRENCH', 'FRENCH_MEDIEVAL', 'ENGLISH_ANGLO_SAXON', 'ENGLISH_MEDIEVAL', 'ENGLISH', 'SPANISH_CASTILIAN', 'PORTUGUESE', 'ITALIAN', 'FRENCH', 'GERMAN', 'RUSSIAN', 'GREEK', 'CELTIC_IRISH', 'WELSH', 'SCOTTISH', 'DUTCH', 'SCANDINAVIAN', 'BYZANTINE', 'SLAVIC_MEDIEVAL', 'HUNGARIAN_MEDIEVAL', 'HUNGARIAN_MODERN', 'POLISH_MEDIEVAL', 'POLISH_MODERN', 'CZECH', 'ROMANIAN', 'BULGARIAN', 'SERBIAN', 'CROATIAN', 'ICELANDIC', 'BOHEMIAN', 'ARMENIAN', 'GEORGIAN', 'EUROPEAN'].includes(g)
-            );
-        case 'EAST_ASIAN':
-            return groups.filter(g => 
-                ['JAPANESE', 'CHINESE_MANDARIN', 'CHINESE_CANTONESE', 'KOREAN', 'KOREAN_ANCIENT', 'MONGOLIAN_TRADITIONAL', 'KAZAKH', 'UZBEK', 'KYRGYZ', 'TURKMEN', 'TIBETAN', 'UYGHUR', 'MANCHU', 'EAST_ASIAN'].includes(g)
-            );
-        case 'MENA':
-            return groups.filter(g => 
-                ['ARABIC_LEVANT', 'PERSIAN_FARSI', 'TURKISH', 'JEWISH_ASHKENAZI', 'BERBER_AMAZIGH', 'ARABIC_TRADITIONAL', 'MENA'].includes(g)
-            );
-        case 'SOUTH_ASIAN':
-            return groups.filter(g => 
-                ['HINDI', 'BENGALI_TRADITIONAL', 'BENGALI_MODERN', 'TAMIL', 'PUNJABI', 'SOUTH_ASIAN'].includes(g)
-            );
-        case 'SOUTHEAST_ASIAN':
-            return groups.filter(g =>
-                ['MALAY', 'INDONESIAN', 'JAVANESE', 'FILIPINO', 'THAI', 'KHMER', 'VIETNAMESE',
-                 'BURMESE', 'LAO', 'CHAM', 'PREHISTORIC_AUSTRONESIAN'].includes(g)
-            );
-        case 'SUB_SAHARAN_AFRICAN':
-            return groups.filter(g => 
-                ['YORUBA_TRADITIONAL', 'YORUBA_MODERN', 'SWAHILI_COASTAL', 'SWAHILI_INTERIOR', 'AKAN', 'HAUSA', 'SOMALI', 'WEST_AFRICAN_SAHEL', 'RWANDA_BURUNDI', 'AMHARIC', 'ZULU', 'IGBO', 'KONGO', 'LUBA', 'SHONA', 'XHOSA', 'SOTHO_TSWANA', 'MALAGASY_MERINA', 'MALAGASY_BETSILEO', 'MALAGASY_SAKALAVA', 'SUB_SAHARAN_AFRICAN'].includes(g)
-            );
-        case 'OCEANIA':
-            return groups.filter(g => 
-                ['POLYNESIAN', 'MELANESIAN', 'ABORIGINAL_AUSTRALIAN', 'HAWAIIAN', 'TAHITIAN', 'SAMOAN', 'TONGAN', 'FIJIAN', 'OCEANIA',
-                 'POLYNESIAN_PRECONTACT', 'MAORI_PRECONTACT', 'MELANESIAN_PRECONTACT', 'HAWAIIAN_PRECONTACT',
-                 'TAHITIAN_PRECONTACT', 'SAMOAN_PRECONTACT', 'TONGAN_PRECONTACT', 'FIJIAN_PRECONTACT'].includes(g)
-            );
-        case 'SOUTH_AMERICAN':
-            return groups.filter(g => 
-                ['ANDEAN_QUECHUA', 'GUARANI', 'SOUTH_AMERICAN', 'SPANISH_LATIN_AMERICAN', 'PORTUGUESE_BRAZIL'].includes(g)
-            );
-        case 'NORTH_AMERICAN_PRE_COLUMBIAN':
-            return groups.filter(g => 
-                ['NORTH_AMERICAN_ALGONQUIAN', 'IROQUOIAN', 'IROQUOIS_HAUDENOSAUNEE', 'PUEBLO', 'PLAINS_NATIVE', 'APACHE', 'CHEROKEE', 'LAKOTA_SIOUX', 'NORTH_AMERICAN_PRE_COLUMBIAN'].includes(g)
-            );
-        case 'NORTH_AMERICAN_COLONIAL':
-            return groups.filter(g => 
-                ['NORTH_AMERICAN_COLONIAL', 'ENGLISH', 'FRENCH', 'SPANISH_CASTILIAN', 'DUTCH'].includes(g)
-            );
-        default:
-            return groups;
-    }
+    return false;
 }

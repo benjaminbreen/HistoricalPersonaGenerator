@@ -26,6 +26,7 @@
 
 import { PortraitSpec } from '../../components/portraitLab/spec/types';
 import { LegwearForm } from '../../components/portraitLab/spec/garmentLayers';
+import { unit } from '../../components/portraitLab/core/rng';
 
 export type Construction =
   /** Long straight fall from the shoulders: robe, thobe, kurta, kalasiris. */
@@ -40,6 +41,20 @@ export type Construction =
   | 'crop_top'
   /** Wrapped lower body, bare chest: dhoti, lungi, kilt, loincloth, schenti. */
   | 'wrapped_lower'
+  /**
+   * One length of cloth or hide wound round the body and knotted at a shoulder.
+   *
+   * The commonest garment in the app's deep-time range and the one it had no
+   * word for: hide wraps, bark cloth, tapa, pelts, plant-fibre wraps, kaross.
+   * All of them fell through to `robe` — the floor-length tailored fall of a
+   * thobe or a kimono — which is the least like them of the nine. A wrap is
+   * *cut from nothing*: it stops at the calf because that is the length of the
+   * skin, it has no sleeves because it has no armscye, and its top edge runs
+   * diagonally from one armpit to the opposite shoulder because a single cloth
+   * has to be knotted somewhere. Those three facts are the whole silhouette and
+   * none of them survive being drawn as a robe.
+   */
+  | 'wrapped_cloth'
   /** A skirt with a separate upper garment. */
   | 'skirted'
   /** Legs covered as two separate tubes: trousers, churidar, braies. */
@@ -94,20 +109,57 @@ export interface GarmentShape {
    * paints an unnamed top above in the second colour.
    */
   lowerNamed: boolean;
+  /**
+   * Which shoulder a single wrapped cloth leaves uncovered: -1, 0 or 1.
+   *
+   * Zero for everything tailored, because a garment cut with two armscyes
+   * covers both shoulders whatever else it does. Only the wrapped forms have a
+   * choice about it, and the choice is the loudest thing about their outline.
+   */
+  bareShoulder: -1 | 0 | 1;
 }
 
 const RE = {
-  wrappedLower: /dhoti|lungi|kilt|loincloth|breechclout|schenti|langot|veshti|sarong|malo|perizoma/,
-  cropTop: /choli|bandeau|kanchuka/,
+  // `breechcloth` and `breechclout` are the same object spelled two ways and
+  // only one of them was here, which is how a persona in a breechcloth came out
+  // in a smock.
+  wrappedLower: /dhoti|lungi|kilt|loincloth|breechclout|breechcloth|schenti|langot|veshti|sarong|malo\b|maro\b|perizoma/,
+  cropTop: /choli|bandeau|kanchuka|breast band|breast.?cloth/,
   skirted: /\bskirt|petticoat|wrapper|lehenga|sari\b|saree/,
-  trousered: /trouser|churidar|braies|pantaloon|hose\b|breeches|salwar|shalwar|pyjama|pajama/,
+  /**
+   * A single cloth or skin wound round the body — tested before the tailored
+   * constructions, because the words it matches are exactly the ones that
+   * previously fell past every rule here into the `robe` fallback.
+   *
+   * `\bwrap\b` at the end is the catch-all and has to stay last inside this
+   * pattern: "Wrap Dress" and "Wrap Skirt" are tailored garments that happen to
+   * fasten by wrapping, and they are claimed by `gown` and `skirted` before
+   * this ever runs.
+   */
+  wrappedCloth: /bark ?cloth|bark-cloth|\btapa\b|kaross|pelt|animal hide|skin garment|leaf covering|plant.?fibre|plant.?fiber|hide wrap|skin wrap|fur wrap|wrap cloth|woven cloth|upper cloth|traditional cloth|minimal wrap|\bwrap\b/,
+  // Leggings cover the legs and nothing else. Absent from this list they were
+  // reaching the kind fallback and being drawn as floor-length robes.
+  trousered: /trouser|churidar|braies|pantaloon|hose\b|breeches|legging|salwar|shalwar|pyjama|pajama/,
   gown: /gown|dress|kirtle|cotehardie|frock|stola|chemise/,
   jacket: /jacket|jerkin|doublet|coat|vest|waistcoat|angarkha|caftan jacket/,
   robe: /robe|thobe|kurta|changshan|kalasiris|kaftan|caftan|kimono|hanbok|abaya|djellaba|tunica talaris/,
   tunic: /tunic|shirt|smock|blouse|t-shirt|kameez|chiton|exomis/,
-  drape: /sari\b|saree|odhani|dupatta|shawl|pallu|stole|himation|toga|wrap\b/,
+  /**
+   * Cloth that goes *over* whatever is underneath: a sari's pallu, a shawl, a
+   * himation.
+   *
+   * `wrap\b` used to be in here and was the single busiest pattern in the file
+   * — it fired on "Hide Wrap", "Wrap Dress", "Wrap Skirt", "Wrap Cloth",
+   * "Wrap Kilt", 105 of 130 drapes in a 600-persona sample — hanging a
+   * sari-style sash diagonally across garments that have no such thing. A wrap
+   * dress is a dress; the wrapping is how it fastens, not something worn on top
+   * of it. The named drapes below are the ones that really are a second cloth.
+   */
+  drape: /sari\b|saree|odhani|dupatta|chunni|orna\b|pallu|shawl|stole|himation|toga|rebozo|manta\b|khanga|kanga\b/,
   apron: /apron|pinafore/,
   cloak: /cloak|mantle|cape|chlamys|paenula/,
+  /** A name that really is describing an uncovered body rather than a garment. */
+  nothing: /^\s*(bare|naked|nude|none|nothing|no clothing|unclothed)\b|^\s*$/,
 };
 
 /**
@@ -121,13 +173,21 @@ const RE = {
 export function readShape(spec: PortraitSpec, accessoryName = ''): GarmentShape {
   const kind = spec.garment.kind;
   const legs: LegwearForm | null = spec.legwear?.form ?? null;
-  if (kind === 'bare') {
+  const n = `${spec.garment.name}`.toLowerCase();
+
+  // `kind` is the bust's verdict, and the bust is cropped at the collarbone: a
+  // figure in a loincloth has bare shoulders, so `bare` is the right answer
+  // *there*. Taking it at face value here — which is what an early return did —
+  // threw the name away before this file's whole vocabulary could look at it,
+  // and every persona wearing a loincloth or a breechcloth was drawn with no
+  // clothing whatsoever from the neck down. `bare` has to mean the name
+  // describes no garment, not that the garment stops above the frame.
+  if (kind === 'bare' && RE.nothing.test(n)) {
     return {
       construction: 'bare', over: 'none', bareChest: true, bareMidriff: true,
-      legs, twoTone: legs !== null, lowerNamed: false,
+      legs, twoTone: legs !== null, lowerNamed: false, bareShoulder: 0,
     };
   }
-  const n = `${spec.garment.name}`.toLowerCase();
 
   // A shawl, cloak or wrap is usually an *accessory*, not the garment — the
   // generator puts "Rough Wool Wool Shawl" in the accessory slot and names the
@@ -149,13 +209,24 @@ export function readShape(spec: PortraitSpec, accessoryName = ''): GarmentShape 
   else if (RE.jacket.test(n)) construction = 'jacket';
   else if (RE.robe.test(n)) construction = 'robe';
   else if (RE.tunic.test(n)) construction = 'tunic';
+  // Last of the name tests, because "Wrap Dress", "Wrap Skirt" and "Hide Wrap
+  // Kilt" all contain a wrap word and all of them are something more specific.
+  // What is left over by this point genuinely is one cloth and nothing else.
+  else if (RE.wrappedCloth.test(n)) construction = 'wrapped_cloth';
   else {
     // The name said nothing; fall back to what the kind can carry.
     construction =
       kind === 'robe' ? 'robe'
       : kind === 'gown' ? 'gown'
       : kind === 'jacket' || kind === 'doublet' ? 'jacket'
-      : kind === 'wrapped_garment' ? 'robe'
+      // A `wrapped_garment` used to land on `robe`, which meant a hide skin, a
+      // sheet of bark cloth and a tailored kaftan were the same silhouette —
+      // and since this is the kind the whole pre-industrial half of the corpus
+      // arrives under, a floor-length robe became the app's default figure.
+      : kind === 'wrapped_garment' ? 'wrapped_cloth'
+      // The bust saw bare shoulders and the name still described something, so
+      // whatever it is, it is worn below them.
+      : kind === 'bare' ? 'wrapped_lower'
       : 'tunic';
   }
 
@@ -200,6 +271,13 @@ export function readShape(spec: PortraitSpec, accessoryName = ''): GarmentShape 
     // invent a join the eye has no reason to see.
     twoTone: lower !== null && lower !== 'hose',
     lowerNamed: namedIsLower,
+    // Which way the cloth is knotted, and whether it is knotted at all. Seeded
+    // off the persona so a figure always wears it the same way, and on its own
+    // stream so adding it does not shift anything else drawn from the seed.
+    bareShoulder: construction === 'wrapped_cloth' && over === 'none'
+      ? (unit(spec.seed, 'wrap-knot') < 0.28 ? 0
+        : unit(spec.seed, 'wrap-side') < 0.5 ? -1 : 1)
+      : 0,
   };
 }
 
@@ -246,11 +324,28 @@ export function hemFraction(
       return floorLen;
     case 'crop_top':
       return floorLen - 0.05;   // the skirt below it, not the blouse
+    case 'wrapped_cloth': {
+      // Mid-calf, and the length is a fact about the material rather than a
+      // choice: a wrap is as long as the skin or the bolt it was cut from, and
+      // the ones that are wider than they are long stop above the knee. The
+      // named full-length forms — a kaross, a blanket wrap — keep their fall.
+      const wn = spec.garment.name.toLowerCase();
+      if (/kaross|blanket|full|long|robe/.test(wn)) return floorLen - 0.05;
+      return /minimal|short|brief|scant/.test(wn) ? 0.42 : floorLen - 0.22;
+    }
     case 'wrapped_lower':
-      // Knee-length by default; the long-wrapped names reach the ankle.
+      // The long-wrapped names reach the ankle; a loincloth, a kilt and a
+      // schenti sit between the mid-thigh and the knee.
+      //
+      // This used to read `t.tunicHem + 0.08` for the short case and describe
+      // itself as knee-length, which it was when `tunicHem` was small. It is
+      // 0.76 now, so the "short" branch was landing at 0.84 of the way to the
+      // ankle — *longer* than the dhoti it exists to be shorter than, and the
+      // reason every loincloth in the app was drawn as a long skirt. A hem this
+      // specific has no business being derived from a tunic's.
       return /lungi|sarong|veshti|dhoti/.test(spec.garment.name.toLowerCase())
         ? floorLen - 0.07
-        : t.tunicHem + 0.08;
+        : 0.34;
     case 'jacket':
       return t.coatHem;
     case 'trousered':

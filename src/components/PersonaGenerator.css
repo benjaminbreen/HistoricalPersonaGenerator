@@ -7523,3 +7523,725 @@ body.dark-mode .sampling-mode {
     margin-right: 0.07em;
   }
 }
+
+/* =========================================================================
+   MOBILE PASS 2 — reach, touch targets and standing chrome
+   =========================================================================
+
+   The pass above solved density: it got the toolbar down to one row and the
+   header down to a third of its height. What it did not address is that a
+   phone is held in one hand and driven with one thumb, and that the page is
+   2,885px long. Three problems followed from that:
+
+     · the only "Generate Random Persona" button lives at the top of the
+       document, so the app's core loop cost a full-page scroll each time
+     · the tab strip sits 936px down with 1,700px of content beneath it, so
+       reaching Family from the end of Biography meant scrolling back up
+     · twenty controls were under the 44px touch minimum, the encounter egg
+       among them at 8x17px, which is smaller than a fingertip's contact patch
+
+   The fixes are: a bottom action bar that arrives only once the real controls
+   have scrolled away, a tab strip that sticks under the toolbar, and a sweep
+   of the undersized targets. Everything below 768px also gets 16px form text,
+   because iOS Safari zooms any smaller field on focus and never zooms back.
+   ========================================================================= */
+
+/* --- Shared metrics ------------------------------------------------------
+   Both bars are sticky or fixed, and the tab strip has to park exactly under
+   the toolbar. Deriving all three offsets from one pair of variables keeps
+   them in register when the toolbar's padding is next adjusted. The safe-area
+   terms are live now that the viewport meta carries `viewport-fit=cover`.
+   ---------------------------------------------------------------------- */
+@media (max-width: 600px) {
+  :root {
+    /* 44px control + 4px above and below + the 1px rule underneath. */
+    --topbar-h: calc(53px + env(safe-area-inset-top, 0px));
+    --actionbar-h: calc(60px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* --- Form fields: 16px, without exception --------------------------------
+   Safari zooms the viewport in on any focused field whose text is under 16px
+   and offers no way back out, which left the Source Studio unusable after the
+   first tap: the layout ended up 1.3x scale with the submit button off-screen.
+   All ten fields computed to 14px or less.
+   ---------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea,
+  .source-ingestion-panel input,
+  .source-ingestion-panel select,
+  .source-ingestion-panel textarea {
+    font-size: 16px;
+  }
+
+  /* Fields grew with the type; the controls around them follow so the forms
+     still read as rows rather than a stack of mismatched heights. */
+  .source-ingestion-panel input,
+  .source-ingestion-panel select {
+    min-height: 44px;
+  }
+}
+
+/* --- Panels stop dragging the page behind them --------------------------- */
+.modal-body,
+.about-modal .about-body,
+.donate-body,
+.family-tree-body,
+.life-events-timeline,
+.source-expanded-content,
+.annotation-jsonl {
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 600px) {
+
+  /* --- Toolbar: four 44px targets, not six 30px ones -------------------- */
+
+  /* Six round buttons at 30px were both under the touch minimum and, at 3px
+     apart, close enough that a thumb covered two at once. Save/About/Donate
+     are the three nobody presses mid-read, so they move behind a single
+     overflow control and the four that remain get the full 44px. */
+  .top-bar {
+    padding-top: calc(var(--sp-xs) + env(safe-area-inset-top, 0px));
+    padding-left: calc(var(--sp-sm) + env(safe-area-inset-left, 0px));
+    padding-right: calc(var(--sp-sm) + env(safe-area-inset-right, 0px));
+  }
+
+  .top-bar-buttons {
+    gap: 5px;
+  }
+
+  .top-bar button {
+    width: 44px;
+    height: 44px;
+    /* The icons were sized against a 30px button and looked lost at 44. */
+    border-width: 1px;
+  }
+
+  .top-bar button svg {
+    font-size: 17px;
+  }
+
+  /* Three of the six are now inside the overflow sheet. */
+  .top-bar-buttons .top-bar-overflow-hidden {
+    display: none;
+  }
+
+  /* The wordmark keeps its two lines but can afford to be legible: four 44px
+     buttons leave 175px where six 30px ones left about 140. */
+  .top-bar-title {
+    font-size: 0.875rem;
+  }
+
+  /* --- Sampling toggle: its own row --------------------------------------
+
+     `.sampling-mode` is an `inline-flex` with `overflow: hidden`, and the row
+     it shared with the AI button had `flex-wrap: nowrap`. There was never
+     enough width for both, so the second option was clipped — by 22px at
+     390px and by 92px at 320px, where it read "TRUE FREQUENC". As a full
+     width segmented control it fits at every size and the two options finally
+     look like the pair of alternatives they are.
+     -------------------------------------------------------------------- */
+
+  .generation-mode-row {
+    flex-wrap: wrap;
+    gap: var(--sp-sm);
+  }
+
+  /* Matches `.control-buttons .generation-ai-button`, which pins `min-height`
+     to 0 to keep the desktop row tight. */
+  .control-buttons .generation-ai-button,
+  .control-buttons .generation-schema-button {
+    flex: 1 1 auto;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .sampling-mode {
+    flex: 1 1 100%;
+    margin-left: 0;
+    display: flex;
+    overflow: visible;         /* nothing left to clip, and it hid the ring */
+  }
+
+  .sampling-mode button {
+    flex: 1 1 0;
+    min-height: 44px;
+    padding-inline: var(--sp-sm);
+    font-size: 0.6875rem;
+    /* Both labels sit on one line at 320px once each has half the row. */
+    white-space: nowrap;
+  }
+
+  /* The one control the whole page exists to serve; it should be the easiest
+     thing on the screen to hit. */
+  .control-buttons .generation-random-button {
+    min-height: 48px;
+  }
+
+  /* The heading doubles as the panel's expand control. */
+  .source-studio-title {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .sampling-mode button:first-child {
+    border-radius: 999px 0 0 999px;
+  }
+
+  .sampling-mode button:last-child {
+    border-radius: 0 999px 999px 0;
+  }
+
+  /* --- Tab strip parks under the toolbar --------------------------------
+
+     `.persona-card` moves from `overflow: hidden` to `overflow: clip`. Both
+     clip to the radius, but `hidden` makes the card a scroll container, which
+     would make the strip stick to the card's own scrollport — a box that never
+     scrolls — instead of to the page.
+     -------------------------------------------------------------------- */
+
+  .persona-card {
+    overflow: clip;
+  }
+
+  /* The other half of the same problem. Both of these are framer-motion
+     entrance animations — `y: 30 → 0` on the wrapper, `scale: 0.95 → 1` on the
+     card — and any transformed ancestor becomes the containing block for a
+     sticky descendant. With them in place the strip parked against the card
+     instead of the viewport, leaving a 28px window under the toolbar for the
+     article text to scroll through. Motion writes these as inline styles, so
+     `!important` is what it takes to override them; the entrance survives as
+     the opacity half of the same animation, which needs no transform. */
+  .persona-display-simple,
+  .persona-card {
+    transform: none !important;
+  }
+
+  .biography-tabs {
+    position: sticky;
+    /* Overlap the toolbar's bottom rule by a pixel so no seam shows through
+       between the two while scrolling. */
+    top: calc(var(--topbar-h) - 1px);
+    z-index: 20;
+    /* The strip was translucent against the elevated surface; sitting over
+       running text it has to be opaque. */
+    background: var(--color-surface-elevated);
+    box-shadow: 0 6px 12px -10px rgba(26, 22, 18, 0.55);
+  }
+
+  body.dark-mode .biography-tabs {
+    box-shadow: 0 6px 14px -10px rgba(0, 0, 0, 0.8);
+  }
+
+  .biography-tabs > button,
+  .biography-tabs > * {
+    min-height: 46px;
+  }
+
+  /* --- Targets the sweep above missed ------------------------------------ */
+
+  .symptoms-toggle-button,
+  .polity-badge,
+  .source-show-all-button,
+  .source-panel-toggle,
+  .source-ingestion-panel .btn {
+    min-height: 44px;
+  }
+
+  .portrait-details-button {
+    min-height: 44px;
+    padding: 0.5rem 0.8rem;
+  }
+
+  /* Tapping a tab from the foot of a long section leaves the reader wherever
+     they were; sending the strip back to its parking position gives the new
+     section a top. */
+  .backstory-section-compact {
+    scroll-margin-top: var(--topbar-h);
+  }
+
+  /* --- Remaining undersized targets ------------------------------------- */
+
+  /* Reserve the action bar's height so the last line of the footer, and the
+     encounter egg sitting in it, are not covered when the bar is up. */
+  .footer {
+    padding-bottom: calc(var(--sp-xl) + var(--actionbar-h));
+    line-height: 2.1;          /* separates the inline links into tappable rows */
+  }
+
+  .footer a,
+  .footer .encounter-egg {
+    display: inline-block;
+    padding: 10px 2px;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Bottom action bar
+
+   Permanent bottom chrome would cost 60px of every screen to hold a button
+   that is only wanted between personae, so the bar is absent until the real
+   controls have scrolled out of view and slides away again when they return.
+   What it carries is the loop and nothing else: generate, and the AI path
+   that most often follows it.
+   ---------------------------------------------------------------------- */
+.mobile-action-bar {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .mobile-action-bar {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 90;
+    align-items: center;
+    gap: var(--sp-md);
+    padding: var(--sp-md) var(--sp-lg);
+    padding-bottom: calc(var(--sp-md) + env(safe-area-inset-bottom, 0px));
+    padding-left: calc(var(--sp-lg) + env(safe-area-inset-left, 0px));
+    padding-right: calc(var(--sp-lg) + env(safe-area-inset-right, 0px));
+    background: rgba(255, 255, 255, 0.93);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -6px 20px -14px rgba(26, 22, 18, 0.7);
+    /* Parked below the fold rather than hidden, so it can slide. */
+    transform: translateY(120%);
+    transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+    pointer-events: none;
+  }
+
+  body.dark-mode .mobile-action-bar {
+    background: rgba(39, 36, 31, 0.94);
+    box-shadow: 0 -6px 20px -14px rgba(0, 0, 0, 0.9);
+  }
+
+  .mobile-action-bar.is-visible {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .mobile-action-bar .mobile-action-primary {
+    flex: 1 1 auto;
+    min-height: 46px;
+    justify-content: center;
+    margin: 0;
+    font-size: 0.8125rem;
+    /* The full label is the same words as the button it stands in for, and it
+       fits: 46px of height and the whole row minus one 46px icon button. */
+    letter-spacing: 0.05em;
+  }
+
+  .mobile-action-bar .mobile-action-icon {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+  }
+
+  .mobile-action-bar .mobile-action-icon svg {
+    font-size: 19px;
+  }
+
+  .mobile-action-bar .mobile-action-icon:disabled {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-action-bar {
+    transition: none;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Toolbar overflow sheet
+
+   Save as PDF, About and Donate leave the toolbar on phones and arrive here.
+   A sheet rather than a dropdown: it opens against the thumb instead of at
+   the far top corner, and it gives each item a 52px row to be pressed by.
+   ---------------------------------------------------------------------- */
+/* Scoped to `.top-bar` to outrank `.top-bar button`, which sets `display:
+   flex` on every button in the bar and would otherwise show the overflow
+   control at every width. */
+.top-bar .top-bar-overflow-button {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .top-bar .top-bar-overflow-button {
+    display: flex;
+  }
+}
+
+.overflow-sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(26, 22, 18, 0.42);
+  animation: overflowSheetFade 0.18s ease-out;
+}
+
+.overflow-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1201;
+  padding: var(--sp-md) var(--sp-lg);
+  padding-bottom: calc(var(--sp-2xl) + env(safe-area-inset-bottom, 0px));
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -10px 40px -14px rgba(26, 22, 18, 0.5);
+  animation: overflowSheetRise 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.overflow-sheet-grip {
+  width: 38px;
+  height: 4px;
+  margin: 2px auto var(--sp-md);
+  border-radius: 999px;
+  background: var(--color-border-strong);
+  opacity: 0.55;
+}
+
+.overflow-sheet button {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xl);
+  width: 100%;
+  min-height: 52px;
+  padding: 0 var(--sp-md);
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: 600 0.9375rem var(--font-sans);
+  text-align: left;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.overflow-sheet button + button {
+  border-top: 1px solid var(--color-border);
+  border-radius: 0;
+}
+
+.overflow-sheet button:active {
+  background: var(--color-surface-elevated);
+}
+
+.overflow-sheet button svg {
+  font-size: 19px;
+  color: var(--color-text-tertiary);
+  flex: 0 0 auto;
+}
+
+.overflow-sheet .overflow-sheet-donate svg {
+  color: var(--color-accent-primary);
+}
+
+@keyframes overflowSheetFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes overflowSheetRise {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overflow-sheet,
+  .overflow-sheet-scrim {
+    animation: none;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Narrowest screens
+
+   Four 44px targets and their gaps claim 191px, which at 320px leaves the
+   wordmark 83px — not wide enough for "Generator" to reach the second line,
+   so the clamp ellipsised it to "Historical Persona…". Three smaller lines
+   still measure 40px against the row's 44px, so the name survives intact on
+   the narrowest phones still in use.
+   ---------------------------------------------------------------------- */
+@media (max-width: 360px) {
+  .top-bar-title {
+    font-size: 0.75rem;
+    -webkit-line-clamp: 3;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Hover plates
+
+   The little parchment card that opens beside a mark when it is hovered. Three
+   things use it — the trait seals, the rarity line, and the target laid over
+   the portrait's corner mark — and they all needed the same thing the browser's
+   own `title` was doing badly: a slow grey system box on a page that is
+   otherwise a printed document.
+
+   The plate is a separate absolutely positioned element rather than text
+   revealed inside a growing pill, because a pill that grows has to guess a max
+   width and anything longer than the guess is clipped mid-word.
+   ---------------------------------------------------------------------- */
+.plate-anchor {
+  position: relative;
+  outline: none;
+}
+
+.hover-plate {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  /* `max-content`, and not merely a max-width.
+
+     An absolutely positioned box with `left` set gets a shrink-to-fit width out
+     of what remains of its *containing block* — which for a 40px seal came out
+     negative, so every plate collapsed to the narrowest word it could break to.
+     `max-content` sizes to the text and ignores the containing block; the
+     max-width is then a real cap rather than the thing doing the sizing. */
+  width: max-content;
+  max-width: 230px;
+  padding: 0.36rem 0.6rem 0.4rem;
+  border: 1px solid var(--plate-edge, #b59a6a);
+  border-radius: 3px;
+  background: linear-gradient(160deg, #fbf4e4 0%, #f1e6cd 100%);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease, transform 180ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+/* The notch, pointing back at whatever was hovered. */
+.hover-plate::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #fbf4e4;
+  border-left: 1px solid var(--plate-edge, #b59a6a);
+  border-bottom: 1px solid var(--plate-edge, #b59a6a);
+}
+
+.hover-plate-right {
+  left: calc(100% + 9px);
+  /* Top-aligned with the mark, not centred on it: centring a two-line plate on
+     a 40px seal that already sits 9px from the top of the portrait pushes its
+     first line up over the frame, where the panel header clips it. */
+  top: -1px;
+  transform: translateX(-6px);
+}
+
+.hover-plate-right::before {
+  left: -5px;
+  top: 15px;
+  transform: rotate(45deg);
+}
+
+.hover-plate-left {
+  right: calc(100% + 9px);
+  top: -1px;
+  transform: translateX(6px);
+}
+
+.hover-plate-left::before {
+  right: -5px;
+  top: 15px;
+  transform: rotate(-135deg);
+}
+
+.hover-plate-below {
+  left: 0;
+  top: calc(100% + 8px);
+  transform: translateY(-4px);
+}
+
+.hover-plate-below::before {
+  left: 14px;
+  top: -5px;
+  transform: rotate(135deg);
+}
+
+.plate-anchor:hover > .hover-plate,
+.plate-anchor:focus-visible > .hover-plate {
+  opacity: 1;
+  transform: none;
+}
+
+.hover-plate strong {
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.15;
+  color: #2a1d0e;
+}
+
+.hover-plate em {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.35;
+  color: #5c4c33;
+}
+
+/* The seals' treatment: one short line, set as small capitals, tinted to the
+   wax it belongs to. */
+.hover-plate-caps em {
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--seal, #6b5a3e) 62%, #6b5a3e);
+}
+
+/* -------------------------------------------------------------------------
+   Trait seals
+
+   Wax stamped into the top-left corner of the portrait, one per genuinely
+   extreme score, at most two. Closed it is 40px of coloured wax with a device
+   pressed into it; the claim is on a hover plate, which opens to the right —
+   the seal is at the left corner, so there is a whole portrait's width of room
+   on that side and none on the other.
+   ---------------------------------------------------------------------- */
+.portrait-container {
+  position: relative;
+}
+
+.trait-seals {
+  position: absolute;
+  top: 0.55rem;
+  /* The canvas is centred and capped at 300px, so on a wider column there is a
+     gutter either side. Anchoring to the container's edge would hang the seal
+     in that gutter, off the portrait it belongs to; this walks it back in by
+     half the overspill. */
+  left: calc(max(0px, (100% - 300px) / 2) + 0.55rem);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  pointer-events: none;
+}
+
+.trait-seal {
+  pointer-events: auto;
+  display: block;
+  width: 40px;
+  height: 40px;
+  cursor: help;
+  --plate-edge: color-mix(in srgb, var(--seal) 45%, #b59a6a);
+}
+
+/* The tilt lives on the wax, not on the seal, so the plate hanging off it stays
+   level — a label that leans seven degrees is a label, not a stamp. */
+.trait-seal-wax {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(var(--seal-tilt, -7deg));
+  transition: transform 180ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  /* Four things together make it read as poured wax rather than a coloured
+     circle: an off-round radius so no edge is a perfect arc; a radial highlight
+     up and left, which is where every other light in this app comes from; an
+     inset rim darkening down and right, for thickness; and a real drop shadow,
+     because the one thing a decal never has is a shadow. */
+  border-radius: 47% 53% 52% 48% / 52% 47% 53% 48%;
+  background:
+    radial-gradient(
+      circle at 33% 28%,
+      color-mix(in srgb, var(--seal) 55%, #ffe9c4) 0%,
+      var(--seal) 46%,
+      color-mix(in srgb, var(--seal) 78%, #150802) 100%
+    );
+  box-shadow:
+    inset 0 1px 1px color-mix(in srgb, var(--seal) 40%, #ffe4bc),
+    inset -1px -2px 3px color-mix(in srgb, var(--seal) 55%, #180a02),
+    inset 0 0 0 3px color-mix(in srgb, var(--seal) 82%, #1c0a02),
+    0 2px 3px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(0, 0, 0, 0.25);
+  color: color-mix(in srgb, var(--seal) 42%, #2a0f04);
+  font-size: 20px;
+  /* The device is pressed *into* the wax, so its lit edge is the lower one. */
+  filter: drop-shadow(0 1px 0 color-mix(in srgb, var(--seal) 30%, #ffdfae));
+}
+
+.trait-seal:hover .trait-seal-wax,
+.trait-seal:focus-visible .trait-seal-wax {
+  transform: rotate(0deg) scale(1.07);
+}
+
+/* A gold rim for the top of a scale, pewter for the bottom — so a glance at the
+   corner says which kind of extreme this is before anything is read. */
+.trait-seal-top .trait-seal-wax {
+  outline: 1.5px solid rgba(214, 176, 94, 0.85);
+  outline-offset: -1px;
+}
+
+.trait-seal-bottom .trait-seal-wax {
+  outline: 1.5px solid rgba(178, 184, 190, 0.6);
+  outline-offset: -1px;
+}
+
+/* Body, mind, temperament. Three waxes, so the corner says what kind of extreme
+   it is before the plate is open. */
+.trait-seal-body { --seal: #9c3b1c; }
+.trait-seal-mind { --seal: #2f4a6b; }
+.trait-seal-temper { --seal: #6a2a52; }
+
+/* The invisible target over the mark painted into the canvas. Sized and placed
+   from `MARK_HOTSPOT`, so it follows the art rather than a guess. */
+.portrait-mark-hotspot {
+  position: absolute;
+  z-index: 3;
+  cursor: help;
+}
+
+.portrait-mark-target {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Narrower than the default cap: the mark sits at the far right of the picture,
+   so a plate opening left at the full 230px runs off the other edge and over
+   the wax seals in the opposite corner. */
+.portrait-mark-hotspot .hover-plate {
+  max-width: 196px;
+}
+
+/* The rarity line carries the same plate, hanging below the sentence. */
+.persona-rarity.plate-anchor {
+  display: inline-flex;
+  width: max-content;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hover-plate,
+  .trait-seal-wax {
+    transition: none;
+  }
+}

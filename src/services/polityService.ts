@@ -1243,7 +1243,12 @@ const ALLEGIANCES: Array<{
     ],
   },
   {
-    match: /anatolia|bosphorus|marmara|constantinople|istanbul|smyrna/i,
+    // "bosphorus" with the h is the English spelling of the strait; the map
+    // area is spelled "Bosporus", so this entry could never match it and
+    // Istanbul fell through to the Balkans entry below — which is why a
+    // persona there was told authority had run to Turkey "since 1945", the
+    // date the Balkan states rule begins, rather than since 1923.
+    match: /anatolia|bospor|bosphorus|marmara|constantinople|istanbul|smyrna/i,
     eras: [
       { from: -1650, until: -1180, name: 'Hittite Empire' },
       { from: -546, until: -334, name: 'Achaemenid Empire' },

@@ -60,7 +60,8 @@ import {
   IoSparkles,
   IoTelescope,
   IoHandLeft,
-  IoMusicalNotes
+  IoMusicalNotes,
+  IoEllipsisHorizontal
 } from 'react-icons/io5';
 import {
   FaDumbbell,
@@ -156,8 +157,10 @@ import { DEFAULT_SAMPLING_MODE, type SamplingMode } from '../services/demography
 import { getAreaClimate, hemisphereFor, seasonFor } from '../services/climateService';
 import { ClimateType } from '../types/enums';
 import { HistoricalEra, CulturalZone, Gender } from '../types';
-import { generateNpcName } from '../generation/common/npcUtils';
+import { generateNpcNameDetailed } from '../generation/common/npcUtils';
+import { isEuropeanNameSet, nameKeyOfferedByRegion } from '../constants/characterData/names';
 import { ValueNoise } from '../utils/noise';
+import { triggerHaptic } from '../utils/deviceUtils';
 import { EventImportance, EventKind } from '../constants/characterData/lifeHistoryService';
 import { standingRole } from '../constants/characterData/professions';
 import { HistoricalPersonaAnnotationRecord } from '../types/personaAnnotation';
@@ -179,7 +182,11 @@ import {
   type AiAccessStatus,
 } from '../services/aiAccessService';
 import { createPastedTextSource, getRandomWikidataPerson, ingestRandomOldBaileySource, ingestUrlSource, OldBaileyRandomFilters } from '../services/sourceIngestionService';
-import PixelPortrait from './portraitLab/PixelPortrait';
+import PixelPortrait, { MARK_HOTSPOT } from './portraitLab/PixelPortrait';
+import { portraitMarkFor } from './portraitLab/art/distinctionMark';
+import TraitSeals from './TraitSeals';
+import HoverPlate from './HoverPlate';
+import { traitSeals } from '../utils/traitSeals';
 import RosterStrip, { SavePersonaStar } from '../encounter/RosterStrip';
 import { loadRoster } from '../encounter/roster';
 import { generateStatDescription } from '../utils/statToText';
@@ -727,6 +734,11 @@ const AI_COST_COPY: Record<AiCostKind, { title: string; lead: string; detail: st
   },
 };
 
+/** Height of the phone toolbar, matching `--topbar-h` in PersonaGenerator.css.
+ *  Anything scrolled above this line is behind the toolbar, not merely near
+ *  the top of the viewport. */
+const MOBILE_TOP_BAR_PX = 53;
+
 const RANDOM_PERSONA_COUNT_KEY = 'hpg_random_persona_clicks_v1';
 const RANDOM_DONATION_COPY: Record<RandomDonationMilestone, {
   kicker: string;
@@ -1027,10 +1039,28 @@ const normalizeDisplayZone = (zone: string): CulturalZone | undefined => {
   return allowed.includes(normalized) ? normalized : undefined;
 };
 
-const EUROPEAN_FALLBACK_NAME_PATTERN = /^(john|william|james|robert|thomas|edward|henry|charles|george|richard|joseph|david|michael|daniel|matthew|christopher|andrew|joshua|samuel|benjamin|mary|elizabeth|margaret|anne|sarah|jane|alice|catherine|helen|emma|emily|frances|harriet)\b|\b(harris|smith|brown|jones|williams|taylor|miller|wilson|moore|clark|walker)\b/i;
-
-const looksLikeEuropeanFallbackName = (name?: string): boolean =>
-  Boolean(name && EUROPEAN_FALLBACK_NAME_PATTERN.test(name.trim()));
+/**
+ * Did this persona's name come out of a set the region never offered?
+ *
+ * This used to be a hand-written list of about forty-five English given names
+ * and a dozen surnames, tested against the finished string. It could only ever
+ * catch the spellings somebody had thought of, and it did not catch the one
+ * that prompted this: an Egyptian dock worker in 1950 called Nicholas Mason,
+ * whose given name, surname, father, mother and wife were all missed, because
+ * none of the six were on the list.
+ *
+ * The generator records which tradition it drew from, and the region table says
+ * which traditions that region offers, so the question can be answered exactly
+ * instead of guessed. This also stops the check destroying the cases it should
+ * leave alone — a French name in colonial Algiers or a Greek one in Alexandria
+ * is offered by those rules on purpose, at the low weight those communities
+ * actually had, and the old spelling test would have thrown both away.
+ */
+const cameFromUnofferedNameSet = (persona: HistoricalPersona, zone: CulturalZone): boolean => {
+  const nameKey = (persona.character as { nameKey?: string }).nameKey;
+  if (!nameKey || !isEuropeanNameSet(nameKey)) return false;
+  return !nameKeyOfferedByRegion(zone, persona.region, persona.year, nameKey, persona.location);
+};
 
 const seedFromPersonaContext = (persona: HistoricalPersona): number => {
   const seedText = [
@@ -1051,22 +1081,28 @@ const seedFromPersonaContext = (persona: HistoricalPersona): number => {
 const repairSyntheticSeedName = (persona: HistoricalPersona): HistoricalPersona => {
   const culturalZone = normalizeDisplayZone(persona.culturalZone);
   if (!culturalZone || culturalZone === 'EUROPEAN') return persona;
-  if (!looksLikeEuropeanFallbackName(persona.character.name)) return persona;
+  if (!cameFromUnofferedNameSet(persona, culturalZone)) return persona;
 
   const repaired = structuredClone(persona) as HistoricalPersona;
   const gender = repaired.character.gender === 'Female' ? 'Female' : 'Male';
   const baseSeed = seedFromPersonaContext(repaired);
 
   for (let attempt = 0; attempt < 8; attempt++) {
-    const candidate = generateNpcName(
+    const candidate = generateNpcNameDetailed(
       gender,
       culturalZone,
       repaired.region,
       repaired.year,
-      new ValueNoise(baseSeed + attempt * 7919)
+      new ValueNoise(baseSeed + attempt * 7919),
+      undefined,
+      { location: repaired.location }
     );
-    if (candidate && !looksLikeEuropeanFallbackName(candidate)) {
-      repaired.character.name = candidate;
+    // Judged by where the redraw came from, not by how it reads — the same
+    // test that got us here, so a redraw cannot be accepted for a reason the
+    // original was rejected for.
+    if (candidate.full && nameKeyOfferedByRegion(culturalZone, repaired.region, repaired.year, candidate.nameKey, repaired.location)) {
+      repaired.character.name = candidate.full;
+      (repaired.character as { nameKey?: string }).nameKey = candidate.nameKey;
       return repaired;
     }
   }
@@ -1286,6 +1322,42 @@ export default function PersonaGenerator() {
   const [shareStatus, setShareStatus] = useState<string | null>(null);
   const initialPersonaLoadStarted = useRef(false);
 
+  /* Phone chrome. `showMobileActions` drives the bottom bar, which stands in
+     for the generation controls once they have scrolled out of the document;
+     `showOverflowSheet` holds the three toolbar actions that do not fit a
+     44px-target row. Both render at every width — the stylesheet takes them
+     out of the layout above 600px — so there is no width state to keep in
+     sync with the media query. */
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const [showMobileActions, setShowMobileActions] = useState(false);
+  const [showOverflowSheet, setShowOverflowSheet] = useState(false);
+
+  useEffect(() => {
+    const el = controlsRef.current;
+    if (!el) return;
+    /* The listener reads a rect per scroll event but only touches state when
+       the answer flips, so a full-page flick costs one render rather than one
+       per frame. `.controls` encloses the Source Studio panel and so changes
+       height when it opens, which is why the boundary is measured each time
+       rather than cached against `scrollY`. */
+    let showing = false;
+    const update = () => {
+      // Gone once its last pixel has passed under the toolbar, not once it has
+      // left the viewport — the toolbar covers the top 53px.
+      const gone = el.getBoundingClientRect().bottom < MOBILE_TOP_BAR_PX;
+      if (gone === showing) return;
+      showing = gone;
+      setShowMobileActions(gone);
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
   const openMobileSourceStudio = () => {
     setSourceStudioView('full');
     setSourcePanelCollapsed(false);
@@ -1417,6 +1489,45 @@ export default function PersonaGenerator() {
   };
 
   const detailsIdlePosture = useIdlePosture(showSecrets && !!persona);
+
+  // The one or two scores this person is genuinely off the scale on. Usually
+  // none, which is the point — see `traitSeals`.
+  const portraitSeals = useMemo(
+    () => traitSeals(persona?.character as any),
+    [persona?.character]
+  );
+
+  /**
+   * What the mark in the portrait's corner is claiming, if there is one.
+   *
+   * Two different things put a mark there and they say different sentences:
+   * a rare *standing* — the gold star or the diamond — is a fact about the
+   * society, and the persona's own rarity is a fact about the person. Asking
+   * `portraitMarkFor` with the same three inputs the portrait itself uses is
+   * what keeps the plate from describing a mark that is not on screen.
+   */
+  const portraitMark = useMemo(() => {
+    if (!persona) return null;
+    const character = persona.character as any;
+    const tier = portraitMarkFor(character?.distinctionShare, character?.profession, character?.rarityTier);
+    if (!tier) return null;
+
+    if (tier === 'star' || tier === 'diamond') {
+      const standing = persona.distinction;
+      return {
+        title: standing?.label || 'A rare standing',
+        lines: standing
+          ? [standing.clause, `Roughly ${formatShareAsOdds(standing.share)} of people here held this standing.`]
+          : ['Held by a very small share of people here.'],
+      };
+    }
+
+    const rarity = persona.rarity;
+    return {
+      title: `1 in ${rarity?.oneIn.toLocaleString() ?? '—'} people`,
+      lines: rarity?.reasons?.length ? rarity.reasons : ['Unusual across the whole run of scores.'],
+    };
+  }, [persona]);
 
   // Handler for main portrait hover - randomly selects an expression and shows greeting bubble
   const handleMainPortraitHover = () => {
@@ -2797,6 +2908,10 @@ export default function PersonaGenerator() {
 
   const handleRandomPersonaClick = () => {
     handleHourglassClick();
+    // A persona arrives instantly and silently, and from the bottom bar the
+    // button is often under the thumb that pressed it. The tick confirms the
+    // press on the devices that can produce one; elsewhere it is a no-op.
+    triggerHaptic('light');
     generateProceduralOnly();
     const next = (randomPersonaCountRef.current || 0) + 1;
     randomPersonaCountRef.current = next;
@@ -3864,6 +3979,27 @@ export default function PersonaGenerator() {
   };
 
   /**
+   * The lower half as a single equipment line: "Denim Jeans", "Moleskin
+   * Trousers", "Skirt".
+   *
+   * The material is dropped when the garment's name already says it — the
+   * tables carry both "Trousers"/"Cotton Drill" and "Cotton Drill Trousers",
+   * and "Cotton Drill Cotton Drill Trousers" is what naive concatenation gives.
+   */
+  const describeLegwear = (piece?: { name?: string; material?: string }): string | null => {
+    const name = (piece?.name || '').trim();
+    if (!name || /^(none|bare)$/i.test(name)) return null;
+    const material = (piece?.material || '').trim();
+    const shown = formatItemName(name);
+    if (!material || /^(none|n\/a)$/i.test(material)) return shown;
+    const already = material
+      .toLowerCase()
+      .split(/\s+and\s+|\s+/)
+      .some(word => word.length > 2 && shown.toLowerCase().includes(word));
+    return already ? shown : `${material} ${shown}`;
+  };
+
+  /**
    * What to call the row a garment sits in.
    *
    * The clothing tables have one `garments` list per culture and era, and it is
@@ -3873,13 +4009,16 @@ export default function PersonaGenerator() {
    * move them to, so the label follows the garment instead of the slot key.
    */
   const slotLabelFor = (slot: string, itemName: string): string => {
-    if (slot !== 'torso') return formatItemName(slot);
+    // The legs slot goes through the same naming test as the torso: what sits
+    // there is as often a wrapped cloth as a pair of trousers, and "Legs:
+    // Wrapper" is the wrong word for a garment tied at the waist.
+    if (slot !== 'torso' && slot !== 'legs') return formatItemName(slot);
     const name = itemName.toLowerCase();
-    if (/legging|trouser|breeches|pants|chaps/.test(name)) return 'Legs';
+    if (/legging|trouser|breeches|pants|chaps|jeans|shorts|hose/.test(name)) return 'Legs';
     if (/breechcloth|breechclout|loincloth|apron string|malo|sarong|lungi|dhoti|sash skirt/.test(name)) return 'Waist';
     if (/skirt|kilt|wrapper|pareo|lavalava/.test(name)) return 'Waist';
     if (/cloak|mantle|cape|robe over/.test(name)) return 'Cloak';
-    return 'Torso';
+    return slot === 'legs' ? 'Legs' : 'Torso';
   };
 
   const getSeasonInfo = (
@@ -4421,28 +4560,110 @@ export default function PersonaGenerator() {
             <IoShareSocial aria-hidden="true" />
             <span className="top-bar-label">{isCreatingShare ? 'Saving…' : 'Share'}</span>
           </button>
-          <button onClick={handleSavePDF} aria-label="Save persona as PDF">
+          {/* Six 30px buttons fitted a phone row only by being under the touch
+              minimum and close enough together that a thumb covered two. These
+              three are the ones nobody reaches for mid-read, so on phones they
+              move into the overflow sheet and the rest get their 44px. */}
+          <button
+            className="top-bar-overflow-hidden"
+            onClick={handleSavePDF}
+            aria-label="Save persona as PDF"
+          >
             <IoSave aria-hidden="true" />
             <span className="top-bar-label">Save as PDF</span>
           </button>
-          <button onClick={() => setShowAbout(true)} aria-label="About this application">
+          <button
+            className="top-bar-overflow-hidden"
+            onClick={() => setShowAbout(true)}
+            aria-label="About this application"
+          >
             <IoInformationCircle aria-hidden="true" />
             <span className="top-bar-label">About</span>
           </button>
           <button
-            className="top-bar-donate"
+            className="top-bar-donate top-bar-overflow-hidden"
             onClick={() => setShowDonate(true)}
             aria-label="Support this project"
           >
             <IoHeart aria-hidden="true" />
             <span className="top-bar-label">Donate</span>
           </button>
+          <button
+            className="top-bar-overflow-button"
+            onClick={() => setShowOverflowSheet(true)}
+            aria-label="More actions"
+            aria-haspopup="dialog"
+            aria-expanded={showOverflowSheet}
+          >
+            <IoEllipsisHorizontal aria-hidden="true" />
+            <span className="top-bar-label">More</span>
+          </button>
         </div>
+      </div>
+
+      {showOverflowSheet && createPortal(
+        <>
+          <div
+            className="overflow-sheet-scrim"
+            onClick={() => setShowOverflowSheet(false)}
+          />
+          <div className="overflow-sheet" role="dialog" aria-label="More actions">
+            <div className="overflow-sheet-grip" aria-hidden="true" />
+            <button
+              onClick={() => { setShowOverflowSheet(false); handleSavePDF(); }}
+            >
+              <IoSave aria-hidden="true" />
+              Save as PDF
+            </button>
+            <button
+              onClick={() => { setShowOverflowSheet(false); setShowAbout(true); }}
+            >
+              <IoInformationCircle aria-hidden="true" />
+              About this project
+            </button>
+            <button
+              className="overflow-sheet-donate"
+              onClick={() => { setShowOverflowSheet(false); setShowDonate(true); }}
+            >
+              <IoHeart aria-hidden="true" />
+              Support this project
+            </button>
+          </div>
+        </>,
+        document.body
+      )}
+
+      {/* The generation controls live at the top of a 2,885px document, so on a
+          phone the app's own loop cost a full-page scroll each time round. The
+          bar carries the loop and the step that most often follows it, and it
+          is only up while the real controls are off-screen. */}
+      <div className={`mobile-action-bar ${showMobileActions ? 'is-visible' : ''}`}>
+        <button
+          className="btn btn-primary mobile-action-primary"
+          onClick={handleRandomPersonaClick}
+          disabled={isSourceGenerating}
+          tabIndex={showMobileActions ? 0 : -1}
+          aria-hidden={!showMobileActions}
+          aria-label="Generate a random historical persona"
+        >
+          <IoShuffle aria-hidden="true" />
+          Generate Persona
+        </button>
+        <button
+          className="mobile-action-icon"
+          onClick={() => setShowAiDevelopmentChoice(true)}
+          disabled={isSourceGenerating}
+          tabIndex={showMobileActions ? 0 : -1}
+          aria-hidden={!showMobileActions}
+          aria-label="Choose how AI should develop a persona"
+        >
+          <IoSparkles aria-hidden="true" />
+        </button>
       </div>
 
       <div className="persona-generator">
 
-      <div className="controls" role="region" aria-label="Persona generation controls">
+      <div className="controls" ref={controlsRef} role="region" aria-label="Persona generation controls">
         <div className="control-buttons">
           {/* The primary action is the fast, local, procedural persona — the same
               one the landing page shows. Sending every click to the language
@@ -5132,15 +5353,17 @@ export default function PersonaGenerator() {
                     about this individual, so it is the one line here that is
                     allowed full contrast. */}
                 {persona.rarity && persona.rarity.tier !== 'ordinary' && (
-                  <div
+                  <HoverPlate
+                    title={`1 in ${persona.rarity.oneIn.toLocaleString()} people`}
+                    lines={persona.rarity.reasons}
+                    placement="below"
                     className={`persona-rarity rarity-${persona.rarity.tier}`}
-                    title={persona.rarity.reasons.join('\n')}
                   >
                     <span className="rarity-mark" aria-hidden="true">
                       {persona.rarity.tier === 'legendary' ? '◆' : persona.rarity.tier === 'rare' ? '◈' : '◇'}
                     </span>
                     About <strong>1 in {persona.rarity.oneIn.toLocaleString()}</strong> people are this unusual
-                  </div>
+                  </HoverPlate>
                 )}
 
                 {annotationRecord && (
@@ -5205,6 +5428,31 @@ export default function PersonaGenerator() {
                             temporaryExpression={mainPortraitHoverExpression}
                             onBackdropColor={setPortraitBackdropColor}
                           />
+                        )}
+                        {/* Sits over whichever portrait is showing: the seal is a
+                            fact about the person, not about the renderer. */}
+                        <TraitSeals seals={portraitSeals} />
+                        {/* The mark in the opposite corner is painted into the
+                            canvas, so it cannot be hovered on its own. This is
+                            an invisible target laid exactly over it, carrying
+                            the same plate the rarity line carries — the two are
+                            the same claim and a reader should not have to find
+                            out that they are by comparing them. */}
+                        {!sourcePortraitUrl && portraitMark && (
+                          <HoverPlate
+                            title={portraitMark.title}
+                            lines={portraitMark.lines}
+                            placement="left"
+                            className="portrait-mark-hotspot"
+                            style={{
+                              right: `${MARK_HOTSPOT.rightPct}%`,
+                              top: `${MARK_HOTSPOT.topPct}%`,
+                              width: `${MARK_HOTSPOT.widthPct}%`,
+                              height: `${MARK_HOTSPOT.heightPct}%`,
+                            }}
+                          >
+                            <span className="portrait-mark-target" aria-hidden="true" />
+                          </HoverPlate>
                         )}
                       </div>
                       <button
@@ -6011,15 +6259,28 @@ export default function PersonaGenerator() {
                         ))}
                       </>
                     ) : (
-                      (['head', 'torso', 'feet'] as const).map((slot) => {
+                      (['head', 'torso', 'legs', 'feet'] as const).map((slot) => {
                         const item =
                           persona.character.portraitVisualOverrides?.displayEquipment?.[slot] ||
                           persona.character.equippedItems?.[slot];
-                        if (!item || item.name.toLowerCase() === 'none') return null;
+                        // The lower half is generated as part of the outfit but
+                        // almost never becomes an equipped *item*, because
+                        // `createItemInstance` only knows the base ids in the
+                        // item tables and most trousers are not in them. The
+                        // slot was simply left out of this list, so a persona
+                        // wearing a shirt and trousers was listed as wearing a
+                        // shirt — which read, in the twentieth century, as a
+                        // world where nobody owned a pair of trousers.
+                        const name = item && item.name.toLowerCase() !== 'none'
+                          ? formatItemName(item.name)
+                          : slot === 'legs'
+                            ? describeLegwear(persona.character.appearance.legwear)
+                            : null;
+                        if (!name) return null;
                         return (
                           <div key={slot} className="equipment-item">
-                            <span className="equipment-slot">{slotLabelFor(slot, item.name)}</span>
-                            <span className="equipment-name">{formatItemName(item.name)}</span>
+                            <span className="equipment-slot">{slotLabelFor(slot, name)}</span>
+                            <span className="equipment-name">{name}</span>
                           </div>
                         );
                       })

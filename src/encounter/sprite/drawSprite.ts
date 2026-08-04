@@ -28,7 +28,9 @@ import { Ramp } from '../../components/portraitLab/core/color';
 import { unit } from '../../components/portraitLab/core/rng';
 import { PortraitSpec } from '../../components/portraitLab/spec/types';
 import { restingExpression } from '../../components/portraitLab/spec/buildSpec';
-import { ArmWear, FootwearKind, RestStance, SpriteExtras, SpriteSource } from './spriteSource';
+import {
+  ArmWear, FootwearKind, HeldMaterial, RestStance, SpriteExtras, SpriteSource,
+} from './spriteSource';
 import {
   ArmPose, buildSkeleton, getTuning, HandShape, LegPose, Posture, Skeleton,
   SPRITE_H, SPRITE_HEADROOM, SPRITE_W, SpriteTuning,
@@ -307,7 +309,10 @@ function planGarment(
     : hemY;
 
   // How far down the arm the sleeve reaches, 0 shoulder … 1 wrist.
+  // A wrapped cloth has no armscye to hang a sleeve from, so it has none: at
+  // most it falls a little way over the shoulder it is knotted at.
   const sleeveT = con === 'bare' || con === 'wrapped_lower' ? 0
+    : con === 'wrapped_cloth' ? 0.08
     : con === 'crop_top' ? 0.34
     : /sleeveless|vest|tabard|singlet|tank top|toga|himation|chiton/.test(name) ? 0.12
     // Modern casual shirts are cut short in the sleeve, and at this size that
@@ -318,6 +323,10 @@ function planGarment(
 
   const hemHalf = floorLen ? t.robeHemHalf
     : con === 'wrapped_lower' ? s.hipHalf + 2
+    // A wrap hangs from the hip rather than being cut to flare from it, so it
+    // falls nearly straight — narrower at the hem than a robe of the same
+    // length, which is most of what separates the two at a glance.
+    : con === 'wrapped_cloth' ? s.hipHalf + 3
     : Math.min(s.shoulderHalf, s.hipHalf + 1);
   // A garment worn over separate legwear takes its belt from the *lower*
   // garment, and that waistband is under the hem. Drawing one at the waist
@@ -1007,6 +1016,15 @@ function torsoMask(s: Skeleton, plan: GarmentPlan): Mask {
     ? s.waistY - 2
     : s.shoulderY - t.shoulderSlope;
 
+  // A single cloth knotted at one shoulder: its top edge is a diagonal from
+  // that shoulder down to the opposite armpit, and the triangle of chest above
+  // the diagonal is skin. This is drawn as a *cut* into the trunk rather than
+  // as a shape in its own right, so the wrap keeps the body's silhouette
+  // everywhere else and differs from a robe only where it should.
+  const bareSide = plan.shape.bareShoulder;
+  const armpitY = s.chestY + Math.round((s.waistY - s.chestY) * 0.22);
+  const knotTop = s.shoulderY - Math.round(t.shoulderSlope * 0.4);
+
   for (let y = topY; y <= plan.hemY; y += 1) {
     // A cropped blouse covers the ribs and stops; the skirt picks up again at
     // the hip, and the midriff between them is skin.
@@ -1055,6 +1073,17 @@ function torsoMask(s: Skeleton, plan: GarmentPlan): Mask {
     const hi = trunkEdge(s, half, 1, skew);
     for (let x = lo.x; x <= hi.x; x += 1) {
       if (x < 0 || x >= SPRITE_W) continue;
+      // The diagonal. Above the armpit the cloth's edge slopes from the knotted
+      // shoulder across to the bare one; a pixel on the bare side of that line
+      // is skin. `u` runs 0 at the knot to 1 at the far edge of the trunk.
+      if (bareSide !== 0 && y < armpitY) {
+        const span = Math.max(1, hi.x - lo.x);
+        const u = bareSide > 0 ? (x - lo.x) / span : (hi.x - x) / span;
+        const drop = (y - knotTop) / Math.max(1, armpitY - knotTop);
+        // A cloth pulled over one shoulder is not a straight edge — it curves,
+        // because the fold gathers at the knot and spreads as it falls.
+        if (u > Math.pow(Math.max(0, drop), 0.72)) continue;
+      }
       m[y * SPRITE_W + x] = 1;
     }
   }
@@ -1160,6 +1189,26 @@ function drawTorso(
     s.cx + Math.round((t.torsoSkew + t.hipSkew) / 2) + Math.round(s.turn * s.shoulderHalf * 0.22) * s.nearSide,
     s.shoulderHalf + 1, DEPTH.torso,
   );
+
+  // The wrap's diagonal edge, and what it does to the chest above it.
+  //
+  // Two marks, and between them they are what makes the cut read as a hem
+  // rather than as a hole punched in the garment: the topmost row of cloth in
+  // each column stands proud, because a cut edge is a *thickness*; and the skin
+  // just above it goes into shadow, because the cloth is in front of it.
+  if (plan.shape.bareShoulder !== 0) {
+    for (let x = 0; x < SPRITE_W; x += 1) {
+      let top = -1;
+      for (let y = 0; y < SPRITE_H; y += 1) {
+        if (m[y * SPRITE_W + x]) { top = y; break; }
+      }
+      // Only where the edge is the diagonal — at the shoulder the cloth simply
+      // starts at the top of the trunk and there is nothing above it to shade.
+      if (top < 0 || top <= s.shoulderY - t.shoulderSlope) continue;
+      form.addBias(x, top, 2);
+      for (let i = 1; i <= 3; i += 1) form.addBias(x, top - i, 4 - i);
+    }
+  }
 
   if (!plan.bare) {
     weaveBias(form, m, spec.garment.material, spec.seed, t.textureAmt);
@@ -1588,7 +1637,12 @@ function drawBareTorso(
   spec: PortraitSpec
 ): void {
   const t = s.t;
-  const from = plan.shape.bareChest ? s.shoulderY - 1 : s.chestY;
+  // A bared shoulder shows the same landmarks a bare chest does — clavicle,
+  // deltoid, the near pectoral — just less of them. What the cloth covers is
+  // repainted over the top of this, and `form.set` clears the bias underneath
+  // it, so drawing the whole chest and then hiding most of it costs nothing.
+  const showsChest = plan.shape.bareChest || plan.shape.bareShoulder !== 0;
+  const from = showsChest ? s.shoulderY - 1 : s.chestY;
   const to = plan.shape.bareMidriff ? s.hipY + 2 : s.waistY + 4;
   const m = makeMask(SPRITE_W, SPRITE_H);
   for (let y = from; y <= to; y += 1) {
@@ -1633,7 +1687,7 @@ function drawBareTorso(
   const slack = spec.age >= 60 ? 0.8 : spec.age >= 45 ? 0.45 : spec.age <= 22 ? 0.1 : 0.25;
   const female = spec.gender === 'Female';
 
-  if (plan.shape.bareChest) {
+  if (showsChest) {
     const halfAt = (y: number) => {
       const tt = Math.max(0, Math.min(1, (y - s.shoulderY) / Math.max(1, s.waistY - s.shoulderY)));
       return Math.round((s.shoulderHalf + (s.waistHalf - s.shoulderHalf) * tt) * 0.86);
@@ -1665,16 +1719,26 @@ function drawBareTorso(
     // in, and the border is a soft crease rather than a line. Same three
     // marks, different proportions — which is the point of doing it with
     // geometry instead of two hand-drawn bitmaps.
-    const massW = female ? Math.round(halfW * 0.52) : Math.round(halfW * 0.72);
+    // Each mass has to sit *beside* the sternum, not across it. The half-width
+    // was 0.72 of the chest against an offset of 0.46, so the two ellipses
+    // overlapped by half their width and met in a lens — the pair read as a
+    // Venn diagram drawn on the ribs. Both meet the midline instead and the
+    // clip below keeps them there, which is also what the anatomy does: the
+    // pectorals insert *on* the breastbone, and a breast has a gap at it.
+    const massW = female ? Math.round(halfW * 0.44) : Math.round(halfW * 0.54);
     const massH = female ? Math.round(chestH * 0.62) : Math.round(chestH * 0.52);
     const massY = chestTop + Math.round(chestH * (female ? 0.52 : 0.40)) + Math.round(slack * 2);
-    const massX = Math.round(halfW * (female ? 0.42 : 0.46));
+    const massX = female ? Math.round(halfW * 0.50) : Math.round(halfW * 0.55);
     for (const side of [-1, 1] as const) {
       const cx0 = mid + side * massX;
       const mass = makeMask(SPRITE_W, SPRITE_H);
       for (let y = massY - massH; y <= massY + massH; y += 1) {
         for (let x = cx0 - massW; x <= cx0 + massW; x += 1) {
           if (!inside(x, y)) continue;
+          // Nothing crosses the midline. Without this the second mass's
+          // `ellipsoidSurface` overwrote the first's normals wherever they met,
+          // so the overlap lit as a third dome standing between them.
+          if (side * (x - mid) < 0) continue;
           const u = (x - cx0) / Math.max(1, massW);
           const v = (y - massY) / Math.max(1, massH);
           if (u * u + v * v <= 1) mass[y * SPRITE_W + x] = 1;
@@ -1692,6 +1756,10 @@ function drawBareTorso(
       for (let dx = -massW; dx <= massW; dx += 1) {
         const u = Math.abs(dx) / Math.max(1, massW);
         if (u > 0.94) continue;
+        // Same rule as the mass itself: the border stops at the breastbone.
+        // Carried across it, the two arcs met and crossed, which drew the lower
+        // half of the lens even after the masses themselves stopped overlapping.
+        if (side * (cx0 + dx - mid) < 0) continue;
         const y = massY + Math.round(massH * Math.sqrt(Math.max(0, 1 - u * u)));
         bias(cx0 + dx, y, edge + deeper);
         bias(cx0 + dx, y + 1, Math.max(1, edge - 1));
@@ -1834,6 +1902,9 @@ function drawBareTorso(
   }
 
   // Where cloth meets skin the cloth casts, exactly as the hem does on legs.
+  // A wrap's edge is a diagonal rather than a row, so its cast is drawn against
+  // the garment mask in `drawTorso` instead of here.
+  if (plan.shape.bareShoulder !== 0 && !plan.shape.bareChest) return;
   const edgeY = plan.shape.bareChest ? s.waistY - 2 : plan.topHemY;
   for (let x = 0; x < SPRITE_W; x += 1) {
     for (let i = 1; i <= 3; i += 1) {
@@ -2268,6 +2339,16 @@ function drawClosure(
   s: Skeleton, plan: GarmentPlan, m: Mask
 ): void {
   const t = s.t;
+  // A wrapped cloth has no front. It is closed by being tucked into itself, so
+  // neither the overlapping panels of an open garment nor the placket of a
+  // closed one belongs on it — and where it is knotted at one shoulder there is
+  // no neck opening either, because the diagonal edge already is the opening.
+  // Drawing a collar and a centre-front seam over that was what kept every hide
+  // wrap in the app reading as a coat somebody had left undone.
+  if (plan.construction === 'wrapped_cloth') {
+    if (plan.shape.bareShoulder === 0) drawNeckline(raster, form, spec, ramps, s, plan, m);
+    return;
+  }
   const open = plan.kind === 'jacket' || plan.kind === 'doublet' || plan.kind === 'robe'
     || plan.kind === 'gown' || plan.kind === 'wrapped_garment';
   const cx = s.cx + t.torsoSkew + 1;
@@ -2976,98 +3057,839 @@ function drawFeet(
 }
 
 // ---------------------------------------------------------------------------
-// Held items.
+// Held and carried objects.
+//
+// What a person is holding is, at this size, the single most informative thing
+// about them after their clothes. Nothing else in the figure says farmer rather
+// than fisherman rather than spinner: the face is 22px across, the garment is
+// often the same undyed cloth for all three, and the one thing that differs is
+// the object in the hand. So these are drawn as objects — a hoe with a socket
+// and a blade, a bow with a string standing off the grip, a net with mesh in it
+// — and not as the two-pixel vertical stick that used to stand in for eleven
+// different tools.
 // ---------------------------------------------------------------------------
+
+/** The ramp and material id for a substance a carried object is made of. */
+function substance(ramps: PortraitRamps, m: HeldMaterial): [Ramp, number] {
+  switch (m) {
+    // `iron` is what a tool is made of and `metal` is what a *bangle* is made
+    // of, and they are deliberately different substances: see MAT.IRON.
+    case 'iron': return [ramps.book[MAT.IRON] ?? ramps.metal, MAT.IRON];
+    case 'metal': return [ramps.metal, MAT.METAL];
+    case 'stone': return [ramps.book[MAT.STONE] ?? ramps.metal, MAT.STONE];
+    case 'bone': return [ramps.book[MAT.BONE] ?? ramps.leather, MAT.BONE];
+    case 'fibre': return [ramps.book[MAT.CORD] ?? ramps.leather, MAT.CORD];
+    case 'leather': return [ramps.leather, MAT.LEATHER];
+    // Only for things that really are a bolt of the wearer's own cloth — a
+    // bound grip, a bundle. Anything else picks up their trim colour.
+    case 'cloth': return [ramps.clothC, MAT.CLOTH_C];
+    // Terracotta. `PAINT` is already a warm red-orange and already outlined
+    // with the figure, which is exactly what fired clay wants.
+    case 'clay': return [ramps.book[MAT.PAINT] ?? ramps.leather, MAT.PAINT];
+    default: return [ramps.book[MAT.WOOD] ?? ramps.leather, MAT.WOOD];
+  }
+}
+
+/**
+ * A drawing surface for one object, so each form below can describe its shape
+ * and nothing else.
+ *
+ * `plot` carries the rule that mattered most in the old code and still does: a
+ * held thing passes *behind* the head, never across the face. Held items are
+ * drawn last and nearest, so without it a staff ran a wooden stripe down the
+ * middle of somebody's nose.
+ */
+interface Chisel {
+  /** Mark a pixel, subject to the head rule. */
+  plot(x: number, y: number): void;
+  /** Fill a disc — the swept cross-section of a shaft or cord. */
+  disc(cx: number, cy: number, r: number): void;
+  /** Sweep a disc of radius `r` along a line: any shaft, haft, cord or limb. */
+  bar(x0: number, y0: number, x1: number, y1: number, r: number): void;
+  /** Sweep with the radius easing from `r0` to `r1` — a taper. */
+  taper(x0: number, y0: number, x1: number, y1: number, r0: number, r1: number): void;
+  /** Paint everything marked so far in one substance, then clear the buffer. */
+  cast(mat: HeldMaterial, shade?: number): Mask;
+}
+
+/**
+ * `sparesTheHead` is the default and is what keeps a spear from being driven
+ * through somebody's nose. It has to be switchable, because the things a
+ * persona wears *in their hair* — a comb, a pin, a pipe at the lip — are
+ * exactly the pixels it forbids, and with it on they were all silently erased:
+ * every comb and hairpin in the app drew nothing at all.
+ */
+function chisel(
+  raster: Raster, ramps: PortraitRamps, s: Skeleton, sparesTheHead = true
+): Chisel {
+  let m = makeMask(SPRITE_W, SPRITE_H);
+  const plot = (x: number, y: number) => {
+    x = Math.round(x); y = Math.round(y);
+    if (x < 0 || y < 0 || x >= SPRITE_W || y >= SPRITE_H) return;
+    const under = raster.matAt(x, y);
+    if (sparesTheHead
+      && (under === MAT.SKIN || under === MAT.HAIR || under === MAT.BEARD
+        || under === MAT.HEADWEAR || under === MAT.HEADWEAR_ACCENT
+        || under === MAT.SCLERA || under === MAT.IRIS || under === MAT.BROW
+        || under === MAT.LIP)) {
+      if (y < s.shoulderY + 2) return;
+    }
+    m[y * SPRITE_W + x] = 1;
+  };
+  const disc = (cx: number, cy: number, r: number) => {
+    const lim = Math.ceil(r);
+    for (let dy = -lim; dy <= lim; dy += 1) {
+      for (let dx = -lim; dx <= lim; dx += 1) {
+        if (dx * dx + dy * dy <= r * r + 0.3) plot(cx + dx, cy + dy);
+      }
+    }
+  };
+  const taper = (x0: number, y0: number, x1: number, y1: number, r0: number, r1: number) => {
+    const steps = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) * 1.4));
+    for (let i = 0; i <= steps; i += 1) {
+      const t = i / steps;
+      disc(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, r0 + (r1 - r0) * t);
+    }
+  };
+  return {
+    plot,
+    disc,
+    taper,
+    bar: (x0, y0, x1, y1, r) => taper(x0, y0, x1, y1, r, r),
+    cast(mat: HeldMaterial, shade = 3): Mask {
+      const [ramp, id] = substance(ramps, mat);
+      for (let y = 0; y < SPRITE_H; y += 1) {
+        for (let x = 0; x < SPRITE_W; x += 1) {
+          if (m[y * SPRITE_W + x]) raster.set(x, y, ramp.steps[shade], id, shade);
+        }
+      }
+      const done = m;
+      m = makeMask(SPRITE_W, SPRITE_H);
+      return done;
+    },
+  };
+}
+
+/** How long a shaft is, as a share of the figure, so it scales with the person. */
+const reach = (s: Skeleton, frac: number) => Math.round((s.floorY - s.crownY) * frac);
 
 function drawHeldItem(
   raster: Raster, form: FormBuffer, ramps: PortraitRamps, extras: SpriteExtras,
   s: Skeleton, hand: [number, number]
 ): void {
-  if (!extras.held) return;
+  const held = extras.held;
+  if (!held || !held.kind) return;
   const [hx, hy] = hand;
-  const wood = ramps.book[MAT.WOOD] ?? ramps.leather;
-  const m = makeMask(SPRITE_W, SPRITE_H);
-  const put = (x: number, y: number) => {
-    if (x < 0 || y < 0 || x >= SPRITE_W || y >= SPRITE_H) return;
-    // A staff is held at the side and passes *behind* the head, not across
-    // it. Held items draw last and at the greatest depth, so without this a
-    // pole ran straight down the middle of the face.
-    const under = raster.matAt(x, y);
-    if (under === MAT.SKIN || under === MAT.HAIR || under === MAT.BEARD
-      || under === MAT.HEADWEAR || under === MAT.HEADWEAR_ACCENT
-      || under === MAT.SCLERA || under === MAT.IRIS || under === MAT.BROW || under === MAT.LIP) {
-      if (y < s.shoulderY + 2) return;
-    }
-    m[y * SPRITE_W + x] = 1;
+  const n = held.name.toLowerCase();
+  const c = chisel(raster, ramps, s);
+  // Which way the object leans and where its working end goes: out from the
+  // body, on the side the holding hand is already on.
+  const dir: -1 | 1 = hx === s.cx ? s.nearSide : (hx > s.cx ? 1 : -1);
+  const wood = held.material === 'metal' ? 'wood' : held.material;
+
+  /** Wrap a cast mask in a round cross-section along the given axis. */
+  const round = (mask: Mask, x0: number, y0: number, x1: number, y1: number, r: number) =>
+    limbSurface(form, mask, x0, y0, x1, y1, r, DEPTH.held);
+  const flat = (mask: Mask, nx: number, ny: number) =>
+    planeSurface(form, mask, nx, ny, DEPTH.held);
+  /** One dark line along a mask's own axis: a seam, a fuller, a bound grip. */
+  const groove = (x: number, y0: number, y1: number, d: number) => {
+    for (let y = y0; y <= y1; y += 1) form.addBias(x, y, d);
   };
 
-  switch (extras.held.kind) {
-    case 'staff':
+  switch (held.kind) {
+    // -----------------------------------------------------------------------
     case 'pole': {
-      const top = Math.max(2, s.crownY - 8);
-      const bottom = s.floorY;
-      for (let y = top; y <= bottom; y += 1) {
-        put(hx, y);
-        put(hx + 1, y);
-      }
-      for (let y = 0; y < SPRITE_H; y += 1) {
-        for (let x = 0; x < SPRITE_W; x += 1) {
-          if (m[y * SPRITE_W + x]) raster.set(x, y, wood.steps[3], MAT.WOOD, 3);
+      // Butt on the ground, tip above the head. A pole arm at rest is stood on
+      // its end, and that is also what puts its head clear of the figure where
+      // it can be read against the background.
+      const isPaddle = /paddle|oar|punt/.test(n);
+      const isSpear = /spear|harpoon|lance|pike|javelin/.test(n);
+      const isFork = /fork|rake|trident/.test(n);
+      const isGun = /musket|flintlock|matchlock|rifle|arquebus/.test(n);
+      const top = isPaddle ? hy - reach(s, 0.30) : s.crownY - reach(s, 0.10);
+      const bot = isPaddle ? s.floorY - reach(s, 0.20) : s.floorY - 2;
+      c.taper(hx, top, hx, bot, 2.6, 3.1);
+      round(c.cast(wood), hx, top, hx, bot, 3);
+
+      if (isSpear) {
+        // A leaf blade: widest a third of the way down from the point, and
+        // *narrower than the shaft is long* — a spearhead that reads as a
+        // spearhead is mostly point.
+        const len = reach(s, 0.13);
+        const tip = top - len;
+        for (let i = 0; i <= len; i += 1) {
+          const t = i / len;                     // 0 at the tip, 1 at the socket
+          const w = Math.sin(Math.min(1, t * 1.25) * Math.PI * 0.62) * 5.2;
+          for (let dx = -w; dx <= w; dx += 1) c.plot(hx + dx, tip + i);
         }
-      }
-      cylinderSurface(form, m, hx, 1.2, DEPTH.held);
-      if (extras.held.kind === 'pole') {
-        for (let i = 0; i < 4; i += 1) {
-          raster.set(hx, top - 3 + i, ramps.metal.steps[2], MAT.METAL, 2);
-          raster.set(hx + 1, top - 3 + i, ramps.metal.steps[3], MAT.METAL, 3);
+        const blade = c.cast(held.material === 'stone' ? 'stone' : 'iron', 2);
+        round(blade, hx, tip, hx, top, 5);
+        // The midrib, which is the whole reason a blade reads as metal rather
+        // than as a grey leaf.
+        groove(hx, tip + 2, top - 1, -2);
+        // …and the binding that holds the socket on.
+        c.bar(hx, top, hx, top + 4, 3.4);
+        flat(c.cast('fibre', 4), 0, -0.2);
+      } else if (isPaddle) {
+        // The blade is at the bottom, because a paddle is carried blade-down
+        // and a paddle drawn blade-up is a shovel.
+        const bl = reach(s, 0.20);
+        for (let i = 0; i <= bl; i += 1) {
+          const t = i / bl;
+          const w = Math.sin(Math.min(1, 0.12 + t * 1.05) * Math.PI) * 8.5;
+          for (let dx = -w; dx <= w; dx += 1) c.plot(hx + dx, bot + i);
+        }
+        const blade = c.cast(wood, 3);
+        flat(blade, dir * 0.22, -0.12);
+        groove(hx, bot + 2, bot + bl - 2, -2);
+      } else if (isFork) {
+        for (const off of [-5, 0, 5]) {
+          c.taper(hx + off, top + 12, hx + off * 1.4, top - 10, 1.6, 1.1);
+        }
+        round(c.cast('iron', 2), hx, top, hx, top - 10, 6);
+      } else if (isGun) {
+        // The stock: a thickening at the lower half with a dropped heel.
+        c.taper(hx, hy + 6, hx - dir * 3, bot, 3.2, 5.4);
+        round(c.cast('wood', 4), hx, hy, hx, bot, 5);
+        c.bar(hx + dir * 2, hy - 4, hx + dir * 2, hy + 8, 2.2);
+        flat(c.cast('iron', 3), dir * 0.3, 0);
+      } else {
+        // A plain shaft — a carrying pole, a digging stick. Its tip is worked,
+        // and one dark band is all it takes to say so.
+        for (let i = 0; i < 3; i += 1) {
+          for (let dx = -3; dx <= 3; dx += 1) form.addBias(hx + dx, bot - i, 2 - i);
         }
       }
       break;
     }
+
+    // -----------------------------------------------------------------------
+    case 'hafted': {
+      // Head uppermost. Stood on its butt with the head at the bottom, the tool
+      // fights the feet and the ground shadow for the same few rows; up here it
+      // is silhouetted against nothing but background and reads at a glance.
+      const top = s.shoulderY - reach(s, 0.12);
+      const bot = s.floorY - 3;
+      c.taper(hx, top, hx, bot, 2.4, 2.9);
+      round(c.cast('wood'), hx, top, hx, bot, 2.8);
+
+      // Iron, not `metal`: `metal` is the persona's ornament ramp, so a woman
+      // in gold earrings was issued a gold hoe.
+      const headMat: HeldMaterial = held.material === 'stone' ? 'stone'
+        : held.material === 'bone' ? 'bone' : 'iron';
+      // Heads are cast dark and given a *curved* surface across their width.
+      // Both matter. A tool head lit by `planeSurface` takes one constant
+      // normal, and a constant normal facing the viewer resolves to the top of
+      // the ramp everywhere at once — every axe, hoe and hammer in the app came
+      // out as the same white pennant on a stick, which at a glance is a flag.
+      // A cylinder gives it a lit edge and a shadow side, which is what makes
+      // eighteen pixels of grey read as forged iron.
+      const forged = (mask: Mask, ax: number, ay: number, bx: number, by: number, r: number) =>
+        limbSurface(form, mask, ax, ay, bx, by, r, DEPTH.held);
+      const eye = () => {
+        // The socket the haft passes through: a narrow band, and narrow is the
+        // point. Cast as wide as the head itself it merged with it, and a hoe,
+        // an axe and a pick all came out as the same solid rectangle — the eye
+        // has to be a *neck* for anything hung off it to read as a separate
+        // shape.
+        c.bar(hx, top + 3, hx, top + 11, 2.9);
+        forged(c.cast(headMat, 5), hx, top + 3, hx, top + 11, 2.9);
+        for (let i = 3; i <= 11; i += 1) form.addBias(hx - dir * 2, top + i, 2);
+      };
+
+      // Pickaxe first: "pickaxe" contains "axe", and tested the other way round
+      // it never reached its own branch at all — every pick in the app was
+      // drawn as a hatchet. The same trap as "sickle" under "blade".
+      if (/pickaxe|\bpick\b|mattock/.test(n)) {
+        // Two swept spikes, one longer than the other. Length is what says
+        // pick: drawn stubby they are an axe with two bits.
+        for (const [len, lift, side] of [[0.135, 0.05, 1], [0.09, 0.028, -1]] as const) {
+          const L = reach(s, len);
+          const rise = reach(s, lift);
+          for (let k = 0; k <= L; k += 1) {
+            const t = k / L;
+            c.disc(hx + dir * side * k, top + 8 - rise * t * t, 3.4 * (1 - t) ** 0.85 + 0.7);
+          }
+        }
+        const pick = c.cast(headMat, 4);
+        forged(pick, hx - dir * reach(s, 0.09), top + 8,
+          hx + dir * reach(s, 0.135), top + 8 - reach(s, 0.05), 3);
+        eye();
+      } else if (/hoe|spade|shovel/.test(n)) {
+        // A plate hung off the eye and swung down and out. Compact: the first
+        // attempt tapered it away over twenty-odd pixels and the result drooped
+        // like a pennant. A hoe blade is a short flat sheet with a straight
+        // working edge, and the straightness of that edge is what reads.
+        const L = reach(s, 0.085);
+        const D = reach(s, 0.058);
+        for (let k = 0; k <= L; k += 1) {
+          const t = k / L;
+          const y0 = top + 6 + t * D * 0.55;
+          const y1 = top + 6 + D * 0.45 + t * D * 0.85;
+          for (let y = y0; y <= y1; y += 1) c.plot(hx + dir * k, y);
+        }
+        const blade = c.cast(headMat, 4);
+        forged(blade, hx, top + 6, hx + dir * L, top + 6 + D, 4);
+        // The ground edge, bright and worn thin.
+        for (let y = top + 6 + D * 0.55; y <= top + 6 + D * 1.3; y += 1) {
+          form.addBias(hx + dir * L, y, -4);
+        }
+        eye();
+      } else if (/axe|hatchet|adze|maul|tomahawk/.test(n)) {
+        // A crescent bit: a small poll at the haft, a waisted neck, then a fan
+        // out to a convex edge with the horns swept back.
+        const w = reach(s, 0.105);
+        const h = reach(s, 0.062);
+        for (let i = -h; i <= h; i += 1) {
+          const v = Math.abs(i) / h;
+          // The cutting edge bulges — that arc is the single most recognisable
+          // thing about an axe and a straight edge loses it entirely.
+          const outer = w * (1 - 0.16 * v * v);
+          // Where the metal starts on this row. Zero across the poll, then
+          // running outward so the bit tapers to its horns.
+          const inner = v < 0.30 ? 0 : w * 0.82 * ((v - 0.30) / 0.70) ** 0.85;
+          for (let k = inner; k <= outer; k += 1) c.plot(hx + dir * k, top + 8 + i);
+        }
+        const bit = c.cast(headMat, 4);
+        forged(bit, hx, top + 8, hx + dir * w, top + 8, h);
+        // The bevel: the outer edge takes the light.
+        for (let i = -h; i <= h; i += 1) {
+          const v = Math.abs(i) / h;
+          form.addBias(hx + dir * Math.round(w * (1 - 0.16 * v * v)), top + 8 + i, -4);
+        }
+        eye();
+      } else if (/sickle|scythe|hook/.test(n)) {
+        // An arc opening back toward the holder, thick at the tang and thinning
+        // to the point.
+        const r = reach(s, 0.105);
+        for (let a = -0.3; a <= 1.62; a += 0.015) {
+          const t = (a + 0.3) / 1.92;
+          c.disc(hx + dir * r * Math.sin(a), top + 6 - r * Math.cos(a) + r, 2.6 - t * 1.3);
+        }
+        const arc = c.cast(headMat, 4);
+        forged(arc, hx, top + 6, hx + dir * r, top + 6 + r, 2.4);
+        // The inside of the curve is the edge, so it takes the light.
+        for (let a = -0.2; a <= 1.5; a += 0.03) {
+          form.addBias(hx + dir * (r - 2) * Math.sin(a), top + 6 - (r - 2) * Math.cos(a) + r, -3);
+        }
+        eye();
+      } else {
+        // Hammer, mallet, shears: a squat head with a face on one side and a
+        // tapering peen on the other, so its outline is asymmetric and it does
+        // not read as a signboard. Small — a hammer head is a *fist* of metal,
+        // and drawn as wide as an axe bit it stops being one.
+        // The face is a *square* block — no taper at all, because the one
+        // thing a hammer has that an axe does not is a flat end. The peen
+        // opposite it tapers hard, so the outline is blocky on one side and
+        // pointed on the other and cannot be mistaken for a bit.
+        const w = reach(s, 0.042);
+        const h = reach(s, 0.034);
+        for (let k = 0; k <= w; k += 1) {
+          for (let i = -h; i <= h; i += 1) c.plot(hx + dir * k, top + 8 + i);
+        }
+        const pw = reach(s, 0.050);
+        for (let k = 0; k <= pw; k += 1) {
+          const half = h * (0.9 - (k / pw) * 0.62);
+          for (let i = -half; i <= half; i += 1) c.plot(hx - dir * k, top + 8 + i);
+        }
+        const block = c.cast(headMat, 4);
+        forged(block, hx - dir * pw, top + 8, hx + dir * w, top + 8, h);
+        // The face, worn bright by use.
+        for (let i = -h; i <= h; i += 1) form.addBias(hx + dir * w, top + 8 + i, -4);
+        eye();
+      }
+      // The grip: two bindings where the hand actually closes.
+      for (const gy of [hy - 3, hy + 4]) {
+        c.bar(hx, gy, hx, gy + 2, 3.1);
+        flat(c.cast('fibre', 4), 0, 0);
+      }
+      break;
+    }
+
+    // -----------------------------------------------------------------------
+    case 'staff': {
+      const top = s.crownY - reach(s, 0.09);
+      const bot = s.floorY - 1;
+      c.taper(hx, top + 6, hx, bot, 2.9, 3.4);
+      round(c.cast(wood), hx, top, hx, bot, 3.2);
+      if (/crook|shepherd|crozier/.test(n)) {
+        // The hook, which is the entire difference between a shepherd and a
+        // man standing next to a pole.
+        const r = reach(s, 0.055);
+        for (let a = 0; a <= Math.PI * 1.15; a += 0.03) {
+          c.disc(hx - dir * r * Math.sin(a), top + 6 - r + r * Math.cos(a) * -1, 2.5);
+        }
+        round(c.cast(wood, 3), hx, top, hx - dir * r, top, 2.5);
+      } else {
+        c.disc(hx, top + 5, 4.4);
+        const knob = c.cast(/gold|silver|bronze|brass/.test(n) ? 'metal' : wood, 3);
+        ellipsoidSurface(form, knob, hx, top + 5, 4.4, 4.4, DEPTH.held, 1);
+      }
+      break;
+    }
+
+    // -----------------------------------------------------------------------
+    case 'bow': {
+      // The grip sits in the fist and the limbs curve *back* from it, so the
+      // string stands off the hand by the depth of the bow. That gap is the
+      // whole read: without it the thing is a bent stick.
+      const half = reach(s, 0.33);
+      const bend = reach(s, 0.07);
+      const gy = hy - reach(s, 0.05);
+      const limbX = (t: number) => hx - dir * bend * t * t;
+      for (let i = -100; i <= 100; i += 1) {
+        const t = i / 100;
+        c.disc(limbX(t), gy + t * half, 1.4 + (1 - Math.abs(t)) * 1.5);
+      }
+      const limb = c.cast(wood, 3);
+      round(limb, hx, gy - half, hx, gy + half, 2.6);
+      // The string: one pixel, taut, from nock to nock.
+      const sx = limbX(1);
+      c.bar(sx, gy - half + 1, sx, gy + half - 1, 0.6);
+      flat(c.cast('fibre', 2), dir * 0.4, 0);
+      // Nocks, and the wrapped grip the hand is closed on.
+      for (const t of [-1, 1]) c.disc(limbX(t), gy + t * (half - 1), 1.9);
+      flat(c.cast('bone', 2), 0, 0);
+      c.bar(hx, gy - 5, hx, gy + 5, 2.8);
+      flat(c.cast('fibre', 4), dir * 0.3, 0);
+      break;
+    }
+
+    // -----------------------------------------------------------------------
+    case 'net': {
+      // Gathered in the fist and hanging as a bag of mesh.
+      //
+      // Drawn as actual strands with the background between them, which was not
+      // the first attempt: filling the envelope solid and cutting the weave in
+      // as shading gave a pale ellipse that read as a shield. A net is defined
+      // by being *mostly holes*, and no amount of tonal work on a solid mass
+      // will say that — the gaps have to be real gaps.
+      const drop = reach(s, 0.32);
+      const wide = reach(s, 0.125);
+      const pitch = 6;
+      const envelope: Array<[number, number, number]> = [];
+      for (let i = 0; i <= drop; i += 1) {
+        const t = i / drop;
+        // Narrow at the fist, belling out, then drawn back in by its own weight.
+        const w = wide * Math.sin(Math.min(1, 0.10 + t * 0.95) * Math.PI * 0.92);
+        // The hem sags away from the body — a net hangs, it does not stand.
+        const lean = dir * t * t * reach(s, 0.035);
+        envelope.push([i, w, lean]);
+      }
+      for (const [i, w, lean] of envelope) {
+        for (let dx = -w; dx <= w; dx += 1) {
+          const px = Math.round(hx + dx + lean);
+          const py = hy + i;
+          // Two crossing families of strands. Everything else is air.
+          const a = ((px + py) % pitch + pitch) % pitch < 2;
+          const b = ((px - py) % pitch + pitch) % pitch < 2;
+          // The selvedge: the outermost pixel of each row is always cloth, so
+          // the mass keeps a continuous edge for the ink pass to follow and
+          // does not dissolve into confetti at the rim.
+          const rim = Math.abs(dx) >= w - 1;
+          if (a || b || rim) c.plot(px, py);
+        }
+      }
+      const mesh = c.cast('fibre', 3);
+      cylinderSurface(form, mesh, hx, wide, DEPTH.held);
+      // Knots where the two families cross, and shadow inside the bag.
+      for (let y = 0; y < SPRITE_H; y += 1) {
+        for (let x = 0; x < SPRITE_W; x += 1) {
+          if (!mesh[y * SPRITE_W + x]) continue;
+          const a = ((x + y) % pitch + pitch) % pitch < 2;
+          const b = ((x - y) % pitch + pitch) % pitch < 2;
+          if (a && b) form.addBias(x, y, 3);
+          else if (b) form.addBias(x, y, 1);
+        }
+      }
+      // Floats along the foot rope, which is what stops the bottom edge being a
+      // ruled line and says the thing has weight.
+      for (let k = -2; k <= 2; k += 1) {
+        const fx = hx + dir * reach(s, 0.035) + k * 5;
+        const fy = hy + drop - 2 - Math.abs(k);
+        c.disc(fx, fy, 2.2);
+      }
+      const floats = c.cast(held.material === 'stone' ? 'stone' : 'wood', 4);
+      ellipsoidSurface(form, floats, hx, hy + drop - 2, wide, 3, DEPTH.held + 0.02, 1);
+      // The gather: every strand runs into the fist, so the top is solid.
+      c.taper(hx, hy - 2, hx, hy + 7, 3.4, 2.4);
+      const collar = c.cast('fibre', 4);
+      limbSurface(form, collar, hx, hy - 2, hx, hy + 7, 3.4, DEPTH.held + 0.01);
+      break;
+    }
+
+    // -----------------------------------------------------------------------
+    case 'sling': {
+      // Two cords and a pouch, hanging slack. The slack is the point: a sling
+      // drawn taut is a whip.
+      const drop = reach(s, 0.26);
+      for (const off of [-3, 3]) {
+        for (let i = 0; i <= drop; i += 1) {
+          const t = i / drop;
+          // A catenary, pulled out from the body as it falls.
+          c.disc(hx + off * (1 - t) + dir * Math.sin(t * Math.PI) * reach(s, 0.045), hy + i, 0.7);
+        }
+      }
+      flat(c.cast('fibre', 3), dir * 0.3, 0);
+      const py = hy + drop;
+      for (let dy = -3; dy <= 3; dy += 1) {
+        const w = Math.round(4.5 * Math.sqrt(Math.max(0, 1 - (dy / 3.4) ** 2)));
+        for (let dx = -w; dx <= w; dx += 1) c.plot(hx + dx, py + dy);
+      }
+      const pouch = c.cast('leather', 3);
+      ellipsoidSurface(form, pouch, hx, py, 4.5, 3.4, DEPTH.held, 1);
+      break;
+    }
+
+    // -----------------------------------------------------------------------
+    case 'spindle': {
+      if (/broom|besom|whisk/.test(n)) {
+        const top = s.shoulderY - reach(s, 0.05);
+        const bristle = s.floorY - reach(s, 0.13);
+        c.taper(hx, top, hx, bristle, 2.2, 2.6);
+        round(c.cast('wood'), hx, top, hx, bristle, 2.4);
+        // A fan of straw, spreading as it falls and ragged along the bottom.
+        const span = reach(s, 0.075);
+        for (let k = -9; k <= 9; k += 1) {
+          const t = k / 9;
+          const len = reach(s, 0.115) * (1 - Math.abs(t) * 0.28);
+          c.taper(hx + t * 2, bristle - 2, hx + t * span, bristle + len, 1.4, 0.7);
+        }
+        const straw = c.cast('fibre', 3);
+        flat(straw, 0, -0.35);
+        // The binding that holds the head on.
+        c.bar(hx, bristle - 3, hx, bristle + 1, 3.4);
+        flat(c.cast('fibre', 5), 0, 0);
+      } else {
+        // A drop spindle: shaft, whorl low down, and a cone of spun thread
+        // above it. The cone is what says it is in use.
+        const top = hy - reach(s, 0.06);
+        const bot = hy + reach(s, 0.22);
+        c.taper(hx, top, hx, bot, 1.5, 1.1);
+        round(c.cast('wood'), hx, top, hx, bot, 1.5);
+        const wy = bot - reach(s, 0.045);
+        for (let dy = -2; dy <= 2; dy += 1) {
+          const w = Math.round(6.5 * Math.sqrt(Math.max(0, 1 - (dy / 2.6) ** 2)));
+          for (let dx = -w; dx <= w; dx += 1) c.plot(hx + dx, wy + dy);
+        }
+        const whorl = c.cast(held.material === 'wood' ? 'clay' : held.material, 3);
+        ellipsoidSurface(form, whorl, hx, wy, 6.5, 2.6, DEPTH.held, 1);
+        // The cop of thread.
+        const ct = wy - reach(s, 0.10);
+        for (let i = 0; i <= wy - ct; i += 1) {
+          const w = 1 + (i / Math.max(1, wy - ct)) * 4.5;
+          for (let dx = -w; dx <= w; dx += 1) c.plot(hx + dx, ct + i);
+        }
+        const cop = c.cast('fibre', 3);
+        cylinderSurface(form, cop, hx, 5, DEPTH.held);
+        for (let i = 0; i <= wy - ct; i += 3) groove(hx - 3, ct + i, ct + i, 2);
+        // …and the single thread running up to the other hand.
+        for (let i = 0; i < reach(s, 0.09); i += 1) c.plot(hx - dir * i * 0.4, ct - i);
+        flat(c.cast('fibre', 2), 0, 0);
+      }
+      break;
+    }
+
+    // -----------------------------------------------------------------------
     case 'blade': {
-      for (let y = hy - 2; y <= hy + 12; y += 1) { put(hx, y); put(hx + 1, y); }
-      for (let y = 0; y < SPRITE_H; y += 1) {
-        for (let x = 0; x < SPRITE_W; x += 1) {
-          if (m[y * SPRITE_W + x]) raster.set(x, y, ramps.metal.steps[2], MAT.METAL, 2);
-        }
+      // Point down beside the leg. Pommel, grip, guard, blade — four parts,
+      // and a sword missing any one of them reads as a metal ruler.
+      const len = reach(s, 0.32);
+      const curve = /scimitar|sabre|saber|kukri|falchion/.test(n) ? dir * reach(s, 0.05) : 0;
+      const bladeTop = hy + 7;
+      for (let i = 0; i <= len; i += 1) {
+        const t = i / len;
+        const w = 3.6 * (1 - t * 0.78);
+        const off = curve * t * t;
+        for (let dx = -w; dx <= w; dx += 1) c.plot(hx + dx + off, bladeTop + i);
       }
-      cylinderSurface(form, m, hx, 1.2, DEPTH.held);
-      for (let dx = -2; dx <= 3; dx += 1) raster.set(hx + dx, hy - 2, ramps.metal.steps[4], MAT.METAL, 4);
+      const blade = c.cast(held.material === 'stone' ? 'stone' : 'iron', 2);
+      round(blade, hx, bladeTop, hx + curve, bladeTop + len, 3.6);
+      // The fuller: a lit groove down the spine, and the two edges going bright.
+      for (let i = 2; i < len - 2; i += 1) {
+        const off = Math.round(curve * (i / len) ** 2);
+        form.addBias(hx + off, bladeTop + i, 2);
+        const w = Math.round(3.6 * (1 - (i / len) * 0.78));
+        form.addBias(hx + off - w, bladeTop + i, -3);
+        form.addBias(hx + off + w, bladeTop + i, -3);
+      }
+      // Guard.
+      const gw = reach(s, 0.055);
+      for (let dx = -gw; dx <= gw; dx += 1) for (let dy = 0; dy < 3; dy += 1) c.plot(hx + dx, hy + 4 + dy);
+      flat(c.cast('iron', 3), 0, -0.6);
+      // Grip and pommel.
+      c.bar(hx, hy - 6, hx, hy + 4, 2.4);
+      round(c.cast('leather', 4), hx, hy - 6, hx, hy + 4, 2.4);
+      c.disc(hx, hy - 7, 3.2);
+      const pommel = c.cast('metal', 3);
+      ellipsoidSurface(form, pommel, hx, hy - 7, 3.2, 3.2, DEPTH.held, 1);
       break;
     }
+
+    // -----------------------------------------------------------------------
+    case 'tusk': {
+      // Carried up against the shoulder, curving as ivory does.
+      const len = reach(s, 0.42);
+      const x0 = hx;
+      const y0 = hy + 4;
+      for (let i = 0; i <= len; i += 1) {
+        const t = i / len;
+        // Quadratic sweep: nearly vertical at the butt, swinging out at the tip.
+        const px = x0 + dir * (t * t * reach(s, 0.16) - t * reach(s, 0.02));
+        c.disc(px, y0 - i, 3.8 * (1 - t * 0.82) + 0.9);
+      }
+      const ivory = c.cast('bone', 3);
+      round(ivory, x0, y0, x0 + dir * reach(s, 0.14), y0 - len, 4);
+      // Growth rings near the butt, which is where they show.
+      for (let i = 2; i < len * 0.35; i += 4) {
+        for (let dx = -4; dx <= 4; dx += 1) form.addBias(x0 + dx, y0 - i, 1);
+      }
+      break;
+    }
+
+    // -----------------------------------------------------------------------
+    case 'small': {
+      // Inside the fist, so what shows is short and mostly points one way.
+      if (/\bpen\b|stylus|needle|brush/.test(n)) {
+        c.taper(hx, hy + 2, hx + dir * 4, hy - reach(s, 0.075), 1.5, 0.8);
+        round(c.cast(held.material === 'metal' ? 'iron' : 'wood', 3),
+          hx, hy + 2, hx + dir * 4, hy - reach(s, 0.06), 1.5);
+      } else if (/seal\b|scale\b|balance|amulet|disc/.test(n)) {
+        c.disc(hx + dir * 3, hy + 2, 4.2);
+        const disc = c.cast(held.material, 3);
+        ellipsoidSurface(form, disc, hx + dir * 3, hy + 2, 4.2, 4.2, DEPTH.held, 1);
+        form.addBias(hx + dir * 3, hy + 2, 2);
+      } else {
+        // A knife: short grip below the fist, blade above it and angled out.
+        const bl = reach(s, 0.10);
+        for (let i = 0; i <= bl; i += 1) {
+          const t = i / bl;
+          const w = 2.6 * (1 - t * 0.72);
+          for (let dx = -w; dx <= w; dx += 1) c.plot(hx + dx + dir * t * 3, hy - 3 - i);
+        }
+        const edge = c.cast(held.material === 'stone' ? 'stone' : 'iron', 2);
+        round(edge, hx, hy - 3, hx + dir * 3, hy - 3 - bl, 2.6);
+        for (let i = 1; i < bl; i += 1) {
+          form.addBias(hx + Math.round(dir * (i / bl) * 3) + 2, hy - 3 - i, -3);
+        }
+        c.bar(hx, hy + 1, hx, hy + 6, 2.2);
+        round(c.cast('wood', 4), hx, hy + 1, hx, hy + 6, 2.2);
+      }
+      break;
+    }
+
+    // -----------------------------------------------------------------------
     case 'book': {
-      for (let y = hy - 2; y <= hy + 3; y += 1) for (let x = hx - 3; x <= hx + 2; x += 1) put(x, y);
-      for (let y = 0; y < SPRITE_H; y += 1) {
-        for (let x = 0; x < SPRITE_W; x += 1) {
-          if (m[y * SPRITE_W + x]) raster.set(x, y, ramps.leather.steps[3], MAT.LEATHER, 3);
+      const w = reach(s, 0.08);
+      const h = reach(s, 0.115);
+      const bx = hx + dir * 2;
+      const by = hy - Math.round(h * 0.55);
+      if (/scroll|roll/.test(n)) {
+        c.bar(bx, by, bx, by + h, 4.2);
+        const roll = c.cast('bone', 3);
+        round(roll, bx, by, bx, by + h, 4.2);
+        // The lap of the outer turn, and the darkness inside the tube.
+        groove(bx + dir * 2, by + 1, by + h - 1, 2);
+        for (let dx = -4; dx <= 4; dx += 1) form.addBias(bx + dx, by, 2);
+      } else {
+        for (let dy = 0; dy <= h; dy += 1) for (let dx = -w; dx <= w; dx += 1) c.plot(bx + dx, by + dy);
+        const cover = c.cast('leather', 3);
+        flat(cover, -dir * 0.3, -0.15);
+        // The page block: a pale edge down the fore-edge side, which is the one
+        // mark that separates a book from a brick.
+        for (let dy = 1; dy < h; dy += 1) {
+          for (let k = 0; k < 3; k += 1) c.plot(bx + dir * (w - k), by + dy);
         }
+        const pages = c.cast('bone', 2);
+        flat(pages, dir * 0.7, 0);
+        for (let dy = 2; dy < h; dy += 3) form.addBias(bx + dir * (w - 1), by + dy, 2);
+        // The spine, opposite.
+        groove(bx - dir * w, by + 1, by + h - 1, 2);
       }
-      planeSurface(form, m, -0.25, -0.3, DEPTH.held);
-      for (let y = hy - 2; y <= hy + 3; y += 1) form.addBias(hx + 2, y, 2);
       break;
     }
+
+    // -----------------------------------------------------------------------
     case 'bag': {
-      for (let y = hy; y <= hy + 6; y += 1) {
-        const half = 3 - Math.abs(y - (hy + 3)) * 0.3;
-        for (let x = hx - half; x <= hx + half; x += 1) put(Math.round(x), y);
+      // Gathered at the fist and bellying out below it.
+      const drop = reach(s, 0.22);
+      const wide = reach(s, 0.085);
+      for (let i = 0; i <= drop; i += 1) {
+        const t = i / drop;
+        const w = wide * Math.sin(Math.min(1, 0.14 + t * 0.9) * Math.PI * 0.95);
+        for (let dx = -w; dx <= w; dx += 1) c.plot(hx + dx + dir * t * 3, hy + 3 + i);
       }
-      for (let y = 0; y < SPRITE_H; y += 1) {
-        for (let x = 0; x < SPRITE_W; x += 1) {
-          if (m[y * SPRITE_W + x]) raster.set(x, y, ramps.clothC.steps[3], MAT.CLOTH_C, 3);
+      const sack = c.cast(held.material === 'cloth' ? 'cloth' : 'fibre', 3);
+      ellipsoidSurface(form, sack, hx + dir * 2, hy + 3 + drop * 0.55, wide, drop * 0.5,
+        DEPTH.held, 0.85);
+      // The neck, tied. Three creases radiating from the tie is what turns a
+      // bulge into a sack.
+      c.bar(hx, hy + 2, hx, hy + 5, 3.0);
+      flat(c.cast('fibre', 5), 0, 0);
+      for (const k of [-3, 0, 3]) {
+        for (let i = 0; i < Math.round(drop * 0.4); i += 1) {
+          form.addBias(hx + k + Math.round(k * i * 0.12), hy + 6 + i, k === 0 ? -1 : 2);
         }
       }
-      ellipsoidSurface(form, m, hx, hy + 3, 3, 3, DEPTH.held, 0.9);
       break;
     }
-    default: {
-      for (let y = hy - 1; y <= hy + 7; y += 1) { put(hx, y); put(hx + 1, y); }
-      for (let y = 0; y < SPRITE_H; y += 1) {
-        for (let x = 0; x < SPRITE_W; x += 1) {
-          if (m[y * SPRITE_W + x]) raster.set(x, y, wood.steps[3], MAT.WOOD, 3);
+  }
+}
+
+/**
+ * The object accessories: what a person carries that is neither tool nor
+ * ornament.
+ *
+ * Drawn from `appearance.accessory`, which is filled on every persona in the
+ * app and which no renderer had ever read — see `pieceIn` in `spriteSource.ts`.
+ * Only the forms that are *objects* come through here; the beads, pendants and
+ * amulets that make up most of that slot are ornament and go through the
+ * jewelry pass, where they belong.
+ */
+function drawCarried(
+  raster: Raster, form: FormBuffer, ramps: PortraitRamps, extras: SpriteExtras,
+  s: Skeleton, L: HeadLayout, freeHand: [number, number]
+): void {
+  const worn = extras.carried;
+  if (!worn) return;
+  // Head-worn objects are allowed over the head; hand-held ones are not.
+  const onHead = worn.kind === 'comb' || worn.kind === 'hairpin' || worn.kind === 'pipe';
+  const c = chisel(raster, ramps, s, !onHead);
+  const [hx, hy] = freeHand;
+  const dir: -1 | 1 = hx === s.cx ? s.nearSide : (hx > s.cx ? 1 : -1);
+  const flat = (mask: Mask, nx: number, ny: number, depth: number = DEPTH.held) =>
+    planeSurface(form, mask, nx, ny, depth);
+
+  switch (worn.kind) {
+    case 'comb': {
+      // Set into the hair above and behind the ear, teeth inward. Drawn at the
+      // headwear depth rather than the held depth: it is *in* the hair, and at
+      // held depth it floated in front of the skull.
+      const side = -s.nearSide;
+      const cx = L.hx + side * Math.round(L.rx * 0.72);
+      const cy = L.crownY + Math.round((L.chinY - L.crownY) * 0.18);
+      const w = Math.max(5, Math.round(L.rx * 0.5));
+      for (let dy = 0; dy < 4; dy += 1) for (let dx = -w; dx <= w; dx += 1) c.plot(cx + dx, cy + dy);
+      const spine = c.cast(worn.material === 'wood' ? 'wood' : worn.material, 3);
+      planeSurface(form, spine, side * 0.4, -0.5, DEPTH.headwear + 0.02);
+      for (let k = -w + 1; k < w; k += 2) {
+        for (let i = 0; i < 4; i += 1) c.plot(cx + k, cy + 4 + i);
+      }
+      const teeth = c.cast(worn.material === 'wood' ? 'wood' : worn.material, 4);
+      planeSurface(form, teeth, side * 0.4, 0, DEPTH.headwear + 0.02);
+      break;
+    }
+    case 'hairpin': {
+      // Through the knot, on the diagonal, with the head of the pin showing.
+      const side = -s.nearSide;
+      const px = L.hx + side * Math.round(L.rx * 0.55);
+      const py = L.crownY + Math.round((L.chinY - L.crownY) * 0.12);
+      const len = Math.round(L.rx * 1.15);
+      c.taper(px - side * len * 0.5, py + 5, px + side * len * 0.5, py - 3, 1.4, 0.8);
+      const shaft = c.cast(worn.material === 'cloth' ? 'bone' : worn.material, 3);
+      planeSurface(form, shaft, side * 0.4, -0.4, DEPTH.headwear + 0.03);
+      c.disc(px - side * len * 0.5, py + 5, 2.6);
+      const head = c.cast(worn.material === 'cloth' ? 'bone' : worn.material, 2);
+      ellipsoidSurface(form, head, px - side * len * 0.5, py + 5, 2.6, 2.6,
+        DEPTH.headwear + 0.04, 1);
+      break;
+    }
+    case 'pipe': {
+      // At the mouth: stem angled down and out, bowl standing up at the end of
+      // it. Six pixels of clay, and no other accessory in the set changes a
+      // face this much for so little.
+      //
+      // Kaolin, not terracotta. Clay elsewhere in the app is the fired red of a
+      // spindle whorl, which on a pipe reads as a chilli hanging off the lip;
+      // the pipes people actually smoked were white.
+      const mat: HeldMaterial = worn.material === 'clay' ? 'bone' : worn.material;
+      const side = s.nearSide;
+      const mx = L.fx + side * Math.round(L.rx * 0.46);
+      const my = L.chinY - Math.round((L.chinY - L.crownY) * 0.20);
+      const len = Math.max(7, Math.round(L.rx * 0.85));
+      const bx = mx + side * len;
+      const by = my + Math.round(len * 0.42);
+      c.taper(mx, my, bx, by, 1.6, 1.3);
+      const stem = c.cast(mat, 3);
+      planeSurface(form, stem, 0, -0.55, DEPTH.head + 0.10);
+      // The bowl rises from the end of the stem, leaning outward.
+      const bh = Math.max(6, Math.round(L.rx * 0.55));
+      for (let i = 0; i <= bh; i += 1) {
+        const t = i / bh;
+        const w = 1.9 + t * 1.7;
+        for (let dx = -w; dx <= w; dx += 1) c.plot(bx + dx + side * t * 1.6, by - i);
+      }
+      const bowl = c.cast(mat, 3);
+      cylinderSurface(form, bowl, bx + side, 3.4, DEPTH.head + 0.11);
+      // The mouth of it, dark, with char round the rim.
+      for (let dx = -3; dx <= 3; dx += 1) form.addBias(bx + dx + side * 2, by - bh, 4);
+      break;
+    }
+    case 'watch': {
+      if (/pocket/.test(worn.name.toLowerCase())) {
+        // On a chain into the waistcoat: the chain is the visible part, and it
+        // is the swag between two points that reads, not the watch itself.
+        const ax = s.cx + s.nearSide * Math.round(s.hipHalf * 0.55);
+        const bx2 = s.cx - s.nearSide * Math.round(s.hipHalf * 0.1);
+        for (let i = 0; i <= 20; i += 1) {
+          const t = i / 20;
+          c.disc(ax + (bx2 - ax) * t, s.waistY - 2 + Math.sin(t * Math.PI) * 7, 0.7);
+        }
+        flat(c.cast('metal', 2), 0, -0.4, DEPTH.torso + 0.12);
+      } else {
+        // At the wrist, on the side the viewer can see.
+        for (let dy = -3; dy <= 3; dy += 1) {
+          const w = Math.round(3.4 * Math.sqrt(Math.max(0, 1 - (dy / 3.4) ** 2)));
+          for (let dx = -w; dx <= w; dx += 1) c.plot(hx + dx, hy - 8 + dy);
+        }
+        const face = c.cast('metal', 2);
+        ellipsoidSurface(form, face, hx, hy - 8, 3.4, 3.4, DEPTH.hand + 0.02, 1);
+        form.addBias(hx, hy - 8, -3);
+      }
+      break;
+    }
+    case 'phone': {
+      // In the free hand, tilted up. A slab with a lit face — the only object
+      // in the app that emits rather than reflects, and drawing it dark would
+      // make it a whetstone.
+      const w = 3;
+      const h = Math.max(7, Math.round(reach(s, 0.045)));
+      const px = hx + dir * 2;
+      const py = hy - 2;
+      for (let dy = -h; dy <= h; dy += 1) for (let dx = -w; dx <= w; dx += 1) c.plot(px + dx, py + dy);
+      const body = c.cast('metal', 5);
+      flat(body, -dir * 0.35, -0.2, DEPTH.hand + 0.04);
+      for (let dy = -h + 1; dy <= h - 1; dy += 1) {
+        for (let dx = -w + 1; dx <= w - 1; dx += 1) c.plot(px + dx, py + dy);
+      }
+      const screen = c.cast('cloth', 0);
+      flat(screen, -dir * 0.35, -0.2, DEPTH.hand + 0.05);
+      for (let dy = -h + 1; dy <= h - 1; dy += 1) {
+        for (let dx = -w + 1; dx <= w - 1; dx += 1) form.addBias(px + dx, py + dy, -4);
+      }
+      break;
+    }
+    case 'fan': {
+      // Held open at the chest, ribs radiating from the wrist.
+      const r = Math.max(9, reach(s, 0.10));
+      const ax = hx;
+      const ay = hy - 4;
+      for (let k = -5; k <= 5; k += 1) {
+        const a = -Math.PI / 2 + dir * k * 0.13;
+        c.taper(ax, ay, ax + Math.cos(a) * r, ay + Math.sin(a) * r, 1.5, 0.9);
+      }
+      const ribs = c.cast(worn.material === 'metal' ? 'metal' : 'wood', 4);
+      flat(ribs, -dir * 0.2, -0.4, DEPTH.hand + 0.03);
+      for (let k = -50; k <= 50; k += 1) {
+        const a = -Math.PI / 2 + dir * k * 0.013;
+        for (let d = r * 0.52; d <= r; d += 0.6) {
+          c.plot(ax + Math.cos(a) * d, ay + Math.sin(a) * d);
         }
       }
-      cylinderSurface(form, m, hx, 1.2, DEPTH.held);
-      for (let dx = -1; dx <= 2; dx += 1) raster.set(hx + dx, hy - 1, ramps.metal.steps[3], MAT.METAL, 3);
+      const leaf = c.cast('cloth', 2);
+      flat(leaf, -dir * 0.2, -0.5, DEPTH.hand + 0.02);
+      break;
     }
   }
 }
@@ -3119,9 +3941,12 @@ function restingArms(
     && fp.posture.legs.near.step === 0 && fp.posture.legs.far.step === 0
     && fp.posture.drop === 0 && fp.posture.shoulderLift === 0;
   // The garment can still insist: a clasped-rest robe overrides a hanging one.
+  // Unless there is something in the hand, which overrules both it and
+  // temperament — see the note on `readStance`. A robe cannot fold the arms of
+  // a person carrying a hoe, and drawing it that way put the hoe through them.
   const stance: RestStance = !idle ? 'hang'
     : extras.stance !== 'hang' ? extras.stance
-    : clasped ? 'clasp' : 'hang';
+    : clasped && !extras.held ? 'clasp' : 'hang';
   if (stance === 'hang') return { near: fp.posture.arms.near, far: fp.posture.arms.far };
   return STANCES[stance];
 }
@@ -3179,7 +4004,10 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
   const base = buildSkeleton(spec, getTuning());
   const s = foldSpine(base, fp.posture);
   const t = s.t;
-  const plan = planGarment(spec, s, fp.wind, extras.worn?.name ?? extras.armWear?.name ?? '');
+  // The accessory's raw name, first: a shawl or a bandana in that slot is an
+  // over-layer, and it reaches `readShape` nowhere else.
+  const plan = planGarment(spec, s, fp.wind,
+    extras.accessoryName || extras.worn?.name || extras.armWear?.name || '');
   const raster = new Raster(SPRITE_W, SPRITE_H);
   const form = new FormBuffer();
   const rig = buildRig(t);
@@ -3264,7 +4092,10 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
   // garment mask leaves is a *hole* rather than a person: the first attempt at
   // a cropped blouse cut a window straight through the figure to the
   // background, because the torso mask and the garment were the same mask.
-  if (plan.shape.bareChest || plan.shape.bareMidriff) {
+  // A one-shouldered wrap leaves a triangle of chest showing, and it needs the
+  // body under it for the same reason the dhoti does: the garment mask is a cut
+  // through the trunk, so whatever the cut exposes has to already be a person.
+  if (plan.shape.bareChest || plan.shape.bareMidriff || plan.shape.bareShoulder !== 0) {
     drawBareTorso(raster, form, ramps, s, plan, spec);
   }
   const bodyM = drawTorso(raster, form, spec, ramps, s, plan);
@@ -3357,7 +4188,12 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
   // anything is put in them.
   drawLimbMarkings(raster, spec, ramps, farActs ? [nearChain, farChain] : [nearChain]);
 
-  drawHeldItem(raster, form, ramps, extras, s, farActs ? farChain.hand : nearChain.hand);
+  // The tool goes in the acting hand; anything else the persona carries goes in
+  // the other one, so a fisherman with a watch does not wear it through his net.
+  const toolHand = farActs ? farChain.hand : nearChain.hand;
+  const otherHand = farActs ? nearChain.hand : farChain.hand;
+  drawHeldItem(raster, form, ramps, extras, s, toolHand);
+  drawCarried(raster, form, ramps, extras, s, L, extras.held ? otherHand : toolHand);
 
   // --- One lamp, applied to everything at once. ---
   //
@@ -3463,7 +4299,8 @@ export function poseLandmarks(source: SpriteSource, id: FrameId): PoseLandmarks 
   const fp = FRAME_POSES[id === 'fallen' ? 'stand' : id];
   const base = buildSkeleton(source.spec, getTuning());
   const s = foldSpine(base, fp.posture);
-  const plan = planGarment(source.spec, s, fp.wind, source.extras.worn?.name ?? '');
+  const plan = planGarment(source.spec, s, fp.wind,
+    source.extras.accessoryName || source.extras.worn?.name || '');
   const arms = restingArms(fp, source.extras, plan.clasped);
   const nearSide = s.nearSide;
   const farSide = -nearSide as -1 | 1;

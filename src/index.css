@@ -13,6 +13,21 @@ body {
   color: #1a1612;
   margin: 0;
   padding: 0;
+  /* Taps get their feedback from the `:active` styles the components already
+     define. The platform highlight is a grey rectangle drawn over the top of
+     them, which on the round toolbar buttons and pill controls reads as a
+     rendering fault rather than a press. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* `dvh` tracks the visible viewport as mobile Safari grows and shrinks its
+   address bar; `vh` is frozen at the *largest* height, so a 100vh page always
+   sat about 80px taller than the screen and started life mid-bounce. Declared
+   after the `vh` rule so engines without `dvh` keep the fallback. */
+@supports (min-height: 100dvh) {
+  body {
+    min-height: 100dvh;
+  }
 }
 
 body.dark-mode {
@@ -24,4 +39,10 @@ body.dark-mode {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+@supports (min-height: 100dvh) {
+  #root {
+    min-height: 100dvh;
+  }
 }

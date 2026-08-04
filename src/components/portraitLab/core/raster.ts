@@ -56,9 +56,31 @@ export const MAT = {
    * colours leaking onto anything else the figure is wearing.
    */
   LEGWEAR: 22,
+  /**
+   * Twisted plant fibre: a fishing net, a sling's cords, a bowstring, rope,
+   * basketry, a spindle's thread.
+   *
+   * Cordage was going through `CLOTH_C`, the garment's accent colour, so a net
+   * came out whatever the fisherman's trim happened to be — and since the whole
+   * point of a net is that it reads as a mass of pale twine against darker
+   * cloth, borrowing the cloth's own palette was self-defeating.
+   */
+  CORD: 23,
+  /** Bone, ivory, antler, tooth, shell: pale, warm, and never quite white. */
+  BONE: 24,
+  /** Worked stone: flint, obsidian, ground slate. Cool where bone is warm. */
+  STONE: 25,
+  /**
+   * Working iron: the head of a hoe, an axe bit, a blade.
+   *
+   * Distinct from `METAL`, which follows the persona's *ornament* — a woman in
+   * silver earrings gets silver buttons, which is right, and gave her a silver
+   * hoe, which is not. Tool iron answers to nothing but itself.
+   */
+  IRON: 26,
 } as const;
 
-export const MAT_COUNT = 24;
+export const MAT_COUNT = 27;
 export const NO_SHADE: number = 255;
 
 export type MaterialId = number;
@@ -69,6 +91,7 @@ export const BODY_MATS = new Set<number>([
   MAT.SKIN, MAT.HAIR, MAT.BEARD, MAT.CLOTH_A, MAT.CLOTH_B, MAT.CLOTH_C,
   MAT.LEGWEAR, MAT.HEADWEAR, MAT.HEADWEAR_ACCENT, MAT.FOLIAGE, MAT.METAL,
   MAT.LEATHER, MAT.WOOD, MAT.GEM, MAT.PAINT, MAT.GLASS,
+  MAT.CORD, MAT.BONE, MAT.STONE, MAT.IRON,
 ]);
 
 export type Mask = Uint8Array;

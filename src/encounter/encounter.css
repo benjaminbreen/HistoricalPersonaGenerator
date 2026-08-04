@@ -137,6 +137,21 @@
   line-height: 1;
   color: var(--color-text-tertiary, #736e68);
   transition: transform 0.15s, color 0.15s;
+  /* The glyph draws 21x21. Saving a persona is the only route into encounter
+     mode, and at that size the control was landing under half of the taps
+     aimed at it; the inset pseudo-element takes the hit box to 44 without
+     moving the star or disturbing the row it sits in. */
+  position: relative;
+}
+
+.roster-star::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
 }
 
 .roster-star:hover { transform: scale(1.2); color: var(--color-accent-tertiary, #c59563); }
@@ -1242,6 +1257,19 @@
   opacity: 0.55;
   text-decoration: underline dotted;
   padding: 0;
+  /* An 8x17px glyph in a run of footer text. It is meant to be quiet, but it
+     was not findable by touch at all; the hit box grows, the mark does not. */
+  position: relative;
+}
+
+.encounter-egg::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
 }
 
 .encounter-egg:hover { opacity: 1; color: var(--color-accent-primary, #d97757); }

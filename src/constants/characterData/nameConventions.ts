@@ -123,6 +123,24 @@ const SLAVIC_PATRONYMIC = (parent: string, gender: 'Male' | 'Female') =>
 const MALAY_PATRONYMIC = (parent: string, gender: 'Male' | 'Female') =>
   `${gender === 'Male' ? 'bin' : 'binti'} ${parent}`;
 
+/** Ottoman and pre-1934 Turkish: Mehmet oğlu, Ayşe kızı. */
+const TURKISH_PATRONYMIC = (parent: string, gender: 'Male' | 'Female') =>
+  `${parent} ${gender === 'Male' ? 'oğlu' : 'kızı'}`;
+
+/**
+ * Name sets that carry a European naming world with them wherever the region
+ * rules place them — a French family in Algiers, a Portuguese one in Goa. They
+ * take their own convention rather than the surrounding zone's.
+ */
+const EUROPEAN_NAME_SETS = new Set([
+  'ENGLISH', 'ENGLISH_MEDIEVAL', 'SCOTTISH', 'WELSH', 'CELTIC_IRISH',
+  'FRENCH', 'FRENCH_MEDIEVAL', 'NORMAN_FRENCH', 'GERMAN', 'DUTCH', 'ITALIAN',
+  'SPANISH_CASTILIAN', 'PORTUGUESE', 'RUSSIAN',
+]);
+// ANCIENT_GREEK and ANCIENT_ROMAN are deliberately absent: classical Greeks
+// were placed by father, not by a family name, and the pre-600 branch of the
+// MENA case already gives them a patronymic.
+
 const ARABIC_TEKNONYM = (child: string, gender: 'Male' | 'Female') =>
   `${gender === 'Male' ? 'Abu' : 'Umm'} ${child}`;
 
@@ -554,6 +572,35 @@ function resolveConventionProfile(
     }
 
     case 'MENA': {
+      // The zone is not one naming world. Its Christian, Jewish, Turkic and
+      // European communities are all reachable through the region rules, and
+      // this case used to hand every one of them the Arabic *ibn* and *Abu* —
+      // hence "Eleanor bint Arthur", "Odysseus ibn Socrates" and an Armenian
+      // called "Levon ibn Armen". Each of these traditions settled on a
+      // hereditary family name well before it appears here: Armenian -ian and
+      // Greek patronymic surnames are medieval, and the Turkish Surname Law of
+      // 1934 made the rest compulsory.
+      if (nameKey === 'ARMENIAN' || nameKey === 'GEORGIAN' || nameKey === 'GREEK' || nameKey === 'BYZANTINE') {
+        return { weights: { inherited: 0.8, patronymic: 0.12, toponymic: 0.08 }, patronymic: PLAIN_PATRONYMIC };
+      }
+      if (nameKey === 'TURKISH' || nameKey === 'OTTOMAN_TURKISH' || nameKey === 'TURKIC_STEPPE') {
+        // Before the Surname Law an Ottoman was placed by father — Mehmet oğlu
+        // — or by trade or town, and had no family name to pass on.
+        if (year >= 1934) return { weights: { inherited: 0.92, patronymic: 0.08 }, patronymic: TURKISH_PATRONYMIC };
+        return {
+          weights: { patronymic: 0.45, personal: 0.25, toponymic: 0.18, occupational: 0.12 },
+          patronymic: TURKISH_PATRONYMIC,
+        };
+      }
+      if (nameKey === 'HEBREW' || nameKey === 'JEWISH_ASHKENAZI') {
+        if (year >= 1800) return { weights: { inherited: 0.85, patronymic: 0.15 }, patronymic: HEBREW_PATRONYMIC };
+        return { weights: { patronymic: 0.7, personal: 0.3 }, patronymic: HEBREW_PATRONYMIC };
+      }
+      if (EUROPEAN_NAME_SETS.has(nameKey ?? '')) {
+        // A Greek merchant house in Alexandria or a French family in Algiers
+        // brought its own naming with it.
+        return { weights: { inherited: 0.88, toponymic: 0.07, patronymic: 0.05 }, patronymic: PLAIN_PATRONYMIC };
+      }
       if (has(place, /israel|judea|galilee|samaria/) && year >= -1000 && year < 700) {
         return { weights: { patronymic: 0.7, personal: 0.3 }, patronymic: HEBREW_PATRONYMIC };
       }

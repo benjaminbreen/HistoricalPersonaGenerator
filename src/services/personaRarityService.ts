@@ -265,6 +265,22 @@ export function describePersonaRarity(character: RarityInput): PersonaRarity {
   };
 }
 
+/**
+ * The share of people at least this far out on one score, in the direction the
+ * score is out.
+ *
+ * Exported so the portrait's trait seals quote the same arithmetic the card's
+ * rarity line does. A seal that says "top 1%" while the line beneath it works
+ * from a different model is a card arguing with itself, and the stat
+ * distribution here is derived rather than measured precisely so there is only
+ * ever one answer to this question.
+ */
+export function statStanding(value: number): { direction: 'top' | 'bottom'; share: number } {
+  return value >= 6
+    ? { direction: 'top', share: topShare(value) }
+    : { direction: 'bottom', share: bottomShare(value) };
+}
+
 function topShare(value: number): number {
   let p = 0;
   for (let v = value; v <= STAT_MAX; v += 1) p += STAT_PMF[v];

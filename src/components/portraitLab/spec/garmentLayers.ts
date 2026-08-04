@@ -68,6 +68,10 @@ const BOTTOM = new RegExp([
  */
 const WHOLE = new RegExp([
   'dress\\b', 'gown', 'robe', 'kaftan', 'caftan', 'abaya', 'thobe', 'dishdasha',
+  // The Egyptian and Levantine forms of the same garment as the thobe. Absent,
+  // they classified as tops, and the generator put a pair of trousers under a
+  // galabeya.
+  'galabeya', 'gallabiy', 'jellabiy', 'galabiy', 'kandura', 'bisht', 'chador', 'jubba',
   'djellaba', 'agbada', 'boubou', 'kimono', 'hanbok', 'hanfu', 'sari\\b', 'saree',
   'qipao', 'cheongsam', 'changshan', 'kalasiris', 'toga', 'himation', 'chiton',
   'peplos', 'stola', 'palla\\b', 'cassock', 'habit\\b', 'sherwani', 'achkan',

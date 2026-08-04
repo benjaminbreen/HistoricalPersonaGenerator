@@ -21,13 +21,34 @@ import {
   drawDistinctionMark,
   drawPortraitFrame,
   FRAME_WIDTH,
+  MARK_SIZE,
   MOUNT_Y,
 } from './art/distinctionMark';
 import { buildPortraitSpec, normalizeExpression, PortraitSource, restingExpression } from './spec/buildSpec';
-import { VIEW_HEIGHT } from './spec/anatomy';
+import { CANVAS, VIEW_HEIGHT } from './spec/anatomy';
 import { Expression } from './spec/types';
 import { compilePortrait, renderFrame, FrameState } from './render/pipeline';
 import { idleFrame } from './render/animation';
+
+/**
+ * Where the corner mark lands, in percentages of the displayed canvas.
+ *
+ * The mark is painted into the canvas rather than laid over it in the DOM,
+ * which is right — it is part of the picture and it has to survive a PNG export
+ * — but it means nothing can be hovered. So the card puts an invisible target
+ * over it, and takes the arithmetic from here rather than repeating the
+ * constants, which is how a hotspot ends up two pixels off the thing it is
+ * supposed to be on.
+ */
+export const MARK_HOTSPOT = (() => {
+  const inset = Math.max(FRAME_WIDTH + 1, MOUNT_Y + 2);
+  return {
+    rightPct: (inset / CANVAS) * 100,
+    topPct: (inset / VIEW_HEIGHT) * 100,
+    widthPct: (MARK_SIZE / CANVAS) * 100,
+    heightPct: (MARK_SIZE / VIEW_HEIGHT) * 100,
+  };
+})();
 
 export interface PixelPortraitHandle {
   /** A PNG of the current frame, for PDF export and downloads. */

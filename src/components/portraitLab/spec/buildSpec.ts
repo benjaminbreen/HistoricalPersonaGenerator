@@ -1130,12 +1130,75 @@ function contrastingTrim(accent: string, primary: string, secondary: string, see
  * gets `null` — the overwhelming majority.
  */
 const SKIRTED_NAME = /\bskirt|petticoat|wrapper|lehenga|sari\b|saree/i;
-/** Cloth that goes over the shoulder as part of the same garment. */
-const DRAPED_NAME = /sari\b|saree|odhani|dupatta|shawl|pallu|stole|himation|toga|wrap\b/i;
+/**
+ * Cloth that goes over the shoulder as part of the same garment.
+ *
+ * `wrap\b` used to be on this list and had to come off it, for the same reason
+ * it came off the drape pattern in `encounter/sprite/construction.ts`: a wrap
+ * skirt is a skirt, and reading it as self-bodiced said the cloth continued up
+ * over the chest. It does not — a wrap skirt is worn with a blouse, and the
+ * blouse is the separate bodice this is meant to detect.
+ */
+const DRAPED_NAME = /sari\b|saree|odhani|dupatta|chunni|shawl|pallu|stole|himation|toga|rebozo/i;
 
 function bodiceFor(name: string): BodiceSource | null {
   if (!SKIRTED_NAME.test(name)) return null;
   return DRAPED_NAME.test(name) ? 'self' : 'separate';
+}
+
+/**
+ * Hold the garment's own colour off the skin it is worn against.
+ *
+ * The undyed materials are the whole problem, and they are the ones that cannot
+ * be argued with: leather, hide, rawhide, bark cloth and fur all resolve to a
+ * fixed mid-brown, because that is what they are. Skin over most of the app's
+ * range is also a mid-brown. Measured across 400 personas, 19% had less than 35
+ * of RGB distance between the cloth the sprite painted and the skin beside it,
+ * and the closest pairs sat at *four* — a figure in a hide wrap and a figure
+ * wearing nothing are the same picture at that distance, which is exactly the
+ * complaint that sent me looking.
+ *
+ * Value only, and only when the hues already agree. A leather jerkin over pale
+ * skin needs nothing done to it, and rotating a hue here would make tanned hide
+ * some colour hide is not — but the *same* hide is legitimately lighter or
+ * darker depending on how it was worked, so moving lightness costs nothing that
+ * matters and is the axis the eye reads a silhouette along anyway.
+ */
+function separateFromSkin(hex: string, skinHex: string): string {
+  const GAP = 0.15;
+  const cloth = rgbToHsl(hexToRgb(hex));
+  const skin = rgbToHsl(hexToRgb(skinHex));
+  const delta = cloth.l - skin.l;
+  if (Math.abs(delta) >= GAP) return hex;
+
+  // Chroma, not HSL saturation. `s` for a dark brown like #6b482f is 0.39 —
+  // higher than a mid indigo's — so gating on it excluded the tanned hides and
+  // barkcloths this whole function exists for while letting pale cloth through.
+  // The span between the channels is what the eye is actually reading, and by
+  // that measure a hide is 0.24 and a madder red is 0.48.
+  const rgb = hexToRgb(hex);
+  const chroma = (Math.max(rgb.r, rgb.g, rgb.b) - Math.min(rgb.r, rgb.g, rgb.b)) / 255;
+  // A vivid dye reads as cloth at any value: saffron on tan skin is unmistakably
+  // a garment even where the two are the same weight.
+  if (chroma > 0.45) return hex;
+
+  // Hue does the rest of the work: skin sits in a narrow band around 25–35°, so
+  // a cloth outside that band is legible against it however dark either is. But
+  // a near-neutral has no meaningful hue to compare — a charcoal apron scores
+  // 240° purely on rounding noise, and letting it claim separation on that
+  // basis is how a black work apron ends up invisible on a dark-skinned figure.
+  if (chroma > 0.06) {
+    let hueGap = Math.abs(cloth.h - skin.h);
+    if (hueGap > 180) hueGap = 360 - hueGap;
+    if (hueGap > 45) return hex;
+  }
+
+  const away = delta === 0 ? (skin.l > 0.5 ? -1 : 1) : Math.sign(delta);
+  const target = skin.l + away * GAP;
+  const clamped = target > 0.92 ? skin.l - GAP : target < 0.10 ? skin.l + GAP : target;
+  return rgbToHex(hslToRgb({
+    h: cloth.h, s: cloth.s, l: Math.max(0.07, Math.min(0.93, clamped)),
+  }));
 }
 
 function separateGarmentColors(
@@ -2031,9 +2094,16 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
       // Straw is the colour of straw; leather is the colour of leather. The
       // old precedence let a generated palette entry paint a sedge sunhat
       // lilac and a bark-cloth wrap sky blue.
-      intrinsicColorFor(garmentPiece.material)
-        || resolveColor(garmentPiece.color) || colorFromName(garmentPiece.name)
-        || resolveColor(palette.primary) || '#7c6a54',
+      //
+      // …and then the cloth has to clear the body wearing it, which is the same
+      // constraint the background already answers to a few lines down and for
+      // the same reason: a colour is only a colour relative to what it is next
+      // to. This is where a hide loincloth stops being invisible.
+      separateFromSkin(
+        intrinsicColorFor(garmentPiece.material)
+          || resolveColor(garmentPiece.color) || colorFromName(garmentPiece.name)
+          || resolveColor(palette.primary) || '#7c6a54',
+        appearance.skinColor || '#c58f68'),
       resolveColor(palette.secondary) || '#9a8768',
       resolveColor(palette.accent) || '#a8834f',
       seed

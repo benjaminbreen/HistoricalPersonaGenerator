@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- `viewport-fit=cover` lets the sticky bars run under the notch and home
+         indicator; the safe-area insets in the stylesheet keep their contents
+         out from under them. Without it those insets always resolve to 0. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#f8f6f3" />
     <title>Historical Persona Generator</title>
     <style>

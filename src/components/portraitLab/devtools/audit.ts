@@ -546,6 +546,7 @@ const nameWarnings = auditNameRules(
 rule('Name rules reaching past their tradition (data warning)');
 const unboundedRules = nameWarnings.filter(w => w.kind === 'unbounded');
 const overlapRules = nameWarnings.filter(w => w.kind === 'overlap');
+const lapsedRules = nameWarnings.filter(w => w.kind === 'lapsed');
 lines.push(`  ${unboundedRules.length} rules with no lower bound, ${overlapRules.length} bounded rules starting early`);
 if (unboundedRules.length > 0) {
   lines.push('  Unbounded — these reach to the era floor:');
@@ -553,6 +554,17 @@ if (unboundedRules.length > 0) {
     lines.push(`    ${w.zone}/${w.region} [${w.rule}] → ${w.implausibleKeys.join(', ')}`);
   }
   if (unboundedRules.length > 10) lines.push(`    … and ${unboundedRules.length - 10} more`);
+}
+// The other direction, and the one that leaves no trace at generation time:
+// the set is dropped by the era gate on every draw this rule makes, so the
+// rule reads as though it includes a people it silently cannot produce.
+lines.push(`  ${lapsedRules.length} rules naming a tradition that had already lapsed`);
+if (lapsedRules.length > 0) {
+  lines.push('  Lapsed — dead on every draw, their share goes to the other keys:');
+  for (const w of lapsedRules.slice(0, 12)) {
+    lines.push(`    ${w.zone}/${w.region} [${w.rule}] → ${w.implausibleKeys.join(', ')}`);
+  }
+  if (lapsedRules.length > 12) lines.push(`    … and ${lapsedRules.length - 12} more`);
 }
 
 rule('Structural findings');

@@ -382,6 +382,12 @@ function compileMask(mask: string[]): Compiled {
   return { width, height, cells, diagonal, maxDiagonal };
 }
 
+/**
+ * Both masks are square and the same size, which the hover target over the mark
+ * relies on — see `MARK_HOTSPOT`.
+ */
+export const MARK_SIZE = STAR_MASK.length;
+
 const COMPILED: Record<Exclude<DistinctionTier, null>, Compiled> = {
   notable: compileMask(STAR_MASK),
   rare: compileMask(STAR_MASK),

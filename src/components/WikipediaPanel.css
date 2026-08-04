@@ -54,6 +54,14 @@
   background: #f9fafb;
 }
 
+/* The drag grip is a phone affordance; on a pointer the panel is still a
+   side drawer, dismissed with the close button. Declared here rather than
+   after the media query below, which would win on order at equal specificity
+   and leave the sheet with no visible handle. */
+.wikipedia-sheet-grip {
+  display: none;
+}
+
 .wikipedia-panel-header h2 {
   margin: 0;
   font-size: 1.125rem;
@@ -192,19 +200,109 @@
   font-size: 0.9375rem;
 }
 
-/* Responsive */
+/* -------------------------------------------------------------------------
+   Phones: a sheet, not a drawer
+
+   The panel is a right-edge drawer that went full-bleed under 768px, which
+   left it with a drawer's manners on a screen where it filled everything: it
+   arrived from the side, covered the article the reader had just tapped from,
+   and could only be dismissed by a 32px x in the far top corner — the one
+   part of a phone screen a thumb cannot reach.
+
+   As a bottom sheet it comes from the direction it is dismissed in, stops
+   short of the top so the page underneath stays visible as context, and takes
+   a downward drag anywhere on its header. The x stays for pointer users.
+   ---------------------------------------------------------------------- */
 @media (max-width: 768px) {
   .wikipedia-panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
     max-width: 100vw;
+    height: 86dvh;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.22);
+    animation: wikipediaSheetRise 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    /* Set by the drag handler while a drag is in progress; the transition is
+       suppressed for the same span so the sheet tracks the finger exactly. */
+    transform: translateY(var(--sheet-drag, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .wikipedia-panel.is-dragging {
+    animation: none;
+    transition: none;
+  }
+
+  .wikipedia-panel.is-settling {
+    animation: none;
+    transition: transform 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .wikipedia-panel-header {
+    padding: 0.5rem 1.25rem 0.9rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    /* The whole header is the drag surface, so it must not also be a scroll
+       surface or a text selection. */
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grab;
+  }
+
+  /* The grip owns a full row so the title and close button sit beneath it;
+     the pill itself is drawn by the pseudo-element, because on a flex item a
+     `flex-basis` of 100% overrides `width` and the bar would run the whole
+     width of the sheet. */
+  .wikipedia-sheet-grip {
+    display: block;
+    position: relative;
+    flex: 0 0 100%;
+    height: 4px;
+    margin-bottom: 0.55rem;
+  }
+
+  .wikipedia-sheet-grip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 38px;
+    height: 4px;
+    border-radius: 999px;
+    background: #cbd5e1;
+  }
+
+  .wikipedia-panel-header h2 {
+    flex: 1 1 auto;
   }
 
   .wikipedia-panel-content {
     padding: 1.25rem;
+    /* Scrolling to the end of the article must not start dragging the page
+       behind the sheet. */
+    overscroll-behavior: contain;
   }
 
-  .wikipedia-panel-header {
-    padding: 1rem 1.25rem;
+  .wikipedia-close {
+    width: 44px;
+    height: 44px;
+    font-size: 1.75rem;
+    flex: 0 0 auto;
+  }
+}
+
+@keyframes wikipediaSheetRise {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wikipedia-panel {
+    animation: none;
   }
 }
 

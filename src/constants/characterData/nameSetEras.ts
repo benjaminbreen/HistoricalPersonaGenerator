@@ -194,6 +194,21 @@ const NAME_SET_EARLIEST: Record<string, number> = {
   PUERTO_RICAN: 1500,
   PORTUGUESE_BRAZIL: 1500,
   SPANISH_LATIN_AMERICAN: 1500,
+  // The Spanish mission on Guam, which is what put Spanish given names on
+  // Chamorro families. Before it, the Marianas rule uses the precontact sets.
+  CHAMORRO: 1668,
+  // Marshallese, Kiribati and Caroline naming. Given no floor: unlike the
+  // Chamorro set it is not a product of a mission, and the islands were
+  // settled two thousand years before any European reached them.
+  // Indigenous America after the conquest: a Spanish given name over an
+  // Indigenous surname, which is a form that only exists once the missions do.
+  // No ceiling on any of the three — these are how millions of people are
+  // named today, which is the whole reason they had to be written.
+  MAYA_MODERN: 1550,
+  ZAPOTEC_MODERN: 1550,
+  ANDEAN_MODERN: 1550,
+  // The Rio Grande missions, from the 1598 entrada.
+  PUEBLO_MODERN: 1600,
   TEXAS_ANGLO: 1820,
   TEXAS_SPANISH_COLONIAL: 1690,
   NORTH_AMERICAN_COLONIAL: 1607,
@@ -254,7 +269,13 @@ const NAME_SET_LATEST: Record<string, number> = {
   ANCIENT_SOUTH_ARABIAN: 600,
   ARABIAN_HEJAZ: 700,
   KOREAN_ANCIENT: 950,
-  EGYPTIAN_COPTIC: 1400,
+  // EGYPTIAN_COPTIC deliberately has no ceiling. It sat here at 1400, which is
+  // a claim about the Coptic *language* rather than about Coptic names: Mina,
+  // Girgis, Tadros, Boutros, Ghobrial and Shenouda are what Egypt's Christians
+  // — a tenth of the country — are called today. The ceiling meant the set was
+  // silently dropped from every Ottoman and modern rule that listed it, so the
+  // Copts vanished from Egypt in 1400 and their share of the draw went to
+  // whoever else was in the rule.
   NUBIAN: 1400,
   SOGDIAN: 1000,
 
@@ -300,7 +321,13 @@ const SUCCESSOR_BY_ZONE: Record<string, Array<{ from: number; key: string }>> = 
   EAST_ASIAN: [{ from: 900, key: 'CHINESE_MANDARIN' }],
   SOUTH_ASIAN: [{ from: 1200, key: 'HINDI' }],
   SOUTHEAST_ASIAN: [{ from: 600, key: 'MALAY' }],
-  SUB_SAHARAN_AFRICAN: [{ from: 800, key: 'YORUBA' }],
+  // 'YORUBA' is not a key in CHARACTER_NAMES and never has been — the real
+  // sets are era-qualified. So this successor resolved to nothing, and every
+  // lapsed African tradition fell past it to the *prehistoric* set instead.
+  SUB_SAHARAN_AFRICAN: [
+    { from: 800, key: 'YORUBA_TRADITIONAL' },
+    { from: 1900, key: 'YORUBA_MODERN' },
+  ],
   OCEANIA: [
     { from: -800, key: 'POLYNESIAN_PRECONTACT' },
     { from: 1830, key: 'POLYNESIAN' },
@@ -342,8 +369,26 @@ export function isNameSetPlausible(key: string, year: number): boolean {
   return year >= nameSetEarliestYear(key) && year <= nameSetLatestYear(key);
 }
 
+/**
+ * Latin America inside the North American zones.
+ *
+ * `NORTH_AMERICAN_COLONIAL` covers the continent from Hudson Bay to Panama, and
+ * its successor is `NORTH_AMERICAN_MODERN` — a set of United States census
+ * names. So every lapsed tradition south of the Rio Grande fell forward into
+ * it, and a Maya farmer in 1950 Yucatán was called Floyd Martinez or Roy Green.
+ * The zone is too coarse to answer this; the place has to.
+ */
+const LATIN_AMERICAN_PLACES =
+  /\b(mexic|yucat|oaxaca|chiapas|maya|guatemal|honduras|nicaragua|costa rica|panama|salvador|central america|new spain|sonora|sinaloa|zacatecas|michoacan|puebla|veracruz|tabasco|campeche|mosquito)\b/;
+
 /** The set to use when a tradition has lapsed rather than not yet begun. */
-function successorNameKeyFor(culturalZone: string, year: number): string | undefined {
+function successorNameKeyFor(culturalZone: string, year: number, region = ''): string | undefined {
+  if (culturalZone.startsWith('NORTH_AMERICAN')) {
+    const place = region.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    if (LATIN_AMERICAN_PLACES.test(place)) {
+      return year >= 1821 ? 'SPANISH_LATIN_AMERICAN' : 'SPANISH_CASTILIAN';
+    }
+  }
   const rules = SUCCESSOR_BY_ZONE[culturalZone];
   if (!rules) return undefined;
   // The latest rule whose start year this persona is past.
@@ -417,7 +462,7 @@ export function resolveNameKey(
   // forms, but one that has lapsed must fall *forward*, or 1925 Los Angeles is
   // repopulated with Palaeolithic foragers instead of Puritans.
   if (key && year > nameSetLatestYear(key)) {
-    const successor = successorNameKeyFor(culturalZone, year);
+    const successor = successorNameKeyFor(culturalZone, year, region);
     if (successor && successor !== key && isNameSetPlausible(successor, year)) return successor;
   }
   return prehistoricNameKeyFor(culturalZone, year, region);
@@ -439,21 +484,32 @@ export interface NameRuleWarning {
    * the way to the era floor — the class that produced an Achaemenid name in
    * the Palaeolithic. `overlap` is a bounded rule that merely starts somewhat
    * before its tradition is attested, which is usually a rounding difference
-   * rather than a mistake.
+   * rather than a mistake. `lapsed` is the mirror image and the one that hides:
+   * the rule names a tradition that had already ended before the rule's window
+   * opens, so `filterNameKeys` drops it on every draw and the share it was
+   * meant to have goes silently to whoever else is in the list.
    */
-  kind: 'unbounded' | 'overlap';
+  kind: 'unbounded' | 'overlap' | 'lapsed';
 }
 
 /** Bounded rules within this many years of their tradition are not reported. */
 const OVERLAP_TOLERANCE_YEARS = 250;
 
 /**
- * Report region rules that can hand out a naming tradition before it existed.
+ * Report region rules whose dates and whose name sets disagree.
  *
- * Run from the audit harness. `resolveNameKey` already prevents these from
- * reaching a persona, so this is a "your data says something it does not mean"
- * warning rather than a bug report — but an unbounded rule is a latent trap for
- * whoever edits the table next.
+ * Two directions, and the second was missing for a long time. A rule can name a
+ * tradition *before* it existed, which `resolveNameKey` catches at generation
+ * time — that is the `unbounded`/`overlap` half, and it is a "your table says
+ * something it does not mean" warning rather than a live bug.
+ *
+ * A rule can also name one that had already *lapsed*, and that half is worse,
+ * because nothing downstream complains: `filterNameKeys` quietly drops the key
+ * and the share it was written to have is redistributed to whatever else is in
+ * the list. The Nile Valley rule for 1517–1882 named `EGYPTIAN_COPTIC` beside
+ * Arabic and Turkish, the Coptic set had a ceiling of 1400, and the effect was
+ * that Egypt's Copts were absent from four centuries of Egypt while the table
+ * appeared to include them. Nobody could see that by reading either file.
  */
 export function auditNameRules(
   mapping: Record<string, Record<string, Array<{ before?: number; after?: number; keys: string[] }>>>,
@@ -465,19 +521,32 @@ export function auditNameRules(
       for (const rule of rules) {
         const unbounded = rule.after === undefined;
         const from = rule.after ?? eraFloor;
+        const label = `${rule.after ?? '−∞'}..${rule.before ?? '+∞'}`;
         const tolerance = unbounded ? 0 : OVERLAP_TOLERANCE_YEARS;
+
         const implausible = rule.keys.filter(
           key => nameSetEarliestYear(key) > from + tolerance
         );
-        if (implausible.length === 0) continue;
-        warnings.push({
-          zone,
-          region,
-          rule: `${rule.after ?? '−∞'}..${rule.before ?? '+∞'}`,
-          implausibleKeys: implausible,
-          from,
-          kind: unbounded ? 'unbounded' : 'overlap',
-        });
+        if (implausible.length > 0) {
+          warnings.push({
+            zone, region, rule: label, from,
+            implausibleKeys: implausible,
+            kind: unbounded ? 'unbounded' : 'overlap',
+          });
+        }
+
+        // A set whose ceiling falls *inside* the window is not reported: that
+        // is exactly what the era gate is for, and every rule spanning a
+        // transition would otherwise be flagged. Only a set that is already
+        // over before the window opens — dead on every draw the rule makes.
+        const lapsed = rule.keys.filter(key => nameSetLatestYear(key) < from);
+        if (lapsed.length > 0) {
+          warnings.push({
+            zone, region, rule: label, from,
+            implausibleKeys: lapsed,
+            kind: 'lapsed',
+          });
+        }
       }
     }
   }

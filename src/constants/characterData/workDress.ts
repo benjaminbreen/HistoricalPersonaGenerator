@@ -3594,6 +3594,36 @@ export const ALL_WORK_DRESS: WorkDressData = mergeWorkDress(
     WORK_DRESS_OFFICE,
 );
 
+/**
+ * Garments that carry a gender in the garment itself.
+ *
+ * Most work dress does not. A boiler suit is a boiler suit, a miner's overalls
+ * are a miner's overalls, and a woman who went down a pit or onto a trawler
+ * wore what the work required — so borrowing across the table is usually the
+ * right answer when only one gender's set was written.
+ *
+ * These are the exceptions, and the reason this test exists: 17 of the table's
+ * categories hold a `Female` entry and no `Male` one, all of them domestic
+ * service, and every one of them dressed a manservant in a housedress and
+ * apron. A kitchen porter in 2000 New Mexico was pictured in one.
+ */
+const GENDERED_WORK_GARMENT =
+  /housedress|\bdress\b|gown|skirt|blouse|petticoat|apron dress|pinafore|sari\b|saree|abaya|habit\b|cassock|kimono|hanbok/i;
+
+/**
+ * The other gender's set, but only when nothing in it is gendered by cut.
+ * Otherwise nothing, and the wealth table dresses them instead — which is a
+ * duller answer and a true one.
+ */
+function crossGenderWorkDress(
+  byGender: Partial<Record<Gender, { garments: ClothingPiece[]; headgear: ClothingPiece[]; footwear: ClothingPiece[] }>>,
+) {
+  const candidate = byGender.Male ?? byGender.Female;
+  if (!candidate) return undefined;
+  if (candidate.garments.some(item => GENDERED_WORK_GARMENT.test(item.name))) return undefined;
+  return candidate;
+}
+
 /** The work set for a persona, or undefined to leave the wealth table alone. */
 export function workDressFor(
     culturalZone: CulturalZone,
@@ -3605,9 +3635,7 @@ export function workDressFor(
     if (!category) return undefined;
     const byGender = ALL_WORK_DRESS[culturalZone]?.[era]?.[category];
     if (!byGender) return undefined;
-    // Non-binary personas have no separate work wardrobe; fall to whichever
-    // the table holds rather than dropping the whole layer.
-    const set = byGender[gender] ?? byGender.Male ?? byGender.Female;
+    const set = byGender[gender] ?? crossGenderWorkDress(byGender);
     if (!set || set.garments.length === 0) return undefined;
     return set;
 }

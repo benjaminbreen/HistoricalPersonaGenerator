@@ -369,13 +369,27 @@ export function generateNpcNameDetailed(
             // 1980 Colombia were still being named like pre-Columbian Muisca.
             const colonialMapping: Record<string, { key: string; from: number }> = {
                 NORTH_AMERICAN_PRE_COLUMBIAN: { key: 'NORTH_AMERICAN', from: 1600 },
+                // `NORTH_AMERICAN_COLONIAL` was missing from this table, and it
+                // is the zone most of the continent's post-contact personas are
+                // actually in — so the whole 'NORTH_AMERICAN' block, every
+                // authored rule for Mexico, the Caribbean and Central America
+                // included, was unreachable for them. They fell through to the
+                // broad-zone key instead, which lapses in 1840 and hands over
+                // to a US census set: hence Floyd Martinez in 1950 Mérida.
+                NORTH_AMERICAN_COLONIAL: { key: 'NORTH_AMERICAN', from: 1500 },
                 SOUTH_AMERICAN: { key: 'SOUTH_AMERICAN_COLONIAL', from: 1533 },
             };
             const colonial = colonialMapping[culturalZone as string];
 
             if (colonial && year > colonial.from) {
                 devLog(`[NameGen] Checking ${colonial.key} for post-${colonial.from}`);
-                const colonialRules = REGION_NAME_MAPPING[colonial.key as keyof typeof REGION_NAME_MAPPING]?.[region];
+                // Locale before region, the same precedence the zone lookup
+                // below uses. Yucatán, Oaxaca and the Valley of Mexico are
+                // *locales* inside "Mexico and Central Highlands", so without
+                // this their rules were unreachable even once the zone was.
+                const colonialZoneRules = REGION_NAME_MAPPING[colonial.key as keyof typeof REGION_NAME_MAPPING];
+                const colonialRules = (options.location ? colonialZoneRules?.[options.location] : undefined)
+                    ?? colonialZoneRules?.[region];
                 if (colonialRules) {
                     devLog(`[NameGen] Found colonial rules for region "${region}":`, colonialRules);
                     for (const rule of colonialRules) {
@@ -545,8 +559,15 @@ export function generateNpcNameDetailed(
             }
         }
 
-        // For modern-era (1900+) indigenous peoples, use English first names with traditional surnames
-        const isIndigenousNamePool = nameKeyToUse && (
+        // For modern-era (1900+) indigenous peoples, use English first names with traditional surnames.
+        //
+        // Not applied to a `_MODERN` set: those exist precisely because the
+        // precontact register needed a modern counterpart, and they already
+        // carry the given names their people actually use. Overriding those
+        // with a US census list is how a Pueblo persona in 2000 came out as
+        // Richard Antelope-Clan — English given name, invented clan surname,
+        // and nothing in between that anyone is called.
+        const isIndigenousNamePool = nameKeyToUse && !nameKeyToUse.endsWith('_MODERN') && (
             nameKeyToUse.includes('ALGONQUIAN') ||
             nameKeyToUse.includes('CREEK') ||
             nameKeyToUse.includes('CHEROKEE') ||
@@ -611,7 +632,13 @@ export function generateNpcNameDetailed(
             surnames: surnames || [],
             malePool: maleNames,
             femalePool: femaleNames,
-            occupation: professionNameKey,
+            // Deliberately not `professionNameKey`. That parameter is a *name
+            // set* key — 'TURKISH', 'CHINESE', 'JAPANESE' — and the
+            // occupational convention renders it as "X the Y", so every caller
+            // that supplied one was producing personas called "Ahmet the
+            // TURKISH". Without an occupation the convention falls back to the
+            // set's own surnames, most of which are occupational anyway.
+            occupation: undefined,
             nameKey: nameKeyToUse,
             standingId: options.standingId,
             random: noise.random,
@@ -1045,7 +1072,7 @@ export function generateCompleteOutfit(
     belt: ClothingPiece;
     accessory: ClothingPiece;
 } {
-    const baseClothingSet = clothingModule.getClothingData(culturalZone, era, wealthLevel, gender);
+    const baseClothingSet = clothingModule.getClothingData(culturalZone, era, wealthLevel, gender, year);
 
     // What this persona wears TO WORK, where their trade has its own dress.
     //

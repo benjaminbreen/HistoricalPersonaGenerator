@@ -2059,8 +2059,150 @@ export const CLOTHING_DATA: ClothingData = {
                     palette: INDUSTRIAL_MENA_COLORS
                 }
             }
+        },
+        /**
+         * The zone had no modern era at all, and the industrial one it would
+         * have fallen back to has only a `common` tier — so every twentieth-
+         * century persona in Cairo, Algiers or Beirut fell through two whole
+         * strategies of `getClothingData` and was dressed out of the *South
+         * Asian* tables. A dock worker in 1950 Alexandria came out in a lungi.
+         *
+         * Two wardrobes coexist here through the whole century rather than one
+         * replacing the other: the galabeya and thobe are ordinary daily dress
+         * in Egypt and the Gulf now, and so are a shirt and a pair of trousers.
+         * Both are in every pool, and `dressBothHalves` pairs the shirt with
+         * the trousers standing beside it and leaves the galabeya alone.
+         */
+        [HistoricalEra.MODERN_ERA]: {
+            poor: {
+                Male: {
+                    garments: [
+                        { name: 'Galabeya', material: 'Cotton', adjectives: ['Faded'] },
+                        { name: 'Work Shirt', material: 'Cotton' },
+                        { name: 'Work Trousers', material: 'Cotton Drill' }
+                    ],
+                    headgear: [
+                        { name: 'Taqiyah', material: 'White Cotton' },
+                        { name: 'Keffiyeh', material: 'Cotton' },
+                        { name: 'None', material: 'None' }
+                    ],
+                    footwear: [
+                        { name: 'Sandals', material: 'Leather', adjectives: ['Worn'] },
+                        { name: 'Plastic Sandals', material: 'Rubber' },
+                        { name: 'Barefoot', material: 'None' }
+                    ],
+                    belts: [{ name: 'Belt', material: 'Cracked Leather' }, { name: 'None', material: 'None' }],
+                    accessories: [
+                        { name: 'Prayer Beads', material: 'Plastic' },
+                        { name: 'None', material: 'None' }
+                    ],
+                    palette: MENA_COLORS
+                },
+                Female: {
+                    garments: [
+                        { name: 'Galabeya', material: 'Printed Cotton' },
+                        { name: 'Blouse', material: 'Cotton' },
+                        { name: 'Long Skirt', material: 'Cotton' }
+                    ],
+                    headgear: [
+                        { name: 'Headscarf', material: 'Cotton' },
+                        { name: 'Hijab', material: 'Cotton' }
+                    ],
+                    footwear: [
+                        { name: 'Sandals', material: 'Leather' },
+                        { name: 'Plastic Sandals', material: 'Rubber' }
+                    ],
+                    belts: [{ name: 'None', material: 'None' }],
+                    accessories: [
+                        { name: 'Bangles', material: 'Brass' },
+                        { name: 'None', material: 'None' }
+                    ],
+                    palette: MENA_COLORS
+                }
+            },
+            common: {
+                Male: {
+                    garments: [
+                        { name: 'Shirt', material: 'Cotton' },
+                        { name: 'Trousers', material: 'Cotton Twill' },
+                        { name: 'Galabeya', material: 'Fine Cotton' }
+                    ],
+                    headgear: [
+                        { name: 'Taqiyah', material: 'White Cotton' },
+                        { name: 'Flat Cap', material: 'Wool' },
+                        { name: 'None', material: 'None' }
+                    ],
+                    footwear: [{ name: 'Leather Shoes', material: 'Leather' }, { name: 'Sandals', material: 'Leather' }],
+                    belts: [{ name: 'Belt', material: 'Leather' }],
+                    accessories: [
+                        { name: 'Wristwatch', material: 'Steel' },
+                        { name: 'Prayer Beads', material: 'Olive Wood' }
+                    ],
+                    palette: MENA_COLORS
+                },
+                Female: {
+                    garments: [
+                        { name: 'Blouse', material: 'Cotton' },
+                        { name: 'Long Skirt', material: 'Wool' },
+                        { name: 'Kaftan', material: 'Printed Cotton', adjectives: ['Embroidered'] }
+                    ],
+                    headgear: [
+                        { name: 'Hijab', material: 'Cotton' },
+                        { name: 'Headscarf', material: 'Printed Cotton' },
+                        { name: 'None', material: 'None' }
+                    ],
+                    footwear: [{ name: 'Leather Shoes', material: 'Leather' }, { name: 'Sandals', material: 'Leather' }],
+                    belts: [{ name: 'Sash', material: 'Cotton' }, { name: 'None', material: 'None' }],
+                    accessories: [
+                        { name: 'Gold Bangles', material: 'Gold' },
+                        { name: 'Earrings', material: 'Gold' }
+                    ],
+                    palette: MENA_COLORS
+                }
+            },
+            wealthy: {
+                Male: {
+                    garments: [
+                        { name: 'Business Suit', material: 'Wool', adjectives: ['Tailored'] },
+                        { name: 'Dress Shirt', material: 'Poplin' },
+                        { name: 'Pressed Trousers', material: 'Wool' },
+                        { name: 'Thobe', material: 'Fine Cotton', adjectives: ['Pressed'] }
+                    ],
+                    headgear: [
+                        { name: 'Ghutra', material: 'Fine Cotton' },
+                        { name: 'Fez', material: 'Felt' },
+                        { name: 'None', material: 'None' }
+                    ],
+                    footwear: [{ name: 'Oxford Shoes', material: 'Polished Leather' }],
+                    belts: [{ name: 'Belt', material: 'Fine Leather' }],
+                    accessories: [
+                        { name: 'Wristwatch', material: 'Gold' },
+                        { name: 'Signet Ring', material: 'Gold' }
+                    ],
+                    palette: INDUSTRIAL_MENA_COLORS
+                },
+                Female: {
+                    garments: [
+                        { name: 'Kaftan', material: 'Silk', adjectives: ['Embroidered'] },
+                        { name: 'Day Dress', material: 'Silk' },
+                        { name: 'Silk Blouse', material: 'Silk' },
+                        { name: 'Pencil Skirt', material: 'Fine Wool' }
+                    ],
+                    headgear: [
+                        { name: 'Silk Headscarf', material: 'Silk' },
+                        { name: 'None', material: 'None' }
+                    ],
+                    footwear: [{ name: 'Leather Heels', material: 'Fine Leather' }],
+                    belts: [{ name: 'Sash', material: 'Silk' }, { name: 'None', material: 'None' }],
+                    accessories: [
+                        { name: 'Gold Necklace', material: 'Gold' },
+                        { name: 'Pearl Earrings', material: 'Pearl and Gold' }
+                    ],
+                    palette: INDUSTRIAL_MENA_COLORS
+                }
+            }
         }
-    
+
     },
 
    // OCEANIA CULTURAL ZONE
@@ -5625,13 +5767,140 @@ SUB_SAHARAN_AFRICAN: {
 };
 
 /**
+ * Garments that carry a gender in the cut, and so cannot be borrowed across the
+ * table when only one gender's wardrobe was written for a context.
+ *
+ * Deliberately about the garment and not about the wearer: trousers, tunics,
+ * robes, overalls and wraps are all absent, because in most of the world and
+ * most of history they were worn by everybody.
+ */
+const GENDERED_GARMENT =
+    /housedress|\bdress\b|gown|\bskirt\b|blouse|bodice|petticoat|pinafore|sari\b|saree|lehenga|salwar|kameez|choli|\bveil\b|corset|chemise/i;
+
+/**
+ * The wardrobe of the last two generations, where `MODERN_ERA` is too coarse.
+ *
+ * `MODERN_ERA` is one bucket from 1900 to now, and whoever wrote each zone's
+ * entry had a decade in mind. Mostly that decade is recent enough not to
+ * matter — Oceania's modern poor tier is a sundress and a tank top, South
+ * Asia's is a salwar kameez — but Europe's was written as the interwar
+ * working class and then used for the next ninety years. A computer programmer
+ * in Istanbul in 2016 was generated in a work dress, a kerchief and cloth
+ * shoes: not badly dressed for her wealth, dressed for 1935.
+ *
+ * So this is a third window inside the era rather than a fourth era, because
+ * `HistoricalEra` is a shared enum and splitting it would reach every system
+ * that switches on it. Only the tiers that were actually stuck are listed;
+ * anything absent keeps the era table it already had.
+ *
+ * The cut-off is 1960 — mass-produced knitwear, denim as ordinary daywear,
+ * and the end of the headscarf as everyday dress in industrial Europe.
+ */
+const CONTEMPORARY_FROM_YEAR = 1960;
+
+const CONTEMPORARY_CLOTHING: Partial<Record<CulturalZone, Partial<Record<SimplifiedWealthLevel, Partial<Record<Gender, ClothingSet>>>>>> = {
+    EUROPEAN: {
+        poor: {
+            Male: {
+                garments: [
+                    { name: 'T-shirt', material: 'Cotton', adjectives: ['Faded'] },
+                    { name: 'Jeans', material: 'Denim', adjectives: ['Worn'] },
+                    { name: 'Work Shirt', material: 'Cotton' },
+                    { name: 'Tracksuit Top', material: 'Polyester' }
+                ],
+                headgear: [
+                    { name: 'Flat Cap', material: 'Wool' },
+                    { name: 'Baseball Cap', material: 'Cotton', adjectives: ['Worn'] },
+                    { name: 'None', material: 'None' }
+                ],
+                footwear: [
+                    { name: 'Trainers', material: 'Canvas and Rubber', adjectives: ['Scuffed'] },
+                    { name: 'Work Boots', material: 'Leather' }
+                ],
+                belts: [{ name: 'Belt', material: 'Cracked Leather' }, { name: 'None', material: 'None' }],
+                accessories: [
+                    { name: 'Wristwatch', material: 'Steel', adjectives: ['Cheap'] },
+                    { name: 'None', material: 'None' }
+                ],
+                palette: MODERN_COLORS
+            },
+            Female: {
+                garments: [
+                    { name: 'Blouse', material: 'Polyester' },
+                    { name: 'Jeans', material: 'Denim' },
+                    { name: 'Cardigan', material: 'Acrylic Knit' },
+                    { name: 'Print Dress', material: 'Cotton', adjectives: ['Faded'] }
+                ],
+                headgear: [
+                    { name: 'Headscarf', material: 'Nylon' },
+                    { name: 'None', material: 'None' },
+                    { name: 'None', material: 'None' }
+                ],
+                footwear: [
+                    { name: 'Trainers', material: 'Canvas and Rubber' },
+                    { name: 'Flat Shoes', material: 'Synthetic Leather' }
+                ],
+                belts: [{ name: 'None', material: 'None' }],
+                accessories: [
+                    { name: 'Wristwatch', material: 'Steel', adjectives: ['Cheap'] },
+                    { name: 'Stud Earrings', material: 'Gold Plate' }
+                ],
+                palette: MODERN_COLORS
+            }
+        }
+    },
+    EAST_ASIAN: {
+        poor: {
+            Male: {
+                garments: [
+                    { name: 'T-shirt', material: 'Cotton' },
+                    { name: 'Work Trousers', material: 'Cotton Drill' },
+                    { name: 'Zip Jacket', material: 'Nylon' }
+                ],
+                headgear: [
+                    { name: 'Baseball Cap', material: 'Cotton' },
+                    { name: 'None', material: 'None' }
+                ],
+                footwear: [
+                    { name: 'Trainers', material: 'Canvas and Rubber' },
+                    { name: 'Cloth Shoes', material: 'Cotton' }
+                ],
+                belts: [{ name: 'Belt', material: 'Synthetic Leather' }],
+                accessories: [{ name: 'Wristwatch', material: 'Steel' }, { name: 'None', material: 'None' }],
+                palette: MODERN_COLORS
+            },
+            Female: {
+                garments: [
+                    { name: 'Blouse', material: 'Polyester' },
+                    { name: 'Work Trousers', material: 'Cotton Drill' },
+                    { name: 'Knit Cardigan', material: 'Acrylic Knit' }
+                ],
+                headgear: [
+                    { name: 'Sun Visor', material: 'Plastic' },
+                    { name: 'None', material: 'None' }
+                ],
+                footwear: [
+                    { name: 'Trainers', material: 'Canvas and Rubber' },
+                    { name: 'Cloth Shoes', material: 'Cotton' }
+                ],
+                belts: [{ name: 'None', material: 'None' }],
+                accessories: [{ name: 'Wristwatch', material: 'Steel' }, { name: 'None', material: 'None' }],
+                palette: MODERN_COLORS
+            }
+        }
+    },
+};
+
+/**
  * Intelligent clothing data retrieval with comprehensive fallback system
  */
 export const getClothingData = (
     culturalZone: CulturalZone,
     era: HistoricalEra,
     wealthLevel: WealthLevel,
-    gender: Gender
+    gender: Gender,
+    /** Where known, the year — `MODERN_ERA` alone cannot tell 1910 from 2016. */
+    year?: number
 ): ClothingSet => {
     // Convert wealth level to simplified version
     const simplifiedWealth: SimplifiedWealthLevel = 
@@ -5644,6 +5913,14 @@ export const getClothingData = (
     if (culturalZone === 'NORTH_AMERICAN_COLONIAL' && 
         (era === HistoricalEra.INDUSTRIAL_ERA || era === HistoricalEra.MODERN_ERA)) {
         effectiveCulturalZone = 'EUROPEAN' as CulturalZone;
+    }
+
+    // The last two generations, where the era table is too coarse to be right.
+    // Checked before the era table rather than after it, because the era table
+    // does hold an answer for these — just a much older one.
+    if (era === HistoricalEra.MODERN_ERA && year !== undefined && year >= CONTEMPORARY_FROM_YEAR) {
+        const contemporary = CONTEMPORARY_CLOTHING[effectiveCulturalZone]?.[simplifiedWealth]?.[gender];
+        if (contemporary) return contemporary;
     }
 
     // Try direct lookup first
@@ -5683,10 +5960,22 @@ export const getClothingData = (
         }
     }
 
-    // Fallback strategy 5: Try opposite gender in same context
+    // Fallback strategy 5: Try opposite gender in same context.
+    //
+    // `adaptClothingForGender` renames Dress, Gown and Skirt when it crosses,
+    // which covers European tailoring and nothing else — so a sari, a housedress,
+    // a salwar kameez or a wrap dress crossed over untouched and a male persona
+    // was generated wearing it. Rather than extend the rename list forever,
+    // gendered garments are dropped from the borrowed set and only what is
+    // genuinely unisex is kept.
     const oppositeGender = gender === 'Male' ? 'Female' : 'Male';
     const genderFallback = CLOTHING_DATA[effectiveCulturalZone]?.[era]?.[simplifiedWealth]?.[oppositeGender];
-    if (genderFallback) return adaptClothingForGender(genderFallback, gender);
+    if (genderFallback) {
+        const wearable = genderFallback.garments.filter(item => !GENDERED_GARMENT.test(item.name));
+        if (wearable.length > 0) {
+            return adaptClothingForGender({ ...genderFallback, garments: wearable }, gender);
+        }
+    }
 
     // Fallback strategy 6: Try the most populated era for the culture
     const culturalEras = Object.keys(CLOTHING_DATA[effectiveCulturalZone] || {}) as HistoricalEra[];

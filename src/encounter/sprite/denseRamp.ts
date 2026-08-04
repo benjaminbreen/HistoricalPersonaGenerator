@@ -137,6 +137,15 @@ function stretchTable(cloth: number): Record<number, number> {
     [MAT.CLOTH_C]: 1 + (cloth - 1) * 0.75,
     [MAT.LEATHER]: 1 + (cloth - 1) * 0.75,
     [MAT.WOOD]: 1 + (cloth - 1) * 0.55,
+    // Carried objects compete with a whole figure for attention and are much
+    // smaller than it, so they need most of cloth's widening to hold their own —
+    // but not all of it, or a hoe blade reads as a hole cut in the background.
+    [MAT.BONE]: 1 + (cloth - 1) * 0.5,
+    [MAT.STONE]: 1 + (cloth - 1) * 0.7,
+    [MAT.IRON]: 1 + (cloth - 1) * 0.8,
+    // The exception. A net's mesh is already drawn as bias, and stretching the
+    // ramp under it doubles every knot into a black speck.
+    [MAT.CORD]: 1 + (cloth - 1) * 0.3,
   };
 }
 
