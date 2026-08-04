@@ -76,6 +76,12 @@ try {
     action: 'generate_annotation',
     prompt: 'Return a JSON annotation record.',
     json: true,
+    schema: {
+      type: 'object',
+      properties: { status: { type: 'string', enum: ['valid'] } },
+      required: ['status'],
+      additionalProperties: false,
+    },
     env: { OPENAI_API_KEY: 'test-key' },
   });
 
@@ -84,7 +90,10 @@ try {
   assert.equal(requestBody.model, 'gpt-5.6-luna');
   assert.deepEqual(requestBody.reasoning, { effort: 'none' });
   assert.equal(requestBody.max_output_tokens, 4000);
-  assert.deepEqual(requestBody.text, { format: { type: 'json_object' } });
+  assert.equal(requestBody.text.format.type, 'json_schema');
+  assert.equal(requestBody.text.format.name, 'historical_persona_annotation');
+  assert.equal(requestBody.text.format.strict, false);
+  assert.deepEqual(requestBody.text.format.schema.properties.status.enum, ['valid']);
 
   console.log('LLM transport tests passed.');
 } finally {

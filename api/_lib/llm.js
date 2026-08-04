@@ -76,7 +76,7 @@ const DEFAULT_BUDGET = { maxOutput: 1000, temperature: 0.35 };
  * It rides along in the usage log so "did that edit help?" is answerable
  * against real traffic later, rather than from memory.
  */
-export const PROMPT_VERSION = '3';
+export const PROMPT_VERSION = '4';
 
 /**
  * A client-supplied name, reduced to one this file knows and one this
@@ -120,17 +120,20 @@ function modelIdFor(variant, env) {
   return env[spec.envKey] || spec.fallback;
 }
 
-async function callGemini({ model, prompt, json, temperature, maxOutput, env }) {
+async function callGemini({ model, prompt, json, schema, temperature, maxOutput, env }) {
   // VITE_* variables are compiled into the browser bundle; never read secrets from them.
   const key = env.GEMINI_API_KEY || env.GOOGLE_AI_API_KEY;
   if (!key) throw new Error('Missing Gemini API key. Set GEMINI_API_KEY in the environment.');
 
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+  const effectivePrompt = schema
+    ? `${prompt}\n\nJSON Schema:\n${JSON.stringify(schema)}`
+    : prompt;
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      contents: [{ role: 'user', parts: [{ text: effectivePrompt }] }],
       generationConfig: {
         temperature,
         maxOutputTokens: maxOutput,
@@ -174,7 +177,7 @@ export function extractOpenAIResponseText(data) {
     .join('\n');
 }
 
-async function callOpenAI({ model, prompt, json, maxOutput, effort, env }) {
+async function callOpenAI({ model, prompt, json, schema, maxOutput, effort, env }) {
   const key = env.OPENAI_API_KEY;
   if (!key) throw new Error('Missing OPENAI_API_KEY.');
 
@@ -191,7 +194,21 @@ async function callOpenAI({ model, prompt, json, maxOutput, effort, env }) {
     input: prompt,
     max_output_tokens: maxOutput,
     reasoning: { effort },
-    ...(json ? { text: { format: { type: 'json_object' } } } : {}),
+    ...(json ? {
+      text: {
+        format: schema
+          ? {
+            type: 'json_schema',
+            name: 'historical_persona_annotation',
+            schema,
+            // The app schema deliberately has optional fields. Strict mode
+            // requires every property to be required, so the client still
+            // normalizes and validates after this best-effort constraint.
+            strict: false,
+          }
+          : { type: 'json_object' },
+      },
+    } : {}),
   };
 
   let response = await send(base);
@@ -241,7 +258,7 @@ async function callOpenAI({ model, prompt, json, maxOutput, effort, env }) {
  * what makes a model comparison a measurement instead of an impression. Both
  * providers report token counts and both were throwing them away.
  */
-export async function callModel({ variant, action, prompt, json = false, env = process.env }) {
+export async function callModel({ variant, action, prompt, json = false, schema, env = process.env }) {
   const chosen = resolveVariant(variant, env);
   const spec = MODEL_VARIANTS[chosen];
   const budget = TASK_BUDGETS[action] || DEFAULT_BUDGET;
@@ -252,6 +269,7 @@ export async function callModel({ variant, action, prompt, json = false, env = p
     model,
     prompt,
     json,
+    schema,
     temperature: budget.temperature,
     maxOutput: budget.maxOutput,
     effort: spec.reasoningEffort,
@@ -266,6 +284,7 @@ export async function callModel({ variant, action, prompt, json = false, env = p
     action,
     promptVersion: PROMPT_VERSION,
     promptChars: prompt.length,
+    schemaChars: schema ? JSON.stringify(schema).length : 0,
     ms: Date.now() - startedAt,
     truncated: result.truncated || false,
   };

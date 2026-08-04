@@ -393,8 +393,9 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
             const { text, usage } = await callModel({
               variant: body.model,
               action: 'generate_annotation',
-              prompt: buildAnnotationPrompt(body.source, body.options, annotationSchema),
+              prompt: buildAnnotationPrompt(body.source, body.options),
               json: true,
+              schema: annotationSchema,
               env,
             })
             res.setHeader('Content-Type', 'application/json')

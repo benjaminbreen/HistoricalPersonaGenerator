@@ -176,6 +176,78 @@ const normalizeResidenceLocale = (value: unknown): unknown =>
 const normalizeActivityLocale = (value: unknown): unknown =>
   normalizeEnumValue(value, ACTIVITY_LOCALE_VALUES, ACTIVITY_LOCALE_SYNONYMS, 'mixed_or_itinerant');
 
+type SchemaNode = {
+  $ref?: string;
+  type?: string;
+  enum?: unknown[];
+  properties?: Record<string, SchemaNode>;
+  items?: SchemaNode;
+  additionalProperties?: boolean;
+  $defs?: Record<string, SchemaNode>;
+};
+
+const enumFallbackOrder = [
+  'other',
+  'uncertain',
+  'mixed',
+  'unknown',
+  'unclear',
+  'mixed_or_unclear',
+  'variable',
+  'none_apparent',
+];
+
+const compactEnum = (value: string): string =>
+  value.trim().toLowerCase().replace(/[\s-]+/g, '_');
+
+const normalizeSchemaEnum = (value: unknown, choices: unknown[]): unknown => {
+  if (choices.includes(value) || typeof value !== 'string') return value;
+  const stringChoices = choices.filter((choice): choice is string => typeof choice === 'string');
+  const compact = compactEnum(value);
+  const exact = stringChoices.find(choice => compactEnum(choice) === compact);
+  if (exact) return exact;
+
+  const contained = stringChoices
+    .filter(choice => compact.includes(compactEnum(choice)) || compactEnum(choice).includes(compact))
+    .sort((left, right) => right.length - left.length)[0];
+  if (contained) return contained;
+
+  return enumFallbackOrder.find(fallback => stringChoices.includes(fallback)) ?? value;
+};
+
+const resolveSchemaNode = (node: SchemaNode, root: SchemaNode): SchemaNode => {
+  if (!node.$ref?.startsWith('#/$defs/')) return node;
+  return root.$defs?.[node.$ref.slice('#/$defs/'.length)] || node;
+};
+
+/**
+ * Repair the small schema-language mistakes JSON-mode models commonly make:
+ * invented enum synonyms and extra explanatory properties. Required fields
+ * are never fabricated here; validation still rejects a genuinely incomplete
+ * record and lets the UI use its explicit local fallback.
+ */
+const normalizeAgainstSchema = (value: unknown, rawNode: SchemaNode, root: SchemaNode): unknown => {
+  const node = resolveSchemaNode(rawNode, root);
+  if (node.enum) return normalizeSchemaEnum(value, node.enum);
+  if (node.type === 'array' && Array.isArray(value) && node.items) {
+    return value.map(item => normalizeAgainstSchema(item, node.items as SchemaNode, root));
+  }
+  if (node.type === 'object' && value && typeof value === 'object' && !Array.isArray(value)) {
+    const source = value as Record<string, unknown>;
+    const properties = node.properties || {};
+    const normalized: Record<string, unknown> = {};
+    for (const [key, item] of Object.entries(source)) {
+      if (properties[key]) {
+        normalized[key] = normalizeAgainstSchema(item, properties[key], root);
+      } else if (node.additionalProperties !== false) {
+        normalized[key] = item;
+      }
+    }
+    return normalized;
+  }
+  return value;
+};
+
 export function normalizePersonaAnnotationRecord(record: unknown): unknown {
   if (!record || typeof record !== 'object') return record;
   const clone = structuredClone(record) as any;
@@ -190,7 +262,8 @@ export function normalizePersonaAnnotationRecord(record: unknown): unknown {
   if (place?.activity_locale !== undefined) {
     place.activity_locale = normalizeActivityLocale(place.activity_locale);
   }
-  return clone;
+  const schema = annotationSchema as unknown as SchemaNode;
+  return normalizeAgainstSchema(clone, schema, schema);
 }
 
 const formatPath = (error: ErrorObject): string => {

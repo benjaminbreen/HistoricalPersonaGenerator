@@ -43,8 +43,9 @@ export default async function handler(req, res) {
       const { text, usage } = await callModel({
         variant: body.model,
         action: 'generate_annotation',
-        prompt: buildAnnotationPrompt(body.source, body.options, annotationSchema),
+        prompt: buildAnnotationPrompt(body.source, body.options),
         json: true,
+        schema: annotationSchema,
       });
       res.status(200).json({ record: parseJsonObject(text), usage });
       return;

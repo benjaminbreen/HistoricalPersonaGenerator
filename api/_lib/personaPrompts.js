@@ -7,7 +7,7 @@
 // same task, so that every knob governing what a call costs and how it reads is
 // on one screen rather than split across two files.
 
-export const buildAnnotationPrompt = (source, options, annotationSchema) => {
+export const buildAnnotationPrompt = (source, options) => {
   const targetInstruction = options?.target === 'named_subject'
     ? 'Generate the persona record for the named subject of the source if the source clearly has one. For a Wikipedia biography, this means the article subject. Use a historically situated moment during that person\'s life, not a posthumous summary.'
     : 'Generate a plausible ordinary person from the source world, not the famous subject unless the source itself is ordinary-person evidence.';
@@ -18,8 +18,7 @@ export const buildAnnotationPrompt = (source, options, annotationSchema) => {
     targetInstruction,
     options?.preferredMoment ? `Preferred moment or angle: ${options.preferredMoment}` : '',
     'Use schema_version "1.1.0".',
-    'The output must conform to this JSON Schema. Do not include properties outside the schema:',
-    JSON.stringify(annotationSchema),
+    'The output must conform to the supplied JSON Schema. Do not include properties outside it, and use enum values exactly as written.',
     '',
     'Evidence rules:',
     '- Fill every required field.',
