@@ -33,12 +33,14 @@ export const MODEL_VARIANTS = {
     envKey: 'LUNA_MODEL',
     fallback: 'gpt-5.6-luna',
     label: 'Luna',
+    reasoningEffort: 'none',
   },
   nano: {
     provider: 'openai',
     envKey: 'NANO_MODEL',
     fallback: 'gpt-5-nano',
     label: 'Nano',
+    reasoningEffort: 'minimal',
   },
   gemini: {
     provider: 'gemini',
@@ -58,16 +60,16 @@ export const MODEL_VARIANTS = {
  * JSON, so `callModel` reports the truncation rather than letting the parser
  * fail on it and surface as a 500.
  *
- * `effort` is set explicitly on every call. Left unset, a reasoning-capable
- * model uses its own default, and those tokens are billed as output while
- * never appearing in the response body — paid for and never seen.
+ * Reasoning effort is set per model variant above. Left unset, a
+ * reasoning-capable model uses its own default, and those tokens are billed as
+ * output while never appearing in the response body — paid for and never seen.
  */
 export const TASK_BUDGETS = {
-  generate_sketch: { maxOutput: 420, effort: 'minimal', temperature: 0.55 },
-  generate_annotation: { maxOutput: 4000, effort: 'minimal', temperature: 0.35 },
+  generate_sketch: { maxOutput: 420, temperature: 0.55 },
+  generate_annotation: { maxOutput: 4000, temperature: 0.35 },
 };
 
-const DEFAULT_BUDGET = { maxOutput: 1000, effort: 'minimal', temperature: 0.35 };
+const DEFAULT_BUDGET = { maxOutput: 1000, temperature: 0.35 };
 
 /**
  * Bumped by hand when a prompt in `personaPrompts.js` changes materially.
@@ -157,6 +159,22 @@ async function callGemini({ model, prompt, json, temperature, maxOutput, env }) 
   };
 }
 
+/**
+ * Extract text from either an SDK-shaped response or the raw Responses REST
+ * payload returned by `fetch`. The SDK adds `output_text` as a convenience;
+ * raw HTTP responses keep text in message content items.
+ */
+export function extractOpenAIResponseText(data) {
+  if (typeof data?.output_text === 'string') return data.output_text;
+  if (!Array.isArray(data?.output)) return '';
+
+  return data.output
+    .flatMap(item => Array.isArray(item?.content) ? item.content : [])
+    .filter(part => part?.type === 'output_text' && typeof part.text === 'string')
+    .map(part => part.text)
+    .join('\n');
+}
+
 async function callOpenAI({ model, prompt, json, maxOutput, effort, env }) {
   const key = env.OPENAI_API_KEY;
   if (!key) throw new Error('Missing OPENAI_API_KEY.');
@@ -204,7 +222,7 @@ async function callOpenAI({ model, prompt, json, maxOutput, effort, env }) {
   const data = await response.json();
   const usage = data?.usage || {};
   return {
-    text: data?.output_text || '',
+    text: extractOpenAIResponseText(data),
     // `incomplete` with a max-tokens reason is the only case worth reporting
     // separately: the text came back, it just stops mid-sentence, and for the
     // annotation route that means the JSON will not parse.
@@ -237,7 +255,7 @@ export async function callModel({ variant, action, prompt, json = false, env = p
     json,
     temperature: budget.temperature,
     maxOutput: budget.maxOutput,
-    effort: budget.effort,
+    effort: spec.reasoningEffort,
     env,
   };
   const result = spec.provider === 'gemini' ? await callGemini(args) : await callOpenAI(args);

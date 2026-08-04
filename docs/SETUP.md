@@ -87,10 +87,10 @@ actually spends on this workload. `promptVersion` is bumped by hand in
 `api/_lib/llm.js` when a prompt changes materially, so a later "did that edit
 help?" can be answered against real traffic.
 
-Output ceilings and reasoning effort live in the same file, in `TASK_BUDGETS`.
-Effort is always sent explicitly: left unset, a reasoning model spends its own
-default number of reasoning tokens, and those bill as output while never
-appearing in the response.
+Output ceilings live in `TASK_BUDGETS`, while reasoning effort is set per model
+variant in `MODEL_VARIANTS`. Effort is always sent explicitly: left unset, a
+reasoning model spends its own default number of reasoning tokens, and those
+bill as output while never appearing in the response.
 
 For production-style local serving:
 
