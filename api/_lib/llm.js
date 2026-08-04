@@ -157,7 +157,7 @@ async function callGemini({ model, prompt, json, temperature, maxOutput, env }) 
   };
 }
 
-async function callOpenAI({ model, prompt, json, temperature, maxOutput, effort, env }) {
+async function callOpenAI({ model, prompt, json, maxOutput, effort, env }) {
   const key = env.OPENAI_API_KEY;
   if (!key) throw new Error('Missing OPENAI_API_KEY.');
 
@@ -167,28 +167,25 @@ async function callOpenAI({ model, prompt, json, temperature, maxOutput, effort,
     body: JSON.stringify(body),
   });
 
+  // No temperature. These models reject it outright, and register is set by the
+  // prompt anyway. `TASK_BUDGETS.temperature` applies to Gemini only.
   const base = {
     model,
     input: prompt,
     max_output_tokens: maxOutput,
+    reasoning: { effort },
     ...(json ? { text: { format: { type: 'json_object' } } } : {}),
   };
 
-  let response = await send({ ...base, temperature, reasoning: { effort } });
+  let response = await send(base);
 
-  // Reasoning models reject temperature, and which knobs a given model takes is
-  // not knowable ahead of time. Drop whatever the 400 names and retry once.
+  // Which knobs a given model takes is not knowable ahead of time.
   if (response.status === 400) {
     const complaint = await response.text().catch(() => '');
-    const dropTemperature = /temperature/i.test(complaint);
-    const dropEffort = /reasoning|effort/i.test(complaint);
-    if (dropTemperature || dropEffort) {
-      console.warn(`[llm] retrying without a rejected parameter: ${complaint.slice(0, 200)}`);
-      response = await send({
-        ...base,
-        ...(dropTemperature ? {} : { temperature }),
-        ...(dropEffort ? {} : { reasoning: { effort } }),
-      });
+    if (/reasoning|effort/i.test(complaint)) {
+      console.warn('[llm] retrying without reasoning.effort');
+      const { reasoning, ...withoutEffort } = base;
+      response = await send(withoutEffort);
     } else {
       response = { ok: false, status: 400, text: async () => complaint };
     }
