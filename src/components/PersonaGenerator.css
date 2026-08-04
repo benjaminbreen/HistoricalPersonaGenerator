@@ -1149,6 +1149,71 @@ body.dark-mode .top-bar {
   line-height: 1.45;
 }
 
+/* The intro line and the model switch share a row: the switch governs both
+   options below it, so it belongs above both rather than inside either. */
+.ai-choice-lede {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-lg);
+  margin-bottom: 0.85rem;
+}
+
+.ai-choice-lede > p {
+  margin: 0;
+}
+
+/* Same control as the Explore / True frequency pill above the persona card,
+   because it is the same kind of decision: two named modes, one of them on. */
+.ai-choice-model {
+  display: inline-flex;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.ai-choice-model button {
+  padding: 0.2rem 0.62rem;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-sans);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.ai-choice-model button:hover {
+  color: var(--color-text-primary);
+}
+
+.ai-choice-model button.is-active {
+  background: var(--color-accent-primary);
+  color: #fff;
+}
+
+/* Only after a call has run. Token counts are the whole point of the toggle —
+   without them the switch is a preference rather than a measurement. */
+.ai-choice-usage {
+  margin: -0.5rem 0 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--color-text-tertiary);
+  opacity: 0.85;
+}
+
+@media (max-width: 480px) {
+  .ai-choice-lede {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-md);
+  }
+}
+
 .ai-choice-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2023,23 +2088,6 @@ body.dark-mode .top-bar {
   }
 }
 
-/* Disclaimer box in About modal */
-.disclaimer-box {
-  background: linear-gradient(135deg, #fff8e7 0%, #fff3d4 100%);
-  border: 1px solid #e6d5a8;
-  border-left: 4px solid #d4a855;
-  border-radius: var(--radius-sm);
-  padding: var(--sp-lg);
-  margin: var(--sp-lg) 0;
-  font-size: 0.9rem;
-}
-
-body.dark-mode .disclaimer-box {
-  background: linear-gradient(135deg, rgba(212, 168, 85, 0.15) 0%, rgba(212, 168, 85, 0.1) 100%);
-  border-color: rgba(212, 168, 85, 0.3);
-  border-left-color: #d4a855;
-}
-
 /* Donate Modal */
 .donate-modal {
   max-width: 600px;
@@ -2118,62 +2166,135 @@ body.dark-mode .disclaimer-box {
   }
 }
 
-/* About Modal - Improved */
-/*
- * The about modal stacks a 220px banner and a header on top of its body, but
- * `.modal-body` sizes itself with `max-height: calc(85vh - 100px)` — as though
- * it were the only thing in the modal. The sum overflowed `.modal`, which is
- * `overflow: hidden`, so the last third of the text was clipped and could not
- * be scrolled to at all. Lay the modal out as a column and let the body take
- * the remaining space instead of guessing at it.
+/* --- About panel ---------------------------------------------------------
+ *
+ * Four bands, three of them fixed: the generated crowd, the title it stands
+ * on, the text, and a footer that stays put while the text scrolls under it.
+ * The footer is the reason this is a flex column. The two links used to sit
+ * at the end of the scroll, which meant a reader had to get through the whole
+ * panel before finding out that the project had a repository or could be
+ * supported at all.
  */
 .about-modal {
-  max-width: 900px;
+  max-width: 880px;
+  max-height: min(88vh, 920px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border-radius: 10px;
 }
 
-.about-modal .modal-banner,
-.about-modal .modal-header {
+.about-hero,
+.about-titlebar,
+.about-footer {
   flex-shrink: 0;
 }
 
-.about-modal .about-body {
-  flex: 1 1 auto;
-  min-height: 0;
-  max-height: none;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
+/* --- The crowd ---------------------------------------------------------- */
 
-.modal-banner {
+/* Dark in both themes: it is a picture, not a surface. The height is what
+   sets the figures' scale, so it steps down on small screens rather than
+   letting a rank of two-inch people fill a phone. */
+.about-hero {
   position: relative;
-  width: 100%;
   height: 220px;
-  overflow: hidden;
+  background: #221a14;
+  border-bottom: 2px solid var(--color-accent-primary);
 }
 
-.modal-banner-image {
+.about-crowd,
+.about-crowd-canvas {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
 }
 
-.modal-banner-overlay {
-  /* Header is now below banner, this element can be removed from markup */
-  display: none;
+.about-crowd-canvas {
+  image-rendering: pixelated;
 }
 
-.modal-banner-overlay h2 {
-  /* Styles moved to .modal-header below */
+/* Shown for the instant before the sprite renderer's chunk arrives, and for
+   the second after that while the crowd assembles. Same ground, so nothing
+   flashes. */
+.about-crowd-idle {
+  background: linear-gradient(180deg, #2b211a 0%, #221a14 62%, #15100b 100%);
 }
 
-.modal-banner-subtitle {
-  /* Styles moved to .modal-header below */
+.about-crowd {
+  position: relative;
 }
 
+/* Only over a figure — the gaps between people are not hoverable, and the
+   cursor is the only thing that says so before the pointer gets there. */
+.about-crowd.is-hovering {
+  cursor: help;
+}
+
+.about-crowd-tip {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.06rem;
+  /* Anchored to whichever side the pointer is nearest, so anything under half
+     the banner's width is guaranteed to fit without being measured. */
+  max-width: 46%;
+  padding: 0.34rem 0.55rem;
+  border: 1px solid rgba(245, 243, 240, 0.16);
+  border-radius: 5px;
+  background: rgba(10, 8, 5, 0.93);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+.about-crowd-tip b {
+  font-family: var(--font-serif);
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #f7f5f2;
+}
+
+.about-crowd-tip span {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: rgba(247, 245, 242, 0.6);
+}
+
+.modal-close-overlay {
+  position: absolute;
+  top: var(--sp-md);
+  right: var(--sp-md);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #f5f3f0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.modal-close-overlay:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: scale(1.08);
+}
+
+.modal-close-overlay svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Not About's any more — it uses `.about-titlebar` — but the share, secrets,
+   family-tree and cost modals all render `.modal-header`, and they have been
+   picking up these overrides rather than the base rule for long enough that
+   they are what those headers look like. Left where they are. */
 .modal-header {
   padding: var(--sp-2xl) var(--sp-3xl) var(--sp-lg);
   background: var(--color-surface);
@@ -2196,125 +2317,244 @@ body.dark-mode .disclaimer-box {
   color: var(--color-text-secondary);
 }
 
-.modal-close-overlay {
-  position: absolute;
-  top: var(--sp-md);
-  right: var(--sp-md);
-  background: rgba(0, 0, 0, 0.5);
-  border: none;
-  color: white;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+/* --- Title, on the line the figures stand on ---------------------------- */
+.about-titlebar {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-xl);
+  padding: var(--sp-xl) var(--sp-3xl) var(--sp-lg);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.modal-close-overlay:hover {
-  background: rgba(0, 0, 0, 0.7);
-  transform: scale(1.1);
+.about-titlebar h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.95rem;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.018em;
+  color: var(--color-text-primary);
 }
 
-.modal-close-overlay svg {
-  width: 20px;
-  height: 20px;
+.about-tagline {
+  margin: 0.3rem 0 0;
+  font-size: 0.83rem;
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--color-text-tertiary);
 }
 
+.about-version {
+  flex-shrink: 0;
+  margin-top: 0.4rem;
+  padding: 0.16rem 0.5rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+/* --- Body --------------------------------------------------------------- */
 .about-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--sp-2xl) var(--sp-3xl) var(--sp-3xl);
 }
 
-.about-intro {
-  margin-bottom: var(--sp-xl);
-}
-
-.about-intro p {
-  font-size: 1rem;
-  line-height: 1.7;
-  color: var(--color-text-primary);
+.about-lede {
   margin: 0;
-}
-
-.disclaimer-box {
-  background: linear-gradient(135deg, rgba(212, 168, 85, 0.12) 0%, rgba(212, 168, 85, 0.08) 100%);
-  border: 1px solid rgba(212, 168, 85, 0.25);
-  border-left: 4px solid #d4a855;
-  border-radius: var(--radius-md);
-  padding: var(--sp-lg);
-  margin-bottom: var(--sp-xl);
-}
-
-.disclaimer-box strong {
-  display: block;
-  margin-bottom: var(--sp-sm);
-  color: #b8941f;
-  font-size: 0.9rem;
-}
-
-.disclaimer-box p {
-  font-size: 0.85rem;
-  margin: 0;
-  color: var(--color-text-secondary);
-}
-
-.about-features {
-  margin-bottom: var(--sp-xl);
-}
-
-.about-features h3,
-.about-use-cases h3 {
   font-family: var(--font-serif);
-  font-size: 1.15rem;
+  font-size: 1.18rem;
+  line-height: 1.58;
   color: var(--color-text-primary);
-  margin-bottom: var(--sp-md);
-  padding-bottom: var(--sp-xs);
-  border-bottom: 2px solid var(--color-accent-primary);
 }
 
-.about-features ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.about-features li {
-  position: relative;
-  padding-left: var(--sp-xl);
-  margin-bottom: var(--sp-sm);
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-}
-
-.about-features li::before {
-  content: '✦';
-  position: absolute;
-  left: 0;
+/* The button is named, so it should look like the button. */
+.about-lede strong {
+  font-family: var(--font-sans);
+  font-size: 0.88em;
+  font-weight: 600;
   color: var(--color-accent-primary);
 }
 
-.about-features li strong {
+.about-byline {
+  margin: var(--sp-xl) 0 0;
+  padding-left: var(--sp-xl);
+  border-left: 2px solid var(--color-border);
+  font-size: 0.88rem;
+  line-height: 1.62;
+  color: var(--color-text-secondary);
+}
+
+/* --- The four numbers --------------------------------------------------- */
+.about-facts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  list-style: none;
+  margin: var(--sp-2xl) 0 0;
+  padding: var(--sp-xl) 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.about-facts li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0 var(--sp-lg);
+  border-left: 1px solid var(--color-border);
+}
+
+.about-facts li:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.about-facts b {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--color-accent-primary);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.about-facts span {
+  font-size: 0.68rem;
+  line-height: 1.32;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+/* --- Sections ----------------------------------------------------------- */
+.about-section {
+  margin-top: var(--sp-3xl);
+}
+
+.about-section h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  margin: 0 0 var(--sp-lg);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+.about-section h3::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.about-list {
+  display: grid;
+  gap: var(--sp-lg);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.about-list li {
+  position: relative;
+  padding-left: var(--sp-2xl);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+/* A rule rather than a bullet: the items are terms with glosses, and an
+   em-dash marker reads as the same punctuation the text uses. */
+.about-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 11px;
+  height: 1.5px;
+  background: var(--color-accent-primary);
+}
+
+.about-list strong {
+  font-weight: 650;
   color: var(--color-text-primary);
 }
 
-.about-use-cases {
-  margin-bottom: var(--sp-xl);
-}
-
-.about-use-cases p {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
+.about-para {
   margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
 }
 
-.about-links {
+.about-para strong {
+  font-weight: 650;
+  color: var(--color-text-primary);
+}
+
+/* Everything in here sits on top of the generator rather than inside it, and
+   the panel should say so before the reader has to infer it from the words. */
+.about-section-optional {
+  padding: var(--sp-xl);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-elevated);
+}
+
+body.dark-mode .about-section-optional {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.about-section-optional h3 {
+  margin-top: 0;
+}
+
+.about-caveat {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-md);
+  margin: var(--sp-3xl) 0 0;
+  padding: var(--sp-lg) var(--sp-xl);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.58;
+  color: var(--color-text-tertiary);
+}
+
+.about-caveat svg {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  margin-top: 0.16rem;
+  color: var(--color-accent-tertiary);
+}
+
+/* --- Pinned footer ------------------------------------------------------ */
+.about-footer {
   display: flex;
   gap: var(--sp-md);
-  padding-top: var(--sp-md);
+  padding: var(--sp-lg) var(--sp-3xl);
+  background: var(--color-surface-elevated);
   border-top: 1px solid var(--color-border);
+  /* The scroll has to look like it goes under the footer, or the pinning
+     reads as the panel having simply ended there. */
+  box-shadow: 0 -10px 22px -16px rgba(0, 0, 0, 0.55);
+  padding-bottom: calc(var(--sp-lg) + env(safe-area-inset-bottom, 0px));
 }
 
 .about-link-btn {
@@ -2324,13 +2564,14 @@ body.dark-mode .disclaimer-box {
   justify-content: center;
   gap: var(--sp-sm);
   padding: var(--sp-md) var(--sp-lg);
-  font-size: 0.9rem;
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
   font-weight: 600;
-  border-radius: var(--radius-md);
+  border-radius: 6px;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
   cursor: pointer;
-  border: 2px solid var(--color-border);
+  border: 1.5px solid var(--color-border-strong);
   background: var(--color-surface);
   color: var(--color-text-primary);
 }
@@ -2344,18 +2585,18 @@ body.dark-mode .disclaimer-box {
 .about-link-btn.primary {
   background: var(--color-accent-primary);
   border-color: var(--color-accent-primary);
-  color: white;
+  color: #fff;
 }
 
 .about-link-btn.primary:hover {
   background: var(--color-accent-secondary);
   border-color: var(--color-accent-secondary);
-  color: white;
+  color: #fff;
 }
 
 .about-link-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
 }
 
 /* Improved Donate Modal */
@@ -2411,8 +2652,8 @@ body.dark-mode .disclaimer-box {
     max-height: 90vh;
   }
 
-  .modal-banner {
-    height: 180px;
+  .about-hero {
+    height: 176px;
   }
 
   .modal-header {
@@ -2427,17 +2668,33 @@ body.dark-mode .disclaimer-box {
     font-size: 0.9rem;
   }
 
+  .about-titlebar {
+    padding: var(--sp-xl) var(--sp-xl) var(--sp-lg);
+  }
+
+  .about-titlebar h2 {
+    font-size: 1.6rem;
+  }
+
   .about-body,
   .donate-body {
-    padding: var(--sp-xl) var(--sp-lg);
+    padding: var(--sp-xl) var(--sp-xl) var(--sp-2xl);
   }
 
-  .about-links {
-    flex-direction: column;
+  .about-footer {
+    padding-left: var(--sp-xl);
+    padding-right: var(--sp-xl);
   }
 
-  .about-link-btn {
-    width: 100%;
+  /* Four numbers in a row are unreadable at this width, two by two are not. */
+  .about-facts {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-lg) 0;
+  }
+
+  .about-facts li:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
   }
 
   .donate-banner {
@@ -2477,8 +2734,8 @@ body.dark-mode .disclaimer-box {
     border: none;
   }
 
-  .modal-banner {
-    height: 140px;
+  .about-hero {
+    height: 148px;
   }
 
   .modal-header {
@@ -2493,14 +2750,33 @@ body.dark-mode .disclaimer-box {
     font-size: 0.85rem;
   }
 
-  .about-body,
-  .donate-body {
-    padding: var(--sp-lg) var(--sp-md);
+  .about-titlebar {
+    padding: var(--sp-lg) var(--sp-lg) var(--sp-md);
   }
 
-  .about-features li {
+  .about-titlebar h2 {
+    font-size: 1.4rem;
+  }
+
+  .about-body,
+  .donate-body {
+    padding: var(--sp-lg) var(--sp-lg) var(--sp-2xl);
+  }
+
+  .about-lede {
+    font-size: 1.02rem;
+    line-height: 1.5;
+  }
+
+  .about-footer {
+    flex-direction: column;
     padding-left: var(--sp-lg);
-    font-size: 0.85rem;
+    padding-right: var(--sp-lg);
+  }
+
+  .about-list li {
+    padding-left: var(--sp-xl);
+    font-size: 0.87rem;
   }
 
   .donate-banner {
@@ -8154,57 +8430,83 @@ body.dark-mode .sampling-mode {
   --plate-edge: color-mix(in srgb, var(--seal) 45%, #b59a6a);
 }
 
-/* The tilt lives on the wax, not on the seal, so the plate hanging off it stays
-   level — a label that leans seven degrees is a label, not a stamp. */
+/* The disc.
+
+   A circle, deliberately. An earlier pass clipped it to an irregular blob on
+   the theory that real wax has no compass edge, and it was right about wax and
+   wrong about the screen: at 40 pixels an intentionally wobbly outline is
+   indistinguishable from a rendering fault, and the first thing anyone thinks
+   on seeing one is that something is broken.
+
+   So the polish goes into the surface instead, and each layer is one physical
+   claim: a sheen across the upper third, the way light lies on curved glass; a
+   thin bright meniscus around the inside of the rim, tinted gold or pewter by
+   the tier; a body that falls away down and right, under the same key light the
+   portrait itself uses; a hairline ring; and a soft shadow underneath, which is
+   the one thing a flat decal never has. */
 .trait-seal-wax {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: rotate(var(--seal-tilt, -7deg));
-  transition: transform 180ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
-  /* Four things together make it read as poured wax rather than a coloured
-     circle: an off-round radius so no edge is a perfect arc; a radial highlight
-     up and left, which is where every other light in this app comes from; an
-     inset rim darkening down and right, for thickness; and a real drop shadow,
-     because the one thing a decal never has is a shadow. */
-  border-radius: 47% 53% 52% 48% / 52% 47% 53% 48%;
+  --wax-rim: rgba(255, 240, 214, 0.5);
+  border-radius: 50%;
   background:
+    /* the sheen */
+    linear-gradient(
+      168deg,
+      rgba(255, 250, 236, 0.34) 0%,
+      rgba(255, 250, 236, 0.12) 26%,
+      transparent 48%
+    ),
+    /* the meniscus inside the rim */
     radial-gradient(
-      circle at 33% 28%,
-      color-mix(in srgb, var(--seal) 55%, #ffe9c4) 0%,
-      var(--seal) 46%,
-      color-mix(in srgb, var(--seal) 78%, #150802) 100%
+      circle at 50% 50%,
+      transparent 0 74%,
+      var(--wax-rim) 86%,
+      transparent 97%
+    ),
+    /* the body */
+    radial-gradient(
+      circle at 36% 28%,
+      color-mix(in srgb, var(--seal) 66%, #ffe0b8) 0%,
+      var(--seal) 52%,
+      color-mix(in srgb, var(--seal) 74%, #140701) 100%
     );
   box-shadow:
-    inset 0 1px 1px color-mix(in srgb, var(--seal) 40%, #ffe4bc),
-    inset -1px -2px 3px color-mix(in srgb, var(--seal) 55%, #180a02),
-    inset 0 0 0 3px color-mix(in srgb, var(--seal) 82%, #1c0a02),
-    0 2px 3px rgba(0, 0, 0, 0.45),
-    0 0 0 1px rgba(0, 0, 0, 0.25);
-  color: color-mix(in srgb, var(--seal) 42%, #2a0f04);
-  font-size: 20px;
-  /* The device is pressed *into* the wax, so its lit edge is the lower one. */
-  filter: drop-shadow(0 1px 0 color-mix(in srgb, var(--seal) 30%, #ffdfae));
+    inset 0 1px 1px rgba(255, 245, 225, 0.42),
+    inset 0 -2px 4px color-mix(in srgb, var(--seal) 55%, #140701),
+    0 0 0 1px rgba(255, 240, 214, 0.16),
+    0 2px 5px rgba(0, 0, 0, 0.4),
+    0 1px 1px rgba(0, 0, 0, 0.3);
+  color: color-mix(in srgb, var(--seal) 40%, #2b1105);
+  font-size: 19px;
+  transition:
+    transform 200ms cubic-bezier(0.2, 0.9, 0.3, 1.25),
+    box-shadow 200ms ease;
+  /* The device is pressed *into* the surface, so its lit edge is the lower one. */
+  filter: drop-shadow(0 1px 0 color-mix(in srgb, var(--seal) 24%, #ffe6bd));
 }
 
+/* Lifts toward the reader on hover, and its shadow spreads the way a thing's
+   does when it comes off the surface. */
 .trait-seal:hover .trait-seal-wax,
 .trait-seal:focus-visible .trait-seal-wax {
-  transform: rotate(0deg) scale(1.07);
+  transform: translateY(-1px) scale(1.08);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 248, 232, 0.5),
+    inset 0 -2px 4px color-mix(in srgb, var(--seal) 55%, #140701),
+    0 0 0 1px rgba(255, 244, 222, 0.24),
+    0 4px 9px rgba(0, 0, 0, 0.42),
+    0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* A gold rim for the top of a scale, pewter for the bottom — so a glance at the
-   corner says which kind of extreme this is before anything is read. */
-.trait-seal-top .trait-seal-wax {
-  outline: 1.5px solid rgba(214, 176, 94, 0.85);
-  outline-offset: -1px;
-}
-
-.trait-seal-bottom .trait-seal-wax {
-  outline: 1.5px solid rgba(178, 184, 190, 0.6);
-  outline-offset: -1px;
-}
+/* Gold in the meniscus for the top of a scale, pewter for the bottom — so a
+   glance at the corner says which kind of extreme this is before anything is
+   read. */
+.trait-seal-top .trait-seal-wax { --wax-rim: rgba(244, 210, 138, 0.7); }
+.trait-seal-bottom .trait-seal-wax { --wax-rim: rgba(202, 210, 218, 0.5); }
 
 /* Body, mind, temperament. Three waxes, so the corner says what kind of extreme
    it is before the plate is open. */

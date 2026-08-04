@@ -172,9 +172,15 @@ import {
 import {
   generatePersonaAnnotationWithGemini,
   generatePersonaSketchWithGemini,
+  MODEL_VARIANT_LABELS,
+  ModelUsage,
+  ModelVariant,
   normalizePersonaAnnotationRecord,
   PersonaGenerationTarget,
+  readLastModelUsage,
+  readModelVariant,
   validatePersonaAnnotationRecord,
+  writeModelVariant,
 } from '../services/geminiPersonaMaterialService';
 import {
   AI_ACCESS_REQUIRED_EVENT,
@@ -246,6 +252,9 @@ import './PersonaGenerator.css';
 const EncounterMode = React.lazy(() => import('../encounter/EncounterMode'));
 const SpriteTunerPanel = React.lazy(() => import('../encounter/sprite/SpriteTunerPanel'));
 const SpriteFigure = React.lazy(() => import('../encounter/sprite/SpriteCanvas'));
+// The About header draws its own crowd, which means pulling in the whole sprite
+// renderer — worth deferring, since nobody opens About before the first persona.
+const AboutSpriteBanner = React.lazy(() => import('./AboutSpriteBanner'));
 
 /**
  * The figure breathes, blinks and glances on its own, but outside a fight
@@ -263,6 +272,10 @@ const ATTRIBUTE_SCORES = [
   { key: 'intelligence', abbr: 'INT', label: 'Intelligence' },
   { key: 'wisdom', abbr: 'WIS', label: 'Wisdom' },
   { key: 'charisma', abbr: 'CHA', label: 'Charisma' },
+  // Next to charisma because it is the other half of the same pair: both are
+  // read off the persona's temperament, and the encounter engine adds them
+  // together into one charm score.
+  { key: 'persuasion', abbr: 'PRS', label: 'Persuasion' },
   { key: 'perception', abbr: 'PER', label: 'Perception' },
   { key: 'luck', abbr: 'LCK', label: 'Luck' },
   { key: 'craftiness', abbr: 'CRF', label: 'Craftiness' },
@@ -978,6 +991,9 @@ const eliteStatusStanding = (socialClass?: string): { label: string; note: strin
   };
 };
 
+const capitalizeFirst = (text: string): string =>
+  (text ? text.charAt(0).toUpperCase() + text.slice(1) : text);
+
 /** "1 in 10" for a share, in the same voice as the draw odds above the card. */
 const formatShareAsOdds = (share: number): string => {
   if (share <= 0) return 'almost nobody';
@@ -1297,6 +1313,13 @@ export default function PersonaGenerator() {
    */
   const [hasRequestedAi, setHasRequestedAi] = useState(false);
   const [showAiDevelopmentChoice, setShowAiDevelopmentChoice] = useState(false);
+  const [modelVariant, setModelVariant] = useState<ModelVariant>(() => readModelVariant());
+  /**
+   * Read when the dialog opens rather than held in sync with every call: the
+   * only place it is shown is this dialog, and a request made from it has
+   * already closed it by the time the counts come back.
+   */
+  const [lastModelUsage, setLastModelUsage] = useState<ModelUsage | null>(null);
   const [costConfirm, setCostConfirm] = useState<{ kind: AiCostKind; run: () => Promise<void> } | null>(null);
   const [aiAccess, setAiAccess] = useState<AiAccessStatus | null>(null);
   const [aiGate, setAiGate] = useState<AiGateState | null>(null);
@@ -1513,6 +1536,15 @@ export default function PersonaGenerator() {
     if (!tier) return null;
 
     if (tier === 'star' || tier === 'diamond') {
+      if (persona.office) {
+        return {
+          title: persona.office.role,
+          lines: [
+            `${capitalizeFirst(persona.office.gloss)}.`,
+            `Roughly ${formatShareAsOdds(persona.office.trueShare)} human lives were lived in such a place.`,
+          ],
+        };
+      }
       const standing = persona.distinction;
       return {
         title: standing?.label || 'A rare standing',
@@ -1564,8 +1596,6 @@ export default function PersonaGenerator() {
     };
   };
 
-  // Random banner for About modal (1-3)
-  const [aboutBannerIndex] = useState(() => Math.floor(Math.random() * 3) + 1);
   const [activeTab, setActiveTab] = useState<BiographyTab>('biography');
   const [wikipediaArticle, setWikipediaArticle] = useState<string | null>(null);
 
@@ -1685,6 +1715,7 @@ export default function PersonaGenerator() {
 
   useEffect(() => {
     if (!showAiDevelopmentChoice) return undefined;
+    setLastModelUsage(readLastModelUsage());
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setShowAiDevelopmentChoice(false);
     };
@@ -3420,6 +3451,7 @@ export default function PersonaGenerator() {
                 <div class="stat"><div class="stat-label">INT</div><div class="stat-value">${char.stats?.intelligence || '-'}</div></div>
                 <div class="stat"><div class="stat-label">WIS</div><div class="stat-value">${char.stats?.wisdom || '-'}</div></div>
                 <div class="stat"><div class="stat-label">CHA</div><div class="stat-value">${char.stats?.charisma || '-'}</div></div>
+                <div class="stat"><div class="stat-label">PRS</div><div class="stat-value">${char.stats?.persuasion || '-'}</div></div>
                 <div class="stat"><div class="stat-label">PER</div><div class="stat-value">${char.stats?.perception || '-'}</div></div>
                 <div class="stat"><div class="stat-label">LCK</div><div class="stat-value">${char.stats?.luck || '-'}</div></div>
                 <div class="stat"><div class="stat-label">CRF</div><div class="stat-value">${char.stats?.craftiness || '-'}</div></div>
@@ -5263,7 +5295,18 @@ export default function PersonaGenerator() {
                         badge appeared on one persona in forty-four, which is
                         not "rare", it is "absent". */}
                     {(() => {
-                      const standing = persona.distinction
+                      // An office outranks a stratum on the pill: "Bishop" is
+                      // the more specific fact than "Gentry", and it is much the
+                      // rarer of the two. The share quoted is the true one — see
+                      // `eliteOffices.ts` on why the draw rate and the printed
+                      // rate are deliberately different numbers.
+                      const standing = persona.office
+                        ? {
+                          label: persona.office.role,
+                          note: `${capitalizeFirst(persona.office.gloss)}. `
+                            + `Roughly ${formatShareAsOdds(persona.office.trueShare)} human lives were lived in such a place.`,
+                        }
+                        : persona.distinction
                         ? {
                           label: persona.distinction.label,
                           note: `${persona.distinction.clause} Roughly ${formatShareAsOdds(persona.distinction.share)} of people here held this standing.`,
@@ -6896,82 +6939,170 @@ export default function PersonaGenerator() {
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
           >
-          <div className="modal-banner">
-            <img
-              src={`/banners/HistoricalPersonaBanner${aboutBannerIndex}.jpg`}
-              alt="Historical Persona Generator"
-              className="modal-banner-image"
-            />
+          <div className="about-hero">
+            <React.Suspense fallback={<div className="about-crowd about-crowd-idle" />}>
+              <AboutSpriteBanner />
+            </React.Suspense>
             <button className="modal-close modal-close-overlay" onClick={() => setShowAbout(false)} aria-label="Close dialog">
               <IoClose aria-hidden="true" />
             </button>
           </div>
-          <div className="modal-header">
-            <h2 id="about-modal-title">Historical Persona Generator, version 0.1</h2>
-           
+
+          <div className="about-titlebar">
+            <div className="about-titlebar-text">
+              <h2 id="about-modal-title">Historical Persona Generator</h2>
+              <p className="about-tagline">
+                Everyone above was generated a moment ago. Point at one to see who they are.
+              </p>
+            </div>
+            <span className="about-version">v0.1</span>
           </div>
+
           <div className="modal-body about-body">
-            <div className="about-intro">
-              <p>
-                Created by{' '}
-                <a href="https://benjaminpbreen.com" target="_blank" rel="noopener noreferrer">
-                  <strong>Benjamin Breen</strong>
-                </a>, Associate Professor of History at UC Santa Cruz, this project is an experimental
-                source-first studio for turning historical documents, reference pages, and archival
-                fragments into plausible personas rooted in a specific time and place.
-              </p>
-            </div>
+            <p className="about-lede">
+              Press <strong>Generate Random Persona</strong> and the app invents an ordinary person —
+              a name, a household, a trade, a body, a language, a set of beliefs, a face — starting
+              from a year and a place it draws first. Everything after aims to be historically
+              authentic as possible in capturing life in a specific time and place (although true
+              accuracy is impossible!). There is no pre-written list of people, no stock art, and no
+              image model: the whole persona is procedurally generated from a set of data files, in
+              your browser, with nothing sent anywhere.
+            </p>
 
-            <div className="disclaimer-box">
-              <strong>⚠️ Disclaimer</strong>
-              <p>
-                This is still a work in progress and will contain errors. Generated personas should be
-                read as historically informed drafts, not factual reconstructions. The app tries to
-                distinguish source-supported details from inference and plausible synthesis, but dates,
-                cultural details, social categories, and visual cues may still be inaccurate or
-                anachronistic. If you spot an error, please{' '}
-                <a href="mailto:bebreen@ucsc.edu">contact me</a>.
-              </p>
-            </div>
-
-            <div className="about-features">
-              <h3>What It Does</h3>
-              <ul>
-                <li><strong>Source Ingestion</strong> — Paste text, enter a Wikipedia or readable URL, or sample Old Bailey trial material</li>
-                <li><strong>Evidence-Aware Records</strong> — Converts sources into compact persona material with confidence and support labels</li>
-                <li><strong>Historical Context</strong> — Extracts dates, places, status, work, household economy, concerns, worldview, and material life</li>
-                <li><strong>Procedural Completion</strong> — Uses the existing generator to fill out a character while preserving source-derived constraints</li>
-                <li><strong>Portraits And Exports</strong> — Renders a procedural portrait and lets you inspect or export the JSON material behind the persona</li>
-              </ul>
-            </div>
-
-            <div className="about-use-cases">
-              <h3>Who Is This For?</h3>
-              <p>
-                Writers, game designers, tabletop RPG players, historians, educators, students, and
-                anyone curious about building historical characters from evidence rather than generic
-                period flavor. I created it as part of a larger educational history simulation project
-                for classroom use, with an emphasis on uncertainty, bias, and the limits of what a
-                source can responsibly support.
-              </p>
-            </div>
-
-            <div className="about-links">
-              <a
-                href="https://github.com/benjaminbreen/HistoricalPersonaGenerator"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="about-link-btn"
-              >
-                <IoLogoGithub /> View on GitHub
+            <p className="about-byline">
+              Made by{' '}
+              <a href="https://benjaminpbreen.com" target="_blank" rel="noopener noreferrer">
+                Benjamin Breen
               </a>
-              <button
-                className="about-link-btn primary"
-                onClick={() => { setShowAbout(false); setShowDonate(true); }}
-              >
-                <IoHeart /> Support This Project
-              </button>
-            </div>
+              , who teaches history at UC Santa Cruz, for a classroom exercise: generate a persona,
+              then reconstruct a day in that life while fact-checking everything on the card. Most of
+              the work happens in the fact-checking.
+            </p>
+
+            <ul className="about-facts">
+              <li><b>10,000 BCE</b><span>earliest year it will draw</span></li>
+              <li><b>~780</b><span>dated states and empires</span></li>
+              <li><b>100+</b><span>dated language windows</span></li>
+              <li><b>117 bn</b><span>lives in the sampling weights</span></li>
+            </ul>
+
+            <section className="about-section">
+              <h3>How a persona gets built</h3>
+              <ul className="about-list">
+                <li>
+                  <strong>A year and a place, first</strong> — then which state actually held that
+                  place that year. A life that begins under Roman Britain and ends under something
+                  else says so.
+                </li>
+                <li>
+                  <strong>Work, status, household</strong> — a trade and a social position filtered by
+                  what existed in that region and that century, with the household economy behind them.
+                </li>
+                <li>
+                  <strong>Body and material life</strong> — age, health, disease exposure, possessions,
+                  crops, clothing and tools, weighted by period demography and by what was actually
+                  available locally.
+                </li>
+                <li>
+                  <strong>Language and belief</strong> — a native language with its family, script and
+                  period, plus how it was arrived at: attested from records, inferred, or an honest
+                  guess with the scholarship cited.
+                </li>
+                <li>
+                  <strong>Procedurally generated pixel art images</strong> — a portrait and a full-body
+                  figure, drawn from the same facts as the rest. The same seed always draws the same
+                  person.
+                </li>
+                <li>
+                  <strong>A written life</strong> — a procedural biography with dated events, a family,
+                  and an inner life, all from that one constraint set.
+                </li>
+              </ul>
+            </section>
+
+            <section className="about-section">
+              <h3>Random out of what?</h3>
+              <p className="about-para">
+                <strong>True Frequency</strong> weights every era and region by how many people were
+                really born there — pick a random human life and this is roughly what you get, which is
+                most often a farmer in ancient or medieval South or East Asia.{' '}
+                <strong>Explore</strong> flattens those weights just enough that the whole world is
+                reachable in one sitting. Either way the card prints the real odds of the draw it made,
+                so the flattening is never silent.
+              </p>
+            </section>
+
+            <section className="about-section about-section-optional">
+              <h3>The rest of it</h3>
+              <ul className="about-list">
+                <li>
+                  <strong>Source Studio</strong> — hand it a Wikipedia article, a readable web page,
+                  pasted text, or a real Old Bailey trial record, and it generates someone who could
+                  have been in that room.
+                </li>
+                <li>
+                  <strong>An AI biography</strong> — an optional model (GPT 5.4 nano) pass that writes
+                  a longer life from a persona the generator has already built. It is the only part
+                  that leaves your machine, and everything else works without it.
+                </li>
+                <li>
+                  <strong>Take it away</strong> — a two-page PDF for handouts, a share link that freezes
+                  one persona at a URL, or the full JSON record with its confidence labels intact.
+                </li>
+              </ul>
+            </section>
+
+            <section className="about-section">
+              <h3>Who it&rsquo;s for</h3>
+              <p className="about-para">
+                Writers and game designers who need a character grounded in a period rather than in
+                generic period flavour, tabletop players, teachers assembling a lesson, students,
+                historians, and anyone curious about how differently a life could have gone.
+              </p>
+            </section>
+
+            <section className="about-section">
+              <h3>Related work</h3>
+              <p className="about-para">
+                Two other projects that put a reader inside an ordinary past life, both worth your
+                time:{' '}
+                <a href="https://veil-of-history.netlify.app" target="_blank" rel="noopener noreferrer">
+                  Veil of History
+                </a>{' '}
+                by Ethan Mollick, and{' '}
+                <a href="https://random-lives.github.io/random-lives/" target="_blank" rel="noopener noreferrer">
+                  Random Lives
+                </a>{' '}
+                by Damon Binder.
+              </p>
+            </section>
+
+            <p className="about-caveat">
+              <IoWarning aria-hidden="true" />
+              <span>
+                A generated persona is a historically informed draft, not a reconstruction of a real
+                person. This is a prototype and it will contain errors — dates, cultural details,
+                social categories and visual cues can all be wrong or anachronistic. If you spot one,{' '}
+                <a href="mailto:bebreen@ucsc.edu">tell me</a>.
+              </span>
+            </p>
+          </div>
+
+          <div className="about-footer">
+            <a
+              href="https://github.com/benjaminbreen/HistoricalPersonaGenerator"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="about-link-btn"
+            >
+              <IoLogoGithub /> View on GitHub
+            </a>
+            <button
+              className="about-link-btn primary"
+              onClick={() => { setShowAbout(false); setShowDonate(true); }}
+            >
+              <IoHeart /> Support this project
+            </button>
           </div>
           </motion.div>
         </motion.div>
@@ -7012,9 +7143,34 @@ export default function PersonaGenerator() {
               </button>
             </div>
             <div className="modal-body ai-choice-body">
-              <p id="ai-choice-modal-description">
-                Keep exploring the person on screen, or begin with a fresh historical character.
-              </p>
+              <div className="ai-choice-lede">
+                <p id="ai-choice-modal-description">
+                  Keep exploring the person on screen, or begin with a fresh historical character.
+                </p>
+                <div className="ai-choice-model" role="group" aria-label="Which model writes the biography">
+                  {(['luna', 'nano'] as ModelVariant[]).map((variant) => (
+                    <button
+                      key={variant}
+                      type="button"
+                      className={modelVariant === variant ? 'is-active' : ''}
+                      onClick={() => { setModelVariant(variant); writeModelVariant(variant); }}
+                      title={variant === 'luna'
+                        ? 'Default. Cheaper per output token.'
+                        : 'The previous default, kept for comparison.'}
+                    >
+                      {MODEL_VARIANT_LABELS[variant]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {lastModelUsage && (
+                <p className="ai-choice-usage">
+                  Last call on {MODEL_VARIANT_LABELS[lastModelUsage.variant as ModelVariant] ?? lastModelUsage.variant}:{' '}
+                  {lastModelUsage.input ?? '—'} in, {lastModelUsage.output ?? '—'} out
+                  {lastModelUsage.reasoning ? ` (${lastModelUsage.reasoning} reasoning)` : ''}
+                  , {(lastModelUsage.ms / 1000).toFixed(1)}s.
+                </p>
+              )}
               <div className="ai-choice-options">
                 <button
                   type="button"
