@@ -81,9 +81,12 @@ const postGeminiRoute = async <T,>(body: Record<string, unknown>): Promise<T> =>
   if (!response.ok) {
     const data = await response.json().catch(() => null);
     if (response.status === 402 && data?.code === 'AI_SUPPORT_REQUIRED') {
-      announceAiAccessRequired((data?.access || null) as AiAccessStatus | null);
+      announceAiAccessRequired(
+        (data?.access || null) as AiAccessStatus | null,
+        body.action === 'generate_annotation' ? 'schema' : 'biography'
+      );
     }
-    throw new Error(data?.error || `Gemini API route returned ${response.status}.`);
+    throw new Error(data?.error || `AI persona route returned ${response.status}.`);
   }
 
   const data = await response.json();

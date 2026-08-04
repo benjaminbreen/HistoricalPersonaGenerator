@@ -184,6 +184,7 @@ import {
 } from '../services/geminiPersonaMaterialService';
 import {
   AI_ACCESS_REQUIRED_EVENT,
+  type AiAccessRequiredDetail,
   getAiAccessStatus,
   type AiAccessStatus,
 } from '../services/aiAccessService';
@@ -732,7 +733,6 @@ type BiographyTab = 'biography' | 'family' | 'lifeEvents' | 'innerLife';
 type AiCostKind = 'schema';
 type AiDevelopmentMode = 'existing' | 'new';
 type AiGateState = {
-  kind: 'nudge' | 'required';
   action: 'biography' | 'schema';
   run?: () => Promise<void>;
 };
@@ -742,7 +742,7 @@ const AI_COST_COPY: Record<AiCostKind, { title: string; lead: string; detail: st
   schema: {
     title: 'Build the full schema record?',
     lead: 'This asks the model to fill the whole JSONL annotation record — the evidence-tagged fields behind the character sheet.',
-    detail: 'It costs about six times as much per persona as the standard AI biography, because the entire schema goes to the model with every request.',
+    detail: 'Your first three full schema generations are free. After that, each uses six supporter credits because the entire schema goes to the model with every request.',
     confirm: 'Build schema record',
   },
 };
@@ -1168,7 +1168,7 @@ const lockProceduralSeedRecord = (
   locked.source.source_reliability_notes = 'Synthetic procedural seed generated inside the application; not an external historical document.';
   locked.annotation.overall_confidence = 'speculative';
   locked.annotation.completion_status = 'draft';
-  locked.annotation.annotation_notes = 'Gemini filled schema gaps from a locked procedural seed. Seed identity, date, place, profession, religion, and demographic fields were preserved by the application.';
+  locked.annotation.annotation_notes = 'AI filled schema gaps from a locked procedural seed. Seed identity, date, place, profession, religion, and demographic fields were preserved by the application.';
 
   locked.persona_seed.identity_name = {
     ...locked.persona_seed.identity_name,
@@ -1314,6 +1314,7 @@ export default function PersonaGenerator() {
   const [hasRequestedAi, setHasRequestedAi] = useState(false);
   const [showAiDevelopmentChoice, setShowAiDevelopmentChoice] = useState(false);
   const [modelVariant, setModelVariant] = useState<ModelVariant>(() => readModelVariant());
+  const selectedModelLabel = MODEL_VARIANT_LABELS[modelVariant];
   /**
    * Read when the dialog opens rather than held in sync with every call: the
    * only place it is shown is this dialog, and a request made from it has
@@ -1735,12 +1736,9 @@ export default function PersonaGenerator() {
       });
 
     const handleRequired = (event: Event) => {
-      const access = (event as CustomEvent<AiAccessStatus | null>).detail;
+      const { access, action } = (event as CustomEvent<AiAccessRequiredDetail>).detail;
       if (access) setAiAccess(access);
-      setAiGate({
-        kind: 'required',
-        action: access?.canUseBiography === false ? 'biography' : 'schema',
-      });
+      setAiGate({ action });
     };
     window.addEventListener(AI_ACCESS_REQUIRED_EVENT, handleRequired);
     return () => {
@@ -1804,8 +1802,9 @@ export default function PersonaGenerator() {
   };
 
   /**
-   * Schema filling is the expensive specialist path. It always retains its
-   * explanatory confirmation, and requires six active supporter credits.
+   * Schema filling is the expensive specialist path. It retains its
+   * explanatory confirmation, uses three free runs, then requires six active
+   * supporter credits.
    */
   const requestAiRun = async (kind: AiCostKind, run: () => Promise<void>) => {
     if (isSourceGenerating) return;
@@ -1819,7 +1818,7 @@ export default function PersonaGenerator() {
       const access = await getAiAccessStatus();
       setAiAccess(access);
       if (!access.canUseSchema) {
-        setAiGate({ kind: 'required', action: 'schema', run });
+        setAiGate({ action: 'schema', run });
         return;
       }
     } catch {
@@ -1829,8 +1828,8 @@ export default function PersonaGenerator() {
   };
 
   /**
-   * The third free biography gets a deliberate donation appeal. Five remain
-   * genuinely free; the sixth request is stopped until Stripe confirms support.
+   * Five biographies are free without an interruption; the sixth request is
+   * stopped until Stripe confirms support.
    */
   const requestAiBiographyRun = async (run: () => Promise<void>) => {
     if (isSourceGenerating) return;
@@ -1842,11 +1841,7 @@ export default function PersonaGenerator() {
       const access = await getAiAccessStatus();
       setAiAccess(access);
       if (!access.canUseBiography) {
-        setAiGate({ kind: 'required', action: 'biography', run });
-        return;
-      }
-      if (!access.supporterActive && access.freeBiographyRunsUsed === 2) {
-        setAiGate({ kind: 'nudge', action: 'biography', run });
+        setAiGate({ action: 'biography', run });
         return;
       }
     } catch {
@@ -1860,12 +1855,6 @@ export default function PersonaGenerator() {
     setCostConfirm(null);
     if (!pending) return;
     runAiAction(pending.run);
-  };
-
-  const continuePastAiNudge = () => {
-    const pending = aiGate;
-    setAiGate(null);
-    if (pending?.run) runAiAction(pending.run);
   };
 
   const checkSupporterAccess = async () => {
@@ -2015,9 +2004,9 @@ export default function PersonaGenerator() {
       setSourceUrl(source.url || person.wikipediaUrl);
       setSourceText(source.text);
       setOldBaileySelectionActive(false);
-      setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking Gemini to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
+      setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
       const record = await recordFromSource(source, { target: 'named_subject' });
-      setSourceIngestionStatus(useGeminiExtraction ? `Generated a Gemini-filled annotation record from ${source.citationLabel}.` : `Generated a heuristic annotation record from ${source.citationLabel}.`);
+      setSourceIngestionStatus(useGeminiExtraction ? `Generated a ${selectedModelLabel}-filled annotation record from ${source.citationLabel}.` : `Generated a heuristic annotation record from ${source.citationLabel}.`);
       await generateFromAnnotationRecord(record, {
         useSourceTitleAsName: true,
         portraitUrl: source.imageUrl,
@@ -2028,7 +2017,7 @@ export default function PersonaGenerator() {
       if (sourceForFallback) {
         setSourceIngestionStatus(error instanceof Error
           ? `${error.message} Using local source-based fallback instead of a synthetic placeholder.`
-          : 'Gemini/schema generation failed. Using local source-based fallback instead of a synthetic placeholder.');
+          : 'AI schema generation failed. Using local source-based fallback instead of a synthetic placeholder.');
         noteGenerationFallback('record', error instanceof Error ? error.message : 'Schema generation failed.');
         noteGenerationFallback('prose', 'Written from the offline record instead.');
         const record = createAnnotationRecordFromSource(sourceForFallback);
@@ -2065,7 +2054,7 @@ export default function PersonaGenerator() {
       noteGenerationFallback('record', error instanceof Error ? error.message : 'Schema generation failed.');
       setSourceIngestionStatus(error instanceof Error
         ? `${error.message} Using local source-based fallback instead.`
-        : 'Gemini schema generation failed. Using local source-based fallback instead.');
+        : 'AI schema generation failed. Using local source-based fallback instead.');
       return createAnnotationRecordFromSource(source);
     }
   };
@@ -2083,11 +2072,11 @@ export default function PersonaGenerator() {
 
     setIsSourceGenerating(true);
     setSourcePanelCollapsed(true);
-    setSourceIngestionStatus(useGeminiExtraction ? 'Asking Gemini to populate the annotation schema...' : 'Generating a heuristic annotation record...');
+    setSourceIngestionStatus(useGeminiExtraction ? `Asking ${selectedModelLabel} to populate the annotation schema...` : 'Generating a heuristic annotation record...');
     try {
       const source = createPastedTextSource(sourceText, sourceTitle.trim() || 'Pasted source text');
       const record = await recordFromSource(source);
-      setSourceIngestionStatus(useGeminiExtraction ? 'Generated a Gemini-filled annotation record from pasted text.' : 'Generated a heuristic annotation record from pasted text.');
+      setSourceIngestionStatus(useGeminiExtraction ? `Generated a ${selectedModelLabel}-filled annotation record from pasted text.` : 'Generated a heuristic annotation record from pasted text.');
       await generateFromAnnotationRecord(record, { useSourceTitleAsName: sourceTarget === 'named_subject', generateSketch: true });
     } catch (error) {
       setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to generate from pasted text.');
@@ -2108,11 +2097,11 @@ export default function PersonaGenerator() {
     setSourceIngestionStatus('Fetching source text...');
     try {
       const source = await ingestUrlSource(sourceUrl.trim());
-      setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking Gemini to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
+      setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
       const record = await recordFromSource(source);
       setSourceTitle(source.title);
       setSourceText(source.text);
-      setSourceIngestionStatus(useGeminiExtraction ? `Generated a Gemini-filled annotation record from ${source.citationLabel}.` : `Generated a heuristic annotation record from ${source.citationLabel}.`);
+      setSourceIngestionStatus(useGeminiExtraction ? `Generated a ${selectedModelLabel}-filled annotation record from ${source.citationLabel}.` : `Generated a heuristic annotation record from ${source.citationLabel}.`);
       await generateFromAnnotationRecord(record, {
         useSourceTitleAsName: sourceTarget === 'named_subject',
         portraitUrl: source.imageUrl,
@@ -2142,11 +2131,11 @@ export default function PersonaGenerator() {
       setSourceText(source.text);
       setOldBaileySelectionActive(false);
       setSourceTarget(filters.personaAngle === 'named_subject' ? 'named_subject' : 'ordinary_person_from_source_world');
-      setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking Gemini to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
+      setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
       const record = await recordFromSource(source, {
         target: filters.personaAngle === 'named_subject' ? 'named_subject' : 'ordinary_person_from_source_world',
       });
-      setSourceIngestionStatus(useGeminiExtraction ? `Generated a Gemini-filled annotation record from ${source.citationLabel}.` : `Generated a heuristic annotation record from ${source.citationLabel}.`);
+      setSourceIngestionStatus(useGeminiExtraction ? `Generated a ${selectedModelLabel}-filled annotation record from ${source.citationLabel}.` : `Generated a heuristic annotation record from ${source.citationLabel}.`);
       await generateFromAnnotationRecord(record, {
         useSourceTitleAsName: filters.personaAngle === 'named_subject',
         portraitUrl: source.imageUrl,
@@ -2904,7 +2893,7 @@ export default function PersonaGenerator() {
     if (isSourceGenerating) return;
     const { proceduralPersona, source } = beginAiRunFromProceduralSeed();
     setSourceIngestionStatus(useGeminiExtraction
-      ? `Generated ${proceduralPersona.character.name} as a procedural seed. Asking Gemini to populate the schema...`
+      ? `Generated ${proceduralPersona.character.name} as a procedural seed. Asking ${selectedModelLabel} to populate the schema...`
       : `Generated ${proceduralPersona.character.name} as a procedural seed. Building a heuristic schema record...`);
     try {
       const record = lockProceduralSeedRecord(
@@ -2912,7 +2901,7 @@ export default function PersonaGenerator() {
         proceduralPersona
       );
       setSourceIngestionStatus(useGeminiExtraction
-        ? `Generated a Gemini-filled schema record from procedural seed ${proceduralPersona.character.name}.`
+        ? `Generated a ${selectedModelLabel}-filled schema record from procedural seed ${proceduralPersona.character.name}.`
         : `Generated a heuristic schema record from procedural seed ${proceduralPersona.character.name}.`);
       await generateFromAnnotationRecord(record, { useSourceTitleAsName: true, generateSketch: true });
     } catch (error) {
@@ -7302,7 +7291,7 @@ export default function PersonaGenerator() {
           aria-describedby="ai-support-modal-description"
         >
           <motion.div
-            className={`modal ai-support-modal ai-support-modal-${aiGate.kind}`}
+            className="modal ai-support-modal ai-support-modal-required"
             onClick={(event) => event.stopPropagation()}
             initial={{ opacity: 0, scale: 0.93, y: 18 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -7311,40 +7300,24 @@ export default function PersonaGenerator() {
           >
             <div className="ai-support-hero">
               <span className="ai-support-heart" aria-hidden="true"><IoHeart /></span>
-              <span className="ai-support-kicker">
-                {aiGate.kind === 'nudge' ? 'A small request' : 'Supporter access'}
-              </span>
+              <span className="ai-support-kicker">Supporter access</span>
               <h2 id="ai-support-modal-title">
-                {aiGate.kind === 'nudge'
-                  ? 'You have reached your third AI biography'
-                  : aiGate.action === 'schema'
-                    ? 'Full schema generation is a supporter feature'
-                    : 'You have used your five free AI biographies'}
+                {aiGate.action === 'schema'
+                  ? 'You have used your three free schema generations'
+                  : 'You have used your five free AI biographies'}
               </h2>
             </div>
             <div className="modal-body ai-support-body">
               <p id="ai-support-modal-description">
-                {aiGate.kind === 'nudge'
-                  ? 'This project has no ads or subscription, but every AI request creates a real API bill. If the tool is useful to you, this is the moment when a donation makes the biggest difference.'
-                  : aiGate.action === 'schema'
-                    ? 'The evidence-aware schema call sends a much larger historical record to the model and costs six credits. A verified donation unlocks enough credit for this and many more biographies.'
-                    : 'Procedural personas remain free and unlimited. To keep model-generated biographies sustainable, additional AI requests unlock after a verified donation.'}
+                {aiGate.action === 'schema'
+                  ? 'The evidence-aware schema call sends a much larger historical record to the model. Additional schema records use six credits; a verified donation unlocks enough credit for this and many more biographies.'
+                  : 'Procedural personas remain free and unlimited. To keep model-generated biographies sustainable, additional AI requests unlock after a verified donation.'}
               </p>
               <div className="ai-support-credit-card">
                 <strong>Donate once, receive 50 AI credits</strong>
                 <span>Valid for 30 days · biographies use 1 credit · full schema records use 6</span>
               </div>
-              {aiGate.kind === 'nudge' && (
-                <p className="ai-support-remaining">
-                  You can still continue without donating — 2 free AI biographies remain after this one.
-                </p>
-              )}
               <div className="ai-support-actions">
-                {aiGate.kind === 'nudge' && (
-                  <button type="button" className="btn btn-secondary" onClick={continuePastAiNudge}>
-                    Continue — 2 free runs remain
-                  </button>
-                )}
                 <button
                   type="button"
                   className="btn btn-primary ai-support-donate-button"

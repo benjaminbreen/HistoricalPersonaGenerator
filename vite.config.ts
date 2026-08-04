@@ -381,7 +381,7 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
               res.end(JSON.stringify({
                 code: 'AI_SUPPORT_REQUIRED',
                 error: body.action === 'generate_annotation'
-                  ? 'The full schema record costs six supporter credits.'
+                  ? 'You have used all three free full schema generations. A donation unlocks 50 credits for 30 days.'
                   : 'You have used all five free AI biographies. A donation unlocks 50 credits for 30 days.',
                 access: accessVerdict.access,
               }))

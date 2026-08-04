@@ -34,9 +34,16 @@ npm run build
 npm run preview
 ```
 
-## Gemini Setup
+## AI Model Setup
 
-Source-backed persona generation can use Gemini to fill the historical persona annotation schema. For local development, add a Gemini key to `.env.local`:
+Luna is the default for both biographies and full historical annotation-schema
+generation. For local development, add an OpenAI key to `.env.local`:
+
+```bash
+OPENAI_API_KEY=your_key_here
+```
+
+Gemini remains available as an explicit fallback. To use it, add:
 
 ```bash
 GEMINI_API_KEY=your_key_here
@@ -45,12 +52,8 @@ GEMINI_MODEL=gemini-3.1-flash-lite
 
 The Vite dev server exposes a local `/api/gemini-persona` middleware and keeps this key server-side during development. The static browser bundle does not call Gemini directly. Do not use `VITE_GEMINI_API_KEY` or any other `VITE_*` variable for secrets: Vite includes those values in the browser build.
 
-The OpenAI models are the default, and the AI dialog carries a Luna/Nano toggle
-so the two can be compared on the same persona. One key covers both:
-
-```bash
-OPENAI_API_KEY=your_key_here
-```
+The AI dialog carries a Luna/Nano toggle so the two can be compared on the same
+persona. One OpenAI key covers both.
 
 Model ids are overridable per variant, so a rename upstream is a config change
 rather than a deploy. `api/_lib/llm.js` holds the defaults:
@@ -114,8 +117,8 @@ The annotation prompt carries the whole JSON schema — about 6,500 tokens of th
 
 ### Free use and supporter credits
 
-Each browser receives five free AI biographies. The third request shows a
-prominent donation appeal but can still continue; the sixth is stopped.
+Each browser receives five free AI biographies and three free full schema
+generations. The sixth biography or fourth schema request is stopped.
 Procedural personas remain free and unlimited. A verified donation grants 50 AI
 credits for 30 days:
 

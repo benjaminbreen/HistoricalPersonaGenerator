@@ -17,15 +17,30 @@ try {
     grantSupporterCredits,
     loadAiAccessRecord,
     publicAiAccessStatus,
+    saveAiAccessRecord,
   } = await import('../api/_lib/aiAccess.js');
   const { verifyStripeSignature } = await import('../api/stripe-webhook.js');
 
   const visitorId = randomUUID();
   const initial = publicAiAccessStatus(await loadAiAccessRecord(visitorId));
   assert.equal(initial.freeBiographyRunsRemaining, 5);
+  assert.equal(initial.freeSchemaRunsRemaining, 3);
   assert.equal(initial.canUseBiography, true);
-  assert.equal(initial.canUseSchema, false);
+  assert.equal(initial.canUseSchema, true);
   assert.match(initial.donateUrl, new RegExp(`client_reference_id=${visitorId}`));
+
+  const legacyVisitorId = randomUUID();
+  await saveAiAccessRecord({
+    schemaVersion: 1,
+    id: legacyVisitorId,
+    freeBiographyRunsUsed: 2,
+    supporterCredits: 0,
+    supporterExpiresAt: null,
+    processedStripeSessions: [],
+  });
+  const migrated = publicAiAccessStatus(await loadAiAccessRecord(legacyVisitorId));
+  assert.equal(migrated.freeBiographyRunsRemaining, 3);
+  assert.equal(migrated.freeSchemaRunsRemaining, 3);
 
   for (let run = 1; run <= 5; run += 1) {
     const result = await consumeAiCredit(visitorId, 'generate_sketch');
@@ -35,6 +50,16 @@ try {
   const denied = await consumeAiCredit(visitorId, 'generate_sketch');
   assert.equal(denied.allowed, false);
   assert.equal(denied.access.freeBiographyRunsRemaining, 0);
+
+  for (let run = 1; run <= 3; run += 1) {
+    const result = await consumeAiCredit(visitorId, 'generate_annotation');
+    assert.equal(result.allowed, true);
+    assert.equal(result.access.freeSchemaRunsUsed, run);
+  }
+  const deniedSchema = await consumeAiCredit(visitorId, 'generate_annotation');
+  assert.equal(deniedSchema.allowed, false);
+  assert.equal(deniedSchema.access.freeSchemaRunsRemaining, 0);
+  assert.equal(deniedSchema.access.canUseSchema, false);
 
   const now = Date.UTC(2026, 6, 29);
   const grant = await grantSupporterCredits(visitorId, 'cs_test_supporter', now);

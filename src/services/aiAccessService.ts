@@ -1,6 +1,8 @@
 export interface AiAccessStatus {
   freeBiographyRunsUsed: number;
   freeBiographyRunsRemaining: number;
+  freeSchemaRunsUsed: number;
+  freeSchemaRunsRemaining: number;
   supporterActive: boolean;
   supporterCredits: number;
   supporterExpiresAt: string | null;
@@ -14,6 +16,12 @@ export interface AiAccessStatus {
 }
 
 export const AI_ACCESS_REQUIRED_EVENT = 'historical-persona:ai-access-required';
+export type AiAccessAction = 'biography' | 'schema';
+
+export interface AiAccessRequiredDetail {
+  access: AiAccessStatus | null;
+  action: AiAccessAction;
+}
 
 export async function getAiAccessStatus(): Promise<AiAccessStatus> {
   const response = await fetch('/api/ai-access', {
@@ -28,8 +36,11 @@ export async function getAiAccessStatus(): Promise<AiAccessStatus> {
   return data as AiAccessStatus;
 }
 
-export function announceAiAccessRequired(access: AiAccessStatus | null): void {
+export function announceAiAccessRequired(
+  access: AiAccessStatus | null,
+  action: AiAccessAction
+): void {
   window.dispatchEvent(new CustomEvent(AI_ACCESS_REQUIRED_EVENT, {
-    detail: access,
+    detail: { access, action } satisfies AiAccessRequiredDetail,
   }));
 }

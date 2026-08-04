@@ -72,6 +72,20 @@ try {
   assert.equal(requestBody.max_output_tokens, 260);
   assert.equal('temperature' in requestBody, false);
 
+  const annotation = await callModel({
+    action: 'generate_annotation',
+    prompt: 'Return a JSON annotation record.',
+    json: true,
+    env: { OPENAI_API_KEY: 'test-key' },
+  });
+
+  assert.equal(annotation.usage.variant, 'luna');
+  assert.equal(annotation.usage.model, 'gpt-5.6-luna');
+  assert.equal(requestBody.model, 'gpt-5.6-luna');
+  assert.deepEqual(requestBody.reasoning, { effort: 'none' });
+  assert.equal(requestBody.max_output_tokens, 4000);
+  assert.deepEqual(requestBody.text, { format: { type: 'json_object' } });
+
   console.log('LLM transport tests passed.');
 } finally {
   globalThis.fetch = originalFetch;

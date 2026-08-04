@@ -5,6 +5,7 @@ import { BlobPreconditionFailedError, get, put } from '@vercel/blob';
 import { ACTION_COST } from './rateLimit.js';
 
 export const FREE_BIOGRAPHY_RUNS = 5;
+export const FREE_SCHEMA_RUNS = 3;
 export const SUPPORTER_CREDITS_PER_DONATION = 50;
 export const SUPPORTER_ACCESS_DAYS = 30;
 
@@ -96,6 +97,7 @@ const emptyRecord = id => ({
   schemaVersion: 1,
   id,
   freeBiographyRunsUsed: 0,
+  freeSchemaRunsUsed: 0,
   supporterCredits: 0,
   supporterExpiresAt: null,
   processedStripeSessions: [],
@@ -110,6 +112,10 @@ const normalizeRecord = (value, id) => {
     freeBiographyRunsUsed: Math.max(0, Math.min(
       FREE_BIOGRAPHY_RUNS,
       Math.floor(Number(value.freeBiographyRunsUsed) || 0)
+    )),
+    freeSchemaRunsUsed: Math.max(0, Math.min(
+      FREE_SCHEMA_RUNS,
+      Math.floor(Number(value.freeSchemaRunsUsed) || 0)
     )),
     supporterCredits: Math.max(0, Math.floor(Number(value.supporterCredits) || 0)),
     supporterExpiresAt:
@@ -200,16 +206,19 @@ export const donationUrlFor = id => {
 
 export const publicAiAccessStatus = (record, now = Date.now()) => {
   const supporterActive = supporterIsActive(record, now);
-  const freeRemaining = Math.max(0, FREE_BIOGRAPHY_RUNS - record.freeBiographyRunsUsed);
+  const freeBiographyRunsRemaining = Math.max(0, FREE_BIOGRAPHY_RUNS - record.freeBiographyRunsUsed);
+  const freeSchemaRunsRemaining = Math.max(0, FREE_SCHEMA_RUNS - record.freeSchemaRunsUsed);
   const supporterCredits = supporterActive ? record.supporterCredits : 0;
   return {
     freeBiographyRunsUsed: record.freeBiographyRunsUsed,
-    freeBiographyRunsRemaining: freeRemaining,
+    freeBiographyRunsRemaining,
+    freeSchemaRunsUsed: record.freeSchemaRunsUsed,
+    freeSchemaRunsRemaining,
     supporterActive,
     supporterCredits,
     supporterExpiresAt: supporterActive ? record.supporterExpiresAt : null,
-    canUseBiography: supporterCredits >= ACTION_COST.generate_sketch || freeRemaining > 0,
-    canUseSchema: supporterCredits >= ACTION_COST.generate_annotation,
+    canUseBiography: supporterCredits >= ACTION_COST.generate_sketch || freeBiographyRunsRemaining > 0,
+    canUseSchema: supporterCredits >= ACTION_COST.generate_annotation || freeSchemaRunsRemaining > 0,
     biographyCreditCost: ACTION_COST.generate_sketch,
     schemaCreditCost: ACTION_COST.generate_annotation,
     supporterCreditGrant: SUPPORTER_CREDITS_PER_DONATION,
@@ -240,7 +249,8 @@ const mutateAiAccessRecord = async (id, mutate) => {
 
 /**
  * Charge a model request before it is sent. Supporter credits are used while
- * active; the five free credits are reserved for biography/sketch requests.
+ * active; otherwise biographies and schema records use their separate free
+ * allowances.
  */
 export const consumeAiCredit = async (id, action, now = Date.now()) => {
   const cost = ACTION_COST[action];
@@ -252,6 +262,10 @@ export const consumeAiCredit = async (id, action, now = Date.now()) => {
     }
     if (action === 'generate_sketch' && record.freeBiographyRunsUsed < FREE_BIOGRAPHY_RUNS) {
       record.freeBiographyRunsUsed += 1;
+      return { allowed: true, save: true };
+    }
+    if (action === 'generate_annotation' && record.freeSchemaRunsUsed < FREE_SCHEMA_RUNS) {
+      record.freeSchemaRunsUsed += 1;
       return { allowed: true, save: true };
     }
     return { allowed: false, save: false };
