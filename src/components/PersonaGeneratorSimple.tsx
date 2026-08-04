@@ -173,11 +173,9 @@ import {
   generatePersonaAnnotationWithGemini,
   generatePersonaSketchWithGemini,
   MODEL_VARIANT_LABELS,
-  ModelUsage,
   ModelVariant,
   normalizePersonaAnnotationRecord,
   PersonaGenerationTarget,
-  readLastModelUsage,
   readModelVariant,
   validatePersonaAnnotationRecord,
   writeModelVariant,
@@ -731,7 +729,6 @@ type BiographyTab = 'biography' | 'family' | 'lifeEvents' | 'innerLife';
 
 /** Which AI action the cost confirmation is standing in front of. */
 type AiCostKind = 'schema';
-type AiDevelopmentMode = 'existing' | 'new';
 type AiGateState = {
   action: 'biography' | 'schema';
   run?: () => Promise<void>;
@@ -744,7 +741,7 @@ type RandomDonationMilestone = 10 | 20 | 50;
  * source text, API keys, persona data, or visitor identifiers.
  */
 const logAiFlow = (event: string, details: Record<string, unknown> = {}) => {
-  console.info(`[HPG AI flow] ${event}`, details);
+  console.info(`[HPG AI flow] ${event} ${JSON.stringify(details)}`);
 };
 
 const AI_COST_COPY: Record<AiCostKind, { title: string; lead: string; detail: string; confirm: string }> = {
@@ -1313,15 +1310,8 @@ export default function PersonaGenerator() {
   // model. Kept next to the biography so a failed call cannot masquerade as a
   // successful one.
   const [generationFallbacks, setGenerationFallbacks] = useState<GenerationFallback[]>([]);
-  const [showAiDevelopmentChoice, setShowAiDevelopmentChoice] = useState(false);
   const [modelVariant, setModelVariant] = useState<ModelVariant>(() => readModelVariant());
   const selectedModelLabel = MODEL_VARIANT_LABELS[modelVariant];
-  /**
-   * Read when the dialog opens rather than held in sync with every call: the
-   * only place it is shown is this dialog, and a request made from it has
-   * already closed it by the time the counts come back.
-   */
-  const [lastModelUsage, setLastModelUsage] = useState<ModelUsage | null>(null);
   const [costConfirm, setCostConfirm] = useState<{ kind: AiCostKind; run: () => Promise<void> } | null>(null);
   const [aiAccess, setAiAccess] = useState<AiAccessStatus | null>(null);
   const [aiGate, setAiGate] = useState<AiGateState | null>(null);
@@ -1359,13 +1349,34 @@ export default function PersonaGenerator() {
 
   useEffect(() => {
     logAiFlow('dialog state changed', {
-      choiceOpen: showAiDevelopmentChoice,
       donationOpen: showDonate,
       gateAction: aiGate?.action || null,
       costConfirmationOpen: Boolean(costConfirm),
       generating: isSourceGenerating,
     });
-  }, [showAiDevelopmentChoice, showDonate, aiGate?.action, costConfirm, isSourceGenerating]);
+  }, [showDonate, aiGate?.action, costConfirm, isSourceGenerating]);
+
+  useEffect(() => {
+    if (!aiGate && !showDonate) return undefined;
+    const frame = window.requestAnimationFrame(() => {
+      const selector = showDonate ? '.donate-support-overlay' : '.ai-support-overlay';
+      const overlay = document.querySelector<HTMLElement>(selector);
+      const card = overlay?.querySelector<HTMLElement>('.modal') || null;
+      const style = card ? window.getComputedStyle(card) : null;
+      const rect = card?.getBoundingClientRect();
+      logAiFlow('dialog DOM check', {
+        selector,
+        overlayFound: Boolean(overlay),
+        cardFound: Boolean(card),
+        display: style?.display || null,
+        visibility: style?.visibility || null,
+        opacity: style?.opacity || null,
+        width: rect ? Math.round(rect.width) : null,
+        height: rect ? Math.round(rect.height) : null,
+      });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [aiGate, showDonate]);
 
   useEffect(() => {
     const el = controlsRef.current;
@@ -1726,16 +1737,6 @@ export default function PersonaGenerator() {
   }, [shareStatus]);
 
   useEffect(() => {
-    if (!showAiDevelopmentChoice) return undefined;
-    setLastModelUsage(readLastModelUsage());
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setShowAiDevelopmentChoice(false);
-    };
-    window.addEventListener('keydown', closeOnEscape);
-    return () => window.removeEventListener('keydown', closeOnEscape);
-  }, [showAiDevelopmentChoice]);
-
-  useEffect(() => {
     let active = true;
     getAiAccessStatus()
       .then(access => {
@@ -1889,24 +1890,6 @@ export default function PersonaGenerator() {
       // The generation route performs the definitive check.
     }
     runAiAction(run);
-  };
-
-  const openAiDevelopmentChoice = () => {
-    logAiFlow('AI development button clicked', {
-      generating: isSourceGenerating,
-      hadDonationDialog: showDonate,
-      hadGate: Boolean(aiGate),
-    });
-    // A stale modal flag must never make the visible AI button a no-op. Any
-    // required gate is re-established by the fresh access check after the user
-    // chooses which biography path to run.
-    setShowDonate(false);
-    setAiGate(null);
-    setCostConfirm(null);
-    setRandomDonationMilestone(null);
-    setShowAbout(false);
-    setShowOverflowSheet(false);
-    setShowAiDevelopmentChoice(true);
   };
 
   const confirmAiRun = () => {
@@ -2977,14 +2960,26 @@ export default function PersonaGenerator() {
     }
   };
 
-  const chooseAiDevelopmentMode = (mode: AiDevelopmentMode) => {
-    logAiFlow('AI development mode selected', {
+  const handleAiDevelopmentClick = () => {
+    const mode = persona ? 'existing' : 'new';
+    logAiFlow('AI development button clicked', {
       mode,
+      generating: isSourceGenerating,
       hasExistingPersona: Boolean(persona),
+      hadDonationDialog: showDonate,
+      hadGate: Boolean(aiGate),
     });
-    setShowAiDevelopmentChoice(false);
+    // Clear stale dialog flags before the authoritative access check. If this
+    // visitor is out of free runs, requestAiBiographyRun immediately restores
+    // the supporter gate with the pending action attached.
+    setShowDonate(false);
+    setAiGate(null);
+    setCostConfirm(null);
+    setRandomDonationMilestone(null);
+    setShowAbout(false);
+    setShowOverflowSheet(false);
     void requestAiBiographyRun(
-      mode === 'existing' ? elaborateExistingPersona : developPersonaProse
+      persona ? elaborateExistingPersona : developPersonaProse
     );
   };
 
@@ -4792,11 +4787,11 @@ export default function PersonaGenerator() {
         </button>
         <button
           className="mobile-action-icon"
-          onClick={openAiDevelopmentChoice}
+          onClick={handleAiDevelopmentClick}
           disabled={isSourceGenerating}
           tabIndex={showMobileActions ? 0 : -1}
           aria-hidden={!showMobileActions}
-          aria-label="Choose how AI should develop a persona"
+          aria-label="Develop the current persona with AI"
         >
           <IoSparkles aria-hidden="true" />
         </button>
@@ -4827,10 +4822,10 @@ export default function PersonaGenerator() {
           <div className="generation-mode-row">
           <button
             className="btn btn-secondary generation-ai-button"
-            onClick={openAiDevelopmentChoice}
+            onClick={handleAiDevelopmentClick}
             disabled={isSourceGenerating}
-            title="Ask AI to elaborate this persona, or create and develop a new one."
-            aria-label="Choose how AI should develop a persona"
+            title="Ask AI to elaborate the persona on screen. If none exists, create and develop one."
+            aria-label="Develop the current persona with AI"
           >
             <IoSparkles aria-hidden="true" />
             {isSourceGenerating ? 'Developing…' : 'Use AI to Develop Persona'}
@@ -7226,115 +7221,6 @@ export default function PersonaGenerator() {
           </div>
           </motion.div>
         </motion.div>
-      )}
-
-      {showAiDevelopmentChoice && !showDonate && createPortal(
-        <div
-          className="modal-overlay ai-choice-overlay"
-          onClick={() => {
-            logAiFlow('AI development choice dismissed from backdrop');
-            setShowAiDevelopmentChoice(false);
-          }}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="ai-choice-modal-title"
-          aria-describedby="ai-choice-modal-description"
-        >
-          <div
-            className="modal ai-choice-modal"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="modal-header">
-              <div>
-                <span className="ai-choice-kicker">AI development</span>
-                <h2 id="ai-choice-modal-title">What should AI work from?</h2>
-              </div>
-              <button
-                className="modal-close ai-choice-close"
-                onClick={() => {
-                  logAiFlow('AI development choice closed');
-                  setShowAiDevelopmentChoice(false);
-                }}
-                aria-label="Close dialog"
-              >
-                <IoClose aria-hidden="true" />
-              </button>
-            </div>
-            <div className="modal-body ai-choice-body">
-              <div className="ai-choice-lede">
-                <p id="ai-choice-modal-description">
-                  Keep exploring the person on screen, or begin with a fresh historical character.
-                </p>
-                <div className="ai-choice-model" role="group" aria-label="Which model writes the biography">
-                  {(['luna', 'nano'] as ModelVariant[]).map((variant) => (
-                    <button
-                      key={variant}
-                      type="button"
-                      className={modelVariant === variant ? 'is-active' : ''}
-                      onClick={() => { setModelVariant(variant); writeModelVariant(variant); }}
-                      title={variant === 'luna'
-                        ? 'Default. Cheaper per output token.'
-                        : 'The previous default, kept for comparison.'}
-                    >
-                      {MODEL_VARIANT_LABELS[variant]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {lastModelUsage && (
-                <p className="ai-choice-usage">
-                  Last call on {MODEL_VARIANT_LABELS[lastModelUsage.variant as ModelVariant] ?? lastModelUsage.variant}:{' '}
-                  {lastModelUsage.input ?? '—'} in, {lastModelUsage.output ?? '—'} out
-                  {lastModelUsage.reasoning ? ` (${lastModelUsage.reasoning} reasoning)` : ''}
-                  , {(lastModelUsage.ms / 1000).toFixed(1)}s.
-                </p>
-              )}
-              <div className="ai-choice-options">
-                <button
-                  type="button"
-                  className="ai-choice-option ai-choice-option-existing"
-                  onClick={() => chooseAiDevelopmentMode('existing')}
-                  disabled={!persona}
-                  autoFocus={Boolean(persona)}
-                >
-                  <span className="ai-choice-icon" aria-hidden="true"><IoSparkles /></span>
-                  <span className="ai-choice-copy">
-                    <strong>Elaborate on existing persona</strong>
-                    <small>
-                      {persona
-                        ? `Keep ${persona.character.name}'s identity, portrait, character sheet, and ${formatYear(persona.year)} setting.`
-                        : 'Generate a persona first to use this option.'}
-                    </small>
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className="ai-choice-option ai-choice-option-new"
-                  onClick={() => chooseAiDevelopmentMode('new')}
-                >
-                  <span className="ai-choice-icon" aria-hidden="true"><IoShuffle /></span>
-                  <span className="ai-choice-copy">
-                    <strong>Create a new persona</strong>
-                    <small>Generate a fresh character, then ask AI to develop their biography.</small>
-                  </span>
-                </button>
-              </div>
-              <p className="ai-choice-donate-note">
-                API and hosting costs are a real thing, and this is being offered for free.{' '}
-                <a
-                  href="/donate"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setShowDonate(true);
-                  }}
-                >
-                  Donate?
-                </a>
-              </p>
-            </div>
-          </div>
-        </div>,
-        document.body
       )}
 
       {randomDonationMilestone && !showDonate && (
