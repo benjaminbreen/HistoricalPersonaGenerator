@@ -2025,6 +2025,11 @@ export default function PersonaGenerator() {
     newPersona.character = adaptedMaterial.applyToCharacter(newPersona.character);
     newPersona.enhancedLifeEvents = adaptedMaterial.lifeEvents;
     if (generationParams.year) newPersona.year = generationParams.year;
+    const sourceDateMatch = record.source.source_date?.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (sourceDateMatch && Number(sourceDateMatch[1]) === newPersona.year) {
+      newPersona.month = Number(sourceDateMatch[2]);
+      newPersona.day = Number(sourceDateMatch[3]);
+    }
     if (generationParams.era) newPersona.era = String(generationParams.era).replace(/_/g, ' ');
     if (generationParams.culturalZone) newPersona.culturalZone = String(generationParams.culturalZone).replace(/_/g, ' ');
     if (generationParams.region) newPersona.region = generationParams.region;
@@ -5884,7 +5889,7 @@ export default function PersonaGenerator() {
                             </ul>
                           </div>
                         )}
-                        {annotationRecord && personaSketch ? (
+                        {personaSketch ? (
                           <div className="source-sketch">
                             {personaSketch.split(/\n{2,}/).map((paragraph, index) => (
                               <p key={index}>{paragraph}</p>

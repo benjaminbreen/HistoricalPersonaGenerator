@@ -14,6 +14,17 @@ const oldBaileyCrimeTerms = {
 
 const oldBaileyGenderTerms = { female: 'woman', male: 'man' };
 const normalizeWhitespace = value => String(value || '').replace(/\s+/g, ' ').trim();
+export const oldBaileyDefendantSubject = source => {
+  const name = String(source?.title || '').split('.')[0].trim();
+  const gender = String(source?.xml || '').match(/type="defendantName"[\s\S]{0,1600}?type="gender"\s+value="(female|male)"/i)?.[1]?.toLowerCase();
+  if (!name) return undefined;
+  return {
+    name,
+    description: 'Defendant named in the tagged Old Bailey trial record.',
+    genderRole: gender === 'female' ? 'woman' : gender === 'male' ? 'man' : undefined,
+    externalId: source?.idkey,
+  };
+};
 
 const oldBaileyDateFromTitle = (title = '') => {
   const match = String(title).match(/(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\s+(\d{4})/);
@@ -109,6 +120,8 @@ const oldBaileySourceFromHit = (hit, filters) => {
     extractionMethod: 'structured_api',
     citationLabel: `Old Bailey Proceedings: ${idkey}`,
     reliabilityNotes: 'Old Bailey trial account from the DHI API. Treat as institutional/legal testimony with reporting, transcription, and courtroom bias.',
+    sourceDate: date?.toISOString().slice(0, 10),
+    subject: oldBaileyDefendantSubject(source),
   };
 };
 

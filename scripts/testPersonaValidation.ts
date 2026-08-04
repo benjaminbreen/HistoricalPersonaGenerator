@@ -10,6 +10,7 @@ import {
   personaOrientationToAnnotationRecord,
   validatePersonaOrientationRecord,
 } from '../src/services/personaOrientationService';
+import { adaptPersonaMaterialRecord } from '../src/services/personaMaterialAdapter';
 
 const normalized = normalizePersonaAnnotationRecord({
   schema_version: '1.1.0',
@@ -150,8 +151,8 @@ assert.equal(wikipediaOrientation.persona.age_and_life_stage.age, 16);
 const wikipediaCompatibilityRecord = personaOrientationToAnnotationRecord(wikipediaOrientation, wikipediaSource);
 assert.equal(wikipediaCompatibilityRecord.schema_version, '1.1.0');
 assert.equal(wikipediaCompatibilityRecord.persona_seed.place.region, 'Venezuela');
-assert.equal(wikipediaCompatibilityRecord.persona_seed.religious_practice?.specific_label, 'Roman Catholic practice');
-assert.equal(wikipediaCompatibilityRecord.persona_seed.social_identity.religious_or_communal_identity, 'Roman Catholic practice');
+assert.equal(wikipediaCompatibilityRecord.persona_seed.religious_practice?.specific_label, 'Roman Catholic');
+assert.equal(wikipediaCompatibilityRecord.persona_seed.social_identity.religious_or_communal_identity, 'Roman Catholic');
 
 const providerMisnested = structuredClone({
   persona: {
@@ -179,6 +180,47 @@ assert.deepEqual(repairedProviderRecord.persona.anachronism_guards, ['later Vene
 assert.equal(repairedProviderRecord.persona.conversation_frame?.situation, 'Barcelona during the 1817 crisis.');
 assert.equal(repairedProviderRecord.persona.clothing_and_possessions?.length, 6);
 assert.equal(repairedProviderRecord.provenance[0].snippet, undefined);
+
+const graceSource = {
+  title: 'Grace Sympson. Theft; theft from a specified place. 26th April 1693.',
+  text: 'Grace Sympson was tried for stealing in St. John-street. She was found guilty.',
+  url: 'https://www.dhi.ac.uk/data/oldbailey/record/t16930426-67',
+  sourceBasis: 'court_testimony' as const,
+  extractionMethod: 'structured_api' as const,
+  citationLabel: 'Old Bailey Proceedings: t16930426-67',
+  sourceDate: '1693-04-26',
+  subject: {
+    name: 'Grace Sympson',
+    genderRole: 'woman',
+    externalId: 't16930426-67',
+  },
+};
+const graceOrientation = createPersonaOrientationRecord({
+  persona: {
+    ...wikipediaOrientation.persona,
+    name_and_address: { full_name: 'Wrong alias' },
+    gender_role: 'man',
+    year: 1693,
+    age_and_life_stage: { age: 30, life_stage: 'adult' },
+    place_context: { locality: 'St. John Street and Holborn', region: 'Middlesex', polity: 'Kingdom of England', locale_type: 'London streets and lodging house' },
+    language_and_literacy: { languages: ['English'], literacy: 'basic practical' },
+    occupation: 'occasional domestic and street work',
+    religion_and_ritual: 'Nominally Anglican in a parish world of bells, church courts, oaths, and Christian burial.',
+    clothing_and_possessions: ['Worn wool gown or petticoat', 'Coarse shift', 'Apron and kerchief', 'Rosary', 'Few personal goods'],
+  },
+}, graceSource);
+assert.equal(graceOrientation.persona.name_and_address.full_name, 'Grace Sympson');
+assert.equal(graceOrientation.persona.gender_role, 'woman');
+const graceRecord = personaOrientationToAnnotationRecord(graceOrientation, graceSource);
+assert.equal(graceRecord.source.source_date, '1693-04-26');
+assert.equal(graceRecord.persona_seed.religious_practice?.specific_label, 'Anglican');
+assert.match(graceRecord.persona_seed.religious_practice?.practice_context || '', /parish world/);
+assert.equal(graceRecord.persona_seed.material_life.clothing_detail, 'Worn wool gown or petticoat; Coarse shift; Apron and kerchief');
+assert.deepEqual(graceRecord.persona_seed.material_life.possessions, ['Rosary', 'Few personal goods']);
+const graceAdapter = adaptPersonaMaterialRecord(graceRecord, { useSourceTitleAsName: true });
+assert.equal(graceAdapter.generationParams.gender, 'Female');
+assert.equal(graceAdapter.displayOverrides.languageLabel, 'Early Modern English');
+assert.equal(graceAdapter.displayOverrides.clothingDetail, 'Worn wool gown or petticoat');
 
 const responsePath = process.argv[2];
 if (responsePath) {

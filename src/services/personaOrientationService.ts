@@ -115,6 +115,7 @@ export function createPersonaOrientationRecord(
   const persona = normalizedPersona;
   const subject = lockNamedSubject ? source.subject : undefined;
   if (subject?.name) persona.name_and_address.full_name = subject.name;
+  if (subject?.genderRole) persona.gender_role = subject.genderRole;
   if (subject?.birthYear !== undefined) {
     const finalLivingYear = subject.deathYear !== undefined && (persona.year < subject.birthYear || persona.year > subject.deathYear)
       ? subject.birthYear + Math.floor((subject.deathYear - subject.birthYear) * 0.75)
@@ -246,6 +247,52 @@ const autonomy = (legal: string, labor: string | undefined): NonNullable<Histori
 const confidenceFor = (sourceBasis: string): 'speculative' | 'low' | 'medium' =>
   sourceBasis === 'synthetic_composite' ? 'speculative' : 'medium';
 
+const conciseReligionLabel = (value?: string): string | undefined => {
+  if (!value) return undefined;
+  const known: Array<[RegExp, string]> = [
+    [/\broman catholic\b/i, 'Roman Catholic'],
+    [/\bcatholic\b/i, 'Catholic'],
+    [/\banglican\b/i, 'Anglican'],
+    [/\bquaker\b|\bsociety of friends\b/i, 'Quaker'],
+    [/\bpuritan\b/i, 'Puritan'],
+    [/\beastern orthodox\b|\borthodox christian\b/i, 'Eastern Orthodox'],
+    [/\bprotestant\b/i, 'Protestant'],
+    [/\bsunni\b/i, 'Sunni Muslim'],
+    [/\bshia\b|\bshi['’]?i\b/i, 'Shia Muslim'],
+    [/\bmuslim\b|\bislam(?:ic)?\b/i, 'Muslim'],
+    [/\bjewish\b|\bjudaism\b/i, 'Jewish'],
+    [/\bhindu\b/i, 'Hindu'],
+    [/\bbuddhist\b/i, 'Buddhist'],
+    [/\bsikh\b/i, 'Sikh'],
+    [/\bjain\b/i, 'Jain'],
+    [/\bshinto\b/i, 'Shinto'],
+    [/\bdaoist\b|\btaoist\b/i, 'Daoist'],
+    [/\bconfucian\b/i, 'Confucian'],
+  ];
+  const match = known.find(([pattern]) => pattern.test(value));
+  if (match) return match[1];
+  const leadingPhrase = value.split(/[;:.]/)[0].trim();
+  return leadingPhrase.length <= 60 ? leadingPhrase : undefined;
+};
+
+const religionTradition = (label?: string): NonNullable<HistoricalPersonaAnnotationRecord['persona_seed']['religious_practice']>['tradition'] => {
+  if (!label) return 'uncertain';
+  if (/Catholic|Anglican|Quaker|Puritan|Orthodox|Protestant|Christian/i.test(label)) return 'christian';
+  if (/Muslim|Sunni|Shia|Islam/i.test(label)) return 'islamic';
+  if (/Jewish|Judaism/i.test(label)) return 'jewish';
+  if (/Hindu/i.test(label)) return 'hindu';
+  if (/Buddhist/i.test(label)) return 'buddhist';
+  if (/Sikh/i.test(label)) return 'sikh';
+  if (/Jain/i.test(label)) return 'jain';
+  if (/Confucian/i.test(label)) return 'confucian_or_literati';
+  if (/Daoist/i.test(label)) return 'daoist';
+  if (/Shinto/i.test(label)) return 'shinto';
+  return 'other';
+};
+
+const looksLikeClothing = (value: string): boolean =>
+  /\b(gown|petticoat|shift|smock|apron|kerchief|cap|hat|hood|bonnet|veil|shawl|dress|shirt|blouse|coat|jacket|doublet|waistcoat|jerkin|tunic|robe|habit|cassock|sari|kimono|hanfu|kaftan|cloak|mantle|breeches|trousers|shoes|boots|sandals|stockings)\b/i.test(value);
+
 const oldSupport = (support: PersonaOrientationProvenance['support']) => {
   if (support === 'explicit') return 'explicit' as const;
   if (support === 'inferred') return 'weak_inference' as const;
@@ -298,6 +345,10 @@ export function applyPersonaOrientationToAnnotationRecord(
   const relations = p.household_and_relations || [];
   const concerns = p.concerns_and_desires?.concerns || [];
   const desires = p.concerns_and_desires?.desires || [];
+  const religionLabel = conciseReligionLabel(p.religion_and_ritual || p.community_identity);
+  const clothingAndPossessions = p.clothing_and_possessions || [];
+  const clothing = clothingAndPossessions.filter(looksLikeClothing);
+  const possessions = clothingAndPossessions.filter(value => !looksLikeClothing(value));
 
   const next = structuredClone(base) as HistoricalPersonaAnnotationRecord;
   next.schema_version = '1.1.0';
@@ -351,7 +402,7 @@ export function applyPersonaOrientationToAnnotationRecord(
     legal_condition: legalCondition(p.legal_condition),
     household_role: next.persona_seed.social_identity.household_role || 'other_dependent_kin',
     marital_status: next.persona_seed.social_identity.marital_status || 'unclear',
-    religious_or_communal_identity: p.religion_and_ritual || p.community_identity,
+    religious_or_communal_identity: religionLabel || p.community_identity,
     languages: p.language_and_literacy.languages,
     literacy: literacyLevel(p.language_and_literacy.literacy),
     numeracy: 'practical',
@@ -386,15 +437,15 @@ export function applyPersonaOrientationToAnnotationRecord(
   next.persona_seed.material_life = {
     dwelling_type: 'other',
     dwelling_detail: p.dwelling,
-    possessions: p.clothing_and_possessions,
+    possessions,
     clothing_level: security === 'wealthy' || security === 'elite' ? 'fine'
       : security === 'comfortable' ? 'respectable' : security === 'destitute' ? 'ragged' : 'plain_working',
-    clothing_detail: p.clothing_and_possessions?.join('; '),
+    clothing_detail: clothing.join('; ') || undefined,
     food_security: security === 'wealthy' || security === 'elite' || security === 'comfortable' ? 'secure'
       : security === 'precarious' || security === 'destitute' ? 'seasonally_precarious' : 'uneven_but_adequate',
     foods_or_consumables: p.food,
     body_conditions: p.health_and_body,
-    material_notes: [p.dwelling, p.food?.join('; '), p.clothing_and_possessions?.join('; ')].filter(Boolean).join(' '),
+    material_notes: [p.dwelling, p.food?.join('; '), clothingAndPossessions.join('; ')].filter(Boolean).join(' '),
   };
   next.persona_seed.mobility_and_horizon = {
     mobility: includes(p.horizons.mobility, /long|distant|region|travel/) ? 'regionally_mobile' : 'locally_mobile',
@@ -408,8 +459,8 @@ export function applyPersonaOrientationToAnnotationRecord(
     detail: [p.horizons.knowledge, p.current_pressures?.join('; ')].filter(Boolean).join(' '),
   };
   next.persona_seed.religious_practice = {
-    tradition: 'uncertain',
-    specific_label: p.religion_and_ritual,
+    tradition: religionTradition(religionLabel),
+    specific_label: religionLabel,
     practice_context: p.religion_and_ritual,
   };
   next.persona_seed.normative_world = {

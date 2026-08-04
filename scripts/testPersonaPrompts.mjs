@@ -9,6 +9,7 @@ import {
   buildSketchPrompt,
   formatHistoricalYear,
 } from '../api/_lib/personaPrompts.js';
+import { oldBaileyDefendantSubject } from '../api/old-bailey/random.js';
 
 const orientationSchema = JSON.parse(fs.readFileSync('src/schemas/personaOrientation.schema.json', 'utf8'));
 const modelSchema = buildOrientationModelSchema(orientationSchema);
@@ -38,6 +39,14 @@ assert.match(sourcePersonaPrompt, /exactly two paragraphs/i);
 assert.match(sourcePersonaPrompt, /1795/);
 assert.match(sourcePersonaPrompt, /locked_subject/);
 assert.doesNotMatch(sourcePersonaPrompt, /Bengal|apprentice carpenter/);
+
+const taggedDefendant = oldBaileyDefendantSubject({
+  idkey: 't16930426-67',
+  title: 'Grace Sympson. Theft; theft from a specified place. 26th April 1693.',
+  xml: '<persName type="defendantName">Grace Sympson<interp type="gender" value="female"/></persName>',
+});
+assert.equal(taggedDefendant.name, 'Grace Sympson');
+assert.equal(taggedDefendant.genderRole, 'woman');
 
 const record = {
   source: {

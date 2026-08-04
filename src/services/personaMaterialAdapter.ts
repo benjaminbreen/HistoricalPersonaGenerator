@@ -293,6 +293,19 @@ const displayValue = (value?: string): string => {
   return labels[normalized] || normalizeMaterialText(value || '');
 };
 
+const primaryClothingDetail = (value?: string): string | undefined => {
+  if (!value) return undefined;
+  return value.split(';').map(part => part.trim()).find(Boolean);
+};
+
+const languageLabelForYear = (value: string | undefined, year: number): string | undefined => {
+  if (!value || !/\benglish\b/i.test(value)) return value;
+  if (year < 1150) return 'Old English';
+  if (year < 1500) return 'Middle English';
+  if (year < 1750) return 'Early Modern English';
+  return 'Modern English';
+};
+
 const materialSupportTagFromSchema = (supportLevel?: string): MaterialSupportTag => {
   switch (supportLevel) {
     case 'explicit':
@@ -542,7 +555,7 @@ export function adaptPersonaMaterialRecord(
     seed.work.primary_occupation,
   ].filter(Boolean).join('|');
   const age = seed.social_identity.estimated_age || ageFromBand(seed.social_identity.age_band, recordKey);
-  const sourceLanguageLabel = seed.social_identity.languages?.[0] || record.source.language;
+  const sourceLanguageLabel = languageLabelForYear(seed.social_identity.languages?.[0] || record.source.language, year);
   const sourceLanguageData = findLanguageDataForMaterial(sourceLanguageLabel);
   const culturalZone = inferCulturalZone(record) || normalizeCulturalZone(sourceLanguageData?.culturalZones?.[0]);
   const name = materialName(record) || (
@@ -572,10 +585,12 @@ export function adaptPersonaMaterialRecord(
   const displayOverrides: MaterialDisplayOverrides = {
     languageLabel: sourceLanguageLabel,
     languageData: sourceLanguageData,
-    clothingDetail: seed.material_life.clothing_detail || displayValue(seed.material_life.clothing_level),
+    clothingDetail: primaryClothingDetail(seed.material_life.clothing_detail) || displayValue(seed.material_life.clothing_level),
     possessions: seed.material_life.possessions || [],
     attributes: [
-      seed.temperament_and_voice.dominant_temperament && {
+      seed.temperament_and_voice.dominant_temperament
+      && !/^(uncertain|mixed|variable|unspecified)$/i.test(seed.interaction_style?.under_stress || seed.temperament_and_voice.dominant_temperament)
+      && {
         name: seed.interaction_style?.under_stress
           ? displayValue(seed.interaction_style.under_stress)
           : displayValue(seed.temperament_and_voice.dominant_temperament),
@@ -631,7 +646,7 @@ export function adaptPersonaMaterialRecord(
     const sourceEquippedItems = {} as typeof character.equippedItems;
     const sourceBodyConditions = seed.material_life.body_conditions || [];
     const clothingIsSpecific = isSpecificClothingDetail(displayOverrides.clothingDetail);
-    const sourceHeadgear = sourceHeadgearForRecord(record, displayOverrides.clothingDetail);
+    const sourceHeadgear = sourceHeadgearForRecord(record, seed.material_life.clothing_detail || displayOverrides.clothingDetail);
     const sourceSkinTextureValue = sourceSkinTexture(sourceBodyConditions);
     const sourceMarkings = sourceMarkingsForBodyConditions(sourceBodyConditions);
     const sourcePalette = sourcePaletteForClothing(seed.material_life.clothing_detail || seed.material_life.clothing_level);

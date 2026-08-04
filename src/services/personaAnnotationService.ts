@@ -310,7 +310,7 @@ export function createAnnotationRecordFromSource(source: IngestedPersonaSource):
       title: source.title,
       citation_label: source.citationLabel,
       url: source.url,
-      source_date: yearMatch?.[0],
+      source_date: source.sourceDate || yearMatch?.[0],
       language: 'unknown',
       translation_status: 'unknown',
       document_genre: source.sourceBasis === 'wikipedia_or_reference' ? 'reference article' : 'submitted text',
