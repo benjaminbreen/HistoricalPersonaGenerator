@@ -179,6 +179,7 @@ const normalizeActivityLocale = (value: unknown): unknown =>
 type SchemaNode = {
   $ref?: string;
   type?: string;
+  format?: string;
   enum?: unknown[];
   properties?: Record<string, SchemaNode>;
   items?: SchemaNode;
@@ -228,6 +229,17 @@ const resolveSchemaNode = (node: SchemaNode, root: SchemaNode): SchemaNode => {
  */
 const normalizeAgainstSchema = (value: unknown, rawNode: SchemaNode, root: SchemaNode): unknown => {
   const node = resolveSchemaNode(rawNode, root);
+  if (value === null && node.type && node.type !== 'null') return undefined;
+  if (typeof value === 'string' && node.format === 'uri') {
+    try {
+      new URL(value);
+    } catch {
+      return undefined;
+    }
+  }
+  if (typeof value === 'string' && node.format === 'date-time' && Number.isNaN(Date.parse(value))) {
+    return undefined;
+  }
   if (node.enum) return normalizeSchemaEnum(value, node.enum);
   if (node.type === 'array' && Array.isArray(value) && node.items) {
     return value.map(item => normalizeAgainstSchema(item, node.items as SchemaNode, root));
@@ -238,7 +250,8 @@ const normalizeAgainstSchema = (value: unknown, rawNode: SchemaNode, root: Schem
     const normalized: Record<string, unknown> = {};
     for (const [key, item] of Object.entries(source)) {
       if (properties[key]) {
-        normalized[key] = normalizeAgainstSchema(item, properties[key], root);
+        const normalizedItem = normalizeAgainstSchema(item, properties[key], root);
+        if (normalizedItem !== undefined) normalized[key] = normalizedItem;
       } else if (node.additionalProperties !== false) {
         normalized[key] = item;
       }

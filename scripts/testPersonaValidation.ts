@@ -8,6 +8,8 @@ import {
 const normalized = normalizePersonaAnnotationRecord({
   schema_version: '1.1.0',
   invented_root_property: 'drop me',
+  source: { url: '' },
+  annotation: { reviewed_at: '' },
   persona_seed: {
     social_position: { economic_security: 'seasonally_precarious' },
     constraint_regimes: [{ type: 'environmental_stress' }],
@@ -21,6 +23,8 @@ assert.equal(normalized.persona_seed.constraint_regimes[0].type, 'other');
 assert.equal(normalized.persona_seed.household_economy.property_relation, 'mixed');
 assert.equal(normalized.persona_seed.temperament_and_voice.dominant_temperament, 'mixed');
 assert.equal('invented_root_property' in normalized, false);
+assert.equal('url' in normalized.source, false);
+assert.equal('reviewed_at' in normalized.annotation, false);
 
 const responsePath = process.argv[2];
 if (responsePath) {
