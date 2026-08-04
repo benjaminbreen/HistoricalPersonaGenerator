@@ -1125,6 +1125,10 @@ body.dark-mode .top-bar {
   color: var(--color-accent-primary);
 }
 
+.ai-choice-overlay {
+  z-index: 11000;
+}
+
 .ai-choice-modal {
   max-width: 39rem;
 }

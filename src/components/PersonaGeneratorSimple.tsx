@@ -738,6 +738,15 @@ type AiGateState = {
 };
 type RandomDonationMilestone = 10 | 20 | 50;
 
+/**
+ * Intentionally remains enabled in production while the supporter flow is
+ * being exercised. It records state transitions and quota decisions only—no
+ * source text, API keys, persona data, or visitor identifiers.
+ */
+const logAiFlow = (event: string, details: Record<string, unknown> = {}) => {
+  console.info(`[HPG AI flow] ${event}`, details);
+};
+
 const AI_COST_COPY: Record<AiCostKind, { title: string; lead: string; detail: string; confirm: string }> = {
   schema: {
     title: 'Build the full schema record?',
@@ -1349,6 +1358,16 @@ export default function PersonaGenerator() {
   const [showOverflowSheet, setShowOverflowSheet] = useState(false);
 
   useEffect(() => {
+    logAiFlow('dialog state changed', {
+      choiceOpen: showAiDevelopmentChoice,
+      donationOpen: showDonate,
+      gateAction: aiGate?.action || null,
+      costConfirmationOpen: Boolean(costConfirm),
+      generating: isSourceGenerating,
+    });
+  }, [showAiDevelopmentChoice, showDonate, aiGate?.action, costConfirm, isSourceGenerating]);
+
+  useEffect(() => {
     const el = controlsRef.current;
     if (!el) return;
     /* The listener reads a rect per scroll event but only touches state when
@@ -1729,6 +1748,11 @@ export default function PersonaGenerator() {
 
     const handleRequired = (event: Event) => {
       const { access, action } = (event as CustomEvent<AiAccessRequiredDetail>).detail;
+      logAiFlow('generation route required supporter access', {
+        action,
+        canUseBiography: access?.canUseBiography ?? null,
+        canUseSchema: access?.canUseSchema ?? null,
+      });
       if (access) setAiAccess(access);
       setAiGate({ action });
     };
@@ -1791,7 +1815,15 @@ export default function PersonaGenerator() {
   };
 
   const runAiAction = (run: () => Promise<void>) => {
-    void run().finally(refreshAiAccess);
+    logAiFlow('starting AI action');
+    void run()
+      .catch(error => {
+        console.error('[HPG AI flow] AI action rejected', error);
+      })
+      .finally(() => {
+        logAiFlow('AI action settled');
+        refreshAiAccess();
+      });
   };
 
   /**
@@ -1825,22 +1857,56 @@ export default function PersonaGenerator() {
    * stopped until Stripe confirms support.
    */
   const requestAiBiographyRun = async (run: () => Promise<void>) => {
-    if (isSourceGenerating) return;
+    logAiFlow('biography access check requested', {
+      generating: isSourceGenerating,
+      modelEnabled: useGeminiExtraction,
+    });
+    if (isSourceGenerating) {
+      logAiFlow('biography request ignored because another generation is active');
+      return;
+    }
     if (!useGeminiExtraction) {
+      logAiFlow('model filling is disabled; running local biography path');
       runAiAction(run);
       return;
     }
     try {
       const access = await getAiAccessStatus();
       setAiAccess(access);
+      logAiFlow('biography access response', {
+        allowed: access.canUseBiography,
+        freeRunsRemaining: access.freeBiographyRunsRemaining,
+        supporterActive: access.supporterActive,
+        supporterCredits: access.supporterCredits,
+      });
       if (!access.canUseBiography) {
+        logAiFlow('opening biography supporter gate');
         setAiGate({ action: 'biography', run });
         return;
       }
-    } catch {
+    } catch (error) {
+      console.error('[HPG AI flow] biography access lookup failed; trying authoritative generation route', error);
       // The generation route performs the definitive check.
     }
     runAiAction(run);
+  };
+
+  const openAiDevelopmentChoice = () => {
+    logAiFlow('AI development button clicked', {
+      generating: isSourceGenerating,
+      hadDonationDialog: showDonate,
+      hadGate: Boolean(aiGate),
+    });
+    // A stale modal flag must never make the visible AI button a no-op. Any
+    // required gate is re-established by the fresh access check after the user
+    // chooses which biography path to run.
+    setShowDonate(false);
+    setAiGate(null);
+    setCostConfirm(null);
+    setRandomDonationMilestone(null);
+    setShowAbout(false);
+    setShowOverflowSheet(false);
+    setShowAiDevelopmentChoice(true);
   };
 
   const confirmAiRun = () => {
@@ -2912,6 +2978,10 @@ export default function PersonaGenerator() {
   };
 
   const chooseAiDevelopmentMode = (mode: AiDevelopmentMode) => {
+    logAiFlow('AI development mode selected', {
+      mode,
+      hasExistingPersona: Boolean(persona),
+    });
     setShowAiDevelopmentChoice(false);
     void requestAiBiographyRun(
       mode === 'existing' ? elaborateExistingPersona : developPersonaProse
@@ -4722,7 +4792,7 @@ export default function PersonaGenerator() {
         </button>
         <button
           className="mobile-action-icon"
-          onClick={() => setShowAiDevelopmentChoice(true)}
+          onClick={openAiDevelopmentChoice}
           disabled={isSourceGenerating}
           tabIndex={showMobileActions ? 0 : -1}
           aria-hidden={!showMobileActions}
@@ -4757,7 +4827,7 @@ export default function PersonaGenerator() {
           <div className="generation-mode-row">
           <button
             className="btn btn-secondary generation-ai-button"
-            onClick={() => setShowAiDevelopmentChoice(true)}
+            onClick={openAiDevelopmentChoice}
             disabled={isSourceGenerating}
             title="Ask AI to elaborate this persona, or create and develop a new one."
             aria-label="Choose how AI should develop a persona"
@@ -7158,26 +7228,21 @@ export default function PersonaGenerator() {
         </motion.div>
       )}
 
-      {showAiDevelopmentChoice && !showDonate && (
-        <motion.div
+      {showAiDevelopmentChoice && !showDonate && createPortal(
+        <div
           className="modal-overlay ai-choice-overlay"
-          onClick={() => setShowAiDevelopmentChoice(false)}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18 }}
+          onClick={() => {
+            logAiFlow('AI development choice dismissed from backdrop');
+            setShowAiDevelopmentChoice(false);
+          }}
           role="dialog"
           aria-modal="true"
           aria-labelledby="ai-choice-modal-title"
           aria-describedby="ai-choice-modal-description"
         >
-          <motion.div
+          <div
             className="modal ai-choice-modal"
             onClick={(event) => event.stopPropagation()}
-            initial={{ opacity: 0, scale: 0.95, y: 14 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 14 }}
-            transition={{ duration: 0.2, ease: [0.2, 0.75, 0.2, 1] }}
           >
             <div className="modal-header">
               <div>
@@ -7186,7 +7251,10 @@ export default function PersonaGenerator() {
               </div>
               <button
                 className="modal-close ai-choice-close"
-                onClick={() => setShowAiDevelopmentChoice(false)}
+                onClick={() => {
+                  logAiFlow('AI development choice closed');
+                  setShowAiDevelopmentChoice(false);
+                }}
                 aria-label="Close dialog"
               >
                 <IoClose aria-hidden="true" />
@@ -7264,8 +7332,9 @@ export default function PersonaGenerator() {
                 </a>
               </p>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>,
+        document.body
       )}
 
       {randomDonationMilestone && !showDonate && (
