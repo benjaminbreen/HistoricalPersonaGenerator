@@ -823,12 +823,34 @@ export function formatPersonalName(input: FormatNameInput): FormattedName {
     list.length > 0 ? list[Math.floor(random() * list.length)] : undefined;
 
   let convention = pickConvention(profile.weights, random);
+  let patronymicForm = profile.patronymic;
 
   // A convention that needs material the name set does not carry falls back to
   // the bare given name rather than inventing something.
+  //
+  // Except once the state is writing everyone down. After civil registration
+  // `settleDescriptiveForms` folds every descriptive weight into `inherited`,
+  // so a name set with no surname pool collapsed the whole profile to a single
+  // given name — which is how a persona in the Kimberley in 1969 and another in
+  // the Victorian Alps in 1988 came out as "Eliza" and "Tarkine", with no
+  // family name at all, in a country that had been issuing birth certificates
+  // for a century.
+  //
+  // The fallback is the mechanism that actually produced most of these
+  // surnames: a mission or a registrar wrote the father's given name in the
+  // family-name column and it stuck. So the surname is a real name from the
+  // same pool rather than a borrowed settler one, which would be the other kind
+  // of wrong.
   const needsSurnamePool = convention === 'inherited' || convention === 'clan' || convention === 'toponymic';
-  if (needsSurnamePool && usableSurnames.length === 0) convention = 'personal';
-  if (convention === 'patronymic' && !profile.patronymic) convention = 'personal';
+  if (needsSurnamePool && usableSurnames.length === 0) {
+    if (year >= CIVIL_REGISTRATION && malePool.length > 0) {
+      convention = 'patronymic';
+      patronymicForm = (parent: string) => parent;
+    } else {
+      convention = 'personal';
+    }
+  }
+  if (convention === 'patronymic' && !patronymicForm) convention = 'personal';
   if (convention === 'teknonym' && !profile.teknonym) convention = 'personal';
 
   // Built first, then decorated. The estate's markers are applied to a finished
@@ -842,7 +864,7 @@ export function formatPersonalName(input: FormatNameInput): FormattedName {
       // same world. Returned so the family can be generated to match.
       const parent = pick(malePool) || given;
       return {
-        full: `${given} ${profile.patronymic!(parent, gender)}`,
+        full: `${given} ${patronymicForm!(parent, gender)}`,
         given,
         convention,
         patronymicFrom: parent,

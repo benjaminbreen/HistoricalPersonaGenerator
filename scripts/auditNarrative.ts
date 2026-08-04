@@ -40,6 +40,9 @@ const [
   { getAllAttributes },
   { hasCapability },
   { IDEOLOGIES },
+  { sampleEliteOffice },
+  { ELITE_TIERS, LOCAL_NOTABLE },
+  { withSeed },
 ] = await Promise.all([
   import('../src/services/personaGenerator'),
   import('../src/services/narrativeBiographyService'),
@@ -49,6 +52,9 @@ const [
   import('../src/constants/attributeDefinitions'),
   import('../src/constants/societyCapabilities'),
   import('../src/constants/gameData/beliefs'),
+  import('../src/services/eliteOfficeService'),
+  import('../src/constants/gameData/eliteOffices'),
+  import('../src/utils/seededRandom'),
 ]);
 
 console.log = originalLog;
@@ -247,7 +253,12 @@ const biographies: string[] = quiet(() =>
 
   const seen = new Set<string>();
   const clashes: string[] = [];
-  const samples = FAST ? 40000 : 200000;
+  // Not scaled down by `--fast`. This loop is synthetic — no persona is
+  // generated — so it costs a second either way, and 40,000 draws is not enough
+  // to reach the rarest attributes: `giant_boned` and one other were missing
+  // from every fast run, which made the quick loop fail for a reason that had
+  // nothing to do with the code being checked.
+  const samples = 200000;
   for (let i = 0; i < samples; i++) {
     const female = rnd() < 0.5;
     const char: any = {
@@ -264,9 +275,19 @@ const biographies: string[] = quiet(() =>
       personality: { openness: 0.5, conscientiousness: 0.5, extraversion: 0.5, agreeableness: 0.5, neuroticism: (i * 17) % 100 / 100 },
     };
     char.birthplace = char.region;
-    const ids = quiet(() => AttributeBadgeService.generateAttributes(
-      char, pick(YEARS), char.region, { localeType: pick(['rural', 'town', 'city']) as any },
-    )).map((b: any) => b.id);
+    // Inside a seed scope, as generation always is.
+    //
+    // `attributeBadgeService` reaches for `Math.random`, which `withSeed`
+    // makes deterministic for the duration of a call — but this check was
+    // calling it bare, so the run was unseeded and the reachable count came
+    // out 219 or 220 depending on the day. A flaky commit gate is worse than
+    // no gate, and the app itself was never affected: every persona is built
+    // inside `withSeed` already.
+    const year = pick(YEARS);
+    const locale = pick(['rural', 'town', 'city']) as any;
+    const ids = quiet(() => withSeed(0x5eed ^ i, () => AttributeBadgeService.generateAttributes(
+      char, year, char.region, { localeType: locale },
+    ))).map((b: any) => b.id);
     ids.forEach((id: string) => seen.add(id));
     BAD_PAIRS.forEach(([a, b]) => {
       if (ids.includes(a) && ids.includes(b)) clashes.push(`${a}+${b}`);
@@ -363,8 +384,24 @@ const biographies: string[] = quiet(() =>
     entry.n += 1;
     if (!/\s/.test(String(p.character.name || '').replace(/^\*/, ''))) entry.mono += 1;
   });
+  // A zone counts as an offender only if it is majority-mononym by more than
+  // its own sampling error. The flat `> 0.5` test was under-powered for the
+  // small zones, which are exactly the ones at risk: the corpus gives OCEANIA
+  // about thirty post-1700 personas, where one draw in three is roughly nine
+  // points of rate, so a zone sitting honestly at 42% reads anywhere from 25%
+  // to 60% between runs. It duly failed the audit once on 19 mononyms out of
+  // 33 while the rate measured over six times the corpus was 42.6%. Raising the
+  // `n` gate instead would have stopped watching the small zones altogether,
+  // which is the opposite of what the invariant is for.
+  //
+  // One-sided 95% lower bound, normal approximation. A genuinely majority-
+  // mononym zone still fails at any n the corpus produces; noise no longer does.
+  const majorityBeyondNoise = (mono: number, n: number): boolean => {
+    const rate = mono / n;
+    return rate - 1.64 * Math.sqrt(rate * (1 - rate) / n) > 0.5;
+  };
   const offenders = [...byZone]
-    .filter(([, v]) => v.n >= 20 && v.mono / v.n > 0.5)
+    .filter(([, v]) => v.n >= 20 && majorityBeyondNoise(v.mono, v.n))
     .map(([k, v]) => `${k} ${(v.mono / v.n * 100).toFixed(0)}% of ${v.n}`);
   add({
     name: 'post-1700-surnames',
@@ -383,8 +420,18 @@ const biographies: string[] = quiet(() =>
   personas.forEach(p => {
     const zone = p.historicalContext.culturalZone;
     (p.character.appearance?.jewelry ?? []).forEach((piece: any) => {
+      // The place, not only the zone. `ornamentService` decides eligibility
+      // with the full capability context, and the place overrides are where
+      // most of the interesting answers live — Mesoamerican metallurgy is dated
+      // from 800 CE by name, and a check that passed the zone alone read the
+      // whole Valley of Mexico off the NORTH_AMERICAN_COLONIAL row and called a
+      // correctly smelted brooch anachronistic.
       if (METALS.has(piece.material)
-        && !hasCapability('metallurgy', { year: p.year, culturalZone: zone })) {
+        && !hasCapability('metallurgy', {
+          year: p.year,
+          culturalZone: zone,
+          placeLower: `${p.location ?? ''} ${p.region ?? ''}`.toLowerCase(),
+        })) {
         anachronistic.push(`${p.year} ${zone} ${piece.material} ${piece.type}`);
       }
     });
@@ -462,6 +509,89 @@ const biographies: string[] = quiet(() =>
     passed: impossible.length === 0 && collisions.length === 0
       && deathShare > 0.25 && deathShare < 0.6 && modernShare < 0.25,
     detail: [...impossible.slice(0, 5), ...collisions.slice(0, 3)],
+  });
+}
+
+// --- 14. The elite, at the rate the sources give ---------------------------
+//
+// Two separate claims, because they fail separately.
+//
+// The rungs are measured against the *sampler*, over far more rolls than a
+// persona corpus could afford: a rung at one in seventy-five thousand cannot be
+// checked against two thousand people. Whether an office survives the rest of
+// the pipeline is a different question, and is checked against the corpus.
+//
+// This check is the reason the frequencies stay honest. Before it, elite
+// standing was decided by relative weights inside a profession pool, which
+// meant nobody could say what rate anything was occurring at — and the answer
+// turned out to be zero for most of the world.
+{
+  const ROLLS = FAST ? 200_000 : 1_000_000;
+  const ZONES: any[] = [
+    'EUROPEAN', 'EAST_ASIAN', 'SOUTH_ASIAN', 'MENA', 'SOUTHEAST_ASIAN',
+    'SUB_SAHARAN_AFRICAN', 'SOUTH_AMERICAN', 'OCEANIA',
+    'NORTH_AMERICAN_PRE_COLUMBIAN', 'NORTH_AMERICAN_COLONIAL',
+  ];
+  // A spread of years each zone actually has offices for, so coverage gaps
+  // show up as a low share rather than being sampled around.
+  const YEARS = [-1500, -300, 200, 800, 1250, 1500, 1700, 1850, 1950, 2010];
+
+  let seed = 12345;
+  const rng = () => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 0x100000000;
+  };
+
+  const counts: Record<string, number> = { district: 0, great: 0, sovereign: 0 };
+  const zonesSeen = new Set<string>();
+  for (let i = 0; i < ROLLS; i += 1) {
+    const zone = ZONES[i % ZONES.length];
+    const year = YEARS[(i / ZONES.length | 0) % YEARS.length];
+    const sex = i % 2 === 0 ? 'Male' : 'Female';
+    const office = sampleEliteOffice(zone, year, undefined, undefined, sex as any, rng);
+    if (office) { counts[office.tier] += 1; zonesSeen.add(zone); }
+  }
+
+  const rungs = ELITE_TIERS.filter((t: any) => t.source === 'office-roll');
+  const offRate = rungs.filter((t: any) => {
+    const share = counts[t.tier] / ROLLS;
+    return share < t.auditBand[0] || share > t.auditBand[1];
+  });
+
+  // Coverage: a zone with no offices in any era would silently lose its whole
+  // elite, which is exactly the defect this table was written to fix.
+  const uncovered = ZONES.filter(z => !zonesSeen.has(z));
+
+  // And the pipeline: an office that is sampled but then overwritten by a
+  // profession table, or that arrives with a commoner's social class, is
+  // the same bug in a different place.
+  const withOffice = personas.filter(p => p.office);
+  const mismatched = withOffice.filter(p =>
+    p.character.profession !== p.office.role
+    || !/noble|gentry|upper class|lineage|chiefly/i.test(p.character.socialClass || ''));
+
+  // The local rung is emergent — it comes from the profession tables, not from
+  // an up-front roll — so it is reported rather than pinned.
+  const localShare = personas
+    .filter(p => LOCAL_NOTABLE.test(p.character.profession || '')).length / personas.length;
+
+  add({
+    name: 'elite-frequency',
+    invariant: 'Each rung of office occurs at its stated rate, every zone has one, and offices survive generation',
+    measured: rungs.map((t: any) =>
+      `${t.tier} 1 in ${counts[t.tier] ? Math.round(ROLLS / counts[t.tier]).toLocaleString() : '∞'}`).join(', ')
+      + `; local ${(localShare * 100).toFixed(1)}%`
+      + `; ${uncovered.length} zones without offices, ${mismatched.length} mangled`,
+    passed: offRate.length === 0 && uncovered.length === 0 && mismatched.length === 0
+      && localShare > 0.001 && localShare < 0.08,
+    detail: [
+      ...offRate.map((t: any) =>
+        `${t.tier}: 1 in ${Math.round(ROLLS / (counts[t.tier] || 1)).toLocaleString()}, wanted 1 in `
+        + `${Math.round(1 / t.auditBand[1]).toLocaleString()}–${Math.round(1 / t.auditBand[0]).toLocaleString()}`),
+      ...uncovered.map(z => `no office reachable in ${z}`),
+      ...mismatched.slice(0, 5).map((p: any) =>
+        `${p.character.name}: office ${p.office.role} but profession ${p.character.profession} / ${p.character.socialClass}`),
+    ],
   });
 }
 

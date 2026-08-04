@@ -88,6 +88,23 @@ export const ATTRIBUTION_WINDOWS: AttributionWindow[] = [
     ],
   },
   {
+    // The far north-east, ahead of the Fennoscandian window below because the
+    // Urals and the White Sea are not the Baltic: a persona on the Pechora had
+    // no more business speaking Proto-Germanic than one in Crete did.
+    id: 'eu-arctic-northeast',
+    yearRange: [-10000, 1600],
+    zones: ['EUROPEAN'],
+    places: /\b(ural|white sea|kola|pechora|arctic europe|nenets)\b/,
+    hypotheses: [
+      h('Proto-Uralic (reconstructed)', 'Uralic', 0.45, 'reconstructed', ['janhunen2009'],
+        'The Uralic homeland is usually placed on either side of the middle Urals, which makes this one of the few parts of Europe where the reconstructed language is probably local rather than arrived.'),
+      h('Pre-Uralic language of the taiga (hypothetical)', 'unclassified', 0.35, 'conjectural', ['janhunen2009', 'nichols1992'],
+        'The forest was hunted and fished for six thousand years before Uralic can be reconstructed anywhere; nothing of what those people spoke is recoverable.'),
+      h('Samoyedic (reconstructed)', 'Uralic', 0.2, 'reconstructed', ['janhunen2009'],
+        'The eastern branch of Uralic, which separated first and stayed nearest the Urals.'),
+    ],
+  },
+  {
     id: 'eu-north-uralic',
     yearRange: [-2000, 1600],
     zones: ['EUROPEAN'],
@@ -102,10 +119,76 @@ export const ATTRIBUTION_WINDOWS: AttributionWindow[] = [
     ],
   },
   {
+    // Before Uralic can be reconstructed this far west, which is the window
+    // above's starting point.
+    id: 'eu-north-forager',
+    yearRange: [-10000, -2000],
+    zones: ['EUROPEAN'],
+    places: /\b(finland|karelia|lapland|sapmi|sami|bothnia|estonia|baltic)\b/,
+    hypotheses: [
+      h('Palaeo-European language of the north (hypothetical)', 'unclassified', 0.55, 'conjectural', ['janhunen2009', 'nichols1992'],
+        'Fennoscandia was settled as the ice went and held languages for six thousand years that left only substrate vocabulary in Sámi and Finnish — words for snow conditions, for reindeer, for the sea.'),
+      h('Early Uralic (reconstructed)', 'Uralic', 0.28, 'reconstructed', ['janhunen2009'],
+        'The western edge of the Uralic spread, which reaches the Baltic late and unevenly.'),
+      h('Northwest Indo-European (reconstructed)', 'Indo-European', 0.17, 'reconstructed', ['mallory2006', 'anthony2007'],
+        'Corded Ware reaches the eastern Baltic around 2800 BCE, and its language was some form of Indo-European.'),
+    ],
+  },
+  // Cyprus and Sicily sit in the geography's "Greece and Aegean" region, so
+  // the Aegean windows below match them on the region name alone. These come
+  // first: neither island was Greek-speaking for most of the Bronze Age, and a
+  // Sicilian in 1200 BCE was being handed Mycenaean Greek.
+  {
+    id: 'eu-cyprus-pre-greek',
+    yearRange: [-10000, -1200],
+    zones: ['EUROPEAN'],
+    places: /\b(cyprus|cypriot|cypro)\b/,
+    hypotheses: [
+      h('Eteocypriot, in Cypro-Minoan script (unread)', 'unclassified', 0.6, 'attested', ['renfrew1987', 'glottolog'],
+        'Cyprus writes from about 1550 BCE in a script nobody can read, in a language that is demonstrably not Greek and has no established relatives.'),
+      h('Levantine Semitic of the trading ports (inferred)', 'Afro-Asiatic', 0.22, 'inferred', ['glottolog'],
+        'The island traded copper with Ugarit and the Levantine coast throughout the Late Bronze Age.'),
+      h('Anatolian-related language (hypothetical)', 'Indo-European', 0.18, 'conjectural', ['mallory2006'],
+        'Cyprus lies sixty miles off a coast that was Luwian-speaking, and some of its names look Anatolian.'),
+    ],
+  },
+  {
+    id: 'eu-cyprus-greek',
+    yearRange: [-1200, -400],
+    zones: ['EUROPEAN'],
+    places: /\b(cyprus|cypriot|cypro)\b/,
+    hypotheses: [
+      h('Arcado-Cypriot Greek (attested)', 'Indo-European', 0.48, 'attested', ['glottolog', 'ventrisChadwick1973'],
+        'Greek settlement follows the collapse of the Mycenaean palaces, and Cypriot Greek keeps archaic features the mainland dialects lost.'),
+      h('Eteocypriot (unread)', 'unclassified', 0.34, 'attested', ['renfrew1987'],
+        'The older language of the island does not disappear: it is still being inscribed at Amathus in the fourth century BCE, beside Greek.'),
+      h('Phoenician (attested)', 'Afro-Asiatic', 0.18, 'attested', ['glottolog'],
+        'Kition was a Tyrian colony, and Phoenician was an everyday language of the south coast for centuries.'),
+    ],
+  },
+  {
+    id: 'eu-sicily-pre-greek',
+    yearRange: [-10000, -750],
+    zones: ['EUROPEAN'],
+    places: /\b(sicily|sicilian|syracuse)\b/,
+    hypotheses: [
+      h('Sicanian or Elymian (hypothetical)', 'unclassified', 0.42, 'conjectural', ['nichols1992', 'glottolog'],
+        'Thucydides names three peoples on the island before the Greeks. Of the two western ones almost nothing survives but place-names and a handful of inscriptions in borrowed alphabets.'),
+      h('Sicel (hypothetical)', 'Indo-European', 0.36, 'conjectural', ['mallory2006'],
+        'The eastern fragments look Indo-European and possibly Italic-related, which would make the Sicels arrivals from the mainland rather than islanders throughout.'),
+      h('Pre-Indo-European Mediterranean (hypothetical)', 'unclassified', 0.22, 'conjectural', ['nichols1992'],
+        'The island was farmed for four thousand years before any of these names are recorded.'),
+    ],
+  },
+  {
     id: 'eu-aegean-pre-greek',
     yearRange: [-10000, -1450],
     zones: ['EUROPEAN'],
-    places: /\b(greece|aegean|crete|cyclad|pelopon|thessal|macedon|thrac)\b/,
+    // Thrace and Macedon are gone from this pattern: they are not the Aegean,
+    // and the Balkan window below says what was spoken there. Cyprus and Sicily
+    // are filed under "Greece and Aegean" by the geography but had languages of
+    // their own through the second millennium, and their own windows above.
+    places: /\b(greece|aegean|crete|cyclad|pelopon|thessal|olympus|delos|dodecanese|athens)\b/,
     hypotheses: [
       h('Pre-Greek Aegean (hypothetical)', 'unclassified', 0.55, 'conjectural', ['renfrew1987', 'nichols1992'],
         'Greek place-names and vocabulary in -nth- and -ss- are borrowed from a language that was here first.'),
@@ -113,6 +196,397 @@ export const ATTRIBUTION_WINDOWS: AttributionWindow[] = [
         'Written in Linear A from about 1800 BCE and still undeciphered — recorded, but not readable.'),
       h('Early Greek (reconstructed)', 'Indo-European', 0.2, 'reconstructed', ['mallory2006', 'heggarty2023'],
         'Greek speakers were present in the peninsula for some centuries before Linear B records them.'),
+    ],
+  },
+  // -------------------------------------------------------------------------
+  // The European Bronze Age, region by region.
+  //
+  // The attested table has exactly three European entries between 2500 and 1200
+  // BCE — Proto-Hellenic, Minoan and Basque — and only zone-level geography to
+  // place them with, so Proto-Hellenic was the answer for something like
+  // seven-eighths of Bronze Age Europe: for Wessex, for the Ebro, for Jutland.
+  // The zone window below (`eu-bronze-branches`) was the honest fallback but
+  // draws one Europe-wide lottery, which puts Proto-Balto-Slavic in Andalusia
+  // as readily as in Kyiv.
+  //
+  // These windows say what was probably spoken *here*. None of it is recorded —
+  // the point is to commit to the best available guess with the reasoning
+  // attached, not to retreat to "an Indo-European language of the region".
+  // Each closes where the attested table has something real to say.
+  // -------------------------------------------------------------------------
+  {
+    id: 'eu-aegean-mycenaean',
+    yearRange: [-1450, -1050],
+    zones: ['EUROPEAN'],
+    places: /\b(greece|aegean|crete|cyclad|pelopon|thessal|olympus|delos|dodecanese|athens)\b/,
+    hypotheses: [
+      h('Mycenaean Greek (attested)', 'Indo-European', 0.5, 'attested', ['ventrisChadwick1973', 'glottolog'],
+        'Linear B was read in 1952 and turned out to be Greek: from about 1450 BCE the palace accounts of Knossos, Pylos and Mycenae record the language directly.'),
+      h('Pre-Greek Aegean (hypothetical)', 'unclassified', 0.22, 'conjectural', ['renfrew1987', 'nichols1992'],
+        'The palaces wrote Greek; it does not follow that every village spoke it. The -nth- and -ss- vocabulary belongs to whatever was here before.'),
+      h('Minoan or Eteocretan (unread)', 'unclassified', 0.16, 'attested', ['renfrew1987'],
+        'Linear A runs alongside Linear B on Crete, and non-Greek Cretan inscriptions continue for another thousand years.'),
+      h('Early Greek dialect (reconstructed)', 'Indo-European', 0.12, 'reconstructed', ['mallory2006'],
+        'The dialects that surface in the alphabet had already separated; the palace language is not the ancestor of all of them.'),
+    ],
+  },
+  {
+    id: 'eu-aegean-dark-age',
+    yearRange: [-1050, -800],
+    zones: ['EUROPEAN'],
+    places: /\b(greece|aegean|crete|cyclad|pelopon|thessal|olympus|delos|dodecanese|athens)\b/,
+    hypotheses: [
+      h('Early Greek dialect (reconstructed)', 'Indo-European', 0.68, 'reconstructed', ['mallory2006', 'glottolog'],
+        'Writing stops with the palaces and Greek does not. It reappears in the alphabet around 800 BCE already split into Ionic, Doric, Aeolic and Arcado-Cypriot, so those centuries were spent speaking it.'),
+      h('Pre-Greek survival (hypothetical)', 'unclassified', 0.18, 'conjectural', ['renfrew1987', 'nichols1992'],
+        'Non-Greek speech held on in the hills and on Crete well past the point where Greek dominated the coast.'),
+      h('Eteocretan (unread)', 'unclassified', 0.14, 'inferred', ['renfrew1987'],
+        'Inscriptions from Praisos and Dreros, written in Greek letters and in no known language.'),
+    ],
+  },
+  {
+    id: 'eu-bronze-italy',
+    yearRange: [-2500, -1200],
+    zones: ['EUROPEAN'],
+    places: /\b(italy|italian|latium|rome|roman campagna|campania|apennine|naples|po valley|florence|venetian|tuscan|etruria)\b/,
+    hypotheses: [
+      h('Early Italic (reconstructed)', 'Indo-European', 0.38, 'reconstructed', ['mallory2006'],
+        'The ancestor of Latin, Oscan and Umbrian was somewhere in the peninsula through the second millennium, though not yet differentiated into them.'),
+      h('Tyrsenian, ancestral to Etruscan (hypothetical)', 'unclassified', 0.32, 'conjectural', ['nichols1992', 'mallory2006'],
+        'Etruscan is not Indo-European and its only convincing relatives are Lemnian and Rhaetic. Whatever it continues was in Italy before Latin was.'),
+      h('Pre-Indo-European Italy (hypothetical)', 'unclassified', 0.3, 'conjectural', ['nichols1992'],
+        'Ligurian, Sicanian, North Picene: the peninsula kept unclassifiable languages into the historical period, and held more of them earlier.'),
+    ],
+  },
+  {
+    id: 'eu-bronze-gaul-mediterranean',
+    yearRange: [-2500, -800],
+    zones: ['EUROPEAN'],
+    places: /\b(marseille|languedoc|provence|rhone|rhône)\b/,
+    hypotheses: [
+      h('Ligurian (hypothetical)', 'unclassified', 0.4, 'conjectural', ['mallory2006', 'nichols1992'],
+        'The coast from the Rhône to the Arno was Ligurian-speaking when Greek traders reached it, and the ancient writers could not decide whether the language was Indo-European. Nothing survives but names.'),
+      h('Pre-Indo-European southern Gaul (hypothetical)', 'unclassified', 0.32, 'conjectural', ['trask1997', 'nichols1992'],
+        'Aquitanian, a relative of Basque, is still being written in the Roman period a few days west of here; the Mediterranean coast is unlikely to have been emptier of non-Indo-European speech.'),
+      h('Early Western Indo-European (reconstructed)', 'Indo-European', 0.28, 'reconstructed', ['mallory2006', 'anthony2007'],
+        'Ancestral to Celtic without yet being Celtic. The Rhône was a route between the Mediterranean and the Bronze Age north for the whole period.'),
+    ],
+  },
+  {
+    id: 'eu-bronze-gaul-north',
+    yearRange: [-2500, -800],
+    zones: ['EUROPEAN'],
+    places: /\b(france|gaul|paris basin|loire|normandy|low countries|flanders|brabant|ardennes|scheldt|zuiderzee|meuse)\b/,
+    hypotheses: [
+      h('Early Western Indo-European (reconstructed)', 'Indo-European', 0.42, 'reconstructed', ['mallory2006', 'anthony2007', 'cunliffe2001'],
+        'The dialect continuum out of which Celtic, Italic and Germanic each separated. Naming it Celtic this early is running ahead of the evidence.'),
+      h('Pre-Indo-European western Europe (hypothetical)', 'unclassified', 0.36, 'conjectural', ['nichols1992', 'trask1997'],
+        'The Beaker migrations changed the population of the north-west but did not empty it, and non-Indo-European speech is still being written in Aquitaine two thousand years later.'),
+      h('Early Celtic (reconstructed)', 'Indo-European', 0.22, 'reconstructed', ['cunliffe2001', 'mallory2006'],
+        'On the Atlantic view Celtic took shape along the sea routes rather than arriving from the Danube, which would put it here earlier than the textbook chronology allows.'),
+    ],
+  },
+  {
+    id: 'eu-bronze-britain',
+    yearRange: [-2500, -1000],
+    zones: ['EUROPEAN'],
+    places: /\b(british isles|britain|england|scotland|wales|ireland|london|edinburgh|leinster|york|hadrian|thames|oxfordshire|dover|mersey)\b/,
+    hypotheses: [
+      h('Early Indo-European of the Atlantic seaboard (hypothetical)', 'Indo-European', 0.42, 'conjectural', ['haak2015', 'cunliffe2001', 'mallory2006'],
+        'Beaker-associated people replaced the great majority of the ancestry of Neolithic Britain within a few centuries around 2400 BCE. A change that thorough usually takes the language with it — but nothing here is written for another two thousand years, so the branch is unknowable.'),
+      h('Pre-Indo-European Britain and Ireland (hypothetical)', 'unclassified', 0.34, 'conjectural', ['nichols1992', 'cunliffe2001'],
+        'The language of the people who raised Stonehenge, of which the only possible trace is a handful of river names.'),
+      h('Early Celtic (reconstructed)', 'Indo-European', 0.24, 'reconstructed', ['cunliffe2001', 'mallory2006'],
+        'Celtic is spoken across these islands by the time anyone writes them down; how early it got there is exactly what is argued about.'),
+    ],
+  },
+  {
+    id: 'eu-bronze-iberia',
+    yearRange: [-2500, -800],
+    zones: ['EUROPEAN'],
+    places: /\b(iberia|iberian|spain|portugal|andalusian|lisbon|ebro|toledo|gibraltar|catalonian|galicia)\b/,
+    hypotheses: [
+      h('Pre-Indo-European Iberia (hypothetical)', 'unclassified', 0.38, 'conjectural', ['deHoz2010', 'trask1997'],
+        'Iberian is written across the east and south of the peninsula in the first millennium BCE and is not Indo-European and not readable. Its ancestor was here.'),
+      h('Early Indo-European of the peninsula (reconstructed)', 'Indo-European', 0.27, 'reconstructed', ['deHoz2010', 'mallory2006'],
+        'Lusitanian in the west is Indo-European but not securely Celtic, which argues for an arrival early enough to have gone its own way.'),
+      h('Tartessian-related (hypothetical)', 'unclassified', 0.19, 'conjectural', ['deHoz2010'],
+        'The Guadalquivir inscriptions are the oldest writing in western Europe and are read aloud but not understood. Whether the language is Celtic is a live and unusually bitter argument.'),
+      h('Vasconic (hypothetical)', 'Vasconic', 0.16, 'conjectural', ['trask1997'],
+        'Basque is the surviving end of something that was once wider, though how much wider is not established.'),
+    ],
+  },
+  {
+    id: 'eu-bronze-danube',
+    yearRange: [-2500, -1300],
+    zones: ['EUROPEAN'],
+    places: /\b(central europe|danube|bohemia|bohemian|carpathian foothills|vienna|moravian|tatra|vistula|bavarian|black forest)\b/,
+    hypotheses: [
+      h('Late Proto-Indo-European dialect (reconstructed)', 'Indo-European', 0.42, 'reconstructed', ['anthony2007', 'mallory2006', 'haak2015'],
+        'The Únětice and Tumulus cultures sit on the route the steppe ancestry took into central Europe; the branches have not separated yet, but the language is here.'),
+      h('Pre-Indo-European central Europe (hypothetical)', 'unclassified', 0.26, 'conjectural', ['nichols1992', 'renfrew1987'],
+        'The farming population was not replaced everywhere, and the Alps kept unclassifiable languages — Rhaetic among them — into the Roman period.'),
+      h('Early Celtic or Italic (reconstructed)', 'Indo-European', 0.2, 'reconstructed', ['mallory2006', 'bouckaert2012'],
+        'The upper Danube is where the textbook chronology puts Celtic forming, a few centuries after this.'),
+      h('Early Balto-Slavic (reconstructed)', 'Indo-European', 0.12, 'reconstructed', ['mallory2006', 'bouckaert2012'],
+        'The Vistula end of this region faces the other way.'),
+    ],
+  },
+  {
+    id: 'eu-bronze-north-sea',
+    // Runs to where the table's Proto-Germanic entry starts, rather than to the
+    // end of the Bronze Age, so the intervening three centuries do not fall
+    // through to a continent-wide draw.
+    yearRange: [-2500, -500],
+    zones: ['EUROPEAN'],
+    places: /\b(germanic lands|germania|rhine valley|brandenburg|hamburg|saxon|scandinavia|jutland|stockholm|norwegian|gotland|oresund|øresund|denmark|sweden|norway)\b/,
+    hypotheses: [
+      h('Pre-Proto-Germanic (reconstructed)', 'Indo-European', 0.4, 'reconstructed', ['mallory2006', 'kristiansen2005'],
+        'The Nordic Bronze Age runs without a break into the Iron Age society that demonstrably spoke Germanic, which is the whole argument for the language being here this early. Germanic itself is not reconstructible before about 500 BCE.'),
+      h('Northwest Indo-European (reconstructed)', 'Indo-European', 0.28, 'reconstructed', ['mallory2006', 'anthony2007'],
+        'Germanic, Celtic and Italic share vocabulary that the eastern branches lack; before they separated, that shared thing was what was spoken from the Rhine to the Sound.'),
+      h('Pre-Indo-European northern Europe (hypothetical)', 'unclassified', 0.2, 'conjectural', ['nichols1992'],
+        'Something like a third of Germanic vocabulary has no Indo-European etymology — sea, ship, sword, king. The standard explanation is a substrate language nobody can name.'),
+      h('Proto-Uralic-related speech of the north (reconstructed)', 'Uralic', 0.12, 'reconstructed', ['janhunen2009'],
+        'The Uralic frontier was well south of where it is now.'),
+    ],
+  },
+  {
+    id: 'eu-bronze-east',
+    yearRange: [-2500, -800],
+    zones: ['EUROPEAN'],
+    places: /\b(eastern europe|moscow|dnieper|volga|carpathian ridge|steppe borderlands|novgorod|pontic|ukraine|russia)\b/,
+    hypotheses: [
+      h('Pre-Proto-Balto-Slavic (reconstructed)', 'Indo-European', 0.36, 'reconstructed', ['mallory2006', 'bouckaert2012'],
+        'Balto-Slavic separates late and stays put; the forest-steppe between the Vistula and the Dnieper is where it is usually placed.'),
+      h('Early Iranian of the steppe (reconstructed)', 'Indo-European', 0.26, 'reconstructed', ['anthony2007', 'mallory2006'],
+        'The grassland south of the forest was Iranian-speaking from the Bronze Age through the Scythians and Sarmatians — a thousand years of it.'),
+      h('Proto-Uralic (reconstructed)', 'Uralic', 0.22, 'reconstructed', ['janhunen2009'],
+        'The forest zone from the Volga west, which is where the Uralic homeland is generally put.'),
+      h('Pre-Indo-European forest zone (hypothetical)', 'unclassified', 0.16, 'conjectural', ['nichols1992'],
+        'Hunting and fishing populations north of the farming frontier, whose languages left substrate vocabulary in Finnic and nothing else.'),
+    ],
+  },
+  {
+    id: 'eu-bronze-balkans',
+    yearRange: [-2500, -800],
+    zones: ['EUROPEAN'],
+    places: /\b(balkan|dinaric|bosporus|pindus|thracian|thrace|dalmatian|vardar|macedon|epirus|illyria)\b/,
+    hypotheses: [
+      h('Palaeo-Balkan language (hypothetical)', 'Indo-European', 0.38, 'inferred', ['mallory2006', 'glottolog'],
+        'Thracian, Dacian, Illyrian, Paeonian: each known from names, glosses and a few inscriptions, each clearly Indo-European, none classifiable any further than that.'),
+      h('Pre-Indo-European Balkans (hypothetical)', 'unclassified', 0.24, 'conjectural', ['renfrew1987', 'nichols1992'],
+        'The oldest farming villages in Europe are here, and their languages went under without a name.'),
+      h('Early Albanoid (hypothetical)', 'Indo-European', 0.2, 'conjectural', ['mallory2006'],
+        'Albanian\'s ancestor was somewhere in the western Balkans throughout, but which ancient language it continues — Illyrian, Dacian, neither — is unsettled.'),
+      h('Hellenic-related dialect (reconstructed)', 'Indo-European', 0.18, 'reconstructed', ['mallory2006', 'heggarty2023'],
+        'Greek arrived from the north and its relatives did not all continue south.'),
+    ],
+  },
+  // -------------------------------------------------------------------------
+  // Iron Age and Roman Europe, outside the Mediterranean.
+  //
+  // The table's ancient European entries are Latin, Greek, Gaulish, Proto-Celtic
+  // and Proto-Germanic, so everywhere those five do not reach — Britain, Ireland,
+  // Iberia, the Balkans, the Russian forest — half of all personas were coming
+  // back with the zone backstop, "an Indo-European language of the region". That
+  // is a true statement and a useless one. These are periods with names, glosses,
+  // inscriptions and in some cases whole corpora behind them.
+  // -------------------------------------------------------------------------
+  {
+    // The table has Proto-Celtic and then Gaulish, but its regional mapping
+    // never reaches for Proto-Celtic in Gaul — only in Bohemia and Austria — so
+    // the Hallstatt and early La Tène centuries in France came back as "an
+    // Indo-European language of the region".
+    id: 'eu-iron-gaul',
+    yearRange: [-800, -500],
+    zones: ['EUROPEAN'],
+    places: /\b(france|gaul|paris basin|loire|normandy|languedoc|marseille|provence|rhone|rhône|low countries|flanders|brabant|ardennes|scheldt|zuiderzee|meuse)\b/,
+    hypotheses: [
+      h('Early Gaulish (reconstructed)', 'Indo-European', 0.55, 'reconstructed', ['mallory2006', 'cunliffe2001'],
+        'Celtic in Gaul before anyone wrote it in Greek letters, which they begin to do in the south around 300 BCE.'),
+      h('Ligurian (hypothetical)', 'unclassified', 0.16, 'conjectural', ['mallory2006'],
+        'Still holding the Mediterranean coast when Phocaean traders founded Massalia around 600 BCE.'),
+      h('Aquitanian or another pre-Indo-European survival', 'Vasconic', 0.15, 'conjectural', ['trask1997', 'nichols1992'],
+        'The south-west, where it outlasts both Gaulish and Latin.'),
+      h('Belgic (attested in names)', 'Indo-European', 0.14, 'inferred', ['mallory2006', 'glottolog'],
+        'Caesar says the Belgae differed from the rest of Gaul in language; whether that means a Celtic dialect or something with Germanic in it is still argued.'),
+    ],
+  },
+  {
+    id: 'eu-roman-iberia',
+    yearRange: [-50, 300],
+    zones: ['EUROPEAN'],
+    places: /\b(iberia|iberian|spain|portugal|andalusian|lisbon|ebro|toledo|gibraltar|catalonian|galicia)\b/,
+    hypotheses: [
+      h('Hispanic Latin (attested)', 'Indo-European', 0.52, 'attested', ['glottolog', 'deHoz2010'],
+        'Baetica was Latin-speaking early and thoroughly — it sends emperors and poets to Rome within a century of Augustus.'),
+      h('Iberian (unread)', 'unclassified', 0.18, 'attested', ['deHoz2010'],
+        'The inscriptions thin out through the first century CE and stop; the speech behind them presumably lasted a while longer.'),
+      h('Celtiberian or Lusitanian (attested)', 'Indo-European', 0.16, 'attested', ['deHoz2010'],
+        'The Meseta and the west, where Latin arrived later and shallower than on the coast.'),
+      h('Aquitanian, ancestral to Basque (attested)', 'Vasconic', 0.14, 'attested', ['trask1997'],
+        'The western Pyrenees, which Latin never took.'),
+    ],
+  },
+  {
+    id: 'eu-proto-norse',
+    yearRange: [-500, 750],
+    zones: ['EUROPEAN'],
+    places: /\b(scandinavia|jutland|stockholm|norwegian|gotland|oresund|øresund|denmark|sweden|norway)\b/,
+    hypotheses: [
+      h('Proto-Norse (attested in runes)', 'Indo-European', 0.62, 'attested', ['glottolog', 'kristiansen2005'],
+        'Elder futhark inscriptions from about 150 CE — short, formulaic and unmistakably the ancestor of Old Norse. Before that the same speech is reconstructed rather than read.'),
+      h('Proto-Germanic (reconstructed)', 'Indo-European', 0.2, 'reconstructed', ['mallory2006'],
+        'The earlier centuries of this window, before the runes.'),
+      h('Sámi or Finnic (reconstructed)', 'Uralic', 0.18, 'reconstructed', ['janhunen2009'],
+        'The interior and the north, which was not Germanic-speaking and in places still is not.'),
+    ],
+  },
+  {
+    // The table jumps from Old Dutch to Dutch across three and a half centuries
+    // that include Bruges, Ghent and Ypres at their height. Middle Dutch is not
+    // in it, so the best-documented urban society in northern Europe was being
+    // handed a language-family label.
+    id: 'eu-low-countries-middle',
+    yearRange: [1150, 1500],
+    zones: ['EUROPEAN'],
+    places: /\b(low countries|flanders|brabant|zuiderzee|scheldt|holland|frisia|meuse)\b/,
+    hypotheses: [
+      h('Middle Dutch (attested)', 'Indo-European', 0.72, 'attested', ['glottolog'],
+        'Written from the twelfth century in Flanders, Brabant and Holland — charters, guild ordinances, Reynard the Fox — and by far the likeliest thing for anyone here to be speaking.'),
+      h('French of the courts and the wool trade (attested)', 'Indo-European', 0.16, 'attested', ['glottolog'],
+        'The county of Flanders held from the French crown, and its counts and clerks worked in French.'),
+      h('Frisian (attested)', 'Indo-European', 0.12, 'attested', ['glottolog'],
+        'The northern coast and the islands, which were their own thing and largely stayed it.'),
+    ],
+  },
+  {
+    id: 'eu-rus',
+    yearRange: [600, 1400],
+    zones: ['EUROPEAN'],
+    places: /\b(moscow|novgorod|dnieper|volga|kyiv|kiev|rus\b|steppe borderlands|eastern europe)\b/,
+    hypotheses: [
+      h('Old East Slavic (attested)', 'Indo-European', 0.58, 'attested', ['glottolog', 'mallory2006'],
+        'The language of the Novgorod birchbark letters, which are shopping lists and love notes rather than chronicles, and so are as close to ordinary speech as the period gets anywhere in Europe.'),
+      h('Finnic or Volga Finnic (attested in names)', 'Uralic', 0.2, 'inferred', ['janhunen2009'],
+        'Merya, Meshchera, Muroma: the peoples the chronicles list as paying tribute, whose languages went under without being written and left the names of half the rivers.'),
+      h('Turkic of the steppe (attested)', 'Turkic', 0.12, 'attested', ['glottolog'],
+        'Khazars, Pechenegs, Cumans — the grassland south of the forest changes hands repeatedly through this window.'),
+      h('Baltic (reconstructed)', 'Indo-European', 0.1, 'reconstructed', ['mallory2006'],
+        'The upper Dnieper, where Baltic speech survived until Slavic absorbed it.'),
+    ],
+  },
+  {
+    id: 'eu-iron-britain',
+    yearRange: [-800, 43],
+    zones: ['EUROPEAN'],
+    places: /\b(britain|british isles|england|scotland|wales|london|edinburgh|york|thames|oxfordshire|dover|mersey|hadrian)\b/,
+    hypotheses: [
+      h('Common Brittonic (attested in names)', 'Indo-European', 0.68, 'attested', ['cunliffe2001', 'glottolog'],
+        'The ancestor of Welsh, Cornish and Breton. Nobody in Britain wrote it down, but Greek and Roman authors record enough British place- and personal names to show it was being spoken across the south and midlands.'),
+      h('Pictish or a pre-Brittonic survival (hypothetical)', 'unclassified', 0.18, 'conjectural', ['nichols1992', 'glottolog'],
+        'North of the Forth the names are harder to read as Celtic, and the argument over whether Pictish was Celtic at all has run for two centuries.'),
+      h('Goidelic-related speech (reconstructed)', 'Indo-European', 0.14, 'reconstructed', ['glottolog'],
+        'The Irish Sea was a road rather than a border, and Goidelic settlement on the British side is attested by the fifth century.'),
+    ],
+  },
+  {
+    id: 'eu-roman-britain',
+    yearRange: [43, 450],
+    zones: ['EUROPEAN'],
+    places: /\b(britain|british isles|england|wales|london|york|thames|oxfordshire|dover|mersey|hadrian)\b/,
+    hypotheses: [
+      h('British Latin (attested)', 'Indo-European', 0.3, 'attested', ['glottolog'],
+        'The towns, the forts and the villa estates. The Bath curse tablets are ordinary people writing Latin about stolen laundry, which is about as good evidence of everyday use as the period offers.'),
+      h('Common Brittonic (attested in names)', 'Indo-European', 0.55, 'attested', ['cunliffe2001', 'glottolog'],
+        'Most of the province, most of the time. Latin never displaced it in the countryside, which is why Welsh exists.'),
+      h('Pictish (unclassified)', 'unclassified', 0.15, 'conjectural', ['glottolog'],
+        'Beyond the wall, and beyond the reach of both.'),
+    ],
+  },
+  {
+    id: 'eu-iron-ireland',
+    yearRange: [-800, 450],
+    zones: ['EUROPEAN'],
+    places: /\b(ireland|irish|leinster|munster|ulster|connacht)\b/,
+    hypotheses: [
+      h('Primitive Irish (attested)', 'Indo-European', 0.72, 'attested', ['glottolog', 'cunliffe2001'],
+        'Written in ogham on standing stones from the fourth century CE, and spoken for a long time before anyone cut it into a rock.'),
+      h('Pre-Goidelic language of Ireland (hypothetical)', 'unclassified', 0.28, 'conjectural', ['nichols1992', 'cunliffe2001'],
+        'Irish has a stratum of vocabulary with no Indo-European etymology, which is the usual argument that Goidelic arrived somewhere that was already occupied.'),
+    ],
+  },
+  {
+    id: 'eu-iron-iberia',
+    yearRange: [-800, -50],
+    zones: ['EUROPEAN'],
+    places: /\b(iberia|iberian|spain|portugal|andalusian|lisbon|ebro|toledo|gibraltar|catalonian|galicia)\b/,
+    hypotheses: [
+      h('Iberian (unread)', 'unclassified', 0.32, 'attested', ['deHoz2010'],
+        'Thousands of inscriptions from the Ebro to Andalusia, in a script that has been read since 1922 and a language nobody understands.'),
+      h('Celtiberian (attested)', 'Indo-European', 0.26, 'attested', ['deHoz2010', 'mallory2006'],
+        'Celtic, written on bronze in the Meseta, and the earliest substantial Celtic text anywhere.'),
+      h('Lusitanian (attested)', 'Indo-European', 0.16, 'attested', ['deHoz2010'],
+        'The west: Indo-European, not securely Celtic, and preserved in a handful of long inscriptions about sacrifices.'),
+      h('Tartessian or Turdetanian (unread)', 'unclassified', 0.14, 'conjectural', ['deHoz2010'],
+        'The Guadalquivir. Strabo says the Turdetani had written laws six thousand years old; what survives is stelae nobody can construe.'),
+      h('Aquitanian, ancestral to Basque (attested)', 'Vasconic', 0.12, 'attested', ['trask1997'],
+        'Names in Roman-period inscriptions along the western Pyrenees that are transparently Basque.'),
+    ],
+  },
+  {
+    id: 'eu-iron-balkans',
+    yearRange: [-800, 500],
+    zones: ['EUROPEAN'],
+    places: /\b(balkan|dinaric|bosporus|pindus|thracian|thrace|dalmatian|vardar|illyria|epirus)\b/,
+    hypotheses: [
+      h('Thracian (attested in fragments)', 'Indo-European', 0.28, 'attested', ['mallory2006', 'glottolog'],
+        'The plain between the Haemus and the Aegean. A few inscriptions, several hundred glosses and a great many names — enough to place it in Indo-European and not enough to do anything else with.'),
+      h('Illyrian (attested in names)', 'Indo-European', 0.24, 'inferred', ['mallory2006', 'glottolog'],
+        'The Adriatic hinterland, known almost entirely from personal names on Roman epitaphs.'),
+      h('Greek (attested)', 'Indo-European', 0.2, 'attested', ['glottolog'],
+        'The coasts and the colonies, and after Alexander the language of anyone with business to do.'),
+      h('Latin (attested)', 'Indo-European', 0.16, 'attested', ['glottolog'],
+        'From the conquest onward, and permanently in the Danube provinces — Romanian is what became of it.'),
+      h('Dacian or Paeonian (attested in names)', 'Indo-European', 0.12, 'conjectural', ['mallory2006'],
+        'North of the Danube and up the Vardar; the labels are Roman administrative ones as much as linguistic.'),
+    ],
+  },
+  {
+    id: 'eu-iron-central',
+    yearRange: [-500, 400],
+    zones: ['EUROPEAN'],
+    places: /\b(central europe|danube|bohemia|bohemian|carpathian foothills|vienna|moravian|tatra|vistula|noricum|pannonia)\b/,
+    hypotheses: [
+      h('Continental Celtic (attested)', 'Indo-European', 0.38, 'attested', ['mallory2006', 'glottolog'],
+        'La Tène ran from the Danube to the Atlantic, and the Boii who gave Bohemia its name were Celtic-speaking.'),
+      h('East Germanic (reconstructed)', 'Indo-European', 0.22, 'reconstructed', ['mallory2006', 'glottolog'],
+        'Vandals, Lombards, Goths: Germanic speech moves down the Vistula and the Elbe through these centuries and displaces Celtic from much of the upper Danube.'),
+      h('Pannonian or Illyrian (attested in names)', 'Indo-European', 0.16, 'inferred', ['mallory2006'],
+        'The middle Danube kept its own languages under Roman rule, recorded only as names.'),
+      h('Early Slavic (reconstructed)', 'Indo-European', 0.14, 'reconstructed', ['mallory2006', 'bouckaert2012'],
+        'Behind the Carpathians for most of this window, and over them by the end of it.'),
+      h('Latin (attested)', 'Indo-European', 0.1, 'attested', ['glottolog'],
+        'The provinces south of the Danube, in the towns and the legionary camps.'),
+    ],
+  },
+  {
+    id: 'eu-iron-east',
+    yearRange: [-800, 600],
+    zones: ['EUROPEAN'],
+    places: /\b(eastern europe|moscow|dnieper|volga|carpathian ridge|steppe borderlands|novgorod|pontic|ukraine|russia)\b/,
+    hypotheses: [
+      h('Scythian or Sarmatian (attested in names)', 'Indo-European', 0.28, 'inferred', ['anthony2007', 'mallory2006'],
+        'Iranian, and the language of the steppe for a thousand years. Known from names in Greek inscriptions around the Black Sea and from what Herodotus could make of it.'),
+      h('Proto-Slavic (reconstructed)', 'Indo-European', 0.27, 'reconstructed', ['mallory2006', 'bouckaert2012'],
+        'The forest-steppe north of the grassland. Slavic is not written until the ninth century but is remarkably uniform when it appears, which argues for a late and rapid spread out of somewhere near here.'),
+      h('Baltic (reconstructed)', 'Indo-European', 0.2, 'reconstructed', ['mallory2006'],
+        'Baltic hydronyms run far east of the modern Baltic languages, as far as the upper Dnieper and the Oka.'),
+      h('Volga Finnic (reconstructed)', 'Uralic', 0.15, 'reconstructed', ['janhunen2009'],
+        'The Oka and middle Volga forest, ancestral to Mordvin and Mari.'),
+      h('Gothic (attested)', 'Indo-European', 0.1, 'attested', ['glottolog'],
+        'From the third century the Goths hold the country between the Dniester and the Don, and theirs is the first Germanic language written at length.'),
     ],
   },
   {

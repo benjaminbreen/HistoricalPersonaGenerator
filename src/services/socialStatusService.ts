@@ -199,13 +199,43 @@ export function sampleSocialStatus(
   return 'commoner';
 }
 
-const normalizeStatus = (status: string): ProceduralSocialStatus => {
+/**
+ * Every display label, back to the token it came from.
+ *
+ * Built from `STATUS_LABELS` rather than listed by hand, so a new vocabulary
+ * cannot be added in one direction only. Where a label is ambiguous — a band
+ * calls all four stations "Band Member" — the first token in `STATUS_ORDER`
+ * wins, which is the flat answer an egalitarian society is entitled to.
+ */
+const LABEL_TO_STATUS: Record<string, ProceduralSocialStatus> = (() => {
+  const map: Record<string, ProceduralSocialStatus> = {};
+  for (const row of Object.values(STATUS_LABELS)) {
+    for (const [status, label] of Object.entries(row)) {
+      const key = label.toLowerCase();
+      if (!(key in map)) map[key] = status as ProceduralSocialStatus;
+    }
+  }
+  return map;
+})();
+
+/**
+ * A station as a token, whether it arrived as one or as a society's own word
+ * for it.
+ *
+ * Both directions are needed and they used to be one-way: "Gentry" and
+ * "Chiefly Lineage" fell through to `commoner`, so a persona whose station had
+ * already been formatted for display — the family-origin path does exactly
+ * this — was silently demoted on the way back in.
+ */
+export const toProceduralStatus = (status: string): ProceduralSocialStatus => {
   const normalized = status.trim().toLowerCase();
   if (normalized === 'peasant' || normalized === 'working class') return 'peasant';
   if (normalized === 'merchant') return 'merchant';
   if (normalized === 'noble' || normalized === 'upper class') return 'noble';
-  return 'commoner';
+  return LABEL_TO_STATUS[normalized] ?? 'commoner';
 };
+
+const normalizeStatus = toProceduralStatus;
 
 /**
  * The display label for a status, in the vocabulary of the society that holds

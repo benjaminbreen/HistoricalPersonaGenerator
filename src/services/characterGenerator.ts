@@ -7,7 +7,7 @@ import { CHARACTER_NAMES as NAME_LISTS } from '../constants/characterData/names'
 import { parseDateString } from '../utils/dateUtils';
 import { createItemInstance, addItemToInventory, assembleStartingPackage } from '../utils/inventoryUtils';
 import { ValueNoise } from '../utils/noise';
-import { generateBaseProfile, determineSocialRole, generateNpcName, generateNpcNameDetailed, assignBeliefs, generateClothingPalette, generateCompleteOutfit, generateCulturalAppearance, adjustPersonalityForProfession, validateCharacterCoherence, hashSeed } from '../generation/common/npcUtils';
+import { generateBaseProfile, determineSocialRole, generateNpcName, generateNpcNameDetailed, assignBeliefs, generateClothingPalette, generateCompleteOutfit, generateCulturalAppearance, adjustPersonalityForProfession, deriveSocialStatsFromPersonality, validateCharacterCoherence, hashSeed } from '../generation/common/npcUtils';
 import { featuresFor, hasAncestryOverride } from '../constants/characterData/ancestryAppearance';
 import { mapLocationToCulture } from '../utils/mapUtils';
 import { hexToColorName } from '../utils/colorUtils';
@@ -21,7 +21,7 @@ import { AttributeBadgeService } from './attributeBadgeService';
 import { findAttributeById } from '../constants/attributeDefinitions';
 import { hasCapability } from '../constants/societyCapabilities';
 import { getMarkingsForCharacter, selectRandomMarking, getRandomPattern, convertToAppearanceMarking, getMarkingProbability } from '../constants/characterData/culturalMarkings';
-import { formatSocialStatus, polityFormFor, sampleSocialStatus } from './socialStatusService';
+import { formatSocialStatus, polityFormFor, sampleSocialStatus, toProceduralStatus } from './socialStatusService';
 import { reconcileEpithet } from '../constants/characterData/nameConventions';
 import { applyAttributeAppearance } from './attributeAppearanceService';
 import { generateOrnament } from './ornamentService';
@@ -1065,20 +1065,24 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         baseProfile.religion = spec.religion;
     }
     
-    // Handle health specification
+    // Handle health specification. Ability scores run 1–10 and sit around 5.5;
+    // these bands were written against a 1–20 scale that this generator has
+    // never used, so a persona specified as `sickly` came out with a
+    // constitution of 6 to 8 — above average — and `healthy` asked for 12 to 15
+    // and got the clamp.
     if (spec.health) {
         switch (spec.health) {
             case 'sickly':
-                baseProfile.stats.constitution = 6 + Math.floor(noise.random() * 3); // 6-8
-                baseProfile.stats.strength = 6 + Math.floor(noise.random() * 3); // 6-8
+                baseProfile.stats.constitution = 1 + Math.floor(noise.random() * 3); // 1-3
+                baseProfile.stats.strength = 1 + Math.floor(noise.random() * 3); // 1-3
                 break;
             case 'unhealthy':
-                baseProfile.stats.constitution = 8 + Math.floor(noise.random() * 3); // 8-10
-                baseProfile.stats.strength = 8 + Math.floor(noise.random() * 3); // 8-10
+                baseProfile.stats.constitution = 3 + Math.floor(noise.random() * 3); // 3-5
+                baseProfile.stats.strength = 3 + Math.floor(noise.random() * 3); // 3-5
                 break;
             case 'healthy':
-                baseProfile.stats.constitution = 12 + Math.floor(noise.random() * 4); // 12-15
-                baseProfile.stats.strength = 12 + Math.floor(noise.random() * 4); // 12-15
+                baseProfile.stats.constitution = 7 + Math.floor(noise.random() * 4); // 7-10
+                baseProfile.stats.strength = 7 + Math.floor(noise.random() * 4); // 7-10
                 break;
             case 'average':
             default:
@@ -1087,6 +1091,25 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         }
     }
     
+    // Charisma and persuasion are read off the temperament rather than rolled
+    // beside it — see `deriveSocialStatsFromPersonality`. The roll is kept in
+    // hand because it is the spread around that temperament rather than a
+    // starting point, and deriving a second time from an already-derived score
+    // would count the personality twice.
+    const rolledSocial = {
+        charisma: baseProfile.stats.charisma,
+        persuasion: baseProfile.stats.persuasion,
+    };
+    // Derived once here because `determineSocialRole` weights the profession
+    // tables on persuasion — 257 roles carry a `minPersuasion`, mostly 5 to 7,
+    // and a miss costs 15 points of fit each — so the draw should be weighing
+    // the persuasion this person actually has rather than a loose roll that is
+    // about to be overwritten.
+    Object.assign(baseProfile.stats, deriveSocialStatsFromPersonality(
+        rolledSocial,
+        baseProfile.personality
+    ));
+
     // Status and wealth are separate axes. Wealth affects the probabilities but
     // no longer dictates that every wealthy person is a merchant or every poor
     // person a peasant. Explicit status also leaves an independently supplied
@@ -1104,8 +1127,20 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         historicalContext.localeType,
         polity,
     );
-    // The label is the society's own word for the station, not a period label.
-    const socialClass = formatSocialStatus(spec.socialClass || sampledStatus, statusPlace);
+    // Two different things are wanted from the same station, and conflating
+    // them cost the app its entire elite.
+    //
+    // `socialClass` is the society's own word for it — "Gentry", "Chiefly
+    // Lineage", "Middling Sort" — and is what the card prints. `proceduralStatus`
+    // is the token the tables are keyed on. Passing the *label* to
+    // `determineSocialRole` meant that for every polity form except the agrarian
+    // state and the industrial one, the requested class matched nothing in
+    // `allowedClassGroups`, the class filter was skipped, and the draw fell back
+    // to the full commoner pool. A noble roll in a commercial society — which is
+    // most of literate Eurasia from antiquity on — influenced the profession not
+    // at all, and came out a farm labourer.
+    const proceduralStatus = toProceduralStatus(spec.socialClass || sampledStatus);
+    const socialClass = formatSocialStatus(proceduralStatus, statusPlace);
 
     let role = determineSocialRole(
         baseProfile,
@@ -1115,7 +1150,7 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             region: context.region,
             localArea: context.location,
             year: dateInfo.year,
-            preferredSocialClass: socialClass,
+            preferredSocialClass: proceduralStatus,
             historicalContext,
         }
     ).role;
@@ -1198,6 +1233,17 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         role,
         baseProfile.stats
     );
+
+    // And derived again, now that the profession has had its say on the
+    // temperament, so that the two halves of the card agree: the personality on
+    // the right is the one the scores on the left were read from. Still upstream
+    // of everything that consumes them — the attribute badges weight on
+    // charisma, and the backstory and biography both describe it. Both
+    // derivations start from `rolledSocial`, never from each other.
+    Object.assign(baseProfile.stats, deriveSocialStatsFromPersonality(
+        rolledSocial,
+        baseProfile.personality
+    ));
 
     // Where the line came from, when that is not where the person is. Set for
     // displaced, transported and diaspora populations and undefined for

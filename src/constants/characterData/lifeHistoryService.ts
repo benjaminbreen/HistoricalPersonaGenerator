@@ -26,6 +26,12 @@ import { withIndefiniteArticle } from '../../services/narrativeTextService';
 import { getPolityAt, getPolityChanges, withPolityArticle } from '../../services/polityService';
 import { disruptionDeathCauses, disruptionLifeEvents } from '../../services/disruptionResolution';
 import { random as seededRandom } from '../../utils/seededRandom';
+import { allEliteOfficeRoles } from '../gameData/eliteOffices';
+
+/** Offices, which are appointed rather than apprenticed into. */
+const ELITE_OFFICE_ROLES = new Set(allEliteOfficeRoles().map(role => role.toLowerCase()));
+const isEliteOfficeRole = (profession: string): boolean =>
+  ELITE_OFFICE_ROLES.has(profession.trim().toLowerCase());
 
 // ============================================================================
 // CORE TYPE DEFINITIONS
@@ -1508,6 +1514,39 @@ function generateEarlyLifeEvent(
    * anyone alive now.
    */
   const wageWork = trainingYear >= 1900;
+
+  /**
+   * An office is not a trade and cannot be apprenticed into.
+   *
+   * Nobody was ever "taken as an apprentice bishop", and the generic branch at
+   * the foot of this function produced exactly that: "At age 15, she began
+   * learning the trade of ambassador from an experienced practitioner." What a
+   * boy of thirteen bound for one of these places actually did was study, serve
+   * in a household, or be sent somewhere to be seen — the office comes decades
+   * later and by appointment. See `eliteOffices.ts`.
+   */
+  if (isEliteOfficeRole(profession)) {
+    // Each of these has to open on a verb `PREDICATE_OPENERS` recognises, or
+    // the biography renders it without a subject: "At age 13, was put to
+    // letters early".
+    const variants = wageWork
+      ? [
+        'Stayed at school past the age most of the district left it',
+        'Went to the capital to study, at an expense the household felt',
+        'Joined the party as a youth, which was the road such things were reached by',
+      ]
+      : [
+        'Learned letters early, which in this household meant something was intended',
+        'Went into a great household to be brought up, and to be seen there',
+        'Began the studies that such a place is reached through, and no other work',
+        'Carried letters for someone already placed, and was in the room for a good deal of it',
+      ];
+    return {
+      kind: 'apprenticeship',
+      title: 'Early Training',
+      text: variants[Math.floor(seededRandom() * variants.length)],
+    };
+  }
 
   // Crafts & Trades - Traditional apprenticeship
   const craftProfessions = ['blacksmith', 'carpenter', 'mason', 'weaver', 'potter', 'tanner',

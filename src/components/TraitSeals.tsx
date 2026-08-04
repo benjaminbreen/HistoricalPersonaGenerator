@@ -19,7 +19,7 @@
 import React from 'react';
 import { IconType } from 'react-icons';
 import {
-  GiBiceps, GiHandGrip, GiRun, GiHeartBeats, GiOpenBook, GiOwl, GiEagleEmblem,
+  GiBiceps, GiHandGrip, GiRun, GiHeartBeats, GiBrain, GiOwl, GiEagleEmblem,
   GiFoxHead, GiCharm, GiTalk, GiClover, GiCompass, GiHourglass, GiThreeFriends,
   GiShakingHands, GiPsychicWaves,
 } from 'react-icons/gi';
@@ -36,7 +36,7 @@ const DEVICE: Record<string, IconType> = {
   'stat:dexterity': GiHandGrip,
   'stat:stamina': GiRun,
   'stat:constitution': GiHeartBeats,
-  'stat:intelligence': GiOpenBook,
+  'stat:intelligence': GiBrain,
   'stat:wisdom': GiOwl,
   'stat:perception': GiEagleEmblem,
   'stat:craftiness': GiFoxHead,
@@ -59,7 +59,7 @@ export default function TraitSeals({ seals }: Props): React.ReactElement | null 
 
   return (
     <div className="trait-seals">
-      {seals.map((seal, index) => {
+      {seals.map(seal => {
         const Device = DEVICE[seal.id] || GiCharm;
         return (
           <HoverPlate
@@ -69,10 +69,6 @@ export default function TraitSeals({ seals }: Props): React.ReactElement | null 
             placement="right"
             variant="caps"
             className={`trait-seal trait-seal-${seal.family} trait-seal-${seal.direction}`}
-            // Hand-stamped, so no two sit at quite the same angle. Alternating
-            // rather than random: a seal that tilts differently on every render
-            // is a seal that jitters when React re-renders the card.
-            style={{ '--seal-tilt': index % 2 === 0 ? '-7deg' : '5deg' } as React.CSSProperties}
           >
             <span className="trait-seal-wax" aria-hidden="true">
               <Device />

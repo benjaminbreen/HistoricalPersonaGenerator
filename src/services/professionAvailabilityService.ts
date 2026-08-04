@@ -2,6 +2,26 @@ import type { HistoricalContext } from '../types/historicalContext';
 import type { CulturalZone } from '../types/characterData';
 import { hasCapability } from '../constants/societyCapabilities';
 import { disruptionProfessionMultiplier } from './disruptionResolution';
+import { allEliteOfficeRoles } from '../constants/gameData/eliteOffices';
+
+/** Titles owned by the office roll rather than by the profession tables. */
+const ELITE_OFFICE_ROLES = new Set(allEliteOfficeRoles().map(role => role.toLowerCase()));
+const isEliteOfficeRole = (profession: string): boolean =>
+  ELITE_OFFICE_ROLES.has(profession.trim().toLowerCase());
+
+/**
+ * The same titles where the tables spell them differently — "Spanish Viceroy",
+ * "Priest-King", "Coya", "Queen Mother" — plus the handful the catalogue does
+ * not carry at all. Held to zero for the same reason: an office is drawn at a
+ * per-capita rate by `eliteOfficeService` or it is not drawn.
+ *
+ * Zeroing a whole class is safe now. `determineSocialRole` rescans the entire
+ * table when the requested class comes back empty, so a noble roll in a block
+ * that is nothing but regal titles gets an ordinary trade of that society
+ * rather than the generic field hand it used to get.
+ */
+const SINGULAR_OFFICE =
+  /\b(?:maharaja|nawab|emperor|empress|king|queen|coya|duke|duchess|prince|princess|oil baron|bank president|viceroy|encomendero|governor.general|colonial governor|sultan|caliph|shah|tsar|czar|pharaoh|doge|khan|pope|patriarch|grand vizier|shogun|caudillo|paramount chief|war chief|priest.?king|chaebol chairman|tech ceo)\b/i;
 
 interface ProfessionAvailabilityRule {
   pattern: RegExp;
@@ -100,8 +120,14 @@ const PROFESSION_AVAILABILITY_RULES: ProfessionAvailabilityRule[] = [
   {
     // Mesoamerican institutions and crops. Chinampas are the raised fields of
     // the Valley of Mexico; cacao is a lowland tropical tree.
+    //
+    // Scoped to the Americas, and it was not. A fence built around Mesoamerica
+    // deleted the West African cocoa farmer — Ghana and Côte d'Ivoire grow most
+    // of the world's crop — and the Chinese jade carver, jade being the
+    // archetypal craft of the zone this rule was silently governing.
     pattern: /\b(?:chinampero|chinampa|cacao|cocoa|tribute collector|pochteca|calpixqui|nahual|curandero|codex painter|obsidian knapper|featherworker|jade carver|ball court player|ticitl|herbatero|sobador)\b/i,
     places: /\b(?:mexico|maya|yucatan|oaxaca|guatemala|chiapas|belize|honduras|central highlands|mesoameric|tenochtitlan|teotihuacan|veracruz|isthmus|central america|caribbean|antill)\b/i,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'NORTH_AMERICAN_COLONIAL'],
   },
   {
     // Rice is a wet crop, and the profession tables offer it zone-wide across
@@ -122,8 +148,12 @@ const PROFESSION_AVAILABILITY_RULES: ProfessionAvailabilityRule[] = [
   // are reachable at all, they need pinning to the ground they describe, or the
   // Baffin coast fills up with buffalo hunters and wampum makers.
   {
+    // North American only: "buffalo" in monsoon Asia is the water buffalo, a
+    // plough animal on every wet-rice farm from the Punjab to Luzon, and this
+    // rule was quietly deleting the Southeast Asian buffalo herder.
     pattern: /\b(?:buffalo|bison|pemmican|tipi|travois|horse trainer)\b/i,
     places: /\b(?:great plains|plains|prairie|dakota|nebraska|llano|missouri|platte|comanche|blackfoot|great basin|rockies|texas)\b/i,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'NORTH_AMERICAN_COLONIAL'],
   },
   {
     // Wampum is Atlantic quahog and whelk shell; maple sugar needs sugar maples;
@@ -137,9 +167,12 @@ const PROFESSION_AVAILABILITY_RULES: ProfessionAvailabilityRule[] = [
     places: /\b(?:southwest|puebloan|colorado plateau|rio grande|sonora|arizona|new mexico|mexico|cerrillos|chaco canyon)\b/i,
   },
   {
-    // Arctic and subarctic work.
+    // Arctic and subarctic work — in the Arctic. Pacific whaling was a real
+    // Oceanian occupation from the 1790s, worked out of island ports by island
+    // crews, and this rule was refusing it.
     pattern: /\b(?:umiak|kayak|harpoon|sealer|whaler|dog ?sled|igloo|caribou)\b/i,
     places: /\b(?:arctic|subarctic|baffin|greenland|labrador|alaska|yukon|inuit|thule|aleut|yupik|bering|hudson bay|tundra)\b/i,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'NORTH_AMERICAN_COLONIAL'],
   },
   {
     // Acorn meal is the Californian and Great Basin staple; shellfish middens
@@ -155,8 +188,13 @@ const PROFESSION_AVAILABILITY_RULES: ProfessionAvailabilityRule[] = [
     excludePlaces: /\b(?:colorado plateau|mojave|sonora|llano|high desert|painted desert|canyonlands|absaroka|yellowstone basin|gobi|taklamakan|rub al khali|empty quarter|kalahari|namib|atacama)\b/i,
   },
   {
+    // Written for the Northwest Coast, where the place names carry the water in
+    // them. Southeast Asian regions are named for their uplands and their
+    // rivers' valleys, so an archipelago of shellfish gatherers failed a test
+    // that was only ever asking "is this the seaside".
     pattern: /\b(?:shellfish gatherer|fish weir builder)\b/i,
     places: /\b(?:coast|sound|bay|harbor|harbour|estuary|delta|island|shore|sea|puget|salish|fraser|chesapeake|atlantic|pacific|arctic|baffin|labrador|gulf|lagoon|strait|inlet|fjord|river)\b/i,
+    zones: ['NORTH_AMERICAN_PRE_COLUMBIAN', 'NORTH_AMERICAN_COLONIAL'],
   },
   {
     // Andean institutions.
@@ -296,15 +334,61 @@ const FORAGING_LIVELIHOOD = /\b(?:forager|seed gatherer|acorn processor|root dig
  * matched against location and region. Only genuinely place-bound work belongs
  * here: a baker or a clerk existed everywhere and must not be listed.
  */
-const PLACE_BOUND_PROFESSIONS: Array<{ profession: RegExp; places: RegExp }> = [
+const PLACE_BOUND_PROFESSIONS: Array<{
+  profession: RegExp;
+  places: RegExp;
+  /**
+   * Which zones the fence applies in. Omitted means everywhere, which is
+   * almost never what one of these rules means.
+   *
+   * Every rule here was written from inside one zone and then applied to all
+   * ten, so a fence built to keep the rubber boom in the Amazon deleted the
+   * rubber tapper from Malaya — where the largest rubber workforce that ever
+   * existed actually worked. `reach-audit` names each one it kills.
+   */
+  zones?: CulturalZone[];
+}> = [
   // Tango is a Río de la Plata form — Buenos Aires and Montevideo.
-  { profession: /\btango\b/i, places: /pampas|plata|paran|buenos aires|montevideo|uruguay|santa fe|c[oó]rdoba/i },
+  {
+    profession: /\btango\b/i, zones: ['SOUTH_AMERICAN'],
+    places: /pampas|plata|paran|buenos aires|montevideo|uruguay|santa fe|c[oó]rdoba/i,
+  },
   // Andean highland pastoralism. Llamas and alpacas are not lowland animals.
-  { profession: /\b(?:llama|alpaca)\b/i, places: /andes|altiplano|titicaca|yungas|cusco|quito|puna|highland/i },
-  // The rubber boom was an Amazon and Acre phenomenon.
-  { profession: /\brubber tapper\b/i, places: /amazon|acre|manaus|negro|tapaj|xingu|varzea|purus|madeira/i },
-  // Gaucho and vaquero work belongs to the grass, not the rainforest.
-  { profession: /\b(?:gaucho|vaquero)\b/i, places: /pampas|plata|chaco|llanos|patagonia|banda oriental|uruguay/i },
+  {
+    profession: /\b(?:llama|alpaca)\b/i, zones: ['SOUTH_AMERICAN'],
+    places: /andes|altiplano|titicaca|yungas|cusco|quito|puna|highland/i,
+  },
+  // The South American rubber boom was an Amazon and Acre phenomenon.
+  {
+    profession: /\brubber tapper\b/i, zones: ['SOUTH_AMERICAN'],
+    places: /amazon|acre|manaus|negro|tapaj|xingu|varzea|purus|madeira/i,
+  },
+  // And the far larger plantation belt, which is where rubber went after 1876:
+  // Malaya, Sumatra, Java, Indochina, and the Congo concessions.
+  {
+    profession: /\brubber tapper\b/i, zones: ['SOUTHEAST_ASIAN'],
+    places: /malay|sumatra|java|borneo|sarawak|johor|selangor|perak|indochina|mekong|cochin|annam|siam|thai|peninsula|archipelago|island|highland|lowland|delta|valley|coast|basin/i,
+  },
+  {
+    profession: /\brubber tapper\b/i, zones: ['SUB_SAHARAN_AFRICAN'],
+    places: /congo|kasai|ubangi|equator|gabon|cameroon|liberia|guinea|forest|basin|coast|river/i,
+  },
+  // Gaucho work belongs to the grass, not the rainforest.
+  {
+    profession: /\bgaucho\b/i, zones: ['SOUTH_AMERICAN'],
+    places: /pampas|plata|chaco|llanos|patagonia|banda oriental|uruguay/i,
+  },
+  // The vaquero is Mexican and then Californian and Texan — the word, the
+  // saddle and the work all travelled north, and fencing him to the pampas put
+  // him nowhere at all.
+  {
+    profession: /\bvaquero\b/i, zones: ['NORTH_AMERICAN_COLONIAL', 'NORTH_AMERICAN_PRE_COLUMBIAN'],
+    places: /mexico|sonora|california|texas|rio grande|new mexico|arizona|central valley|sierra|plain|prairie|llano|basin|coast|valley|highland/i,
+  },
+  {
+    profession: /\bvaquero\b/i, zones: ['SOUTH_AMERICAN'],
+    places: /pampas|plata|chaco|llanos|patagonia|banda oriental|uruguay/i,
+  },
 ];
 
 export function isProfessionHistoricallyAvailable(
@@ -323,12 +407,19 @@ export function isProfessionHistoricallyAvailable(
     placeLower: farmingPlace,
   });
 
-  if (NEEDS_AGRICULTURE.test(profession) && !farms) return false;
+  // "Fire-stick farming" is the term for burning country to manage it, and the
+  // whole point of the phrase is that it is what foragers did instead of
+  // sowing. Matching it on the word "farmer" and then demanding settled
+  // agriculture made it unreachable in the one place it names.
+  const FORAGER_LANDCARE = /\bfire ?stick farmer\b/i;
+
+  if (NEEDS_AGRICULTURE.test(profession) && !FORAGER_LANDCARE.test(profession) && !farms) return false;
 
   // Work that belongs to a particular corner of its zone. `farmingPlace` is
   // already the location and region lowercased, which is exactly what these
   // need.
-  for (const { profession: pattern, places } of PLACE_BOUND_PROFESSIONS) {
+  for (const { profession: pattern, places, zones } of PLACE_BOUND_PROFESSIONS) {
+    if (zones && !zones.includes(context.culturalZone as CulturalZone)) continue;
     if (pattern.test(profession) && !places.test(farmingPlace)) return false;
   }
 
@@ -545,12 +636,19 @@ export function getProfessionSelectionWeight(
 ): number {
   let weight = 1;
 
-  // Offices only one person held at a time. The pattern used to name a dozen
-  // royal titles and stop, so "Spanish Viceroy" — of which colonial Peru had
-  // one — carried the same weight as "Shepherd", of which it had tens of
-  // thousands, and a golden-baseline shepherd was promoted to viceroy.
-  if (/\b(?:maharaja|nawab|emperor|empress|king|queen|duke|duchess|prince|princess|oil baron|bank president|viceroy|governor.general|sultan|caliph|shah|tsar|czar|pharaoh|doge|khan|pope|patriarch|grand vizier|shogun|caudillo|paramount chief|chaebol chairman|tech ceo)\b/i.test(profession)) {
-    weight = 0.02;
+  // Offices are no longer drawn here at all.
+  //
+  // Frequency by relative weight cannot express "one in seventy-five thousand":
+  // the figure depends on what else happens to be in the pool, which varies by
+  // zone, era and locale, so the old 0.02 meant something different in every
+  // draw and nothing in particular in any of them. The four rungs now have
+  // per-capita target shares of their own and are rolled up front by
+  // `eliteOfficeService`, before the tables are consulted — see
+  // `eliteOffices.ts`. Zeroing them here is what stops the same titles being
+  // produced a second time, at an uncontrolled rate, out of the tail of a
+  // profession table.
+  if (isEliteOfficeRole(profession) || SINGULAR_OFFICE.test(profession)) {
+    weight = 0;
   } else if (/\b(?:robber baron|tycoon|magnate|mogul|film star|movie star|hollywood star|television presenter|news anchor|rock star|pop star|recording artist|professional athlete|olympian|prizefighter|astronaut|test pilot|explorer|spy|secret agent|cartel|mob boss|crime boss|bootlegger)\b/i.test(profession)) {
     // The conspicuous occupations — the ones a period is remembered by, and
     // which a table of "what is interesting about this time and place" fills up

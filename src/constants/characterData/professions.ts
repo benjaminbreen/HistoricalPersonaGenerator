@@ -11,6 +11,7 @@
 
 import { HistoricalEra } from '../../types';
 import { type CulturalZone } from './names';
+import { ELITE_OFFICE_STANDINGS } from '../gameData/eliteOffices';
 
 export type { CulturalZone };
 
@@ -82,9 +83,15 @@ export const STANDING_ROLES: Record<string, { gloss: string; livelihood: string 
   },
 };
 
-/** The gloss for a standing role, or undefined for an ordinary trade. */
+/**
+ * The gloss for a standing role, or undefined for an ordinary trade.
+ *
+ * The office catalogue carries its own, for the same reason and in the same
+ * shape — "he makes his living as a bishop" is wrong in exactly the way "as a
+ * maharaja" is — so both maps are consulted.
+ */
 export const standingRole = (profession?: string) =>
-  (profession ? STANDING_ROLES[profession] : undefined);
+  (profession ? (STANDING_ROLES[profession] ?? ELITE_OFFICE_STANDINGS[profession]) : undefined);
 
 /* ---------- Helper alias types ----------------------------------------- */
 export type RoleMap        = { [role: string]: ProfessionDefinition };

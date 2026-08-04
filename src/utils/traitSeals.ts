@@ -73,13 +73,24 @@ interface Entry {
  * sheet would print — "ox-strong", not "Strength 10". They are the same
  * vocabulary `statToText` works in, one register shorter, and they carry no
  * pronoun so they fit any persona.
+ *
+ * One rule governs the wording, and it is worth stating because the obvious
+ * candidates break it. An epithet may be an English idiom — "all thumbs",
+ * "hawk-eyed", "silver-tongued" — because the narrator is speaking modern
+ * English about every persona in the app, in every millennium, and always has.
+ * What an epithet may *not* do is make a claim about the person's own world.
+ * "Unlettered" was the first draft for a low intelligence score and it is
+ * exactly that: it says letters existed and this person did not have them,
+ * which for a Neolithic herder is not a description of their mind but a
+ * statement about a technology that had not been invented. The same trap is
+ * waiting in any word that presumes schooling, coinage, clocks or scripture.
  */
 const STATS: Record<string, Entry> = {
   strength: { label: 'strength', glyph: 'St', family: 'body', high: 'ox-strong', low: 'slight-built' },
   dexterity: { label: 'dexterity', glyph: 'Dx', family: 'body', high: 'deft-handed', low: 'all thumbs' },
   stamina: { label: 'stamina', glyph: 'Sm', family: 'body', high: 'tireless', low: 'soon winded' },
   constitution: { label: 'constitution', glyph: 'Cn', family: 'body', high: 'never ails', low: 'sickly' },
-  intelligence: { label: 'intelligence', glyph: 'In', family: 'mind', high: 'lettered', low: 'unlettered' },
+  intelligence: { label: 'intelligence', glyph: 'In', family: 'mind', high: 'quick-witted', low: 'slow of wit' },
   wisdom: { label: 'wisdom', glyph: 'Ws', family: 'mind', high: 'an old head', low: 'rash' },
   perception: { label: 'perception', glyph: 'Pc', family: 'mind', high: 'hawk-eyed', low: 'dim-sighted' },
   craftiness: { label: 'craftiness', glyph: 'Cf', family: 'mind', high: 'sly', low: 'plain-dealing' },

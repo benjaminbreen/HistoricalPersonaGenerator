@@ -14,7 +14,7 @@ import { CITIES_DATA } from '../../constants/gameData/cities';
 import * as clothingModule from '../../constants/characterData/clothing';
 import { adjustMaterialQuality } from '../../constants/characterData/clothing';
 import { workDressFor, resolveWorkCategory, WORK_DYE_DAMPING } from '../../constants/characterData/workDress';
-import { hasCapability, SocietyCapability } from '../../constants/societyCapabilities';
+import { hasCapability, SocietyCapability, subsistenceMode } from '../../constants/societyCapabilities';
 import { cleanShavenChance, pickFacialHairStyle, type FacialHairContext } from '../../constants/characterData/facialHair';
 import { ValueNoise } from '../../utils/noise';
 import { generatePersonalGoal } from '../../services/goalService';
@@ -1612,23 +1612,103 @@ export function generateBaseProfile(
         stats.defense = Math.max(1, Math.floor((stats.constitution + stats.dexterity) / 3));
         stats.level = 1 + Math.floor(noise.random() * 5);
 
+        /**
+         * Temperament, on the same bell the ability scores use.
+         *
+         * These were five raw uniform draws, and a uniform draw over a trait is
+         * the same slab `generateStat` was rescued from: a fifth of every
+         * population past 0.8 on any given trait, 92% of personas extreme on at
+         * least one. Extremity that common is not a characteristic, it is the
+         * baseline. It showed most in the prose — the biography trait banks open
+         * at 0.7 and 0.3, and were firing on three traits in five for 99% of
+         * personas, so every life story announced the same kind of thing about
+         * its subject.
+         *
+         * Averaging three draws puts most people in the middle and thins the
+         * ends fast: about one trait in twenty-eight now lands past 0.8, and the
+         * banks open for roughly one trait in four.
+         *
+         * The two extra draws per trait come from a stream derived off the five
+         * originals rather than from `noise`, so the main stream still advances
+         * by exactly five and no unrelated persona downstream shifts.
+         */
+        const traitRolls = [
+            noise.random(), noise.random(), noise.random(), noise.random(), noise.random(),
+        ];
+        const traitNoise = new ValueNoise(hashSeed(`personality|${traitRolls.join('|')}`));
+        const trait = (first: number): number =>
+            Math.max(0, Math.min(1, (first + traitNoise.random() + traitNoise.random()) / 3));
+
         let personality: CharacterPersonality = {
-            openness: Math.max(0, Math.min(1, noise.random())),
-            conscientiousness: Math.max(0, Math.min(1, noise.random())),
-            extraversion: Math.max(0, Math.min(1, noise.random())),
-            agreeableness: Math.max(0, Math.min(1, noise.random())),
-            neuroticism: Math.max(0, Math.min(1, noise.random())),
+            openness: trait(traitRolls[0]),
+            conscientiousness: trait(traitRolls[1]),
+            extraversion: trait(traitRolls[2]),
+            agreeableness: trait(traitRolls[3]),
+            neuroticism: trait(traitRolls[4]),
         };
 
         // Correlate personality with stats for initial coherence
         personality = correlateStatsWithPersonality(stats, personality);
 
+        /**
+         * Disposition toward the world, centred on the world in question.
+         *
+         * These five were uniform draws too, and being uniform they were also
+         * era-blind: mean religiosity came out 0.51 in the tenth century and
+         * 0.51 in the twenty-first, and ambition, wanderlust and entrepreneurial
+         * spirit sat at 0.50 in every society the generator can depict. They are
+         * not decorative — 84 professions gate on religiosity, `determineSocialRole`
+         * scores all four, and religiosity feeds ideology — so a flat 0.5
+         * everywhere is the generator declining to have an opinion about the
+         * single thing it exists to model.
+         *
+         * The centres key off `subsistenceMode`, which already knows whether
+         * this society has markets, wages, herds or fields, rather than off a
+         * new table of eras invented here. The model is deliberately coarse: it
+         * claims that people move more where movement is how you eat, that
+         * enterprise means more where there is something to trade, and that
+         * industrial urbanisation is where religious observance starts to come
+         * apart. Individual variation is wide enough that any persona can still
+         * cut against the century they were born in.
+         *
+         * `privilege` keeps its flat draw because it does not survive: the
+         * demographic sampling in `personaGenerator` overwrites it from the era's
+         * own wealth distribution, which is why wealth already comes out at 47%
+         * poor and 0.1% noble rather than the uniform roll's 20% wealthy.
+         */
+        const societyCtx = {
+            year: context.year ?? 0,
+            culturalZone: context.culturalZone,
+            placeLower: `${context.localArea ?? ''} ${context.region ?? ''}`.toLowerCase(),
+        };
+        const mode = subsistenceMode(societyCtx);
+        // Late-modern secularisation, on top of whatever the subsistence mode
+        // says. Industrial Britain in 1900 was still a churchgoing place; the
+        // steep fall is recent, so it is carried by the year rather than by the
+        // mode that has described both since 1850.
+        const secularDrift = Math.max(0, Math.min(0.15, ((context.year ?? 0) - 1950) / 80 * 0.15));
+        const CENTRES: Record<string, { wanderlust: number; religiosity: number; ambition: number; entrepreneurial: number }> = {
+            foraging:       { wanderlust: 0.62, religiosity: 0.68, ambition: 0.45, entrepreneurial: 0.25 },
+            pastoral:       { wanderlust: 0.65, religiosity: 0.68, ambition: 0.45, entrepreneurial: 0.28 },
+            horticultural:  { wanderlust: 0.42, religiosity: 0.68, ambition: 0.45, entrepreneurial: 0.28 },
+            agrarian:       { wanderlust: 0.35, religiosity: 0.68, ambition: 0.45, entrepreneurial: 0.38 },
+            commercial:     { wanderlust: 0.50, religiosity: 0.62, ambition: 0.55, entrepreneurial: 0.55 },
+            industrial:     { wanderlust: 0.58, religiosity: 0.50, ambition: 0.55, entrepreneurial: 0.62 },
+        };
+        const centre = CENTRES[mode] ?? CENTRES.agrarian;
+        // Same five draws as before, so the stream is unmoved; each is placed
+        // around its centre instead of around 0.5. A band of ±0.35 leaves an
+        // ordinary person recognisably of their time without making everyone in
+        // a century the same.
+        const around = (centreValue: number, roll: number): number =>
+            Math.max(0, Math.min(1, centreValue + (roll - 0.5) * 0.7));
+
         const socialContext: CharacterSocialContext = {
             privilege: Math.max(0, Math.min(1, noise.random())),
-            wanderlust: Math.max(0, Math.min(1, noise.random())),
-            religiosity: Math.max(0, Math.min(1, noise.random())),
-            ambition: Math.max(0, Math.min(1, noise.random())),
-            entrepreneurial: Math.max(0, Math.min(1, noise.random())),
+            wanderlust: around(centre.wanderlust, noise.random()),
+            religiosity: around(centre.religiosity - secularDrift, noise.random()),
+            ambition: around(centre.ambition, noise.random()),
+            entrepreneurial: around(centre.entrepreneurial, noise.random()),
         };
 
         const gender: Gender = overrides.gender || (noise.random() > 0.5 ? 'Male' : 'Female');
@@ -1895,7 +1975,126 @@ export function generateCulturalAppearance(
  * Certain professions are inappropriate for specific regions within a cultural zone
  * e.g., Kava is not found in Australia, breadfruit is not native there either
  */
-function isProfessionValidForRegion(professionName: string, region: string | undefined, culturalZone: CulturalZone): boolean {
+/**
+ * Which table classes a requested social class may draw from.
+ *
+ * Culture-area classes have to be listed here or they are dead data:
+ * the North American table has had `Woodlands` and `Plains` blocks all
+ * along, and because neither name appeared below, every peasant in
+ * medieval North America was filtered out of them and fell through to
+ * the generic fallback — which is why the Baffin coast, Puget Sound and
+ * the Central Valley all returned the identical distribution, 88% of it
+ * "Fisher". `Foragers` is the antiquity-era equivalent.
+ */
+const SUBSISTENCE_CLASSES = [
+    'FORAGERS', 'WOODLANDS', 'PLAINS', 'SOUTHWEST', 'NORTHWEST',
+    'PALEOLITHIC', 'AGRICULTURAL',
+];
+/**
+ * The same problem one rung up, and it cost the app its entire elite.
+ *
+ * `NOBLE` used to list four names — NOBILITY, NOBLE, ELITE, UPPER_CLASS
+ * — and outside the modern era only three blocks in the whole 6,500-line
+ * profession table carry any of them: European medieval NOBILITY, and
+ * the Sub-Saharan and South American UPPER_CLASS blocks. Every other
+ * zone keeps its elite under the society's own name — SAMURAI_CLASS,
+ * KSHATRIYA, BRAHMIN, MUGHAL_COURT, SCHOLAR_OFFICIAL, IMPERIAL_SERVICE,
+ * OTTOMAN_SERVICE, PERSIAN_ADMIN — and none of those names appeared
+ * here, so all of it was unreachable. A noble roll in Song China or
+ * Mughal India matched nothing, fell through `classFallbackRoles`, and
+ * landed in `getFallbackRole`, which ignores class entirely and returns
+ * a farmer.
+ */
+const ZONE_ELITE_CLASSES = [
+    'SCHOLAR_OFFICIAL', 'IMPERIAL_SERVICE', 'SAMURAI_CLASS',
+    'BRAHMIN', 'KSHATRIYA', 'MUGHAL_COURT',
+    'PERSIAN_ADMIN', 'OTTOMAN_SERVICE', 'SCHOLAR',
+    'CITIZEN', 'BOURGEOISIE', 'MERCHANT_CLASS',
+];
+/**
+ * Elite by wealth and standing rather than by birth. Kept apart from
+ * the group above because a merchant roll should reach a Venetian
+ * banker and an Ottoman tax farmer, but not a samurai or a brahmin —
+ * those are conditions of birth that money did not buy.
+ */
+const COMMERCIAL_ELITE_CLASSES = ['MERCHANT_CLASS', 'BOURGEOISIE', 'VAISHYA', 'COMPANY_SERVICE'];
+
+/**
+ * Blocks that hold a whole society rather than one class of it.
+ *
+ * `OCEANIA / MEDIEVAL / POLYNESIAN_EXPANSION` runs from Master Navigator to
+ * Coconut Gatherer; `NORTH_AMERICAN_COLONIAL / RENAISSANCE / SPANISH_COLONIAL`
+ * from Ranchero to Mission Indian. These are era and culture-area labels that
+ * the table uses where a society was not organised into the classes this map is
+ * named after, so every status has to be able to reach them — filtering them by
+ * class means filtering out the entire zone.
+ *
+ * `reach-audit` exists to catch what happens when they are missing: 543 of 1,653
+ * table entries, a third of the file, were unreachable from any status.
+ */
+const CULTURE_AREA_CLASSES = [
+    'HUNTER_GATHERER', 'TRIBAL', 'MARGINAL_SOCIETY',
+    'ISLAND_SETTLERS', 'ABORIGINAL_AUSTRALIAN', 'POLYNESIAN', 'POLYNESIAN_EXPANSION',
+    'MESOPOTAMIAN', 'HARAPPAN',
+    'NATIVE_AMERICAN', 'CONTACT', 'COLONIAL', 'FRONTIER',
+    'SPANISH_COLONIAL', 'ENGLISH_COLONIAL', 'FRENCH_COLONIAL',
+];
+
+/**
+ * The ordinary population under the names the other tables give it.
+ *
+ * `PEASANTS`, `LABORERS` and `WORKING_CLASS` were listed; `PEASANTRY`,
+ * `COMMONERS`, `LOWER_CLASS`, `URBAN_WORKERS`, `SHUDRA` and `DALITS` were not,
+ * and are the same people.
+ */
+const LABOURING_CLASSES = [
+    'PEASANT', 'PEASANTS', 'PEASANTRY', 'COMMONER', 'COMMONERS',
+    'LABORER', 'LABORERS', 'LOWER_CLASS', 'WORKING_CLASS', 'URBAN_WORKERS',
+    'SHUDRA', 'DALITS', 'AGRICULTURAL', 'SERVICE_ECONOMY',
+];
+
+/** Crafts and the trades that are neither land nor letters. */
+const CRAFT_CLASSES = ['ARTISAN', 'CRAFT', 'CRAFTSPEOPLE'];
+
+/**
+ * Vocations and arms, which are drawn from every station.
+ *
+ * A parish priest and a bishop came out of very different households, and the
+ * table keeps both in one CLERGY block; the same is true of a foot soldier and
+ * a knight. So these are reachable from the bottom of the order to the top,
+ * and it is the individual role's own requirements that sort them out.
+ */
+const VOCATION_CLASSES = ['CLERGY', 'RELIGIOUS', 'MILITARY'];
+
+/**
+ * Outlaws are not filtered here.
+ *
+ * `determineSocialRole` separates these classes out of the pool and gives them
+ * a 1% share of the draw, so the rarity is already handled downstream — but a
+ * role has to be *in* the pool to be separated out of it, and leaving these
+ * unlisted meant the 1% was of nothing.
+ */
+const OUTLAW_CLASSES = ['OUTLAWS_AND_REVOLUTIONARIES', 'OUTLAWS_AND_ACTIVISTS', 'WAR_ERA'];
+
+/** Reachable from any station, because they are not stations. */
+const UNIVERSAL_CLASSES = [...SUBSISTENCE_CLASSES, ...CULTURE_AREA_CLASSES, ...OUTLAW_CLASSES];
+
+export const ALLOWED_CLASS_GROUPS: Record<string, string[]> = {
+    PEASANT: [...LABOURING_CLASSES, ...VOCATION_CLASSES, ...UNIVERSAL_CLASSES],
+    COMMONER: ['COMMONER', 'COMMONERS', 'MIDDLE_CLASS', 'URBAN', 'URBAN_WORKERS', 'SERVICE_ECONOMY', 'MODERNIZING_CLASS',
+        ...CRAFT_CLASSES, ...VOCATION_CLASSES, ...UNIVERSAL_CLASSES],
+    MERCHANT: ['MERCHANT', 'MERCHANTS', 'TRADER', 'TRADERS', 'UPPER_CLASS', 'URBAN',
+        ...COMMERCIAL_ELITE_CLASSES, ...CULTURE_AREA_CLASSES],
+    NOBLE: ['NOBILITY', 'NOBLE', 'ELITE', 'UPPER_CLASS',
+        ...ZONE_ELITE_CLASSES, ...VOCATION_CLASSES, ...CULTURE_AREA_CLASSES],
+    WORKING_CLASS: [...LABOURING_CLASSES, ...CRAFT_CLASSES, ...VOCATION_CLASSES, ...UNIVERSAL_CLASSES],
+    MIDDLE_CLASS: ['COMMONER', 'PROFESSIONAL', 'MIDDLE_CLASS', 'URBAN', 'SERVICE_ECONOMY', 'MODERNIZING_CLASS',
+        ...CRAFT_CLASSES, ...VOCATION_CLASSES, ...CULTURE_AREA_CLASSES],
+    UPPER_CLASS: ['MERCHANT', 'MERCHANTS', 'PROFESSIONAL', 'NOBILITY', 'UPPER_CLASS',
+        ...ZONE_ELITE_CLASSES, ...VOCATION_CLASSES, ...CULTURE_AREA_CLASSES],
+};
+
+export function isProfessionValidForRegion(professionName: string, region: string | undefined, culturalZone: CulturalZone): boolean {
     if (!region) return true;
 
     const regionLower = region.toLowerCase();
@@ -1996,7 +2195,7 @@ function isProfessionValidForRegion(professionName: string, region: string | und
  * This filters entire profession categories, not individual professions
  * For example, Australian regions should ONLY use ABORIGINAL_AUSTRALIAN, not ISLAND_SETTLERS
  */
-function isSocialClassValidForRegion(socialClass: string, region: string | undefined, culturalZone: CulturalZone): boolean {
+export function isSocialClassValidForRegion(socialClass: string, region: string | undefined, culturalZone: CulturalZone): boolean {
     if (!region) return true;
 
     const regionLower = region.toLowerCase();
@@ -2360,32 +2559,8 @@ export function determineSocialRole(
         const possibleRoles: { socialClass: string, role: string, roleDef: ProfessionDefinition, selectionWeight: number }[] = [];
 
         const normalizedPreferredClass = context.preferredSocialClass?.toUpperCase().replace(/[\s-]+/g, '_');
-        /**
-         * Which table classes a requested social class may draw from.
-         *
-         * Culture-area classes have to be listed here or they are dead data:
-         * the North American table has had `Woodlands` and `Plains` blocks all
-         * along, and because neither name appeared below, every peasant in
-         * medieval North America was filtered out of them and fell through to
-         * the generic fallback — which is why the Baffin coast, Puget Sound and
-         * the Central Valley all returned the identical distribution, 88% of it
-         * "Fisher". `Foragers` is the antiquity-era equivalent.
-         */
-        const SUBSISTENCE_CLASSES = [
-            'FORAGERS', 'WOODLANDS', 'PLAINS', 'SOUTHWEST', 'NORTHWEST',
-            'PALEOLITHIC', 'AGRICULTURAL',
-        ];
-        const allowedClassGroups: Record<string, string[]> = {
-            PEASANT: ['COMMONER', 'PEASANT', 'PEASANTS', 'LABORER', 'LABORERS', 'AGRICULTURAL', 'WORKING_CLASS', ...SUBSISTENCE_CLASSES],
-            COMMONER: ['COMMONER', 'ARTISAN', 'CRAFT', 'MIDDLE_CLASS', ...SUBSISTENCE_CLASSES],
-            MERCHANT: ['MERCHANT', 'MERCHANTS', 'TRADER', 'TRADERS', 'UPPER_CLASS'],
-            NOBLE: ['NOBILITY', 'NOBLE', 'ELITE', 'UPPER_CLASS'],
-            WORKING_CLASS: ['COMMONER', 'LABORER', 'LABORERS', 'WORKING_CLASS', ...SUBSISTENCE_CLASSES],
-            MIDDLE_CLASS: ['COMMONER', 'ARTISAN', 'PROFESSIONAL', 'MIDDLE_CLASS'],
-            UPPER_CLASS: ['MERCHANT', 'MERCHANTS', 'PROFESSIONAL', 'NOBILITY', 'UPPER_CLASS'],
-        };
         const allowedClasses = normalizedPreferredClass
-            ? allowedClassGroups[normalizedPreferredClass]
+            ? ALLOWED_CLASS_GROUPS[normalizedPreferredClass]
             : undefined;
 
         for (const socialClass in eraRoles) {
@@ -2477,14 +2652,19 @@ export function determineSocialRole(
                      // it is split among them. Weighting them individually is
                      // what made them unreachable in the first place.
                      const fit = fitMultiplier * genderWeight;
-                     possibleRoles.push({
-                         socialClass,
-                         role: roleName,
-                         roleDef,
-                         selectionWeight: roleDef.texture
-                             ? fit
-                             : getProfessionSelectionWeight(roleName, historicalContext) * fit,
-                     });
+                     const selectionWeight = roleDef.texture
+                         ? fit
+                         : getProfessionSelectionWeight(roleName, historicalContext) * fit;
+                     // A weight of zero means "never from this table" — the
+                     // office titles, which `eliteOfficeService` owns and rolls
+                     // at a per-capita rate. Keeping them in the pool would
+                     // still return them: `pickWeightedRole` starts its roll at
+                     // zero, so the first entry of an all-zero pool always wins,
+                     // and the South American medieval UPPER_CLASS block is four
+                     // regal titles and nothing else.
+                     if (selectionWeight > 0) {
+                         possibleRoles.push({ socialClass, role: roleName, roleDef, selectionWeight });
+                     }
                 }
             }
         }
@@ -2514,24 +2694,39 @@ export function determineSocialRole(
         // choose a valid role from the requested class rather than silently
         // returning a shepherd, laborer, or merchant from another class.
         if (allowedClasses) {
-            const classFallbackRoles: { socialClass: string, role: string, roleDef: ProfessionDefinition, selectionWeight: number }[] = [];
-            for (const socialClass of Object.keys(eraRoles)) {
-                if (!allowedClasses.includes(socialClass.toUpperCase())) continue;
-                if (!isSocialClassValidForRegion(socialClass, context.region, context.culturalZone)) continue;
+            const rescan = (classes?: string[]) => {
+                const roles: { socialClass: string, role: string, roleDef: ProfessionDefinition, selectionWeight: number }[] = [];
+                for (const socialClass of Object.keys(eraRoles)) {
+                    if (classes && !classes.includes(socialClass.toUpperCase())) continue;
+                    if (!isSocialClassValidForRegion(socialClass, context.region, context.culturalZone)) continue;
 
-                for (const [roleName, roleDef] of Object.entries(eraRoles[socialClass])) {
-                    if (!isClergyRoleCompatible(roleName, profile.religion, socialClass)) continue;
-                    if (!isProfessionValidForRegion(roleName, context.region, context.culturalZone)) continue;
-                    if (!isProfessionAvailable(roleName, roleDef)) continue;
-                    const genderWeight = genderWeightFor(roleName, roleDef);
-                    if (genderWeight === 0) continue;
-                    classFallbackRoles.push({ socialClass, role: roleName, roleDef, selectionWeight:
-                        getProfessionSelectionWeight(roleName, historicalContext) * genderWeight });
+                    for (const [roleName, roleDef] of Object.entries(eraRoles[socialClass])) {
+                        if (!isClergyRoleCompatible(roleName, profile.religion, socialClass)) continue;
+                        if (!isProfessionValidForRegion(roleName, context.region, context.culturalZone)) continue;
+                        if (!isProfessionAvailable(roleName, roleDef)) continue;
+                        const genderWeight = genderWeightFor(roleName, roleDef);
+                        if (genderWeight === 0) continue;
+                        const selectionWeight = getProfessionSelectionWeight(roleName, historicalContext) * genderWeight;
+                        if (selectionWeight <= 0) continue;
+                        roles.push({ socialClass, role: roleName, roleDef, selectionWeight });
+                    }
                 }
-            }
+                return roles;
+            };
 
-            if (classFallbackRoles.length > 0) {
-                const chosen = pickWeightedRole(classFallbackRoles);
+            // The requested class first, and then — new — the whole table.
+            //
+            // A class whose every entry is an office title now leaves nothing
+            // behind: South American medieval UPPER_CLASS is Sapa Inca, Coya,
+            // High Priest and Curaca, all four of which the office roll owns.
+            // Dropping straight to `getFallbackRole` from there answered "this
+            // woman is of the ruling lineage" with "she is a field hand", which
+            // is a worse answer than the society's own ordinary trades.
+            const fallbackRoles = rescan(allowedClasses);
+            const roles = fallbackRoles.length > 0 ? fallbackRoles : rescan(undefined);
+
+            if (roles.length > 0) {
+                const chosen = pickWeightedRole(roles);
                 return {
                     socialClass: chosen.socialClass,
                     role: chosen.role,
@@ -2816,10 +3011,14 @@ export function adjustPersonalityForProfession(
 }
 
 /**
- * Correlate D&D-style stats with Big 5 personality traits.
- * High intelligence should correlate with higher openness.
- * High charisma should correlate with higher extraversion.
- * High wisdom should correlate with lower neuroticism and higher conscientiousness.
+ * Let the capacities colour the temperament: a sharp mind is a curious one, a
+ * steady one is harder to rattle.
+ *
+ * This runs in one direction only, and deliberately so. Charisma used to be in
+ * here too, lending extraversion a nudge, but that was the wrong way round —
+ * how good company someone is follows from their temperament, it does not
+ * produce it. Charisma and persuasion are now derived from the finished
+ * personality instead; see `deriveSocialStatsFromPersonality`.
  */
 export function correlateStatsWithPersonality(
     stats: CharacterStats,
@@ -2827,25 +3026,17 @@ export function correlateStatsWithPersonality(
 ): CharacterPersonality {
     const adjusted = { ...personality };
 
-    // Normalize stats from 1-10 scale to influence factor (-0.15 to +0.15)
+    // Normalize stats from 1-10 scale to influence factor (-0.12 to +0.12)
     const statInfluence = (stat: number): number => ((stat - 5.5) / 4.5) * 0.12;
 
     // Intelligence correlates with openness (intellectual curiosity)
     adjusted.openness = Math.max(0, Math.min(1, adjusted.openness + statInfluence(stats.intelligence)));
-
-    // Charisma correlates with extraversion
-    adjusted.extraversion = Math.max(0, Math.min(1, adjusted.extraversion + statInfluence(stats.charisma)));
 
     // Wisdom correlates negatively with neuroticism (emotional stability)
     adjusted.neuroticism = Math.max(0, Math.min(1, adjusted.neuroticism - statInfluence(stats.wisdom)));
 
     // Wisdom also correlates with conscientiousness (thoughtful, disciplined)
     adjusted.conscientiousness = Math.max(0, Math.min(1, adjusted.conscientiousness + statInfluence(stats.wisdom) * 0.5));
-
-    // High strength + low charisma can lead to lower agreeableness (intimidating)
-    if (stats.strength > 7 && stats.charisma < 5) {
-        adjusted.agreeableness = Math.max(0, adjusted.agreeableness - 0.08);
-    }
 
     // High perception correlates with openness (observant, detail-oriented)
     adjusted.openness = Math.max(0, Math.min(1, adjusted.openness + statInfluence(stats.perception) * 0.5));
@@ -2857,6 +3048,90 @@ export function correlateStatsWithPersonality(
     }
 
     return adjusted;
+}
+
+/** Centre and spread of the three-draw bell `generateStat` builds, on the 1–10 scale. */
+const STAT_CENTRE = 5.5;
+const STAT_SPREAD = 10 / 6;
+
+/**
+ * Blend a personality composite with the score already rolled for the stat.
+ *
+ * Both terms are standardised before mixing and the weights square to one, so
+ * the result keeps the marginal distribution the roll had — mean 5.5, sd 5/3,
+ * both tails reachable. That matters beyond looks: `personaRarityService` reads
+ * the population shape to decide how unusual a persona is, and would call a
+ * charisma of 9 ordinary if this quietly compressed the spread.
+ *
+ * `weight` is then simply how much of the score the temperament accounts for.
+ */
+const blendSocialStat = (
+    composite: number,
+    compositeSpread: number,
+    rolled: number,
+    weight: number
+): number => {
+    const fromPersonality = (composite - 0.5) / compositeSpread;
+    const fromRoll = (rolled - STAT_CENTRE) / STAT_SPREAD;
+    const z = weight * fromPersonality + Math.sqrt(1 - weight * weight) * fromRoll;
+    return Math.max(1, Math.min(10, Math.round(STAT_CENTRE + z * STAT_SPREAD)));
+};
+
+/**
+ * Charisma and persuasion, read off the finished personality.
+ *
+ * These two were rolled like any other ability score and then left free to
+ * contradict the temperament they are supposed to describe. A persona could
+ * come out 92% agreeable and 77% extraverted holding a charisma of 1, and did:
+ * across 500 generated personas charisma and extraversion correlated at 0.15,
+ * agreeableness correlated with nothing at all, and persuasion — the stat most
+ * plainly about handling people — was coupled to nothing whatsoever. The only
+ * link ran stats-to-traits and was worth at most ±0.12 on a uniform draw, so it
+ * could never overturn a roll; it could only tint one.
+ *
+ * So for these two the arrow is reversed. The temperament decides roughly where
+ * the score sits and the roll supplies the spread around it. Nothing new is
+ * drawn — the roll that used to *be* the score now varies it — so the noise
+ * stream is untouched and no unrelated persona shifts.
+ *
+ * `rolled` must always be the original draw. Feeding a previously derived score
+ * back in would count the personality twice and pull the population in toward
+ * its middle; callers that derive more than once keep the roll in hand.
+ */
+export function deriveSocialStatsFromPersonality(
+    rolled: Pick<CharacterStats, 'charisma' | 'persuasion'>,
+    personality: CharacterPersonality
+): { charisma: number; persuasion: number } {
+    // Presence: how the person lands on a stranger. Sociability first, warmth
+    // just behind it, composure a smaller share — a nervous host is still a host.
+    const presence =
+        0.40 * personality.extraversion +
+        0.35 * personality.agreeableness +
+        0.25 * (1 - personality.neuroticism);
+    // sqrt((0.40² + 0.35² + 0.25²) / 36) — the 36 is the variance of the
+    // three-draw bell each trait is now built from. It was 12, for the uniform
+    // draws they used to be; leaving it there would have under-dispersed the
+    // standardised term and quietly halved the link this function exists for.
+    const presenceSpread = 0.0979;
+
+    // Persuasion is the argument rather than the impression: engaging, prepared,
+    // able to find the other person's terms, and steady while doing it. It shares
+    // extraversion and composure with presence, so the two hang together without
+    // either being a copy of the other.
+    const suasion =
+        0.35 * personality.extraversion +
+        0.25 * personality.conscientiousness +
+        0.20 * personality.openness +
+        0.20 * (1 - personality.neuroticism);
+    const suasionSpread = 0.0858;  // sqrt((0.35² + 0.25² + 0.20² + 0.20²) / 36)
+
+    return {
+        // Charisma is close to temperament outright. Persuasion is partly a
+        // craft — practice, and knowing your trade — so more of it is left to
+        // the roll.
+        charisma: blendSocialStat(presence, presenceSpread, rolled.charisma, 0.68),
+        persuasion: blendSocialStat(suasion, suasionSpread, rolled.persuasion, 0.55),
+    };
 }
 
 /**

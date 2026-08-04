@@ -28,6 +28,7 @@ import {
 import { polityFormFor, sampleSocialStatus } from './socialStatusService';
 import { sampleStratum, type SampledStratum } from './populationStrataService';
 import { sampleElite, type SampledElite } from './eliteStrataService';
+import { sampleEliteOffice, type SampledOffice } from './eliteOfficeService';
 import { describePersonaRarity, type PersonaRarity } from './personaRarityService';
 import { disruptionRole } from './disruptionResolution';
 import { describeLifeEventSecondPerson } from './narrativeTextService';
@@ -141,6 +142,18 @@ export interface HistoricalPersona {
     stratumId: string;
     label: string;
     clause: string;
+  };
+  /**
+   * An office held, where one was. The share here is the *true* per-capita
+   * share of the rung, not the rate it was rolled at — the top two rungs are
+   * drawn more often than they occurred so that they occur at all, and the
+   * card's job is to keep saying the real number. See `eliteOffices.ts`.
+   */
+  office?: {
+    role: string;
+    tier: string;
+    gloss: string;
+    trueShare: number;
   };
 }
 
@@ -384,6 +397,35 @@ function generatePersonaWithSeed(
     ? null
     : sampleElite(culturalZone, year, region, location, birthSex, random);
 
+  // The office question takes a stream of its own, derived from the seed rather
+  // than drawn from the main sequence.
+  //
+  // Every persona is asked it, and the answer is "no" 999 times in a thousand —
+  // so taking the draw from `random` would advance the shared counter for all of
+  // them and rename the entire corpus. This is the same hazard the ornament
+  // block in `characterGenerator` documents: adding a question should not change
+  // the answers to the questions after it.
+  const officeRandom = (() => {
+    let state = (resolvedSeed ^ 0x0ff1ce5) >>> 0;
+    return (): number => {
+      state = (state + 0x6D2B79F5) >>> 0;
+      let value = state;
+      value = Math.imul(value ^ value >>> 15, value | 1);
+      value ^= value + Math.imul(value ^ value >>> 7, value | 61);
+      return ((value ^ value >>> 14) >>> 0) / 4294967296;
+    };
+  })();
+
+  // And the narrowest of the three questions: did this person hold an office?
+  // A stratum is inherited and can be a tenth of a population; an office is
+  // appointed and there are a fixed number of them. Asked only of the free,
+  // for the same reason as above, and it overrides the stratum's trade because
+  // holding the office is the more specific fact about a life. See
+  // `eliteOffices.ts` for the four rungs and what each one is anchored on.
+  const office: SampledOffice | null = stratum
+    ? null
+    : sampleEliteOffice(culturalZone, year, region, location, birthSex, officeRandom);
+
   // Determine wealth level. The elite table carries its own distribution rather
   // than a level, because the penniless hidalgo and the Edo retainer living on
   // a rice stipend that has not risen in a century are the modal cases of their
@@ -410,7 +452,7 @@ function generatePersonaWithSeed(
   // Standing in a privileged order *is* the answer to the status question; it
   // does not need to be sampled a second time from a wealth table that knows
   // nothing about the fuero or the banner registers.
-  const socialClass = params.socialClass || (elite ? 'noble' : null) || sampleSocialStatus(
+  const socialClass = params.socialClass || (elite || office ? 'noble' : null) || sampleSocialStatus(
     era,
     wealthLevel,
     random,
@@ -442,7 +484,7 @@ function generatePersonaWithSeed(
       // The stratum's trade, where there is one. It is drawn from a list of
       // real occupations — cooper, midwife, boatman — never from the status
       // itself, because the status is carried on its own axis below.
-      profession: params.profession ?? stratum?.role ?? elite?.role ?? catastropheRole ?? undefined,
+      profession: params.profession ?? stratum?.role ?? office?.role ?? elite?.role ?? catastropheRole ?? undefined,
       birthYear: params.birthYear, // Use provided birth year if available
       ethnicity: culturalZone, // Pass cultural zone as ethnicity to ensure proper character generation
       // Naming, appearance and language resolve off this rather than off the
@@ -484,12 +526,18 @@ function generatePersonaWithSeed(
   // only — see `backgroundFor` — and nothing about the face.
   const rarity = describePersonaRarity(character as any);
   (character as any).rarityTier = rarity.tier;
-  (character as any).hasDistinction = Boolean(elite);
+  (character as any).hasDistinction = Boolean(elite || office);
   // The share as well as the fact, because the corner mark is keyed to how rare
   // the standing was rather than to holding one at all: the hidalguía of
   // Castile was a tenth of the population, and a badge on that is a badge on
   // the ordinary case. See art/distinctionMark.ts.
-  (character as any).distinctionShare = elite?.stratum.share;
+  //
+  // An office outranks a stratum here, and by a long way: the hidalguía was a
+  // tenth of Castile, a bishopric one seat in seventy thousand lives. The mark
+  // is keyed to the rarer of the two claims when a persona carries both.
+  (character as any).distinctionShare = office
+    ? Math.min(office.trueShare, elite?.stratum.share ?? 1)
+    : elite?.stratum.share;
 
   // Generate enhanced life events using the new service
   const enhancedLifeEvents = generateLifeHistory(
@@ -552,6 +600,14 @@ function generatePersonaWithSeed(
         label: elite.stratum.statusLabel,
         share: elite.stratum.share,
         clause: elite.stratum.clause,
+      }
+      : undefined,
+    office: office
+      ? {
+        role: office.role,
+        tier: office.tier,
+        gloss: office.office.gloss,
+        trueShare: office.trueShare,
       }
       : undefined,
     samplingMode,

@@ -272,9 +272,40 @@ const PLACE_RULES: Record<string, PlaceRule> = {
     from: 630,
   },
 
+  // Ancient and prehistoric Europe. The zone check is at its worst here: between
+  // 2500 and 1200 BCE the table holds three European entries in total, so
+  // whichever of them the selector reached for became the language of the whole
+  // continent. Proto-Hellenic — a language of the Balkans and the Aegean — was
+  // coming back for something like seven-eighths of Bronze Age Europe, Wessex
+  // and Jutland and the Ebro included. These say where each of them was.
+  PROTO_HELLENIC: { places: /greece|aegean|athens|pelopon|thessal|olympus|delos|dodecanese|cyclad|crete|balkan|macedon|epirus|pindus|vardar/i },
+  MINOAN: { places: /crete|knossos|phaistos|aegean|cyclad|thera|santorini|delos|dodecanese/i },
+  PROTO_ITALIC: { places: /ital|latium|rome|roman|campania|apennine|naples|po valley|florence|venetian|tuscan|etruria|umbria/i },
+  // Celtic in Gaul and central Europe on the textbook chronology; the islands
+  // and Iberia are left to the Bronze Age windows until the Iron Age, which is
+  // as much as the evidence supports either way.
+  PROTO_CELTIC: { places: /gaul|france|paris|loire|normandy|languedoc|marseille|central europe|bohemia|danube|vienna|moravian|tatra|austria|rhine|bavarian|black forest|britain|british|london|york|thames|edinburgh|mersey|oxfordshire|dover|ireland|leinster|hadrian/i, from: -1300 },
+  GAULISH: { places: /gaul|france|paris|loire|normandy|languedoc|marseille|belgium|flanders|ardennes|scheldt|meuse|switzerland|rhine|helvetia/i },
+  PROTO_GERMANIC: { places: /german|scandinav|jutland|denmark|sweden|norway|stockholm|gotland|oresund|øresund|norwegian|rhine|hamburg|brandenburg|saxon|northern europe|low countries|zuiderzee|frisia/i },
+  SAMI: { places: /lapland|sapmi|sami|northern scandinavia|kola|white sea|arctic|finnmark|norwegian|tornio/i },
+  // "Iberia" in this entry's own `regions` list is the Caucasian one, and the
+  // loose region match reads it as Spain: a Toledo persona could be handed
+  // Georgian, which is the sort of thing the gate exists for.
+  GEORGIAN: { places: /georgia|caucas|tbilisi|colchis|kartli|abkhaz|svan|kura/i },
+  PROTO_INDO_EUROPEAN: { places: /steppe|pontic|caspian|volga|dnieper|don\b|kuban|ukraine|russia|eastern europe|central asia/i },
+
   // Europe. Mostly fine on the zone check, but a few regional languages were
   // being offered across whole countries: Occitan is the language of the south
   // of France and was turning up in Paris, and Basque covered all of Iberia.
+  // Medieval vernaculars that were roaming the continent. Old French was the
+  // answer for three-quarters of tenth-century Iberia — a peninsula that had
+  // Andalusi Arabic, Old Spanish, Catalan, Galician-Portuguese and Basque
+  // available — and Hungarian for the whole of tenth-century Muscovy.
+  // Flanders is deliberately absent from both: the county was ruled in French
+  // and farmed in Flemish, and it is the farmers this app generates.
+  OLD_FRENCH: { places: /france|paris|loire|normandy|champagne|aquitaine|burgundy|anjou|picard|orleans|languedoc|marseille|provence|ardennes|wallon/i, from: 842 },
+  MIDDLE_FRENCH: { places: /france|paris|loire|normandy|burgundy|champagne|aquitaine|picard|orleans|languedoc|marseille|provence|ardennes|wallon/i, from: 1400 },
+  HUNGARIAN: { places: /hungar|magyar|pannonia|danube bend|carpathian|tisza|buda|transylvania|slovakia|vojvodina|vienna basin|moravian gate/i, from: 896 },
   OCCITAN: { places: /occitan|languedoc|provence|gascony|toulouse|marseille|pyrenees|aquitaine|montpellier|bordeaux|southern france/i, from: 900 },
   BASQUE: { places: /basque|euskadi|bilbao|san sebastian|navarre|vitoria|pyrenees|biscay/i },
   SCOTS_GAELIC: { places: /highland|hebrides|argyll|scotland|scottish|isles|skye|inverness/i, from: 900 },
