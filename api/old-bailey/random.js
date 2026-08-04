@@ -80,8 +80,9 @@ const oldBaileyTrialMatches = (hit, filters, startDate, endDate) => {
   if (startDate && (!date || date < startDate)) return false;
   if (endDate && (!date || date >= endDate)) return false;
   const text = `${source.title || ''} ${source.text || ''}`.toLowerCase();
-  if (filters.get('gender') === 'female' && !/\b(woman|female|she|her|spinster|wife|widow|elizabeth|mary|ann|anne|sarah|margaret|jane)\b/.test(text)) return false;
-  if (filters.get('gender') === 'male' && !/\b(man|male|he|his|husband|john|william|thomas|james|george|henry)\b/.test(text)) return false;
+  const taggedGender = oldBaileyDefendantSubject(source)?.genderRole;
+  if (filters.get('gender') === 'female' && (taggedGender ? taggedGender !== 'woman' : !/\b(woman|female|she|her|spinster|wife|widow|elizabeth|mary|ann|anne|sarah|margaret|jane)\b/.test(text))) return false;
+  if (filters.get('gender') === 'male' && (taggedGender ? taggedGender !== 'man' : !/\b(man|male|he|his|husband|john|william|thomas|james|george|henry)\b/.test(text))) return false;
   const crime = filters.get('crime');
   if (crime === 'theft' && !/(theft|steal|stole|stealing|shoplifting|burglary|larceny)/.test(text)) return false;
   if (crime === 'violent_theft' && !/(violent theft|robbery|highway robbery|highway|assault)/.test(text)) return false;

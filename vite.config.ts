@@ -119,8 +119,9 @@ const oldBaileyTrialMatches = (hit: any, filters: URLSearchParams, startDate?: D
 
   const text = `${source.title || ''} ${source.text || ''}`.toLowerCase()
   const gender = filters.get('gender')
-  if (gender === 'female' && !/\b(woman|female|she|her|spinster|wife|widow|elizabeth|mary|ann|anne|sarah|margaret|jane)\b/.test(text)) return false
-  if (gender === 'male' && !/\b(man|male|he|his|husband|john|william|thomas|james|george|henry)\b/.test(text)) return false
+  const taggedGender = oldBaileyDefendantSubject(source)?.genderRole
+  if (gender === 'female' && (taggedGender ? taggedGender !== 'woman' : !/\b(woman|female|she|her|spinster|wife|widow|elizabeth|mary|ann|anne|sarah|margaret|jane)\b/.test(text))) return false
+  if (gender === 'male' && (taggedGender ? taggedGender !== 'man' : !/\b(man|male|he|his|husband|john|william|thomas|james|george|henry)\b/.test(text))) return false
   const crime = filters.get('crime')
   if (crime === 'theft' && !/(theft|steal|stole|stealing|shoplifting|burglary|larceny)/.test(text)) return false
   if (crime === 'violent_theft' && !/(violent theft|robbery|highway robbery|highway|assault)/.test(text)) return false
