@@ -164,6 +164,7 @@ import { triggerHaptic } from '../utils/deviceUtils';
 import { EventImportance, EventKind } from '../constants/characterData/lifeHistoryService';
 import { standingRole } from '../constants/characterData/professions';
 import { HistoricalPersonaAnnotationRecord } from '../types/personaAnnotation';
+import { periodBucketForYear } from '../constants/personaAnnotationTemporal';
 import {
   annotationRecordToJsonl,
   createAnnotationRecordFromSource,
@@ -1016,16 +1017,6 @@ const splitFullName = (fullName: string): { givenName?: string; familyName?: str
     givenName: parts.slice(0, -1).join(' '),
     familyName: parts[parts.length - 1],
   };
-};
-
-const periodBucketForYear = (year: number): HistoricalPersonaAnnotationRecord['persona_seed']['temporal']['period_bucket'] => {
-  if (year < 1500) return '1400_1499';
-  if (year < 1600) return '1500_1599';
-  if (year < 1700) return '1600_1699';
-  if (year < 1750) return '1700_1749';
-  if (year < 1850) return '1750_1849';
-  if (year < 1915) return '1850_1914';
-  return '1915_1930';
 };
 
 const ageBandForAge = (age: number): string => {

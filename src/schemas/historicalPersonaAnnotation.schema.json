@@ -155,8 +155,8 @@
             },
             "decade": {
               "type": "integer",
-              "minimum": 1400,
-              "maximum": 1930,
+              "minimum": -10000,
+              "maximum": 2030,
               "multipleOf": 10
             },
             "within_decade_position": {
@@ -164,8 +164,8 @@
             },
             "specific_year": {
               "type": "integer",
-              "minimum": 1400,
-              "maximum": 1930
+              "minimum": -10000,
+              "maximum": 2030
             },
             "date_basis": {
               "type": "string",
@@ -352,13 +352,13 @@
                   },
                   "birth_year": {
                     "type": "integer",
-                    "minimum": 1300,
-                    "maximum": 1930
+                    "minimum": -10000,
+                    "maximum": 2030
                   },
                   "death_year": {
                     "type": "integer",
-                    "minimum": 1300,
-                    "maximum": 2000
+                    "minimum": -10000,
+                    "maximum": 2100
                   },
                   "is_deceased": {
                     "type": "boolean"
@@ -760,7 +760,7 @@
     },
     "period_bucket": {
       "type": "string",
-      "enum": ["1400_1499", "1500_1599", "1600_1699", "1700_1749", "1750_1849", "1850_1914", "1915_1930"]
+      "enum": ["10000_bce_3001_bce", "3000_bce_1_bce", "0_499", "500_999", "1000_1399", "1400_1499", "1500_1599", "1600_1699", "1700_1749", "1750_1849", "1850_1914", "1915_1930", "1931_2030"]
     },
     "within_decade_position": {
       "type": "string",

@@ -1,6 +1,11 @@
 import Ajv2020, { ErrorObject } from 'ajv/dist/2020';
 import annotationSchema from '../schemas/historicalPersonaAnnotation.schema.json';
 import { HistoricalPersonaAnnotationRecord } from '../types/personaAnnotation';
+import {
+  PERSONA_ANNOTATION_MAX_YEAR,
+  PERSONA_ANNOTATION_MIN_YEAR,
+  periodBucketForYear,
+} from '../constants/personaAnnotationTemporal';
 
 const ajv = new Ajv2020({
   allErrors: true,
@@ -274,6 +279,19 @@ export function normalizePersonaAnnotationRecord(record: unknown): unknown {
   }
   if (place?.activity_locale !== undefined) {
     place.activity_locale = normalizeActivityLocale(place.activity_locale);
+  }
+  const temporal = clone?.persona_seed?.temporal;
+  const specificYear = temporal?.specific_year;
+  if (
+    temporal
+    && Number.isInteger(specificYear)
+    && specificYear >= PERSONA_ANNOTATION_MIN_YEAR
+    && specificYear <= PERSONA_ANNOTATION_MAX_YEAR
+  ) {
+    // The exact year is authoritative. Models sometimes repeat it in `decade`
+    // (for example 761 instead of 760), or choose a legacy 1400+ bucket.
+    temporal.decade = Math.floor(specificYear / 10) * 10;
+    temporal.period_bucket = periodBucketForYear(specificYear);
   }
   const schema = annotationSchema as unknown as SchemaNode;
   return normalizeAgainstSchema(clone, schema, schema);

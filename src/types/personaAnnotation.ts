@@ -1,3 +1,5 @@
+import type { PersonaPeriodBucket } from '../constants/personaAnnotationTemporal';
+
 export type Confidence = 'high' | 'medium' | 'low' | 'speculative';
 
 export interface HistoricalPersonaAnnotationRecord {
@@ -59,7 +61,7 @@ export interface HistoricalPersonaAnnotationRecord {
       confidence?: Confidence;
     };
     temporal: {
-      period_bucket: '1400_1499' | '1500_1599' | '1600_1699' | '1700_1749' | '1750_1849' | '1850_1914' | '1915_1930';
+      period_bucket: PersonaPeriodBucket;
       decade?: number;
       within_decade_position: 'early' | 'mid' | 'late' | 'unspecified';
       specific_year?: number;

@@ -4,6 +4,7 @@ import {
   assertPersonaAnnotationRecord,
   normalizePersonaAnnotationRecord,
 } from '../src/services/personaMaterialValidationService';
+import { generateRandomPersonaAnnotationRecord } from '../src/services/personaAnnotationService';
 
 const normalized = normalizePersonaAnnotationRecord({
   schema_version: '1.1.0',
@@ -25,6 +26,49 @@ assert.equal(normalized.persona_seed.temperament_and_voice.dominant_temperament,
 assert.equal('invented_root_property' in normalized, false);
 assert.equal('url' in normalized.source, false);
 assert.equal('reviewed_at' in normalized.annotation, false);
+
+const ancientTemporal = normalizePersonaAnnotationRecord({
+  schema_version: '1.1.0',
+  persona_seed: {
+    temporal: {
+      period_bucket: '1400_1499',
+      decade: 761,
+      within_decade_position: 'unspecified',
+      specific_year: 761,
+    },
+  },
+}) as any;
+
+assert.equal(ancientTemporal.persona_seed.temporal.specific_year, 761);
+assert.equal(ancientTemporal.persona_seed.temporal.decade, 760);
+assert.equal(ancientTemporal.persona_seed.temporal.period_bucket, '500_999');
+
+const bceTemporal = normalizePersonaAnnotationRecord({
+  schema_version: '1.1.0',
+  persona_seed: {
+    temporal: {
+      period_bucket: '1400_1499',
+      decade: -2645,
+      within_decade_position: 'unspecified',
+      specific_year: -2645,
+    },
+  },
+}) as any;
+
+assert.equal(bceTemporal.persona_seed.temporal.decade, -2650);
+assert.equal(bceTemporal.persona_seed.temporal.period_bucket, '3000_bce_1_bce');
+
+const completeAncientRecord = generateRandomPersonaAnnotationRecord();
+completeAncientRecord.persona_seed.temporal = {
+  period_bucket: '1400_1499',
+  decade: 761,
+  within_decade_position: 'unspecified',
+  specific_year: 761,
+  date_basis: 'synthetic_within_period',
+};
+const validatedAncientRecord = assertPersonaAnnotationRecord(completeAncientRecord);
+assert.equal(validatedAncientRecord.persona_seed.temporal.decade, 760);
+assert.equal(validatedAncientRecord.persona_seed.temporal.period_bucket, '500_999');
 
 const responsePath = process.argv[2];
 if (responsePath) {

@@ -1,5 +1,6 @@
 import { HistoricalPersona } from './personaGenerator';
 import { HistoricalPersonaAnnotationRecord } from '../types/personaAnnotation';
+import { PERSONA_PERIOD_BUCKET_RANGES } from '../constants/personaAnnotationTemporal';
 
 export type ConsistencyIssueSeverity = 'info' | 'warning' | 'error';
 
@@ -53,15 +54,7 @@ const leakedEnumValues = [
 
 const europeanFallbackNamePattern = /^(john|william|james|robert|thomas|edward|henry|charles|george|richard|joseph|david|michael|daniel|matthew|christopher|andrew|joshua|samuel|benjamin|mary|elizabeth|margaret|anne|sarah|jane|alice|catherine|helen|emma|emily|frances|harriet)\b|\b(harris|smith|brown|jones|williams|taylor|miller|wilson|moore|clark|walker)\b/i;
 
-const periodBucketRanges: Record<string, [number, number]> = {
-  '1400_1499': [1400, 1499],
-  '1500_1599': [1500, 1599],
-  '1600_1699': [1600, 1699],
-  '1700_1749': [1700, 1749],
-  '1750_1849': [1750, 1849],
-  '1850_1914': [1850, 1914],
-  '1915_1930': [1915, 1930],
-};
+const periodBucketRanges = PERSONA_PERIOD_BUCKET_RANGES;
 
 export function checkPersonaConsistency(input: {
   record: HistoricalPersonaAnnotationRecord;
@@ -78,7 +71,7 @@ export function checkPersonaConsistency(input: {
     persona.region,
     persona.location,
   ].filter(Boolean).join(' '));
-  const year = seed.temporal.specific_year || seed.temporal.decade;
+  const year = seed.temporal.specific_year ?? seed.temporal.decade;
   const bucketRange = periodBucketRanges[seed.temporal.period_bucket];
   const sourceBasis = normalize(record.source.source_basis);
 

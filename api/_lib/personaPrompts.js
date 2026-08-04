@@ -40,7 +40,7 @@ export const buildAnnotationPrompt = (source, options) => {
     '- Use evidence.bias_flags to note Wikipedia/reference source limitations, elite bias, model_synthesized_gaps, and uncertainty.',
     '- Do not give modern concepts, later hindsight, or broad omniscience to the persona.',
     '- If the named subject is elite or famous, household economy and material life should reflect their actual social position rather than ordinary defaults.',
-    '- Choose a specific_year between 1400 and 1930. For biography pages, choose a meaningful living-year moment supported by the page.',
+    '- Choose a specific_year between -10000 and 2030; negative integers represent BCE dates. Set decade to the multiple of 10 containing that year. For biography pages, choose a meaningful living-year moment supported by the page.',
     source?.sourceBasis === 'synthetic_composite'
       ? '- This source is a synthetic procedural seed, not a documentary archive. Preserve the seed name, year, place, gender, age, religion, profession, and social position exactly when present. Fill missing schema fields only, mark all unsupported details as synthetic_fill or weak_inference, and do not write as if archival evidence or a historical record proves the persona.'
       : '',

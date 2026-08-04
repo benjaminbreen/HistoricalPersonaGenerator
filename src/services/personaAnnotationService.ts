@@ -4,6 +4,7 @@ import { HistoricalPersonaAnnotationRecord, IngestedPersonaSource } from '../typ
 import { adaptPersonaMaterialRecord } from './personaMaterialAdapter';
 import { getPolityAt, getPolityNames } from './polityService';
 import { random as seededRandom } from '../utils/seededRandom';
+import { PERSONA_PERIOD_BUCKET_RANGES, periodBucketForYear } from '../constants/personaAnnotationTemporal';
 
 const pick = <T,>(values: T[]): T => values[Math.floor(seededRandom() * values.length)];
 
@@ -12,15 +13,7 @@ const randomInt = (min: number, max: number): number => Math.floor(seededRandom(
 const slug = (value: string): string =>
   value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48) || 'source';
 
-const periodRanges: Record<HistoricalPersonaAnnotationRecord['persona_seed']['temporal']['period_bucket'], [number, number]> = {
-  '1400_1499': [1400, 1499],
-  '1500_1599': [1500, 1599],
-  '1600_1699': [1600, 1699],
-  '1700_1749': [1700, 1749],
-  '1750_1849': [1750, 1849],
-  '1850_1914': [1850, 1914],
-  '1915_1930': [1915, 1930],
-};
+const periodRanges = PERSONA_PERIOD_BUCKET_RANGES;
 
 /**
  * The regions a synthetic seed can be placed in. The polity used to be a column
@@ -93,6 +86,8 @@ const statusByOccupation: Record<string, string> = {
 };
 
 const periodFromYear = (year: number): HistoricalEra => {
+  if (year < -3000) return 'PREHISTORY' as HistoricalEra;
+  if (year < 500) return 'ANTIQUITY' as HistoricalEra;
   if (year < 1450) return 'MEDIEVAL' as HistoricalEra;
   if (year < 1750) return 'RENAISSANCE_EARLY_MODERN' as HistoricalEra;
   if (year < 1900) return 'INDUSTRIAL_ERA' as HistoricalEra;
@@ -294,7 +289,7 @@ export function createAnnotationRecordFromSource(source: IngestedPersonaSource):
   const yearMatch = text.match(/\b(14\d{2}|15\d{2}|16\d{2}|17\d{2}|18\d{2}|19[012]\d|1930)\b/);
   const year = yearMatch ? Number(yearMatch[1]) : randomInt(1750, 1849);
   const decade = Math.floor(year / 10) * 10;
-  const period_bucket = (Object.entries(periodRanges).find(([, [min, max]]) => year >= min && year <= max)?.[0] || '1750_1849') as HistoricalPersonaAnnotationRecord['persona_seed']['temporal']['period_bucket'];
+  const period_bucket = periodBucketForYear(year);
   const lower = text.toLowerCase();
   const occupation = occupations.find(job => lower.includes(job)) || pick(occupations);
   const place = regions.find(candidate =>
