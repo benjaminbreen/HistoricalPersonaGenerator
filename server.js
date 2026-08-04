@@ -8,15 +8,9 @@ import stripeWebhookHandler from './api/stripe-webhook.js';
 import { parseJsonObject } from './api/_lib/llmJson.js';
 import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './api/_lib/rateLimit.js';
 import { consumeAiCredit, ensureVisitorId } from './api/_lib/aiAccess.js';
-import {
-  ANNOTATION_TEMPERATURE,
-  SKETCH_TEMPERATURE,
-  buildAnnotationPrompt,
-  buildSketchPrompt,
-} from './api/_lib/personaPrompts.js';
+import { buildAnnotationPrompt, buildSketchPrompt } from './api/_lib/personaPrompts.js';
+import { callModel, TRUNCATED_CODE } from './api/_lib/llm.js';
 
-const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite';
-const DEFAULT_OPENAI_MODEL = 'gpt-5-nano';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, 'dist');
 const schemaPath = path.join(__dirname, 'src/schemas/historicalPersonaAnnotation.schema.json');
@@ -58,59 +52,6 @@ const readRequestBody = req => new Promise((resolve, reject) => {
 const sendJson = (res, statusCode, body) => {
   res.writeHead(statusCode, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
   res.end(JSON.stringify(body));
-};
-
-const geminiText = async (prompt, options = {}) => {
-  // VITE_* variables are public at build time, so they must never be used for secrets.
-  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
-  if (!key) {
-    throw new Error('Missing Gemini API key. Set GEMINI_API_KEY before starting the server.');
-  }
-
-  const model = process.env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: options.temperature ?? 0.35,
-        ...(options.json ? { response_mime_type: 'application/json' } : {}),
-      },
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Gemini returned ${response.status}. Check the API key, model name, and quota.`);
-  }
-
-  const data = await response.json();
-  return data?.candidates?.[0]?.content?.parts?.map(part => part.text).join('\n') || '';
-};
-
-const openaiText = async (prompt, options = {}) => {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) throw new Error('Missing OPENAI_API_KEY.');
-  const response = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL,
-      input: prompt,
-      ...(options.json ? { text: { format: { type: 'json_object' } } } : {}),
-    }),
-  });
-  if (!response.ok) throw new Error(`OpenAI returned ${response.status}.`);
-  const data = await response.json();
-  return data?.output_text || '';
-};
-
-const llmText = (prompt, options) => {
-  const provider = (process.env.LLM_PROVIDER || 'gemini').toLowerCase();
-  if (provider === 'openai') return openaiText(prompt, options);
-  if (provider === 'gemini') return geminiText(prompt, options);
-  throw new Error('Unsupported LLM_PROVIDER.');
 };
 
 const OLD_BAILEY_API = 'https://www.dhi.ac.uk/api/data/oldbailey_record';
@@ -384,20 +325,33 @@ const handleGeminiRoute = async (req, res) => {
     }
 
     if (body.action === 'generate_annotation') {
-      const text = await llmText(buildAnnotationPrompt(body.source, body.options, annotationSchema), { json: true, temperature: ANNOTATION_TEMPERATURE });
-      sendJson(res, 200, { record: parseJsonObject(text) });
+      const { text, usage } = await callModel({
+        variant: body.model,
+        action: 'generate_annotation',
+        prompt: buildAnnotationPrompt(body.source, body.options, annotationSchema),
+        json: true,
+      });
+      sendJson(res, 200, { record: parseJsonObject(text), usage });
       return;
     }
 
     if (body.action === 'generate_sketch') {
-      const sketch = await llmText(buildSketchPrompt(body.record), { temperature: SKETCH_TEMPERATURE });
-      sendJson(res, 200, { sketch: sketch.trim() });
+      const { text, usage } = await callModel({
+        variant: body.model,
+        action: 'generate_sketch',
+        prompt: buildSketchPrompt(body.record),
+      });
+      sendJson(res, 200, { sketch: text.trim(), usage });
       return;
     }
 
     sendJson(res, 400, { error: 'Unknown Gemini action.' });
   } catch (error) {
     console.error('Persona generation failed:', error);
+    if (error?.code === TRUNCATED_CODE) {
+      sendJson(res, 502, { error: error.message });
+      return;
+    }
     sendJson(res, 500, { error: 'Persona generation is temporarily unavailable. Please try again.' });
   }
 };

@@ -2,8 +2,10 @@
 // the Vite dev middleware all build their prompts here, so a persona developed
 // locally is written by the same instructions as one developed in production.
 
-export const ANNOTATION_TEMPERATURE = 0.35;
-export const SKETCH_TEMPERATURE = 0.55;
+// Temperatures used to live here, beside the prompts they belong to. They now
+// sit in `llm.js` alongside the output ceiling and the reasoning effort for the
+// same task, so that every knob governing what a call costs and how it reads is
+// on one screen rather than split across two files.
 
 export const buildAnnotationPrompt = (source, options, annotationSchema) => {
   const targetInstruction = options?.target === 'named_subject'
@@ -143,6 +145,38 @@ const voiceDirectives = record => {
   return directives;
 };
 
+/**
+ * The part of the record a 120–180 word sketch can actually use.
+ *
+ * The whole record used to go into the prompt, which meant every call paid for
+ * the pipeline's own bookkeeping — record and persona uuids, the annotator id
+ * and timestamps, the export-target flags, the source's filename and
+ * repository. None of it can appear in two paragraphs of prose.
+ *
+ * What is *kept* is deliberate. `evidence` and `field_evidence` are the largest
+ * things here and both survive, because the sketch is asked to distinguish
+ * direct evidence from plausible inference, and those two fields are the only
+ * places the record says which is which. Cutting them would be the bigger
+ * saving and would quietly cost the thing the instruction is asking for.
+ */
+export const sketchRecordView = record => {
+  if (!record || typeof record !== 'object') return record;
+  const source = record.source || {};
+  return {
+    source: {
+      source_basis: source.source_basis,
+      title: source.title,
+      citation_label: source.citation_label,
+      creator_or_author: source.creator_or_author,
+      source_date: source.source_date,
+      document_genre: source.document_genre,
+    },
+    persona_seed: record.persona_seed,
+    evidence: record.evidence,
+    field_evidence: record.field_evidence,
+  };
+};
+
 export const buildSketchPrompt = record => [
   'Write a historically grounded persona sketch from this annotation record.',
   'Write exactly two compact paragraphs, totaling 120-180 words.',
@@ -165,5 +199,5 @@ export const buildSketchPrompt = record => [
     ? 'This is a synthetic procedural seed, not a real archival source. Do not use phrases like "the historical record", "the archive", "evidence shows", or "thin trace". Present it as a plausible generated persona, with uncertainty kept modest and unobtrusive.'
     : '',
   'Return plain text only.',
-  JSON.stringify(record),
+  JSON.stringify(sketchRecordView(record)),
 ].filter(Boolean).join('\n\n');

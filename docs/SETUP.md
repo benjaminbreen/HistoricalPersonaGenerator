@@ -45,15 +45,52 @@ GEMINI_MODEL=gemini-3.1-flash-lite
 
 The Vite dev server exposes a local `/api/gemini-persona` middleware and keeps this key server-side during development. The static browser bundle does not call Gemini directly. Do not use `VITE_GEMINI_API_KEY` or any other `VITE_*` variable for secrets: Vite includes those values in the browser build.
 
-To compare GPT-5 nano, use server-only environment variables instead. The client never selects the provider and cannot read either key:
+The OpenAI models are the default, and the AI dialog carries a Luna/Nano toggle
+so the two can be compared on the same persona. One key covers both:
 
 ```bash
-LLM_PROVIDER=openai
 OPENAI_API_KEY=your_key_here
-OPENAI_MODEL=gpt-5-nano
 ```
 
-On Vercel, add only the selected provider's variables in **Project Settings → Environment Variables** (Production, Preview, and/or Development as appropriate). Do not create `VITE_GEMINI_API_KEY`, `VITE_GOOGLE_AI_API_KEY`, or `VITE_OPENAI_API_KEY` variables.
+Model ids are overridable per variant, so a rename upstream is a config change
+rather than a deploy. `api/_lib/llm.js` holds the defaults:
+
+```bash
+LUNA_MODEL=gpt-5.6-luna   # the default variant
+NANO_MODEL=gpt-5-nano
+```
+
+`OPENAI_MODEL` is no longer read. It used to set one id for the whole
+deployment, which would now resolve both toggle positions to the same model and
+make the comparison meaningless — set the two variant keys instead.
+
+Without `OPENAI_API_KEY`, a deployment that has a Gemini key falls back to
+Gemini and logs that it did, so adding the OpenAI key can happen after the
+deploy rather than before it. `LLM_PROVIDER=gemini` still pins Gemini outright.
+
+On Vercel, add these in **Project Settings → Environment Variables** (Production,
+Preview, and/or Development as appropriate). Do not create
+`VITE_GEMINI_API_KEY`, `VITE_GOOGLE_AI_API_KEY`, or `VITE_OPENAI_API_KEY`
+variables.
+
+### Reading the cost of a call
+
+Every model call logs one line to the platform log:
+
+```
+[llm] {"input":4821,"output":233,"reasoning":0,"variant":"luna","model":"gpt-5.6-luna","action":"generate_sketch","promptVersion":"1","promptChars":19204,"ms":1840,"truncated":false}
+```
+
+That is what makes a model comparison a measurement rather than an impression —
+published per-token prices say nothing about how many tokens each model
+actually spends on this workload. `promptVersion` is bumped by hand in
+`api/_lib/llm.js` when a prompt changes materially, so a later "did that edit
+help?" can be answered against real traffic.
+
+Output ceilings and reasoning effort live in the same file, in `TASK_BUDGETS`.
+Effort is always sent explicitly: left unset, a reasoning model spends its own
+default number of reasoning tokens, and those bill as output while never
+appearing in the response.
 
 For production-style local serving:
 

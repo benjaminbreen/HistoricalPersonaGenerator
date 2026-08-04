@@ -12,15 +12,9 @@ import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './api/_li
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
 import { consumeAiCredit, ensureVisitorId } from './api/_lib/aiAccess.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
-import {
-  ANNOTATION_TEMPERATURE,
-  SKETCH_TEMPERATURE,
-  buildAnnotationPrompt,
-  buildSketchPrompt,
-} from './api/_lib/personaPrompts.js'
-
-const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite'
-const DEFAULT_OPENAI_MODEL = 'gpt-5-nano'
+import { buildAnnotationPrompt, buildSketchPrompt } from './api/_lib/personaPrompts.js'
+// @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
+import { callModel, TRUNCATED_CODE } from './api/_lib/llm.js'
 
 const readRequestBody = async (req: any): Promise<any> => {
   const chunks: Buffer[] = []
@@ -28,59 +22,6 @@ const readRequestBody = async (req: any): Promise<any> => {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
   }
   return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}')
-}
-
-const geminiText = async (prompt: string, env: Record<string, string>, options: { json?: boolean; temperature?: number } = {}): Promise<string> => {
-  // VITE_* variables are compiled into the browser bundle; never read secrets from them.
-  const key = env.GEMINI_API_KEY || env.GOOGLE_AI_API_KEY
-  if (!key) {
-    throw new Error('Missing Gemini API key. Add GEMINI_API_KEY to .env.local and restart the dev server.')
-  }
-
-  const model = env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: options.temperature ?? 0.35,
-        ...(options.json ? { response_mime_type: 'application/json' } : {}),
-      },
-    }),
-  })
-
-  if (!response.ok) {
-    throw new Error(`Gemini returned ${response.status}. Check the API key, model name, and quota.`)
-  }
-
-  const data = await response.json()
-  return data?.candidates?.[0]?.content?.parts?.map((part: any) => part.text).join('\n') || ''
-}
-
-const openaiText = async (prompt: string, env: Record<string, string>, options: { json?: boolean } = {}): Promise<string> => {
-  const key = env.OPENAI_API_KEY
-  if (!key) throw new Error('Missing OPENAI_API_KEY.')
-  const response = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-    body: JSON.stringify({
-      model: env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL,
-      input: prompt,
-      ...(options.json ? { text: { format: { type: 'json_object' } } } : {}),
-    }),
-  })
-  if (!response.ok) throw new Error(`OpenAI returned ${response.status}.`)
-  const data = await response.json()
-  return data?.output_text || ''
-}
-
-const llmText = (prompt: string, env: Record<string, string>, options: { json?: boolean; temperature?: number } = {}): Promise<string> => {
-  const provider = (env.LLM_PROVIDER || 'gemini').toLowerCase()
-  if (provider === 'openai') return openaiText(prompt, env, options)
-  if (provider === 'gemini') return geminiText(prompt, env, options)
-  throw new Error('Unsupported LLM_PROVIDER.')
 }
 
 const OLD_BAILEY_API = 'https://www.dhi.ac.uk/api/data/oldbailey_record'
@@ -449,18 +390,29 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
           }
 
           if (body.action === 'generate_annotation') {
-            const text = await llmText(buildAnnotationPrompt(body.source, body.options, annotationSchema), env, { json: true, temperature: ANNOTATION_TEMPERATURE })
+            const { text, usage } = await callModel({
+              variant: body.model,
+              action: 'generate_annotation',
+              prompt: buildAnnotationPrompt(body.source, body.options, annotationSchema),
+              json: true,
+              env,
+            })
             res.setHeader('Content-Type', 'application/json')
             res.setHeader('Cache-Control', 'no-store')
-            res.end(JSON.stringify({ record: parseJsonObject(text) }))
+            res.end(JSON.stringify({ record: parseJsonObject(text), usage }))
             return
           }
 
           if (body.action === 'generate_sketch') {
-            const sketch = await llmText(buildSketchPrompt(body.record), env, { temperature: SKETCH_TEMPERATURE })
+            const { text, usage } = await callModel({
+              variant: body.model,
+              action: 'generate_sketch',
+              prompt: buildSketchPrompt(body.record),
+              env,
+            })
             res.setHeader('Content-Type', 'application/json')
             res.setHeader('Cache-Control', 'no-store')
-            res.end(JSON.stringify({ sketch: sketch.trim() }))
+            res.end(JSON.stringify({ sketch: text.trim(), usage }))
             return
           }
 
@@ -469,6 +421,12 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
           res.end(JSON.stringify({ error: 'Unknown Gemini action.' }))
         } catch (error) {
           console.error('Persona generation failed:', error)
+          if ((error as any)?.code === TRUNCATED_CODE) {
+            res.statusCode = 502
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({ error: (error as Error).message }))
+            return
+          }
           res.statusCode = 500
           res.setHeader('Content-Type', 'application/json')
           res.setHeader('Cache-Control', 'no-store')
