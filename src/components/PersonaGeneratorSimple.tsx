@@ -1304,14 +1304,6 @@ export default function PersonaGenerator() {
   // model. Kept next to the biography so a failed call cannot masquerade as a
   // successful one.
   const [generationFallbacks, setGenerationFallbacks] = useState<GenerationFallback[]>([]);
-  /**
-   * Whether the reader has asked for the AI path at all. The schema record is
-   * the expensive, specialist option — roughly six times the cost of the
-   * standard biography — and offering it in the top row to someone who has not
-   * yet chosen to involve a model at all put the most costly control on screen
-   * before the cheapest one had been tried. It appears once AI is in play.
-   */
-  const [hasRequestedAi, setHasRequestedAi] = useState(false);
   const [showAiDevelopmentChoice, setShowAiDevelopmentChoice] = useState(false);
   const [modelVariant, setModelVariant] = useState<ModelVariant>(() => readModelVariant());
   const selectedModelLabel = MODEL_VARIANT_LABELS[modelVariant];
@@ -1784,6 +1776,7 @@ export default function PersonaGenerator() {
     setPersona(newPersona);
     beginPersonaLineage(newPersona);
     setAnnotationRecord(null);
+    setSourceIngestionStatus(null);
     setSourcePortraitUrl(null);
     setSourcePortraitAttribution(null);
     setPersonaSketch(null);
@@ -1903,6 +1896,7 @@ export default function PersonaGenerator() {
       portraitAttribution?: string;
       generateSketch?: boolean;
       fieldEditStatus?: string | null;
+      publishAnnotationRecord?: boolean;
     } = {}
   ) => {
     resetSharedPersonaState();
@@ -1949,8 +1943,18 @@ export default function PersonaGenerator() {
     }
 
     setParams(generationParams);
-    setAnnotationRecord(record);
-    setEditableJsonl(annotationRecordToJsonl(record));
+    if (options.publishAnnotationRecord !== false) {
+      setAnnotationRecord(record);
+      setEditableJsonl(annotationRecordToJsonl(record));
+    } else {
+      // The ordinary AI-biography path still uses a compact local record as
+      // prompt scaffolding, but that record is not a Luna-filled annotation.
+      // Keeping it private prevents heuristic placeholders from masquerading
+      // as model output in the schema editor.
+      setAnnotationRecord(null);
+      setEditableJsonl('');
+      setShowMaterialJson(false);
+    }
     setSourcePortraitUrl(options.portraitUrl || null);
     setSourcePortraitAttribution(options.portraitAttribution || null);
     setFieldEditStatus(options.fieldEditStatus ?? null);
@@ -2005,13 +2009,16 @@ export default function PersonaGenerator() {
       setSourceText(source.text);
       setOldBaileySelectionActive(false);
       setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
-      const record = await recordFromSource(source, { target: 'named_subject' });
-      setSourceIngestionStatus(useGeminiExtraction ? `Generated a ${selectedModelLabel}-filled annotation record from ${source.citationLabel}.` : `Generated a heuristic annotation record from ${source.citationLabel}.`);
-      await generateFromAnnotationRecord(record, {
+      const result = await recordFromSource(source, { target: 'named_subject' });
+      setSourceIngestionStatus(result.modelFilled
+        ? `Generated a ${selectedModelLabel}-filled annotation record from ${source.citationLabel}.`
+        : `Generated a local fallback persona from ${source.citationLabel}; no AI schema record was created.`);
+      await generateFromAnnotationRecord(result.record, {
         useSourceTitleAsName: true,
         portraitUrl: source.imageUrl,
         portraitAttribution: source.imageAttribution,
         generateSketch: true,
+        publishAnnotationRecord: result.modelFilled,
       });
     } catch (error) {
       if (sourceForFallback) {
@@ -2026,6 +2033,7 @@ export default function PersonaGenerator() {
           portraitUrl: sourceForFallback.imageUrl,
           portraitAttribution: sourceForFallback.imageAttribution,
           generateSketch: false,
+          publishAnnotationRecord: false,
         });
       } else {
         setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to generate a surprise Wikipedia persona.');
@@ -2042,20 +2050,21 @@ export default function PersonaGenerator() {
     setGenerationFallbacks([]);
     if (!useGeminiExtraction) {
       noteGenerationFallback('record', 'Model schema filling is switched off.');
-      return createAnnotationRecordFromSource(source);
+      return { record: createAnnotationRecordFromSource(source), modelFilled: false };
     }
 
     try {
-      return await generatePersonaAnnotationWithGemini(source, {
+      const record = await generatePersonaAnnotationWithGemini(source, {
         target: options?.target || sourceTarget,
         preferredMoment: preferredMoment.trim() || undefined,
       });
+      return { record, modelFilled: true };
     } catch (error) {
       noteGenerationFallback('record', error instanceof Error ? error.message : 'Schema generation failed.');
       setSourceIngestionStatus(error instanceof Error
         ? `${error.message} Using local source-based fallback instead.`
         : 'AI schema generation failed. Using local source-based fallback instead.');
-      return createAnnotationRecordFromSource(source);
+      return { record: createAnnotationRecordFromSource(source), modelFilled: false };
     }
   };
 
@@ -2075,9 +2084,15 @@ export default function PersonaGenerator() {
     setSourceIngestionStatus(useGeminiExtraction ? `Asking ${selectedModelLabel} to populate the annotation schema...` : 'Generating a heuristic annotation record...');
     try {
       const source = createPastedTextSource(sourceText, sourceTitle.trim() || 'Pasted source text');
-      const record = await recordFromSource(source);
-      setSourceIngestionStatus(useGeminiExtraction ? `Generated a ${selectedModelLabel}-filled annotation record from pasted text.` : 'Generated a heuristic annotation record from pasted text.');
-      await generateFromAnnotationRecord(record, { useSourceTitleAsName: sourceTarget === 'named_subject', generateSketch: true });
+      const result = await recordFromSource(source);
+      setSourceIngestionStatus(result.modelFilled
+        ? `Generated a ${selectedModelLabel}-filled annotation record from pasted text.`
+        : 'Generated a local fallback persona from pasted text; no AI schema record was created.');
+      await generateFromAnnotationRecord(result.record, {
+        useSourceTitleAsName: sourceTarget === 'named_subject',
+        generateSketch: true,
+        publishAnnotationRecord: result.modelFilled,
+      });
     } catch (error) {
       setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to generate from pasted text.');
     } finally {
@@ -2098,15 +2113,18 @@ export default function PersonaGenerator() {
     try {
       const source = await ingestUrlSource(sourceUrl.trim());
       setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
-      const record = await recordFromSource(source);
+      const result = await recordFromSource(source);
       setSourceTitle(source.title);
       setSourceText(source.text);
-      setSourceIngestionStatus(useGeminiExtraction ? `Generated a ${selectedModelLabel}-filled annotation record from ${source.citationLabel}.` : `Generated a heuristic annotation record from ${source.citationLabel}.`);
-      await generateFromAnnotationRecord(record, {
+      setSourceIngestionStatus(result.modelFilled
+        ? `Generated a ${selectedModelLabel}-filled annotation record from ${source.citationLabel}.`
+        : `Generated a local fallback persona from ${source.citationLabel}; no AI schema record was created.`);
+      await generateFromAnnotationRecord(result.record, {
         useSourceTitleAsName: sourceTarget === 'named_subject',
         portraitUrl: source.imageUrl,
         portraitAttribution: source.imageAttribution,
         generateSketch: true,
+        publishAnnotationRecord: result.modelFilled,
       });
     } catch (error) {
       setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to ingest that URL.');
@@ -2132,15 +2150,18 @@ export default function PersonaGenerator() {
       setOldBaileySelectionActive(false);
       setSourceTarget(filters.personaAngle === 'named_subject' ? 'named_subject' : 'ordinary_person_from_source_world');
       setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
-      const record = await recordFromSource(source, {
+      const result = await recordFromSource(source, {
         target: filters.personaAngle === 'named_subject' ? 'named_subject' : 'ordinary_person_from_source_world',
       });
-      setSourceIngestionStatus(useGeminiExtraction ? `Generated a ${selectedModelLabel}-filled annotation record from ${source.citationLabel}.` : `Generated a heuristic annotation record from ${source.citationLabel}.`);
-      await generateFromAnnotationRecord(record, {
+      setSourceIngestionStatus(result.modelFilled
+        ? `Generated a ${selectedModelLabel}-filled annotation record from ${source.citationLabel}.`
+        : `Generated a local fallback persona from ${source.citationLabel}; no AI schema record was created.`);
+      await generateFromAnnotationRecord(result.record, {
         useSourceTitleAsName: filters.personaAngle === 'named_subject',
         portraitUrl: source.imageUrl,
         portraitAttribution: source.imageAttribution,
         generateSketch: true,
+        publishAnnotationRecord: result.modelFilled,
       });
     } catch (error) {
       setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to fetch an Old Bailey record.');
@@ -2187,7 +2208,7 @@ export default function PersonaGenerator() {
   };
 
   const exportCharacterSheet = () => {
-    if (!persona || !annotationRecord) return;
+    if (!persona) return;
 
     const sheet = {
       exported_at: new Date().toISOString(),
@@ -2205,7 +2226,7 @@ export default function PersonaGenerator() {
         portrait_url: sourcePortraitUrl,
       },
       sketch: personaSketch,
-      annotation_record: annotationRecord,
+      annotation_record: annotationRecord || undefined,
       adapter_overrides: materialAdapter ? {
         ...materialAdapter.adapterOverrides,
         display_overrides: materialAdapter.displayOverrides,
@@ -2220,7 +2241,7 @@ export default function PersonaGenerator() {
           source_note: (event as any).sourceNote,
         })),
       } : undefined,
-      field_provenance: annotationRecord.field_evidence || [],
+      field_provenance: annotationRecord?.field_evidence || [],
       generated_character: persona.character,
     };
 
@@ -2744,6 +2765,7 @@ export default function PersonaGenerator() {
     setPersona(newPersona);
     beginPersonaLineage(newPersona);
     setAnnotationRecord(null);
+    setSourceIngestionStatus(null);
     setSourcePortraitUrl(null);
     setSourcePortraitAttribution(null);
     setPersonaSketch(null);
@@ -2801,8 +2823,14 @@ export default function PersonaGenerator() {
       : `Generated ${proceduralPersona.character.name} as a procedural seed. Writing a local biography...`);
     try {
       const record = lockProceduralSeedRecord(createAnnotationRecordFromSource(source), proceduralPersona);
-      await generateFromAnnotationRecord(record, { useSourceTitleAsName: true, generateSketch: true });
-      setSourceIngestionStatus(`Developed ${proceduralPersona.character.name} from a locally built schema record.`);
+      await generateFromAnnotationRecord(record, {
+        useSourceTitleAsName: true,
+        generateSketch: true,
+        publishAnnotationRecord: false,
+      });
+      setSourceIngestionStatus(useGeminiExtraction
+        ? `AI developed ${proceduralPersona.character.name}'s biography. No AI schema record has been created yet.`
+        : `Developed ${proceduralPersona.character.name} locally. No AI schema record has been created yet.`);
     } catch (error) {
       setSourceIngestionStatus(error instanceof Error ? error.message : 'Persona development failed.');
     } finally {
@@ -2833,8 +2861,11 @@ export default function PersonaGenerator() {
     setSourcePanelCollapsed(true);
     setSourceTarget('named_subject');
     setGenerationFallbacks([]);
-    setAnnotationRecord(record);
-    setEditableJsonl(annotationRecordToJsonl(record));
+    if (!existingRecord) {
+      setAnnotationRecord(null);
+      setEditableJsonl('');
+      setShowMaterialJson(false);
+    }
     setFieldEditStatus(null);
     setActiveTab('biography');
 
@@ -2882,36 +2913,55 @@ export default function PersonaGenerator() {
 
   const chooseAiDevelopmentMode = (mode: AiDevelopmentMode) => {
     setShowAiDevelopmentChoice(false);
-    setHasRequestedAi(true);
     void requestAiBiographyRun(
       mode === 'existing' ? elaborateExistingPersona : developPersonaProse
     );
   };
 
-  /** The opt-in path: pay for a model-filled schema record, then the biography. */
-  const generateCompletelyRandom = async () => {
-    if (isSourceGenerating) return;
-    const { proceduralPersona, source } = beginAiRunFromProceduralSeed();
-    setSourceIngestionStatus(useGeminiExtraction
-      ? `Generated ${proceduralPersona.character.name} as a procedural seed. Asking ${selectedModelLabel} to populate the schema...`
-      : `Generated ${proceduralPersona.character.name} as a procedural seed. Building a heuristic schema record...`);
+  /**
+   * Add a genuine model-filled schema to the persona already on screen. This
+   * deliberately does not call generateFromAnnotationRecord: schema creation
+   * enriches the current persona instead of silently replacing it.
+   */
+  const generateSchemaForExistingPersona = async () => {
+    if (isSourceGenerating || !persona) return;
+    if (!useGeminiExtraction) {
+      setSourceIngestionStatus('Turn on AI schema filling in Source Studio to make an AI schema record.');
+      return;
+    }
+
+    const existingPersona = persona;
+    const source = sourceFromProceduralPersona(existingPersona);
+    resetSharedPersonaState();
+    setIsSourceGenerating(true);
+    setSourcePanelCollapsed(true);
+    setSourceTarget('named_subject');
+    setGenerationFallbacks(previous => previous.filter(entry => entry.stage !== 'record'));
+    setFieldEditStatus(null);
+    setSourceTitle(source.title);
+    setSourceText(source.text);
+    setSourceUrl('');
+    setOldBaileySelectionActive(false);
+    setSourceIngestionStatus(`Keeping ${existingPersona.character.name} fixed. Asking ${selectedModelLabel} to fill the schema record...`);
+
     try {
       const record = lockProceduralSeedRecord(
-        await recordFromSource(source, { target: 'named_subject' }),
-        proceduralPersona
+        await generatePersonaAnnotationWithGemini(source, {
+          target: 'named_subject',
+          preferredMoment: preferredMoment.trim() || undefined,
+        }),
+        existingPersona
       );
-      setSourceIngestionStatus(useGeminiExtraction
-        ? `Generated a ${selectedModelLabel}-filled schema record from procedural seed ${proceduralPersona.character.name}.`
-        : `Generated a heuristic schema record from procedural seed ${proceduralPersona.character.name}.`);
-      await generateFromAnnotationRecord(record, { useSourceTitleAsName: true, generateSketch: true });
+      setAnnotationRecord(record);
+      setEditableJsonl(annotationRecordToJsonl(record));
+      setShowMaterialJson(false);
+      setFieldEditStatus(`Generated by ${selectedModelLabel} for ${existingPersona.character.name}.`);
+      setSourceIngestionStatus(`Generated a ${selectedModelLabel}-filled schema record for ${existingPersona.character.name} without replacing the persona.`);
     } catch (error) {
       setSourceIngestionStatus(error instanceof Error
-        ? `${error.message} Showing local source-based fallback instead.`
-        : 'Schema generation failed. Showing local source-based fallback instead.');
+        ? `${error.message} No placeholder schema was saved; the existing persona is unchanged.`
+        : 'Schema generation failed. No placeholder schema was saved; the existing persona is unchanged.');
       noteGenerationFallback('record', error instanceof Error ? error.message : 'Schema generation failed.');
-      noteGenerationFallback('prose', 'Written from the offline record instead.');
-      const record = lockProceduralSeedRecord(createAnnotationRecordFromSource(source), proceduralPersona);
-      await generateFromAnnotationRecord(record, { useSourceTitleAsName: true, generateSketch: false });
     } finally {
       setIsSourceGenerating(false);
     }
@@ -4701,9 +4751,9 @@ export default function PersonaGenerator() {
             <IoShuffle aria-hidden="true" />
             Generate Random Persona
           </button>
-          {/* The AI path, the schema record and the sampling toggle are all
-              modifiers on the primary action rather than actions in their own
-              right, so they share one row and one visual weight. */}
+          {/* AI prose is a modifier on the primary action. The more expensive
+              schema action lives beside the exports it creates, after a
+              persona exists. */}
           <div className="generation-mode-row">
           <button
             className="btn btn-secondary generation-ai-button"
@@ -4715,18 +4765,6 @@ export default function PersonaGenerator() {
             <IoSparkles aria-hidden="true" />
             {isSourceGenerating ? 'Developing…' : 'Use AI to Develop Persona'}
           </button>
-          {hasRequestedAi && (
-          <button
-            className="btn btn-tertiary generation-schema-button"
-            onClick={() => requestAiRun('schema', generateCompletelyRandom)}
-            disabled={isSourceGenerating}
-            title="Also ask the model to fill the full JSONL annotation record. Roughly six times the cost of the standard AI biography."
-            aria-label="Generate a persona with a model-filled schema record"
-          >
-            <IoDocumentText aria-hidden="true" />
-            AI Schema Record
-          </button>
-          )}
           <div className="sampling-mode" role="group" aria-label="How personas are sampled">
             <button
               type="button"
@@ -6590,18 +6628,32 @@ export default function PersonaGenerator() {
                 )}
               </div>
             </div>
-            {annotationRecord && (
+            {persona && (
               <div className="character-sheet-editor">
                 <div className="character-sheet-editor-header">
                   <div>
-                    <h3>Export as JSONL or PDF</h3>
-                    <p>Export the generated persona, inspect consistency warnings, or edit populated JSONL categories.</p>
+                    <h3>{annotationRecord ? 'Export as JSONL or PDF' : 'AI Schema Record'}</h3>
+                    <p>{annotationRecord
+                      ? 'Export the generated persona, inspect consistency warnings, or edit populated JSONL categories.'
+                      : `Make a Luna-filled JSONL record that elaborates ${persona.character.name} without replacing the persona.`}</p>
                   </div>
                   <div className="export-action-panel" aria-label="Export persona">
-                    <button className="btn btn-primary" onClick={exportAnnotationJsonl}>
-                      <IoDownload aria-hidden="true" />
-                      Export JSONL
-                    </button>
+                    {annotationRecord ? (
+                      <button className="btn btn-primary" onClick={exportAnnotationJsonl}>
+                        <IoDownload aria-hidden="true" />
+                        Export JSONL
+                      </button>
+                    ) : (
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => requestAiRun('schema', generateSchemaForExistingPersona)}
+                        disabled={isSourceGenerating}
+                        title="Ask Luna to fill a full schema record for this existing persona."
+                      >
+                        <IoSparkles aria-hidden="true" />
+                        {isSourceGenerating ? 'Making AI Schema…' : 'Make AI Schema Record'}
+                      </button>
+                    )}
                     <button className="btn btn-secondary" onClick={handleSavePDF}>
                       <IoSave aria-hidden="true" />
                       Export PDF
@@ -6612,6 +6664,13 @@ export default function PersonaGenerator() {
                     </button>
                   </div>
                 </div>
+                {!annotationRecord && sourceIngestionStatus && (
+                  <div className="source-actions" role="status" aria-live="polite">
+                    <span className="source-status">{sourceIngestionStatus}</span>
+                  </div>
+                )}
+                {annotationRecord && (
+                <>
                 {consistencyIssues.length > 0 && (
                   <div className="consistency-panel">
                     <div className="consistency-panel-header">
@@ -6705,6 +6764,8 @@ export default function PersonaGenerator() {
                   </button>
                   {fieldEditStatus && <span className="source-status">{fieldEditStatus}</span>}
                 </div>
+                </>
+                )}
               </div>
             )}
             </motion.div>
