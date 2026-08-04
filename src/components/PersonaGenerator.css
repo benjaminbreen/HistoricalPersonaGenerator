@@ -2151,6 +2151,23 @@ body.dark-mode .top-bar {
   cursor: not-allowed;
 }
 
+.donate-research-note {
+  max-width: 650px;
+  margin: 0 auto;
+  padding: var(--sp-lg) var(--sp-xl);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-elevated);
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.donate-research-note a {
+  color: var(--color-accent-primary);
+  font-weight: 700;
+}
+
 .donate-footer {
   font-size: 0.95rem;
   font-style: italic;

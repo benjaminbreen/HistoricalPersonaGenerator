@@ -7158,7 +7158,7 @@ export default function PersonaGenerator() {
         </motion.div>
       )}
 
-      {showAiDevelopmentChoice && (
+      {showAiDevelopmentChoice && !showDonate && (
         <motion.div
           className="modal-overlay ai-choice-overlay"
           onClick={() => setShowAiDevelopmentChoice(false)}
@@ -7268,7 +7268,7 @@ export default function PersonaGenerator() {
         </motion.div>
       )}
 
-      {randomDonationMilestone && (
+      {randomDonationMilestone && !showDonate && (
         <motion.div
           className="modal-overlay random-support-overlay"
           onClick={() => setRandomDonationMilestone(null)}
@@ -7338,7 +7338,7 @@ export default function PersonaGenerator() {
         </motion.div>
       )}
 
-      {aiGate && (
+      {aiGate && !showDonate && (
         <motion.div
           className="modal-overlay ai-support-overlay"
           onClick={() => setAiGate(null)}
@@ -7401,7 +7401,7 @@ export default function PersonaGenerator() {
         </motion.div>
       )}
 
-      {costConfirm && (
+      {costConfirm && !showDonate && (
         <motion.div
           className="modal-overlay"
           onClick={() => setCostConfirm(null)}
@@ -7528,6 +7528,18 @@ export default function PersonaGenerator() {
                 </a>
               </div>
             </div>
+
+            <p className="donate-research-note">
+              If you’re a researcher and want to experiment with this yourself, you can{' '}
+              <a
+                href="https://github.com/benjaminbreen/HistoricalPersonaGenerator"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                clone the project on GitHub
+              </a>{' '}
+              or <a href="mailto:breen85@gmail.com">contact me</a> to discuss collaborations.
+            </p>
 
             <p className="donate-footer">
               Thank you for your support! Every contribution helps make historical education more accessible.
