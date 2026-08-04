@@ -4,7 +4,7 @@ import { parseJsonObject } from './_lib/llmJson.js';
 import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './_lib/rateLimit.js';
 import { consumeAiCredit, ensureVisitorId } from './_lib/aiAccess.js';
 import { buildAnnotationPrompt, buildSketchPrompt } from './_lib/personaPrompts.js';
-import { callModel, TRUNCATED_CODE } from './_lib/llm.js';
+import { callModel } from './_lib/llm.js';
 
 const schemaPath = path.join(process.cwd(), 'src/schemas/historicalPersonaAnnotation.schema.json');
 const annotationSchema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
@@ -63,10 +63,10 @@ export default async function handler(req, res) {
     res.status(400).json({ error: 'Unknown Gemini persona action.' });
   } catch (error) {
     console.error('Persona generation failed:', error);
-    if (error?.code === TRUNCATED_CODE) {
-      res.status(502).json({ error: error.message });
-      return;
-    }
-    res.status(500).json({ error: 'Persona generation is temporarily unavailable. Please try again.' });
+    // The credit gate runs before the model and throws 503s of its own; a flat
+    // 500 here made a missing env var look like a model outage.
+    res.status(Number(error?.statusCode) || 500).json({
+      error: error?.code ? error.message : 'Persona generation is temporarily unavailable. Please try again.',
+    });
   }
 }

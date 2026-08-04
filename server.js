@@ -9,7 +9,7 @@ import { parseJsonObject } from './api/_lib/llmJson.js';
 import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './api/_lib/rateLimit.js';
 import { consumeAiCredit, ensureVisitorId } from './api/_lib/aiAccess.js';
 import { buildAnnotationPrompt, buildSketchPrompt } from './api/_lib/personaPrompts.js';
-import { callModel, TRUNCATED_CODE } from './api/_lib/llm.js';
+import { callModel } from './api/_lib/llm.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, 'dist');
@@ -348,11 +348,11 @@ const handleGeminiRoute = async (req, res) => {
     sendJson(res, 400, { error: 'Unknown Gemini action.' });
   } catch (error) {
     console.error('Persona generation failed:', error);
-    if (error?.code === TRUNCATED_CODE) {
-      sendJson(res, 502, { error: error.message });
-      return;
-    }
-    sendJson(res, 500, { error: 'Persona generation is temporarily unavailable. Please try again.' });
+    // The credit gate runs before the model and throws 503s of its own; a flat
+    // 500 here made a missing env var look like a model outage.
+    sendJson(res, Number(error?.statusCode) || 500, {
+      error: error?.code ? error.message : 'Persona generation is temporarily unavailable. Please try again.',
+    });
   }
 };
 

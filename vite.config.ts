@@ -14,7 +14,7 @@ import { consumeAiCredit, ensureVisitorId } from './api/_lib/aiAccess.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
 import { buildAnnotationPrompt, buildSketchPrompt } from './api/_lib/personaPrompts.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
-import { callModel, TRUNCATED_CODE } from './api/_lib/llm.js'
+import { callModel } from './api/_lib/llm.js'
 
 const readRequestBody = async (req: any): Promise<any> => {
   const chunks: Buffer[] = []
@@ -421,16 +421,16 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
           res.end(JSON.stringify({ error: 'Unknown Gemini action.' }))
         } catch (error) {
           console.error('Persona generation failed:', error)
-          if ((error as any)?.code === TRUNCATED_CODE) {
-            res.statusCode = 502
-            res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify({ error: (error as Error).message }))
-            return
-          }
-          res.statusCode = 500
+          // The credit gate runs before the model and throws 503s of its own; a
+          // flat 500 here made a missing env var look like a model outage.
+          res.statusCode = Number((error as any)?.statusCode) || 500
           res.setHeader('Content-Type', 'application/json')
           res.setHeader('Cache-Control', 'no-store')
-          res.end(JSON.stringify({ error: 'Persona generation is temporarily unavailable. Please try again.' }))
+          res.end(JSON.stringify({
+            error: (error as any)?.code
+              ? (error as Error).message
+              : 'Persona generation is temporarily unavailable. Please try again.',
+          }))
         }
       })
     },

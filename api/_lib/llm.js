@@ -235,13 +235,12 @@ export async function callModel({ variant, action, prompt, json = false, env = p
   console.log(`[llm] ${JSON.stringify(usage)}`);
 
   if (result.truncated && json) {
-    // Tagged so the routes can say what happened. Left untagged it reaches the
-    // reader as a parse failure and a generic 500, which is the least useful
-    // possible description of "the ceiling in this file is set too low".
+    // `code` marks it as ours, so the routes know the message is safe to show.
     const error = new Error(
       `The ${spec.label} response hit the ${budget.maxOutput}-token ceiling before finishing its JSON record.`
     );
     error.code = TRUNCATED_CODE;
+    error.statusCode = 502;
     throw error;
   }
 
