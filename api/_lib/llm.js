@@ -53,8 +53,8 @@ export const MODEL_VARIANTS = {
 /**
  * Per-task limits.
  *
- * `maxOutput` is a ceiling, not a target. The compact sketch asks for 160–210
- * words and uses no reasoning tokens, so 300 tokens leaves modest room without
+ * `maxOutput` is a ceiling, not a target. The compact sketch asks for 150–180
+ * words and uses no reasoning tokens, so 260 tokens leaves modest room without
  * paying for a runaway answer. The annotation record is a large object and
  * genuinely needs the headroom — but a truncated one is invalid JSON, so
  * `callModel` reports the truncation rather than letting the parser fail on it.
@@ -64,7 +64,7 @@ export const MODEL_VARIANTS = {
  * output while never appearing in the response body — paid for and never seen.
  */
 export const TASK_BUDGETS = {
-  generate_sketch: { maxOutput: 300, temperature: 0.55 },
+  generate_sketch: { maxOutput: 260, temperature: 0.55 },
   generate_annotation: { maxOutput: 4000, temperature: 0.35 },
 };
 
@@ -76,7 +76,7 @@ const DEFAULT_BUDGET = { maxOutput: 1000, temperature: 0.35 };
  * It rides along in the usage log so "did that edit help?" is answerable
  * against real traffic later, rather than from memory.
  */
-export const PROMPT_VERSION = '2';
+export const PROMPT_VERSION = '3';
 
 /**
  * A client-supplied name, reduced to one this file knows and one this

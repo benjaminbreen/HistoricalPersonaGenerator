@@ -107,7 +107,7 @@ Two model actions exist, and they are priced very differently per persona:
 
 | Action | Tokens (in/out) | Cost | Triggered by |
 | --- | --- | --- | --- |
-| `generate_sketch` | measured in deployment logs | verify from current Luna pricing | **Use AI to Develop Persona** (compact dossier, 300-token ceiling) |
+| `generate_sketch` | measured in deployment logs | verify from current Luna pricing | **Use AI to Develop Persona** (compact dossier, 260-token ceiling) |
 | `generate_annotation` | ~7.5k / 1.6k | ~0.43¢ | **AI Schema Record**, and the Source Studio flows |
 
 The annotation prompt carries the whole JSON schema — about 6,500 tokens of the 7,500 it sends — which is why it dominates. The default AI path therefore builds the schema record locally from the procedural seed and pays only for the biography.

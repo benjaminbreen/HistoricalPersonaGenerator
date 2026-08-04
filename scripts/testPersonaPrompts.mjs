@@ -106,7 +106,8 @@ assert.doesNotMatch(dossier, /personality traits|must-not-reach-prose|field path
 assert.doesNotMatch(prompt, /-2650/);
 assert.doesNotMatch(prompt, /most under fourteen|Big Five|annotator_id/);
 assert.match(prompt, /at least three concrete details/i);
-assert.match(prompt, /160-210 words/);
+assert.match(prompt, /150-180 words/);
+assert.match(prompt, /Do not add household members, possessions/);
 assert.ok(prompt.length < 3600, `compact sketch prompt grew to ${prompt.length} characters`);
 
 const sourcedRecord = structuredClone(record);

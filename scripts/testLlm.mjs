@@ -69,7 +69,7 @@ try {
   assert.equal(result.usage.output, 18);
   assert.equal(requestBody.model, 'gpt-5.6-luna');
   assert.deepEqual(requestBody.reasoning, { effort: 'none' });
-  assert.equal(requestBody.max_output_tokens, 300);
+  assert.equal(requestBody.max_output_tokens, 260);
   assert.equal('temperature' in requestBody, false);
 
   console.log('LLM transport tests passed.');

@@ -207,11 +207,11 @@ export const buildSketchDossier = record => {
 export const buildSketchPrompt = record => {
   const synthetic = record?.source?.source_basis === 'synthetic_composite';
   return [
-    'Write exactly two paragraphs, 160-210 words total, of vivid close-third historical fiction grounded in the dossier.',
+    'Write exactly two paragraphs, 150-180 words total, of vivid close-third historical fiction grounded in the dossier.',
     'Begin mid-action in ordinary work or household life. Make the physical world perceptible through at least three concrete details of tools, materials, food, clothing, shelter, weather, sound, smell, touch, heat, cold, fatigue, or hunger. Show status, dependence, belief, and danger through choices and gestures rather than naming categories.',
     'Use flowing, varied sentence lengths, precise concrete verbs, and unsentimental psychological intimacy. Stay inside this person\'s period knowledge. Never use modern analysis, schema language, a raw negative year, or an encyclopedia-summary voice. Do not begin with a date or age.',
     synthetic
-      ? 'This is a synthetic seed. Add only unnamed mundane connective details that are highly plausible consequences of the listed work and material conditions. Do not invent named people, events, prices, possessions, technologies, or beliefs.'
+      ? 'This is a synthetic seed. Sensory connective detail may elaborate only what the dossier already implies. Do not add household members, possessions, events, prices, technologies, or beliefs.'
       : 'Treat source facts as fixed. Where evidence is silent, omit specificity rather than inventing names, events, prices, possessions, technologies, or beliefs.',
     'Do not mention sources, evidence, uncertainty, personality labels, or the dossier. Avoid “navigates”, “precarious”, “weathered”, and “a testament to”. Return plain text only.',
     'DOSSIER',
