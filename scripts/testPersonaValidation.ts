@@ -164,13 +164,21 @@ const providerMisnested = structuredClone({
     interlocutor_relation: 'A trusted neighbor.',
   },
   anachronism_guards: ['later Venezuelan politics', 'telegraph and radio'],
-  provenance: [],
+  provenance: [{
+    field_path: '/persona/clothing_and_possessions',
+    support: 'inferred',
+    confidence: 'medium',
+    snippet: '',
+  }],
 }) as any;
 delete providerMisnested.persona.conversation_frame;
 delete providerMisnested.persona.anachronism_guards;
+providerMisnested.persona.clothing_and_possessions = ['dress', 'shawl', 'cap', 'shoes', 'apron', 'pouch', 'seventh excess item'];
 const repairedProviderRecord = createPersonaOrientationRecord(providerMisnested, wikipediaSource);
 assert.deepEqual(repairedProviderRecord.persona.anachronism_guards, ['later Venezuelan politics', 'telegraph and radio']);
 assert.equal(repairedProviderRecord.persona.conversation_frame?.situation, 'Barcelona during the 1817 crisis.');
+assert.equal(repairedProviderRecord.persona.clothing_and_possessions?.length, 6);
+assert.equal(repairedProviderRecord.provenance[0].snippet, undefined);
 
 const responsePath = process.argv[2];
 if (responsePath) {

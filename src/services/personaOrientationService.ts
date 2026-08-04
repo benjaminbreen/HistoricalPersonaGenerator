@@ -24,6 +24,49 @@ ajv.addFormat('uri', {
   },
 });
 const validateOrientationSchema = ajv.compile(orientationSchema);
+const orientationSchemaRoot = orientationSchema as any;
+
+const resolveSchemaNode = (node: any): any => {
+  if (!node?.$ref || !String(node.$ref).startsWith('#/')) return node;
+  return String(node.$ref)
+    .slice(2)
+    .split('/')
+    .reduce((value: any, key: string) => value?.[key.replace(/~1/g, '/').replace(/~0/g, '~')], orientationSchemaRoot);
+};
+
+/**
+ * Provider structured output is best-effort because the schema has optional
+ * fields and therefore cannot use OpenAI strict mode. Normalize only limits
+ * already declared by the canonical schema; missing required values and bad
+ * enum/type values are left for AJV to reject.
+ */
+const normalizeModelValue = (value: unknown, schemaNode: any): any => {
+  const node = resolveSchemaNode(schemaNode);
+  if (value === undefined || value === null) return undefined;
+
+  if (node?.type === 'string' && typeof value === 'string') {
+    const trimmed = value.trim();
+    return node.minLength && trimmed.length < node.minLength ? undefined : trimmed;
+  }
+
+  if (node?.type === 'array' && Array.isArray(value)) {
+    const capped = typeof node.maxItems === 'number' ? value.slice(0, node.maxItems) : value;
+    return capped
+      .map(item => normalizeModelValue(item, node.items))
+      .filter(item => item !== undefined);
+  }
+
+  if (node?.type === 'object' && value && typeof value === 'object' && !Array.isArray(value)) {
+    const result: Record<string, unknown> = {};
+    for (const [key, childSchema] of Object.entries(node.properties || {})) {
+      const normalized = normalizeModelValue((value as Record<string, unknown>)[key], childSchema);
+      if (normalized !== undefined) result[key] = normalized;
+    }
+    return result;
+  }
+
+  return value;
+};
 
 const slug = (value: string): string =>
   value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 56) || 'persona';
@@ -64,10 +107,12 @@ export function createPersonaOrientationRecord(
     }
     if (!raw.provenance && Array.isArray(rawPersona.provenance)) raw.provenance = rawPersona.provenance as PersonaOrientationProvenance[];
   }
-  if (!rawPersona?.name_and_address?.full_name || !Number.isInteger(rawPersona?.year)) {
+  const normalizedPersona = normalizeModelValue(rawPersona, orientationSchemaRoot.properties.persona) as PersonaOrientationCore;
+  const normalizedProvenance = normalizeModelValue(raw.provenance || [], orientationSchemaRoot.properties.provenance) as PersonaOrientationProvenance[];
+  if (!normalizedPersona?.name_and_address?.full_name || !Number.isInteger(normalizedPersona?.year)) {
     throw new Error('Luna returned an incomplete persona orientation record. No schema record was saved.');
   }
-  const persona = rawPersona as PersonaOrientationCore;
+  const persona = normalizedPersona;
   const subject = lockNamedSubject ? source.subject : undefined;
   if (subject?.name) persona.name_and_address.full_name = subject.name;
   if (subject?.birthYear !== undefined) {
@@ -91,7 +136,7 @@ export function createPersonaOrientationRecord(
       url: source.url,
       extraction_method: source.extractionMethod,
     }],
-    provenance: (raw.provenance || []).map(item => ({
+    provenance: normalizedProvenance.map(item => ({
       ...item,
       source_id: sourceId,
     })),

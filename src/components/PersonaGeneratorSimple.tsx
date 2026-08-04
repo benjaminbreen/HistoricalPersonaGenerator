@@ -2176,7 +2176,6 @@ export default function PersonaGenerator() {
       });
       return { record: generated.annotationRecord, orientationRecord: generated.orientationRecord, sketch: generated.sketch, modelFilled: true };
     } catch (error) {
-      noteGenerationFallback('record', error instanceof Error ? error.message : 'Schema generation failed.');
       setSourceIngestionStatus(error instanceof Error ? error.message : 'AI source generation failed.');
       throw error;
     }
@@ -5077,6 +5076,9 @@ export default function PersonaGenerator() {
                   <span>{sourceTitle || annotationRecord?.source.title || 'Generating source record'}</span>
                   {sourceUrl && <code>{sourceUrl}</code>}
                 </div>
+                {!isSourceGenerating && sourceIngestionStatus && (
+                  <div className="source-status" aria-live="polite">{sourceIngestionStatus}</div>
+                )}
                 {isSourceGenerating && (
                 <div className="source-loading-state" aria-live="polite">
                   <div className="source-loading-bar" />
