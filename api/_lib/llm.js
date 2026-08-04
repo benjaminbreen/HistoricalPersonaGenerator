@@ -55,8 +55,8 @@ export const MODEL_VARIANTS = {
  *
  * `maxOutput` is a ceiling, not a target. The compact sketch asks for 150–180
  * words and uses no reasoning tokens, so 260 tokens leaves modest room without
- * paying for a runaway answer. The annotation record is a large object and
- * genuinely needs the headroom — but a truncated one is invalid JSON, so
+ * paying for a runaway answer. The persona record is compact but structured
+ * and needs enough room for concrete daily-life detail; a truncated one is invalid JSON, so
  * `callModel` reports the truncation rather than letting the parser fail on it.
  *
  * Reasoning effort is set per model variant above. Left unset, a
@@ -65,7 +65,7 @@ export const MODEL_VARIANTS = {
  */
 export const TASK_BUDGETS = {
   generate_sketch: { maxOutput: 260, temperature: 0.55 },
-  generate_annotation: { maxOutput: 4000, temperature: 0.35 },
+  generate_annotation: { maxOutput: 2200, temperature: 0.35 },
 };
 
 const DEFAULT_BUDGET = { maxOutput: 1000, temperature: 0.35 };
@@ -76,7 +76,7 @@ const DEFAULT_BUDGET = { maxOutput: 1000, temperature: 0.35 };
  * It rides along in the usage log so "did that edit help?" is answerable
  * against real traffic later, rather than from memory.
  */
-export const PROMPT_VERSION = '4';
+export const PROMPT_VERSION = '5';
 
 /**
  * A client-supplied name, reduced to one this file knows and one this
@@ -199,7 +199,7 @@ async function callOpenAI({ model, prompt, json, schema, maxOutput, effort, env 
         format: schema
           ? {
             type: 'json_schema',
-            name: 'historical_persona_annotation',
+            name: 'historical_persona_orientation',
             schema,
             // The app schema deliberately has optional fields. Strict mode
             // requires every property to be required, so the client still

@@ -7,42 +7,44 @@
 // same task, so that every knob governing what a call costs and how it reads is
 // on one screen rather than split across two files.
 
+export const buildOrientationModelSchema = schema => ({
+  $schema: schema.$schema,
+  type: 'object',
+  additionalProperties: false,
+  required: ['persona'],
+  properties: {
+    persona: schema.properties.persona,
+    provenance: schema.properties.provenance,
+  },
+  $defs: schema.$defs,
+});
+
 export const buildAnnotationPrompt = (source, options) => {
   const targetInstruction = options?.target === 'named_subject'
     ? 'Generate the persona record for the named subject of the source if the source clearly has one. For a Wikipedia biography, this means the article subject. Use a historically situated moment during that person\'s life, not a posthumous summary.'
     : 'Generate a plausible ordinary person from the source world, not the famous subject unless the source itself is ordinary-person evidence.';
 
   return [
-    'You are filling a strict JSONL annotation record for a historical persona generator.',
+    'Create a compact historical persona-orientation record for conditioning a vintage language model.',
     'Return exactly one JSON object and no markdown.',
     targetInstruction,
     options?.preferredMoment ? `Preferred moment or angle: ${options.preferredMoment}` : '',
-    'Use schema_version "1.1.0".',
-    'The output must conform to the supplied JSON Schema. Do not include properties outside it, and use enum values exactly as written.',
+    'Return only persona and provenance. The application adds IDs, source metadata, and export metadata.',
+    'The output must conform to the supplied compact JSON Schema. Do not include properties outside it.',
     '',
-    'Evidence rules:',
-    '- Fill every required field.',
-    '- Prefer direct evidence from the source.',
-    '- Use conservative historical inference for guessable fields.',
-    '- Use plausible synthesis only for mundane gaps like dwelling, food security, clothing, temperament, or concerns.',
-    '- Mark synthesized or inferred fields in field_evidence using support_level.',
-    '- Fill persona_seed.identity_name for ordinary fictional personas or inferred source-world people. Use historically plausible names for the place, language, status, gender role, and period; mark support_level and confidence.',
-    '- Fill persona_seed.social_position, persona_seed.constraint_regimes, persona_seed.public_world, persona_seed.religious_practice, persona_seed.normative_world, and persona_seed.interaction_style when evidence or conservative inference supports them.',
-    '- Use the new compact fields to classify portable dimensions: social/economic security, autonomy, structural constraints, public-world scale, religious or ritual practice, normative frame, and behavior under social conditions. Put culturally specific terms in detail fields rather than inventing narrow enum values.',
-    '- For literary salons, reform circles, artistic circles, or public intellectual communities, prefer public_world.scale "cultural_or_reform_network" over ritual_or_scholarly_network unless ritual institutions or formal scholarship are central.',
-    '- For unpaid editorial, household, or business collaboration within a marriage or family enterprise, prefer work.labor_relation "family_enterprise_or_spousal_collaboration" over self_employed.',
-    '- For work.workplace, use only schema enum values: household, field, workshop, shop, street, dock, office, kitchen, ship, barracks, court, religious_house, factory, mixed.',
-    '- For persona_seed.place.residence_locale and activity_locale, use only schema enum values. If unsure, use urban_neighborhood for residence_locale and mixed_or_itinerant for activity_locale.',
-    '- Ensure persona_seed.temporal.period_bucket contains persona_seed.temporal.specific_year.',
-    '- Fill persona_seed.family.members when parents, spouse, children, or siblings are known or can be conservatively inferred. Use real known family for named historical subjects when available; otherwise use sparse plausible placeholders and mark support_level synthetic_fill or weak_inference.',
-    '- Fill persona_seed.temperament_and_voice.personality_traits as Big Five values from 0 to 1. Ground them in the source where possible; otherwise infer conservatively from temperament, voice, work, and social position.',
-    '- Keep source_snippets short.',
-    '- Use evidence.bias_flags to note Wikipedia/reference source limitations, elite bias, model_synthesized_gaps, and uncertainty.',
-    '- Do not give modern concepts, later hindsight, or broad omniscience to the persona.',
-    '- If the named subject is elite or famous, household economy and material life should reflect their actual social position rather than ordinary defaults.',
-    '- Choose a specific_year between -10000 and 2030; negative integers represent BCE dates. Set decade to the multiple of 10 containing that year. For biography pages, choose a meaningful living-year moment supported by the page.',
+    'Persona rules:',
+    '- Treat supplied identity, year, place, age, gender, work, status, and religion as fixed.',
+    '- Prefer direct source facts, then conservative inference, then mundane synthesis. Omit optional fields that would require distinctive invented facts.',
+    '- Write short natural-language values, not abstract sociological labels. Concrete routines, tools, food, bodily conditions, obligations, and limits are most useful.',
+    '- Make knowledge and mobility horizons narrow and period-specific. The persona does not know later history.',
+    '- Moral assumptions must be the person’s situated categories, not modern political or psychological analysis.',
+    '- Voice describes register, cadence, vocabulary, and avoidance cues. Keep any sample to one short sentence so it does not become a repeated catchphrase.',
+    '- Conversation frame states where and why the person is speaking and what relation they assume with the interlocutor.',
+    '- Add 2-6 concrete anachronism guards naming unavailable events, concepts, technologies, or vocabulary.',
+    '- Use provenance only for important claims. Paths begin /persona/. Mark support explicit, inferred, synthetic, or uncertain; quote at most a short source phrase.',
+    '- Choose year between -10000 and 2030; negative integers represent BCE dates. For biography pages choose a meaningful living-year moment.',
     source?.sourceBasis === 'synthetic_composite'
-      ? '- This source is a synthetic procedural seed, not a documentary archive. Preserve the seed name, year, place, gender, age, religion, profession, and social position exactly when present. Fill missing schema fields only, mark all unsupported details as synthetic_fill or weak_inference, and do not write as if archival evidence or a historical record proves the persona.'
+      ? '- This is a synthetic procedural seed, not documentary evidence. Preserve every supplied core fact exactly. Use provenance support synthetic for elaborations and never imply archival proof.'
       : '',
     '',
     'Source metadata:',
@@ -56,7 +58,7 @@ export const buildAnnotationPrompt = (source, options) => {
     }),
     '',
     'Source text:',
-    String(source?.text || '').slice(0, 30000),
+    String(source?.text || '').slice(0, 16000),
   ].filter(Boolean).join('\n');
 };
 

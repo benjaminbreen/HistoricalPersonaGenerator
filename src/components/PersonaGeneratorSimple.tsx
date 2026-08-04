@@ -164,9 +164,9 @@ import { triggerHaptic } from '../utils/deviceUtils';
 import { EventImportance, EventKind } from '../constants/characterData/lifeHistoryService';
 import { standingRole } from '../constants/characterData/professions';
 import { HistoricalPersonaAnnotationRecord } from '../types/personaAnnotation';
+import type { PersonaOrientationRecord } from '../types/personaOrientation';
 import { periodBucketForYear } from '../constants/personaAnnotationTemporal';
 import {
-  annotationRecordToJsonl,
   createAnnotationRecordFromSource,
   generateRandomPersonaAnnotationRecord,
 } from '../services/personaAnnotationService';
@@ -178,9 +178,15 @@ import {
   normalizePersonaAnnotationRecord,
   PersonaGenerationTarget,
   readModelVariant,
-  validatePersonaAnnotationRecord,
   writeModelVariant,
 } from '../services/geminiPersonaMaterialService';
+import {
+  applyPersonaOrientationToAnnotationRecord,
+  assertPersonaOrientationRecord,
+  legacyAnnotationToPersonaOrientation,
+  personaOrientationRecordToJsonl,
+  validatePersonaOrientationRecord,
+} from '../services/personaOrientationService';
 import {
   AI_ACCESS_REQUIRED_EVENT,
   type AiAccessRequiredDetail,
@@ -747,10 +753,10 @@ const logAiFlow = (event: string, details: Record<string, unknown> = {}) => {
 
 const AI_COST_COPY: Record<AiCostKind, { title: string; lead: string; detail: string; confirm: string }> = {
   schema: {
-    title: 'Build the full schema record?',
-    lead: 'This asks the model to fill the whole JSONL annotation record — the evidence-tagged fields behind the character sheet.',
-    detail: 'Your first three full schema generations are free. After that, each uses six supporter credits because the entire schema goes to the model with every request.',
-    confirm: 'Build schema record',
+    title: 'Build the Talkie persona record?',
+    lead: 'This asks the model for a compact, evidence-tagged set of fields that can orient a vintage language model toward this persona.',
+    detail: 'Your first three persona records are free. After that, each uses three supporter credits.',
+    confirm: 'Build persona record',
   },
 };
 
@@ -827,32 +833,28 @@ type AnnotationCategory = {
   id: string;
   label: string;
   path: Array<string | number>;
+  keys?: string[];
 };
 
 const ANNOTATION_CATEGORIES: AnnotationCategory[] = [
-  { id: 'source', label: 'Source', path: ['source'] },
-  { id: 'annotation', label: 'Annotation Metadata', path: ['annotation'] },
-  { id: 'summary', label: 'Persona Summary', path: ['persona_seed', 'summary'] },
-  { id: 'identity_name', label: 'Identity Name', path: ['persona_seed', 'identity_name'] },
-  { id: 'temporal', label: 'Temporal Setting', path: ['persona_seed', 'temporal'] },
-  { id: 'place', label: 'Place', path: ['persona_seed', 'place'] },
-  { id: 'social_identity', label: 'Social Identity', path: ['persona_seed', 'social_identity'] },
-  { id: 'social_position', label: 'Social Position', path: ['persona_seed', 'social_position'] },
-  { id: 'constraint_regimes', label: 'Constraint Regimes', path: ['persona_seed', 'constraint_regimes'] },
-  { id: 'family', label: 'Family', path: ['persona_seed', 'family'] },
-  { id: 'work', label: 'Work', path: ['persona_seed', 'work'] },
-  { id: 'household_economy', label: 'Household Economy', path: ['persona_seed', 'household_economy'] },
-  { id: 'material_life', label: 'Material Life', path: ['persona_seed', 'material_life'] },
-  { id: 'mobility_and_horizon', label: 'Mobility And Horizon', path: ['persona_seed', 'mobility_and_horizon'] },
-  { id: 'public_world', label: 'Public World', path: ['persona_seed', 'public_world'] },
-  { id: 'religious_practice', label: 'Religious Practice', path: ['persona_seed', 'religious_practice'] },
-  { id: 'normative_world', label: 'Normative World', path: ['persona_seed', 'normative_world'] },
-  { id: 'temperament_and_voice', label: 'Temperament And Voice', path: ['persona_seed', 'temperament_and_voice'] },
-  { id: 'interaction_style', label: 'Interaction Style', path: ['persona_seed', 'interaction_style'] },
-  { id: 'field_evidence', label: 'Field Evidence', path: ['field_evidence'] },
-  { id: 'evidence', label: 'Evidence Summary', path: ['evidence'] },
-  { id: 'export_targets', label: 'Export Targets', path: ['export_targets'] },
+  { id: 'identity', label: 'Identity And Position', path: ['persona'], keys: ['name_and_address', 'age_and_life_stage', 'gender_role', 'community_identity', 'social_status', 'legal_condition', 'household_and_relations'] },
+  { id: 'setting', label: 'Setting', path: ['persona'], keys: ['year', 'place_context', 'current_pressures', 'language_and_literacy'] },
+  { id: 'livelihood', label: 'Work And Subsistence', path: ['persona'], keys: ['occupation', 'labor_relation', 'skills_and_tools', 'daily_routine', 'economic_position'] },
+  { id: 'material', label: 'Material And Bodily Life', path: ['persona'], keys: ['dwelling', 'food', 'clothing_and_possessions', 'health_and_body'] },
+  { id: 'worldview', label: 'Mental And Moral World', path: ['persona'], keys: ['religion_and_ritual', 'horizons', 'moral_assumptions', 'self_conception', 'loyalties_and_obligations', 'concerns_and_desires'] },
+  { id: 'conversation', label: 'Conversation', path: ['persona'], keys: ['social_manner', 'voice', 'conversation_frame', 'anachronism_guards'] },
+  { id: 'sources', label: 'Sources', path: ['sources'] },
+  { id: 'provenance', label: 'Provenance', path: ['provenance'] },
 ];
+
+const orientationCategoryValue = (record: PersonaOrientationRecord, category: AnnotationCategory): unknown => {
+  if (!category.keys) return getPathValue(record, category.path);
+  return Object.fromEntries(
+    category.keys
+      .map(key => [key, (record.persona as unknown as Record<string, unknown>)[key]])
+      .filter(([, value]) => value !== undefined)
+  );
+};
 
 const isPopulatedValue = (value: unknown): boolean => {
   if (value === undefined || value === null) return false;
@@ -962,7 +964,7 @@ const sourceFromProceduralPersona = (generatedPersona: HistoricalPersona): Retur
     `Beliefs: ${(character.beliefs || []).map((belief: any) => belief.beliefId || String(belief)).join(', ') || 'none listed'}.`,
     `Life events: ${(character.lifeEvents || []).map(event => `${event.year}: ${event.event}`).join(' | ') || 'none listed'}.`,
     `Health: ${character.diseaseHealth?.currentDiseases?.map(disease => disease.disease.name).join(', ') || 'none listed'}.`,
-    `This is a synthetic procedural seed generated by the application, not an external historical document. Convert it into a complete annotation record with all fields present, marking unsupported details as synthetic_fill or weak_inference.`,
+    `This is a synthetic procedural seed generated by the application, not an external historical document. Preserve its core facts and elaborate it as a compact persona-orientation record, marking unsupported details as synthetic.`,
   ].join('\n');
 
   return {
@@ -1248,6 +1250,74 @@ const lockProceduralSeedRecord = (
   return normalizePersonaAnnotationRecord(locked) as HistoricalPersonaAnnotationRecord;
 };
 
+const lockProceduralOrientationRecord = (
+  record: PersonaOrientationRecord,
+  proceduralPersona: HistoricalPersona
+): PersonaOrientationRecord => {
+  const locked = structuredClone(record) as PersonaOrientationRecord;
+  const character = proceduralPersona.character;
+  const culturalZone = normalizeDisplayZone(proceduralPersona.culturalZone);
+  const languageData = culturalZone
+    ? getLanguageForCharacter(
+      culturalZone,
+      proceduralPersona.year,
+      proceduralPersona.region,
+      proceduralPersona.location,
+      character.name,
+      character.profession
+    )
+    : undefined;
+  const polity = getPolityAt({
+    year: proceduralPersona.year,
+    region: proceduralPersona.region,
+    location: proceduralPersona.location,
+    culturalZone,
+  });
+
+  locked.persona.name_and_address.full_name = character.name;
+  locked.persona.age_and_life_stage = {
+    age: character.age,
+    life_stage: ageBandForAge(character.age).replace(/_/g, ' '),
+  };
+  locked.persona.gender_role = genderRoleForCharacter(character.gender, character.age);
+  locked.persona.year = proceduralPersona.year;
+  locked.persona.place_context = {
+    ...locked.persona.place_context,
+    locality: proceduralPersona.location,
+    region: proceduralPersona.region,
+    polity: polity?.name,
+  };
+  locked.persona.social_status = character.socialClass || character.class || locked.persona.social_status;
+  locked.persona.occupation = character.profession;
+  locked.persona.religion_and_ritual = character.religion;
+  if (languageData?.name) {
+    locked.persona.language_and_literacy.languages = [languageData.name];
+  }
+
+  const lockedPaths = [
+    '/persona/name_and_address',
+    '/persona/age_and_life_stage',
+    '/persona/gender_role',
+    '/persona/year',
+    '/persona/place_context',
+    '/persona/social_status',
+    '/persona/occupation',
+    '/persona/religion_and_ritual',
+    '/persona/language_and_literacy',
+  ];
+  locked.provenance = [
+    ...locked.provenance.filter(item => !lockedPaths.includes(item.field_path)),
+    ...lockedPaths.map(field_path => ({
+      field_path,
+      support: 'synthetic' as const,
+      confidence: 'speculative' as const,
+      source_id: locked.sources[0]?.source_id,
+      note: 'Locked from the original procedural persona seed.',
+    })),
+  ].slice(0, 20);
+  return assertPersonaOrientationRecord(locked);
+};
+
 export default function PersonaGenerator() {
   const [persona, setPersona] = useState<HistoricalPersona | null>(null);
   const [encounterPair, setEncounterPair] = useState<[HistoricalPersona, HistoricalPersona] | null>(null);
@@ -1279,6 +1349,7 @@ export default function PersonaGenerator() {
   const [showGreetingBubble, setShowGreetingBubble] = useState(false);
   const [bubblePosition, setBubblePosition] = useState({ top: 0, left: 0 });
   const [annotationRecord, setAnnotationRecord] = useState<HistoricalPersonaAnnotationRecord | null>(null);
+  const [orientationRecord, setOrientationRecord] = useState<PersonaOrientationRecord | null>(null);
   const [sourceText, setSourceText] = useState('');
   const [sourceTitle, setSourceTitle] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
@@ -1486,14 +1557,14 @@ export default function PersonaGenerator() {
       : []
   ), [annotationRecord, persona, sourceTarget]);
   const annotationCategories = useMemo(() => {
-    if (!annotationRecord) return [];
+    if (!orientationRecord) return [];
     return ANNOTATION_CATEGORIES
       .map(category => ({
         ...category,
-        value: getPathValue(annotationRecord, category.path),
-        populated: isPopulatedValue(getPathValue(annotationRecord, category.path)),
+        value: orientationCategoryValue(orientationRecord, category),
+        populated: isPopulatedValue(orientationCategoryValue(orientationRecord, category)),
       }));
-  }, [annotationRecord]);
+  }, [orientationRecord]);
 
   // Ref for portrait container to calculate bubble position
   const portraitContainerRef = useRef<HTMLDivElement>(null);
@@ -1501,7 +1572,7 @@ export default function PersonaGenerator() {
 
   useEffect(() => {
     setCategoryEditDrafts({});
-  }, [annotationRecord]);
+  }, [orientationRecord]);
 
   // Expression options for portrait cycling in character details modal
   const expressionCycle = [
@@ -1641,11 +1712,14 @@ export default function PersonaGenerator() {
     const snapshot = stored.snapshot;
     const restoredPersona = snapshot.persona;
     const restoredRecord = snapshot.annotationRecord || null;
+    const restoredOrientation = snapshot.personaOrientationRecord
+      || (restoredRecord ? legacyAnnotationToPersonaOrientation(restoredRecord) : null);
 
     setPersona(restoredPersona);
     setParams({});
     setAnnotationRecord(restoredRecord);
-    setEditableJsonl(restoredRecord ? annotationRecordToJsonl(restoredRecord) : '');
+    setOrientationRecord(restoredOrientation);
+    setEditableJsonl(restoredOrientation ? personaOrientationRecordToJsonl(restoredOrientation) : '');
     setPersonaSketch(snapshot.personaSketch || null);
     setSourcePortraitUrl(snapshot.sourcePortraitUrl || null);
     setSourcePortraitAttribution(snapshot.sourcePortraitAttribution || null);
@@ -1792,6 +1866,7 @@ export default function PersonaGenerator() {
     setPersona(newPersona);
     beginPersonaLineage(newPersona);
     setAnnotationRecord(null);
+    setOrientationRecord(null);
     setSourceIngestionStatus(null);
     setSourcePortraitUrl(null);
     setSourcePortraitAttribution(null);
@@ -1819,8 +1894,8 @@ export default function PersonaGenerator() {
   };
 
   /**
-   * Schema filling is the expensive specialist path. It retains its
-   * explanatory confirmation, uses three free runs, then requires six active
+   * Schema filling is the specialist path. It retains its explanatory
+   * confirmation, uses three free runs, then requires three active
    * supporter credits.
    */
   const requestAiRun = async (kind: AiCostKind, run: () => Promise<void>) => {
@@ -1937,6 +2012,7 @@ export default function PersonaGenerator() {
       generateSketch?: boolean;
       fieldEditStatus?: string | null;
       publishAnnotationRecord?: boolean;
+      orientationRecord?: PersonaOrientationRecord | null;
     } = {}
   ) => {
     resetSharedPersonaState();
@@ -1984,14 +2060,17 @@ export default function PersonaGenerator() {
 
     setParams(generationParams);
     if (options.publishAnnotationRecord !== false) {
+      const publishedOrientation = options.orientationRecord || legacyAnnotationToPersonaOrientation(record);
       setAnnotationRecord(record);
-      setEditableJsonl(annotationRecordToJsonl(record));
+      setOrientationRecord(publishedOrientation);
+      setEditableJsonl(personaOrientationRecordToJsonl(publishedOrientation));
     } else {
       // The ordinary AI-biography path still uses a compact local record as
       // prompt scaffolding, but that record is not a Luna-filled annotation.
       // Keeping it private prevents heuristic placeholders from masquerading
       // as model output in the schema editor.
       setAnnotationRecord(null);
+      setOrientationRecord(null);
       setEditableJsonl('');
       setShowMaterialJson(false);
     }
@@ -2051,9 +2130,10 @@ export default function PersonaGenerator() {
       setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
       const result = await recordFromSource(source, { target: 'named_subject' });
       setSourceIngestionStatus(result.modelFilled
-        ? `Generated a ${selectedModelLabel}-filled annotation record from ${source.citationLabel}.`
+        ? `Generated a ${selectedModelLabel}-filled persona record from ${source.citationLabel}.`
         : `Generated a local fallback persona from ${source.citationLabel}; no AI schema record was created.`);
       await generateFromAnnotationRecord(result.record, {
+        orientationRecord: result.orientationRecord,
         useSourceTitleAsName: true,
         portraitUrl: source.imageUrl,
         portraitAttribution: source.imageAttribution,
@@ -2090,21 +2170,21 @@ export default function PersonaGenerator() {
     setGenerationFallbacks([]);
     if (!useGeminiExtraction) {
       noteGenerationFallback('record', 'Model schema filling is switched off.');
-      return { record: createAnnotationRecordFromSource(source), modelFilled: false };
+      return { record: createAnnotationRecordFromSource(source), orientationRecord: null, modelFilled: false };
     }
 
     try {
-      const record = await generatePersonaAnnotationWithGemini(source, {
+      const generated = await generatePersonaAnnotationWithGemini(source, {
         target: options?.target || sourceTarget,
         preferredMoment: preferredMoment.trim() || undefined,
       });
-      return { record, modelFilled: true };
+      return { record: generated.annotationRecord, orientationRecord: generated.orientationRecord, modelFilled: true };
     } catch (error) {
       noteGenerationFallback('record', error instanceof Error ? error.message : 'Schema generation failed.');
       setSourceIngestionStatus(error instanceof Error
         ? `${error.message} Using local source-based fallback instead.`
         : 'AI schema generation failed. Using local source-based fallback instead.');
-      return { record: createAnnotationRecordFromSource(source), modelFilled: false };
+      return { record: createAnnotationRecordFromSource(source), orientationRecord: null, modelFilled: false };
     }
   };
 
@@ -2121,14 +2201,15 @@ export default function PersonaGenerator() {
 
     setIsSourceGenerating(true);
     setSourcePanelCollapsed(true);
-    setSourceIngestionStatus(useGeminiExtraction ? `Asking ${selectedModelLabel} to populate the annotation schema...` : 'Generating a heuristic annotation record...');
+    setSourceIngestionStatus(useGeminiExtraction ? `Asking ${selectedModelLabel} to populate the compact persona schema...` : 'Generating a heuristic persona record...');
     try {
       const source = createPastedTextSource(sourceText, sourceTitle.trim() || 'Pasted source text');
       const result = await recordFromSource(source);
       setSourceIngestionStatus(result.modelFilled
-        ? `Generated a ${selectedModelLabel}-filled annotation record from pasted text.`
+        ? `Generated a ${selectedModelLabel}-filled persona record from pasted text.`
         : 'Generated a local fallback persona from pasted text; no AI schema record was created.');
       await generateFromAnnotationRecord(result.record, {
+        orientationRecord: result.orientationRecord,
         useSourceTitleAsName: sourceTarget === 'named_subject',
         generateSketch: true,
         publishAnnotationRecord: result.modelFilled,
@@ -2157,9 +2238,10 @@ export default function PersonaGenerator() {
       setSourceTitle(source.title);
       setSourceText(source.text);
       setSourceIngestionStatus(result.modelFilled
-        ? `Generated a ${selectedModelLabel}-filled annotation record from ${source.citationLabel}.`
+        ? `Generated a ${selectedModelLabel}-filled persona record from ${source.citationLabel}.`
         : `Generated a local fallback persona from ${source.citationLabel}; no AI schema record was created.`);
       await generateFromAnnotationRecord(result.record, {
+        orientationRecord: result.orientationRecord,
         useSourceTitleAsName: sourceTarget === 'named_subject',
         portraitUrl: source.imageUrl,
         portraitAttribution: source.imageAttribution,
@@ -2194,9 +2276,10 @@ export default function PersonaGenerator() {
         target: filters.personaAngle === 'named_subject' ? 'named_subject' : 'ordinary_person_from_source_world',
       });
       setSourceIngestionStatus(result.modelFilled
-        ? `Generated a ${selectedModelLabel}-filled annotation record from ${source.citationLabel}.`
+        ? `Generated a ${selectedModelLabel}-filled persona record from ${source.citationLabel}.`
         : `Generated a local fallback persona from ${source.citationLabel}; no AI schema record was created.`);
       await generateFromAnnotationRecord(result.record, {
+        orientationRecord: result.orientationRecord,
         useSourceTitleAsName: filters.personaAngle === 'named_subject',
         portraitUrl: source.imageUrl,
         portraitAttribution: source.imageAttribution,
@@ -2227,16 +2310,20 @@ export default function PersonaGenerator() {
 
   const applyEditedJsonl = async () => {
     try {
-      const parsed = normalizePersonaAnnotationRecord(JSON.parse(editableJsonl)) as HistoricalPersonaAnnotationRecord;
-      const validationErrors = validatePersonaAnnotationRecord(parsed);
+      if (!annotationRecord) throw new Error('No compatibility record is available for this persona.');
+      const parsed = JSON.parse(editableJsonl);
+      const validationErrors = validatePersonaOrientationRecord(parsed);
       if (validationErrors.length > 0) {
         setFieldEditStatus(`Schema validation failed: ${validationErrors.slice(0, 4).join('; ')}`);
         return;
       }
-      setEditableJsonl(annotationRecordToJsonl(parsed));
+      const nextOrientation = assertPersonaOrientationRecord(parsed);
+      const nextAnnotation = applyPersonaOrientationToAnnotationRecord(nextOrientation, annotationRecord);
+      setEditableJsonl(personaOrientationRecordToJsonl(nextOrientation));
       // The edited record supersedes whatever the previous run fell back on.
       setGenerationFallbacks([]);
-      await generateFromAnnotationRecord(parsed, {
+      await generateFromAnnotationRecord(nextAnnotation, {
+        orientationRecord: nextOrientation,
         useSourceTitleAsName: sourceTarget === 'named_subject',
         portraitUrl: sourcePortraitUrl || undefined,
         portraitAttribution: sourcePortraitAttribution || undefined,
@@ -2266,6 +2353,7 @@ export default function PersonaGenerator() {
         portrait_url: sourcePortraitUrl,
       },
       sketch: personaSketch,
+      persona_orientation: orientationRecord || undefined,
       annotation_record: annotationRecord || undefined,
       adapter_overrides: materialAdapter ? {
         ...materialAdapter.adapterOverrides,
@@ -2281,7 +2369,7 @@ export default function PersonaGenerator() {
           source_note: (event as any).sourceNote,
         })),
       } : undefined,
-      field_provenance: annotationRecord?.field_evidence || [],
+      field_provenance: orientationRecord?.provenance || [],
       generated_character: persona.character,
     };
 
@@ -2295,27 +2383,36 @@ export default function PersonaGenerator() {
   };
 
   const exportAnnotationJsonl = () => {
-    if (!annotationRecord) return;
-    const blob = new Blob([annotationRecordToJsonl(annotationRecord)], { type: 'application/x-ndjson' });
+    if (!orientationRecord) return;
+    const blob = new Blob([personaOrientationRecordToJsonl(orientationRecord)], { type: 'application/x-ndjson' });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `${annotationRecord.record_id || 'persona-material'}.jsonl`;
+    anchor.download = `${orientationRecord.persona_id || 'persona-orientation'}.jsonl`;
     anchor.click();
     URL.revokeObjectURL(url);
   };
 
   const applyCategoryEdit = (category: AnnotationCategory, rawValue: string) => {
     try {
-      const current = JSON.parse(editableJsonl || annotationRecordToJsonl(annotationRecord as HistoricalPersonaAnnotationRecord));
+      if (!orientationRecord) return;
+      const current = JSON.parse(editableJsonl || personaOrientationRecordToJsonl(orientationRecord));
       const parsedValue = JSON.parse(rawValue);
-      const nextRecord = normalizePersonaAnnotationRecord(setPathValue(current, category.path, parsedValue)) as HistoricalPersonaAnnotationRecord;
-      const validationErrors = validatePersonaAnnotationRecord(nextRecord);
+      const nextRecord = category.keys
+        ? {
+          ...current,
+          persona: {
+            ...current.persona,
+            ...parsedValue,
+          },
+        }
+        : setPathValue(current, category.path, parsedValue);
+      const validationErrors = validatePersonaOrientationRecord(nextRecord);
       if (validationErrors.length > 0) {
         setFieldEditStatus(`${category.label} edit did not validate: ${validationErrors.slice(0, 3).join('; ')}`);
         return;
       }
-      setEditableJsonl(annotationRecordToJsonl(nextRecord));
+      setEditableJsonl(personaOrientationRecordToJsonl(nextRecord as PersonaOrientationRecord));
       setCategoryEditDrafts(prev => ({ ...prev, [category.id]: JSON.stringify(parsedValue, null, 2) }));
       setFieldEditStatus(`Updated ${category.label}. Apply edited fields to regenerate the persona.`);
     } catch (error) {
@@ -2805,6 +2902,7 @@ export default function PersonaGenerator() {
     setPersona(newPersona);
     beginPersonaLineage(newPersona);
     setAnnotationRecord(null);
+    setOrientationRecord(null);
     setSourceIngestionStatus(null);
     setSourcePortraitUrl(null);
     setSourcePortraitAttribution(null);
@@ -2831,6 +2929,7 @@ export default function PersonaGenerator() {
     setSourceTarget('named_subject');
     setPersona(null);
     setAnnotationRecord(null);
+    setOrientationRecord(null);
     setPersonaSketch(null);
     setGenerationFallbacks([]);
     setEditableJsonl('');
@@ -2903,6 +3002,7 @@ export default function PersonaGenerator() {
     setGenerationFallbacks([]);
     if (!existingRecord) {
       setAnnotationRecord(null);
+      setOrientationRecord(null);
       setEditableJsonl('');
       setShowMaterialJson(false);
     }
@@ -2998,21 +3098,21 @@ export default function PersonaGenerator() {
     setSourceText(source.text);
     setSourceUrl('');
     setOldBaileySelectionActive(false);
-    setSourceIngestionStatus(`Keeping ${existingPersona.character.name} fixed. Asking ${selectedModelLabel} to fill the schema record...`);
+    setSourceIngestionStatus(`Keeping ${existingPersona.character.name} fixed. Asking ${selectedModelLabel} to fill the compact persona record...`);
 
     try {
-      const record = lockProceduralSeedRecord(
-        await generatePersonaAnnotationWithGemini(source, {
-          target: 'named_subject',
-          preferredMoment: preferredMoment.trim() || undefined,
-        }),
-        existingPersona
-      );
+      const generated = await generatePersonaAnnotationWithGemini(source, {
+        target: 'named_subject',
+        preferredMoment: preferredMoment.trim() || undefined,
+      });
+      const compactRecord = lockProceduralOrientationRecord(generated.orientationRecord, existingPersona);
+      const record = applyPersonaOrientationToAnnotationRecord(compactRecord, generated.annotationRecord);
       setAnnotationRecord(record);
-      setEditableJsonl(annotationRecordToJsonl(record));
+      setOrientationRecord(compactRecord);
+      setEditableJsonl(personaOrientationRecordToJsonl(compactRecord));
       setShowMaterialJson(false);
       setFieldEditStatus(`Generated by ${selectedModelLabel} for ${existingPersona.character.name}.`);
-      setSourceIngestionStatus(`Generated a ${selectedModelLabel}-filled schema record for ${existingPersona.character.name} without replacing the persona.`);
+      setSourceIngestionStatus(`Generated a ${selectedModelLabel}-filled Talkie persona record for ${existingPersona.character.name} without replacing the persona.`);
     } catch (error) {
       setSourceIngestionStatus(error instanceof Error
         ? `${error.message} No placeholder schema was saved; the existing persona is unchanged.`
@@ -3065,6 +3165,7 @@ export default function PersonaGenerator() {
       schemaVersion: SHARED_PERSONA_SCHEMA_VERSION,
       persona,
       annotationRecord: annotationRecord || undefined,
+      personaOrientationRecord: orientationRecord || undefined,
       personaSketch: completedSketch,
       sourcePortraitUrl: sourcePortraitUrl || undefined,
       sourcePortraitAttribution: sourcePortraitAttribution || undefined,
@@ -4969,7 +5070,7 @@ export default function PersonaGenerator() {
                 {isSourceGenerating && (
                 <div className="source-loading-state" aria-live="polite">
                   <div className="source-loading-bar" />
-                  <span>{sourceIngestionStatus || 'Generating annotation record...'}</span>
+                  <span>{sourceIngestionStatus || 'Generating persona record...'}</span>
                 </div>
                 )}
                 {!isSourceGenerating && (
@@ -5146,7 +5247,7 @@ export default function PersonaGenerator() {
                       setSourceUrl('');
                       setSourceText(event.target.value);
                     }}
-                    placeholder="Paste a document excerpt here, then generate a persona from the extracted annotation record."
+                    placeholder="Paste a document excerpt here, then generate a compact persona record from it."
                     rows={5}
                   />
                 </label>
@@ -5174,8 +5275,8 @@ export default function PersonaGenerator() {
                 )}
                 {sourceIngestionStatus && <span className="source-status">{sourceIngestionStatus}</span>}
               </div>
-              {annotationRecord && showMaterialJson && (
-                <pre className="annotation-jsonl">{annotationRecordToJsonl(annotationRecord)}</pre>
+              {orientationRecord && showMaterialJson && (
+                <pre className="annotation-jsonl">{personaOrientationRecordToJsonl(orientationRecord)}</pre>
               )}
             </motion.div>
             )}
@@ -6688,13 +6789,13 @@ export default function PersonaGenerator() {
               <div className="character-sheet-editor">
                 <div className="character-sheet-editor-header">
                   <div>
-                    <h3>{annotationRecord ? 'Export as JSONL or PDF' : 'AI Schema Record'}</h3>
-                    <p>{annotationRecord
-                      ? 'Export the generated persona, inspect consistency warnings, or edit populated JSONL categories.'
+                    <h3>{orientationRecord ? 'Talkie Persona Record' : 'AI Schema Record'}</h3>
+                    <p>{orientationRecord
+                      ? 'A compact 30-field persona orientation with source provenance, ready to export as JSONL.'
                       : `Make a Luna-filled JSONL record that elaborates ${persona.character.name} without replacing the persona.`}</p>
                   </div>
                   <div className="export-action-panel" aria-label="Export persona">
-                    {annotationRecord ? (
+                    {orientationRecord ? (
                       <button className="btn btn-primary" onClick={exportAnnotationJsonl}>
                         <IoDownload aria-hidden="true" />
                         Export JSONL
@@ -6704,7 +6805,7 @@ export default function PersonaGenerator() {
                         className="btn btn-primary"
                         onClick={() => requestAiRun('schema', generateSchemaForExistingPersona)}
                         disabled={isSourceGenerating}
-                        title="Ask Luna to fill a full schema record for this existing persona."
+                        title="Ask Luna to fill a compact Talkie persona record for this existing persona."
                       >
                         <IoSparkles aria-hidden="true" />
                         {isSourceGenerating ? 'Making AI Schema…' : 'Make AI Schema Record'}
@@ -6725,7 +6826,7 @@ export default function PersonaGenerator() {
                     <span className="source-status">{sourceIngestionStatus}</span>
                   </div>
                 )}
-                {annotationRecord && (
+                {orientationRecord && annotationRecord && (
                 <>
                 {consistencyIssues.length > 0 && (
                   <div className="consistency-panel">
@@ -6748,18 +6849,20 @@ export default function PersonaGenerator() {
                   </div>
                 )}
                 <div className="source-field-summary">
-                  <div><span>Schema</span><strong>{annotationRecord.schema_version}</strong></div>
-                  <div><span>Year</span><strong>{annotationRecord.persona_seed.temporal.specific_year || annotationRecord.persona_seed.temporal.decade}</strong></div>
-                  <div><span>Region</span><strong>{annotationRecord.persona_seed.place.region}</strong></div>
-                  <div><span>Status</span><strong>{(annotationRecord.persona_seed.social_position?.local_status_detail || annotationRecord.persona_seed.social_identity.status_detail || annotationRecord.persona_seed.social_identity.status_group).replace(/_/g, ' ')}</strong></div>
-                  <div><span>Work</span><strong>{annotationRecord.persona_seed.work.primary_occupation}</strong></div>
-                  <div><span>Confidence</span><strong>{annotationRecord.evidence.confidence}</strong></div>
+                  <div><span>Schema</span><strong>{orientationRecord.schema_version}</strong></div>
+                  <div><span>Year</span><strong>{orientationRecord.persona.year}</strong></div>
+                  <div><span>Region</span><strong>{orientationRecord.persona.place_context.region}</strong></div>
+                  <div><span>Status</span><strong>{orientationRecord.persona.social_status}</strong></div>
+                  <div><span>Work</span><strong>{orientationRecord.persona.occupation}</strong></div>
+                  <div><span>Evidence</span><strong>{orientationRecord.provenance.length} claims</strong></div>
                 </div>
                 <div className="jsonl-category-grid">
                   {annotationCategories.map(category => {
-                    const fieldEvidenceCount = annotationRecord.field_evidence?.filter(item =>
-                      item.field_path.startsWith(`/${category.path.join('/')}`)
-                    ).length || 0;
+                    const categoryFields = new Set(category.keys || []);
+                    const fieldEvidenceCount = orientationRecord.provenance.filter(item => {
+                      const field = item.field_path.replace(/^\/persona\//, '').split('/')[0];
+                      return category.id === 'provenance' || categoryFields.has(field);
+                    }).length;
                     const draftValue = categoryEditDrafts[category.id] ?? (category.value === undefined ? '' : JSON.stringify(category.value, null, 2));
                     const schemaRows = flattenSchemaRows(category.value);
                     return (
@@ -6767,7 +6870,7 @@ export default function PersonaGenerator() {
                         <div className="jsonl-category-header">
                           <div>
                             <h4>{category.label}</h4>
-                            <code>/{category.path.join('/')}</code>
+                            <code>{category.keys ? `/persona/{${category.keys.join(', ')}}` : `/${category.path.join('/')}`}</code>
                           </div>
                           <div className="jsonl-category-badges">
                             <span>{category.populated ? 'populated' : 'empty'}</span>
@@ -6792,11 +6895,11 @@ export default function PersonaGenerator() {
                             spellCheck={false}
                           />
                         </details>
-                        {category.id === 'field_evidence' && Array.isArray(category.value) && (
+                        {category.id === 'provenance' && Array.isArray(category.value) && (
                           <div className="field-evidence-chip-row">
                             {category.value.slice(0, 10).map((item: any, index: number) => (
                               <span key={`${item.field_path || 'field'}-${index}`}>
-                                {supportLevelLabel(item.support_level || 'unknown')}
+                                {supportLevelLabel(item.support || 'unknown')}
                               </span>
                             ))}
                           </div>
@@ -7310,19 +7413,19 @@ export default function PersonaGenerator() {
               <span className="ai-support-kicker">Supporter access</span>
               <h2 id="ai-support-modal-title">
                 {aiGate.action === 'schema'
-                  ? 'You have used your three free schema generations'
+                  ? 'You have used your three free persona records'
                   : 'You have used your five free AI biographies'}
               </h2>
             </div>
             <div className="modal-body ai-support-body">
               <p id="ai-support-modal-description">
                 {aiGate.action === 'schema'
-                  ? 'The evidence-aware schema call sends a much larger historical record to the model. Additional schema records use six credits; a verified donation unlocks enough credit for this and many more biographies.'
+                  ? 'The evidence-aware call creates a compact Talkie persona record. Additional records use three credits; a verified donation unlocks enough credit for this and many more biographies.'
                   : 'Procedural personas remain free and unlimited. To keep model-generated biographies sustainable, additional AI requests unlock after a verified donation.'}
               </p>
               <div className="ai-support-credit-card">
                 <strong>Donate once, receive 50 AI credits</strong>
-                <span>Valid for 30 days · biographies use 1 credit · full schema records use 6</span>
+                <span>Valid for 30 days · biographies use 1 credit · persona records use 3</span>
               </div>
               <div className="ai-support-actions">
                 <button

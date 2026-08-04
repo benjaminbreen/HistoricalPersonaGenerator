@@ -5,6 +5,11 @@ import {
   normalizePersonaAnnotationRecord,
 } from '../src/services/personaMaterialValidationService';
 import { generateRandomPersonaAnnotationRecord } from '../src/services/personaAnnotationService';
+import {
+  createPersonaOrientationRecord,
+  personaOrientationToAnnotationRecord,
+  validatePersonaOrientationRecord,
+} from '../src/services/personaOrientationService';
 
 const normalized = normalizePersonaAnnotationRecord({
   schema_version: '1.1.0',
@@ -69,6 +74,42 @@ completeAncientRecord.persona_seed.temporal = {
 const validatedAncientRecord = assertPersonaAnnotationRecord(completeAncientRecord);
 assert.equal(validatedAncientRecord.persona_seed.temporal.decade, 760);
 assert.equal(validatedAncientRecord.persona_seed.temporal.period_bucket, '500_999');
+
+const orientationSource = {
+  title: 'Procedural seed: Wagga the Frigatebird',
+  text: 'Wagga the Frigatebird, 761, coastal settlement, fisher.',
+  sourceBasis: 'synthetic_composite' as const,
+  extractionMethod: 'mixed' as const,
+  citationLabel: 'Procedural seed: Wagga the Frigatebird',
+};
+const orientation = createPersonaOrientationRecord({
+  persona: {
+    name_and_address: { full_name: 'Wagga the Frigatebird' },
+    age_and_life_stage: { age: 28, life_stage: 'adult household member' },
+    gender_role: 'adult man',
+    social_status: 'free fisher of modest standing',
+    legal_condition: 'free subject',
+    year: 761,
+    place_context: {
+      locality: 'coastal settlement',
+      region: 'island coast',
+      locale_type: 'fishing village',
+    },
+    language_and_literacy: { languages: ['local vernacular'], literacy: 'nonliterate' },
+    occupation: 'fisher',
+    daily_routine: ['checks lines before dawn', 'mends nets after landing'],
+    horizons: { knowledge: 'household, coast, weather, and nearby markets', mobility: 'moves along the local coast by boat' },
+    voice: { register: 'plain and concrete', cadence: 'short clauses shaped by work' },
+    anachronism_guards: ['modern nation-states', 'engines and industrial fishing'],
+  },
+}, orientationSource);
+
+assert.deepEqual(validatePersonaOrientationRecord(orientation), []);
+assert.equal(orientation.schema_version, '2.0.0');
+const orientationCompatibilityRecord = personaOrientationToAnnotationRecord(orientation, orientationSource);
+assert.equal(orientationCompatibilityRecord.persona_seed.temporal.specific_year, 761);
+assert.equal(orientationCompatibilityRecord.persona_seed.temporal.decade, 760);
+assert.equal(orientationCompatibilityRecord.persona_seed.identity_name?.full_name, 'Wagga the Frigatebird');
 
 const responsePath = process.argv[2];
 if (responsePath) {

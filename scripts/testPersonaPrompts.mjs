@@ -1,9 +1,27 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {
+  buildAnnotationPrompt,
+  buildOrientationModelSchema,
   buildSketchDossier,
   buildSketchPrompt,
   formatHistoricalYear,
 } from '../api/_lib/personaPrompts.js';
+
+const orientationSchema = JSON.parse(fs.readFileSync('src/schemas/personaOrientation.schema.json', 'utf8'));
+const modelSchema = buildOrientationModelSchema(orientationSchema);
+const annotationPrompt = buildAnnotationPrompt({
+  title: 'Procedural seed: Tan',
+  sourceBasis: 'synthetic_composite',
+  text: 'Name: Tan. Year: -2650. Place: Delhi Region. Occupation: brick maker.',
+}, { target: 'named_subject' });
+
+assert.equal(Object.keys(orientationSchema.properties.persona.properties).length, 30);
+assert.deepEqual(modelSchema.required, ['persona']);
+assert.ok(JSON.stringify(modelSchema).length < 14000, 'compact model schema should stay below 14 KB');
+assert.ok(annotationPrompt.length < 4200, `orientation prompt grew to ${annotationPrompt.length} characters`);
+assert.match(annotationPrompt, /self|conversation frame|anachronism/i);
+assert.doesNotMatch(annotationPrompt, /Big Five|period_bucket|export_targets/);
 
 const record = {
   source: {

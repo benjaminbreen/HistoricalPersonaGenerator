@@ -1,6 +1,7 @@
 import type { HistoricalPersona } from '../services/personaGenerator';
 import type { SamplingMode } from '../services/demographyService';
 import type { HistoricalPersonaAnnotationRecord } from './personaAnnotation';
+import type { PersonaOrientationRecord } from './personaOrientation';
 
 export const SHARED_PERSONA_SCHEMA_VERSION = 1 as const;
 
@@ -8,6 +9,7 @@ export interface SharedPersonaSnapshot {
   schemaVersion: typeof SHARED_PERSONA_SCHEMA_VERSION;
   persona: HistoricalPersona;
   annotationRecord?: HistoricalPersonaAnnotationRecord;
+  personaOrientationRecord?: PersonaOrientationRecord;
   personaSketch?: string;
   sourcePortraitUrl?: string;
   sourcePortraitAttribution?: string;

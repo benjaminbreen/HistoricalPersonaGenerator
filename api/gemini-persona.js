@@ -3,11 +3,12 @@ import path from 'node:path';
 import { parseJsonObject } from './_lib/llmJson.js';
 import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './_lib/rateLimit.js';
 import { consumeAiCredit, ensureVisitorId } from './_lib/aiAccess.js';
-import { buildAnnotationPrompt, buildSketchPrompt } from './_lib/personaPrompts.js';
+import { buildAnnotationPrompt, buildOrientationModelSchema, buildSketchPrompt } from './_lib/personaPrompts.js';
 import { callModel } from './_lib/llm.js';
 
-const schemaPath = path.join(process.cwd(), 'src/schemas/historicalPersonaAnnotation.schema.json');
-const annotationSchema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+const schemaPath = path.join(process.cwd(), 'src/schemas/personaOrientation.schema.json');
+const orientationSchema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+const orientationModelSchema = buildOrientationModelSchema(orientationSchema);
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -31,7 +32,7 @@ export default async function handler(req, res) {
         res.status(402).json({
           code: 'AI_SUPPORT_REQUIRED',
           error: body.action === 'generate_annotation'
-            ? 'You have used all three free full schema generations. A donation unlocks 50 credits for 30 days.'
+            ? 'You have used all three free persona-record generations. A donation unlocks 50 credits for 30 days.'
             : 'You have used all five free AI biographies. A donation unlocks 50 credits for 30 days.',
           access: accessVerdict.access,
         });
@@ -45,7 +46,7 @@ export default async function handler(req, res) {
         action: 'generate_annotation',
         prompt: buildAnnotationPrompt(body.source, body.options),
         json: true,
-        schema: annotationSchema,
+        schema: orientationModelSchema,
       });
       res.status(200).json({ record: parseJsonObject(text), usage });
       return;

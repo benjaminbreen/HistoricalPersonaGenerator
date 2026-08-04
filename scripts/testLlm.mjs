@@ -89,9 +89,9 @@ try {
   assert.equal(annotation.usage.model, 'gpt-5.6-luna');
   assert.equal(requestBody.model, 'gpt-5.6-luna');
   assert.deepEqual(requestBody.reasoning, { effort: 'none' });
-  assert.equal(requestBody.max_output_tokens, 4000);
+  assert.equal(requestBody.max_output_tokens, 2200);
   assert.equal(requestBody.text.format.type, 'json_schema');
-  assert.equal(requestBody.text.format.name, 'historical_persona_annotation');
+  assert.equal(requestBody.text.format.name, 'historical_persona_orientation');
   assert.equal(requestBody.text.format.strict, false);
   assert.deepEqual(requestBody.text.format.schema.properties.status.enum, ['valid']);
 

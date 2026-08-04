@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://historical-persona-generator.local/schemas/persona-orientation-2.0.0.json",
+  "title": "Talkie Historical Persona Orientation Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "persona_id", "persona", "sources", "provenance"],
+  "properties": {
+    "schema_version": { "const": "2.0.0" },
+    "persona_id": { "$ref": "#/$defs/short" },
+    "persona": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name_and_address",
+        "age_and_life_stage",
+        "gender_role",
+        "social_status",
+        "legal_condition",
+        "year",
+        "place_context",
+        "language_and_literacy",
+        "occupation",
+        "daily_routine",
+        "horizons",
+        "voice",
+        "anachronism_guards"
+      ],
+      "properties": {
+        "name_and_address": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["full_name"],
+          "properties": {
+            "full_name": { "$ref": "#/$defs/short" },
+            "form_of_address": { "$ref": "#/$defs/short" }
+          }
+        },
+        "age_and_life_stage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["age", "life_stage"],
+          "properties": {
+            "age": { "type": "integer", "minimum": 0, "maximum": 120 },
+            "life_stage": { "$ref": "#/$defs/short" }
+          }
+        },
+        "gender_role": { "$ref": "#/$defs/short" },
+        "community_identity": { "$ref": "#/$defs/detail" },
+        "social_status": { "$ref": "#/$defs/short" },
+        "legal_condition": { "$ref": "#/$defs/short" },
+        "household_and_relations": { "$ref": "#/$defs/short_list" },
+        "year": { "type": "integer", "minimum": -10000, "maximum": 2030 },
+        "place_context": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["locality", "region", "locale_type"],
+          "properties": {
+            "locality": { "$ref": "#/$defs/short" },
+            "region": { "$ref": "#/$defs/short" },
+            "polity": { "$ref": "#/$defs/short" },
+            "locale_type": { "$ref": "#/$defs/short" }
+          }
+        },
+        "current_pressures": { "$ref": "#/$defs/short_list" },
+        "language_and_literacy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["languages", "literacy"],
+          "properties": {
+            "languages": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 4,
+              "items": { "$ref": "#/$defs/short" }
+            },
+            "literacy": { "$ref": "#/$defs/short" }
+          }
+        },
+        "occupation": { "$ref": "#/$defs/short" },
+        "labor_relation": { "$ref": "#/$defs/detail" },
+        "skills_and_tools": { "$ref": "#/$defs/short_list" },
+        "daily_routine": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/detail" }
+        },
+        "economic_position": { "$ref": "#/$defs/detail" },
+        "dwelling": { "$ref": "#/$defs/detail" },
+        "food": { "$ref": "#/$defs/short_list" },
+        "clothing_and_possessions": { "$ref": "#/$defs/short_list" },
+        "health_and_body": { "$ref": "#/$defs/short_list" },
+        "religion_and_ritual": { "$ref": "#/$defs/detail" },
+        "horizons": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["knowledge", "mobility"],
+          "properties": {
+            "knowledge": { "$ref": "#/$defs/detail" },
+            "mobility": { "$ref": "#/$defs/detail" }
+          }
+        },
+        "moral_assumptions": { "$ref": "#/$defs/short_list" },
+        "self_conception": { "$ref": "#/$defs/detail" },
+        "loyalties_and_obligations": { "$ref": "#/$defs/short_list" },
+        "concerns_and_desires": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["concerns", "desires"],
+          "properties": {
+            "concerns": { "$ref": "#/$defs/short_list" },
+            "desires": { "$ref": "#/$defs/short_list" }
+          }
+        },
+        "social_manner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["authorities", "peers", "strangers", "under_stress"],
+          "properties": {
+            "authorities": { "$ref": "#/$defs/short" },
+            "peers": { "$ref": "#/$defs/short" },
+            "strangers": { "$ref": "#/$defs/short" },
+            "under_stress": { "$ref": "#/$defs/short" }
+          }
+        },
+        "voice": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["register", "cadence"],
+          "properties": {
+            "register": { "$ref": "#/$defs/detail" },
+            "cadence": { "$ref": "#/$defs/detail" },
+            "characteristic_vocabulary": { "$ref": "#/$defs/short_list" },
+            "avoid": { "$ref": "#/$defs/short_list" },
+            "sample": { "$ref": "#/$defs/detail" }
+          }
+        },
+        "conversation_frame": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["situation", "interlocutor_relation"],
+          "properties": {
+            "situation": { "$ref": "#/$defs/detail" },
+            "interlocutor_relation": { "$ref": "#/$defs/detail" }
+          }
+        },
+        "anachronism_guards": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/short" }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_id", "source_basis", "title", "citation_label"],
+        "properties": {
+          "source_id": { "$ref": "#/$defs/short" },
+          "source_basis": { "$ref": "#/$defs/source_basis" },
+          "title": { "$ref": "#/$defs/detail" },
+          "citation_label": { "$ref": "#/$defs/detail" },
+          "url": { "type": "string", "format": "uri", "maxLength": 2000 },
+          "extraction_method": { "$ref": "#/$defs/extraction_method" }
+        }
+      }
+    },
+    "provenance": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/provenance" }
+    }
+  },
+  "$defs": {
+    "short": { "type": "string", "minLength": 1, "maxLength": 240 },
+    "detail": { "type": "string", "minLength": 1, "maxLength": 600 },
+    "short_list": {
+      "type": "array",
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/short" }
+    },
+    "support": {
+      "type": "string",
+      "enum": ["explicit", "inferred", "synthetic", "uncertain"]
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low", "speculative"]
+    },
+    "source_basis": {
+      "type": "string",
+      "enum": ["will_or_inventory", "tax_or_census", "parish_or_temple_register", "court_testimony", "wage_data", "social_history", "material_culture", "oral_history", "diary_or_letter", "newspaper_or_periodical", "travel_account", "ship_log_or_manifest", "legal_code_or_regulation", "map_or_gazetteer", "image_or_artifact", "wikipedia_or_reference", "secondary_synthesis", "synthetic_composite", "other"]
+    },
+    "extraction_method": {
+      "type": "string",
+      "enum": ["manual_transcription", "paste", "wikipedia_api", "structured_api", "html_readability", "ocr", "pdf_text_layer", "llm_extraction", "mixed", "unknown"]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field_path", "support", "confidence"],
+      "properties": {
+        "field_path": { "type": "string", "pattern": "^/persona/", "maxLength": 180 },
+        "support": { "$ref": "#/$defs/support" },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "source_id": { "$ref": "#/$defs/short" },
+        "snippet": { "$ref": "#/$defs/detail" },
+        "note": { "$ref": "#/$defs/detail" }
+      }
+    }
+  }
+}

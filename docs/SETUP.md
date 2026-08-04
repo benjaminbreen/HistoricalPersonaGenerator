@@ -111,19 +111,19 @@ Two model actions exist, and they are priced very differently per persona:
 | Action | Tokens (in/out) | Cost | Triggered by |
 | --- | --- | --- | --- |
 | `generate_sketch` | measured in deployment logs | verify from current Luna pricing | **Use AI to Develop Persona** (compact dossier, 260-token ceiling) |
-| `generate_annotation` | ~7.5k / 1.6k | ~0.43¢ | **AI Schema Record**, and the Source Studio flows |
+| `generate_annotation` | measured in deployment logs; 2,200-token output ceiling | verify from current Luna pricing | **AI Schema Record**, and the Source Studio flows |
 
-The annotation prompt carries the whole JSON schema — about 6,500 tokens of the 7,500 it sends — which is why it dominates. The default AI path therefore builds the schema record locally from the procedural seed and pays only for the biography.
+The annotation route now sends a 5 KB, 30-field persona-orientation response schema rather than the former 37 KB archival schema. The default AI path still builds its compatibility record locally and pays only for the biography.
 
 ### Free use and supporter credits
 
-Each browser receives five free AI biographies and three free full schema
+Each browser receives five free AI biographies and three free persona-record
 generations. The sixth biography or fourth schema request is stopped.
 Procedural personas remain free and unlimited. A verified donation grants 50 AI
 credits for 30 days:
 
 - an AI biography uses 1 credit
-- a full annotation/schema call uses 6 credits
+- a compact persona-record call uses 3 credits
 
 The limit is enforced in `/api/gemini-persona`, not just in the browser. Visitor
 identity is an anonymous, signed, `HttpOnly` cookie; usage and supporter
@@ -162,17 +162,17 @@ identity, so account-level enforcement would require adding sign-in.
 
 ### Rate limits
 
-`/api/gemini-persona` is public, so every route enforces a cost-weighted limit (a schema record counts six times a biography). Defaults, overridable per environment:
+`/api/gemini-persona` is public, so every route enforces a cost-weighted limit (a persona record counts three times a biography). Defaults, overridable per environment:
 
 ```bash
-LLM_HOURLY_COST_PER_IP=30     # ~30 biographies or 5 schema records per IP per hour
+LLM_HOURLY_COST_PER_IP=30     # ~30 biographies or 10 persona records per IP per hour
 LLM_DAILY_COST_PER_IP=120
 LLM_DAILY_COST_GLOBAL=3000    # backstop on the daily bill (~$3/day at current prices)
 ```
 
 Over the limit the route returns `429` with `Retry-After`, and the app falls back to procedural generation with a visible notice. Counters live in process memory, so on Vercel they are per warm instance; move them to KV if you need a hard global cap.
 
-Current source-backed records use annotation schema `1.1.0`. The schema keeps `1.0.0` records valid, while new generation prefers compact cross-cultural fields for social position, constraint regimes, public world, religious practice, normative world, and interaction style.
+Current user-facing and model-generated records use persona-orientation schema `2.0.0`: 30 conditioning fields plus compact source and provenance envelopes. The former annotation schema `1.1.0` remains an internal compatibility format for the procedural generator and is never sent to Luna.
 
 ## Persona Share Links
 

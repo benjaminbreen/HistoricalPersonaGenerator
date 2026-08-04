@@ -33,6 +33,33 @@ const snapshot = {
   personaSketch: 'A practical neighborhood midwife.',
   portraitEngine: 'lab',
   samplingMode: 'explore',
+  personaOrientationRecord: {
+    schema_version: '2.0.0',
+    persona_id: 'persona-mary-holloway-1691',
+    persona: {
+      name_and_address: { full_name: 'Mary Holloway' },
+      age_and_life_stage: { age: 45, life_stage: 'middle aged householder' },
+      gender_role: 'adult woman and midwife',
+      social_status: 'working neighbor with trusted practical standing',
+      legal_condition: 'free subject',
+      year: 1691,
+      place_context: { locality: 'Stepney', region: 'British Isles', polity: 'Kingdom of England', locale_type: 'urban parish' },
+      language_and_literacy: { languages: ['English'], literacy: 'basic practical literacy' },
+      occupation: 'midwife',
+      daily_routine: ['visits households when summoned', 'prepares linens and practical remedies'],
+      horizons: { knowledge: 'parish households, births, remedies, and local authority', mobility: 'walks within nearby parishes' },
+      voice: { register: 'plain and practical', cadence: 'measured clauses' },
+      anachronism_guards: ['germ theory', 'modern obstetric medicine'],
+    },
+    sources: [{
+      source_id: 'source-mary-holloway',
+      source_basis: 'synthetic_composite',
+      title: 'Procedural seed: Mary Holloway',
+      citation_label: 'Procedural seed: Mary Holloway',
+      extraction_method: 'mixed',
+    }],
+    provenance: [],
+  },
 };
 
 const sanitized = validateAndSanitizeSnapshot(snapshot);
@@ -44,6 +71,10 @@ assert.throws(
 assert.throws(
   () => validateAndSanitizeSnapshot({ ...snapshot, annotationRecord: {} }),
   /Annotation/
+);
+assert.throws(
+  () => validateAndSanitizeSnapshot({ ...snapshot, personaOrientationRecord: {} }),
+  /Persona orientation/
 );
 
 class MockRequest extends Readable {
@@ -101,6 +132,7 @@ const restored = JSON.parse(getResponse.body);
 assert.equal(restored.id, created.id);
 assert.equal(restored.snapshot.persona.character.name, 'Mary alert(1) Holloway');
 assert.equal(restored.snapshot.portraitEngine, 'lab');
+assert.equal(restored.snapshot.personaOrientationRecord.schema_version, '2.0.0');
 assert.match(restored.checksum, /^[a-f0-9]{64}$/);
 
 const invalidResponse = new MockResponse();

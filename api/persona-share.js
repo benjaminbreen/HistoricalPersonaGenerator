@@ -37,6 +37,23 @@ const validateAnnotationRecord = new Ajv2020({
     ),
   },
 }).compile(annotationSchema);
+const orientationSchema = JSON.parse(readFileSync(
+  path.join(process.cwd(), 'src/schemas/personaOrientation.schema.json'),
+  'utf8'
+));
+const validateOrientationRecord = new Ajv2020({
+  allErrors: true,
+  strict: false,
+  formats: {
+    uri: value => {
+      try {
+        return Boolean(new URL(value));
+      } catch {
+        return false;
+      }
+    },
+  },
+}).compile(orientationSchema);
 
 const jsonResponse = (res, status, body, cacheControl = 'no-store') => {
   res.statusCode = status;
@@ -181,6 +198,7 @@ export const validateAndSanitizeSnapshot = input => {
     'schemaVersion',
     'persona',
     'annotationRecord',
+    'personaOrientationRecord',
     'personaSketch',
     'sourcePortraitUrl',
     'sourcePortraitAttribution',
@@ -230,6 +248,11 @@ export const validateAndSanitizeSnapshot = input => {
     const firstError = validateAnnotationRecord.errors?.[0];
     const location = firstError?.instancePath || 'record';
     throw new Error(`Annotation ${location} ${firstError?.message || 'is invalid'}.`);
+  }
+  if (sanitized.personaOrientationRecord && !validateOrientationRecord(sanitized.personaOrientationRecord)) {
+    const firstError = validateOrientationRecord.errors?.[0];
+    const location = firstError?.instancePath || 'record';
+    throw new Error(`Persona orientation ${location} ${firstError?.message || 'is invalid'}.`);
   }
   const serialized = JSON.stringify(sanitized);
   if (Buffer.byteLength(serialized, 'utf8') > MAX_REQUEST_BYTES) {

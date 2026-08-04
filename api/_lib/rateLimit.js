@@ -2,8 +2,8 @@
 //
 // The route is public and unauthenticated, so the only thing standing between a
 // scripted loop and a large API bill is this file. Limits are cost-weighted:
-// a schema record costs roughly six times a biography, so it draws six times as
-// much from the same budget.
+// a compact persona record remains heavier than a short biography, so it draws
+// three times as much from the same budget.
 //
 // State is in-process. On Vercel that means the limit is per warm instance
 // rather than global, which bounds a single attacker but not a distributed one;
@@ -14,7 +14,7 @@ const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
 export const ACTION_COST = {
-  generate_annotation: 6,
+  generate_annotation: 3,
   generate_sketch: 1,
 };
 

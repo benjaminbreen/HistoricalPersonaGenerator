@@ -70,7 +70,7 @@ try {
 
   const schema = await consumeAiCredit(visitorId, 'generate_annotation', now);
   assert.equal(schema.allowed, true);
-  assert.equal(schema.access.supporterCredits, 44);
+  assert.equal(schema.access.supporterCredits, 47);
   assert.equal(schema.access.canUseSchema, true);
 
   const secret = 'whsec_test';

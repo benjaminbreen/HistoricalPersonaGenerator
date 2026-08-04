@@ -1,9 +1,13 @@
 import { HistoricalPersonaAnnotationRecord, IngestedPersonaSource } from '../types/personaAnnotation';
+import type { GeneratedPersonaOrientation, PersonaOrientationModelOutput } from '../types/personaOrientation';
 import {
-  assertPersonaAnnotationRecord,
   normalizePersonaAnnotationRecord,
   validatePersonaAnnotationRecord,
 } from './personaMaterialValidationService';
+import {
+  createPersonaOrientationRecord,
+  personaOrientationToAnnotationRecord,
+} from './personaOrientationService';
 import { announceAiAccessRequired, type AiAccessStatus } from './aiAccessService';
 
 export type PersonaGenerationTarget = 'named_subject' | 'ordinary_person_from_source_world';
@@ -97,9 +101,13 @@ const postGeminiRoute = async <T,>(body: Record<string, unknown>): Promise<T> =>
 export async function generatePersonaAnnotationWithGemini(
   source: IngestedPersonaSource,
   options: GeminiPersonaMaterialOptions
-): Promise<HistoricalPersonaAnnotationRecord> {
+): Promise<GeneratedPersonaOrientation> {
   const data = await postGeminiRoute<{ record: unknown }>({ action: 'generate_annotation', source, options });
-  return assertPersonaAnnotationRecord(data.record);
+  const orientationRecord = createPersonaOrientationRecord(data.record as PersonaOrientationModelOutput, source);
+  return {
+    orientationRecord,
+    annotationRecord: personaOrientationToAnnotationRecord(orientationRecord, source),
+  };
 }
 
 export async function generatePersonaSketchWithGemini(record: HistoricalPersonaAnnotationRecord): Promise<string> {

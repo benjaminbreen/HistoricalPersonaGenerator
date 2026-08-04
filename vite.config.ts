@@ -12,7 +12,7 @@ import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './api/_li
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
 import { consumeAiCredit, ensureVisitorId } from './api/_lib/aiAccess.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
-import { buildAnnotationPrompt, buildSketchPrompt } from './api/_lib/personaPrompts.js'
+import { buildAnnotationPrompt, buildOrientationModelSchema, buildSketchPrompt } from './api/_lib/personaPrompts.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
 import { callModel } from './api/_lib/llm.js'
 
@@ -315,8 +315,8 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
   for (const [key, value] of Object.entries(env)) {
     if (process.env[key] === undefined) process.env[key] = value
   }
-  const schemaPath = path.resolve(process.cwd(), 'src/schemas/historicalPersonaAnnotation.schema.json')
-  const annotationSchema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'))
+  const schemaPath = path.resolve(process.cwd(), 'src/schemas/personaOrientation.schema.json')
+  const annotationSchema = buildOrientationModelSchema(JSON.parse(fs.readFileSync(schemaPath, 'utf8')))
 
   return {
     name: 'gemini-persona-api',

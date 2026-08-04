@@ -8,13 +8,14 @@ import stripeWebhookHandler from './api/stripe-webhook.js';
 import { parseJsonObject } from './api/_lib/llmJson.js';
 import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './api/_lib/rateLimit.js';
 import { consumeAiCredit, ensureVisitorId } from './api/_lib/aiAccess.js';
-import { buildAnnotationPrompt, buildSketchPrompt } from './api/_lib/personaPrompts.js';
+import { buildAnnotationPrompt, buildOrientationModelSchema, buildSketchPrompt } from './api/_lib/personaPrompts.js';
 import { callModel } from './api/_lib/llm.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, 'dist');
-const schemaPath = path.join(__dirname, 'src/schemas/historicalPersonaAnnotation.schema.json');
-const annotationSchema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+const schemaPath = path.join(__dirname, 'src/schemas/personaOrientation.schema.json');
+const orientationSchema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+const orientationModelSchema = buildOrientationModelSchema(orientationSchema);
 
 // Vite reads .env.local through loadEnv; this server has to do it itself, or
 // `npm start` silently runs with no API key and every persona quietly falls
@@ -330,7 +331,7 @@ const handleGeminiRoute = async (req, res) => {
         action: 'generate_annotation',
         prompt: buildAnnotationPrompt(body.source, body.options),
         json: true,
-        schema: annotationSchema,
+        schema: orientationModelSchema,
       });
       sendJson(res, 200, { record: parseJsonObject(text), usage });
       return;
