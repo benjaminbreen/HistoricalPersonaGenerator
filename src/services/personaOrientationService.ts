@@ -49,17 +49,40 @@ export function assertPersonaOrientationRecord(record: unknown): PersonaOrientat
 
 export function createPersonaOrientationRecord(
   output: PersonaOrientationModelOutput,
-  source: IngestedPersonaSource
+  source: IngestedPersonaSource,
+  lockNamedSubject = true
 ): PersonaOrientationRecord {
-  if (!output?.persona?.name_and_address?.full_name || !Number.isInteger(output?.persona?.year)) {
+  const raw = structuredClone(output || {}) as PersonaOrientationModelOutput & Record<string, unknown>;
+  const rawPersona = raw.persona as PersonaOrientationCore & Record<string, unknown>;
+  if (rawPersona && typeof rawPersona === 'object') {
+    // OpenAI structured output must run non-strict because this compact schema
+    // has optional fields. Luna occasionally emits the last persona fields one
+    // level too high. Repair only keys that the canonical schema already knows;
+    // AJV remains authoritative for their values and every other property.
+    for (const key of ['conversation_frame', 'anachronism_guards']) {
+      if (rawPersona[key] === undefined && raw[key] !== undefined) rawPersona[key] = raw[key];
+    }
+    if (!raw.provenance && Array.isArray(rawPersona.provenance)) raw.provenance = rawPersona.provenance as PersonaOrientationProvenance[];
+  }
+  if (!rawPersona?.name_and_address?.full_name || !Number.isInteger(rawPersona?.year)) {
     throw new Error('Luna returned an incomplete persona orientation record. No schema record was saved.');
   }
-  const idStem = `${slug(output.persona.name_and_address.full_name)}-${output.persona.year}-${Date.now()}`;
+  const persona = rawPersona as PersonaOrientationCore;
+  const subject = lockNamedSubject ? source.subject : undefined;
+  if (subject?.name) persona.name_and_address.full_name = subject.name;
+  if (subject?.birthYear !== undefined) {
+    const finalLivingYear = subject.deathYear !== undefined && (persona.year < subject.birthYear || persona.year > subject.deathYear)
+      ? subject.birthYear + Math.floor((subject.deathYear - subject.birthYear) * 0.75)
+      : Math.max(subject.birthYear, persona.year);
+    persona.year = finalLivingYear;
+    persona.age_and_life_stage.age = Math.max(0, finalLivingYear - subject.birthYear);
+  }
+  const idStem = `${slug(persona.name_and_address.full_name)}-${persona.year}-${Date.now()}`;
   const sourceId = `source-${idStem}`;
   const record: PersonaOrientationRecord = {
     schema_version: '2.0.0',
     persona_id: `persona-${idStem}`,
-    persona: output.persona,
+    persona,
     sources: [{
       source_id: sourceId,
       source_basis: source.sourceBasis,
@@ -68,7 +91,7 @@ export function createPersonaOrientationRecord(
       url: source.url,
       extraction_method: source.extractionMethod,
     }],
-    provenance: (output.provenance || []).map(item => ({
+    provenance: (raw.provenance || []).map(item => ({
       ...item,
       source_id: sourceId,
     })),
@@ -283,7 +306,7 @@ export function applyPersonaOrientationToAnnotationRecord(
     legal_condition: legalCondition(p.legal_condition),
     household_role: next.persona_seed.social_identity.household_role || 'other_dependent_kin',
     marital_status: next.persona_seed.social_identity.marital_status || 'unclear',
-    religious_or_communal_identity: p.community_identity,
+    religious_or_communal_identity: p.religion_and_ritual || p.community_identity,
     languages: p.language_and_literacy.languages,
     literacy: literacyLevel(p.language_and_literacy.literacy),
     numeracy: 'practical',

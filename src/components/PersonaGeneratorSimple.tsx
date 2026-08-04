@@ -173,6 +173,7 @@ import {
 import {
   generatePersonaAnnotationWithGemini,
   generatePersonaSketchWithGemini,
+  generateSourcePersonaWithGemini,
   MODEL_VARIANT_LABELS,
   ModelVariant,
   normalizePersonaAnnotationRecord,
@@ -2013,6 +2014,7 @@ export default function PersonaGenerator() {
       fieldEditStatus?: string | null;
       publishAnnotationRecord?: boolean;
       orientationRecord?: PersonaOrientationRecord | null;
+      providedSketch?: string;
     } = {}
   ) => {
     resetSharedPersonaState();
@@ -2088,7 +2090,9 @@ export default function PersonaGenerator() {
       personaCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 120);
 
-    if (options.generateSketch && useGeminiExtraction) {
+    if (options.providedSketch?.trim()) {
+      setPersonaSketch(options.providedSketch.trim());
+    } else if (options.generateSketch && useGeminiExtraction) {
       setPersonaSketch('Writing source-grounded sketch...');
       try {
         const sketch = await generatePersonaSketchWithGemini(record);
@@ -2117,47 +2121,39 @@ export default function PersonaGenerator() {
     setSourcePanelCollapsed(true);
     setSourceTarget('named_subject');
     setSourceIngestionStatus('Finding a surprise historical figure from Wikipedia/Wikidata...');
-    let sourceForFallback: Awaited<ReturnType<typeof ingestUrlSource>> | null = null;
     try {
       const person = await getRandomWikidataPerson();
       setSourceIngestionStatus(`Selected ${person.label}${person.birthYear ? ` (${person.birthYear}${person.deathYear ? `-${person.deathYear}` : ''})` : ''}. Fetching Wikipedia source text...`);
       const source = await ingestUrlSource(person.wikipediaUrl);
-      sourceForFallback = source;
+      source.subject = {
+        name: person.label,
+        description: person.description,
+        birthYear: person.birthYear,
+        deathYear: person.deathYear,
+        externalId: person.qid,
+      };
       setSourceTitle(source.title);
       setSourceUrl(source.url || person.wikipediaUrl);
       setSourceText(source.text);
       setOldBaileySelectionActive(false);
-      setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
+      setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} for a grounded moment and day in the life...` : `Fetched ${source.citationLabel}. Generating a heuristic persona...`);
       const result = await recordFromSource(source, { target: 'named_subject' });
       setSourceIngestionStatus(result.modelFilled
-        ? `Generated a ${selectedModelLabel}-filled persona record from ${source.citationLabel}.`
-        : `Generated a local fallback persona from ${source.citationLabel}; no AI schema record was created.`);
+        ? `${selectedModelLabel} created a source-grounded day in the life from ${source.citationLabel}. The optional Talkie record has not been built.`
+        : `Generated a local persona from ${source.citationLabel}; no Talkie record was created.`);
       await generateFromAnnotationRecord(result.record, {
         orientationRecord: result.orientationRecord,
         useSourceTitleAsName: true,
         portraitUrl: source.imageUrl,
         portraitAttribution: source.imageAttribution,
         generateSketch: true,
-        publishAnnotationRecord: result.modelFilled,
+        providedSketch: result.sketch,
+        publishAnnotationRecord: false,
       });
     } catch (error) {
-      if (sourceForFallback) {
-        setSourceIngestionStatus(error instanceof Error
-          ? `${error.message} Using local source-based fallback instead of a synthetic placeholder.`
-          : 'AI schema generation failed. Using local source-based fallback instead of a synthetic placeholder.');
-        noteGenerationFallback('record', error instanceof Error ? error.message : 'Schema generation failed.');
-        noteGenerationFallback('prose', 'Written from the offline record instead.');
-        const record = createAnnotationRecordFromSource(sourceForFallback);
-        await generateFromAnnotationRecord(record, {
-          useSourceTitleAsName: true,
-          portraitUrl: sourceForFallback.imageUrl,
-          portraitAttribution: sourceForFallback.imageAttribution,
-          generateSketch: false,
-          publishAnnotationRecord: false,
-        });
-      } else {
-        setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to generate a surprise Wikipedia persona.');
-      }
+      setSourceIngestionStatus(error instanceof Error
+        ? `${error.message} No random substitute was generated; please try again.`
+        : 'Unable to generate a surprise Wikipedia persona. No random substitute was generated.');
     } finally {
       setIsSourceGenerating(false);
     }
@@ -2170,21 +2166,19 @@ export default function PersonaGenerator() {
     setGenerationFallbacks([]);
     if (!useGeminiExtraction) {
       noteGenerationFallback('record', 'Model schema filling is switched off.');
-      return { record: createAnnotationRecordFromSource(source), orientationRecord: null, modelFilled: false };
+      return { record: createAnnotationRecordFromSource(source), orientationRecord: null, sketch: undefined, modelFilled: false };
     }
 
     try {
-      const generated = await generatePersonaAnnotationWithGemini(source, {
+      const generated = await generateSourcePersonaWithGemini(source, {
         target: options?.target || sourceTarget,
         preferredMoment: preferredMoment.trim() || undefined,
       });
-      return { record: generated.annotationRecord, orientationRecord: generated.orientationRecord, modelFilled: true };
+      return { record: generated.annotationRecord, orientationRecord: generated.orientationRecord, sketch: generated.sketch, modelFilled: true };
     } catch (error) {
       noteGenerationFallback('record', error instanceof Error ? error.message : 'Schema generation failed.');
-      setSourceIngestionStatus(error instanceof Error
-        ? `${error.message} Using local source-based fallback instead.`
-        : 'AI schema generation failed. Using local source-based fallback instead.');
-      return { record: createAnnotationRecordFromSource(source), orientationRecord: null, modelFilled: false };
+      setSourceIngestionStatus(error instanceof Error ? error.message : 'AI source generation failed.');
+      throw error;
     }
   };
 
@@ -2201,18 +2195,19 @@ export default function PersonaGenerator() {
 
     setIsSourceGenerating(true);
     setSourcePanelCollapsed(true);
-    setSourceIngestionStatus(useGeminiExtraction ? `Asking ${selectedModelLabel} to populate the compact persona schema...` : 'Generating a heuristic persona record...');
+    setSourceIngestionStatus(useGeminiExtraction ? `Asking ${selectedModelLabel} for a source-grounded persona and day in the life...` : 'Generating a heuristic persona...');
     try {
       const source = createPastedTextSource(sourceText, sourceTitle.trim() || 'Pasted source text');
       const result = await recordFromSource(source);
       setSourceIngestionStatus(result.modelFilled
-        ? `Generated a ${selectedModelLabel}-filled persona record from pasted text.`
-        : 'Generated a local fallback persona from pasted text; no AI schema record was created.');
+        ? `${selectedModelLabel} created a source-grounded day in the life from the pasted text. The optional Talkie record has not been built.`
+        : 'Generated a local persona from pasted text; no Talkie record was created.');
       await generateFromAnnotationRecord(result.record, {
         orientationRecord: result.orientationRecord,
         useSourceTitleAsName: sourceTarget === 'named_subject',
         generateSketch: true,
-        publishAnnotationRecord: result.modelFilled,
+        providedSketch: result.sketch,
+        publishAnnotationRecord: false,
       });
     } catch (error) {
       setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to generate from pasted text.');
@@ -2233,20 +2228,21 @@ export default function PersonaGenerator() {
     setSourceIngestionStatus('Fetching source text...');
     try {
       const source = await ingestUrlSource(sourceUrl.trim());
-      setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
+      setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} for a grounded moment and day in the life...` : `Fetched ${source.citationLabel}. Generating a heuristic persona...`);
       const result = await recordFromSource(source);
       setSourceTitle(source.title);
       setSourceText(source.text);
       setSourceIngestionStatus(result.modelFilled
-        ? `Generated a ${selectedModelLabel}-filled persona record from ${source.citationLabel}.`
-        : `Generated a local fallback persona from ${source.citationLabel}; no AI schema record was created.`);
+        ? `${selectedModelLabel} created a source-grounded day in the life from ${source.citationLabel}. The optional Talkie record has not been built.`
+        : `Generated a local persona from ${source.citationLabel}; no Talkie record was created.`);
       await generateFromAnnotationRecord(result.record, {
         orientationRecord: result.orientationRecord,
         useSourceTitleAsName: sourceTarget === 'named_subject',
         portraitUrl: source.imageUrl,
         portraitAttribution: source.imageAttribution,
         generateSketch: true,
-        publishAnnotationRecord: result.modelFilled,
+        providedSketch: result.sketch,
+        publishAnnotationRecord: false,
       });
     } catch (error) {
       setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to ingest that URL.');
@@ -2271,20 +2267,21 @@ export default function PersonaGenerator() {
       setSourceText(source.text);
       setOldBaileySelectionActive(false);
       setSourceTarget(filters.personaAngle === 'named_subject' ? 'named_subject' : 'ordinary_person_from_source_world');
-      setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} to populate the schema...` : `Fetched ${source.citationLabel}. Generating a heuristic record...`);
+      setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} for a grounded moment and day in the life...` : `Fetched ${source.citationLabel}. Generating a heuristic persona...`);
       const result = await recordFromSource(source, {
         target: filters.personaAngle === 'named_subject' ? 'named_subject' : 'ordinary_person_from_source_world',
       });
       setSourceIngestionStatus(result.modelFilled
-        ? `Generated a ${selectedModelLabel}-filled persona record from ${source.citationLabel}.`
-        : `Generated a local fallback persona from ${source.citationLabel}; no AI schema record was created.`);
+        ? `${selectedModelLabel} created a source-grounded day in the life from ${source.citationLabel}. The optional Talkie record has not been built.`
+        : `Generated a local persona from ${source.citationLabel}; no Talkie record was created.`);
       await generateFromAnnotationRecord(result.record, {
         orientationRecord: result.orientationRecord,
         useSourceTitleAsName: filters.personaAngle === 'named_subject',
         portraitUrl: source.imageUrl,
         portraitAttribution: source.imageAttribution,
         generateSketch: true,
-        publishAnnotationRecord: result.modelFilled,
+        providedSketch: result.sketch,
+        publishAnnotationRecord: false,
       });
     } catch (error) {
       setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to fetch an Old Bailey record.');
@@ -3087,7 +3084,20 @@ export default function PersonaGenerator() {
     }
 
     const existingPersona = persona;
-    const source = sourceFromProceduralPersona(existingPersona);
+    const hasLoadedSource = Boolean(sourceText.trim() && sourceTitle.trim() && !/^Procedural seed:/i.test(sourceTitle));
+    const source = hasLoadedSource
+      ? {
+          ...createPastedTextSource(sourceText, sourceTitle),
+          url: sourceUrl || undefined,
+          sourceBasis: sourceUrl.includes('wikipedia.org') ? 'wikipedia_or_reference' as const : 'other' as const,
+          extractionMethod: sourceUrl.includes('wikipedia.org') ? 'wikipedia_api' as const : 'paste' as const,
+          citationLabel: sourceUrl.includes('wikipedia.org') ? `Wikipedia: ${sourceTitle}` : sourceTitle,
+          subject: {
+            name: existingPersona.character.name,
+            birthYear: existingPersona.year - existingPersona.character.age,
+          },
+        }
+      : sourceFromProceduralPersona(existingPersona);
     resetSharedPersonaState();
     setIsSourceGenerating(true);
     setSourcePanelCollapsed(true);
@@ -3096,7 +3106,7 @@ export default function PersonaGenerator() {
     setFieldEditStatus(null);
     setSourceTitle(source.title);
     setSourceText(source.text);
-    setSourceUrl('');
+    setSourceUrl(source.url || '');
     setOldBaileySelectionActive(false);
     setSourceIngestionStatus(`Keeping ${existingPersona.character.name} fixed. Asking ${selectedModelLabel} to fill the compact persona record...`);
 
@@ -4978,12 +4988,12 @@ export default function PersonaGenerator() {
               {/* Collapsed, the four source options below already say what this
                   does, and the subtitle wrapped to four lines in a narrow
                   column — the largest single block above the persona card. */}
-              {(!sourcePanelCollapsed || isSourceGenerating || annotationRecord) && (
+              {(!sourcePanelCollapsed || isSourceGenerating || annotationRecord || sourceTitle) && (
                 <p>
                   {isSourceGenerating
                     ? (sourceIngestionStatus || 'Generating source-backed persona...')
-                    : annotationRecord && sourcePanelCollapsed
-                      ? `${sourceBasisLabel(annotationRecord.source.source_basis)} loaded.`
+                      : sourcePanelCollapsed && (annotationRecord || sourceTitle)
+                      ? `${annotationRecord ? sourceBasisLabel(annotationRecord.source.source_basis) : 'Source'} loaded.`
                       : 'Build a persona from a real historical source.'}
                 </p>
               )}
@@ -5052,7 +5062,7 @@ export default function PersonaGenerator() {
           </div>
           <AnimatePresence initial={false} mode="wait">
             {sourcePanelCollapsed ? (
-              (annotationRecord || isSourceGenerating) && (
+              (annotationRecord || sourceTitle || isSourceGenerating) && (
               <motion.div
                 key="source-summary"
                 className="source-collapsed-body"
@@ -5092,20 +5102,20 @@ export default function PersonaGenerator() {
               <div className="source-workspace-quick-actions">
                 <span>
                   {sourceStudioView === 'wikipedia'
-                    ? 'Generate from a specific Wikipedia article, or let the app choose a historical subject.'
+                    ? 'Wikipedia supplies a named person and documented life. Luna chooses one living-year moment, keeps article facts fixed, and writes a two-paragraph day in that life.'
                     : sourceStudioView === 'web'
-                      ? 'Load a readable historical web page, archive entry, or museum catalogue record.'
+                      ? 'Load a readable archive, museum, or history page. Luna uses its text to build the visible person and a grounded day-in-the-life scene.'
                       : sourceStudioView === 'text'
-                        ? 'Paste a document excerpt and use it as the evidence base for a persona.'
+                        ? 'Paste an excerpt from a letter, inventory, testimony, register, or other source. Luna treats the words as evidence and fills only plausible everyday gaps.'
                         : sourceStudioView === 'old_bailey'
-                          ? 'Draw a real Old Bailey trial using optional date, person, and offence filters.'
+                          ? 'The Old Bailey Proceedings are published records of London criminal trials from 1674–1913. Choose a real trial; Luna turns its partial, mediated testimony into a cautious day-in-the-life persona.'
                           : 'Use any supported source type, or let the app find a subject.'}
                 </span>
                 <div className="source-workspace-action-buttons">
                   {(sourceStudioView === 'wikipedia' || sourceStudioView === 'full') && (
-                    <button className="btn btn-secondary" onClick={() => requestAiRun('schema', generateRandomAnnotationPersona)} disabled={isSourceGenerating} aria-label="Generate a surprise Wikipedia-backed schema persona">
+                    <button className="btn btn-secondary" onClick={() => requestAiBiographyRun(generateRandomAnnotationPersona)} disabled={isSourceGenerating} aria-label="Create a day-in-the-life persona from a surprise Wikipedia biography">
                       <IoDocumentText aria-hidden="true" />
-                      {isSourceGenerating ? 'Finding Source...' : 'Surprise Wikipedia Persona'}
+                      {isSourceGenerating ? 'Finding Source...' : 'Surprise Wikipedia Day'}
                     </button>
                   )}
                   {sourceStudioView !== 'full' && (
@@ -5140,8 +5150,8 @@ export default function PersonaGenerator() {
                           }}
                           placeholder={sourceStudioView === 'web' ? 'https://archive.org/...' : 'https://en.wikipedia.org/wiki/...'}
                         />
-                        <button className="btn btn-secondary" onClick={() => requestAiRun('schema', ingestUrl)} disabled={isSourceGenerating}>
-                          {isSourceGenerating ? 'Working...' : 'Load URL'}
+                        <button className="btn btn-secondary" onClick={() => requestAiBiographyRun(ingestUrl)} disabled={isSourceGenerating}>
+                          {isSourceGenerating ? 'Working...' : sourceStudioView === 'wikipedia' ? 'Create Wikipedia Persona' : 'Create from URL'}
                         </button>
                       </div>
                     </label>
@@ -5171,8 +5181,8 @@ export default function PersonaGenerator() {
                 <div className="old-bailey-source-box">
                   <div className="old-bailey-source-heading">
                     <span>Old Bailey Proceedings</span>
-                    <button className="btn btn-secondary" onClick={() => requestAiRun('schema', ingestRandomOldBailey)} disabled={isSourceGenerating}>
-                      {isSourceGenerating ? 'Searching...' : 'Random Trial'}
+                    <button className="btn btn-secondary" onClick={() => requestAiBiographyRun(ingestRandomOldBailey)} disabled={isSourceGenerating}>
+                      {isSourceGenerating ? 'Searching...' : 'Create from a Random Trial'}
                     </button>
                   </div>
                   <div className="old-bailey-filter-grid">
@@ -5235,7 +5245,7 @@ export default function PersonaGenerator() {
                   checked={useGeminiExtraction}
                   onChange={(event) => setUseGeminiExtraction(event.target.checked)}
                 />
-                Use evidence-aware AI to fill inferred and synthesized schema fields
+                Use Luna for source-grounded facts and a two-paragraph day in the life
               </label>
               {(sourceStudioView === 'text' || sourceStudioView === 'full') && (
                 <label className="source-text-label">
@@ -5254,18 +5264,18 @@ export default function PersonaGenerator() {
               )}
               <div className="source-actions">
                 {(sourceStudioView === 'text' || sourceStudioView === 'full') && (
-                  <button className="btn btn-primary" onClick={() => requestAiRun('schema', generateFromAvailableSource)} disabled={isSourceGenerating}>
+                  <button className="btn btn-primary" onClick={() => requestAiBiographyRun(generateFromAvailableSource)} disabled={isSourceGenerating}>
                     {isSourceGenerating
                       ? 'Generating...'
                       : sourceStudioView === 'text'
-                        ? 'Generate from Source Text'
+                        ? 'Create Day in the Life from Text'
                         : oldBaileySelectionActive || (!sourceText.trim() && !sourceUrl.trim())
-                          ? 'Generate from Old Bailey'
+                          ? 'Create Old Bailey Day in the Life'
                           : sourceUrl.trim()
-                            ? 'Generate from URL'
+                            ? 'Create Day in the Life from URL'
                             : sourceText.trim()
-                              ? 'Generate from Source Text'
-                              : 'Generate from Source'}
+                              ? 'Create Day in the Life from Text'
+                              : 'Create Source-Grounded Persona'}
                   </button>
                 )}
                 {annotationRecord && (

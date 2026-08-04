@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import {
   buildAnnotationPrompt,
   buildOrientationModelSchema,
+  buildSourcePersonaModelSchema,
+  buildSourcePersonaPrompt,
   buildSketchDossier,
   buildSketchPrompt,
   formatHistoricalYear,
@@ -10,6 +12,7 @@ import {
 
 const orientationSchema = JSON.parse(fs.readFileSync('src/schemas/personaOrientation.schema.json', 'utf8'));
 const modelSchema = buildOrientationModelSchema(orientationSchema);
+const sourcePersonaSchema = buildSourcePersonaModelSchema(orientationSchema);
 const annotationPrompt = buildAnnotationPrompt({
   title: 'Procedural seed: Tan',
   sourceBasis: 'synthetic_composite',
@@ -18,10 +21,23 @@ const annotationPrompt = buildAnnotationPrompt({
 
 assert.equal(Object.keys(orientationSchema.properties.persona.properties).length, 30);
 assert.deepEqual(modelSchema.required, ['persona']);
+assert.deepEqual(sourcePersonaSchema.required, ['persona', 'day_in_life']);
+assert.equal(sourcePersonaSchema.properties.day_in_life.maxLength, 1800);
 assert.ok(JSON.stringify(modelSchema).length < 14000, 'compact model schema should stay below 14 KB');
 assert.ok(annotationPrompt.length < 4200, `orientation prompt grew to ${annotationPrompt.length} characters`);
 assert.match(annotationPrompt, /self|conversation frame|anachronism/i);
 assert.doesNotMatch(annotationPrompt, /Big Five|period_bucket|export_targets/);
+
+const sourcePersonaPrompt = buildSourcePersonaPrompt({
+  title: 'Eulalia Ramos',
+  sourceBasis: 'wikipedia_or_reference',
+  text: 'Eulalia Ramos was a Venezuelan independence heroine born in 1795 and killed in 1817.',
+  subject: { name: 'Eulalia Ramos', birthYear: 1795, deathYear: 1817 },
+}, { target: 'named_subject' });
+assert.match(sourcePersonaPrompt, /exactly two paragraphs/i);
+assert.match(sourcePersonaPrompt, /1795/);
+assert.match(sourcePersonaPrompt, /locked_subject/);
+assert.doesNotMatch(sourcePersonaPrompt, /Bengal|apprentice carpenter/);
 
 const record = {
   source: {

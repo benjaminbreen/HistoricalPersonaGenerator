@@ -424,28 +424,10 @@ const sourceFamilyForRecord = (
   const known = knownFamilyBySubject.find(item => item.pattern.test(context));
   if (known) return known.family;
 
-  const birthYear = Number(character.birthYear) || ((seed.temporal.specific_year || seed.temporal.decade || 1800) - character.age);
-  const status = normalizeMaterialText(socialPositionLabel(record) || 'household');
-  const sourceNote = 'Plausible family placeholder because persona_seed.family.members did not supply explicit family fields.';
-
-  return [
-    {
-      relation: 'father',
-      name: `Plausible father of ${character.name.split(' ')[0]}`,
-      profession: status.includes('elite') || status.includes('gentry') ? 'Household patriarch' : 'Household worker',
-      birthYear: birthYear - 30,
-      sourceSupport: 'synthetic-fill',
-      sourceNote,
-    },
-    {
-      relation: 'mother',
-      name: `Plausible mother of ${character.name.split(' ')[0]}`,
-      profession: status.includes('elite') || status.includes('gentry') ? 'Gentlewoman' : 'Household manager',
-      birthYear: birthYear - 27,
-      sourceSupport: 'synthetic-fill',
-      sourceNote,
-    },
-  ];
+  // An invented named parent reads as a factual claim in the family tab. If a
+  // source/model record does not supply relations, absence is more honest and
+  // more useful than a conspicuous “Plausible father of …” placeholder.
+  return [];
 };
 
 const clamp01 = (value: number): number => Math.max(0, Math.min(1, value));
@@ -483,48 +465,7 @@ const sourceLifeEventsForRecord = (
 ): EnhancedLifeEvent[] => {
   const seed = record.persona_seed;
   const currentYear = seed.temporal.specific_year || seed.temporal.decade || 1800;
-  const birthYear = Number(character.birthYear) || currentYear - character.age;
-  const events: EnhancedLifeEvent[] = [
-    {
-      year: birthYear,
-      kind: 'birth',
-      importance: EventImportance.MILESTONE,
-      title: 'Birth and Household Origins',
-      text: `Born into ${socialPositionLabel(record)} circumstances in ${seed.place.settlement_or_locality || seed.place.region}.`,
-      culturalContext: record.source.citation_label,
-      sourceSupport: 'synthetic-fill',
-      sourceNote: 'Adapter synthesis from social identity and place fields.',
-    },
-  ] as Array<EnhancedLifeEvent & { sourceSupport?: MaterialSupportTag; sourceNote?: string }>;
-
-  if (seed.work.primary_occupation) {
-    events.push({
-      year: Math.min(currentYear, birthYear + Math.max(12, Math.floor(character.age * 0.45))),
-      kind: seed.work.skill_level === 'scholarly' || seed.work.skill_level === 'clerical' ? 'education' : 'trade',
-      importance: EventImportance.MILESTONE,
-      title: 'Work Took Shape',
-      text: `Became established in ${seed.work.primary_occupation}, with work centered on ${normalizeMaterialText(seed.work.workplace)} and a ${normalizeMaterialText(seed.work.work_rhythm)} rhythm.`,
-      culturalContext: seed.work.work_notes || record.evidence.basis_summary,
-      sourceSupport: 'synthetic-fill',
-      sourceNote: 'Adapter synthesis from work fields.',
-    });
-  }
-
-  (seed.place.historical_pressures || []).slice(0, 2).forEach((pressure, index) => {
-    if (pressure === 'none_apparent') return;
-    events.push({
-      year: Math.max(birthYear + 8, currentYear - (2 - index)),
-      kind: pressure.includes('war') ? 'political' : pressure.includes('disease') ? 'plague' : pressure.includes('migration') ? 'journey' : 'family',
-      importance: pressure.includes('war') || pressure.includes('disease') || pressure.includes('crisis') ? EventImportance.TRAGEDY : EventImportance.OPPORTUNITY,
-      title: titleCase(pressure),
-      text: `The household lived under the pressure of ${normalizeMaterialText(pressure)}, shaping daily choices and expectations.`,
-      culturalContext: 'Source material historical pressure.',
-      sourceSupport: 'explicit',
-      sourceNote: 'Derived from persona_seed.place.historical_pressures.',
-    });
-  });
-
-  events.push({
+  const events: EnhancedLifeEvent[] = [{
     year: currentYear,
     kind: 'achievement',
     importance: EventImportance.MILESTONE,
@@ -533,9 +474,9 @@ const sourceLifeEventsForRecord = (
     culturalContext: `Evidence confidence: ${record.evidence.confidence}.`,
     sourceSupport: 'explicit',
     sourceNote: 'Summary moment from the material record.',
-  });
+  } as EnhancedLifeEvent & { sourceSupport?: MaterialSupportTag; sourceNote?: string }];
 
-  return events.sort((a, b) => a.year - b.year);
+  return events;
 };
 
 export const findLanguageDataForMaterial = (languageName?: string): LanguageData | undefined => {
@@ -674,8 +615,8 @@ export function adaptPersonaMaterialRecord(
     name,
     culturalZone,
     language: sourceLanguageLabel,
-    family_source: seed.family?.members?.length ? 'schema' : 'adapter_fallback',
-    life_events_source: 'adapter_from_material_record',
+    family_source: seed.family?.members?.length ? 'schema' : 'none_available',
+    life_events_source: 'source_moment_only',
     personality_source: seed.temperament_and_voice.personality_traits ? 'schema_big_five' : 'adapter_temperament_fallback',
     procedural_fields_remaining: ['stats', 'health', 'portrait geometry', 'belief convictions', 'social context'],
   };
@@ -687,7 +628,7 @@ export function adaptPersonaMaterialRecord(
         idSeed: `${recordKey}|possession|${index}`,
       })
     );
-    const sourceEquippedItems = { ...character.equippedItems };
+    const sourceEquippedItems = {} as typeof character.equippedItems;
     const sourceBodyConditions = seed.material_life.body_conditions || [];
     const clothingIsSpecific = isSpecificClothingDetail(displayOverrides.clothingDetail);
     const sourceHeadgear = sourceHeadgearForRecord(record, displayOverrides.clothingDetail);
@@ -722,7 +663,7 @@ export function adaptPersonaMaterialRecord(
       class: socialPositionLabel(record) || character.class,
       socialClass: socialPositionLabel(record) || character.socialClass,
       religion: seed.religious_practice?.specific_label || seed.social_identity.religious_or_communal_identity || character.religion,
-      inventory: sourceInventory.length > 0 ? sourceInventory : character.inventory,
+      inventory: sourceInventory,
       equippedItems: sourceEquippedItems,
       attributes: sourceAttributes.length > 0 ? sourceAttributes : character.attributes,
       name: name || character.name,

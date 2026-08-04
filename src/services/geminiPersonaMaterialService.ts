@@ -103,10 +103,37 @@ export async function generatePersonaAnnotationWithGemini(
   options: GeminiPersonaMaterialOptions
 ): Promise<GeneratedPersonaOrientation> {
   const data = await postGeminiRoute<{ record: unknown }>({ action: 'generate_annotation', source, options });
-  const orientationRecord = createPersonaOrientationRecord(data.record as PersonaOrientationModelOutput, source);
+  const orientationRecord = createPersonaOrientationRecord(
+    data.record as PersonaOrientationModelOutput,
+    source,
+    options.target === 'named_subject'
+  );
   return {
     orientationRecord,
     annotationRecord: personaOrientationToAnnotationRecord(orientationRecord, source),
+  };
+}
+
+/**
+ * Default source experience: one biography-priced call supplies the visible
+ * facts and the prose. The compact record stays internal until the reader
+ * explicitly asks to build a Talkie record.
+ */
+export async function generateSourcePersonaWithGemini(
+  source: IngestedPersonaSource,
+  options: GeminiPersonaMaterialOptions
+): Promise<GeneratedPersonaOrientation> {
+  const data = await postGeminiRoute<{ record: unknown; sketch?: string }>({
+    action: 'generate_source_persona',
+    source,
+    options,
+  });
+  const output = data.record as PersonaOrientationModelOutput;
+  const orientationRecord = createPersonaOrientationRecord(output, source, options.target === 'named_subject');
+  return {
+    orientationRecord,
+    annotationRecord: personaOrientationToAnnotationRecord(orientationRecord, source),
+    sketch: (data.sketch || output.day_in_life || (output.persona as unknown as { day_in_life?: string }).day_in_life || '').trim(),
   };
 }
 

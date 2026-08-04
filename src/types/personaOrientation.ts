@@ -97,9 +97,11 @@ export interface PersonaOrientationRecord {
 export interface PersonaOrientationModelOutput {
   persona: PersonaOrientationCore;
   provenance?: PersonaOrientationProvenance[];
+  day_in_life?: string;
 }
 
 export interface GeneratedPersonaOrientation {
   orientationRecord: PersonaOrientationRecord;
   annotationRecord: HistoricalPersonaAnnotationRecord;
+  sketch?: string;
 }

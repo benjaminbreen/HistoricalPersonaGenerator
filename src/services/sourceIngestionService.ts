@@ -2,6 +2,7 @@ import { IngestedPersonaSource } from '../types/personaAnnotation';
 
 const WIKIPEDIA_SUMMARY_BASE = 'https://en.wikipedia.org/api/rest_v1/page/summary/';
 const WIKIPEDIA_ACTION_API = 'https://en.wikipedia.org/w/api.php';
+const WIKIDATA_ACTION_API = 'https://www.wikidata.org/w/api.php';
 
 const normalizeWhitespace = (text: string): string => text.replace(/\s+/g, ' ').trim();
 
@@ -20,6 +21,14 @@ const titleFromUrl = (url: string): string => {
   } catch {
     return 'Submitted URL';
   }
+};
+
+const yearFromWikidataClaim = (entity: any, property: string): number | undefined => {
+  const time = entity?.claims?.[property]?.[0]?.mainsnak?.datavalue?.value?.time;
+  const match = typeof time === 'string' ? time.match(/^([+-])(\d{1,6})/) : null;
+  if (!match) return undefined;
+  const year = Number(match[2]);
+  return match[1] === '-' ? -year : year;
 };
 
 export function createPastedTextSource(text: string, title = 'Pasted source text'): IngestedPersonaSource {
@@ -87,7 +96,7 @@ export async function ingestUrlSource(url: string): Promise<IngestedPersonaSourc
           'Api-User-Agent': 'HistoricalPersonaGenerator/1.0',
         },
       }),
-      fetch(`${WIKIPEDIA_ACTION_API}?origin=*&action=query&prop=extracts&explaintext=1&redirects=1&format=json&titles=${encodedPageTitle}`, {
+      fetch(`${WIKIPEDIA_ACTION_API}?origin=*&action=query&prop=extracts%7Cpageprops&explaintext=1&redirects=1&format=json&titles=${encodedPageTitle}`, {
         headers: {
           'Api-User-Agent': 'HistoricalPersonaGenerator/1.0',
         },
@@ -100,11 +109,32 @@ export async function ingestUrlSource(url: string): Promise<IngestedPersonaSourc
 
     const data = await summaryResponse.json();
     let fullExtract = '';
+    let wikidataId: string | undefined;
+    let birthYear: number | undefined;
+    let deathYear: number | undefined;
 
     if (extractResponse.ok) {
       const extractData = await extractResponse.json();
       const pages = extractData?.query?.pages ? Object.values(extractData.query.pages) as Array<any> : [];
       fullExtract = pages[0]?.extract || '';
+      wikidataId = pages[0]?.pageprops?.wikibase_item;
+    }
+
+    if (wikidataId) {
+      const wikidataQuery = new URLSearchParams({
+        action: 'wbgetentities',
+        format: 'json',
+        props: 'claims',
+        ids: wikidataId,
+        origin: '*',
+      });
+      const wikidataResponse = await fetch(`${WIKIDATA_ACTION_API}?${wikidataQuery.toString()}`);
+      if (wikidataResponse.ok) {
+        const wikidata = await wikidataResponse.json();
+        const entity = wikidata?.entities?.[wikidataId];
+        birthYear = yearFromWikidataClaim(entity, 'P569');
+        deathYear = yearFromWikidataClaim(entity, 'P570');
+      }
     }
 
     const text = normalizeWhitespace([data.description, fullExtract || data.extract].filter(Boolean).join('\n\n'));
@@ -121,6 +151,13 @@ export async function ingestUrlSource(url: string): Promise<IngestedPersonaSourc
       reliabilityNotes: fullExtract
         ? 'Wikipedia plain-text extract. Use as contextual synthesis unless checked against cited sources.'
         : 'Wikipedia summary API extract. Use as contextual synthesis unless checked against cited sources.',
+      subject: {
+        name: data.title || titleFromUrl(url),
+        description: data.description,
+        birthYear,
+        deathYear,
+        externalId: wikidataId,
+      },
     };
   }
 

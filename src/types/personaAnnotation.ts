@@ -310,4 +310,12 @@ export interface IngestedPersonaSource {
   extractionMethod: NonNullable<HistoricalPersonaAnnotationRecord['source']['extraction_method']>;
   citationLabel: string;
   reliabilityNotes?: string;
+  /** Facts supplied by Wikidata or another structured index and treated as locks. */
+  subject?: {
+    name: string;
+    description?: string;
+    birthYear?: number;
+    deathYear?: number;
+    externalId?: string;
+  };
 }

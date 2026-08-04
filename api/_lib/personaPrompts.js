@@ -19,6 +19,24 @@ export const buildOrientationModelSchema = schema => ({
   $defs: schema.$defs,
 });
 
+/** One inexpensive source call returns both the visible character facts and prose. */
+export const buildSourcePersonaModelSchema = schema => ({
+  $schema: schema.$schema,
+  type: 'object',
+  additionalProperties: false,
+  required: ['persona', 'day_in_life'],
+  properties: {
+    persona: schema.properties.persona,
+    provenance: schema.properties.provenance,
+    day_in_life: {
+      type: 'string',
+      minLength: 500,
+      maxLength: 1800,
+    },
+  },
+  $defs: schema.$defs,
+});
+
 export const buildAnnotationPrompt = (source, options) => {
   const targetInstruction = options?.target === 'named_subject'
     ? 'Generate the persona record for the named subject of the source if the source clearly has one. For a Wikipedia biography, this means the article subject. Use a historically situated moment during that person\'s life, not a posthumous summary.'
@@ -55,12 +73,25 @@ export const buildAnnotationPrompt = (source, options) => {
       source_basis: source?.sourceBasis,
       extraction_method: source?.extractionMethod,
       reliability_notes: source?.reliabilityNotes,
+      locked_subject: options?.target === 'named_subject' ? source?.subject : undefined,
     }),
     '',
     'Source text:',
     String(source?.text || '').slice(0, 16000),
   ].filter(Boolean).join('\n');
 };
+
+export const buildSourcePersonaPrompt = (source, options) => [
+  buildAnnotationPrompt({ ...source, text: String(source?.text || '').slice(0, 9000) }, options)
+    .replace('Return only persona and provenance.', 'Return persona, concise provenance, and day_in_life.'),
+  '',
+  'This is the ordinary Source Studio path, not a Talkie JSONL export.',
+  'Keep persona fields concise and prioritize what the reader sees: identity, date, place, occupation, religion, status, language, household, tools, clothing, possessions, food, bodily state, pressures, and ordinary routine.',
+  'day_in_life must be exactly two paragraphs and 150-180 words total.',
+  'Begin mid-action at the chosen living-year moment. Use close-third historical fiction with at least three precise sensory details. Show rank, dependence, belief, work, and danger through physical action and choices.',
+  'Treat article facts and locked_subject as fixed. Educated guesses must be mundane, compatible with the source, and never contradict the person’s dates, country, occupation, religion, family, or known events.',
+  'Never mention Wikipedia, evidence, schemas, uncertainty, sources, or the model. Never use encyclopedia-summary prose, modern analysis, a raw negative year, or generic filler such as “navigates”, “precarious”, “weathered”, or “a testament to”.',
+].join('\n');
 
 const compactText = (value, maxLength = 180) => {
   if (value === undefined || value === null) return '';

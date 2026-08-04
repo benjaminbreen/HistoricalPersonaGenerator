@@ -65,6 +65,7 @@ export const MODEL_VARIANTS = {
  */
 export const TASK_BUDGETS = {
   generate_sketch: { maxOutput: 260, temperature: 0.55 },
+  generate_source_persona: { maxOutput: 2200, temperature: 0.42 },
   generate_annotation: { maxOutput: 2200, temperature: 0.35 },
 };
 
@@ -76,7 +77,7 @@ const DEFAULT_BUDGET = { maxOutput: 1000, temperature: 0.35 };
  * It rides along in the usage log so "did that edit help?" is answerable
  * against real traffic later, rather than from memory.
  */
-export const PROMPT_VERSION = '5';
+export const PROMPT_VERSION = '6';
 
 /**
  * A client-supplied name, reduced to one this file knows and one this

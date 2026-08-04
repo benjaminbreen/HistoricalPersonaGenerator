@@ -12,7 +12,7 @@ import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './api/_li
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
 import { consumeAiCredit, ensureVisitorId } from './api/_lib/aiAccess.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
-import { buildAnnotationPrompt, buildOrientationModelSchema, buildSketchPrompt } from './api/_lib/personaPrompts.js'
+import { buildAnnotationPrompt, buildOrientationModelSchema, buildSketchPrompt, buildSourcePersonaModelSchema, buildSourcePersonaPrompt } from './api/_lib/personaPrompts.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
 import { callModel } from './api/_lib/llm.js'
 
@@ -316,7 +316,9 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
     if (process.env[key] === undefined) process.env[key] = value
   }
   const schemaPath = path.resolve(process.cwd(), 'src/schemas/personaOrientation.schema.json')
-  const annotationSchema = buildOrientationModelSchema(JSON.parse(fs.readFileSync(schemaPath, 'utf8')))
+  const rawOrientationSchema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'))
+  const annotationSchema = buildOrientationModelSchema(rawOrientationSchema)
+  const sourcePersonaSchema = buildSourcePersonaModelSchema(rawOrientationSchema)
 
   return {
     name: 'gemini-persona-api',
@@ -363,8 +365,9 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
 
         try {
           const body = await readRequestBody(req)
-          if (body.action === 'generate_annotation' || body.action === 'generate_sketch') {
-            const verdict = checkRateLimit(clientIpFromRequest(req), body.action)
+          if (body.action === 'generate_annotation' || body.action === 'generate_sketch' || body.action === 'generate_source_persona') {
+            const billedAction = body.action === 'generate_source_persona' ? 'generate_sketch' : body.action
+            const verdict = checkRateLimit(clientIpFromRequest(req), billedAction)
             if (!verdict.allowed) {
               res.statusCode = 429
               res.setHeader('Content-Type', 'application/json')
@@ -373,20 +376,36 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
               return
             }
             const visitorId = ensureVisitorId(req, res)
-            const accessVerdict = await consumeAiCredit(visitorId, body.action)
+            const accessVerdict = await consumeAiCredit(visitorId, billedAction)
             if (!accessVerdict.allowed) {
               res.statusCode = 402
               res.setHeader('Content-Type', 'application/json')
               res.setHeader('Cache-Control', 'no-store')
               res.end(JSON.stringify({
                 code: 'AI_SUPPORT_REQUIRED',
-                error: body.action === 'generate_annotation'
+                error: billedAction === 'generate_annotation'
                   ? 'You have used all three free full schema generations. A donation unlocks 50 credits for 30 days.'
                   : 'You have used all five free AI biographies. A donation unlocks 50 credits for 30 days.',
                 access: accessVerdict.access,
               }))
               return
             }
+          }
+
+          if (body.action === 'generate_source_persona') {
+            const { text, usage } = await callModel({
+              variant: body.model,
+              action: 'generate_source_persona',
+              prompt: buildSourcePersonaPrompt(body.source, body.options),
+              json: true,
+              schema: sourcePersonaSchema,
+              env,
+            })
+            const record = parseJsonObject(text)
+            res.setHeader('Content-Type', 'application/json')
+            res.setHeader('Cache-Control', 'no-store')
+            res.end(JSON.stringify({ record, sketch: record.day_in_life || '', usage }))
+            return
           }
 
           if (body.action === 'generate_annotation') {

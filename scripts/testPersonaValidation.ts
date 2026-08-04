@@ -111,6 +111,67 @@ assert.equal(orientationCompatibilityRecord.persona_seed.temporal.specific_year,
 assert.equal(orientationCompatibilityRecord.persona_seed.temporal.decade, 760);
 assert.equal(orientationCompatibilityRecord.persona_seed.identity_name?.full_name, 'Wagga the Frigatebird');
 
+const wikipediaSource = {
+  title: 'Eulalia Ramos',
+  text: 'Eulalia Ramos was a Venezuelan independence heroine born in 1795 and killed in 1817.',
+  url: 'https://en.wikipedia.org/wiki/Eulalia_Ramos',
+  sourceBasis: 'wikipedia_or_reference' as const,
+  extractionMethod: 'wikipedia_api' as const,
+  citationLabel: 'Wikipedia: Eulalia Ramos',
+  subject: {
+    name: 'Eulalia Ramos',
+    description: 'Venezuelan independence heroine',
+    birthYear: 1795,
+    deathYear: 1817,
+    externalId: 'Q-test',
+  },
+};
+const wikipediaOrientation = createPersonaOrientationRecord({
+  persona: {
+    ...orientation.persona,
+    name_and_address: { full_name: 'Wrong model name' },
+    age_and_life_stage: { age: 38, life_stage: 'young adult' },
+    gender_role: 'adult woman',
+    community_identity: 'Venezuelan Catholic community',
+    year: 1757,
+    place_context: {
+      locality: 'Barcelona',
+      region: 'Venezuela',
+      polity: 'Captaincy General of Venezuela',
+      locale_type: 'colonial town',
+    },
+    occupation: 'independence patriot and household organizer',
+    religion_and_ritual: 'Roman Catholic practice',
+  },
+}, wikipediaSource);
+assert.equal(wikipediaOrientation.persona.name_and_address.full_name, 'Eulalia Ramos');
+assert.equal(wikipediaOrientation.persona.year, 1811);
+assert.equal(wikipediaOrientation.persona.age_and_life_stage.age, 16);
+const wikipediaCompatibilityRecord = personaOrientationToAnnotationRecord(wikipediaOrientation, wikipediaSource);
+assert.equal(wikipediaCompatibilityRecord.schema_version, '1.1.0');
+assert.equal(wikipediaCompatibilityRecord.persona_seed.place.region, 'Venezuela');
+assert.equal(wikipediaCompatibilityRecord.persona_seed.religious_practice?.specific_label, 'Roman Catholic practice');
+assert.equal(wikipediaCompatibilityRecord.persona_seed.social_identity.religious_or_communal_identity, 'Roman Catholic practice');
+
+const providerMisnested = structuredClone({
+  persona: {
+    ...wikipediaOrientation.persona,
+    conversation_frame: undefined,
+    anachronism_guards: undefined,
+  },
+  conversation_frame: {
+    situation: 'Barcelona during the 1817 crisis.',
+    interlocutor_relation: 'A trusted neighbor.',
+  },
+  anachronism_guards: ['later Venezuelan politics', 'telegraph and radio'],
+  provenance: [],
+}) as any;
+delete providerMisnested.persona.conversation_frame;
+delete providerMisnested.persona.anachronism_guards;
+const repairedProviderRecord = createPersonaOrientationRecord(providerMisnested, wikipediaSource);
+assert.deepEqual(repairedProviderRecord.persona.anachronism_guards, ['later Venezuelan politics', 'telegraph and radio']);
+assert.equal(repairedProviderRecord.persona.conversation_frame?.situation, 'Barcelona during the 1817 crisis.');
+
 const responsePath = process.argv[2];
 if (responsePath) {
   const response = JSON.parse(fs.readFileSync(responsePath, 'utf8'));

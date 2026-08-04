@@ -8,7 +8,7 @@ import stripeWebhookHandler from './api/stripe-webhook.js';
 import { parseJsonObject } from './api/_lib/llmJson.js';
 import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './api/_lib/rateLimit.js';
 import { consumeAiCredit, ensureVisitorId } from './api/_lib/aiAccess.js';
-import { buildAnnotationPrompt, buildOrientationModelSchema, buildSketchPrompt } from './api/_lib/personaPrompts.js';
+import { buildAnnotationPrompt, buildOrientationModelSchema, buildSketchPrompt, buildSourcePersonaModelSchema, buildSourcePersonaPrompt } from './api/_lib/personaPrompts.js';
 import { callModel } from './api/_lib/llm.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -16,6 +16,7 @@ const distDir = path.join(__dirname, 'dist');
 const schemaPath = path.join(__dirname, 'src/schemas/personaOrientation.schema.json');
 const orientationSchema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
 const orientationModelSchema = buildOrientationModelSchema(orientationSchema);
+const sourcePersonaModelSchema = buildSourcePersonaModelSchema(orientationSchema);
 
 // Vite reads .env.local through loadEnv; this server has to do it itself, or
 // `npm start` silently runs with no API key and every persona quietly falls
@@ -304,25 +305,39 @@ const handleGeminiRoute = async (req, res) => {
 
   try {
     const body = await readRequestBody(req);
-    if (body.action === 'generate_annotation' || body.action === 'generate_sketch') {
-      const verdict = checkRateLimit(clientIpFromRequest(req), body.action);
+    if (body.action === 'generate_annotation' || body.action === 'generate_sketch' || body.action === 'generate_source_persona') {
+      const billedAction = body.action === 'generate_source_persona' ? 'generate_sketch' : body.action;
+      const verdict = checkRateLimit(clientIpFromRequest(req), billedAction);
       if (!verdict.allowed) {
         res.setHeader('Retry-After', String(verdict.retryAfterSeconds));
         sendJson(res, 429, { error: rateLimitMessage(verdict.scope), retryAfterSeconds: verdict.retryAfterSeconds });
         return;
       }
       const visitorId = ensureVisitorId(req, res);
-      const accessVerdict = await consumeAiCredit(visitorId, body.action);
+      const accessVerdict = await consumeAiCredit(visitorId, billedAction);
       if (!accessVerdict.allowed) {
         sendJson(res, 402, {
           code: 'AI_SUPPORT_REQUIRED',
-          error: body.action === 'generate_annotation'
+          error: billedAction === 'generate_annotation'
             ? 'You have used all three free full schema generations. A donation unlocks 50 credits for 30 days.'
             : 'You have used all five free AI biographies. A donation unlocks 50 credits for 30 days.',
           access: accessVerdict.access,
         });
         return;
       }
+    }
+
+    if (body.action === 'generate_source_persona') {
+      const { text, usage } = await callModel({
+        variant: body.model,
+        action: 'generate_source_persona',
+        prompt: buildSourcePersonaPrompt(body.source, body.options),
+        json: true,
+        schema: sourcePersonaModelSchema,
+      });
+      const record = parseJsonObject(text);
+      sendJson(res, 200, { record, sketch: record.day_in_life || '', usage });
+      return;
     }
 
     if (body.action === 'generate_annotation') {
