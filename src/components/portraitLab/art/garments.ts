@@ -20,9 +20,10 @@ import {
 import { Ramp } from '../core/color';
 import { choose, makeNoise1D, makeNoise2D, makeRng } from '../core/rng';
 import { RenderContext } from '../render/context';
-import { GarmentKind } from '../spec/types';
+import { GarmentKind, PortraitSpec } from '../spec/types';
 import { drawGarmentSurface } from './garmentSurface';
-import { drawGarmentFeature, garmentFeatureFor, GarmentFeature } from './garmentFeatures';
+import { drawGarmentFeature } from './garmentFeatures';
+import { GarmentFeature, NecklineShape } from '../spec/garmentConstruction';
 import { drawGarmentWear } from './garmentWear';
 
 export interface BodyMasks {
@@ -30,18 +31,105 @@ export interface BodyMasks {
   neckline: Mask;
 }
 
+/**
+ * What the garment does to the shoulder line, as distinct from what the body
+ * does to it.
+ *
+ * The seven garment kinds shared one silhouette — the body's own — so a
+ * contact sheet of the whole vocabulary crossed with the whole wealth range was
+ * thirty-five identical shapes told apart by a neckline and a stripe of trim.
+ * That is the wrong answer twice over. Tailoring is *construction*: a doublet
+ * is padded and a jacket has a sleeve head sewn into a scye, and both stand
+ * proud of the arm they cover. Uncut cloth is the opposite: a robe, a sari or
+ * a wrap has nothing holding it out, so it collapses onto the body and the line
+ * from neck to shoulder sags.
+ *
+ * Three numbers, all in pixels at the point of the shoulder:
+ *   `pad`    how far the cloth stands above the body's own line.
+ *   `spread` how far past the body it reaches sideways.
+ *   `sag`    how far the line dips between the neck and the shoulder point.
+ *
+ * Deliberately small numbers. The whole shoulder is about fourteen rows in this
+ * crop and two pixels of padding is the difference between a coat and a shirt;
+ * four would be a costume.
+ */
+interface ShoulderCut {
+  pad: number;
+  spread: number;
+  sag: number;
+}
+
+const SHOULDER_CUT: Record<GarmentKind, ShoulderCut> = {
+  // Padded and stiffened, and squared off on purpose — the whole point of the
+  // garment was to make the wearer a different shape.
+  doublet: { pad: 2.4, spread: 1.6, sag: 0 },
+  // A sleeve set into a scye stands up at the seam. Widest of the tailored cuts.
+  jacket: { pad: 2.0, spread: 2.2, sag: 0 },
+  // Fitted at the shoulder but not built out from it.
+  gown: { pad: 0.7, spread: 0.4, sag: 1.0 },
+  // Heavy cloth, unsupported: it hangs off the point and swings wide below.
+  robe: { pad: 0, spread: 1.5, sag: 2.2 },
+  tunic: { pad: 0, spread: 0.6, sag: 1.4 },
+  work_shirt: { pad: 0.5, spread: 0.6, sag: 1.0 },
+  // Nothing is holding this out at all, so it sags the most.
+  wrapped_garment: { pad: 0, spread: 0.9, sag: 2.6 },
+  bare: { pad: 0, spread: 0, sag: 0 },
+};
+
+const WEALTH_CUT: Record<PortraitSpec['wealth'], number> = {
+  poor: 0, modest: 0.25, comfortable: 0.5, wealthy: 0.8, noble: 1,
+};
+
+/** Peaks at the point of the shoulder and dies away toward the neck. */
+function atPoint(t: number): number {
+  const u = Math.min(1, Math.abs(t));
+  return Math.max(0, Math.min(1, (u - 0.35) / 0.55));
+}
+
+/** Peaks halfway between neck and shoulder point, which is where cloth dips. */
+function atSpan(t: number): number {
+  return Math.sin(Math.PI * Math.min(1, Math.abs(t)));
+}
+
 function shoulderMask(context: RenderContext): Mask {
-  const { anatomy } = context;
-  const { size } = anatomy;
+  const { anatomy, spec } = context;
+  const { size, centerX } = anatomy;
+  const cut = SHOULDER_CUT[spec.garment.kind] ?? SHOULDER_CUT.tunic;
+  // Tailoring is bought. A poor coat is a loose one — the padding and the
+  // built-out sleeve head are the expensive parts — and cloth that fits badly
+  // sags whatever it is cut from.
+  const money = WEALTH_CUT[spec.wealth] ?? 0.3;
+  const pad = cut.pad * (0.55 + money * 0.75);
+  const spread = cut.spread * (0.7 + money * 0.6);
+  const sag = cut.sag + (1 - money) * 0.9;
+
   const mask = maskFromProfile(size, size, {
     // The body's own silhouette, from `spec/anatomy.ts`. Cloth follows the
-    // torso; it does not get its own opinion about how wide the torso is.
+    // torso; what it adds on top of the torso is this garment's business.
     keys: anatomy.shoulderProfile,
     top: anatomy.shoulderTop,
     bottom: size + 5,
-    centerX: anatomy.centerX,
+    centerX,
+    jitter: (t) => spread * Math.min(1, t * 3.2),
   });
-  return poseShoulders(context, mask);
+
+  // Raise the line at the point and drop it across the span. Done per column on
+  // the finished mask, the way `poseShoulders` does its work, because both are
+  // adjustments to where the *top edge* of the cloth is and the body under it
+  // has not moved.
+  if (pad === 0 && sag === 0) return poseShoulders(context, mask);
+  const cloth = makeMask(size, size);
+  for (let x = 0; x < size; x += 1) {
+    let top = -1;
+    for (let y = 0; y < size; y += 1) {
+      if (mask[y * size + x]) { top = y; break; }
+    }
+    if (top < 0) continue;
+    const t = (x + 0.5 - centerX) / Math.max(1, anatomy.shoulderHalf);
+    const shift = Math.round(sag * atSpan(t) - pad * atPoint(t));
+    for (let y = Math.max(0, top + shift); y < size; y += 1) cloth[y * size + x] = 1;
+  }
+  return poseShoulders(context, cloth);
 }
 
 /**
@@ -99,8 +187,6 @@ function poseShoulders(context: RenderContext, mask: Mask): Mask {
   return out;
 }
 
-type NecklineShape =
-  | 'round' | 'wide' | 'square' | 'v' | 'cross' | 'high' | 'asymmetric' | 'slit' | 'boat';
 
 function necklineMask(context: RenderContext, shape: NecklineShape): Mask {
   const { anatomy } = context;
@@ -180,84 +266,12 @@ function necklineMask(context: RenderContext, shape: NecklineShape): Mask {
   }
 }
 
-/**
- * The plausible necklines for each garment kind, in the absence of a context
- * pack that knows better.
- *
- * This used to be one shape per kind, which meant every tunic the app has ever
- * generated — and a tunic is the fallback kind, so that is a lot of them — wore
- * exactly the same collar. Offering two or three defensible options per kind
- * and choosing among them by seed buys back the variation without pretending to
- * more precision than there is: each option is a construction that turns up
- * across most of the world and most of the period range, so picking one is not
- * a claim about this persona's culture. Where there *is* a real claim to make,
- * `necklineForContext` has already made it and never reaches here.
- */
-const NECKLINES_FOR_KIND: Record<GarmentKind, NecklineShape[]> = {
-  tunic: ['round', 'slit', 'boat'],
-  robe: ['cross', 'slit', 'v'],
-  gown: ['wide', 'square', 'boat'],
-  doublet: ['high', 'square', 'v'],
-  work_shirt: ['v', 'slit', 'round'],
-  wrapped_garment: ['asymmetric', 'boat', 'wide'],
-  jacket: ['v', 'high', 'square'],
-  bare: ['wide'],
-};
-
-/**
- * Context packs that get bespoke treatment. Everything else falls through to
- * the generic silhouette for its garment kind.
- */
-function necklineForContext(context: RenderContext): NecklineShape {
-  const { spec } = context;
-  switch (spec.contextPackId) {
-    case 'old_bailey_london_1674_1800':
-      return spec.gender === 'Female' ? 'square' : 'v';
-    case 'china_ming_1368_1650':
-    case 'china_tang_song_yuan_600_1368':
-    case 'china_early_imperial_200bce_600ce':
-      return 'cross';
-    case 'sahel_medieval_700_1600':
-    case 'sahel_early_0_700':
-      return spec.garment.kind === 'wrapped_garment' ? 'asymmetric' : 'wide';
-    case 'south_asia_mughal_1526_1800':
-      return 'asymmetric';
-    case 'mediterranean_antiquity_500bce_500ce':
-      return 'round';
-    default:
-      return genericNeckline(context);
-  }
-}
-
-function genericNeckline(context: RenderContext): NecklineShape {
-  const { spec } = context;
-  const options = NECKLINES_FOR_KIND[spec.garment.kind] || ['round'];
-
-  // The one zone-level convention worth honouring outside a context pack: a
-  // front-closing overlapped collar is near-universal for East and Central
-  // Asian robes across the whole period this app covers, and drawing one of
-  // those as a round neck is a more visible error than any of the choices
-  // below.
-  if (spec.garment.kind === 'robe' && (spec.culturalZone === 'EAST_ASIAN' || spec.culturalZone === 'CENTRAL_ASIAN')) {
-    return 'cross';
-  }
-
-  // Wealth widens and lowers a neckline: cloth to spare, and no work to do in
-  // it. Poor dress closes up, because an open neck is heat lost and a snagged
-  // hem. This is about as far as a generic rule can honestly go.
-  const wealthy = spec.wealth === 'wealthy' || spec.wealth === 'noble';
-  if (wealthy && options.includes('square')) return 'square';
-  if (spec.wealth === 'poor' && options.includes('slit')) return 'slit';
-
-  return choose(options, spec.seed, `neckline-${spec.garment.kind}`);
-}
-
 export function drawGarment(context: RenderContext): BodyMasks {
   const { raster, spec, anatomy, ramps, book } = context;
   const { size, centerX } = anatomy;
 
   const shoulders = shoulderMask(context);
-  const opening = necklineMask(context, necklineForContext(context));
+  const opening = necklineMask(context, spec.garment.neckline);
   const body = maskSubtract(shoulders, opening);
 
   if (spec.garment.kind === 'bare') {
@@ -309,7 +323,7 @@ export function drawGarment(context: RenderContext): BodyMasks {
   // What this garment is called, as opposed to what shape it is. Resolved
   // before the construction pass so that pass can leave the centre front alone
   // when the feature is going to occupy it.
-  const feature = garmentFeatureFor(spec.garment, spec.gender);
+  const feature = spec.garment.feature;
 
   // The shift worn under everything goes down before the named feature, not
   // after it. It fills the neckline opening, which is exactly where a lapel, a
@@ -771,7 +785,12 @@ function drawShoulderWrap(context: RenderContext, shoulders: Mask): void {
 }
 
 /**
- * The bespoke passes for the five deeply-treated context packs.
+ * The details a place and period puts on clothing, whatever the item is called.
+ *
+ * Which marks a persona gets is decided in `spec/garmentConstruction.ts` and
+ * carried on the spec, so this function no longer knows a pack id from a hole
+ * in the ground — it draws marks. That is what lets the sprite draw the same
+ * ones: it reads the same list and paints its own version at its own scale.
  */
 function drawContextDetails(context: RenderContext, body: Mask, feature: GarmentFeature | null): void {
   const { raster, spec, anatomy, ramps, book } = context;
@@ -787,9 +806,14 @@ function drawContextDetails(context: RenderContext, body: Mask, feature: Garment
     }
   };
 
-  switch (spec.contextPackId) {
-    case 'old_bailey_london_1674_1800': {
-      if (spec.gender === 'Female') {
+  if (spec.contextMarks.length === 0) {
+    drawGenericConstruction(context, body, feature);
+    return;
+  }
+
+  for (const mark of spec.contextMarks) {
+    switch (mark) {
+      case 'kerchief': {
         // A linen kerchief crossed over the bodice — near-universal in the
         // period, and the fastest read for "London working woman".
         for (let i = 0; i < 14; i += 1) {
@@ -802,48 +826,52 @@ function drawContextDetails(context: RenderContext, body: Mask, feature: Garment
             raster.set(x, y, ramps.clothB.steps[index], MAT.CLOTH_B, index);
           }
         }
-      } else {
-        // Coat front with a linen neckcloth showing above it.
+        break;
+      }
+
+      case 'neckcloth':
+        // A linen neckcloth showing above the coat front.
         stripe(centerX - 2, anatomy.collarY - 2, 5, 7, ramps.clothB, MAT.CLOTH_B);
+        break;
+
+      case 'coat_buttons':
         for (let i = 0; i < 3; i += 1) {
           const y = anatomy.collarY + 8 + i * 6;
           raster.set(centerX + 3, y, ramps.metal.steps[1], MAT.METAL, 1);
           raster.set(centerX + 4, y, ramps.metal.steps[4], MAT.METAL, 4);
         }
-      }
-      break;
-    }
+        break;
 
-    case 'china_ming_1368_1650':
-    case 'china_tang_song_yuan_600_1368':
-    case 'china_early_imperial_200bce_600ce': {
-      // The overlapping collar band, right panel crossing over left.
-      for (let i = 0; i < 13; i += 1) {
-        const y = anatomy.collarY - 6 + i;
-        const left = Math.round(centerX - (anatomy.neckHalf + 7) + i * 0.55);
-        const right = Math.round(centerX + (anatomy.neckHalf + 5) * (1 - i / 15));
-        for (let x = left; x <= left + 3; x += 1) stripe(x, y, 1, 1, ramps.clothB, MAT.CLOTH_B);
-        for (let x = right - 3; x <= right; x += 1) stripe(x, y, 1, 1, ramps.clothB, MAT.CLOTH_B);
-      }
-      if (spec.garment.ornament > 0.5) {
-        stripe(centerX - 1, anatomy.collarY + 6, 3, 10, ramps.clothC, MAT.CLOTH_C);
-      }
-      break;
-    }
-
-    case 'sahel_medieval_700_1600':
-    case 'sahel_early_0_700': {
-      // Narrow-strip weaving: the cloth is built from bands, so the seams run
-      // vertically at a regular pitch. That pitch is the visual signature.
-      const pitch = 7;
-      for (let x = centerX - anatomy.shoulderHalf; x <= centerX + anatomy.shoulderHalf; x += 1) {
-        if ((x - centerX + 300) % pitch !== 0) continue;
-        for (let y = anatomy.shoulderTop; y < size; y += 1) {
-          if (x < 0 || x >= size || !body[y * size + x]) continue;
-          raster.shift(x, y, 1, book);
+      case 'cross_band':
+        // The overlapping collar band, right panel crossing over left.
+        for (let i = 0; i < 13; i += 1) {
+          const y = anatomy.collarY - 6 + i;
+          const left = Math.round(centerX - (anatomy.neckHalf + 7) + i * 0.55);
+          const right = Math.round(centerX + (anatomy.neckHalf + 5) * (1 - i / 15));
+          for (let x = left; x <= left + 3; x += 1) stripe(x, y, 1, 1, ramps.clothB, MAT.CLOTH_B);
+          for (let x = right - 3; x <= right; x += 1) stripe(x, y, 1, 1, ramps.clothB, MAT.CLOTH_B);
         }
+        break;
+
+      case 'front_panel':
+        stripe(centerX - 1, anatomy.collarY + 6, 3, 10, ramps.clothC, MAT.CLOTH_C);
+        break;
+
+      case 'strip_seams': {
+        // Narrow-strip weaving: the cloth is built from bands, so the seams run
+        // vertically at a regular pitch. That pitch is the visual signature.
+        const pitch = 7;
+        for (let x = centerX - anatomy.shoulderHalf; x <= centerX + anatomy.shoulderHalf; x += 1) {
+          if ((x - centerX + 300) % pitch !== 0) continue;
+          for (let y = anatomy.shoulderTop; y < size; y += 1) {
+            if (x < 0 || x >= size || !body[y * size + x]) continue;
+            raster.shift(x, y, 1, book);
+          }
+        }
+        break;
       }
-      if (spec.garment.ornament > 0.3) {
+
+      case 'neck_panel':
         // Embroidered neckline panel.
         for (let i = 0; i < 8; i += 1) {
           const y = anatomy.collarY + 2 + i;
@@ -852,46 +880,76 @@ function drawContextDetails(context: RenderContext, body: Mask, feature: Garment
             if ((x + y) % 2 === 0) stripe(x, y, 1, 1, ramps.clothC, MAT.CLOTH_C);
           }
         }
-      }
-      break;
-    }
+        break;
 
-    case 'south_asia_mughal_1526_1800': {
-      // A jama ties to one side; the diagonal closure and the sash are the
-      // legible details at this crop.
-      for (let i = 0; i < 16; i += 1) {
-        const y = anatomy.collarY - 2 + i;
-        const x = Math.round(centerX + 3 + i * 0.85);
-        stripe(x, y, 2, 1, ramps.clothB, MAT.CLOTH_B);
-      }
-      if (spec.garment.ornament > 0.4) {
+      case 'side_closure':
+        // A jama ties to one side, and the diagonal closure is the legible
+        // detail at this crop.
+        for (let i = 0; i < 16; i += 1) {
+          const y = anatomy.collarY - 2 + i;
+          const x = Math.round(centerX + 3 + i * 0.85);
+          stripe(x, y, 2, 1, ramps.clothB, MAT.CLOTH_B);
+        }
+        break;
+
+      case 'closure_studs':
         for (let i = 0; i < 16; i += 1) {
           const y = anatomy.collarY - 2 + i;
           const x = Math.round(centerX + 3 + i * 0.85);
           if (i % 3 === 0) stripe(x + 2, y, 1, 1, ramps.metal, MAT.METAL);
         }
-      }
-      break;
-    }
+        break;
 
-    case 'mediterranean_antiquity_500bce_500ce': {
-      // Clavi: the pair of woven bands running down from the shoulders. Almost
-      // every surviving depiction of a tunic has them.
-      const offset = 9;
-      for (const side of [-1, 1] as const) {
-        for (let y = anatomy.shoulderTop + 2; y < size; y += 1) {
-          const x = Math.round(centerX + side * offset);
-          if (!body[y * size + x]) continue;
-          for (let d = 0; d < 2; d += 1) {
-            const px = x + d;
-            if (!body[y * size + px]) continue;
-            const index = d === 0 ? 2 : 4;
-            raster.set(px, y, ramps.clothC.steps[index], MAT.CLOTH_C, index);
+      case 'clavi': {
+        // The pair of woven bands running down from the shoulders. Almost every
+        // surviving depiction of a tunic has them.
+        const offset = 9;
+        for (const side of [-1, 1] as const) {
+          for (let y = anatomy.shoulderTop + 2; y < size; y += 1) {
+            const x = Math.round(centerX + side * offset);
+            if (!body[y * size + x]) continue;
+            for (let d = 0; d < 2; d += 1) {
+              const px = x + d;
+              if (!body[y * size + px]) continue;
+              const index = d === 0 ? 2 : 4;
+              raster.set(px, y, ramps.clothC.steps[index], MAT.CLOTH_C, index);
+            }
           }
         }
+        break;
       }
-      // A mantle folded over the left shoulder.
-      if (spec.wealth === 'wealthy' || spec.wealth === 'noble') {
+
+      case 'front_opening': {
+        // Two cut edges meeting at the centre, and nothing sewn over them. The
+        // absence is the point: a band or a button here would make it a
+        // European coat, which is what this used to be drawn as.
+        for (let y = anatomy.collarY + 1; y < size; y += 1) {
+          if (!body[y * size + centerX]) continue;
+          raster.shift(centerX - 1, y, -1, book);
+          raster.shift(centerX, y, 2, book);
+          raster.shift(centerX + 1, y, 1, book);
+        }
+        break;
+      }
+
+      case 'collarless_band': {
+        // The opening is bound with a narrow strip of its own cloth and stops
+        // there. One row of light on one of shadow, following the neckline.
+        const edge = maskIntersect(
+          maskDilate(body, size, size, true), maskSubtract(makeMask(size, size), body));
+        for (let y = 0; y < Math.min(size, anatomy.collarY + 10); y += 1) {
+          for (let x = 0; x < size; x += 1) {
+            if (!edge[y * size + x]) continue;
+            if (!body[(y + 1) * size + x]) continue;
+            raster.shift(x, y + 1, -1, book);
+            if (body[(y + 2) * size + x]) raster.shift(x, y + 2, 2, book);
+          }
+        }
+        break;
+      }
+
+      case 'mantle': {
+        // A mantle folded over the left shoulder.
         const mantle = makeMask(size, size);
         for (let y = anatomy.shoulderTop; y < size; y += 1) {
           const t = (y - anatomy.shoulderTop) / 22;
@@ -907,13 +965,9 @@ function drawContextDetails(context: RenderContext, body: Mask, feature: Garment
           return 3 + dx * 1.4 + ((y % 7 === 0) ? 0.8 : 0);
         }, { dither: 0.5 });
         applyContactShadow(raster, mantle, book, { dx: 1, dy: 0, strength: 2, depth: 1 });
+        break;
       }
-      break;
     }
-
-    default:
-      drawGenericConstruction(context, body, feature);
-      break;
   }
 }
 

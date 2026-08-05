@@ -10,6 +10,7 @@
  */
 
 import { LegwearForm } from './garmentLayers';
+import { ContextMark, GarmentFeature, NecklineShape } from './garmentConstruction';
 
 export type Gender = 'Male' | 'Female' | 'Non-binary';
 
@@ -243,6 +244,19 @@ export interface GarmentSpec {
    * whole thing in `colors.primary`.
    */
   bodice: BodiceSource | null;
+  /**
+   * The one thing that would let you name this garment across a room, read out
+   * of its own name. Resolved here rather than inside either renderer because
+   * both have to agree: a suit whose bust has lapels and whose sprite has a
+   * plain buttoned front is two pictures of two garments.
+   */
+  feature: GarmentFeature | null;
+  /**
+   * The shape of the opening. Resolved here for the same reason the feature is:
+   * it was the last construction decision the two renderers made separately,
+   * and a Ming robe came out cross-over above the neck and round below it.
+   */
+  neckline: NecklineShape;
   /** Trim, embroidery, and metal fittings scale with this. */
   ornament: number;
   /** Decoration read out of the item's own name. */
@@ -353,8 +367,75 @@ export interface OrnamentSpec {
  * contrast, sheen hue and specular behaviour. There is one material table in
  * this renderer now, not two, and the jewellery is drawn from the good one.
  */
+/**
+ * The shape hung on the cord, where the piece is a specific object rather than
+ * a bead.
+ *
+ * The pendant is the most legible statement of identity a bust portrait can
+ * carry — it sits in the empty middle of the chest, at the one place the eye is
+ * already looking — and every one of them was being drawn as the same round
+ * bead. Measured over 500 personas the named devotional objects together are
+ * about one persona in eleven: Wooden Cross, Taweez, Stone Amulet, Clay Amulet,
+ * Shell Pendant, Wooden Pendant, and the claw and tooth charms. The card prints
+ * the name in words directly beside the picture, so a persona whose card says
+ * crucifix and whose portrait shows a bead is the picture disagreeing with the
+ * text about the same object.
+ *
+ * Six forms, and the test is the usual one: each has to be tellable from the
+ * others in outline alone at four or five pixels across.
+ */
+export type PendantForm =
+  /** Two bars, the upright longer: Latin, Orthodox, processional. */
+  | 'cross'
+  /** A horned arc, opening upward: the hilal, and the lunula it resembles. */
+  | 'crescent'
+  /** A box or tube holding written text: taweez, gau, mezuzah, hirz. */
+  | 'case'
+  /** A curved point: claw, tusk, tooth, talon. */
+  | 'tooth'
+  /** A flat struck disc: medallion, locket, plaque, pectoral mirror. */
+  | 'disc'
+  /** A hanging bead. The old behaviour, and still right for most pieces. */
+  | 'drop';
+
+/**
+ * How a nose ornament is worn, which is four different objects.
+ *
+ * Nose jewellery had no representation at all: `culturalMarkings.ts` emits a
+ * nostril stud and a septum ring, and `clothing.ts` carries Nose Ring, Nose
+ * Stud, Nose Pin and Diamond Nose Ring as accessory *items* — and of those, the
+ * items were either dropped on the floor (no accessory shape matched them) or
+ * routed to `brooch` on the strength of the word "pin", which pinned a nose
+ * ring to the wearer's chest. The septum marking was worse: its location was
+ * unhandled and fell to the default, which puts a bead beside the mouth.
+ *
+ * The nose is nine pixels wide in this crop, which is not much — but it is dead
+ * centre in the frame, and an ornament there is the first thing a viewer sees.
+ */
+export type NoseForm =
+  /** A single bead through the nostril wing. */
+  | 'stud'
+  /** A small hoop hanging below the nostril. */
+  | 'ring'
+  /** A hoop through the septum, hanging on the midline. */
+  | 'septum'
+  /** The large hoop with a chain sweeping up to the ear or the hair. */
+  | 'nath';
+
 export interface JewelrySpec {
-  type: 'necklace' | 'earrings' | 'bracelet' | 'ring' | 'circlet' | 'brooch' | 'chain' | 'anklet';
+  type:
+    | 'necklace' | 'earrings' | 'bracelet' | 'ring' | 'circlet' | 'brooch'
+    | 'chain' | 'anklet'
+    /** Worn through the nose. See `NoseForm`. */
+    | 'nose'
+    /**
+     * A cord worn over one shoulder and across the torso — the janeu or
+     * yajnopavita, and the Andean and West African cords that hang the same
+     * way. Not a necklace: it does not go round the throat, and drawn as one
+     * the single most recognisable mark of twice-born status came out as a
+     * short string of beads at the collar.
+     */
+    | 'thread';
   /** The body of the piece: the metal of a chain, the substance of a bead. */
   material: OrnamentMaterial;
   /**
@@ -363,6 +444,13 @@ export interface JewelrySpec {
    * the piece is all one substance, and those parts are drawn in `material`.
    */
   stone?: OrnamentMaterial;
+  /**
+   * What hangs at the low point of a necklace or chain. Absent means a bead,
+   * which is what every piece in the app used to get.
+   */
+  pendant?: PendantForm;
+  /** How a `nose` piece is worn. Ignored by every other type. */
+  nose?: NoseForm;
   style: 'simple' | 'ornate' | 'delicate' | 'chunky';
   /**
    * How much of the wearer the piece takes up, as distinct from how finely it
@@ -643,6 +731,11 @@ export interface PortraitSpec {
   background: BackgroundSpec;
 
   contextPackId?: string;
+  /**
+   * What that pack puts on the clothing, resolved once here so both renderers
+   * draw the same details. Empty for the ~92% of personas who match no pack.
+   */
+  contextMarks: ContextMark[];
   culturalZone?: string;
   era?: string;
   wealth: 'poor' | 'modest' | 'comfortable' | 'wealthy' | 'noble';

@@ -756,7 +756,11 @@ export function buildSkeleton(spec: PortraitSpec, tuning: SpriteTuning = active)
     crownY,
     // The eye line sits just above the head's vertical midpoint — the
     // schoolroom rule, and the reference obeys it.
-    eyeY: crownY + Math.round(headH * 0.55),
+    // The bust puts the eye line at 0.517 of the head, crown to chin. At 0.55
+    // the whole face sat lower in the skull, which costs the chin the one row
+    // it has to work with: 36 rows of head leave five below the mouth, so a
+    // 3% shift down is most of a chin.
+    eyeY: crownY + Math.round(headH * 0.517),
     chinY,
     neckTopY: chinY - Math.round(headH * 0.14),
     shoulderY,

@@ -20,6 +20,10 @@
  * Each feature covers many names — that is the point of matching on words
  * rather than on items. Sixteen features carry about a hundred and fifty of the
  * three hundred and ninety-three names in the tables.
+ *
+ * Which feature a garment has is decided in `spec/garmentConstruction.ts`, not
+ * here. This file draws it at bust crop; the sprite draws the same key at full
+ * figure. Only the drawing is per-renderer.
  */
 
 import {
@@ -29,108 +33,7 @@ import {
 import { Ramp } from '../core/color';
 import { makeNoise1D, makeRng } from '../core/rng';
 import { RenderContext } from '../render/context';
-import { isOccasionFormal, leavesChestBare } from '../spec/garmentLayers';
-import { GarmentSpec } from '../spec/types';
-
-export interface GarmentFeature {
-  key: string;
-  /**
-   * Whether this feature is itself the front of the garment. When it is, the
-   * generic construction pass leaves the centre alone — a row of buttons down
-   * the middle of a sari, or through the notch of a lapel, is worse than no
-   * buttons at all.
-   */
-  ownsFront: boolean;
-}
-
-/**
- * Read in order, first match wins. The order is by how specific the word is:
- * "smoking jacket" has to be seen before "jacket", and "kente cloth" before
- * "cloth". Nothing here matches a material on its own, because a material is
- * not a garment — "silk" appears in ninety names across six shapes.
- */
-const FEATURES: Array<[RegExp, string, boolean]> = [
-  [/overall|dungaree|pinafore|bib/i, 'bib', true],
-  [/apron|smock/i, 'apron', true],
-  [/sari|saree|pallu|dupatta|odhani|angavastram|upper cloth/i, 'pallu', true],
-  [/toga|palla|stola|chiton|peplos|himation|senator/i, 'toga', true],
-  [/usekh|broad collar|pharaoh|egyptian/i, 'broad_collar', true],
-  [/ruff|elizabethan|court doublet|spanish jacket/i, 'ruff', false],
-  [/smoking jacket|dinner jacket|tuxedo|opera/i, 'shawl_lapel', true],
-  [/suit|blazer|tailcoat|frock coat|morning coat|business|savile|dinner/i, 'lapels', true],
-  // Evening dress named for the evening. A dinner jacket on a man; on a woman
-  // the same words mean a gown, and it takes whatever the rules below give it.
-  [/evening wear|formal wear|black tie|white tie|full dress/i, 'shawl_lapel', true],
-  [/nehru|zhongshan|mao|bandhgala|sherwani|achkan|jodhpuri|kurta|kurti|dashiki|agbada/i, 'mandarin', true],
-  [/qipao|cheongsam|changshan|magua|frog/i, 'frogs', true],
-  // Knitwear, which has no seams and no facings and is therefore the one modern
-  // garment that cannot be described by any of the above. Before this a
-  // cardigan was drawn as an undifferentiated field of colour with a hemmed
-  // neck — the same picture a peasant smock got.
-  [/cardigan|sweater|jumper|pullover|gansey|guernsey|knitwear|jersey\b|fleece|sweatshirt|hoodie|union suit/i, 'knit', true],
-  // The overlapping Y-front. One construction across East Asia and northern
-  // India, and the thing that tells a kimono from a dressing gown at a glance —
-  // which is what every one of these used to be drawn as.
-  [/cross.?collar|hanfu|kimono|yukata|hanbok|jeogori|\bjama\b|angarkha|shenyi|zhiduo|\bdeel\b/i, 'cross_collar', true],
-  [/kente|aso oke|aso ebi|ankara|adire|strip.?weav/i, 'strip_weave', false],
-  [/feather|plume/i, 'feathered', false],
-  [/fur|pelt|leopard|jaguar|lion mane|buffalo robe|ermine|sable|mink/i, 'fur_collar', false],
-  // Skin that was never cut to a pattern. Read after the fur rule so a trimmed
-  // hide keeps its fur edge, and before the cloth wrap because a hide behaves
-  // differently at the edge: it is torn and tied, not woven and bordered.
-  [/hide|buckskin|deerskin|rawhide|kaross|\bskins?\b|skin (?:wrap|dress|tunic|cloak|garment)/i, 'hide_edge', true],
-  [/shawl|stole|mantilla|fichu/i, 'shawl', false],
-  [/poncho|ruana/i, 'poncho', true],
-  // A length of cloth taken round the body and over one shoulder. This is the
-  // single largest hole in the table: `wrapped_garment` is 34% of everything
-  // the generator dresses people in, and every one of them was falling to the
-  // generic construction — a hide wrap, a tapa, a sarong and a wrap dress all
-  // drawn as a plain shirt with a hemmed neck.
-  [/\bwrap(?:s|per|ped|ping)?\b|tapa\b|bark.?cloth|sarong|\bkain\b|lava ?lava|khanga|\bkanga\b|pagne|\bmanta\b|sampot/i, 'wrapped_edge', true],
-  // A buttoned front opening with a collar turned down over it, which is what
-  // an unqualified shirt, blouse or jacket has been since about 1850 — and
-  // between them those three words are the largest single group of names the
-  // industrial and modern tables produce. The rule used to require a qualifier
-  // ("work shirt", "dress shirt"), so "Olive Shirt" and "Charcoal Blouse" got
-  // the same undifferentiated field a peasant smock did. `lapels` above has
-  // already taken anything tailored, so what reaches here is workwear.
-  [/guayabera|polo|aloha|shirt|blouse|chambray|\bjackets?\b|\bcoats?\b|windbreaker|anorak/i, 'placket', true],
-  // Cut away at the shoulder, which is the one thing about it: a tank top drawn
-  // with a crew rib is a t-shirt.
-  [/tank top|singlet|camisole|vest top|bandeau/i, 'tank', true],
-  [/t-shirt|tee shirt|board short|resort wear/i, 'tee', true],
-  [/embroider|zardozi|kundan|brocade|zari|beaded|jeweled|jewelled/i, 'yoke', false],
-];
-
-/**
- * The two wrapped features describe cloth crossing the *chest*, so both are
- * wrong wherever the named garment covers only the lower body: a wrap skirt is
- * worn with a blouse and a hide kilt with nothing, and a selvedge drawn over
- * either says the cloth continues up over the shoulder when it does not. The
- * verdict is already made twice in the codebase — `bodice` for the skirted
- * constructions, `leavesChestBare` for the loincloth family — so it is read
- * here rather than made a third time.
- */
-const CHEST_FEATURES = new Set(['wrapped_edge', 'hide_edge']);
-
-export function garmentFeatureFor(
-  garment: GarmentSpec, gender?: string
-): GarmentFeature | null {
-  const subject = `${garment.name} ${garment.material}`;
-  for (const [pattern, key, ownsFront] of FEATURES) {
-    if (!pattern.test(subject)) continue;
-    if (CHEST_FEATURES.has(key)
-      && (garment.bodice === 'separate' || leavesChestBare(garment.name))) continue;
-    // Tailoring is the one verdict in this table that the wearer changes. Only
-    // half the people described as being in evening wear are in a dinner
-    // jacket; the other half are in a gown, and drawing lapels on it is worse
-    // than drawing nothing.
-    if (key === 'shawl_lapel' && gender && gender !== 'Male'
-      && isOccasionFormal(garment.name)) continue;
-    return { key, ownsFront };
-  }
-  return null;
-}
+import { GarmentFeature } from '../spec/garmentConstruction';
 
 // ---------------------------------------------------------------------------
 
@@ -259,6 +162,47 @@ function drawBib(context: RenderContext, body: Mask, buckles: boolean): void {
   }
   for (let x = centerX - half; x <= centerX + half; x += 1) {
     put(x, bibTop, ramps.clothA, MAT.CLOTH_A, 1);
+  }
+
+  if (!buckles) {
+    /**
+     * An apron is not a bib with the buckles left off.
+     *
+     * Three things it has that overalls do not, and all three are at the top
+     * where the frame can see them: the neck loop the whole thing hangs from,
+     * the tapes that pass round the body and knot behind, and the gathers where
+     * a rectangle of cloth is pleated onto that tape. Without them this feature
+     * — the third commonest in the app — was a plain panel of a second colour,
+     * and a cook, a smith and a butcher were the same picture.
+     */
+    const rng = makeRng(spec.seed ^ 0x3c71);
+    // The neck loop: two short runs climbing from the bib corners to the
+    // throat, meeting above the chest rather than crossing the shoulders the
+    // way a strap does.
+    for (const side of [-1, 1] as const) {
+      for (let i = 0; i < 7; i += 1) {
+        const t = i / 6;
+        const x = centerX + side * (anatomy.neckHalf + 1 + t * (half - anatomy.neckHalf - 1));
+        put(x, bibTop - 6 + i, ramps.clothA, MAT.CLOTH_A, 1.2);
+        put(x + side, bibTop - 6 + i, ramps.clothA, MAT.CLOTH_A, 5.4);
+      }
+    }
+    // The waist tape, and the gathers hanging off it. The tape is the one
+    // horizontal on the chest and it is what makes the panel read as tied on
+    // rather than sewn to the garment.
+    const tapeY = bibTop + 4;
+    for (let x = centerX - half; x <= centerX + half; x += 1) {
+      put(x, tapeY, ramps.clothA, MAT.CLOTH_A, 0.9);
+      put(x, tapeY + 1, ramps.clothA, MAT.CLOTH_A, 5.6);
+    }
+    for (let x = centerX - half + 2; x <= centerX + half - 2; x += 2) {
+      // Gathers: short vertical creases under the tape, unevenly spaced,
+      // because cloth pleated by hand is never regular.
+      const depth = 3 + Math.round(rng() * 3);
+      for (let dy = 2; dy < 2 + depth; dy += 1) {
+        put(x, tapeY + dy, ramps.clothA, MAT.CLOTH_A, dy === 2 ? 1.6 : 4.8);
+      }
+    }
   }
 
   if (buckles) {

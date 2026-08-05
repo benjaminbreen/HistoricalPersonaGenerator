@@ -22,7 +22,7 @@
 
 import '../src/components/portraitLab/devtools/nodeShims';
 import { generateHistoricalPersona } from '../src/services/personaGenerator';
-import { buildSpriteSource } from '../src/encounter/sprite/spriteSource';
+import { buildSpriteSource, SpriteSource } from '../src/encounter/sprite/spriteSource';
 import { compileSprite, SPRITE_W } from '../src/encounter/sprite/drawSprite';
 import { buildSkeleton } from '../src/encounter/sprite/skeleton';
 import { headLayout } from '../src/encounter/sprite/spriteHead';
@@ -185,6 +185,47 @@ function shapeDeparture(
   return base > 0 ? aspectOf(spec) / base : 1;
 }
 
+/** How many pixels a spec change moves in each view. */
+interface Moved { portrait: number; sprite: number }
+
+function differing(a: Raster, b: Raster): number {
+  let n = 0;
+  for (let i = 0; i < a.width * a.height; i += 1) {
+    if (a.data[i * 4] !== b.data[i * 4] || a.data[i * 4 + 1] !== b.data[i * 4 + 1]
+      || a.data[i * 4 + 2] !== b.data[i * 4 + 2] || a.data[i * 4 + 3] !== b.data[i * 4 + 3]) n += 1;
+  }
+  return n;
+}
+
+function bustOf(spec: PortraitSpec): Raster {
+  const compiled = compilePortrait(spec);
+  const out = new Raster(compiled.size, compiled.size);
+  renderFrame(compiled, RESTING_FRAME, out);
+  return out;
+}
+
+function movedPixels(
+  source: SpriteSource, spec: PortraitSpec, without: PortraitSpec
+): Moved {
+  const spriteOf = (s: PortraitSpec) => compileSprite({ ...source, spec: s }).frame('stand');
+  return {
+    portrait: differing(bustOf(spec), bustOf(without)),
+    sprite: differing(spriteOf(spec), spriteOf(without)),
+  };
+}
+
+/** Per-key totals, so a key drawn by neither renderer is visible as a row. */
+type Reach = Map<string, { n: number; portrait: number; sprite: number }>;
+const featureReach: Reach = new Map();
+const markReach: Reach = new Map();
+function coverage(into: Reach, key: string, moved: Moved): void {
+  const at = into.get(key) ?? { n: 0, portrait: 0, sprite: 0 };
+  at.n += 1;
+  at.portrait += moved.portrait;
+  at.sprite += moved.sprite;
+  into.set(key, at);
+}
+
 interface Row { name: string; kind: string; detail: string }
 const rows: Row[] = [];
 const valueSum: number[] = [];
@@ -342,6 +383,44 @@ for (let i = 0; i < COUNT; i += 1) {
       }
     }
   }
+  // --- Does the construction verdict reach both renderers?
+  //
+  // The feature key and the context marks are decided once, on the spec, so the
+  // two views cannot disagree about *what* the garment is any more. What they
+  // can still do is silently draw nothing for it — a key with no case in one
+  // renderer, or a mark painted onto a lit material where `resolveLight` throws
+  // the colour away. Both failures look exactly like the old bug on the card
+  // and neither shows up in any colour sample.
+  //
+  // So this measures the only thing that settles it: render the same persona
+  // with the verdict removed and count the pixels that moved. Zero means that
+  // renderer has no expression of it.
+  //
+  // The feature figure is reported as reach only, never as a per-persona
+  // mismatch. A zero there does not prove the sprite drew nothing: both
+  // renderers still have name-based fallbacks for the neckline, so a suit whose
+  // feature is taken away is drawn with lapels anyway and the differential is
+  // legitimately zero. The marks have no such fallback — nothing else in either
+  // renderer reads a context pack — so a zero there does mean absent.
+  const feature = spec.garment.feature;
+  if (feature) {
+    const blank = { ...spec, garment: { ...spec.garment, feature: null } };
+    coverage(featureReach, feature.key, movedPixels(source, spec, blank));
+  }
+  if (spec.contextMarks.length) {
+    const blank = { ...spec, contextMarks: [] };
+    const moved = movedPixels(source, spec, blank);
+    for (const mark of spec.contextMarks) coverage(markReach, mark, moved);
+    if (moved.sprite === 0) {
+      bump('marks-sprite');
+      rows.push({ name, kind: 'marks-sprite', detail: `${spec.contextMarks.join(', ')} drawn in bust only` });
+    }
+    if (moved.portrait === 0) {
+      bump('marks-portrait');
+      rows.push({ name, kind: 'marks-portrait', detail: `${spec.contextMarks.join(', ')} drawn in sprite only` });
+    }
+  }
+
   void SPRITE_W;
 }
 
@@ -350,6 +429,7 @@ const ORDER = [
   'headwear-disagree', 'headwear-sprite', 'headwear-portrait',
   'beard-sprite', 'beard-portrait', 'proportion',
   'skull-shape', 'crown-flatness', 'headwear-form',
+  'marks-sprite', 'marks-portrait',
 ];
 
 console.log(`\nPortrait ↔ sprite agreement, ${COUNT} personas\n`);
@@ -388,6 +468,25 @@ if (crownFlat.length) {
   console.log(`    sprite ${avg(crownFlat.map(p => p[1])).toFixed(3)} mean`);
 }
 void dist;
+
+// Construction reach, per key: mean pixels each view moves when the verdict is
+// taken away. A zero column is a key that renderer cannot express — which is
+// the whole failure this seam exists to prevent, and it is invisible to every
+// colour check above.
+const reachTable = (title: string, reach: Reach) => {
+  if (!reach.size) return;
+  console.log(`\n  ${title} (mean pixels the verdict moves in each view):`);
+  const keys = [...reach.keys()].sort();
+  for (const k of keys) {
+    const at = reach.get(k)!;
+    const bust = Math.round(at.portrait / at.n);
+    const sprite = Math.round(at.sprite / at.n);
+    const flag = bust === 0 || sprite === 0 ? '  ←' : '';
+    console.log(`    ${k.padEnd(16)} bust ${String(bust).padStart(5)}   sprite ${String(sprite).padStart(5)}   ×${at.n}${flag}`);
+  }
+};
+reachTable('garment features', featureReach);
+reachTable('context marks', markReach);
 
 const total = [...counts.values()].reduce((a, b) => a + b, 0);
 console.log(`\n${total} mismatches across ${COUNT} personas\n`);

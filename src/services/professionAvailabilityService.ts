@@ -163,6 +163,16 @@ const PROFESSION_AVAILABILITY_RULES: ProfessionAvailabilityRule[] = [
     places: /\b(?:woodland|northeast|great lakes|mississippi|ohio|atlantic coast|new england|chesapeake|southeast|appalach|hudson|st lawrence|saint lawrence|iroquo|algonqu|canada|ontario|quebec)\b/i,
   },
   {
+    // Homesteading is a frontier act under a specific law. The properly gated
+    // copy of the role sits in the FRONTIER class of the zone table, but the
+    // agrarian backfill carries a second one in COMMONER with nothing on it, so
+    // Brooklyn in 1839 — a city of thirty thousand, twenty-three years before
+    // the Homestead Act — came back a homesteader.
+    pattern: /\bhomesteader\b/i,
+    startYear: 1862,
+    places: /\b(?:plains|prairie|badlands|black hills|platte|flint hills|missouri|llano|texas|hill country|rockies|rocky|bitterroot|yellowstone|snake river|glacier|salmon river|absaroka|dakota|nebraska|kansas|oklahoma|colorado|wyoming|montana|idaho|utah|nevada|oregon|ozark|driftless|illinois river|southwest|sonoran|colorado plateau|rio grande|mogollon|frontier)\b/i,
+  },
+  {
     // Turquoise is a Southwestern stone.
     pattern: /\bturquoise\b/i,
     places: /\b(?:southwest|puebloan|colorado plateau|rio grande|sonora|arizona|new mexico|mexico|cerrillos|chaco canyon)\b/i,

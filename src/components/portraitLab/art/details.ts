@@ -22,7 +22,7 @@ import { isSpecular, ornamentGlintPeak, ornamentRamp } from './ornaments';
 import { MAT, Raster } from '../core/raster';
 import { makeNoise1D, makeRng } from '../core/rng';
 import { RenderContext } from '../render/context';
-import { JewelrySpec, MarkingSpec, OrnamentMaterial } from '../spec/types';
+import { JewelrySpec, MarkingSpec, OrnamentMaterial, PendantForm } from '../spec/types';
 
 /**
  * Which substances are drawn as the body of a piece rather than as a stone in
@@ -472,6 +472,33 @@ function drawPattern(
  * common marking the app generates by a wide margin, and it needs to be a
  * two-pixel piece of metal, not a stroke drawn across the cheek.
  */
+/**
+ * A ring hanging from a point, drawn as an outline rather than a filled disc.
+ *
+ * The hole is the whole thing. At three pixels across a filled circle is a
+ * bead and a ring is a bead with one pixel missing out of the middle, so the
+ * radius has to be large enough to leave that pixel — which is why the small
+ * sizes here are drawn as an open horseshoe instead, hung from the anchor
+ * rather than centred on it.
+ */
+function hoop(
+  context: RenderContext, cx: number, topY: number, r: number, ramp: Ramp
+): void {
+  const cy = topY + r;
+  for (let dy = -r; dy <= r; dy += 1) {
+    for (let dx = -r; dx <= r; dx += 1) {
+      const d = Math.hypot(dx, dy);
+      if (d > r + 0.35 || d < r - 0.75) continue;
+      // The upper arc is behind the flesh it hangs from, so only the lower
+      // three-quarters of the ring is drawn.
+      if (dy < -r * 0.35) continue;
+      // Lit on the outside of the left limb, shadowed on the inside right —
+      // the same rule every round thing in this file follows.
+      jewel(context, cx + dx, cy + dy, dx < 0 ? 1.2 : 4.6, ramp, MAT.METAL, dy === r);
+    }
+  }
+}
+
 function drawPiercing(
   context: RenderContext,
   marking: MarkingSpec,
@@ -501,6 +528,7 @@ function drawPiercing(
 
   switch (marking.location) {
     case 'nose':
+    case 'nostril':
       // Through the nostril wing, off to one side. A larger one is a ring that
       // hangs below the nostril, which is the commoner form at this size.
       place(centerX - 3, anatomy.noseBaseY);
@@ -508,6 +536,13 @@ function drawPiercing(
         jewel(context, centerX - 4, anatomy.noseBaseY + 1, 2, metal, MAT.METAL, false);
         jewel(context, centerX - 3, anatomy.noseBaseY + 2, 4, metal, MAT.METAL);
       }
+      break;
+    case 'septum':
+      // `culturalMarkings.ts` has emitted this location since it was written
+      // and nothing here handled it, so a septum ring fell to the default below
+      // and was drawn as a stud beside the mouth. It hangs on the midline,
+      // under the nose, which is the one place no other ornament sits.
+      hoop(context, centerX, anatomy.noseBaseY + 1, scale > 1.2 ? 3 : 2, metal);
       break;
     case 'ear':
       for (const side of [-1, 1] as const) {
@@ -750,6 +785,112 @@ interface PieceScale {
  * at the old scale a "large" ear ornament was five pixels of jaw-coloured
  * jewellery beside a jaw.
  */
+/**
+ * The object on the end of the cord.
+ *
+ * Every one of these is drawn as a *silhouette first*: a lit face, a dark edge
+ * on the lower right, and nothing in the middle. At four or five pixels there
+ * is no room for interior modelling, and the whole recognition is the outline —
+ * a cross is two bars, a crescent is an arc with a bite out of it, a case is a
+ * squared box taller than it is wide. Anything cleverer than that comes out as
+ * a smudge of the same size and shape as the bead it replaced.
+ */
+function drawPendant(
+  context: RenderContext,
+  form: Exclude<PendantForm, 'drop'>,
+  cx: number, cy: number,
+  item: JewelrySpec,
+  ramp: Ramp, stoneRamp: Ramp, mat: number,
+  bodyGlint?: GlintSink, stoneGlint?: GlintSink
+): void {
+  const big = item.scale === 'large' || item.style === 'chunky';
+  const put = (x: number, y: number, index: number, shade = false) =>
+    jewel(context, x, y, index, ramp, mat, shade);
+
+  switch (form) {
+    case 'cross': {
+      // The upright is longer below the crossing than above it, which is the
+      // proportion that stops a cross reading as a plus sign.
+      const up = big ? 2 : 1;
+      const down = big ? 4 : 3;
+      const arm = big ? 3 : 2;
+      for (let dy = -up; dy <= down; dy += 1) {
+        put(cx, cy + dy, dy === -up ? 0.8 : 2.2);
+        put(cx + 1, cy + dy, 4.6, dy === down);
+      }
+      for (let dx = -arm; dx <= arm + 1; dx += 1) {
+        put(cx + dx, cy, dx < 0 ? 1.2 : 3);
+        put(cx + dx, cy + 1, 5, true);
+      }
+      bodyGlint?.(cx, cy - up);
+      break;
+    }
+    case 'crescent': {
+      // A disc with a smaller disc bitten out of it, offset up and right. Drawn
+      // by testing two radii rather than by plotting an arc, which is the only
+      // way the horns come out sharp at this size.
+      const r = big ? 4 : 3;
+      for (let dy = -r; dy <= r; dy += 1) {
+        for (let dx = -r; dx <= r; dx += 1) {
+          if (dx * dx + dy * dy > r * r) continue;
+          const bx = dx - r * 0.55;
+          const by = dy - r * 0.3;
+          if (bx * bx + by * by <= (r * 0.82) * (r * 0.82)) continue;
+          put(cx + dx, cy + dy, dx < 0 ? 1.4 : 3.4 + dy * 0.3, dy === r);
+        }
+      }
+      bodyGlint?.(cx - r + 1, cy);
+      break;
+    }
+    case 'case': {
+      // A sealed box or tube, hung upright. Taller than wide, with a lid.
+      const w = big ? 2 : 1;
+      const h = big ? 5 : 4;
+      for (let dy = 0; dy <= h; dy += 1) {
+        for (let dx = -w; dx <= w; dx += 1) {
+          const edge = dx === w || dy === h;
+          put(cx + dx, cy + dy, dy === 0 ? 0.9 : edge ? 5.2 : dx < 0 ? 1.8 : 3.2, dy === h);
+        }
+      }
+      // The suspension loop at the top, which is what makes it hang rather than
+      // sit — and a stone set in the lid if the piece can afford one.
+      put(cx, cy - 1, 2);
+      if (item.stone) bead(context, cx - 1, cy + 1, 2, stoneRamp, MAT.GEM, stoneGlint);
+      bodyGlint?.(cx - w, cy + 1);
+      break;
+    }
+    case 'tooth': {
+      // A curved point, hanging tip-down and swinging away from the midline.
+      const h = big ? 6 : 5;
+      for (let i = 0; i <= h; i += 1) {
+        const t = i / h;
+        const x = cx + Math.round(t * t * 2);
+        const half = Math.max(0, Math.round((1 - t) * (big ? 1.6 : 1.1)));
+        for (let dx = -half; dx <= half; dx += 1) {
+          put(x + dx, cy + i, dx < 0 ? 1.4 : i === h ? 5.6 : 3.4, i === h);
+        }
+      }
+      bodyGlint?.(cx - 1, cy + 1);
+      break;
+    }
+    case 'disc': {
+      const r = big ? 4 : 3;
+      for (let dy = -r; dy <= r; dy += 1) {
+        for (let dx = -r; dx <= r; dx += 1) {
+          if (dx * dx + dy * dy > r * r) continue;
+          // Struck metal: a bright rim on the upper left, a dark one opposite,
+          // and a flat field between. A shaded ball reads as a bead again.
+          const rim = dx * dx + dy * dy > (r - 1) * (r - 1);
+          put(cx + dx, cy + dy, rim ? (dx + dy < 0 ? 0.8 : 5.6) : 2.6, dy === r);
+        }
+      }
+      if (item.stone) bead(context, cx - 1, cy - 1, 2, stoneRamp, MAT.GEM, stoneGlint);
+      bodyGlint?.(cx - r + 1, cy - r + 1);
+      break;
+    }
+  }
+}
+
 const PIECE_SCALE: Record<JewelrySpec['scale'], PieceScale> = {
   small: { bead: 1, rows: 1, drop: 4, boss: 2, spread: 0.85 },
   // Two strands. The middle of a three-step gradient has to be visibly the
@@ -904,14 +1045,104 @@ export function drawJewelry(context: RenderContext, glints?: GlintSite[]): void 
         }
         // A pendant at the low point. This is the part that actually reads at
         // portrait size, and the old version had none at all.
-        if (lowest.y > 0 && (ornate || !delicate || item.scale === 'large')) {
+        const form = item.pendant ?? 'drop';
+        // A named object hangs whatever the workmanship: a wooden cross on a
+        // pauper is still a cross, and gating it on `ornate` — which is what
+        // the bead did — hid exactly the pieces that carry the most meaning.
+        const hangs = form !== 'drop' || ornate || !delicate || item.scale === 'large';
+        if (lowest.y > 0 && hangs) {
           const py = lowest.y + (size.bead > 1 ? 2 : 1);
           jewel(context, lowest.x, lowest.y + 1, 3, ramp, mat, false);
-          if (ornate || item.scale === 'large') {
+          if (form !== 'drop') {
+            drawPendant(context, form, lowest.x, py + 1, item, ramp, stoneRamp, mat,
+              bodyGlint, stoneGlint);
+          } else if (ornate || item.scale === 'large') {
             bead(context, lowest.x, py + 1, size.boss, stoneRamp, MAT.GEM, stoneGlint);
           } else {
             bead(context, lowest.x, py, 2, ramp, mat, bodyGlint);
           }
+        }
+        break;
+      }
+
+      case 'nose': {
+        /**
+         * Worn on the sitter's left nostril, which is where it is worn — the
+         * side is a fact about the custom, not a rendering choice, and a piece
+         * that swapped sides between renders would read as two different
+         * pieces on two different people.
+         */
+        const wingX = centerX - 3;
+        const wingY = anatomy.noseBaseY;
+        switch (item.nose ?? 'ring') {
+          case 'stud':
+            bead(context, wingX, wingY, item.scale === 'small' ? 2 : 3, ramp, mat, bodyGlint);
+            break;
+          case 'septum':
+            hoop(context, centerX, wingY + 1, item.scale === 'large' ? 4 : 3, ramp);
+            bodyGlint?.(centerX - 2, wingY + 3);
+            break;
+          case 'nath': {
+            /**
+             * The big hoop, and the chain that carries its weight up to the
+             * hair above the ear. The chain is what makes a nath a nath — the
+             * ring alone is just a large nose ring — and it is the one piece of
+             * jewellery in this whole file that crosses the cheek, so it reads
+             * at a glance even where the ring itself is four pixels.
+             */
+            const r = item.scale === 'small' ? 4 : 5;
+            hoop(context, wingX, wingY - 1, r, ramp);
+            // A stone set at the bottom of the hoop, where a nath carries one.
+            bead(context, wingX - 1, wingY - 1 + r * 2 - 1, 2, stoneRamp, MAT.GEM, stoneGlint);
+            const toX = centerX - (anatomy.earX + 1);
+            const toY = anatomy.earBottomY - 4;
+            const steps = Math.max(1, Math.abs(toX - (wingX - r)));
+            for (let i = 0; i <= steps; i += 2) {
+              const t = i / steps;
+              const x = Math.round(wingX - r + (toX - (wingX - r)) * t);
+              // Slack: the chain sags away from the straight line between the
+              // two ends, which is what stops it reading as a scar.
+              const y = Math.round(wingY - 1 + (toY - (wingY - 1)) * t + Math.sin(Math.PI * t) * 2);
+              jewel(context, x, y, 2, ramp, mat, false);
+            }
+            bodyGlint?.(wingX - r + 1, wingY + 1);
+            break;
+          }
+          default:
+            hoop(context, wingX, wingY, item.scale === 'large' ? 4 : 3, ramp);
+            bodyGlint?.(wingX - 2, wingY + 2);
+            break;
+        }
+        break;
+      }
+
+      case 'thread': {
+        /**
+         * The sacred thread: three strands of cotton cord over the left
+         * shoulder and down across the chest to the right hip.
+         *
+         * Drawn as a line rather than as beads because that is what it is — an
+         * unbroken cord, and the one piece in this whole function with no
+         * repeating unit in it. What makes it read at this size is the *angle*:
+         * nothing else anybody wears crosses the chest diagonally, so three
+         * pixels of pale cord at forty degrees is unmistakable even where the
+         * cord itself is barely a value step off the cloth beneath it.
+         */
+        const fromX = centerX - Math.round(anatomy.shoulderHalf * 0.72);
+        const fromY = anatomy.shoulderTop + 1;
+        const toX = centerX + Math.round(anatomy.shoulderHalf * 0.5);
+        const steps = Math.max(1, anatomy.size - fromY);
+        for (let i = 0; i <= steps; i += 1) {
+          const t = i / steps;
+          const x = Math.round(fromX + (toX - fromX) * t);
+          const y = fromY + i;
+          if (y >= anatomy.size) break;
+          if (raster.alphaAt(x, y) === 0) continue;
+          // Three cords: a lit centre with a shadow on the underside, which is
+          // what separates a laid cord from a scratch in the cloth.
+          jewel(context, x, y, 1.2, ramp, mat, false);
+          jewel(context, x + 1, y, 4.6, ramp, mat, false);
+          if (i % 4 === 0) bodyGlint?.(x, y);
         }
         break;
       }

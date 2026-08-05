@@ -12,10 +12,11 @@
  *       > appearance         (the procedural fallback)
  */
 
-import { hashString, unit } from '../core/rng';
+import { choose, hashString, unit } from '../core/rng';
 import { hexToRgb, hslToRgb, luminance, mixRgb, rgbToHex, rgbToHsl } from '../core/color';
 import { hasIntrinsicColor, hexForName } from '../../../constants/gameData/colorNames';
 import { impliesMatchingLegs, legwearFormFor } from './garmentLayers';
+import { contextMarksFor, garmentFeatureFor, necklineFor } from './garmentConstruction';
 import { stoneMaterialForHex } from '../../../services/ornamentService';
 import {
   BackgroundSpec,
@@ -38,8 +39,10 @@ import {
   FaceTraits,
   MarkingSpec,
   MoodSpec,
+  NoseForm,
   OrnamentMaterial,
   OrnamentSpec,
+  PendantForm,
   PortraitSpec,
   PoseSpec,
   SkullShape,
@@ -527,11 +530,53 @@ export function ornamentsFor(
  * not a gap — the item is still on the card, where a thing you own but cannot
  * see belongs.
  */
+/**
+ * What shape is hanging on the cord.
+ *
+ * Read before the shape table below, because these words decide the *object*
+ * while that table only decides how it is hung. Ordered specific to general:
+ * "Bone Claw Amulet" is a tooth and not a case, and a "Silver Cross Pendant" is
+ * a cross rather than the generic drop that `pendant` alone would give it.
+ */
+const PENDANT_FORMS: Array<[RegExp, PendantForm]> = [
+  [/crucifix|\bcross\b|\bankh\b|chi.?rho|\btau\b/i, 'cross'],
+  [/crescent|hilal|lunula|moon\b/i, 'crescent'],
+  // The written-charm containers, which are one object across half the world:
+  // a small sealed box or tube on a cord.
+  [/taweez|ta.?wiz|\bgau\b|mezuzah|hirz|reliquar|phylacter|scroll case|amulet case|prayer box/i, 'case'],
+  [/claw|talon|\btooth\b|teeth|tusk|fang|canine/i, 'tooth'],
+  [/medallion|locket|plaque|disc\b|disk\b|mirror|medal\b|coin\b|gorget/i, 'disc'],
+];
+
+function pendantFormFor(text: string): PendantForm {
+  const found = PENDANT_FORMS.find(([pattern]) => pattern.test(text));
+  return found ? found[1] : 'drop';
+}
+
+/**
+ * Which nose ornament. Ordered by how specific the word is: a nath is a hoop
+ * and would answer to `ring` as well, so it has to be seen first.
+ */
+function noseFormFor(text: string): NoseForm {
+  if (/\bnath\b|nathni|nathiya|bulaq/i.test(text)) return 'nath';
+  if (/septum/i.test(text)) return 'septum';
+  if (/stud|\bphul\b|\blaung\b|\bpin\b/i.test(text)) return 'stud';
+  return 'ring';
+}
+
 const ACCESSORY_SHAPES: Array<[RegExp, JewelrySpec['type']]> = [
+  // Over the shoulder rather than round the throat, so it has to be seen before
+  // the strand words below claim it: a sacred thread is cotton cord and the
+  // word "thread" would otherwise never reach a rule at all.
+  [/sacred thread|janeu|janai|yajnopavita|poonal|upanayana|shoulder cord|baldric/i, 'thread'],
   // Ear ornaments before the generic strand words: "Ear Plugs" and "Shell
   // Earrings" both contain a material that would otherwise route them to a
   // necklace.
   [/ear.?plug|ear.?spool|earring|ear.?stud|ear.?ring/i, 'earrings'],
+  // Before the brooch rule, which owns the word "pin": a Nose Pin routed there
+  // was pinned to the wearer's chest, and a Nose Ring matched nothing at all
+  // and was dropped.
+  [/nose ?(?:ring|stud|pin|jewel|piece)|\bnath\b|nathni|nathiya|bulaq|septum|nostril|\bphul\b|\blaung\b/i, 'nose'],
   [/brooch|fibula|clasp|\bpin\b|seal\b|badge/i, 'brooch'],
   // Hung on a cord: the pendant is the part that reads, so these are drawn as a
   // chain rather than as a beaded strand.
@@ -656,9 +701,12 @@ export function accessoryJewelryFor(
 
   const material = accessoryMaterialFor(text);
 
+  const pendant = pendantFormFor(text);
   return {
     type: shape[1],
     material,
+    pendant,
+    nose: shape[1] === 'nose' ? noseFormFor(text) : undefined,
     // A metal amulet on a wealthy neck has something set in it; a clay one does
     // not, and the stone is only offered where the piece is not already stone.
     stone: wealth > 0.66 && METALS.has(material) ? 'carnelian' : undefined,
@@ -2276,8 +2324,14 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     (overrides?.garmentKind as GarmentKind) ||
     classify(`${garmentPiece.name || ''} ${garmentPiece.material || ''}`, GARMENT_KEYWORDS, 'tunic');
 
+  // A persona with no named garment and no palette is given a plain tunic, and
+  // the neckline has to be chosen for the kind actually drawn — the seeded pick
+  // is keyed on it.
+  const resolvedKind: GarmentKind =
+    isEmptyPiece(garmentPiece) && !palette.primary ? 'tunic' : garmentKind;
+
   const garment: GarmentSpec = {
-    kind: isEmptyPiece(garmentPiece) && !palette.primary ? 'tunic' : garmentKind,
+    kind: resolvedKind,
     name: garmentPiece.name || 'Simple Garment',
     material: (garmentPiece.material || 'wool').toLowerCase(),
     colors: separateGarmentColors(
@@ -2300,6 +2354,18 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
       seed
     ),
     bodice: bodiceFor(garmentPiece.name || ''),
+    feature: garmentFeatureFor(
+      garmentPiece.name || 'Simple Garment',
+      (garmentPiece.material || 'wool').toLowerCase(),
+      { gender, separateBodice: bodiceFor(garmentPiece.name || '') === 'separate' }
+    ),
+    neckline: necklineFor({
+      packId: overrides?.contextPackId,
+      kind: resolvedKind,
+      gender,
+      wealth,
+      culturalZone: source.culturalZone,
+    }, options => choose(options, seed, `neckline-${resolvedKind}`)),
     ornament: ornamentBase,
     surfaces: garmentSurfaceSpecs(garmentPiece, source, ornamentBase, seed),
     wear: garmentWearFor(
@@ -2478,6 +2544,9 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
       source, overrides, appearance.skinColor || '#c58f68', garment.colors.primary),
 
     contextPackId: overrides?.contextPackId,
+    contextMarks: contextMarksFor(overrides?.contextPackId, {
+      gender, wealth, ornament: garment.ornament, garmentName: garment.name,
+    }),
     culturalZone: source.culturalZone,
     era: source.era,
     wealth,

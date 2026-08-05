@@ -119,7 +119,11 @@ export function headLayout(spec: PortraitSpec, s: Skeleton): HeadLayout {
     browY: eyeY - Math.round(H * 0.10) + t.browDy,
     noseY: eyeY + Math.round(H * 0.17),
     mouthY: eyeY + Math.round(H * 0.30) + t.mouthDy,
-    eyeDX: Math.round(W * 0.26) + Math.round(t.eyeGap / 2),
+    // The bust puts the pupils at 0.42 of its head *half*-width. This is a
+    // fraction of the full width, so 0.26 here was 0.52 of a half — the sprite's
+    // eyes sat a quarter further apart than the same persona's portrait, on the
+    // one part of the figure a viewer reads hardest. 0.21 is the bust's number.
+    eyeDX: Math.round(W * 0.21) + Math.round(t.eyeGap / 2),
     // How wide one eye is. Four pixels is the threshold at which an eye can
     // hold a lash line, a white, an iris and an inner corner all at once —
     // which is the single biggest legibility gain of the larger head.
@@ -235,6 +239,37 @@ export function headSurface(
   form: FormBuffer, mask: Mask, L: HeadLayout, depth: number, spec: PortraitSpec
 ): void {
   ellipsoidSurface(form, mask, L.hx + L.turn, L.hy, L.rx + 1, L.ry + 1, depth, 0.72);
+  /**
+   * The lower face is a plane, not the bottom of a ball.
+   *
+   * The ellipsoid puts its south pole at the chin, so the chin's normal points
+   * straight down, away from the lamp — measured against the bust, the sprite's
+   * chin resolved to 0.61 of its own cheek where the bust's is 0.91. Every
+   * sprite ended at the mouth with a dark smear under it, and no amount of
+   * shading elsewhere could put the chin back, because the chin was the one
+   * part of the head being lit as though it faced the floor.
+   *
+   * A jaw does not. From the mouth down the surface turns *under* but keeps
+   * facing the viewer nearly to the point of the chin, so the downward
+   * component of the normal is rolled back over that stretch and the forward
+   * one restored. The occlusion pass then draws the corners, which is where a
+   * jaw's shadow actually is.
+   */
+  const from = L.mouthY;
+  const span = Math.max(1, L.chinY - from);
+  for (let y = from; y <= L.chinY; y += 1) {
+    for (let x = 0; x < SPRITE_W; x += 1) {
+      if (!mask[y * SPRITE_W + x]) continue;
+      const i = y * SPRITE_W + x;
+      if (!form.written[i]) continue;
+      // Full effect at the chin, none at the mouth.
+      const t = (y - from) / span;
+      form.ny[i] *= 1 - 0.65 * t;
+      const nx = form.nx[i];
+      const ny = form.ny[i];
+      form.nz[i] = Math.sqrt(Math.max(0.02, 1 - nx * nx - ny * ny));
+    }
+  }
   faceOcclusion(form, mask, L, spec);
 }
 
@@ -323,10 +358,25 @@ function faceOcclusion(
   }
   // --- Under the lower lip, and the chin's own shelf.
   for (let dx = -1; dx <= 1; dx += 1) cut(L.fx + dx, L.mouthY + 2, 1);
-  // --- The jaw's underside, which is where the head ends and the neck begins.
-  for (let dx = -Math.round(L.W * 0.34); dx <= Math.round(L.W * 0.34); dx += 1) {
-    cut(L.fx + dx, L.chinY, 2);
-    cut(L.fx + dx, L.chinY - 1, 1);
+  /**
+   * The jaw's underside, which is where the head ends and the neck begins.
+   *
+   * The *underside* — not the chin. This used to shade the full width of the
+   * bottom two rows by two steps, which put the front plane of the chin into
+   * the same shadow as the jaw beneath it: measured against the bust, the
+   * sprite's chin came out at 0.61 of its own cheek value where the bust's is
+   * 0.91. A chin as dark as the shadow under it is not a chin, and that is
+   * most of why these faces read as ending at the mouth.
+   *
+   * So the corners go dark and the point stays lit. That contrast *is* the
+   * chin; there is no room at this scale to draw it any other way.
+   */
+  const jawHalf = Math.round(L.W * 0.34);
+  const chinHalf = Math.max(1, Math.round(L.W * 0.13));
+  for (let dx = -jawHalf; dx <= jawHalf; dx += 1) {
+    const underJaw = Math.abs(dx) > chinHalf;
+    cut(L.fx + dx, L.chinY, underJaw ? 2 : 1);
+    if (underJaw) cut(L.fx + dx, L.chinY - 1, 1);
   }
   // --- The temple, in under the hairline on the shadow side.
   for (let i = 0; i < 3; i += 1) {
@@ -570,7 +620,15 @@ function drawBrows(
 
   for (const side of [-1, 1] as const) {
     const far = side === -L.turn;
-    const cx = L.fx + side * (L.eyeDX - (far ? 1 : 0));
+    // Centred on its own eye, exactly as `eyeGeom` centres the eye. The brow
+    // used to shift one pixel inboard on the far side while the eye under it
+    // deliberately does not — `eyeGeom` says so in as many words — so on every
+    // three-quarter face one brow sat over its eye and the other sat between
+    // the eye and the nose. At a four-pixel brow that misalignment is a quarter
+    // of its length and reads as a mistake rather than as foreshortening.
+    const cx = L.fx + side * L.eyeDX;
+    // The far brow *is* foreshortened, though: it loses its outer pixel, the
+    // same end the far eye loses.
     const bl = far ? len - 1 : len;
     for (let i = 0; i < bl; i += 1) {
       // i runs from the inner end outward.
@@ -2454,7 +2512,12 @@ export function drawHeadwear(
           const u = i / reach;
           // The bill droops as it goes out, and a moulded one droops faster.
           const drop = Math.round(u * u * (peak === 'ball' ? 3 : 1.4));
-          const halfW = Math.round((1 - u * 0.55) * L.rx * 0.55);
+          // How *deep* the bill is, top to bottom, before the 0.35 foreshorten
+          // below. At 0.55 of the skull radius the inner end was fifteen pixels
+          // tall — five rows of solid accent colour hanging over one brow,
+          // which read as a patch stuck to the face rather than as a peak. A
+          // bill seen at three-quarters is a thin wedge: two or three rows.
+          const halfW = Math.round((1 - u * 0.55) * L.rx * (peak === 'ball' ? 0.34 : 0.26));
           const x = L.hx + L.turn * (Math.round(L.rx * 0.25) + i);
           for (let dy = -halfW; dy <= halfW; dy += 1) {
             const y = y0 + drop + Math.round(dy * 0.35);

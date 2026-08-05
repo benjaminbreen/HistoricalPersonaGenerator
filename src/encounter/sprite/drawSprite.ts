@@ -45,6 +45,10 @@ import {
   headLayout, HeadLayout, headMask, headSurface, paintHair,
 } from './spriteHead';
 import { Drape, facingAt, foldX, planDrape } from './drape';
+import {
+  drawSpriteContextMarks, drawSpriteFeature, drawSpriteSurfaces,
+} from './spriteGarment';
+import { GarmentFeatureKey, NecklineShape } from '../../components/portraitLab/spec/garmentConstruction';
 import { Construction, GarmentShape, hemFraction, OverLayer, readShape } from './construction';
 import { ornamentRamp } from '../../components/portraitLab/art/ornaments';
 import { densifyBook } from './denseRamp';
@@ -59,8 +63,16 @@ export { SPRITE_H, SPRITE_W };
  */
 const DEPTH = {
   hairBack: 0.20,
-  farArm: 0.30,
   legFar: 0.34,
+  // Behind the torso, but only just. At 0.30 the step across to the body was
+  // 0.20 — well past the 0.12 at which `occlusionAt` starts shading — so the
+  // far arm carried a band of shadow down its whole length where it met the
+  // trunk, and read as a seam rather than as an arm. `nearArm` was lowered for
+  // this exact reason and the far one was left behind. 0.39 keeps the ordering
+  // (still behind the near leg, still in front of the far one) and puts the
+  // step just under the threshold, so the armpit still reads and the shaft
+  // does not.
+  farArm: 0.39,
   legNear: 0.40,
   torso: 0.50,
   neck: 0.46,
@@ -260,6 +272,12 @@ interface GarmentPlan {
   hemY: number;
   hemHalf: number;
   belted: boolean;
+  /**
+   * A wide wrapped cloth rather than a strap. An obi, a faja, a kamarband, a
+   * cummerbund: several times the depth of a belt, gathered, and knotted with
+   * the ends hanging — none of which a two-pixel leather band can say.
+   */
+  sash: boolean;
   /** Where the sleeve's cloth ends and the forearm or hand begins. */
   sleeveT: number;
   bell: boolean;
@@ -283,7 +301,7 @@ interface GarmentPlan {
  * garment kind when the name is silent.
  */
 function planGarment(
-  spec: PortraitSpec, s: Skeleton, wind: number, extrasName: string
+  spec: PortraitSpec, s: Skeleton, wind: number, extrasName: string, beltName = ''
 ): GarmentPlan {
   const kind = spec.garment.kind;
   const t = s.t;
@@ -332,7 +350,15 @@ function planGarment(
   // garment, and that waistband is under the hem. Drawing one at the waist
   // regardless put a leather band across the middle of every t-shirt in the
   // app, and buckled a suit jacket shut over its own trousers.
-  const belted = kind !== 'bare' && (/belt|sash|girdle|obi|cinch/.test(name)
+  //
+  // A *sash* is the exception to that, and it has to be, because a sash is worn
+  // over the garment rather than under it. The rule above is about a waistband
+  // hidden beneath a hem; an obi, a faja or a kamarband is the most conspicuous
+  // thing the wearer has on. So a named sash belts the figure whatever is on
+  // the legs, and a named belt still does not.
+  const sash = kind !== 'bare'
+    && /sash|obi\b|girdle|kamarband|cummerbund|faja/i.test(`${beltName} ${name}`);
+  const belted = kind !== 'bare' && (sash || /belt|cinch/.test(name)
     || ((shape.legs === null || shape.construction === 'skirted')
       && (kind === 'tunic' || kind === 'jacket' || kind === 'doublet' || kind === 'work_shirt')));
   const drape = planDrape(spec, s, {
@@ -360,6 +386,7 @@ function planGarment(
     drape,
     wind,
     belted,
+    sash,
     sleeveT,
     bell: kind === 'robe' || kind === 'gown',
     // Some personas rest with their hands clasped at the waist — a composed
@@ -1215,6 +1242,20 @@ function drawTorso(
     drawFolds(form, m, s, plan);
     drawClosure(raster, form, spec, ramps, s, plan, m);
     drawTrim(raster, form, spec, ramps, s, plan, m);
+    // What the garment is *called*, and what its place and period put on it.
+    // Both verdicts come off the spec, so the bust draws the same two things
+    // at its own scale — see `spec/garmentConstruction.ts`.
+    const surface = {
+      bare: plan.bare,
+      topHemY: plan.topHemY,
+      hemY: plan.hemY,
+      frontX: plan.drape.axis + plan.drape.frontShift,
+    };
+    // Decoration first: a feature's own marks lie on top of the cloth's
+    // pattern, the way a facing is sewn over a printed ground.
+    drawSpriteSurfaces(raster, form, spec, ramps, s, surface, m);
+    drawSpriteFeature(raster, form, spec, ramps, s, surface, m);
+    drawSpriteContextMarks(raster, form, spec, ramps, s, surface, m);
   }
   if (plan.belted) drawBelt(raster, form, ramps, s, plan, m);
   return m;
@@ -2167,27 +2208,67 @@ function drawCuff(
  */
 type Neckline = 'round' | 'vee' | 'stand' | 'cross' | 'square' | 'boat' | 'keyhole' | 'lapel' | 'collar';
 
+/**
+ * Which construction the feature already implies.
+ *
+ * The rules under this used to be a coarser second copy of the bust's feature
+ * table, matching the same words less carefully, and the two disagreed often
+ * enough to matter: "Court Doublet" is a ruff to one and a plain vee to the
+ * other. Where the spec has reached a verdict it wins, and what is left below
+ * handles the names no feature claims.
+ */
+const NECKLINE_FOR_FEATURE: Partial<Record<GarmentFeatureKey, Neckline>> = {
+  lapels: 'lapel',
+  shawl_lapel: 'lapel',
+  placket: 'collar',
+  mandarin: 'stand',
+  frogs: 'stand',
+  cross_collar: 'cross',
+  wrapped_edge: 'cross',
+  hide_edge: 'cross',
+  pallu: 'cross',
+  toga: 'boat',
+  broad_collar: 'square',
+  ruff: 'stand',
+  tank: 'square',
+  tee: 'round',
+  knit: 'round',
+  bib: 'square',
+  apron: 'round',
+};
+
+/**
+ * The shape of the opening, as the spec resolved it, mapped onto what a whole
+ * figure actually shows there.
+ *
+ * The two vocabularies are not the same and should not be. `spec.garment
+ * .neckline` names the *hole* — the bust cuts its cloth with it — and this
+ * names what is sewn round the hole, which is what reads at 96px. `cross` is
+ * one opening and one collar and maps straight across; `slit` is a shape the
+ * bust can draw and the sprite cannot, so it takes the plain round neck a slit
+ * is cut into.
+ */
+const NECKLINE_FOR_SHAPE: Record<NecklineShape, Neckline> = {
+  round: 'round',
+  wide: 'boat',
+  square: 'square',
+  v: 'vee',
+  cross: 'cross',
+  high: 'stand',
+  asymmetric: 'cross',
+  slit: 'round',
+  boat: 'boat',
+};
+
 function readNeckline(spec: PortraitSpec, kind: string): Neckline {
-  const n = `${spec.garment.name} ${spec.garment.material}`.toLowerCase();
-  // A tailored jacket is entirely its lapels at any scale, and the sprite had
-  // no case for them: every suit in the app came out as a plain buttoned coat,
-  // while the bust beside it drew a shirt front and a tie. The two pictures
-  // were of different garments.
-  if (/suit|blazer|tuxedo|dinner jacket|tailcoat|frock coat|morning coat|sport coat|sack coat|savile|lounge/.test(n)) return 'lapel';
-  // A turned collar with points — the shirt of the last two centuries.
-  if (/formal shirt|dress shirt|designer shirt|polo|guayabera|aloha|work shirt|flannel|chambray|shirtwaist|collar/.test(n)) return 'collar';
-  if (/mandarin|stand|band collar|kurta|achkan|sherwani|cheongsam|changshan/.test(n)) return 'stand';
-  if (/kaftan|caftan|kimono|hanbok|wrap|cross|angarkha|dhoti|toga|himation/.test(n)) return 'cross';
-  if (/cotehardie|houppelande|doublet|jerkin/.test(n)) return 'vee';
-  if (/chiton|peplos|stola|tunica/.test(n)) return 'boat';
-  if (/shift|smock|chemise|shirt|blouse/.test(n)) return 'round';
-  // Nothing in the name: pick from what this construction could carry.
-  const pool: Neckline[] =
-    kind === 'robe' || kind === 'gown' ? ['round', 'vee', 'keyhole', 'stand']
-    : kind === 'wrapped_garment' ? ['cross', 'boat']
-    : kind === 'jacket' || kind === 'doublet' ? ['vee', 'stand', 'square']
-    : ['round', 'vee', 'boat'];
-  return pool[Math.floor(unit(spec.seed, 'neckline') * pool.length) % pool.length];
+  // A feature that *is* a collar outranks the opening it is sewn to: a lapel
+  // and a frog closure are both cut into a vee, and drawing the vee alone
+  // throws away the only thing that names the garment.
+  const feature = spec.garment.feature;
+  const fromFeature = feature ? NECKLINE_FOR_FEATURE[feature.key] : undefined;
+  if (fromFeature) return fromFeature;
+  void kind;
+  return NECKLINE_FOR_SHAPE[spec.garment.neckline] ?? 'round';
 }
 
 function drawNeckline(
@@ -2374,7 +2455,17 @@ function drawClosure(
   }
 
   if (!open) {
-    // A closed tunic still has a placket, and buttons if it can afford them.
+    /**
+     * A closed tunic still has a placket, and buttons if it can afford them —
+     * but a pulled-on knitted garment does not. A t-shirt, a tank top and a
+     * jumper have no front opening at all, which is most of what separates
+     * them from every other closed garment in the app, and drawing a seam down
+     * the middle of one is what made a t-shirt read as a button-down.
+     */
+    const pulledOn = spec.garment.feature?.key === 'tee'
+      || spec.garment.feature?.key === 'tank'
+      || spec.garment.feature?.key === 'knit';
+    if (pulledOn) return;
     for (let y = s.shoulderY + 2; y <= s.waistY - 1; y += 1) {
       if (m[y * SPRITE_W + cx]) form.addBias(cx, y, 1);
     }
@@ -2411,21 +2502,65 @@ function drawBelt(
   raster: Raster, form: FormBuffer, ramps: PortraitRamps,
   s: Skeleton, plan: GarmentPlan, m: Mask
 ): void {
-  const y0 = s.waistY;
+  /**
+   * A sash is not a wide belt, and drawing it as one is what made an obi, a
+   * faja and a kamarband indistinguishable from a carter's strap.
+   *
+   * Three differences, all of them cheap: it is *cloth*, so it takes the
+   * garment's accent rather than leather; it is deep, four or five rows against
+   * a belt's two; and it is knotted rather than buckled, so instead of a metal
+   * square there are two ends hanging down the front. The knot is what carries
+   * it — a deep band alone reads as a cummerbund-coloured stripe.
+   */
+  const sash = plan.sash;
+  const y0 = sash ? s.waistY - 2 : s.waistY;
+  const y1 = sash ? s.waistY + 2 : s.waistY + 1;
+  const ramp = sash ? ramps.clothC : ramps.leather;
+  const mat = sash ? MAT.CLOTH_C : MAT.LEATHER;
+
   const beltM = makeMask(SPRITE_W, SPRITE_H);
-  for (let y = y0; y <= y0 + 1; y += 1) {
+  for (let y = y0; y <= y1; y += 1) {
     for (let x = 0; x < SPRITE_W; x += 1) {
       if (!m[y * SPRITE_W + x]) continue;
-      raster.set(x, y, ramps.leather.steps[4], MAT.LEATHER, 4);
+      raster.set(x, y, ramp.steps[4], mat, 4);
       beltM[y * SPRITE_W + x] = 1;
     }
   }
   // The belt is a band around a cylinder, not a stripe painted on one.
   cylinderSurface(form, beltM, s.cx + s.t.torsoSkew, s.waistHalf + 1, DEPTH.torso + 0.04);
-  // The buckle, and the cloth gathering above the belt.
+
   const bx = s.cx + s.t.torsoSkew + 2;
-  raster.set(bx, y0, ramps.metal.steps[2], MAT.METAL, 2);
-  raster.set(bx, y0 + 1, ramps.metal.steps[3], MAT.METAL, 3);
+  if (sash) {
+    // The knot, off to one side, and the two ends falling from it. Folds run
+    // along the wrap above the knot: cloth wound round a body gathers, and the
+    // gathers are what stop a deep band reading as a painted stripe.
+    for (let dy = 0; dy <= y1 - y0; dy += 1) {
+      for (let dx = -2; dx <= 2; dx += 1) {
+        if (!beltM[(y0 + dy) * SPRITE_W + bx + dx]) continue;
+        form.addBias(bx + dx, y0 + dy, dy === 0 ? -1.4 : 1.6);
+      }
+    }
+    for (let i = 0; i < 6; i += 1) {
+      for (const dx of [-1, 1] as const) {
+        const x = bx + dx * 2;
+        const y = y1 + 1 + i;
+        if (y >= SPRITE_H || !m[y * SPRITE_W + x]) continue;
+        raster.set(x, y, ramp.steps[dx < 0 ? 3 : 5], mat, dx < 0 ? 3 : 5);
+        form.addBias(x, y, dx < 0 ? -0.8 : 1.4);
+      }
+    }
+    // Gathers along the wrap, away from the knot.
+    for (let x = 0; x < SPRITE_W; x += 4) {
+      if (beltM[(y0 + 1) * SPRITE_W + x] && Math.abs(x - bx) > 4) {
+        form.addBias(x, y0 + 1, 1.2);
+      }
+    }
+  } else {
+    // The buckle.
+    raster.set(bx, y0, ramps.metal.steps[2], MAT.METAL, 2);
+    raster.set(bx, y0 + 1, ramps.metal.steps[3], MAT.METAL, 3);
+  }
+  // The cloth gathering above whichever it is.
   for (let x = 0; x < SPRITE_W; x += 1) {
     if (m[(y0 - 1) * SPRITE_W + x]) form.addBias(x, y0 - 1, 1);
   }
@@ -2731,15 +2866,28 @@ function drawFeet(
   const boot = kind === 'boot';
   const clog = kind === 'clog';
   const sandal = kind === 'sandal' || kind === 'straw';
+  const moccasin = kind === 'moccasin';
+  const sneaker = kind === 'sneaker';
+  const slipper = kind === 'slipper';
+  const heeled = kind === 'heeled';
 
   const ramp = bare ? ramps.skin
     : soft ? ramps.clothC
+    // A slipper is soft goods — silk, satin, cloth, thin kid — and takes the
+    // accent cloth rather than the boot leather every other shoe is cut from.
+    : slipper ? ramps.clothC
+    : sneaker ? ramps.clothB
     : clog ? ramps.book[MAT.WOOD] ?? ramps.leather
     : ramps.leather;
-  const mat = bare ? MAT.SKIN : soft ? MAT.CLOTH_C : clog ? MAT.WOOD : MAT.LEATHER;
+  const mat = bare ? MAT.SKIN : soft || slipper ? MAT.CLOTH_C
+    : sneaker ? MAT.CLOTH_B : clog ? MAT.WOOD : MAT.LEATHER;
   // The sole is a different material from the upper so the ink pass separates
   // them — the welt line is the single cheapest cue that this is footwear.
-  const soleRamp = clog ? ramps.book[MAT.WOOD] ?? ramps.leather : ramps.leather;
+  // A trainer's sole is pale rubber and is the loudest thing about it; put it
+  // in leather and the whole shoe is one brown mass again.
+  const soleRamp = clog ? ramps.book[MAT.WOOD] ?? ramps.leather
+    : sneaker ? ramps.clothB : ramps.leather;
+  const soleMat = clog ? MAT.WOOD : sneaker ? MAT.CLOTH_B : MAT.LEATHER;
 
   // Both toes point the way the figure *faces*, which is away from `nearSide`
   // — the same inversion the head had. `nearSide` names the shoulder swung
@@ -2828,10 +2976,20 @@ function drawFeet(
       : kind === 'straw' ? 1
       : sandal ? 1
       : kind === 'wrap' ? 1
+      // A moccasin has no sole plate at all — it is one piece of skin turned up
+      // round the foot — and a trainer's is the thickest thing in the set.
+      : moccasin ? 1
+      // A slipper has no welt at all; a heeled shoe's forepart sole is thin,
+      // because all of its height is in the heel and none in the tread.
+      : slipper || heeled ? 1
+      : sneaker ? 3
       : 2;
     // The near foot is taller in the frame for the same reason it is shorter:
     // rotating it toward the camera trades length for height.
-    const upperH = Math.max(3, Math.round((s.shoeH - soleH) * (near ? 1.08 : 0.9)));
+    // A slipper is cut low enough to show the instep, which is most of what
+    // separates it from a shoe at this size — the foot is barely covered.
+    const upperH = Math.max(2, Math.round(
+      (s.shoeH - soleH) * (near ? 1.08 : 0.9) * (slipper ? 0.62 : 1)));
     const shaftTop = boot ? soleY - s.shoeH - Math.round(s.shoeH * 1.1) : null;
 
     const backX = cx - (toeDir > 0 ? heel : heel + toe);
@@ -2853,10 +3011,34 @@ function drawFeet(
       const u = along(x);
       // The sole overhangs the upper at both ends; the upper stops short of it.
       const top = soleTopY - Math.round(upperH * profile(u));
-      for (let y = top; y < soleTopY; y += 1) upperM[y * SPRITE_W + x] = 1;
+      // A heel lifts the back of the foot, so the whole shoe tilts: the arch
+      // and the counter ride up while the toe stays on the ground. The gap
+      // under the waist of the sole says the same thing, but a six-pixel foot
+      // has room for about one pixel of gap and this tilt is what carries it.
+      const lift = heeled ? Math.round((1 - Math.min(1, u / 0.5)) * 2) : 0;
+      for (let y = top - lift; y < soleTopY - lift; y += 1) upperM[y * SPRITE_W + x] = 1;
     }
     for (let x = soleBack; x <= soleFront; x += 1) {
       if (x < 0 || x >= SPRITE_W) continue;
+      if (heeled) {
+        /**
+         * A heeled shoe is the one construction whose sole does not touch the
+         * ground along its length: the tread is under the ball of the foot, the
+         * heel is a separate block at the back, and between them the waist of
+         * the sole is in the air. That gap is the entire recognition — draw the
+         * sole as one slab and a court shoe is a flat shoe in a different
+         * colour.
+         */
+        const u = along(x);
+        const onTread = u > 0.42;
+        const onHeel = u < 0.14;
+        if (!onTread && !onHeel) continue;
+        // The tread is thin and sits on the ground; the heel is a column that
+        // reaches the ground from the raised back of the shoe.
+        const from = onHeel ? soleTopY : soleY - 1;
+        for (let y = from; y <= soleY; y += 1) soleM[y * SPRITE_W + x] = 1;
+        continue;
+      }
       for (let y = soleTopY; y <= soleY; y += 1) soleM[y * SPRITE_W + x] = 1;
     }
 
@@ -2880,7 +3062,7 @@ function drawFeet(
     };
     // A sandal is a sole with straps: the foot itself stays skin.
     put(upperM, sandal ? ramps.skin : ramp, sandal ? MAT.SKIN : mat);
-    if (!bare) put(soleM, soleRamp, clog ? MAT.WOOD : MAT.LEATHER);
+    if (!bare) put(soleM, soleRamp, soleMat);
     else put(soleM, ramps.skin, MAT.SKIN);
 
     const depth = (near ? DEPTH.legNear : DEPTH.legFar) + 0.06;
@@ -2912,8 +3094,9 @@ function drawFeet(
         // it is the one plane the sky never reaches.
         // The welt keeps a hint of light along its top edge; the rest is the
         // darkest band on the shoe.
-        raster.set(x, y, soleRamp.steps[3], clog ? MAT.WOOD : MAT.LEATHER, 3);
-        form.addBias(x, y, y === soleTopY ? 1 : 3);
+        raster.set(x, y, soleRamp.steps[3], soleMat, 3);
+        // Rubber is pale and catches the light; leather and wood do not.
+        form.addBias(x, y, sneaker ? (y === soleTopY ? 0 : 1) : y === soleTopY ? 1 : 3);
       }
     }
 
@@ -2959,7 +3142,89 @@ function drawFeet(
       }
     }
 
-    if (!bare && !sandal && kind !== 'wrap') {
+    if (moccasin) {
+      /**
+       * The vamp plug and its puckered seam: a moccasin is one piece of skin
+       * drawn up round the foot and gathered onto an oval let into the top, and
+       * that ring of gathers is the only thing on it. No welt, no heel, no
+       * counter — which is why it must not go through the shoe branch below.
+       */
+      const plugBack = toeDir > 0 ? backX + Math.round(len * 0.42) : backX + Math.round(len * 0.12);
+      const plugFront = toeDir > 0 ? frontX - Math.round(len * 0.12) : frontX - Math.round(len * 0.42);
+      for (let x = plugBack; x <= plugFront; x += 1) {
+        if (x < 0 || x >= SPRITE_W) continue;
+        const u = (x - plugBack) / Math.max(1, plugFront - plugBack);
+        const y = soleTopY - 1 - Math.round(upperH * (0.42 + Math.sin(Math.PI * u) * 0.28));
+        if (!upperM[y * SPRITE_W + x]) continue;
+        // Alternating pixels: a puckered seam is a row of stitches pulled
+        // tight, and a continuous line reads as a painted stripe.
+        form.addBias(x, y, (x + y) % 2 === 0 ? 2.4 : -1);
+      }
+    } else if (sneaker) {
+      // Three lace ticks up the instep and a toe-cap line, which between them
+      // are the whole of a plimsoll at this size.
+      for (let i = 0; i < 3; i += 1) {
+        const u = 0.34 + i * 0.12;
+        const x = toeDir > 0 ? backX + Math.round(u * len) : frontX - Math.round(u * len);
+        const y = soleTopY - 1 - Math.round(upperH * (0.6 - i * 0.08));
+        if (x >= 0 && x < SPRITE_W && upperM[y * SPRITE_W + x]) form.addBias(x, y, 2.2);
+      }
+      const capX = cx + toeDir * Math.round(toe * 0.55);
+      for (let y = soleTopY - upperH; y < soleTopY; y += 1) {
+        if (capX >= 0 && capX < SPRITE_W && upperM[y * SPRITE_W + capX]) {
+          form.addBias(capX, y, 1.6);
+        }
+      }
+    }
+
+    if (slipper) {
+      // The topline: a scooped opening with the instep showing above it, and —
+      // on the jutti, khussa, mojari and babouche — a toe that curls up off the
+      // ground. Both are outline, which is what survives at five pixels.
+      const scoopX = cx - toeDir * Math.round(toe * 0.1);
+      for (let d = -2; d <= 2; d += 1) {
+        const y = soleTopY - upperH + (Math.abs(d) > 1 ? 1 : 0);
+        const x = scoopX + d;
+        if (x >= 0 && x < SPRITE_W && upperM[y * SPRITE_W + x]) form.addBias(x, y, 2.2);
+      }
+      if (/jutti|khussa|mojari|babouche|slipper/i.test(extras.footwearName)) {
+        const tipX = cx + toeDir * (heel + toe);
+        for (let i = 0; i < 2; i += 1) {
+          const x = tipX - toeDir * i;
+          const y = soleTopY - 1 - i;
+          if (x < 0 || x >= SPRITE_W || y < 0) continue;
+          raster.set(x, y, ramp.steps[2], mat, 2);
+          form.set(x, y, toeDir * 0.4, -0.7, 0.6, depth + 0.02);
+        }
+      }
+    } else if (heeled) {
+      // The breast of the heel — the forward face of the block — catches the
+      // light, and the arch above the gap is in shadow. Together they say the
+      // back of the shoe is off the ground.
+      const heelFrontU = 0.14;
+      const hx = toeDir > 0 ? backX + Math.round(heelFrontU * len) : frontX - Math.round(heelFrontU * len);
+      for (let y = soleTopY; y <= soleY; y += 1) {
+        if (hx >= 0 && hx < SPRITE_W && soleM[y * SPRITE_W + hx]) form.addBias(hx, y, -1.4);
+      }
+      for (let x = backX; x <= frontX; x += 1) {
+        const u = along(x);
+        if (u < heelFrontU || u > 0.44) continue;
+        if (x >= 0 && x < SPRITE_W && upperM[(soleTopY - 1) * SPRITE_W + x]) {
+          form.addBias(x, soleTopY - 1, 2.4);
+        }
+      }
+      // Cut low across the instep, like the slipper: a court shoe shows the
+      // whole top of the foot.
+      const vampX = cx + toeDir * Math.round(toe * 0.34);
+      for (let d = -1; d <= 1; d += 1) {
+        const y = soleTopY - upperH;
+        if (vampX + d >= 0 && vampX + d < SPRITE_W && upperM[y * SPRITE_W + vampX + d]) {
+          form.addBias(vampX + d, y, 2);
+        }
+      }
+    }
+
+    if (!bare && !sandal && !moccasin && !sneaker && !slipper && !heeled && kind !== 'wrap') {
       // The vamp: a raking seam from just behind the toe back up to the ankle
       // opening. Two or three pixels, and the shoe acquires a front.
       const dark = (x: number, y: number, by = 2) => {
@@ -3038,6 +3303,25 @@ function drawFeet(
       // seats the ankle inside rather than on top of it.
       const collarY = soleTopY - upperH;
       for (let x = cx - heel; x <= cx + heel; x += 1) form.addBias(x, collarY, 2);
+    }
+
+    if (extras.anklet) {
+      /**
+       * A band at the ankle, above the foot. Drawn last so it sits on top of
+       * whatever is below it, and two rows deep because one row of metal at
+       * this size is indistinguishable from the contour ink.
+       */
+      const aRamp = extras.anklet.metal ? ramps.metal : ramps.clothC;
+      const aMat = extras.anklet.metal ? MAT.METAL : MAT.CLOTH_C;
+      const ay = soleTopY - upperH - 2;
+      for (let x = cx - heel; x <= cx + heel; x += 1) {
+        if (x < 0 || x >= SPRITE_W || ay < 0) continue;
+        for (let d = 0; d < 2; d += 1) {
+          if (raster.alphaAt(x, ay + d) === 0) continue;
+          raster.set(x, ay + d, aRamp.steps[d === 0 ? 2 : 5], aMat, d === 0 ? 2 : 5);
+          form.addBias(x, ay + d, d === 0 ? -1 : 2);
+        }
+      }
     }
 
     if (bare) {
@@ -4007,7 +4291,8 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
   // The accessory's raw name, first: a shawl or a bandana in that slot is an
   // over-layer, and it reaches `readShape` nowhere else.
   const plan = planGarment(spec, s, fp.wind,
-    extras.accessoryName || extras.worn?.name || extras.armWear?.name || '');
+    extras.accessoryName || extras.worn?.name || extras.armWear?.name || '',
+    extras.beltName);
   const raster = new Raster(SPRITE_W, SPRITE_H);
   const form = new FormBuffer();
   const rig = buildRig(t);
@@ -4057,6 +4342,32 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
         const i = y * SPRITE_W + x;
         hair.back[i] = 0;
         hair.front[i] = 0;
+      }
+    }
+  } else if (spec.headwear && spec.headwear.kind !== 'none' && spec.headwear.kind !== 'band') {
+    /**
+     * Anything with a crown sits *on* the skull, so the hair under it stops at
+     * the hatband — and the back layer, which is painted before the hat and is
+     * wider than the skull, was standing two rows proud of the crown. On a flat
+     * cap that reads as a tuft growing out of the top of the hat.
+     *
+     * Only the volume above the band goes: a cap covers the crown and leaves
+     * everything at ear height and below, which is most of what a viewer uses
+     * to read the hairstyle. A coronet or a band is exempt because it encircles
+     * the head rather than covering it.
+     */
+    const bandY = L.crownY + Math.round(L.H * 0.30) + L.hatY;
+    const rx = L.rx + Math.round(L.H * 0.30);
+    for (let y = L.crownY - Math.round(L.H * 0.7); y < bandY; y += 1) {
+      if (y < 0 || y >= SPRITE_H) continue;
+      for (let x = L.hx - rx; x <= L.hx + rx; x += 1) {
+        if (x < 0 || x >= SPRITE_W) continue;
+        // Both layers. The front one is painted before the hat and so is
+        // covered by it wherever they overlap — but a bouffant or a topknot
+        // stands *above* the crown, where there is no hat to cover it, and that
+        // is exactly the tuft this is here to remove.
+        hair.back[y * SPRITE_W + x] = 0;
+        hair.front[y * SPRITE_W + x] = 0;
       }
     }
   }
@@ -4152,7 +4463,12 @@ function compilePose(source: SpriteSource, ramps: PortraitRamps, fp: FramePose):
   // shadow, deepest right under the chin and easing off toward the collar.
   for (let y = s.neckTopY; y <= s.shoulderY + 1; y += 1) {
     const k = (y - s.neckTopY) / Math.max(1, s.shoulderY + 1 - s.neckTopY);
-    const cast = k < 0.35 ? 3 : k < 0.7 ? 2 : 1;
+    // The throat is a recess for its whole length, so this eases off but never
+    // clears. At a tail of 1 the bottom of the neck resolved *brighter than the
+    // cheek* — measured, 176 against 171, where the bust's throat tops out at
+    // 0.88 of its own cheek — and a lit column under a shaded jaw is read as
+    // the front of the figure. That is what swallowed the chin.
+    const cast = k < 0.3 ? 3.4 : k < 0.65 ? 2.9 : 2.3;
     const half = neckHalfAt(y);
     for (let x = s.headCx - half; x <= s.headCx + half; x += 1) {
       form.addBias(x, y, cast);
@@ -4300,7 +4616,8 @@ export function poseLandmarks(source: SpriteSource, id: FrameId): PoseLandmarks 
   const base = buildSkeleton(source.spec, getTuning());
   const s = foldSpine(base, fp.posture);
   const plan = planGarment(source.spec, s, fp.wind,
-    source.extras.accessoryName || source.extras.worn?.name || '');
+    source.extras.accessoryName || source.extras.worn?.name || '',
+    source.extras.beltName);
   const arms = restingArms(fp, source.extras, plan.clasped);
   const nearSide = s.nearSide;
   const farSide = -nearSide as -1 | 1;

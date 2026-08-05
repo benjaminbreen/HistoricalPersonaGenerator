@@ -115,17 +115,65 @@ export type HeldKind =
   | 'bag'
   | null;
 
-/** What is actually on the feet, read from the equipped item. */
-export type FootwearKind = 'bare' | 'sandal' | 'boot' | 'clog' | 'wrap' | 'straw' | 'shoe';
+/**
+ * What is actually on the feet, read from the equipped item.
+ *
+ * `shoe` was the catch-all and took 18% of every persona in the app — a
+ * moccasin, a court shoe, a turnshoe, a slipper and a canvas trainer all drawn
+ * as the same welted leather shoe with a heel block under it. The two added
+ * here are the two largest groups inside that: soft-soled skin footwear, which
+ * has no sole plate and no heel at all, and the rubber-soled canvas shoe, which
+ * is the commonest thing on a foot anywhere after about 1950.
+ */
+export type FootwearKind =
+  | 'bare' | 'sandal' | 'boot' | 'clog' | 'wrap' | 'straw' | 'shoe'
+  /** One piece of soft skin gathered onto a vamp plug: moccasin, pampootie. */
+  | 'moccasin'
+  /** Canvas upper, pale rubber sole, laced: sneaker, trainer, plimsoll. */
+  | 'sneaker'
+  /**
+   * Flat, soft and slipped on: jutti, khussa, mojari, babouche, lotus shoe,
+   * silk slipper, loafer, ballet flat. No welt, no heel, and a topline cut low
+   * enough to show the instep — which is the opposite of everything the `shoe`
+   * drawing states about itself.
+   */
+  | 'slipper'
+  /**
+   * Raised at the back: court shoe, pump, heel, wedge, T-strap. The one form
+   * whose sole does not touch the ground along its whole length, and that gap
+   * under the arch is the entire recognition.
+   */
+  | 'heeled';
 
 export interface SpriteExtras {
   /** Barefoot is common and should read as such. */
   footwear: FootwearKind;
+  /**
+   * A band at the ankle, where the feet slot turned out to hold jewellery
+   * rather than shoes. Metal for gold, silver and brass; otherwise the bead and
+   * shell strings that hang the same way.
+   */
+  anklet: { metal: boolean } | null;
+  /**
+   * The foot item's raw name. Carried through because a slipper's toe is turned
+   * up on a jutti and a khussa and flat on a silk mule, and that is a fact about
+   * the item rather than about the construction.
+   */
+  footwearName: string;
   held: { kind: HeldKind; material: HeldMaterial; name: string } | null;
   /** Worn at the belt or slung — drawn from the real item, never invented. */
   worn: { kind: WornKind; name: string } | null;
   /** Whether the character actually has a belt item, as opposed to a sash. */
   hasBelt: boolean;
+  /**
+   * What the waist item is called.
+   *
+   * `hasBelt` answered only whether there was one, and the answer to "what
+   * kind" was thrown away — so a Cotton Sash and a Leather Belt, which are not
+   * the same object and do not hang the same way, were drawn identically. About
+   * one persona in twenty wears a named sash.
+   */
+  beltName: string;
   /** What is on the wrists — stacked bangles read very differently from a cuff. */
   armWear: { kind: ArmWear; name: string; metal: boolean };
   /** The object accessory, where it is an object rather than an ornament. */
@@ -233,6 +281,16 @@ export interface SpriteSource {
 }
 
 /**
+ * Jewellery worn on the ankle or the toes, which the generator files in the
+ * *feet* slot because that is where on the body it goes. Three of the four
+ * commonest such items in the app — Toe Rings, Gold Anklets, Payal — were being
+ * read as footwear and drawn as leather shoes.
+ */
+function isAnkleOrnament(text: string): boolean {
+  return /anklet|payal|paayal|toe ?ring|ankle ?bell|ghungroo|khalkhal/i.test(text);
+}
+
+/**
  * The generator dresses feet in period footwear by name — waraji, pattens,
  * buskins, huaraches. Reading the name (and material, when present) sorts
  * them into the handful of constructions the sprite can actually draw.
@@ -240,7 +298,34 @@ export interface SpriteSource {
 function classifyFootwear(name: string | undefined, material?: string): FootwearKind {
   if (!name || /barefoot|\bbare\b|none/i.test(name)) return 'bare';
   const n = `${name} ${material ?? ''}`.toLowerCase();
-  if (/sandal|thong|waraji|zori|zōri|caliga|huarache|chappal|paduka|flip/.test(n)) return 'sandal';
+  // Ankle and toe ornaments are filed in the feet slot and are not footwear at
+  // all. Drawn as shoes — which is what happened — a woman in gold anklets came
+  // out in a pair of brown brogues.
+  if (isAnkleOrnament(n)) return 'bare';
+  if (/sandal|thong|waraji|zori|zōri|caliga|huarache|chappal|kolhapuri|paduka|solea|flip/.test(n)) {
+    return 'sandal';
+  }
+  // Before the slipper rule: a silk pump is a heel, not a soft shoe, and the
+  // material would otherwise claim it.
+  if (/heel|\bpump|court ?shoe|wedge|platform|stiletto|t-?bar|t-?strap|red bottoms/.test(n)) {
+    return 'heeled';
+  }
+  // A turnshoe is sewn inside out and turned, so it has no welt, no stiffener
+  // and no heel — structurally a slipper, whatever a medievalist calls it.
+  if (/slipper|babouche|jutti|khussa|mojari|lotus ?shoe|loafer|ballet|\bflats?\b|espadrille|turnshoe/.test(n)
+    // A shoe made of cloth is a soft shoe wherever it was made. This is the
+    // half of the group that never says "slipper": Embroidered Silk Shoes,
+    // Satin Shoes, Cotton Shoes, Zardozi Shoes.
+    || /(?:silk|satin|cloth|cotton|brocade|velvet|zardozi|embroidered)[^.]*\bshoes?\b/.test(n)) {
+    return 'slipper';
+  }
+  // Before `boot`, because a mukluk and a soft high moccasin are the same
+  // construction and the skin one should read as skin.
+  if (/moccasin|mocassin|pampootie|opanak|carbatina|soft ?shoe|skin ?boot/.test(n)) return 'moccasin';
+  if (/sneaker|trainer|plimsoll|tennis ?shoe|running ?shoe|canvas ?shoe|keds|gym ?shoe|sports ?shoe/
+    .test(n)) {
+    return 'sneaker';
+  }
   if (/boot|buskin|valenki|mukluk|jackboot/.test(n)) return 'boot';
   if (/clog|patten|geta|sabot|wooden/.test(n)) return 'clog';
   if (/straw|rush|rope|bast|espadrille|woven|fiber|fibre|grass|reed/.test(n)) return 'straw';
@@ -385,6 +470,13 @@ export function buildSpriteSource(c: SpriteCharacter): SpriteSource {
     spec,
     extras: {
       footwear: classifyFootwear(feet?.name, feet?.material),
+      footwearName: feet?.name ?? '',
+      anklet: feet && isAnkleOrnament(`${feet.name} ${feet.material ?? ''}`)
+        // Name *and* material: the tables write "Toe Rings" with the metal in
+        // the material field, so testing the name alone made every silver
+        // anklet in the app a string of cloth beads.
+        ? { metal: /gold|silver|bronze|brass|copper|metal/i.test(`${feet.name} ${feet.material ?? ''}`) }
+        : null,
       held: main
         ? {
           kind: heldKind,
@@ -394,6 +486,7 @@ export function buildSpriteSource(c: SpriteCharacter): SpriteSource {
         : null,
       worn: wornItem ? { kind: classifyWorn(wornItem.name), name: wornItem.name } : null,
       hasBelt: !!belt,
+      beltName: belt?.name ?? '',
       armWear: {
         kind: classifyArmWear(armName),
         name: armName,

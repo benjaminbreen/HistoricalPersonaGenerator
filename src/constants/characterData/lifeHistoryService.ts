@@ -134,6 +134,20 @@ interface EventTemplate {
   minYear?: number;
   maxYear?: number;
   requiredGender?: 'male' | 'female';
+  /**
+   * Where this could have happened. `minYear` was the only gate a template
+   * naming a specific geography had, and a date does not keep an event on its
+   * own ground: the zone pools are read by everyone in the zone, so the North
+   * American frontier templates put a gold rush claim in Jamaica, a wagon train
+   * leaving Cape Cod and a prairie homestead on the Isthmus of Tehuantepec.
+   * Eleven of twelve such events landed off any frontier.
+   *
+   * Tested against the same lowercased location-and-region string the
+   * capability checks use.
+   */
+  places?: RegExp;
+  /** And the reverse, for an event that belongs anywhere but here. */
+  excludePlaces?: RegExp;
   requiresLiteracy?: boolean; // Event requires character to be educated/literate
   /**
    * A capability the society must actually have. Ploughing needs draft animals,
@@ -933,20 +947,47 @@ const CULTURAL_EVENT_MODIFIERS: Record<CulturalZone, Partial<EventTemplate>[]> =
   ],
   NORTH_AMERICAN_COLONIAL: [
     {
+      // The frontier is a place and a date, and this template used to be
+      // neither: it is read by everyone in the zone, so it staked gold claims
+      // in Jamaica and raised prairie homesteads on Cape Cod. Split in two
+      // because the overland migration and the gold rushes have different
+      // grounds and different years.
       kind: 'journey',
       importance: EventImportance.MILESTONE,
       titles: ['Westward Movement', 'Frontier Life'],
       templates: [
         'Joined wagon train heading west for new land',
-        'Staked claim during gold rush',
         'Established homestead on prairie'
       ],
       weight: 1.2,
       minAge: 18,
+      // The Oregon Trail opens in 1841 and the Homestead Act follows in 1862.
+      minYear: 1841,
+      places: /\b(?:plains|prairie|badlands|black hills|platte|flint hills|missouri|llano|texas|hill country|rockies|rocky|bitterroot|yellowstone|snake river|glacier|salmon river|absaroka|dakota|nebraska|kansas|oklahoma|colorado|wyoming|montana|idaho|utah|nevada|oregon|ozark|driftless|illinois river|southwest|sonoran|colorado plateau|rio grande|mogollon|frontier)\b/i,
       eraWeights: {
         [HistoricalEra.INDUSTRIAL_ERA]: 1.5,
         [HistoricalEra.MODERN_ERA]: 0,  // Disable for modern era
         [HistoricalEra.FUTURE_ERA]: 0    // Disable for future era
+      }
+    },
+    {
+      kind: 'journey',
+      importance: EventImportance.MILESTONE,
+      titles: ['Gold Rush', 'The Diggings'],
+      templates: [
+        'Staked claim during gold rush',
+        'Went to the diggings, and came back with less than was carried out',
+        'Worked a claim through a winter for what three months paid'
+      ],
+      weight: 0.8,
+      minAge: 18,
+      // Sutter's Mill, 1848. The Champlain Valley in 1833 had no rush.
+      minYear: 1848,
+      places: /\b(?:california|sierra|sacramento|napa|nevada|colorado|black hills|dakota|klondike|yukon|alaska|fraser|pike's peak|comstock)\b/i,
+      eraWeights: {
+        [HistoricalEra.INDUSTRIAL_ERA]: 1.5,
+        [HistoricalEra.MODERN_ERA]: 0,
+        [HistoricalEra.FUTURE_ERA]: 0
       }
     },
     {
@@ -1549,9 +1590,23 @@ function generateEarlyLifeEvent(
   }
 
   // Crafts & Trades - Traditional apprenticeship
+  //
+  // The list was short enough that most of the substrate missed it and fell to
+  // the generic opener at the foot of this function — bakers, millers, brewers
+  // and dyers were all being told they learned "the trade of baker from an
+  // experienced practitioner", which is the one sentence this whole function
+  // exists to avoid. These are the trades a boy was actually bound into.
   const craftProfessions = ['blacksmith', 'carpenter', 'mason', 'weaver', 'potter', 'tanner',
     'cobbler', 'tailor', 'jeweler', 'goldsmith', 'silversmith', 'cooper', 'wheelwright',
-    'instrument maker', 'clockmaker', 'glassblower', 'chandler'];
+    'instrument maker', 'clockmaker', 'glassblower', 'chandler',
+    'smith', 'baker', 'miller', 'brewer', 'dyer', 'fuller', 'butcher', 'saddler',
+    'leatherworker', 'currier', 'shoemaker', 'joiner', 'turner', 'sawyer', 'cutler',
+    'armourer', 'armorer', 'bowyer', 'fletcher', 'roper', 'rope maker', 'ropemaker',
+    'basket maker', 'basketmaker', 'thatcher', 'candle maker', 'soap boiler', 'glazier',
+    'bookbinder', 'printer', 'engraver', 'stonecutter', 'stonemason', 'brickmaker',
+    'lens grinder', 'gunsmith', 'locksmith', 'coppersmith', 'tinsmith', 'founder',
+    'carver', 'lacquerer', 'papermaker', 'paper maker', 'net maker', 'sail maker',
+    'sailmaker', 'shipwright', 'boat builder', 'cartwright', 'apothecary', 'perfumer'];
 
   if (craftProfessions.some(p => profLower.includes(p))) {
     // `guilds` says a craft corporation exists; `guild_apprenticeship` says it
@@ -1616,16 +1671,38 @@ function generateEarlyLifeEvent(
   }
 
   // Farming & Agricultural - No apprenticeship, learned from family
+  //
+  // Nine names covered a substrate that has upwards of forty, so a homesteader,
+  // a crofter and a cane cutter all came out apprenticed to their own job
+  // titles. Anything grown, picked, cut or dug for a living belongs here.
   const farmProfessions = ['farmer', 'peasant', 'rice farmer', 'wheat farmer',
-    'vegetable farmer', 'tenant farmer', 'field hand', 'cultivator', 'planter'];
+    'vegetable farmer', 'tenant farmer', 'field hand', 'cultivator', 'planter',
+    'homesteader', 'crofter', 'cottager', 'sharecropper', 'smallholder', 'grower',
+    'orchardist', 'vintner', 'vine dresser', 'market gardener', 'gardener',
+    'cane cutter', 'tapper', 'picker', 'reaper', 'thresher', 'fellah', 'mitayo',
+    'harvester', 'farm hand', 'farm labourer', 'farm laborer', 'farm worker',
+    'field labourer', 'field laborer', 'ploughman', 'plowman', 'agricultural',
+    'ranch hand', 'dairymaid', 'milkmaid', 'dairy farmer', 'beekeeper'];
 
   if (farmProfessions.some(p => profLower.includes(p))) {
-    const variants = [
-      `Began working family fields, learning the rotation from elders`,
-      `Helped with the harvest for the first season and proved capable despite a young age`,
-      `Trusted to tend the family's animals alone for the first time`,
-      `Learned to read weather signs and predict harvest yields from a parent`
-    ];
+    // Split at the agricultural revolution because the sentences were timeless
+    // and the work was not: a child on an enclosed nineteenth-century farm went
+    // out for a wage, and one before it went out for the household. Four
+    // era-spanning sentences also sat squarely in what the corpus variety audit
+    // counts against us — see `auditNarrative`, biography-variety.
+    const variants = trainingYear >= 1750
+      ? [
+        `Went out to the fields for a day's wage before being old enough to earn a full one`,
+        `Learned the work on someone else's land, which was the only land there was to learn it on`,
+        `Was hired by the season at the statute fair, and stood there to be looked over`,
+        `Took a place on a farm at the term day, and lived in the loft above the beasts`,
+      ]
+      : [
+        `Began working family fields, learning the rotation from elders`,
+        `Helped with the harvest for the first season and proved capable despite a young age`,
+        `Trusted to tend the family's animals alone for the first time`,
+        `Learned to read weather signs and predict harvest yields from a parent`
+      ];
     return {
       kind: 'agricultural',
       title: 'Coming of Age',
@@ -1634,7 +1711,9 @@ function generateEarlyLifeEvent(
   }
 
   // Merchants & Traders
-  const merchantProfessions = ['merchant', 'trader', 'peddler', 'shopkeeper', 'vendor'];
+  const merchantProfessions = ['merchant', 'trader', 'peddler', 'shopkeeper', 'vendor',
+    'chapman', 'pedlar', 'hawker', 'costermonger', 'stallholder', 'market seller',
+    'grocer', 'moneylender', 'broker', 'factor'];
 
   if (merchantProfessions.some(p => profLower.includes(p)) && can('market_exchange')) {
     const variants = wageWork
@@ -1659,7 +1738,8 @@ function generateEarlyLifeEvent(
 
   // Religious Professions
   const religiousProfessions = ['priest', 'monk', 'nun', 'imam', 'rabbi', 'shaman',
-    'healer', 'wise woman', 'oracle', 'temple dancer'];
+    'healer', 'wise woman', 'oracle', 'temple dancer', 'bonesetter', 'herbalist',
+    'diviner', 'medicine', 'sweat lodge keeper', 'muezzin', 'sexton', 'catechist'];
 
   if (religiousProfessions.some(p => profLower.includes(p))) {
     const variants = [
@@ -1727,6 +1807,25 @@ function generateEarlyLifeEvent(
         text: variants[Math.floor(seededRandom() * variants.length)]
       };
     }
+    // A manservant is still a servant. Returning only for women dropped every
+    // male domestic through to the generic opener at the foot of this function,
+    // where he was apprenticed to the trade of servant.
+    const variants = wageWork
+      ? [
+        `Went into service in a house with more rooms than his own had walls`,
+        `Started as the boy who did whatever the household needed doing`,
+        `Took a place in service because it came with a bed and two meals`,
+      ]
+      : [
+        `Placed in a great house as a boy, and learned its stairs before its people`,
+        `Entered service young, and was taught what could be spoken to whom`,
+        `Was sent into another household to be fed, and stayed to work for it`,
+      ];
+    return {
+      kind: 'family',
+      title: 'Entered Service',
+      text: variants[Math.floor(seededRandom() * variants.length)],
+    };
   }
 
   // Military & Guards
@@ -1786,6 +1885,39 @@ function generateEarlyLifeEvent(
       kind: 'mundane',
       title: wageWork ? 'First Job' : 'Hard Labor Begins',
       text: variants[Math.floor(seededRandom() * variants.length)]
+    };
+  }
+
+  // Work nobody was ever apprenticed into.
+  //
+  // Carrying water, washing other people's linen, cutting reeds and sweeping
+  // out privies were among the commonest ways of making a living in every
+  // pre-industrial city, and none of them had a master, a term or a trade
+  // secret. Water carrier alone was the single largest consumer of the generic
+  // "learning the trade of" opener.
+  const unskilledProfessions = ['water carrier', 'water bearer', 'laundry', 'laundress',
+    'washerwoman', 'washerman', 'dhobi', 'cleaner', 'sweeper', 'street sweeper',
+    'night soil', 'scavenger', 'rag picker', 'ragpicker', 'gleaner', 'wood gatherer',
+    'firewood gatherer', 'dung collector', 'reed cutter', 'peat cutter', 'errand',
+    'messenger boy', 'crossing sweeper', 'bath attendant', 'lamplighter'];
+
+  if (unskilledProfessions.some(p => profLower.includes(p))) {
+    const variants = wageWork
+      ? [
+        `Took the work because it needed no papers and started the same day`,
+        `Was doing it beside a parent before anyone thought to call it a job`,
+        `Started for pennies a day, and the pennies were the household's`,
+      ]
+      : [
+        `Was set to it as soon as the load could be carried, and never set down`,
+        `Took over the round from someone in the family who had grown too old for it`,
+        `Learned it in an afternoon, as anyone could, which is why it paid what it paid`,
+        `Began doing it for the household, and went on doing it for other households`,
+      ];
+    return {
+      kind: 'mundane',
+      title: 'Went to Work',
+      text: variants[Math.floor(seededRandom() * variants.length)],
     };
   }
 
@@ -1878,14 +2010,38 @@ function generateEarlyLifeEvent(
       text: variants[Math.floor(seededRandom() * variants.length)]
     };
   }
+  if (birthYear < -8000) {
+    // "Trade" and "practitioner" belong to a world with crafts and masters.
+    // A forager learns from kin, in the country, by going along.
+    return {
+      kind: 'apprenticeship',
+      title: 'Early Training',
+      text: `Began going out with the older ones, learning the country and how to take from it`,
+    };
+  }
+
+  // The pre-industrial tail.
+  //
+  // This was one bare sentence — "Began learning the trade of X from an
+  // experienced practitioner" — and it reached 37% of all personas, because the
+  // branches above are keyword lists and the profession tables are far wider
+  // than any of them. The corpus variety guard could not see it: the
+  // interpolated profession makes every occurrence a different string.
+  //
+  // The branches above now catch most of what used to arrive here. What still
+  // does is genuinely miscellaneous, so these say how the work was entered
+  // without claiming to know what kind of work it was.
+  const variants = [
+    `Was put to the work at an age when it was still someone else's work`,
+    `Learned it from the person in the household who already did it`,
+    `Began under someone who had done it thirty years and said little about it`,
+    `Was taken on to do the part of it that needed no skill, and stayed`,
+    `Started the year the household needed another pair of hands and had none`,
+  ];
   return {
     kind: 'apprenticeship',
     title: 'Early Training',
-    // "Trade" and "practitioner" belong to a world with crafts and masters.
-    // A forager learns from kin, in the country, by going along.
-    text: birthYear < -8000
-      ? `Began going out with the older ones, learning the country and how to take from it`
-      : `Began learning the trade of ${profession} from an experienced practitioner`
+    text: variants[Math.floor(seededRandom() * variants.length)],
   };
 }
 
@@ -2062,6 +2218,10 @@ export function generateLifeHistory(
 
       // A template that names the ways of living it fits must match this one.
       if (template.subsistence && !template.subsistence.includes(subsistence)) return false;
+
+      // And a template that names a place must be in it.
+      if (template.places && !template.places.test(capabilityPlace)) return false;
+      if (template.excludePlaces?.test(capabilityPlace)) return false;
 
       // Check that the society could do this at all
       if (template.requiresCapability) {
