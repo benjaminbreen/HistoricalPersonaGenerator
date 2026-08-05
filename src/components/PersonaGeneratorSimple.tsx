@@ -1446,6 +1446,7 @@ export default function PersonaGenerator() {
   const [costConfirm, setCostConfirm] = useState<{ kind: AiCostKind; run: () => Promise<void> } | null>(null);
   const [aiAccess, setAiAccess] = useState<AiAccessStatus | null>(null);
   const [aiGate, setAiGate] = useState<AiGateState | null>(null);
+  const aiGateBeforeDonateRef = useRef<AiGateState | null>(null);
   const [randomDonationMilestone, setRandomDonationMilestone] = useState<RandomDonationMilestone | null>(null);
   const randomPersonaCountRef = useRef<number | null>(null);
   if (randomPersonaCountRef.current === null) {
@@ -3180,6 +3181,7 @@ export default function PersonaGenerator() {
     // visitor is out of free runs, requestAiBiographyRun immediately restores
     // the supporter gate with the pending action attached.
     setShowDonate(false);
+    aiGateBeforeDonateRef.current = null;
     setAiGate(null);
     setCostConfirm(null);
     setRandomDonationMilestone(null);
@@ -3913,9 +3915,31 @@ export default function PersonaGenerator() {
     }, 500);
   };
 
-  const handleDonate = () => {
-    // Open donate modal
+  const openDonate = () => {
+    // Donation is a modal transition, not a second modal layered over the
+    // supporter gate. Retain the pending AI action off-screen so closing the
+    // donation dialog can return the visitor to the gate without losing it.
+    if (aiGate) aiGateBeforeDonateRef.current = aiGate;
+    setAiGate(null);
+    setCostConfirm(null);
+    setRandomDonationMilestone(null);
+    setShowAbout(false);
+    setShowOverflowSheet(false);
     setShowDonate(true);
+    logAiFlow('opening donation dialog', { suspendedGate: aiGate?.action || null });
+  };
+
+  const closeDonate = () => {
+    setShowDonate(false);
+    const suspendedGate = aiGateBeforeDonateRef.current;
+    aiGateBeforeDonateRef.current = null;
+    if (suspendedGate) {
+      window.requestAnimationFrame(() => setAiGate(suspendedGate));
+    }
+  };
+
+  const handleDonate = () => {
+    openDonate();
   };
 
   const generateDeathInfo = () => {
@@ -4897,11 +4921,11 @@ export default function PersonaGenerator() {
           </div>
           <h1
             className="top-bar-title"
-            onClick={() => setShowDonate(true)}
+            onClick={openDonate}
             style={{ cursor: 'pointer' }}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && setShowDonate(true)}
+            onKeyDown={(e) => e.key === 'Enter' && openDonate()}
           >
             Historical Persona Generator
           </h1>
@@ -4951,7 +4975,7 @@ export default function PersonaGenerator() {
           </button>
           <button
             className="top-bar-donate top-bar-overflow-hidden"
-            onClick={() => setShowDonate(true)}
+            onClick={openDonate}
             aria-label="Support this project"
           >
             <IoHeart aria-hidden="true" />
@@ -4992,7 +5016,7 @@ export default function PersonaGenerator() {
             </button>
             <button
               className="overflow-sheet-donate"
-              onClick={() => { setShowOverflowSheet(false); setShowDonate(true); }}
+              onClick={openDonate}
             >
               <IoHeart aria-hidden="true" />
               Support this project
@@ -7581,7 +7605,7 @@ export default function PersonaGenerator() {
             </a>
             <button
               className="about-link-btn primary"
-              onClick={() => { setShowAbout(false); setShowDonate(true); }}
+              onClick={openDonate}
             >
               <IoHeart /> Support this project
             </button>
@@ -7638,10 +7662,7 @@ export default function PersonaGenerator() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => {
-                    setRandomDonationMilestone(null);
-                    setShowDonate(true);
-                  }}
+                  onClick={openDonate}
                   autoFocus
                 >
                   <IoHeart aria-hidden="true" />
@@ -7704,7 +7725,7 @@ export default function PersonaGenerator() {
                 <button
                   type="button"
                   className="btn btn-primary ai-support-donate-button"
-                  onClick={() => setShowDonate(true)}
+                  onClick={openDonate}
                   autoFocus
                 >
                   <IoHeart aria-hidden="true" />
@@ -7759,7 +7780,7 @@ export default function PersonaGenerator() {
               <div className="ai-cost-actions">
                 <button
                   className="btn btn-secondary"
-                  onClick={() => { setCostConfirm(null); setShowDonate(true); }}
+                  onClick={openDonate}
                 >
                   <IoHeart aria-hidden="true" />
                   Donate
@@ -7776,7 +7797,7 @@ export default function PersonaGenerator() {
       {showDonate && createPortal(
         <div
           className="modal-overlay donate-support-overlay"
-          onClick={() => setShowDonate(false)}
+          onClick={closeDonate}
           role="dialog"
           aria-modal="true"
           aria-labelledby="donate-modal-title"
@@ -7791,7 +7812,7 @@ export default function PersonaGenerator() {
               alt="Support Historical Persona Generator"
               className="donate-banner-image"
             />
-            <button className="modal-close modal-close-overlay" onClick={() => setShowDonate(false)} aria-label="Close dialog">
+            <button className="modal-close modal-close-overlay" onClick={closeDonate} aria-label="Close dialog">
               <IoClose aria-hidden="true" />
             </button>
           </div>
