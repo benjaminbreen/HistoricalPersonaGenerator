@@ -81,6 +81,9 @@ try {
   assert.match(String(testerSetCookie), /SameSite=Strict/);
   const testerRequest = { headers: { cookie: String(testerSetCookie).split(';')[0] } };
   assert.equal(hasTesterAccess(testerRequest), true);
+  process.env.HPG_TESTER_TOKEN = 'rotated-deployed-tester-token-0987654321';
+  assert.equal(hasTesterAccess(testerRequest), false);
+  process.env.HPG_TESTER_TOKEN = 'test-deployed-tester-token-1234567890';
   const testerRun = await consumeAiCredit(visitorId, 'generate_sketch', Date.now(), { testerAccess: true });
   assert.equal(testerRun.allowed, true);
   assert.equal(testerRun.access.testerAccess, true);

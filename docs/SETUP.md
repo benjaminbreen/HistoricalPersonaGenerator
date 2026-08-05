@@ -182,7 +182,8 @@ it from the address bar immediately and exchanges it for a signed `HttpOnly`,
 confirms the browser is unlocked. The tester cookie bypasses the five-biography
 and three-schema allowances but keeps the public per-IP rate limits in force.
 Never reuse `AI_ACCESS_SECRET`, an API key, or a Stripe secret as the tester
-token.
+token. Rotating `HPG_TESTER_TOKEN` and redeploying invalidates existing tester
+cookies.
 
 ### Rate limits
 

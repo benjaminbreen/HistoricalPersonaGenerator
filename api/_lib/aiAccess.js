@@ -91,15 +91,23 @@ export const ensureVisitorId = (req, res) => {
   return id;
 };
 
-const testerCookieValue = () => signatureFor('historical-persona-generator:deployed-tester:v1');
+const configuredTesterToken = () => String(process.env.HPG_TESTER_TOKEN || '');
+
+const testerCookieValue = () => {
+  const token = configuredTesterToken();
+  return token.length >= 24
+    ? signatureFor(`historical-persona-generator:deployed-tester:v1:${token}`)
+    : null;
+};
 
 export const hasTesterAccess = req => {
   const value = cookiesFromRequest(req)[TESTER_COOKIE_NAME] || '';
-  return Boolean(value) && safeEqual(value, testerCookieValue());
+  const expected = testerCookieValue();
+  return Boolean(value && expected) && safeEqual(value, expected);
 };
 
 export const grantTesterAccessCookie = (req, res, suppliedToken) => {
-  const configuredToken = String(process.env.HPG_TESTER_TOKEN || '');
+  const configuredToken = configuredTesterToken();
   if (configuredToken.length < 24) {
     const error = new Error('Deployed tester access is not configured.');
     error.statusCode = 503;
