@@ -7794,7 +7794,12 @@ export default function PersonaGenerator() {
         </motion.div>
       )}
 
-      {showDonate && createPortal(
+      {/* AnimatePresence only retains valid React elements as direct children.
+          A raw React portal is filtered out, which previously left
+          showDonate=true with no .donate-support-overlay in the DOM. */}
+      {showDonate && (
+        <React.Fragment key="donate-dialog-portal">
+        {createPortal(
         <div
           className="modal-overlay donate-support-overlay"
           onClick={closeDonate}
@@ -7883,6 +7888,8 @@ export default function PersonaGenerator() {
           </div>
         </div>,
         document.body
+        )}
+        </React.Fragment>
       )}
 
       {/* Family Tree Modal */}
