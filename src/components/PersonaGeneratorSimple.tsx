@@ -263,7 +263,12 @@ const SpriteTunerPanel = React.lazy(() => import('../encounter/sprite/SpriteTune
 const SpriteFigure = React.lazy(() => import('../encounter/sprite/SpriteCanvas'));
 // The About header draws its own crowd, which means pulling in the whole sprite
 // renderer — worth deferring, since nobody opens About before the first persona.
-const AboutSpriteBanner = React.lazy(() => import('./AboutSpriteBanner'));
+let aboutSpriteBannerModule: Promise<typeof import('./AboutSpriteBanner')> | null = null;
+const loadAboutSpriteBanner = () => {
+  aboutSpriteBannerModule ??= import('./AboutSpriteBanner');
+  return aboutSpriteBannerModule;
+};
+const AboutSpriteBanner = React.lazy(loadAboutSpriteBanner);
 
 /**
  * The figure breathes, blinks and glances on its own, but outside a fight
@@ -1404,6 +1409,12 @@ export default function PersonaGenerator() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [darkMode, setDarkMode] = useState(false); // Light mode by default
   const [showAbout, setShowAbout] = useState(false);
+  const openAbout = () => {
+    // Do not start the modal transition while its lazy hero is still swapping
+    // out of Suspense. Pointer/focus handlers normally preload it; awaiting the
+    // same memoized promise also covers a fast tap on a cold cache.
+    void loadAboutSpriteBanner().then(() => setShowAbout(true));
+  };
   const [showDonate, setShowDonate] = useState(() => window.location.pathname === '/donate');
   const [showSecrets, setShowSecrets] = useState(false);
   const [hourglassRotation, setHourglassRotation] = useState(0);
@@ -4967,7 +4978,10 @@ export default function PersonaGenerator() {
           </button>
           <button
             className="top-bar-overflow-hidden"
-            onClick={() => setShowAbout(true)}
+            onClick={openAbout}
+            onPointerEnter={() => { void loadAboutSpriteBanner(); }}
+            onPointerDown={() => { void loadAboutSpriteBanner(); }}
+            onFocus={() => { void loadAboutSpriteBanner(); }}
             aria-label="About this application"
           >
             <IoInformationCircle aria-hidden="true" />
@@ -5009,7 +5023,9 @@ export default function PersonaGenerator() {
               Save as PDF
             </button>
             <button
-              onClick={() => { setShowOverflowSheet(false); setShowAbout(true); }}
+              onPointerDown={() => { void loadAboutSpriteBanner(); }}
+              onFocus={() => { void loadAboutSpriteBanner(); }}
+              onClick={() => { setShowOverflowSheet(false); openAbout(); }}
             >
               <IoInformationCircle aria-hidden="true" />
               About this project

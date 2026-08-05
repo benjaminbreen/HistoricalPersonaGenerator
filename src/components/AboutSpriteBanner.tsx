@@ -202,18 +202,26 @@ export default function AboutSpriteBanner({ seed: pinnedSeed }: Props) {
   /** Written by the paint, read by the hover. Back rank first. */
   const placedRef = useRef<Placement[]>([]);
   const [size, setSize] = useState({ w: 0, h: 0 });
-  const [filled, setFilled] = useState(0);
+  // Painting once after a batch is complete keeps the modal's opening
+  // animation on a stable texture. Repainting after every generated person
+  // made Chromium briefly composite a cleared canvas between frames.
+  const [paintRevision, setPaintRevision] = useState(0);
   const [hover, setHover] = useState<Hover | null>(null);
 
   useEffect(() => {
     const wrap = wrapRef.current;
     if (!wrap) return;
-    const measure = () => {
-      const rect = wrap.getBoundingClientRect();
-      setSize({ w: Math.round(rect.width), h: Math.round(rect.height) });
+    const measure = (entry?: ResizeObserverEntry) => {
+      // contentRect/clientWidth are layout dimensions. getBoundingClientRect
+      // includes the modal's opening scale transform and could permanently
+      // size the backing canvas from a transient animation frame.
+      const w = Math.round(entry?.contentRect.width ?? wrap.clientWidth);
+      const h = Math.round(entry?.contentRect.height ?? wrap.clientHeight);
+      if (!w || !h) return;
+      setSize((current) => (current.w === w && current.h === h ? current : { w, h }));
     };
     measure();
-    const observer = new ResizeObserver(measure);
+    const observer = new ResizeObserver((entries) => measure(entries[0]));
     observer.observe(wrap);
     return () => observer.disconnect();
   }, []);
@@ -236,10 +244,31 @@ export default function AboutSpriteBanner({ seed: pinnedSeed }: Props) {
     if (!order.length) return;
     let cancelled = false;
     let timer = 0;
+    let idleRequest: number | null = null;
     let step = 0;
 
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
+    const scheduleNext = (delay = 0) => {
+      timer = window.setTimeout(() => {
+        if (cancelled) return;
+        if (idleWindow.requestIdleCallback) {
+          idleRequest = idleWindow.requestIdleCallback(next, { timeout: 160 });
+        } else {
+          timer = window.setTimeout(next, 32);
+        }
+      }, delay);
+    };
+
     const next = () => {
-      if (cancelled || step >= order.length) return;
+      if (cancelled) return;
+      if (step >= order.length) {
+        setPaintRevision((revision) => revision + 1);
+        return;
+      }
       const slot = order[step];
       try {
         const persona = generateHistoricalPersona({ seed: (seed + slot * 7919) >>> 0, samplingMode: 'explore' });
@@ -255,17 +284,17 @@ export default function AboutSpriteBanner({ seed: pinnedSeed }: Props) {
         // One unlucky draw should leave a gap in the crowd, not an empty header.
       }
       step += 1;
-      // The count, not the step: `step` restarts at zero on every run of this
-      // effect, and a repaint has to be triggered by a number that only ever
-      // goes up or the last figure of a top-up lands silently.
-      setFilled(figuresRef.current.size);
-      timer = window.setTimeout(next, 0);
+      scheduleNext();
     };
 
-    timer = window.setTimeout(next, 0);
+    // The modal finishes its 250ms entrance before sprite compilation begins.
+    // Each figure is then compiled in a separate idle task, while the visible
+    // canvas keeps showing the same painted ground until the whole batch lands.
+    scheduleNext(300);
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
+      if (idleRequest !== null) idleWindow.cancelIdleCallback?.(idleRequest);
     };
     // `slots.length` rather than `slots`: a resize that keeps the same number
     // of places moves people, and needs no new ones.
@@ -278,8 +307,10 @@ export default function AboutSpriteBanner({ seed: pinnedSeed }: Props) {
     if (!ctx) return;
 
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = Math.round(size.w * dpr);
-    canvas.height = Math.round(size.h * dpr);
+    const pixelWidth = Math.round(size.w * dpr);
+    const pixelHeight = Math.round(size.h * dpr);
+    if (canvas.width !== pixelWidth) canvas.width = pixelWidth;
+    if (canvas.height !== pixelHeight) canvas.height = pixelHeight;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     const { w, h } = size;
@@ -367,7 +398,7 @@ export default function AboutSpriteBanner({ seed: pinnedSeed }: Props) {
     ctx.fillRect(0, h - 26, w, 26);
 
     placedRef.current = placed;
-  }, [size, slots, filled]);
+  }, [size, slots, paintRevision]);
 
   const handleMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const wrap = wrapRef.current;
