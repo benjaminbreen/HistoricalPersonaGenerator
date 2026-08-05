@@ -189,7 +189,11 @@ const HEADWEAR_KEYWORDS: Array<[RegExp, HeadwearKind]> = [
   // table and turns a decorated turban into a veil.
   [/(veil|wimple|mantilla|dupatta|odhani|\borna\b|chunni|chunari|niqab|chador|hijab|khimar|shayla|barbette)/i, 'veil'],
   [/(hood|cowl|capuche|zukin|chaperon)/i, 'hood'],
-  [/(helmet|helm|casque|morion|sallet|kabuto)/i, 'helmet'],
+  // Most helmets never use the word. `galea` fell to the `cap` fallback and a
+  // legionary's bronze helmet came out a bronze skullcap; `kettle hat` was
+  // worse, reaching the felt-hat rule below on the strength of "hat" and being
+  // drawn as a bowler in iron.
+  [/(helmet|helm\b|casque|morion|cabasset|sallet|kabuto|jingasa|galea|barbute|bascinet|armet|spangen|kettle ?hat|war ?hat|corinthian)/i, 'helmet'],
   // A war bonnet is a feathered headdress and nothing like a linen bonnet, so
   // it has to be caught before the `bonnet` in the cap rule takes it — which
   // is what used to happen, drawing an eagle-feather headdress as a coif.
@@ -204,7 +208,11 @@ const HEADWEAR_KEYWORDS: Array<[RegExp, HeadwearKind]> = [
   // `safa`, `peta` and `dastar` are turbans that never say so: the Rajasthani
   // safa and the Mysore peta were matching nothing at all and taking the `cap`
   // fallback, so nine metres of tied silk came out as a plain skullcap.
-  [/(turban|headcloth|head cloth|headwrap|head wrap|head tie|gele|keffiyeh|shemagh|ghutra|pagri|safa|peta|dastar|scarf|kerchief|tignon|wrap|duku)/i, 'wrapped_cloth'],
+  // The separators are written three ways in the tables and the rule only knew
+  // two of them, so "Linen Head-Cloth" — the commonest unmatched head item in
+  // the app — fell past every rule here to the `cap` fallback and a length of
+  // draped linen came out a felt skullcap.
+  [/(turban|head[- ]?cloth|head[- ]?wrap|head[- ]?tie|gele|keffiyeh|shemagh|ghutra|pagri|safa|peta|dastar|scarf|kerchief|tignon|wrap|duku)/i, 'wrapped_cloth'],
   // Fur headgear is soft and brimless. This has to precede the generic `hat`
   // rule below, or a "Fur Hat" picks up a stiff felt brim.
   [/(fur|pelt|shearling|astrakhan|ushanka|papakha|sheepskin|fox tail)/i, 'cap'],
@@ -217,7 +225,11 @@ const HEADWEAR_KEYWORDS: Array<[RegExp, HeadwearKind]> = [
   [/(cap|coif|bonnet|kufi|taqiyah|biretta|skullcap|futou|beret|toque|fez|tarboosh|hennin|topi|snapback|beanie|biggins|kofia|mitre|songkok|chullo|toboggan|stocking cap|watch cap|knit|visor)/i, 'cap'],
   // `dou li` is written with a space in the item data, so the old `douli`
   // spelling never matched and those hats fell through to the `cap` fallback.
-  [/(brim|tricorn|bicorne|sombrero|straw|petasos|boater|bowler|fedora|homburg|visor|top hat|wide[- ]?hat|conical|dou ?li|bamboo|sedge|sugegasa|kasa|salakot|non la|cheese-cutter|hat)/i, 'brimmed_hat'],
+  // `trilby`, `derby`, `stetson` and the rest name a brimmed felt hat without
+  // ever using the word "hat", so every one of them fell past this rule to the
+  // `cap` fallback and came back a skullcap — a trilby drawn as a coif, with no
+  // brim at all, on a card that says trilby.
+  [/(brim|tricorn|bicorne|sombrero|straw|petasos|boater|bowler|fedora|homburg|trilby|panama|derby\b|stetson|slouch|pork ?pie|visor|top hat|wide[- ]?hat|conical|dou ?li|bamboo|sedge|sugegasa|kasa|salakot|non la|cheese-cutter|hat)/i, 'brimmed_hat'],
   /**
    * Things that are decoration and nothing else, caught last so that anything
    * which is genuinely a covering has already won. Order is the whole point
@@ -754,11 +766,170 @@ export function garmentSurfacesFor(
       material: material_,
       // Cloth of gold on a noble is not the same object as a printed cotton on
       // a farmer, and the difference at this size is mostly density.
-      intensity: clamp01(0.35 + wealth * 0.65),
+      //
+      // Beading is the exception and has to be, because it is the one treatment
+      // the poor own more of than the rich: cowrie, shell and seed work is a
+      // dense mass sewn over a whole edge. Scaled down by wealth it fell to
+      // every third pixel of a two-pixel band, which is nothing — a shell dance
+      // skirt rendered as bare cloth.
+      intensity: rule.kind === 'beading'
+        ? clamp01(0.55 + wealth * 0.45)
+        : clamp01(0.35 + wealth * 0.65),
     });
   }
 
   return { surfaces, matched: surfaces.length > 0 };
+}
+
+/**
+ * Cloth that was patterned on the loom or in the dye vat, where the item's own
+ * name never says so.
+ *
+ * The keyword table above only fires when a word in the item says a treatment,
+ * and measured over 500 personas that is 4.4% of them: the other 95.6% wear
+ * undecorated cloth. That is not what the tables are describing. The app names
+ * clothing as colour + material + form — "Indigo Cotton Dhoti" — and a fibre in
+ * a place and a century is *already* a claim about how the cloth looked. Block-
+ * printed and resist-dyed cotton is what cotton was across the Indian Ocean;
+ * warp-faced stripes are what a camelid-wool bolt was in the Andes; strip-woven
+ * cloth is banded because of how it is made; figured silk is what silk was for
+ * anyone who could afford silk at all.
+ *
+ * So this is the second pass, and it only runs where the first found nothing.
+ * Deliberately conservative: one field treatment at most, gated on a seeded
+ * roll so a village does not come out uniformly patterned, and drawn quieter
+ * than a named treatment — an item that says "Silk Brocade" should still beat
+ * an inferred figured silk.
+ */
+type Fibre = 'silk' | 'cotton' | 'wool' | 'linen' | 'other';
+
+function fibreOf(material: string): Fibre {
+  const m = material.toLowerCase();
+  if (/silk|satin|damask|brocade|tussar|muga|shantung|taffeta/.test(m)) return 'silk';
+  // `twill` is deliberately absent: it is a weave, not a fibre, and having it
+  // here classified "Wool Twill" as cotton before the wool rule below ever saw
+  // it. Anything genuinely cotton says cotton somewhere in the name.
+  if (/cotton|calico|muslin|chintz|khadi|denim|drill|poplin|gingham/.test(m)) return 'cotton';
+  if (/wool|worsted|tweed|serge|flannel|alpaca|llama|vicu|camelid|cashmere|pashmina/.test(m)) return 'wool';
+  if (/linen|flax|hemp|ramie|jute|nettle/.test(m)) return 'linen';
+  return 'other';
+}
+
+/**
+ * Read in order, first match wins. `chance` is the share of personas meeting
+ * the rule who actually get the treatment — none of these is universal, and a
+ * rule at 1.0 would put the same cloth on every farmer in the province.
+ */
+const WEAVE_RULES: Array<{
+  fibre: Fibre[];
+  zones?: string[];
+  eras?: string[];
+  /** Minimum wealth, 0..1, on the ornament scale. */
+  floor?: number;
+  /** Maximum wealth, exclusive. */
+  ceiling?: number;
+  kind: GarmentSurfaceSpec['kind'];
+  material: OrnamentMaterial;
+  chance: number;
+}> = [
+  // Figured silk — brocade, damask, tissue. The point of owning silk.
+  { fibre: ['silk'], floor: 0.35, kind: 'brocade', material: 'gold', chance: 0.75 },
+  // Plain silk sometimes came off the loom striped instead.
+  { fibre: ['silk'], ceiling: 0.35, kind: 'stripe', material: 'cloth', chance: 0.25 },
+  // Block printing, batik, ikat, ajrakh: the signature of Indian Ocean cotton,
+  // reaching every wealth level and every century this app covers.
+  {
+    fibre: ['cotton'], zones: ['SOUTH_ASIAN', 'SOUTHEAST_ASIAN'],
+    kind: 'print', material: 'cloth', chance: 0.55,
+  },
+  // Striped weaves run from the Maghreb to the Levant on both fibres.
+  { fibre: ['cotton', 'wool'], zones: ['MENA'], kind: 'stripe', material: 'cloth', chance: 0.5 },
+  // Andean warp-faced stripe, which is a property of the weaving, not of rank.
+  // Cotton belongs here beside the camelid wool: the coastal valleys wove it
+  // and banded it the same way the highlands banded alpaca.
+  {
+    fibre: ['wool', 'cotton'], zones: ['SOUTH_AMERICAN', 'NORTH_AMERICAN_PRE_COLUMBIAN'],
+    kind: 'stripe', material: 'cloth', chance: 0.6,
+  },
+  // Narrow strip-weave is banded because it is sewn up from four-inch lengths.
+  // `strip_weave` already draws the named kente and aso oke; this is the rest.
+  {
+    fibre: ['cotton', 'wool'], zones: ['SUB_SAHARAN_AFRICAN'],
+    kind: 'stripe', material: 'cloth', chance: 0.55,
+  },
+  // Check, plaid and tweed are cheap only once a power loom exists, so these
+  // two are the one pair of rules that genuinely needs an era gate.
+  {
+    fibre: ['wool'], zones: ['EUROPEAN', 'NORTH_AMERICAN_COLONIAL'],
+    eras: ['INDUSTRIAL_ERA', 'MODERN_ERA', 'FUTURE_ERA'],
+    kind: 'stripe', material: 'cloth', chance: 0.4,
+  },
+  {
+    fibre: ['cotton'], zones: ['EUROPEAN', 'NORTH_AMERICAN_COLONIAL'],
+    eras: ['INDUSTRIAL_ERA', 'MODERN_ERA', 'FUTURE_ERA'],
+    kind: 'print', material: 'cloth', chance: 0.4,
+  },
+  // Shima: striped cotton, the ordinary town dress of late Edo and after.
+  { fibre: ['cotton'], zones: ['EAST_ASIAN'], kind: 'stripe', material: 'cloth', chance: 0.3 },
+];
+
+/** Words that say the cloth is plain, and are to be believed. */
+const SAYS_PLAIN = /plain|simple|rough|coarse|undyed|homespun|sackcloth|unbleached|humble|cheap/i;
+
+/**
+ * Treatments that a coarse grade of cloth argues against, as opposed to ones it
+ * says nothing about.
+ *
+ * The generator writes quality into the *material* — "rough cotton", "coarse
+ * wool", "cheap silk" — and applied flatly that would veto everything, which is
+ * wrong in a specific way: a stripe in the Andes or the Sahel comes off the loom
+ * with the cloth, so rough alpaca is striped rough alpaca. Printing, figuring
+ * and needlework are extra work done to finished cloth, and nobody does extra
+ * work to sackcloth.
+ */
+const SPARED_BY_COARSE = new Set<GarmentSurfaceSpec['kind']>(['stripe']);
+
+export function inferGarmentSurfaces(
+  name: string,
+  material: string,
+  zone: string,
+  era: string,
+  wealth: number,
+  seed: number,
+  adjectives: string[] = []
+): GarmentSurfaceSpec[] {
+  const fibre = fibreOf(material);
+  const surfaces: GarmentSurfaceSpec[] = [];
+  if (fibre === 'other') return surfaces;
+  // Quieter than the named path: this is a guess about a bolt of cloth, not a
+  // description of one.
+  const intensity = clamp01(0.26 + wealth * 0.5);
+  // An item *named* plain is plain, whatever it is woven from.
+  if (SAYS_PLAIN.test(`${name} ${adjectives.join(' ')}`)) return surfaces;
+  const coarse = SAYS_PLAIN.test(material);
+
+  for (const rule of WEAVE_RULES) {
+    if (!rule.fibre.includes(fibre)) continue;
+    if (rule.zones && !rule.zones.includes(zone)) continue;
+    if (rule.eras && !rule.eras.includes(era)) continue;
+    if (rule.floor !== undefined && wealth < rule.floor) continue;
+    if (rule.ceiling !== undefined && wealth >= rule.ceiling) continue;
+    if (coarse && !SPARED_BY_COARSE.has(rule.kind)) break;
+    if (unit(seed, `weave-${rule.kind}`) < rule.chance) {
+      surfaces.push({ kind: rule.kind, material: rule.material, intensity });
+    }
+    break;
+  }
+
+  // A worked band at the neckline, which is what the wealthy did to a garment
+  // whose field was left plain. Independent of the field rule above: an edge
+  // and a field coexist happily, which is the split the keyword table already
+  // makes.
+  if (wealth >= 0.7 && !coarse && unit(seed, 'weave-edge') < 0.5) {
+    surfaces.push({ kind: 'embroidery', material: 'gold', intensity });
+  }
+
+  return surfaces;
 }
 
 /**
@@ -908,6 +1079,26 @@ function isEmptyPiece(piece: Piece | null | undefined): boolean {
   if (!piece || !piece.name) return true;
   const name = piece.name.trim().toLowerCase();
   return name === '' || name === 'none' || name === 'barefoot' || name === 'nothing';
+}
+
+/**
+ * What the item says first, and what its fibre and its province say after.
+ *
+ * The two passes are in this order because a name that claims a treatment is
+ * evidence and a fibre in a place is an inference, and where they disagree the
+ * item wins. They never combine: an item that already says "Silk Brocade" gets
+ * nothing added to it, or the same bolt of cloth ends up brocaded and striped.
+ */
+function garmentSurfaceSpecs(
+  piece: Piece, source: PortraitSource, wealth: number, seed: number
+): GarmentSurfaceSpec[] {
+  const named = garmentSurfacesFor(
+    piece.name || '', piece.material || '', wealth, piece.adjectives || []);
+  if (named.matched) return named.surfaces;
+  return inferGarmentSurfaces(
+    piece.name || '', piece.material || '',
+    source.culturalZone || 'EUROPEAN', String(source.era || ''),
+    wealth, seed, piece.adjectives || []);
 }
 
 /**
@@ -2110,9 +2301,7 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
     ),
     bodice: bodiceFor(garmentPiece.name || ''),
     ornament: ornamentBase,
-    surfaces: garmentSurfacesFor(
-      garmentPiece.name || '', garmentPiece.material || '', ornamentBase,
-      garmentPiece.adjectives || []).surfaces,
+    surfaces: garmentSurfaceSpecs(garmentPiece, source, ornamentBase, seed),
     wear: garmentWearFor(
       garmentPiece.name || '', garmentPiece.adjectives || [], wealth, age, seed),
   };
@@ -2139,7 +2328,7 @@ export function buildPortraitSpec(source: PortraitSource): PortraitSpec {
       || resolveColor(legPiece!.color) || colorFromName(legPiece!.name)
       || resolveColor(palette.secondary) || garment.colors.secondary,
     form: legwearFormFor(`${legPiece!.name ?? ''} ${legPiece!.material ?? ''}`),
-  } : impliesMatchingLegs(garment.name) ? {
+  } : impliesMatchingLegs(garment.name, gender) ? {
     // A suit brings its own trousers, in its own cloth. Nothing names them
     // because nobody would: "Designer Suit" already said it. Without this the
     // sprite drew the jacket to the knee and left the shins bare, which is the

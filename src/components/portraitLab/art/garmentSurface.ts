@@ -277,8 +277,10 @@ export function drawGarmentSurface(
   if (!surfaces.length || spec.garment.kind === 'bare') return;
 
   // One edge treatment needs a wider band than another: fur is a physical
-  // thickness, lace is a fringe, embroidery is a stitched line.
-  const bandWidth = (kind: string) => (kind === 'furTrim' ? 4 : kind === 'lace' ? 3 : 2);
+  // thickness, lace is a fringe, beadwork is a worked yoke several rows deep,
+  // embroidery is a stitched line.
+  const bandWidth = (kind: string) =>
+    (kind === 'furTrim' ? 4 : kind === 'lace' || kind === 'beading' ? 3 : 2);
 
   for (const surface of surfaces) {
     switch (surface.kind) {

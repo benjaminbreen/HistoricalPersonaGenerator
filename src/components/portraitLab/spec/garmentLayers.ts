@@ -204,10 +204,29 @@ export function legwearFormFor(name: string): LegwearForm {
  */
 const MATCHED_LEGS = /suit\b|coverall|boiler ?suit|jumpsuit|overall|dungaree|tracksuit|romper/i;
 
-export function impliesMatchingLegs(name: string): boolean {
+/**
+ * Formal dress named for the occasion rather than the cut, which is the one
+ * place the answer genuinely depends on who is wearing it.
+ *
+ * "Evening Wear" is a dinner suit on a man and a floor-length gown on a woman,
+ * and the tables write the one name for both. Read as a `whole` garment with no
+ * legs it produced the second of those for everybody: a twentieth-century film
+ * director came out in a scarlet dress to the shin, on a card whose own text
+ * said evening wear.
+ */
+const OCCASION_FORMAL =
+  /evening wear|formal wear|dinner dress|black tie|white tie|full dress|dress clothes/i;
+
+export function impliesMatchingLegs(name: string, gender?: string): boolean {
   // A swimsuit, a bathing suit and a suit of armour are not two-piece.
   if (/swim|bathing|armou?r|space ?suit|diving/i.test(name)) return false;
-  return MATCHED_LEGS.test(name);
+  if (MATCHED_LEGS.test(name)) return true;
+  return gender === 'Male' && OCCASION_FORMAL.test(name);
+}
+
+/** Whether this name is formal dress that only says what the evening was. */
+export function isOccasionFormal(name: string): boolean {
+  return OCCASION_FORMAL.test(name);
 }
 
 /**

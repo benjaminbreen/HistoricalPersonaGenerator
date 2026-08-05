@@ -524,15 +524,31 @@ function drawPeakedCap(context: RenderContext, form: PeakedForm): Mask {
     // Stiffened: the top is a flat oval held out by a wire, and it is wider
     // than the band it sits on. That outward flare, and not the visor, is what
     // reads as military at twenty pixels.
+    // Four rows, not five. The band was as deep as the crown was tall, so the
+    // cap read as a stack of horizontal stripes rather than as a cap with a
+    // band round it — three bars and a peak, none of them dominant.
     const bandBottom = browLine;
-    const bandTop = bandBottom - 4;
-    const topY = bandTop - 13;
+    const bandTop = bandBottom - 3;
+    /**
+     * The lid, placed off the skull rather than off the band.
+     *
+     * It used to be a fixed count of rows above the band, which is a measurement
+     * of the *cap* and says nothing about the head underneath — and on most
+     * skulls it landed below the crown, so the top of the head showed above the
+     * hat. That is what made this read as a box: not that it floated, but that
+     * it sat on the brow like a headband with the scalp bare above it.
+     */
+    const topY = Math.min(bandTop - 8, anatomy.headTop - 2);
     for (let y = topY; y <= bandBottom; y += 1) {
       const t = (y - topY) / Math.max(1, bandBottom - topY);
-      // Widest at the crown, narrowing into the band. The flare is a couple of
-      // pixels: any more and the cap is a flying saucer resting on a head.
-      const half = anatomy.headHalfWidth * (1.06 - t * 0.11);
-      for (let x = Math.round(centerX - half); x <= Math.round(centerX + half); x += 1) {
+      // Widest at the crown, narrowing into the band. The flare is what reads
+      // as military; the old two pixels of it were lost against a vertical side.
+      const half = anatomy.headHalfWidth * (1.14 - t * 0.19);
+      // The lid is an oval seen from slightly below, so its front edge is an
+      // arc — the corners come in. Squared off, the whole cap was a rectangle,
+      // and a rectangle on a head is the one shape that cannot look worn.
+      const round = y < topY + 3 ? (3 - (y - topY)) * 1.6 : 0;
+      for (let x = Math.round(centerX - half + round); x <= Math.round(centerX + half - round); x += 1) {
         if (x < 0 || y < 0 || x >= size || y >= size) continue;
         mask[y * size + x] = 1;
       }
@@ -549,13 +565,19 @@ function drawPeakedCap(context: RenderContext, form: PeakedForm): Mask {
     // navy serge — while a Mao or Zhongshan cap is cut from a single bolt and
     // only has a seam there. Painting the second colour on both is what made
     // the People's Liberation Army look like bus conductors.
+    //
+    // Painted from the *hat's* accent, not the garment's. `clothC` is the
+    // wearer's trim colour, so a navy cap over an olive tunic came out with a
+    // bright green band across it — two unrelated objects agreeing to be one
+    // colour because nobody had told the hat it had an accent of its own.
     const uniform = /official|service|kepi|conductor|peaked cap/i.test(spec.headwear!.name);
     for (let y = bandTop; y <= bandBottom; y += 1) {
       for (let x = 0; x < size; x += 1) {
         if (!mask[y * size + x]) continue;
         const step = y === bandTop ? 2 : y === bandBottom ? 5 : 4;
-        if (uniform) raster.set(x, y, ramps.clothC.steps[step], MAT.CLOTH_C, step);
-        else raster.shift(x, y, y === bandTop ? -1 : 1, book);
+        if (uniform) {
+          raster.set(x, y, ramps.headwearAccent.steps[step], MAT.HEADWEAR_ACCENT, step);
+        } else raster.shift(x, y, y === bandTop ? -1 : 1, book);
       }
     }
     // A badge over the band, centred. A service cap without one is a chauffeur.
@@ -569,7 +591,11 @@ function drawPeakedCap(context: RenderContext, form: PeakedForm): Mask {
         }
       }
     }
-    drawBill(context, mask, { y: bandBottom + 1, half: anatomy.headHalfWidth * 1.04, reach: 4, curve: 0.8 });
+    // The visor reaches further than the cap is wide and further down the brow
+    // than the old four rows managed. A peaked cap whose peak does not project
+    // is a pillbox, and at four rows against a five-row band it was reading as
+    // one more stripe on the band rather than as a shelf over the eyes.
+    drawBill(context, mask, { y: bandBottom + 1, half: anatomy.headHalfWidth * 1.12, reach: 6, curve: 0.9 });
     applyContactShadow(raster, mask, book, { dx: 0, dy: 1, strength: 2, depth: 4 });
     for (let y = bandBottom + 2; y < anatomy.eyeY; y += 1) {
       for (let x = 0; x < size; x += 1) {
@@ -1059,7 +1085,12 @@ function drawCap(context: RenderContext): Mask {
     /fur|pelt|shearling|astrakhan|ushanka|papakha|sheepskin|sable|mink|beaver|ermine|wolf|fox|bear|otter|marten/.test(`${name} ${material}`);
 
   const bottom = isCoif ? anatomy.chinY - 4 : anatomy.browY - 3;
-  let mask = crownMask(context, isCoif ? 2.8 : isFur ? 3.1 : 1.6, isFlatTop ? 4 : isFur ? 4 : 2, bottom);
+  // A fur cap is *tall*. A papakha, a kubanka, an ushanka is a cylinder of
+  // fleece standing well clear of the skull — at rise 4 the pile had nowhere to
+  // stand and the whole thing read as a lumpy head of hair rather than a hat,
+  // which is the one silhouette fur must not have.
+  let mask = crownMask(context, isCoif ? 2.8 : isFur ? 3.1 : 1.6,
+    isFlatTop ? 4 : isFur ? 10 : 2, bottom);
   if (isCoif) mask = maskSubtract(mask, faceOpening(context, anatomy.browY - 3));
 
   if (isFur) {
@@ -1274,8 +1305,14 @@ function drawStrawHat(context: RenderContext): Mask {
     const t = Math.min(1, Math.abs(dx) / brimHalf);
     // Thickness in section: deepest under the crown, tapering to the edge.
     const thickness = Math.max(1, Math.round((1 - t * t) * profile.sag + 1.6));
+    // The last coil of the plait, which is the outer edge. A plaited hat is
+    // built as a spiral of a three-strand braid, so its rim is scalloped at the
+    // braid's own pitch — that periodic bump is the difference between a woven
+    // hat and a disc, and it is visible at this size where the interior rings
+    // are not.
+    const scallop = t > 0.8 && Math.abs(dx) % 3 === 0 ? 1 : 0;
     const top = Math.round(brimY + droopAt(dx)) - (profile.frayed && noise(dx * 0.7) > 0.6 ? 1 : 0);
-    for (let y = top; y < top + thickness; y += 1) {
+    for (let y = top; y < top + thickness + scallop; y += 1) {
       if (y < 0 || y >= size) continue;
       brim[y * size + x] = 1;
     }
@@ -1327,8 +1364,10 @@ function drawStrawHat(context: RenderContext): Mask {
     for (let x = 0; x < size; x += 1) {
       if (!crown[y * size + x]) continue;
       const index = y === brimY - 4 ? 2 : 4;
-      const ramp = spec.headwear!.ornament > 0.25 ? ramps.clothC : ramps.headwear;
-      const material = spec.headwear!.ornament > 0.25 ? MAT.CLOTH_C : MAT.HEADWEAR;
+      // The hat's own accent, not the wearer's trim. See the felt hat's band.
+      const ribbon = spec.headwear!.ornament > 0.25;
+      const ramp = ribbon ? ramps.headwearAccent : ramps.headwear;
+      const material = ribbon ? MAT.HEADWEAR_ACCENT : MAT.HEADWEAR;
       raster.set(x, y, ramp.steps[index], material, index);
     }
   }
@@ -1486,8 +1525,13 @@ function drawBrimmedHat(context: RenderContext): Mask {
   const woven = WOVEN_HAT_PATTERN.test(`${name} ${material}`);
   const conical = CONICAL_HAT_PATTERN.test(`${name} ${material}`)
     || (woven && CONICAL_ZONES.has(spec.culturalZone || ''));
-  if (conical) return drawConicalHat(context);
-  if (woven) return drawStrawHat(context);
+  // A boater is straw and is not a sunhat: it is a stiff flat-topped cylinder
+  // with a hard brim and a ribbon, and sent down the woven path on the strength
+  // of its fibre it came back a floppy field hat with a chin cord. Shape beats
+  // material here, the same way a named cone beats its fibre above.
+  const flatTop = /boater|pork ?pie/i.test(name);
+  if (conical && !flatTop) return drawConicalHat(context);
+  if (woven && !flatTop) return drawStrawHat(context);
   // A pillbox is called a hat and has no brim whatever. Routed through the
   // brimmed classifier by its own name, it came out a bowler.
   if (PILLBOX.test(name)) return drawPillbox(context);
@@ -1499,13 +1543,30 @@ function drawBrimmedHat(context: RenderContext): Mask {
   // plus that move rather than from scratch, because the brim, the shadow and
   // the seating on the skull are the same problem every time and only the
   // crown differs.
-  const creased = /fedora|homburg|trilby|panama/i.test(name);
-  const flatTop = /boater|pork ?pie/i.test(name);
+  /**
+   * The soft felt hats divide on what was done to the crown while the felt was
+   * damp, and that is the only thing separating them at this size.
+   *
+   * A **fedora** is creased lengthwise *and* pinched at the two front corners,
+   * so its crown reads as three lobes. A **homburg** has the crease and no
+   * pinches — a single "gutter" running front to back — and a brim bound and
+   * curled up all round. A **bowler** has neither: a hard round dome, and the
+   * curl. Drawn with one `creased` flag for all three they were one hat with a
+   * scratch down it.
+   */
+  const homburg = /homburg/i.test(name);
+  const creased = homburg || /fedora|trilby|panama|slouch/i.test(name);
+  const pinched = creased && !homburg;
+  const bowler = /bowler|derby\b/i.test(name);
   const tricorn = /tricorn|bicorne/i.test(name);
   const pith = /pith|sola|safari/i.test(name);
   // Everything woven has already been sent elsewhere, so from here down this is
   // the felt hat: a dome, a stiff brim, and one move per name.
-  const crown = crownMask(context, 1.8, tall ? 14 : 4, crownBottom);
+  // A soft felt crown stands well clear of the skull. At rise 4 it was a cap
+  // with a brim stapled to it, which is most of why a fedora and a bowler were
+  // the same object — the crease had almost no crown to be a crease in.
+  const crown = crownMask(context, bowler ? 2.0 : 1.8,
+    tall ? 14 : bowler ? 7 : creased ? 9 : 4, crownBottom);
 
   const brimHalf = anatomy.headHalfWidth * (tricorn ? 1.5 : pith ? 1.58 : 1.42);
   const brim = maskEllipse(size, size, centerX, brimY + 1, brimHalf, pith ? 4.2 : 3.6);
@@ -1527,21 +1588,31 @@ function drawBrimmedHat(context: RenderContext): Mask {
   }
 
   if (creased) {
-    // The lengthwise crease and the two pinches at the front of a soft felt
-    // hat. Without them a fedora is a bowler, which is a different decade and
-    // a different class.
-    for (let y = anatomy.headTop - 3; y < brimY - 6; y += 1) {
-      const x = centerX;
-      if (!crown[y * size + x]) continue;
-      raster.shift(x, y, 3, book);
-      raster.shift(x - 1, y, -1, book);
-      raster.shift(x + 1, y, -1, book);
-    }
-    for (const side of [-1, 1] as const) {
-      for (let y = anatomy.headTop - 1; y < anatomy.headTop + 5; y += 1) {
-        const x = Math.round(centerX + side * anatomy.headHalfWidth * 0.62);
+    // The lengthwise crease: a channel two pixels wide with the felt rising on
+    // both sides of it. One dark column was a scratch; a channel is a dent.
+    const creaseTop = anatomy.headTop - (tall ? 3 : 9);
+    for (let y = creaseTop; y < brimY - 6; y += 1) {
+      for (const dx of [0, 1] as const) {
+        const x = centerX + dx;
         if (!crown[y * size + x]) continue;
-        raster.shift(x, y, 2, book);
+        raster.shift(x, y, 3, book);
+      }
+      // The ridges either side, lit because they are the high ground now.
+      for (const dx of [-1, 2] as const) {
+        if (crown[y * size + centerX + dx]) raster.shift(centerX + dx, y, -2, book);
+      }
+    }
+    if (pinched) {
+      // The two front pinches, where the wearer's thumb and finger take the
+      // hat off. Deeper and shorter than the crease, and only a fedora has
+      // them: a homburg is one unbroken gutter, which is the whole difference.
+      for (const side of [-1, 1] as const) {
+        for (let y = creaseTop + 1; y < creaseTop + 9; y += 1) {
+          const x = Math.round(centerX + side * anatomy.headHalfWidth * 0.66);
+          if (!crown[y * size + x]) continue;
+          raster.shift(x, y, 3, book);
+          if (crown[y * size + x + side]) raster.shift(x + side, y, -2, book);
+        }
       }
     }
   }
@@ -1571,13 +1642,59 @@ function drawBrimmedHat(context: RenderContext): Mask {
     }
   }
 
-  // Hat band.
-  if (spec.headwear!.ornament > 0.2) {
-    for (let y = brimY - 4; y < brimY - 1; y += 1) {
+  if (bowler || homburg) {
+    // The curled brim. A bowler and a homburg are both *bound* hats — the edge
+    // is rolled over a wire and turned up — while a fedora's brim is left flat
+    // or snapped down at the front. Two pixels of lift at each outer end is all
+    // it takes, and without it the two are a soft hat with a stiff crown.
+    for (const side of [-1, 1] as const) {
+      for (let i = 0; i < 7; i += 1) {
+        const x = Math.round(centerX + side * (brimHalf - i));
+        const lift = Math.round((7 - i) * 0.42);
+        for (let dy = 0; dy < 2; dy += 1) {
+          const y = brimY + 1 - lift + dy;
+          if (x < 0 || y < 0 || x >= size || y >= size) continue;
+          const index = dy === 0 ? 1.6 : 5;
+          raster.set(x, y, ramps.headwear.steps[Math.round(index)], MAT.HEADWEAR, Math.round(index));
+          brim[y * size + x] = 1;
+        }
+      }
+    }
+  }
+
+  /**
+   * The hat band.
+   *
+   * Ungated, and that is the change. It used to need `ornament > 0.2`, which is
+   * above what a modest persona carries — so the commonest felt hats in the app
+   * had none, and a fedora, a homburg and a bowler were three bare domes told
+   * apart by nothing. Every soft felt hat made between about 1850 and 1960 had
+   * a grosgrain ribbon at the base of the crown; it is not an ornament, it is
+   * part of the hat, and it is the single most useful dark horizontal in the
+   * whole silhouette.
+   *
+   * Painted from the hat's own accent rather than the garment's, so a blue hat
+   * gets a blue-black band instead of taking the colour of the wearer's coat.
+   */
+  {
+    const rich = spec.headwear!.ornament > 0.45;
+    for (let y = brimY - (tall ? 6 : 5); y < brimY - 1; y += 1) {
       for (let x = 0; x < size; x += 1) {
         if (!crown[y * size + x]) continue;
-        const index = y === brimY - 4 ? 2 : 4;
-        raster.set(x, y, ramps.clothC.steps[index], MAT.CLOTH_C, index);
+        const index = y === brimY - (tall ? 6 : 5) ? 2.5 : 5;
+        raster.set(x, y, ramps.headwearAccent.steps[Math.round(index)],
+          MAT.HEADWEAR_ACCENT, Math.round(index));
+      }
+    }
+    // A band on a good hat has a bow on the left side and a pin in it.
+    if (rich) {
+      const x = Math.round(centerX - anatomy.headHalfWidth * 0.7);
+      for (let dy = 0; dy < 3; dy += 1) {
+        for (let dx = -1; dx <= 1; dx += 1) {
+          if (!crown[(brimY - 4 + dy) * size + x + dx]) continue;
+          raster.set(x + dx, brimY - 4 + dy, ramps.metal.steps[dy === 0 ? 1 : 4], MAT.METAL,
+            dy === 0 ? 1 : 4);
+        }
       }
     }
   }
@@ -2388,17 +2505,102 @@ function drawHood(context: RenderContext): Mask {
   return mask;
 }
 
+/**
+ * Armour for the head, which was four thousand years of the most conspicuous
+ * object anyone owned and was being drawn as one silver bowl.
+ *
+ * The forms divide on what is added to the bowl, and each addition is a
+ * silhouette rather than a surface — which is the only kind of distinction that
+ * survives at this size. A **comb** is a fore-and-aft crest standing off the
+ * skull, and it is what makes a morion or a cabasset. A **flare** is a brim
+ * swept up at front and back and down at the sides, which is the other half of
+ * a morion and the whole of a kettle hat. A **neck guard** is the wide laminated
+ * shikoro of a kabuto, standing out past the jaw. A **nasal** is a bar down the
+ * face. A **plume** is horsehair or feathers above the crown.
+ *
+ * They compose: a morion is comb plus flare, a kabuto is neck guard plus crest.
+ */
 function drawHelmet(context: RenderContext): Mask {
   const { anatomy, raster, ramps, spec, book } = context;
   const { size, centerX } = anatomy;
+  const name = spec.headwear!.name.toLowerCase();
 
-  const dome = crownMask(context, 2.6, 5, anatomy.browY - 1);
+  const morion = /morion|cabasset|comb/.test(name);
+  const kettle = /kettle|chapel|war ?hat|barbute/.test(name);
+  const kabuto = /kabuto|jingasa|samurai/.test(name);
+  const sallet = /sallet|barbut|armet|bascinet|great ?helm|close ?helm/.test(name);
+  const crested = morion || /crest|plume|galea|centurion|corinthian|hoplite/.test(name);
+  const flared = morion || kettle;
+  const nasal = /nasal|norman|spangen|conical|vendel|viking/.test(name);
+
+  // A sallet runs back and down over the neck rather than sitting on the crown,
+  // so its dome is longer; everything else is a hemisphere on the skull.
+  const dome = crownMask(context, sallet ? 3.0 : 2.6, sallet ? 7 : 5, anatomy.browY - 1);
   fillMask(raster, dome, ramps.headwear, MAT.METAL, ellipsoidShader(
     centerX - 4, anatomy.headTop + 6, anatomy.headHalfWidth * 1.2, anatomy.headHeight * 0.5, 1,
     { base: 3.4, gain: 7.6, bounce: 0.16 }
   ));
 
-  // Rim.
+  let mask = dome;
+
+  if (kabuto) {
+    // The shikoro: laminated plates flaring out and down past the jaw, which is
+    // the widest thing anybody in this app wears and reads instantly.
+    for (let i = 0; i < 5; i += 1) {
+      const y = anatomy.browY - 3 + i * 3;
+      const half = anatomy.headHalfWidth * (1.06 + i * 0.14);
+      for (let dy = 0; dy < 3; dy += 1) {
+        for (let x = Math.round(centerX - half); x <= Math.round(centerX + half); x += 1) {
+          if (x < 0 || y + dy < 0 || x >= size || y + dy >= size) continue;
+          // The face stays clear: the plates hang beside the head, not over it.
+          if (Math.abs(x - centerX) < anatomy.headHalfWidth * 0.94) continue;
+          const step = dy === 0 ? 1.6 : dy === 2 ? 5.6 : 3.4;
+          raster.set(x, y + dy, ramps.headwear.steps[Math.round(step)], MAT.METAL, Math.round(step));
+          mask[(y + dy) * size + x] = 1;
+        }
+      }
+    }
+  }
+
+  if (flared) {
+    // A brim that rises to a point front and back and falls at the sides. Drawn
+    // from the front that is a shallow V under the dome — the opposite curve to
+    // a felt hat's brim, and the reason a morion cannot be mistaken for one.
+    const brimY = anatomy.browY - 2;
+    const half = anatomy.headHalfWidth * (kettle ? 1.5 : 1.34);
+    for (let dx = -Math.round(half); dx <= Math.round(half); dx += 1) {
+      const x = centerX + dx;
+      if (x < 0 || x >= size) continue;
+      const t = Math.abs(dx) / half;
+      const drop = Math.round(t * t * 5);
+      for (let dy = 0; dy < 3; dy += 1) {
+        const y = brimY + drop + dy;
+        if (y < 0 || y >= size) continue;
+        const step = dy === 0 ? 1.4 : dy === 2 ? 6 : 3.6;
+        raster.set(x, y, ramps.headwear.steps[Math.round(step)], MAT.METAL, Math.round(step));
+        mask[y * size + x] = 1;
+      }
+    }
+  }
+
+  if (crested) {
+    // The comb, standing above the crown on the midline. Two pixels wide with a
+    // lit leading face, because a crest is a plate seen edge-on.
+    const peak = anatomy.headTop - (morion ? 7 : 9);
+    for (let x = centerX - 6; x <= centerX + 6; x += 1) {
+      const t = (x - centerX) / 6;
+      const y0 = Math.round(peak + t * t * 6);
+      for (let dy = 0; dy < 3; dy += 1) {
+        const y = y0 + dy;
+        if (x < 0 || y < 0 || x >= size || y >= size) continue;
+        const step = dy === 0 ? 0.8 : dy === 1 ? 2.6 : 5;
+        raster.set(x, y, ramps.headwear.steps[Math.round(step)], MAT.METAL, Math.round(step));
+        mask[y * size + x] = 1;
+      }
+    }
+  }
+
+  // Rim, last, so the additions above do not paint over it.
   for (let y = anatomy.browY - 4; y < anatomy.browY - 1; y += 1) {
     for (let x = 0; x < size; x += 1) {
       if (!dome[y * size + x]) continue;
@@ -2407,8 +2609,7 @@ function drawHelmet(context: RenderContext): Mask {
     }
   }
 
-  // Nasal bar, if this is that sort of helmet.
-  if (/nasal|norman|spangen|conical/.test(spec.headwear!.name.toLowerCase())) {
+  if (nasal) {
     for (let y = anatomy.browY - 1; y < anatomy.noseBaseY - 4; y += 1) {
       raster.set(centerX - 2, y, ramps.headwear.steps[3], MAT.METAL, 3);
       raster.set(centerX - 1, y, ramps.headwear.steps[1], MAT.METAL, 1);
@@ -2417,8 +2618,22 @@ function drawHelmet(context: RenderContext): Mask {
     }
   }
 
-  castOntoFace(context, dome, 3, 2);
-  return dome;
+  if (sallet) {
+    // The visor slot: one dark horizontal across the brow, which is the whole
+    // face of a closed helm and the single most recognisable mark on any of
+    // these. Cut into the dome rather than laid on it.
+    const y = anatomy.browY - 6;
+    for (let x = Math.round(centerX - anatomy.headHalfWidth * 0.8);
+      x <= Math.round(centerX + anatomy.headHalfWidth * 0.8); x += 1) {
+      if (!dome[y * size + x]) continue;
+      raster.set(x, y, ramps.headwear.steps[6], MAT.METAL, 6);
+      if (dome[(y - 1) * size + x]) raster.set(x, y - 1, ramps.headwear.steps[1], MAT.METAL, 1);
+    }
+  }
+
+  applyContactShadow(raster, mask, book, { dx: 0, dy: 1, strength: 2, depth: 3 });
+  castOntoFace(context, mask, 3, 2);
+  return mask;
 }
 
 /**

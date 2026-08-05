@@ -2283,7 +2283,9 @@ export function isSocialClassValidForRegion(socialClass: string, region: string 
 function getFallbackRole(
     wealth: WealthLevel,
     gender: Gender,
-    historicalContext?: HistoricalContext
+    historicalContext?: HistoricalContext,
+    /** Set when the persona cannot do a day's carrying. See `physicalCapacity`. */
+    frail = false,
 ): { socialClass: string, role: string, emoji: string, nameKey?: string } {
     const year = historicalContext?.year ?? 1500;
     const foraging = year < -8000;
@@ -2300,12 +2302,12 @@ function getFallbackRole(
     const foodRoles = foraging
         ? [
             { role: 'Forager', emoji: '🌿', gender: 'any' },
-            { role: 'Hunter', emoji: '🏹', gender: 'any' },
+            { role: 'Hunter', emoji: '🏹', gender: 'any', heavy: true },
             { role: 'Fisher', emoji: '🎣', gender: 'any' },
         ]
         : [
             { role: 'Farmer', emoji: '🧑‍🌾', gender: 'any' },
-            { role: 'Field Hand', emoji: '🌾', gender: 'any' },
+            { role: 'Field Hand', emoji: '🌾', gender: 'any', heavy: true },
             { role: 'Herder', emoji: '🐐', gender: 'any' },
             { role: 'Shepherd', emoji: '🐑', gender: 'any' },
             { role: 'Fisher', emoji: '🎣', gender: 'any' },
@@ -2332,9 +2334,9 @@ function getFallbackRole(
         ]
         : year >= 1900
         ? [
-            { role: 'Laborer', emoji: '🧑‍🔧', gender: 'any' },
+            { role: 'Laborer', emoji: '🧑‍🔧', gender: 'any', heavy: true },
             { role: 'Factory Worker', emoji: '🏭', gender: 'any' },
-            { role: 'Construction Worker', emoji: '🧱', gender: 'any' },
+            { role: 'Construction Worker', emoji: '🧱', gender: 'any', heavy: true },
             { role: 'Shop Assistant', emoji: '🏪', gender: 'any' },
             { role: 'Cleaner', emoji: '🧹', gender: 'any' },
             { role: 'Driver', emoji: '🚌', gender: 'any' },
@@ -2342,11 +2344,11 @@ function getFallbackRole(
             { role: 'Care Worker', emoji: '🧑‍⚕️', gender: 'any' },
         ]
         : [
-            { role: 'Laborer', emoji: '🧑‍🔧', gender: 'any' },
+            { role: 'Laborer', emoji: '🧑‍🔧', gender: 'any', heavy: true },
             { role: 'Servant', emoji: '🧹', gender: 'any' },
             { role: 'Weaver', emoji: '🧶', gender: 'any' },
             { role: 'Potter', emoji: '🏺', gender: 'any' },
-            { role: 'Water Carrier', emoji: '🏺', gender: 'any' },
+            { role: 'Water Carrier', emoji: '🏺', gender: 'any', heavy: true },
             { role: 'Caretaker', emoji: '🧑‍⚕️', gender: 'any' },
             { role: 'Child Watcher', emoji: '👶', gender: 'Female' },
         ];
@@ -2354,9 +2356,17 @@ function getFallbackRole(
     const usable = (r: { role: string }) =>
         !historicalContext || isProfessionHistoricallyAvailable(r.role, historicalContext);
     const suits = (r: { gender: string }) => r.gender === 'any' || r.gender === gender;
+    // This path supplies over half of all professions, so the frail land here
+    // whether or not the tables rejected them for their bodies. The heaviest
+    // entries stand down for them, and only if something is left to stand up.
+    const bearable = <T extends { heavy?: boolean }>(list: T[]): T[] => {
+        if (!frail) return list;
+        const lighter = list.filter(r => !r.heavy);
+        return lighter.length > 0 ? lighter : list;
+    };
 
-    const food = foodRoles.filter(r => usable(r) && suits(r));
-    const other = otherRoles.filter(r => usable(r) && suits(r));
+    const food = bearable(foodRoles.filter(r => usable(r) && suits(r)));
+    const other = bearable(otherRoles.filter(r => usable(r) && suits(r)));
 
     const pool = seededRandom() < subsistence && food.length > 0 ? food
         : other.length > 0 ? other
@@ -2411,6 +2421,59 @@ function applyTextureBudget(
     for (const entry of roles) {
         if (entry.roleDef.texture) entry.selectionWeight *= scale;
     }
+}
+
+/** The ability scores that describe the body rather than the mind or the manner. */
+const PHYSICAL_STATS = new Set<keyof CharacterStats>(['strength', 'stamina', 'constitution']);
+
+/**
+ * Whether this body can do this work, and how readily.
+ *
+ * The profession tables have carried `minStrength`, `minStamina` and
+ * `minConstitution` all along, but the only thing reading them was a fit score
+ * worth fifteen points out of a hundred per point short — a discount, not a
+ * bar. So the app's frailest personas came out porters, ironworkers and dock
+ * labourers at very close to the base rate: a man in the bottom three per cent
+ * for strength was a fifth as likely as an ordinary man to be a porter, where
+ * he should have been nowhere near the trade.
+ *
+ * Physical requirements are the one part of a table entry that describes
+ * something a person can simply be unable to do, and they are read that way
+ * here. Three points short on a ten-point scale rules the work out; less than
+ * that compounds steeply. Age rides along because it is the same claim about
+ * the same body.
+ */
+function physicalCapacity(
+    roleDef: ProfessionDefinition,
+    stats: CharacterStats | undefined,
+    age: number,
+): { able: boolean, weight: number } {
+    const requirements = roleDef.statRequirements;
+    if (!requirements || !stats) return { able: true, weight: 1 };
+
+    let weight = 1;
+    let heaviest = 0;
+    for (const key of Object.keys(requirements) as (keyof typeof requirements)[]) {
+        if (!key.startsWith('min')) continue;
+        const stat = key.slice(3).toLowerCase() as keyof CharacterStats;
+        if (!PHYSICAL_STATS.has(stat)) continue;
+        const demand = requirements[key] as number;
+        heaviest = Math.max(heaviest, demand);
+        const short = Math.max(0, demand - stats[stat]);
+        if (short >= 3) return { able: false, weight: 0 };
+        // How much a point short costs depends on what was being asked for.
+        // Most of the substrate carries `minStamina: 3` as a nominal figure and
+        // a point under it means very little; three points under the seven a
+        // mine face wants means the man cannot work the face.
+        if (short > 0) weight *= Math.pow(demand >= 5 ? 0.45 : 0.8, short);
+    }
+
+    // Heavy work thins out at the top of the age range rather than stopping.
+    // The old porter and the old ploughman are real; they are not as common as
+    // the generator had them.
+    const heavy = heaviest >= 5;
+    const ageFit = !heavy ? 1 : age >= 70 ? 0.25 : age >= 60 ? 0.5 : 1;
+    return { able: true, weight: weight * ageFit };
 }
 
 export function determineSocialRole(
@@ -2509,7 +2572,12 @@ export function determineSocialRole(
         const genderWeightFor = (roleName: string, roleDef: ProfessionDefinition): number =>
             genderAccessWeight(roleName, profile.gender, currentYear ?? 0, genderOptions(roleDef));
 
-        if (!eraRoles) return getFallbackRole(profile.wealthLevel, profile.gender, historicalContext);
+        // Frailty the tables cannot see. `getFallbackRole` supplies the role
+        // whenever the tables produce no candidate, which is often, so it needs
+        // the same fact `physicalCapacity` reads.
+        const frail = !!profile.stats && (profile.stats.strength <= 3 || profile.stats.stamina <= 3);
+
+        if (!eraRoles) return getFallbackRole(profile.wealthLevel, profile.gender, historicalContext, frail);
 
         // Get the appropriate profession context based on location
         let professionContext: ProfessionContext | null = null;
@@ -2604,8 +2672,15 @@ export function determineSocialRole(
                     continue;
                 }
 
+                // Can this body do this work at all. See `physicalCapacity`:
+                // the soft fit score below cannot express an inability, only a
+                // preference, which is why the app's frailest personas were
+                // coming out porters and ironworkers.
+                const capacity = physicalCapacity(roleDef, profile.stats, profile.age);
+                if (!capacity.able) continue;
+
                 let score = 100;
-                
+
                 const checkStat = (value: number, min?: number, max?: number): number => {
                     // Randomly rolled RPG stats should influence occupation, not
                     // erase it from the historical labor pool. A mismatch lowers
@@ -2651,7 +2726,7 @@ export function determineSocialRole(
                      // them, but not for rarity: their share is the budget, and
                      // it is split among them. Weighting them individually is
                      // what made them unreachable in the first place.
-                     const fit = fitMultiplier * genderWeight;
+                     const fit = fitMultiplier * genderWeight * capacity.weight;
                      const selectionWeight = roleDef.texture
                          ? fit
                          : getProfessionSelectionWeight(roleName, historicalContext) * fit;
@@ -2706,7 +2781,13 @@ export function determineSocialRole(
                         if (!isProfessionAvailable(roleName, roleDef)) continue;
                         const genderWeight = genderWeightFor(roleName, roleDef);
                         if (genderWeight === 0) continue;
-                        const selectionWeight = getProfessionSelectionWeight(roleName, historicalContext) * genderWeight;
+                        // The rescan drops the temperament fit deliberately —
+                        // an explicit class outranks a stat roll — but not what
+                        // the body can do, which is not a matter of preference.
+                        const capacity = physicalCapacity(roleDef, profile.stats, profile.age);
+                        if (!capacity.able) continue;
+                        const selectionWeight =
+                            getProfessionSelectionWeight(roleName, historicalContext) * genderWeight * capacity.weight;
                         if (selectionWeight <= 0) continue;
                         roles.push({ socialClass, role: roleName, roleDef, selectionWeight });
                     }
@@ -2736,7 +2817,7 @@ export function determineSocialRole(
             }
         }
 
-        return getFallbackRole(profile.wealthLevel, profile.gender, historicalContext);
+        return getFallbackRole(profile.wealthLevel, profile.gender, historicalContext, frail);
     } catch (error) {
         console.error("Error determining social role:", error);
         const fallbackContext = createHistoricalContext({
@@ -2746,7 +2827,12 @@ export function determineSocialRole(
             region: context.region || 'Unknown',
             location: context.localArea || context.region || 'Unknown',
         });
-        return getFallbackRole(profile.wealthLevel, profile.gender, fallbackContext);
+        return getFallbackRole(
+            profile.wealthLevel,
+            profile.gender,
+            fallbackContext,
+            !!profile.stats && (profile.stats.strength <= 3 || profile.stats.stamina <= 3),
+        );
     }
 }
 

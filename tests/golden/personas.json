@@ -84,19 +84,19 @@
     "name": "Shing",
     "gender": "Male",
     "age": 20,
-    "profession": "Water Carrier",
+    "profession": "Baker",
     "religion": "Austronesian Traditional Religion",
     "language": "Formosan Austronesian (reconstructed)",
     "languageBasis": "ea-taiwan",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in East Asia",
-    "head": null,
-    "torso": "Indigo Plain Hemp Servant'S Robe [Wool]",
-    "feet": "Silver Cloth Shoes [Cotton]",
+    "head": "Silver Cloth Headband [Cotton]",
+    "torso": "Indigo Cotton Apron [Cotton]",
+    "feet": "Silver Straw Sandals [Wool]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
-      "garmentKind": "robe",
+      "headwearKind": "band",
+      "headwearColor": "#b9bcc2",
+      "garmentKind": "work_shirt",
       "garmentColor": "#2e3f5c",
       "legwear": null,
       "backgroundBase": "#5a3f49",
@@ -110,8 +110,8 @@
     ],
     "events": [
       "1286: Born in a small settlement to a Laboring Poor family",
-      "1300: Began learning the trade of water carrier from an experienced practitioner",
-      "1304: The family pooled their resources to purchase a mill share, a significant investment",
+      "1299: Began learning the trade of baker from an experienced practitioner",
+      "1304: Took over the family business after a parent retired from active work",
       "1305: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
@@ -197,17 +197,17 @@
     "name": "Ichiro Watanabe",
     "gender": "Male",
     "age": 20,
-    "profession": "Ferryman",
+    "profession": "Carter",
     "religion": "Buddhism",
     "language": "Middle Japanese",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in East Asia",
-    "head": "Henna Conical Straw Hat [Cotton]",
-    "torso": "Charcoal Ramie Work Jacket [Wool]",
-    "feet": "Henna Barefoot [Wool]",
+    "head": "Henna Cloth Headband [Cotton]",
+    "torso": "Charcoal Hemp Work Jacket [Wool]",
+    "feet": "Henna Straw Sandals [Wool]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "band",
       "headwearColor": "#b5502e",
       "garmentKind": "jacket",
       "garmentColor": "#3a3a38",
@@ -223,7 +223,7 @@
     ],
     "events": [
       "1286: Born in a small settlement to a Laboring Poor family",
-      "1299: Began learning the trade of ferryman from an experienced practitioner",
+      "1299: Began learning the trade of carter from an experienced practitioner",
       "1302: A brother's marriage brought valuable new trade connections and opportunities",
       "1305: Inherited valuable tools and a workshop from a childless uncle"
     ]
@@ -341,18 +341,18 @@
     "name": "Emma",
     "gender": "Female",
     "age": 75,
-    "profession": "Basket Maker",
+    "profession": "Water Carrier",
     "religion": "Roman Catholicism",
     "language": "Icelandic",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in Europe",
-    "head": null,
-    "torso": "Walnut Work Dress [Hemp]",
-    "feet": "Wooden Shoes [Carved Wood]",
+    "head": "Grey Linen Veil [Rough Wool]",
+    "torso": "Walnut Wool Kirtle [Burlap]",
+    "feet": "Turnshoes [Rough Leather]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "veil",
+      "headwearColor": "#8a8781",
       "garmentKind": "gown",
       "garmentColor": "#5b4229",
       "legwear": null,
@@ -370,10 +370,10 @@
     ],
     "events": [
       "1075: Born in a small settlement to a Laboring Poor family",
-      "1089: Began learning the trade of basket maker from an experienced practitioner",
-      "1102: The family pooled their resources to purchase draft animals, a significant investment",
-      "1105: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1116: Paid annual tribute to local lord"
+      "1090: Began learning the trade of water carrier from an experienced practitioner",
+      "1098: Summoned to lord's court as witness in land dispute",
+      "1103: The family pooled their resources to purchase draft animals, a significant investment",
+      "1110: A sister married into a well-connected cathedral chapter, improving the family's social standing"
     ]
   },
   "stockholm-1150#2": {
@@ -416,19 +416,19 @@
     "name": "Per the Ox",
     "gender": "Male",
     "age": 20,
-    "profession": "Boatman",
+    "profession": "Carter",
     "religion": "Roman Catholicism",
     "language": "Old Norse",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in Europe",
-    "head": "Natural Wool Cap [Rough Wool]",
-    "torso": "Charcoal Oiled Wool Cloak [Rough Wool]",
-    "feet": "Leather Boots, Greased [Rough Leather]",
+    "head": "Natural Coif [Burlap]",
+    "torso": "Charcoal Wool Tunic [Rough Wool]",
+    "feet": "Leather Boots [Raw Hide]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#d8cdb6",
-      "garmentKind": "jacket",
+      "garmentKind": "tunic",
       "garmentColor": "#3a3a38",
       "legwear": null,
       "backgroundBase": "#4a5a6a",
@@ -437,37 +437,38 @@
     "family": [
       "father: Oskar Oskarsson",
       "mother: Maja Olofsdotter",
-      "sister: Margareta Alexandersdotter",
-      "brother: Nils Andersson"
+      "brother: Sven Alexandersson",
+      "sister: Karin Andersdotter",
+      "twin: Astrid Viktorsdotter"
     ],
     "events": [
       "1130: Born in a small settlement to a Laboring Poor family",
-      "1143: Began learning the trade of boatman from an experienced practitioner",
-      "1146: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1147: Paid annual tribute to local lord",
-      "1148: Took over the family business after a parent retired from active work"
+      "1144: Began learning the trade of carter from an experienced practitioner",
+      "1147: Required to provide labor for castle repairs",
+      "1148: A sister married into a well-connected town council, improving the family's social standing",
+      "1149: The family pooled their resources to purchase draft animals, a significant investment"
     ]
   },
   "anatolia-1952#1": {
     "name": "İrem Koç",
     "gender": "Female",
     "age": 81,
-    "profession": "Kitchen Porter",
+    "profession": "Shop Assistant",
     "religion": "Sunni Islam",
     "language": "Modern Turkish",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in the Middle East and North Africa",
     "head": "Green Headscarf [Cotton]",
-    "torso": "Indigo Blouse [Cotton]",
+    "torso": "Natural Blouse [Cotton]",
     "feet": "Green Plastic Sandals [Rubber]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#5a6b3b",
       "garmentKind": "work_shirt",
-      "garmentColor": "#2e3f5c",
+      "garmentColor": "#d8cdb6",
       "legwear": "Long Skirt [cotton] skirt",
-      "backgroundBase": "#655359",
+      "backgroundBase": "#535865",
       "pose": null
     },
     "family": [
@@ -481,11 +482,12 @@
     ],
     "events": [
       "1871: Born in a small settlement to a Working Class family",
-      "1885: Started working alongside father in backbreaking toil",
-      "1890: Took the schooling the family paid for out of everyone else's wages",
-      "1894: A sister married into a well-connected family with a place in the palace service, improving the family's social standing",
-      "1902: A sister married and moved across the city, and the house was quieter for it",
-      "1904: The family pooled their resources to purchase a sewing machine, a significant investment",
+      "1885: Began learning the trade of shop assistant from an experienced practitioner",
+      "1887: A brother's marriage brought valuable new trade connections and opportunities",
+      "1898: The family lost their mother when she was murdered",
+      "1899: Moved into the room a grandparent had left, which settled the question of rent for years",
+      "1903: Stood as witness at a sibling's wedding, and understood that the household had changed shape",
+      "1917: The family pooled their resources to purchase a tractor, a significant investment",
       "1923: came under the Republic of Turkey, having been born under the Ottoman Empire"
     ]
   },
@@ -493,7 +495,7 @@
     "name": "Hüseyin Özdemir",
     "gender": "Male",
     "age": 46,
-    "profession": "Kitchen Porter",
+    "profession": "Bus Driver",
     "religion": "Sunni Islam",
     "language": "Modern Turkish",
     "languageBasis": "attested-table",
@@ -522,7 +524,7 @@
     ],
     "events": [
       "1906: Born in a small settlement to a Working Class family",
-      "1919: Started on the early shift, and has kept those hours ever since",
+      "1919: Started on a trainee's wage, which was most of the training",
       "1923: saw the Ottoman Empire give way to the Republic of Turkey",
       "1944: Inherited valuable tools and a workshop from a childless uncle",
       "1948: Took the schooling the family paid for out of everyone else's wages",
@@ -724,23 +726,23 @@
     "name": "Nasiru Idris",
     "gender": "Male",
     "age": 40,
-    "profession": "Carpenter",
+    "profession": "Tanner",
     "religion": "West African Traditional Religion",
     "language": "Songhay (reconstructed)",
     "languageBasis": "ssa-west-sahel",
     "languageConfidence": "conjectural",
     "odds": "the medieval period in sub-Saharan Africa",
     "head": null,
-    "torso": "Indigo Folk Tunic [Rough Wool]",
-    "feet": "Barefoot [None]",
+    "torso": "Leather Apron [Leather]",
+    "feet": "Barefoot [Cotton]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#a98258",
       "garmentKind": "tunic",
       "garmentColor": "#9b704c",
       "legwear": null,
       "backgroundBase": "#587f6b",
-      "pose": null
+      "pose": "taciturn"
     },
     "family": [
       "father: Ahmadu Idris",
@@ -753,12 +755,9 @@
     ],
     "events": [
       "1310: Born in a small settlement to a Laboring Poor family",
-      "1320: lost family to a raid and never learned where they were taken",
-      "1323: Apprenticed to guild master, learning trade secrets",
-      "1328: Took over the family business after a parent retired from active work",
-      "1335: Father was killed in a raid, leaving the family to manage affairs alone",
-      "1339: Work displayed at important festival",
-      "1340: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1323: Began apprenticeship as a tanner under skilled master craftsman",
+      "1343: Took over the family business after a parent retired from active work",
+      "1349: A sister married into a well-connected family of court griots to a ruling house, improving the family's social standing"
     ]
   },
   "sahel-1350#3": {
@@ -798,7 +797,7 @@
     "name": "Angharad Edwards",
     "gender": "Female",
     "age": 75,
-    "profession": "Herbalist",
+    "profession": "Midwife",
     "religion": "Protestantism",
     "language": "Modern English",
     "languageBasis": "attested-table",
@@ -823,12 +822,11 @@
     ],
     "events": [
       "1665: Born in a small settlement to a Laboring Poor family",
-      "1679: Began learning the trade of herbalist from an experienced practitioner",
-      "1690: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1692: Mother died from smallpox despite efforts to save her",
-      "1697: The family pooled their resources to purchase draft animals, a significant investment",
-      "1706: Paid annual tribute to local lord",
-      "1707: came under the Kingdom of Great Britain, having been born under the Kingdom of England"
+      "1679: Apprenticed to a midwife, witnessing a first birth at a young age",
+      "1688: A sister married into a well-connected household of a robe magistrate, improving the family's social standing",
+      "1696: Took over the family business after a parent retired from active work",
+      "1707: came under the Kingdom of Great Britain, having been born under the Kingdom of England",
+      "1737: Summoned to lord's court as witness in land dispute"
     ]
   },
   "london-1740#2": {
@@ -876,7 +874,7 @@
     "name": "Aneurin Morris",
     "gender": "Male",
     "age": 20,
-    "profession": "Barber",
+    "profession": "Scribe",
     "religion": "Protestantism",
     "language": "Modern English",
     "languageBasis": "attested-table",
@@ -892,7 +890,7 @@
       "garmentColor": "#5d5548",
       "legwear": null,
       "backgroundBase": "#3b403d",
-      "pose": "build:broad"
+      "pose": "build:broad+cunning"
     },
     "family": [
       "father: Neirin Morris",
@@ -902,9 +900,8 @@
     ],
     "events": [
       "1720: Born in a small settlement to a Laboring Poor family",
-      "1734: Summoned to lord's court as witness in land dispute",
-      "1735: Began learning the trade of barber from an experienced practitioner",
-      "1738: Took over the family business after a parent retired from active work",
+      "1735: Apprenticed to court scribe, practicing calligraphy daily",
+      "1738: Required to provide labor for castle repairs",
       "1739: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
@@ -986,7 +983,7 @@
     "name": "Edward Thompson",
     "gender": "Male",
     "age": 21,
-    "profession": "Chapman",
+    "profession": "Saddler",
     "religion": "Protestantism",
     "language": "Modern English",
     "languageBasis": "attested-table",
@@ -1012,7 +1009,7 @@
     ],
     "events": [
       "1849: Born in a small settlement to a Working Class family",
-      "1863: Began learning the trade of chapman from an experienced practitioner",
+      "1863: Began learning the trade of saddler from an experienced practitioner",
       "1868: A brother's marriage brought valuable new trade connections and opportunities",
       "1869: The family pooled their resources to purchase a taxi and the licence to drive it, a significant investment"
     ]
@@ -1063,23 +1060,23 @@
     "name": "Ali son of Jafar",
     "gender": "Male",
     "age": 40,
-    "profession": "Carpenter",
+    "profession": "Thatcher",
     "religion": "Arabian Polytheism",
     "language": "Old Arabic",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in the Middle East and North Africa",
-    "head": "Cream Cotton Turban [Linen]",
-    "torso": "Bronze Loose Cotton Trousers [Wool]",
-    "feet": "Leather Sandals [Leather]",
+    "head": "Cream Turban [Linen]",
+    "torso": "Tyrian Thobe [Cotton]",
+    "feet": "Sandals [Leather]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#ddd3ba",
-      "garmentKind": "work_shirt",
-      "garmentColor": "#9e6f3b",
+      "garmentKind": "robe",
+      "garmentColor": "#6a2450",
       "legwear": null,
       "backgroundBase": "#5c6272",
-      "pose": "loner"
+      "pose": null
     },
     "family": [
       "father: Jafar son of Abbas",
@@ -1089,11 +1086,11 @@
     ],
     "events": [
       "460: Born in a small settlement to a Laboring Poor family",
-      "473: Began apprenticeship as a carpenter under skilled master craftsman",
-      "484: Took over the family business after a parent retired from active work",
-      "487: Completed hajj to Mecca, earning title of Hajji",
-      "489: Noble household commissioned full set of masterworks",
-      "496: A sister married into a well-connected military elite, improving the family's social standing"
+      "472: Began learning the trade of thatcher from an experienced practitioner",
+      "487: The family pooled their resources to purchase a market stall, a significant investment",
+      "488: A sister married into a well-connected military elite, improving the family's social standing",
+      "495: Visited Jerusalem's holy sites during pilgrimage",
+      "498: Tragedy struck when a parent died from dysentery"
     ]
   },
   "arabia-500#3": {
@@ -1213,20 +1210,20 @@
     "name": "*Cen",
     "gender": "Male",
     "age": 52,
-    "profession": "Toddy Tapper",
+    "profession": "Cook",
     "religion": "Local Beliefs",
     "language": "Proto-Dravidian (reconstructed)",
     "languageBasis": "sa-harappan",
     "languageConfidence": "reconstructed",
     "odds": "antiquity in South Asia",
-    "head": "Green Cotton Cap [White Cotton]",
-    "torso": "White Cotton Lungi [Plain Cotton]",
-    "feet": "Barefoot [None]",
+    "head": null,
+    "torso": "Walnut Cotton Dhoti [Rough Wool]",
+    "feet": "Barefoot [Burlap]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#5a6b3b",
+      "headwearKind": null,
+      "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#e8e4d9",
+      "garmentColor": "#45321f",
       "legwear": null,
       "backgroundBase": "#8884a8",
       "pose": "build:broad"
@@ -1239,22 +1236,23 @@
     ],
     "events": [
       "-2052: Born in a small settlement to a Peasant family",
-      "-2037: Began learning the trade of toddy tapper from an experienced practitioner",
-      "-2014: Inherited valuable tools and a workshop from a childless uncle"
+      "-2039: Began learning the trade of cook from an experienced practitioner",
+      "-2017: Father died from starvation during famine despite seeking help",
+      "-2011: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "arnhem-1200#1": {
     "name": "Naia",
     "gender": "Female",
     "age": 75,
-    "profession": "Fisher",
+    "profession": "Weaver",
     "religion": "Local Beliefs",
     "language": "Pama-Nyungan (reconstructed)",
     "languageBasis": "oc-australia-pn",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in Oceania",
     "head": null,
-    "torso": "Walnut Field Shirt [Rough Wool]",
+    "torso": "Walnut Bark-Cloth Wrap [Burlap]",
     "feet": "Madder Barefoot [Rough Wool]",
     "portrait": {
       "headwearKind": null,
@@ -1277,9 +1275,9 @@
     "events": [
       "1125: Born to the band that ranged this country",
       "1132: An elder died, and with them went the knowledge of country nobody else held",
-      "1134: The herds did not come that year, and the camp moved three times looking for them",
       "1138: Sat through the long night when the songs are given to those old enough to hold them",
-      "1140: Went out with the adults for the first time and came back carrying a share",
+      "1139: Took up the weaver's craft in the way of the household, by being there for it",
+      "1142: Was among the party that drove a herd into the narrows, and the band ate well for many days",
       "1143: Lost a child before it could walk, and buried it under the floor of the shelter",
       "1151: Fell badly on the rocks, and the leg never set straight",
       "1168: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season"
@@ -1289,14 +1287,14 @@
     "name": "Te Koha",
     "gender": "Male",
     "age": 40,
-    "profession": "Carpenter",
+    "profession": "Porter",
     "religion": "Local Beliefs",
     "language": "Pama-Nyungan (reconstructed)",
     "languageBasis": "oc-australia-pn",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in Oceania",
     "head": "Tan Sun Hat [Woven Palm]",
-    "torso": "Walnut Work Wrap [Rough Fiber]",
+    "torso": "Marigold Work Wrap [Rough Fiber]",
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": null,
@@ -1315,7 +1313,7 @@
     ],
     "events": [
       "1160: Born to the band that ranged this country",
-      "1172: Took up the carpenter's craft in the way of the household, by being there for it",
+      "1172: Started working alongside father in backbreaking toil",
       "1175: Sat through the long night when the songs are given to those old enough to hold them",
       "1177: Left the band of birth to live with another, as is the custom",
       "1181: A summer of no rain drove the band far from the usual ground, into country nobody knew",
@@ -1328,15 +1326,15 @@
     "name": "Anaru",
     "gender": "Male",
     "age": 20,
-    "profession": "Potter",
+    "profession": "Carpenter",
     "religion": "Local Beliefs",
     "language": "Pama-Nyungan (reconstructed)",
     "languageBasis": "oc-australia-pn",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in Oceania",
-    "head": null,
-    "torso": "Olive Bark-Cloth Wrap [Rough Wool]",
-    "feet": "Turmeric Barefoot [Rough Wool]",
+    "head": "Turmeric Sun Hat [Woven Palm]",
+    "torso": "Olive Work Wrap [Rough Fiber]",
+    "feet": "Turmeric Barefoot [None]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
@@ -1344,7 +1342,7 @@
       "garmentColor": "#8a6e4f",
       "legwear": null,
       "backgroundBase": "#53826e",
-      "pose": "build:broad+curious"
+      "pose": "build:broad"
     },
     "family": [
       "father: Tamati the Lastborn",
@@ -1354,19 +1352,20 @@
     ],
     "events": [
       "1180: Born to the band that ranged this country",
-      "1186: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
-      "1188: Fell badly on the rocks, and the leg never set straight",
-      "1191: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
-      "1194: Learned the potter's work by doing it badly alongside someone who did it well",
-      "1195: Speared a beast that had eluded the band all season",
-      "1198: Left the band of birth to live with another, as is the custom"
+      "1188: Walked with the band to the far camp, further than the children had ever been",
+      "1191: Went through the ice, and lost feeling in the fingers of one hand for good",
+      "1193: Brought down a large animal alone for the first time, and carried the meat back to the camp",
+      "1195: Was set to the simple part of the work, and kept at it until the hands knew it",
+      "1197: Left the band of birth to live with another, as is the custom",
+      "1198: Sat through the long night when the songs are given to those old enough to hold them",
+      "1199: Lost a child before it could walk, and buried it under the floor of the shelter"
     ]
   },
   "tahiti-1200#1": {
     "name": "Sinā",
     "gender": "Female",
     "age": 75,
-    "profession": "Breadfruit Cultivator",
+    "profession": "Kava Grower",
     "religion": "Polynesian Traditional Religion",
     "language": "Eastern Polynesian (reconstructed)",
     "languageBasis": "oc-east-polynesia",
@@ -1392,31 +1391,30 @@
     ],
     "events": [
       "1125: Born in a small settlement to a Commoner family",
-      "1139: Learned to read weather signs and predict harvest yields from a parent",
-      "1142: A sister married into a well-connected warrior band, improving the family's social standing",
-      "1158: Hosted important feast, strengthening clan ties",
-      "1169: Mother died from dysentery, leaving the household in grief",
-      "1198: After years of careful selection, successfully bred a hardier variety of taro"
+      "1139: Began learning the trade of kava grower from an experienced practitioner",
+      "1141: After years of careful selection, successfully bred a hardier variety of coconuts",
+      "1152: Hosted important feast, strengthening clan ties",
+      "1155: A sister married into a well-connected chiefly family, improving the family's social standing"
     ]
   },
   "tahiti-1200#2": {
     "name": "Mumui",
     "gender": "Male",
     "age": 61,
-    "profession": "Coconut Gatherer",
+    "profession": "Village Fisher",
     "religion": "Polynesian Traditional Religion",
     "language": "Eastern Polynesian (reconstructed)",
     "languageBasis": "oc-east-polynesia",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in Oceania",
-    "head": "Henna Sun Hat [Woven Palm]",
-    "torso": "Common Tapa [Bark Cloth]",
-    "feet": "Henna Barefoot [None]",
+    "head": null,
+    "torso": "Bronze Bark-Cloth Waist Wrap (Maro) [Rough Wool]",
+    "feet": "Henna Barefoot [Rough Linen]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
-      "headwearColor": "#b5502e",
+      "headwearKind": null,
+      "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#bea689",
+      "garmentColor": "#7e592f",
       "legwear": null,
       "backgroundBase": "#3c5c67",
       "pose": null
@@ -1429,9 +1427,10 @@
     ],
     "events": [
       "1139: Born in a small settlement to a Commoner family",
-      "1151: Learned to read the weather and the water from a parent",
-      "1159: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1191: Inherited responsibility for family fishing grounds"
+      "1152: Trusted alone with the traps for a season",
+      "1155: A sister married into a well-connected senior line of a chiefly house, improving the family's social standing",
+      "1167: Exchanged gifts with neighboring tribe, preventing conflict",
+      "1174: The family lost their father when he was killed in tribal warfare"
     ]
   },
   "tahiti-1200#3": {
@@ -1555,20 +1554,20 @@
     "name": "Standing Puma",
     "gender": "Male",
     "age": 20,
-    "profession": "Maize Cultivator",
+    "profession": "Potato Farmer",
     "religion": "Roman Catholicism",
     "language": "Quechuan (reconstructed)",
     "languageBasis": "sam-andes",
     "languageConfidence": "reconstructed",
     "odds": "the early modern period in South America",
-    "head": null,
-    "torso": "Turmeric Wool Pants [Coarse Wool]",
-    "feet": "Leather Sandals [Raw Leather]",
+    "head": "Henna Woven Wool Cap [Cotton]",
+    "torso": "Charcoal Wool Tunic (Uncu) [Wool]",
+    "feet": "Leather Sandals [Leather]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
-      "garmentKind": "work_shirt",
-      "garmentColor": "#dfa62c",
+      "headwearKind": "cap",
+      "headwearColor": "#b5502e",
+      "garmentKind": "tunic",
+      "garmentColor": "#3a3a38",
       "legwear": null,
       "backgroundBase": "#34463b",
       "pose": "build:broad"
@@ -1581,10 +1580,11 @@
     ],
     "events": [
       "1480: Born in a small settlement to a Peasant family",
-      "1495: Helped with the harvest for the first season and proved capable despite a young age",
-      "1496: Became the first in the village to successfully grow rubber, earning respect from neighbors",
-      "1498: Participated in Inti Raymi sun ceremony",
-      "1499: A sister married into a well-connected ayllu, improving the family's social standing"
+      "1494: Began working family fields, learning the rotation from elders",
+      "1496: After years of careful selection, successfully bred a hardier variety of quinoa",
+      "1497: Learned healing songs from village shaman",
+      "1498: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1499: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "southwest-1200#1": {
@@ -1712,20 +1712,20 @@
     "name": "Mary Brown",
     "gender": "Female",
     "age": 75,
-    "profession": "Gold Prospector",
+    "profession": "Boarding School Student",
     "religion": "Protestantism",
     "language": "Modern English",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "Carbide Lamp Cap [Bronze]",
-    "torso": "Walnut Miner'S Canvas Coat [Wool]",
-    "feet": "Lace-Up Boots [Treated Hide]",
+    "head": "Ivory Kerchief [Linen]",
+    "torso": "Brown Work Apron [Canvas]",
+    "feet": "Work Boots [Thick Leather]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#a8763f",
-      "garmentKind": "jacket",
-      "garmentColor": "#5b4229",
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#e5ddd0",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#6f5237",
       "legwear": "Skirt [cotton] skirt",
       "backgroundBase": "#4c5354",
       "pose": null
@@ -1739,11 +1739,12 @@
     ],
     "events": [
       "1705: Born in a small settlement to a Gentry family",
-      "1720: Began learning the trade of gold prospector from an experienced practitioner",
-      "1736: A brother's marriage brought valuable new trade connections and opportunities",
-      "1740: Took over the family business after a parent retired from active work",
-      "1755: Elected to town council",
-      "1774: Staked claim during gold rush",
+      "1719: Began learning the trade of boarding school student from an experienced practitioner",
+      "1729: A brother's marriage brought valuable new trade connections and opportunities",
+      "1741: Mother died from childbirth complications, leaving the household in grief",
+      "1746: Took over the family business after a parent retired from active work",
+      "1749: Served as juror in important trial",
+      "1753: Established homestead on prairie",
       "1776: came under the United States, having been born under the British American colonies"
     ]
   },
@@ -1751,7 +1752,7 @@
     "name": "Michiel Peters",
     "gender": "Male",
     "age": 40,
-    "profession": "Shop Assistant",
+    "profession": "Publican",
     "religion": "Protestantism",
     "language": "Modern English",
     "languageBasis": "attested-table",
@@ -1780,7 +1781,7 @@
     ],
     "events": [
       "1740: Born in a small settlement to a Laboring Poor family",
-      "1753: Began learning the trade of shop assistant from an experienced practitioner",
+      "1753: Began learning the trade of publican from an experienced practitioner",
       "1762: A sister married into a well-connected family with a wharf and a share in a brig, improving the family's social standing",
       "1769: Established homestead on prairie",
       "1770: Elected to town council",
@@ -1792,21 +1793,21 @@
     "name": "Samuel Hall",
     "gender": "Male",
     "age": 20,
-    "profession": "Glazier",
+    "profession": "Tailor",
     "religion": "Protestantism",
     "language": "Modern English",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "White Phrygian Cap [Red Wool]",
-    "torso": "Charcoal Shirt [Cotton]",
-    "feet": "Work Boots [Thick Leather]",
+    "head": null,
+    "torso": "Leather Apron [Leather]",
+    "feet": "Leather Boots [Treated Hide]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#e8e4d9",
+      "headwearKind": null,
+      "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#3a3a38",
-      "legwear": "Labor Breeches [patched canvas] trousers",
+      "garmentColor": "#6b482f",
+      "legwear": "Trousers [cotton] trousers",
       "backgroundBase": "#4c5354",
       "pose": "build:broad"
     },
@@ -1818,7 +1819,7 @@
     ],
     "events": [
       "1760: Born in a small settlement to a Laboring Poor family",
-      "1774: Began learning the trade of glazier from an experienced practitioner",
+      "1773: Taken as apprentice by renowned tailor, bound for seven years",
       "1776: saw the British American colonies give way to the United States",
       "1778: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1779: Staked claim during gold rush"
@@ -1828,15 +1829,15 @@
     "name": "Rui Ma",
     "gender": "Female",
     "age": 75,
-    "profession": "Tea Picker",
+    "profession": "Potter",
     "religion": "Buddhism",
     "language": "Early Mandarin",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in East Asia",
-    "head": "White Cotton Headscarf [Rough Wool]",
-    "torso": "Walnut Short Cotton Jacket [Burlap]",
-    "feet": "White Straw Sandals [Rough Linen]",
+    "head": "White Cloth Headband [Rough Wool]",
+    "torso": "Walnut Cotton Work Jacket [Burlap]",
+    "feet": "White Cloth Shoes [Rough Linen]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
@@ -1854,11 +1855,12 @@
     ],
     "events": [
       "1425: Born in a small settlement to a Laboring Poor family",
-      "1440: Began learning the trade of tea picker from an experienced practitioner",
-      "1457: Returned home to care for aging parents",
-      "1457: Tragedy struck when a parent died from plague",
-      "1463: A brother's marriage brought valuable new trade connections and opportunities",
-      "1466: Took over the family business after a parent retired from active work"
+      "1440: Began apprenticeship as a potter under skilled master craftsman",
+      "1450: Arranged favorable marriage for younger sister",
+      "1453: Achieved master status, allowed to take apprentices",
+      "1461: Inherited valuable tools and a workshop from a childless uncle",
+      "1468: The family lost their mother when she was murdered by bandits",
+      "1481: A sister married into a well-connected lineage with a son in the imperial examinations, improving the family's social standing"
     ]
   },
   "ming-china-1500#2": {
@@ -1905,14 +1907,14 @@
     "name": "Xin Wang",
     "gender": "Male",
     "age": 20,
-    "profession": "Porter",
+    "profession": "Herbalist",
     "religion": "Local Beliefs",
     "language": "Early Mandarin",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in East Asia",
     "head": "Bamboo Hat [Woven Bamboo]",
-    "torso": "Olive Hemp Jacket [Rough Hemp]",
+    "torso": "Crimson Hemp Jacket [Rough Hemp]",
     "feet": "Straw Sandals [Rice Straw]",
     "portrait": {
       "headwearKind": null,
@@ -1921,7 +1923,7 @@
       "garmentColor": "#59645d",
       "legwear": null,
       "backgroundBase": "#3b403a",
-      "pose": "build:broad"
+      "pose": "build:broad+humble"
     },
     "family": [
       "father: Hong Wang",
@@ -1931,8 +1933,8 @@
     ],
     "events": [
       "1480: Born in a small settlement to a Laboring Poor family",
-      "1495: Began hauling loads for merchants, building strength",
-      "1496: A brother's marriage brought valuable new trade connections and opportunities",
+      "1495: Began learning the trade of herbalist from an experienced practitioner",
+      "1498: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1499: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
@@ -1940,23 +1942,23 @@
     "name": "Sita Mishra",
     "gender": "Female",
     "age": 81,
-    "profession": "Jute Mill Worker",
+    "profession": "Laundry Worker",
     "religion": "Hinduism",
     "language": "Hindi",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in South Asia",
-    "head": null,
-    "torso": "Charcoal Cotton Coveralls [Linen]",
-    "feet": "Russet Rubber Sandals [Linen]",
+    "head": "Russet Dupatta [Polyester]",
+    "torso": "White Cotton Sari [Printed Cotton]",
+    "feet": "Russet Barefoot [None]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
-      "garmentKind": "work_shirt",
-      "garmentColor": "#3a3a38",
-      "legwear": "Charcoal Cotton Coveralls [linen] trousers",
+      "headwearKind": "veil",
+      "headwearColor": "#8a5a3b",
+      "garmentKind": "gown",
+      "garmentColor": "#e8e4d9",
+      "legwear": null,
       "backgroundBase": "#555365",
-      "pose": "consumptive"
+      "pose": null
     },
     "family": [
       "father: Suresh Mishra",
@@ -1969,33 +1971,34 @@
     ],
     "events": [
       "1819: Born in a small settlement to a Working Class family",
-      "1834: Experienced hard labor for the first time, joining work crews at dawn",
-      "1842: A sister married into a well-connected household of the local revenue farmers, improving the family's social standing",
-      "1852: The family pooled their resources to purchase a tractor, a significant investment",
+      "1833: Began learning the trade of laundry worker from an experienced practitioner",
+      "1835: A sister married into a well-connected warrior clan, improving the family's social standing",
+      "1852: Took over the family business after a parent retired from active work",
       "1858: came under the British Raj, having been born under East India Company rule",
-      "1898: Learned sacred texts under a guru's guidance"
+      "1878: walked to a relief camp and did not find all of the family there afterwards",
+      "1896: Learned sacred texts under a guru's guidance"
     ]
   },
   "bengal-1900#2": {
     "name": "Umesh Awasthi",
     "gender": "Male",
     "age": 67,
-    "profession": "Construction Labourer",
+    "profession": "Electrician",
     "religion": "Hinduism",
     "language": "Hindi",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in South Asia",
     "head": null,
-    "torso": "Olive Cotton Work Shirt [Wool]",
-    "feet": "Russet Rubber Sandals [Linen]",
+    "torso": "Turmeric T-Shirt [Cotton]",
+    "feet": "Russet Rubber Chappals [Rubber]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#6e6b3a",
-      "legwear": "Cotton Drill Trousers [linen] trousers",
-      "backgroundBase": "#555365",
+      "garmentColor": "#dfa62c",
+      "legwear": "Lungi [cotton check] wrapped",
+      "backgroundBase": "#545266",
       "pose": null
     },
     "family": [
@@ -2006,34 +2009,32 @@
     ],
     "events": [
       "1833: Born in a small settlement to a Working Class family",
-      "1846: Began learning the trade of construction labourer from an experienced practitioner",
+      "1846: Began learning the trade of electrician from an experienced practitioner",
+      "1849: A sister married into a well-connected family with a son at the Presidency college, improving the family's social standing",
+      "1852: Inherited valuable tools and a workshop from a childless uncle",
       "1858: came under the British Raj, having been born under East India Company rule",
-      "1859: Father was killed in Partition violence, leaving the family to manage affairs alone",
-      "1875: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1886: Inherited valuable tools and a workshop from a childless uncle",
-      "1896: Bathed in the Ganges during Kumbh Mela",
-      "1899: walked to a relief camp and did not find all of the family there afterwards"
+      "1859: Completed temple service during festival season"
     ]
   },
   "bengal-1900#3": {
     "name": "Ramesh Khan",
     "gender": "Male",
     "age": 59,
-    "profession": "Construction Labourer",
+    "profession": "Electrician",
     "religion": "Hinduism",
     "language": "Hindi",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in South Asia",
     "head": null,
-    "torso": "Charcoal Cotton Work Shirt [Cotton]",
-    "feet": "Russet Rubber Sandals [Cotton]",
+    "torso": "White T-Shirt [Cotton]",
+    "feet": "Russet Rubber Chappals [Rubber]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#333331",
-      "legwear": "Cotton Drill Trousers [cotton] trousers",
+      "garmentColor": "#e8e4d9",
+      "legwear": "Lungi [cotton check] wrapped",
       "backgroundBase": "#8e8ba0",
       "pose": "build:broad"
     },
@@ -2045,19 +2046,18 @@
     ],
     "events": [
       "1841: Born in a small settlement to a Working Class family",
-      "1855: Began learning the trade of construction labourer from an experienced practitioner",
-      "1857: A brother's marriage brought valuable new trade connections and opportunities",
+      "1856: Began learning the trade of electrician from an experienced practitioner",
       "1858: saw East India Company rule give way to the British Raj",
-      "1861: Inherited valuable tools and a workshop from a childless uncle",
-      "1889: Bathed in the Ganges during Kumbh Mela",
-      "1890: walked to a relief camp and did not find all of the family there afterwards"
+      "1861: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1873: Bathed in the Ganges during Kumbh Mela",
+      "1883: The family pooled their resources to purchase a taxi and the licence to drive it, a significant investment"
     ]
   },
   "london-2020#1": {
     "name": "Morag Grant",
     "gender": "Female",
     "age": 82,
-    "profession": "Surgeon",
+    "profession": "Judge",
     "religion": "Atheism",
     "language": "Modern English",
     "languageBasis": "attested-table",
@@ -2202,7 +2202,7 @@
     "name": "Louis Mercier",
     "gender": "Male",
     "age": 44,
-    "profession": "Publican",
+    "profession": "Shop Assistant",
     "religion": "Roman Catholicism",
     "language": "Modern French",
     "languageBasis": "attested-table",
@@ -2232,7 +2232,7 @@
     "events": [
       "1806: Born in a small settlement to a Working Class family",
       "1814: grew up under the restored French monarchy, which had taken the place from the First French Empire too early to be remembered",
-      "1818: Began learning the trade of publican from an experienced practitioner",
+      "1818: Began learning the trade of shop assistant from an experienced practitioner",
       "1832: The family pooled their resources to purchase a plot on the edge of town, a significant investment",
       "1836: A sister married into a well-connected family with a share in a chartered company, improving the family's social standing",
       "1848: lived through a third change of rule, to the French Second Republic"
@@ -2242,7 +2242,7 @@
     "name": "Michel Robert",
     "gender": "Male",
     "age": 21,
-    "profession": "Factory Hand",
+    "profession": "Glazier",
     "religion": "Roman Catholicism",
     "language": "Modern French",
     "languageBasis": "attested-table",
@@ -2257,7 +2257,7 @@
       "garmentKind": "work_shirt",
       "garmentColor": "#3a3a38",
       "legwear": "Labor Breeches [patched canvas] trousers",
-      "backgroundBase": "#555a5f",
+      "backgroundBase": "#565a5f",
       "pose": "build:broad"
     },
     "family": [
@@ -2267,7 +2267,7 @@
     ],
     "events": [
       "1829: Born in a small settlement to a Working Class family",
-      "1843: Natural talent recognized, began training in artistic craft",
+      "1843: Began learning the trade of glazier from an experienced practitioner",
       "1848: A brother's marriage brought valuable new trade connections and opportunities",
       "1848: saw the restored French monarchy give way to the French Second Republic",
       "1849: The family pooled their resources to purchase a taxi and the licence to drive it, a significant investment"
@@ -2277,7 +2277,7 @@
     "name": "Ramona Cristea",
     "gender": "Female",
     "age": 78,
-    "profession": "Waiter",
+    "profession": "Laundry Worker",
     "religion": "Eastern Orthodoxy",
     "language": "Serbo-Croatian",
     "languageBasis": "attested-table",
@@ -2296,17 +2296,17 @@
       "pose": null
     },
     "family": [
-      "father: Sorin Cristea",
-      "mother: Oana Nicolae",
-      "sister: Simona Cristea",
-      "brother: Catalin Cristea",
-      "spouse: Cosmin Nistor",
-      "daughter: Florentina Popescu",
-      "son: Viorel Radulescu"
+      "father: Lucian Cristea",
+      "mother: Corina Pop",
+      "sister: Lavinia Cristea",
+      "brother: Nicolae Cristea",
+      "spouse: Cristian Marinescu",
+      "daughter: Adina Popa",
+      "son: Radu Radulescu"
     ],
     "events": [
       "1822: Born in a small settlement to a Working Class family",
-      "1836: Began learning the trade of waiter from an experienced practitioner",
+      "1836: Began learning the trade of laundry worker from an experienced practitioner",
       "1848: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1867: The family pooled their resources to purchase a tractor, a significant investment",
       "1878: came under the Balkan kingdoms, having been born under the Ottoman Empire"
@@ -2316,23 +2316,23 @@
     "name": "Nicolae Preda",
     "gender": "Male",
     "age": 45,
-    "profession": "Waiter",
+    "profession": "Construction Labourer",
     "religion": "Eastern Orthodoxy",
     "language": "Serbo-Croatian",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in Europe",
-    "head": "Ochre Homburg [Quality Felt]",
-    "torso": "Azurite Cardigan [Wool]",
-    "feet": "Dress Shoes [Polished Leather]",
+    "head": "Ochre Canvas Work Cap [Cotton]",
+    "torso": "Olive Cotton Twill Work Jacket [Cotton]",
+    "feet": "Leather Work Boots [Leather]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "cap",
       "headwearColor": "#b1803c",
       "garmentKind": "jacket",
-      "garmentColor": "#3a63a8",
-      "legwear": "Trousers [cotton twill] trousers",
-      "backgroundBase": "#655359",
-      "pose": null
+      "garmentColor": "#6e6b3a",
+      "legwear": "Trousers [cotton] trousers",
+      "backgroundBase": "#535c65",
+      "pose": "crowd_averse"
     },
     "family": [
       "father: Marin Preda",
@@ -2345,31 +2345,31 @@
     ],
     "events": [
       "1855: Born in a small settlement to a Working Class family",
-      "1868: Began learning the trade of waiter from an experienced practitioner",
-      "1872: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1867: Began learning the trade of construction labourer from an experienced practitioner",
+      "1876: A sister married into a well-connected family with a son articled to a solicitor, improving the family's social standing",
       "1878: saw the Ottoman Empire give way to the Balkan kingdoms",
-      "1894: The family pooled their resources to purchase a tractor, a significant investment"
+      "1898: Took over the family business after a parent retired from active work"
     ]
   },
   "balkans-1900#3": {
     "name": "Christos Alexandrou",
     "gender": "Male",
     "age": 21,
-    "profession": "Bartender",
+    "profession": "Chimney Sweep",
     "religion": "Eastern Orthodoxy",
     "language": "Albanian",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in Europe",
-    "head": "Brown Fedora [Felt]",
-    "torso": "Black Business Suit [Wool Serge]",
-    "feet": "Oxford Shoes [Quality Leather]",
+    "head": "Brown Canvas Work Cap [Cotton]",
+    "torso": "Olive Flannel Work Shirt [Cotton]",
+    "feet": "Leather Work Boots [Treated Hide]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "cap",
       "headwearColor": "#6f5237",
-      "garmentKind": "jacket",
-      "garmentColor": "#1f1f22",
-      "legwear": "Black Business Suit [wool serge] trousers",
+      "garmentKind": "work_shirt",
+      "garmentColor": "#6e6b3a",
+      "legwear": "Trousers [cotton] trousers",
       "backgroundBase": "#535c65",
       "pose": "build:broad"
     },
@@ -2381,29 +2381,29 @@
     ],
     "events": [
       "1879: Born in a small settlement to a Working Class family",
-      "1894: Began learning the trade of bartender from an experienced practitioner",
-      "1897: A brother's marriage brought valuable new trade connections and opportunities",
-      "1898: Inherited valuable tools and a workshop from a childless uncle"
+      "1893: Began learning the trade of chimney sweep from an experienced practitioner",
+      "1898: Inherited valuable tools and a workshop from a childless uncle",
+      "1899: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "andes-1990#1": {
     "name": "Ximena Garcia",
     "gender": "Female",
     "age": 82,
-    "profession": "Care Worker",
+    "profession": "Machine Operator",
     "religion": "Roman Catholicism",
     "language": "Uru-Chipaya (attested)",
     "languageBasis": "sam-andes",
     "languageConfidence": "inferred",
     "odds": "the modern era in South America",
     "head": null,
-    "torso": "Olive Blouse [Polyester]",
+    "torso": "Black Blouse [Polyester]",
     "feet": "Blue Canvas Shoes [Canvas]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#424023",
+      "garmentColor": "#1f1f22",
       "legwear": "Skirt [cotton blend] skirt",
       "backgroundBase": "#708979",
       "pose": null
@@ -2430,20 +2430,20 @@
     "name": "Juan Choquehuanca",
     "gender": "Male",
     "age": 47,
-    "profession": "Banana Plantation Worker",
+    "profession": "Kitchen Porter",
     "religion": "Roman Catholicism",
     "language": "Quechuan (reconstructed)",
     "languageBasis": "sam-andes",
     "languageConfidence": "reconstructed",
     "odds": "the modern era in South America",
     "head": null,
-    "torso": "White T-Shirt [Cotton]",
+    "torso": "Charcoal T-Shirt [Cotton]",
     "feet": "Brown Canvas Sneakers [Canvas and Rubber]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#e8e4d9",
+      "garmentColor": "#333331",
       "legwear": "Jeans [denim] trousers",
       "backgroundBase": "#708979",
       "pose": null
@@ -2456,7 +2456,7 @@
     ],
     "events": [
       "1943: Born in a small settlement to a Working Class family",
-      "1959: Started on a trainee's wage, which was most of the training",
+      "1959: Started on the early shift, and has kept those hours ever since",
       "1985: Participated in Inti Raymi sun ceremony",
       "1988: A sister married and moved across the city, and the house was quieter for it",
       "1989: Took over the family business when a parent's health gave out"
@@ -2466,7 +2466,7 @@
     "name": "Cirilo Mamani",
     "gender": "Male",
     "age": 21,
-    "profession": "Banana Plantation Worker",
+    "profession": "Favela Resident",
     "religion": "Roman Catholicism",
     "language": "Aymaran (reconstructed)",
     "languageBasis": "sam-andes",
@@ -2502,20 +2502,20 @@
     "name": "Kaia Mataʻafa",
     "gender": "Female",
     "age": 82,
-    "profession": "Kitchen Porter",
+    "profession": "Hairdresser",
     "religion": "Atheism",
     "language": "Eastern Polynesian (reconstructed)",
     "languageBasis": "oc-east-polynesia",
     "languageConfidence": "reconstructed",
     "odds": "the modern era in Oceania",
     "head": "Ochre Sun Visor [Woven Coconut Fronds]",
-    "torso": "Olive Tank Top [Cotton]",
+    "torso": "Black Tank Top [Cotton]",
     "feet": "Ochre Barefoot [None]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#b1803c",
       "garmentKind": "work_shirt",
-      "garmentColor": "#8a8649",
+      "garmentColor": "#1b1b1e",
       "legwear": "Skirt [cotton] skirt",
       "backgroundBase": "#5c6c71",
       "pose": null
@@ -2531,7 +2531,7 @@
     ],
     "events": [
       "1928: Born in a small settlement to a Peasant family",
-      "1942: Went out to work young, and found the day longer than school had been",
+      "1942: Started on a trainee's wage, which was most of the training",
       "1952: A brother married young, and the wedding cost more than the family had",
       "1961: Took over the family business when a parent's health gave out",
       "2007: Hosted important feast, strengthening clan ties"
@@ -2541,20 +2541,20 @@
     "name": "Pita",
     "gender": "Male",
     "age": 47,
-    "profession": "Aboriginal Stockman",
+    "profession": "Kitchen Porter",
     "religion": "Atheism",
     "language": "Proto-Polynesian (reconstructed)",
     "languageBasis": "oc-east-polynesia",
     "languageConfidence": "reconstructed",
     "odds": "the modern era in Oceania",
     "head": null,
-    "torso": "Grey T-Shirt [Cotton]",
+    "torso": "Bronze T-Shirt [Cotton]",
     "feet": "Russet Flip Flops [Rubber]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#a7a4a0",
+      "garmentColor": "#7e592f",
       "legwear": "Board Shorts [polyester] shorts",
       "backgroundBase": "#536065",
       "pose": null
@@ -2568,7 +2568,7 @@
     ],
     "events": [
       "1963: Born in a small settlement to a Peasant family",
-      "1979: Spent a first season away with the herd and came back taller",
+      "1979: Started on the early shift, and has kept those hours ever since",
       "2002: The family pooled what they had for a deposit on a tractor",
       "2006: Exchanged gifts with neighboring tribe, preventing conflict",
       "2008: A brother married young, and the wedding cost more than the family had"
@@ -2578,7 +2578,7 @@
     "name": "Nalani Vaea",
     "gender": "Male",
     "age": 21,
-    "profession": "Aboriginal Stockman",
+    "profession": "Hospital Orderly",
     "religion": "Protestantism",
     "language": "Eastern Polynesian (reconstructed)",
     "languageBasis": "oc-east-polynesia",
@@ -2606,27 +2606,27 @@
       "1989: Born in a small settlement to a Peasant family",
       "2007: The family pooled what they had for a deposit on a delivery van",
       "2008: Stood as witness at a sibling's wedding, and understood that the household had changed shape",
-      "2009: Learned to read weather signs and where the water would still be running"
+      "2009: Started work at a place a schoolfriend was already working"
     ]
   },
   "kazakh-steppe-636bce#1": {
     "name": "*Sarnai",
     "gender": "Female",
     "age": 75,
-    "profession": "Tea Grower",
+    "profession": "Vegetable Farmer",
     "religion": "Tengrism",
     "language": "Oxus substrate survival (hypothetical)",
     "languageBasis": "ca-old-iranian",
     "languageConfidence": "conjectural",
     "odds": "antiquity in East Asia",
-    "head": "White Silk Headband [Silk]",
-    "torso": "Crimson Brocade Overrobe [Brocade]",
-    "feet": "White Embroidered Silk Shoes [Silk]",
+    "head": "White Cloth Headscarf [Wool]",
+    "torso": "Olive Short Hemp Jacket [Wool]",
+    "feet": "White Straw Sandals [Linen]",
     "portrait": {
-      "headwearKind": "band",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#e8e4d9",
-      "garmentKind": "robe",
-      "garmentColor": "#8e2436",
+      "garmentKind": "jacket",
+      "garmentColor": "#6e6b3a",
       "legwear": null,
       "backgroundBase": "#445f5a",
       "pose": null
@@ -2642,19 +2642,20 @@
     ],
     "events": [
       "-711: Born in a small settlement to a Peasant family",
-      "-697: Began learning the trade of tea grower from an experienced practitioner",
-      "-695: A sister married into a well-connected merchant consortium, improving the family's social standing",
-      "-686: Took over the family business after a parent retired from active work",
-      "-681: Became the first in the village to successfully grow peanuts, earning respect from neighbors",
-      "-678: Returned home to care for aging parents",
-      "-673: Tragedy struck when a parent was drowned in flood"
+      "-696: Began working family fields, learning the rotation from elders",
+      "-688: A sister married into a well-connected household of a clan with pasture of its own, improving the family's social standing",
+      "-686: The family lost their mother when she died from plague",
+      "-685: Divided the land among the children, keeping the best field for old age",
+      "-676: Returned home to care for aging parents",
+      "-670: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
+      "-665: Took over the family business after a parent retired from active work"
     ]
   },
   "kazakh-steppe-636bce#2": {
     "name": "*Oroq",
     "gender": "Male",
     "age": 40,
-    "profession": "Potter",
+    "profession": "Weaver",
     "religion": "Tengrism",
     "language": "Oxus substrate survival (hypothetical)",
     "languageBasis": "ca-old-iranian",
@@ -2683,7 +2684,7 @@
     ],
     "events": [
       "-676: Born in a small settlement to a Peasant family",
-      "-663: Learned the potter's work by doing it badly alongside someone who did it well",
+      "-663: Learned the weaver's work by doing it badly alongside someone who did it well",
       "-654: Took over the family business after a parent retired from active work",
       "-652: A sister married into a well-connected merchant consortium, improving the family's social standing",
       "-646: Arranged favorable marriage for younger sister"
@@ -2928,7 +2929,7 @@
     "name": "Eun-woo Park",
     "gender": "Male",
     "age": 20,
-    "profession": "Dyer",
+    "profession": "Baker",
     "religion": "Korean Shamanism",
     "language": "Middle Korean",
     "languageBasis": "attested-table",
@@ -2955,28 +2956,28 @@
     "events": [
       "1380: Born in a small settlement to a Laboring Poor family",
       "1392: saw Goryeo give way to Joseon",
-      "1393: Began learning the trade of dyer from an experienced practitioner",
-      "1399: Inherited valuable tools and a workshop from a childless uncle"
+      "1393: Began learning the trade of baker from an experienced practitioner",
+      "1399: The family pooled their resources to purchase a storage barn, a significant investment"
     ]
   },
   "mongolia-1250#1": {
     "name": "Altantsetseg Purev",
     "gender": "Female",
     "age": 75,
-    "profession": "Fisher",
+    "profession": "Beekeeper",
     "religion": "Tengrism",
     "language": "Middle Mongolian",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in East Asia",
-    "head": "Natural Conical Straw Hat [Rough Wool]",
-    "torso": "Walnut Ramie Work Jacket [Burlap]",
-    "feet": "Natural Barefoot [Rough Linen]",
+    "head": null,
+    "torso": "White Hemp Jacket [Rough Hemp]",
+    "feet": "Natural Cloth Slippers [Cotton]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
-      "headwearColor": "#d8cdb6",
+      "headwearKind": null,
+      "headwearColor": null,
       "garmentKind": "jacket",
-      "garmentColor": "#5b4229",
+      "garmentColor": "#e8e4d9",
       "legwear": null,
       "backgroundBase": "#3f5a55",
       "pose": null
@@ -2989,11 +2990,11 @@
     ],
     "events": [
       "1175: Born in a small settlement to a Laboring Poor family",
-      "1190: Went out with the adults for the first time and came back carrying a share",
-      "1200: Arranged favorable marriage for younger sister",
-      "1206: came under the Mongol Empire, having been born under the Jin dynasty",
-      "1207: The family pooled their resources to purchase draft animals, a significant investment",
-      "1214: A brother's marriage brought valuable new trade connections and opportunities"
+      "1189: Began learning the trade of beekeeper from an experienced practitioner",
+      "1191: A sister married into a well-connected tea-and-horse trading house on the Sichuan road, improving the family's social standing",
+      "1202: Returned home to care for aging parents",
+      "1206: Took over the family business after a parent retired from active work",
+      "1206: came under the Mongol Empire, having been born under the Jin dynasty"
     ]
   },
   "mongolia-1250#2": {
@@ -3155,20 +3156,20 @@
     "name": "Katsuki",
     "gender": "Male",
     "age": 21,
-    "profession": "Tailor",
+    "profession": "Muleteer",
     "religion": "Shinto",
     "language": "Modern Japanese",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in East Asia",
-    "head": "Rust Cloth Headband [Cotton]",
-    "torso": "Charcoal Work Jacket [Wool]",
-    "feet": "Rust Straw Sandals [Wool]",
+    "head": "Bamboo Hat [Woven Bamboo]",
+    "torso": "Navy Hemp Jacket [Rough Hemp]",
+    "feet": "Straw Sandals [Rice Straw]",
     "portrait": {
-      "headwearKind": "band",
-      "headwearColor": "#9c5230",
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c0a566",
       "garmentKind": "jacket",
-      "garmentColor": "#3a3a38",
+      "garmentColor": "#23304a",
       "legwear": "Trousers [cotton] trousers",
       "backgroundBase": "#49504f",
       "pose": "build:broad"
@@ -3181,10 +3182,11 @@
     ],
     "events": [
       "1849: Born in a small settlement to a Working Class family",
-      "1862: Taken as apprentice by renowned tailor, bound for seven years",
-      "1867: The family pooled their resources to purchase a delivery van, a significant investment",
-      "1868: A brother's marriage brought valuable new trade connections and opportunities",
-      "1868: saw the Tokugawa shogunate give way to the Empire of Japan"
+      "1864: Began learning the trade of muleteer from an experienced practitioner",
+      "1867: Took over the family business after a parent retired from active work",
+      "1868: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1868: saw the Tokugawa shogunate give way to the Empire of Japan",
+      "1869: Performed ancestral rites as eldest son"
     ]
   },
   "europe-8000bce#1": {
@@ -3233,7 +3235,7 @@
     "name": "Aryomon the Fowler",
     "gender": "Male",
     "age": 40,
-    "profession": "Fowler",
+    "profession": "Root Digger",
     "religion": "Animism",
     "language": "Pre-Neolithic European (hypothetical)",
     "languageBasis": "eu-forager",
@@ -3262,7 +3264,7 @@
     ],
     "events": [
       "-8040: Born to the band that ranged this country",
-      "-8028: Learned to read the weather and the water from a parent",
+      "-8028: Started working alongside father in backbreaking toil",
       "-8023: Followed a river further than anyone in the band had gone, and came back able to describe it",
       "-8019: Met a band nobody knew at the river, and there was trading and wariness and then singing",
       "-8013: A summer of no rain drove the band far from the usual ground, into country nobody knew",
@@ -3352,7 +3354,7 @@
     "name": "Xenophanes son of Kleomenes",
     "gender": "Male",
     "age": 40,
-    "profession": "Beekeeper",
+    "profession": "Vintner",
     "religion": "Local Beliefs",
     "language": "Ancient Greek",
     "languageBasis": "attested-table",
@@ -3378,7 +3380,7 @@
     ],
     "events": [
       "-470: Born in a small settlement to a Laboring Poor family",
-      "-458: Began learning the trade of beekeeper from an experienced practitioner",
+      "-458: Began learning the trade of vintner from an experienced practitioner",
       "-446: The family pooled their resources to purchase a market stall, a significant investment",
       "-442: A sister married into a well-connected noble house, improving the family's social standing",
       "-430: survived the sickness that emptied a third of the city",
@@ -3459,15 +3461,15 @@
     "name": "Publius Flavius",
     "gender": "Male",
     "age": 40,
-    "profession": "Water Carrier",
+    "profession": "Vintner",
     "religion": "Roman Polytheism",
     "language": "Latin",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in Europe",
-    "head": "Russet Linen Headscarf [Rough Linen]",
-    "torso": "Olive Linen Apron [Rough Wool]",
-    "feet": "Russet Barefoot [Hemp]",
+    "head": "Russet Felt Cap [Rough Felt]",
+    "torso": "Woad Loincloth [Hemp]",
+    "feet": "Russet Barefoot [None]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
@@ -3475,7 +3477,7 @@
       "garmentColor": "#9b805e",
       "legwear": null,
       "backgroundBase": "#769e8a",
-      "pose": "taciturn"
+      "pose": null
     },
     "family": [
       "father: Appius Flavius",
@@ -3486,9 +3488,9 @@
     ],
     "events": [
       "60: Born in a small settlement to a Laboring Poor family",
-      "73: Began learning the trade of water carrier from an experienced practitioner",
-      "77: A brother's marriage brought valuable new trade connections and opportunities",
-      "92: The family pooled their resources to purchase a mill share, a significant investment"
+      "72: Began learning the trade of vintner from an experienced practitioner",
+      "84: The family pooled their resources to purchase a market stall, a significant investment",
+      "88: A sister married into a well-connected household of a decurion in the local ordo, improving the family's social standing"
     ]
   },
   "rome-100#3": {
@@ -3572,20 +3574,20 @@
     "name": "Tomos",
     "gender": "Male",
     "age": 40,
-    "profession": "Leatherworker",
+    "profession": "Shepherd",
     "religion": "Roman Catholicism",
     "language": "Old English",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in Europe",
-    "head": "Harvest Cap [Rye Straw]",
-    "torso": "Marigold Peasant Shirt [Hemp]",
-    "feet": "Natural Foot Wraps [Linen]",
+    "head": "Natural Coif [Linen]",
+    "torso": "Bronze Heavy Top [Scratchy Fleece]",
+    "feet": "Turnshoes [Treated Hide]",
     "portrait": {
       "headwearKind": "cap",
-      "headwearColor": "#c2a463",
+      "headwearColor": "#d8cdb6",
       "garmentKind": "work_shirt",
-      "garmentColor": "#d9822f",
+      "garmentColor": "#a8763f",
       "legwear": null,
       "backgroundBase": "#4a5a6a",
       "pose": null
@@ -3601,10 +3603,11 @@
     ],
     "events": [
       "860: Born in a small settlement to a Laboring Poor family",
-      "872: Began learning the trade of leatherworker from an experienced practitioner",
-      "878: Paid annual tribute to local lord",
-      "887: The family pooled their resources to purchase a market stall, a significant investment",
-      "888: A sister married into a well-connected cathedral chapter, improving the family's social standing"
+      "872: Trusted to take the animals out alone for the first time",
+      "884: Inherited valuable tools and a workshop from a childless uncle",
+      "888: The family lost their father when he died from starvation during famine",
+      "892: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "896: Required to provide labor for castle repairs"
     ]
   },
   "ireland-900#3": {
@@ -3686,20 +3689,20 @@
     "name": "Mansour Madani",
     "gender": "Male",
     "age": 40,
-    "profession": "Cottager",
+    "profession": "Ploughman",
     "religion": "Roman Catholicism",
     "language": "Old Spanish",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Turmeric Rush Hat [Woven Rushes]",
-    "torso": "Tyrian Peasant Shirt [Coarse Linen]",
-    "feet": "Leather Shoes [Cracked Leather]",
+    "head": "Turmeric Wool Cap [Linen]",
+    "torso": "Bronze Linen Shirt [Wool]",
+    "feet": "Leather Shoes [Leather]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "cap",
       "headwearColor": "#dfa62c",
       "garmentKind": "work_shirt",
-      "garmentColor": "#6a2450",
+      "garmentColor": "#a8763f",
       "legwear": null,
       "backgroundBase": "#343d46",
       "pose": null
@@ -3715,10 +3718,11 @@
     ],
     "events": [
       "1440: Born in a small settlement to a Laboring Poor family",
-      "1452: Began learning the trade of cottager from an experienced practitioner",
-      "1462: Paid annual tribute to local lord",
-      "1468: A sister married into a well-connected family holding a manor from the abbey, improving the family's social standing",
-      "1472: Took over the family business after a parent retired from active work"
+      "1453: Began learning the trade of ploughman from an experienced practitioner",
+      "1465: Paid annual tribute to local lord",
+      "1469: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1473: Took over the family business after a parent retired from active work",
+      "1479: Experimenting with a new plowing method led to a marked increase in field productivity"
     ]
   },
   "iberia-1480#3": {
@@ -3843,7 +3847,7 @@
     "name": "Nikolai Kozlov",
     "gender": "Male",
     "age": 20,
-    "profession": "Shepherd",
+    "profession": "Thresher",
     "religion": "Eastern Orthodoxy",
     "language": "Russian",
     "languageBasis": "attested-table",
@@ -3865,14 +3869,15 @@
       "father: Andrei Kozlov",
       "mother: Olga Kuznetsov",
       "brother: Oleg Kozlov",
-      "sister: Maria Kozlov"
+      "sister: Anastasia Kozlov",
+      "twin: Roman Sokolov"
     ],
     "events": [
       "1580: Born in a small settlement to a Laboring Poor family",
-      "1594: Trusted to take the animals out alone for the first time",
-      "1597: Paid annual tribute to local lord",
-      "1598: Inherited valuable tools and a workshop from a childless uncle",
-      "1599: A sister married into a well-connected town council, improving the family's social standing"
+      "1594: Began learning the trade of thresher from an experienced practitioner",
+      "1597: Summoned to lord's court as witness in land dispute",
+      "1598: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1599: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "lowcountries-1650#1": {
@@ -3921,22 +3926,22 @@
     "name": "Nicolas Bertrand",
     "gender": "Male",
     "age": 40,
-    "profession": "Ploughman",
+    "profession": "Cottager",
     "religion": "Protestantism",
     "language": "Dutch",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in Europe",
-    "head": "Natural Wool Cap [Linen]",
-    "torso": "Charcoal Linen Shirt [Wool]",
-    "feet": "Leather Shoes [Leather]",
+    "head": "Natural Biggins [Rough Wool]",
+    "torso": "Indigo Peasant Shirt [Coarse Linen]",
+    "feet": "Leather Shoes [Cracked Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#d8cdb6",
       "garmentKind": "work_shirt",
-      "garmentColor": "#3a3a38",
+      "garmentColor": "#2e3f5c",
       "legwear": null,
-      "backgroundBase": "#343d46",
+      "backgroundBase": "#46343b",
       "pose": null
     },
     "family": [
@@ -3948,18 +3953,17 @@
     ],
     "events": [
       "1610: Born in a small settlement to a Laboring Poor family",
-      "1623: Began learning the trade of ploughman from an experienced practitioner",
-      "1635: Paid annual tribute to local lord",
-      "1639: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1643: Took over the family business after a parent retired from active work",
-      "1649: Experimenting with a new plowing method led to a marked increase in field productivity"
+      "1622: Began learning the trade of cottager from an experienced practitioner",
+      "1632: Paid annual tribute to local lord",
+      "1638: A sister married into a well-connected household of the cathedral canons, improving the family's social standing",
+      "1642: Took over the family business after a parent retired from active work"
     ]
   },
   "lowcountries-1650#3": {
     "name": "Antonius van Leeuwen",
     "gender": "Male",
     "age": 20,
-    "profession": "Shepherd",
+    "profession": "Thresher",
     "religion": "Protestantism",
     "language": "Dutch",
     "languageBasis": "attested-table",
@@ -3985,75 +3989,72 @@
     ],
     "events": [
       "1630: Born in a small settlement to a Laboring Poor family",
-      "1644: Trusted to take the animals out alone for the first time",
-      "1647: Paid annual tribute to local lord",
-      "1648: Inherited valuable tools and a workshop from a childless uncle",
-      "1649: A sister married into a well-connected town council, improving the family's social standing"
+      "1644: Began learning the trade of thresher from an experienced practitioner",
+      "1647: Summoned to lord's court as witness in land dispute",
+      "1648: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1649: Inherited valuable tools and a workshop from a childless uncle"
     ]
   },
   "germany-1930#1": {
     "name": "Anna Schäfer",
     "gender": "Female",
     "age": 81,
-    "profession": "Shop Assistant",
+    "profession": "Street Vendor",
     "religion": "Protestantism",
     "language": "German",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in Europe",
-    "head": "Tan Cloche Hat [Felt]",
-    "torso": "Indigo Cocktail Dress [Silk Crepe]",
-    "feet": "Court Shoes [Patent Leather]",
+    "head": null,
+    "torso": "Walnut Rayon Blouse [Linen]",
+    "feet": "Leather Pumps [Treated Hide]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
-      "headwearColor": "#a98a63",
-      "garmentKind": "gown",
-      "garmentColor": "#2e3f5c",
-      "legwear": null,
-      "backgroundBase": "#655359",
+      "headwearKind": null,
+      "headwearColor": null,
+      "garmentKind": "work_shirt",
+      "garmentColor": "#5b4229",
+      "legwear": "Skirt [linen] skirt",
+      "backgroundBase": "#535c65",
       "pose": null
     },
     "family": [
       "father: Wolfgang Schäfer",
       "mother: Petra daughter of Sebastian",
-      "sister: Nicole Schäfer",
-      "brother: Michael Schäfer",
-      "spouse: Ludwig Schmidt",
-      "daughter: Monika Wagner",
-      "son: Johann Neumann"
+      "sister: Sandra Schäfer",
+      "brother: Ernst Schäfer"
     ],
     "events": [
       "1849: Born in a small settlement to a Working Class family",
-      "1863: Began learning the trade of shop assistant from an experienced practitioner",
+      "1864: Sent to apprentice with trading company, learning accounts and negotiation",
       "1871: saw the German Confederation give way to the German Empire",
-      "1875: A sister married into a well-connected noble house, improving the family's social standing",
-      "1879: A sister married and moved across the city, and the house was quieter for it",
-      "1885: Tragedy struck when a parent died from Spanish flu",
-      "1895: The family pooled their resources to purchase a tractor, a significant investment",
-      "1918: lived through a third change of rule, to the Weimar Republic"
+      "1872: The family pooled their resources to purchase a tractor, a significant investment",
+      "1874: Negotiated a lucrative contract with town council for automobiles",
+      "1880: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1883: Father died from pneumonia, leaving the family to manage affairs alone",
+      "1887: Borrowed against the stock at an interest rate that ate the business inside two years"
     ]
   },
   "germany-1930#2": {
     "name": "Florian Schmitz",
     "gender": "Male",
     "age": 46,
-    "profession": "Lorry Driver",
+    "profession": "Construction Labourer",
     "religion": "Protestantism",
     "language": "German",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in Europe",
-    "head": "Ochre Homburg [Quality Felt]",
-    "torso": "White Cardigan [Wool]",
-    "feet": "Dress Shoes [Polished Leather]",
+    "head": "Ochre Canvas Work Cap [Cotton]",
+    "torso": "Charcoal Cotton Twill Work Jacket [Cotton]",
+    "feet": "Leather Work Boots [Leather]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "cap",
       "headwearColor": "#b1803c",
       "garmentKind": "jacket",
-      "garmentColor": "#bfb496",
-      "legwear": "Trousers [cotton twill] trousers",
+      "garmentColor": "#3a3a38",
+      "legwear": "Trousers [cotton] trousers",
       "backgroundBase": "#535c65",
-      "pose": null
+      "pose": "taciturn"
     },
     "family": [
       "father: Peter Schmitz",
@@ -4061,23 +4062,23 @@
       "brother: Andreas Schmitz",
       "sister: Ursula Schmitz",
       "spouse: Ingrid Klein",
-      "son: Karl Müller",
-      "daughter: Martha Krause"
+      "son: Helmut Schulz",
+      "daughter: Brigitte Krüger"
     ],
     "events": [
       "1884: Born in a small settlement to a Working Class family",
-      "1897: Began learning the trade of lorry driver from an experienced practitioner",
-      "1912: The family lost their father when he died by suicide",
+      "1896: Began learning the trade of construction labourer from an experienced practitioner",
+      "1907: Inherited valuable tools and a workshop from a childless uncle",
+      "1913: Father died from heart disease despite seeking help",
       "1918: came under the Weimar Republic, having been born under the German Empire",
-      "1921: Took over the family business after a parent retired from active work",
-      "1928: A sister married and moved across the city, and the house was quieter for it"
+      "1920: Stood as witness at a sibling's wedding, and understood that the household had changed shape"
     ]
   },
   "germany-1930#3": {
     "name": "Karl Schneider",
     "gender": "Male",
     "age": 21,
-    "profession": "Lorry Driver",
+    "profession": "Machine Operator",
     "religion": "Protestantism",
     "language": "German",
     "languageBasis": "attested-table",
@@ -4165,7 +4166,7 @@
     "torso": "Olive Linen Kilt (Schenti) [Wool]",
     "feet": "Green Woven Reed Sandals [Linen]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#5a6b3b",
       "garmentKind": "tunic",
       "garmentColor": "#6e6b3a",
@@ -4193,18 +4194,18 @@
     "name": "Omari the Slow-Spoken",
     "gender": "Male",
     "age": 20,
-    "profession": "Smith",
+    "profession": "Drover",
     "religion": "Local Beliefs",
     "language": "Ancient Egyptian",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": null,
-    "torso": "Charcoal Linen Kilt [Rough Wool]",
+    "head": "Tan Linen Head-Cloth [Rough Wool]",
+    "torso": "Charcoal Linen Kilt (Schenti) [Rough Wool]",
     "feet": "Barefoot [Burlap]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#6b482f",
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#a98a63",
       "garmentKind": "tunic",
       "garmentColor": "#3a3a38",
       "legwear": null,
@@ -4219,9 +4220,9 @@
     ],
     "events": [
       "-1370: Born in a small settlement to a Peasant family",
-      "-1357: Began learning the trade of smith from an experienced practitioner",
-      "-1352: Created masterwork that drew crowds to market square",
-      "-1351: A brother's marriage brought valuable new trade connections and opportunities"
+      "-1356: Trusted to take the animals out alone for the first time",
+      "-1352: Inherited valuable tools and a workshop from a childless uncle",
+      "-1351: A sister married into a well-connected family of temple scribes at Karnak, improving the family's social standing"
     ]
   },
   "mesopotamia-1750bce#1": {
@@ -4280,7 +4281,7 @@
     "torso": "Walnut Linen Kilt (Schenti) [Wool]",
     "feet": "Tan Woven Reed Sandals [Linen]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#a98a63",
       "garmentKind": "tunic",
       "garmentColor": "#5b4229",
@@ -4308,18 +4309,18 @@
     "name": "Tiglath the Younger",
     "gender": "Male",
     "age": 20,
-    "profession": "Smith",
+    "profession": "Drover",
     "religion": "Local Beliefs",
     "language": "Akkadian",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": null,
-    "torso": "Olive Linen Kilt [Rough Wool]",
+    "head": "Green Linen Head-Cloth [Rough Wool]",
+    "torso": "Olive Linen Kilt (Schenti) [Rough Wool]",
     "feet": "Barefoot [Burlap]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#6b482f",
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#5a6b3b",
       "garmentKind": "tunic",
       "garmentColor": "#6e6b3a",
       "legwear": null,
@@ -4334,9 +4335,9 @@
     ],
     "events": [
       "-1770: Born in a small settlement to a Peasant family",
-      "-1757: Began learning the trade of smith from an experienced practitioner",
-      "-1752: Created masterwork that drew crowds to market square",
-      "-1751: A brother's marriage brought valuable new trade connections and opportunities"
+      "-1756: Trusted to take the animals out alone for the first time",
+      "-1752: Inherited valuable tools and a workshop from a childless uncle",
+      "-1751: A sister married into a well-connected tribal confederation, improving the family's social standing"
     ]
   },
   "persia-500bce#1": {
@@ -4392,7 +4393,7 @@
     "torso": "Olive Linen Kilt (Schenti) [Wool]",
     "feet": "Turmeric Woven Reed Sandals [Linen]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#dfa62c",
       "garmentKind": "tunic",
       "garmentColor": "#6e6b3a",
@@ -4417,18 +4418,18 @@
     "name": "Afrasiab son of Bahram",
     "gender": "Male",
     "age": 20,
-    "profession": "Smith",
+    "profession": "Drover",
     "religion": "Zoroastrianism",
     "language": "Old Persian",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": null,
-    "torso": "Indigo Linen Kilt [Rough Wool]",
+    "head": "Green Linen Head-Cloth [Rough Wool]",
+    "torso": "Indigo Linen Kilt (Schenti) [Rough Wool]",
     "feet": "Barefoot [Burlap]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#6b482f",
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#5a6b3b",
       "garmentKind": "tunic",
       "garmentColor": "#2e3f5c",
       "legwear": null,
@@ -4443,16 +4444,16 @@
     ],
     "events": [
       "-520: Born in a small settlement to a Laboring Poor family",
-      "-507: Began learning the trade of smith from an experienced practitioner",
-      "-502: Created masterwork that drew crowds to market square",
-      "-501: A brother's marriage brought valuable new trade connections and opportunities"
+      "-506: Trusted to take the animals out alone for the first time",
+      "-502: Inherited valuable tools and a workshop from a childless uncle",
+      "-501: A sister married into a well-connected landed family of the Achaemenid satrapies, improving the family's social standing"
     ]
   },
   "levant-30#1": {
     "name": "Gula daughter of Shalmaneser",
     "gender": "Female",
     "age": 75,
-    "profession": "Courier",
+    "profession": "Tax Assessor",
     "religion": "Canaanite Religion",
     "language": "Aramaic",
     "languageBasis": "attested-table",
@@ -4481,7 +4482,7 @@
     ],
     "events": [
       "-45: Born in a small settlement to a Gentry family",
-      "-31: Began learning the trade of courier from an experienced practitioner",
+      "-31: Began learning the trade of tax assessor from an experienced practitioner",
       "-20: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "-2: The family pooled their resources to purchase a market stall, a significant investment"
     ]
@@ -4500,7 +4501,7 @@
     "torso": "Bronze Linen Kilt (Schenti) [Rough Wool]",
     "feet": "Turmeric Woven Reed Sandals [Rough Linen]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#dfa62c",
       "garmentKind": "tunic",
       "garmentColor": "#a8763f",
@@ -4528,18 +4529,18 @@
     "name": "Shamash son of Sargon",
     "gender": "Male",
     "age": 20,
-    "profession": "Smith",
+    "profession": "Drover",
     "religion": "Judaism",
     "language": "Aramaic",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": null,
-    "torso": "Olive Linen Kilt [Rough Wool]",
+    "head": "Indigo Linen Head-Cloth [Rough Wool]",
+    "torso": "Olive Linen Kilt (Schenti) [Rough Wool]",
     "feet": "Barefoot [Burlap]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#6b482f",
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#2e3f5c",
       "garmentKind": "tunic",
       "garmentColor": "#6e6b3a",
       "legwear": null,
@@ -4554,9 +4555,9 @@
     ],
     "events": [
       "10: Born in a small settlement to a Laboring Poor family",
-      "23: Began learning the trade of smith from an experienced practitioner",
-      "28: Created masterwork that drew crowds to market square",
-      "29: A brother's marriage brought valuable new trade connections and opportunities"
+      "24: Trusted to take the animals out alone for the first time",
+      "28: Inherited valuable tools and a workshop from a childless uncle",
+      "29: A sister married into a well-connected Alexandrian grain-shipping family, improving the family's social standing"
     ]
   },
   "maghreb-620bce#1": {
@@ -4615,7 +4616,7 @@
     "torso": "Olive Linen Kilt (Schenti) [Wool]",
     "feet": "Turmeric Woven Reed Sandals [Linen]",
     "portrait": {
-      "headwearKind": "cap",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#dfa62c",
       "garmentKind": "tunic",
       "garmentColor": "#6e6b3a",
@@ -4640,18 +4641,18 @@
     "name": "Azegzaw the Well-Digger",
     "gender": "Male",
     "age": 20,
-    "profession": "Smith",
+    "profession": "Drover",
     "religion": "Local Beliefs",
     "language": "Berber (Tamazight)",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "antiquity in the Middle East and North Africa",
-    "head": null,
-    "torso": "Olive Linen Kilt [Wool]",
+    "head": "Indigo Linen Head-Cloth [Cotton]",
+    "torso": "Olive Linen Kilt (Schenti) [Wool]",
     "feet": "Barefoot [Wool]",
     "portrait": {
-      "headwearKind": "cap",
-      "headwearColor": "#6b482f",
+      "headwearKind": "wrapped_cloth",
+      "headwearColor": "#2e3f5c",
       "garmentKind": "tunic",
       "garmentColor": "#6e6b3a",
       "legwear": null,
@@ -4666,31 +4667,31 @@
     ],
     "events": [
       "-640: Born in a small settlement to a Peasant family",
-      "-627: Began learning the trade of smith from an experienced practitioner",
-      "-622: Created masterwork that drew crowds to market square",
-      "-621: A brother's marriage brought valuable new trade connections and opportunities"
+      "-626: Trusted to take the animals out alone for the first time",
+      "-622: Inherited valuable tools and a workshop from a childless uncle",
+      "-621: A sister married into a well-connected tribal confederation, improving the family's social standing"
     ]
   },
   "baghdad-1924#1": {
     "name": "Dina Hamdan",
     "gender": "Female",
     "age": 81,
-    "profession": "Street Vendor",
+    "profession": "Laundry Worker",
     "religion": "Shia Islam",
     "language": "Iraqi Arabic",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in the Middle East and North Africa",
     "head": "Green Headscarf [Cotton]",
-    "torso": "Olive Blouse [Cotton]",
+    "torso": "Woad Blouse [Cotton]",
     "feet": "Green Plastic Sandals [Rubber]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
       "headwearColor": "#5a6b3b",
       "garmentKind": "work_shirt",
-      "garmentColor": "#6e6b3a",
+      "garmentColor": "#3a4f6d",
       "legwear": "Long Skirt [cotton] skirt",
-      "backgroundBase": "#535865",
+      "backgroundBase": "#65535a",
       "pose": null
     },
     "family": [
@@ -4703,32 +4704,31 @@
     ],
     "events": [
       "1843: Born in a small settlement to a Working Class family",
-      "1857: Began managing family stall at market, handling coins and customers",
-      "1859: A sister married into a well-connected military elite, improving the family's social standing",
-      "1863: A sister married and moved across the city, and the house was quieter for it",
-      "1867: Secured exclusive trading rights for natural gas from Cordoba",
-      "1870: The dates price collapsed while the stock was still sitting in the warehouse",
-      "1876: Took over the family business after a parent retired from active work"
+      "1857: Began learning the trade of laundry worker from an experienced practitioner",
+      "1869: A sister married into a well-connected merchant caravan, improving the family's social standing",
+      "1873: A sister married and moved across the city, and the house was quieter for it",
+      "1879: Tragedy struck when a parent died from tuberculosis",
+      "1889: The family pooled their resources to purchase a tractor, a significant investment"
     ]
   },
   "baghdad-1924#2": {
     "name": "Abu Yusuf (Abdallah)",
     "gender": "Male",
     "age": 46,
-    "profession": "Lorry Driver",
+    "profession": "Construction Labourer",
     "religion": "Shia Islam",
     "language": "Iraqi Arabic",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the modern era in the Middle East and North Africa",
     "head": null,
-    "torso": "Charcoal Work Shirt [Cotton]",
+    "torso": "Olive Work Shirt [Cotton]",
     "feet": "Sandals [Leather]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "work_shirt",
-      "garmentColor": "#3a3a38",
+      "garmentColor": "#6e6b3a",
       "legwear": "Work Trousers [cotton drill] trousers",
       "backgroundBase": "#5d6271",
       "pose": null
@@ -4741,7 +4741,7 @@
     ],
     "events": [
       "1878: Born in a small settlement to a Working Class family",
-      "1891: Began learning the trade of lorry driver from an experienced practitioner",
+      "1891: Began learning the trade of construction labourer from an experienced practitioner",
       "1895: Stood as witness at a sibling's wedding, and understood that the household had changed shape",
       "1918: The family pooled their resources to purchase a tractor, a significant investment",
       "1922: A brother's marriage brought valuable new trade connections and opportunities"
@@ -4751,7 +4751,7 @@
     "name": "Yusuf ibn Marwan",
     "gender": "Male",
     "age": 21,
-    "profession": "Bus Driver",
+    "profession": "Lorry Driver",
     "religion": "Shia Islam",
     "language": "Iraqi Arabic",
     "languageBasis": "attested-table",
@@ -4786,20 +4786,20 @@
     "name": "Asha",
     "gender": "Female",
     "age": 75,
-    "profession": "Honey Gatherer",
+    "profession": "Forager",
     "religion": "Local Beliefs",
     "language": "Niger-Congo ancestor (hypothetical)",
     "languageBasis": "ssa-early",
     "languageConfidence": "inferred",
     "odds": "prehistory in sub-Saharan Africa",
-    "head": "Madder Seed Headband [Strung Seeds]",
-    "torso": "Green Bark Wrap [Fig Bark]",
-    "feet": "Madder Barefoot [None]",
+    "head": null,
+    "torso": "Hide Wrap Skirt [Treated Hide]",
+    "feet": "Hide Foot Wrappings [Hide]",
     "portrait": {
-      "headwearKind": "band",
-      "headwearColor": "#a63a2b",
+      "headwearKind": null,
+      "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#5a6b3b",
+      "garmentColor": "#6b482f",
       "legwear": null,
       "backgroundBase": "#3e4d51",
       "pose": null
@@ -4815,20 +4815,20 @@
     ],
     "events": [
       "-9075: Born to the band that ranged this country",
+      "-9062: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
       "-9061: Learned to read the weather and the water from a parent",
-      "-9058: An elder died, and with them went the knowledge of country nobody else held",
-      "-9056: Received the marks that say who this person is and who they may speak to",
-      "-9038: Walked with the band to the far camp, further than the children had ever been",
-      "-9023: Took a partner from a band met at the summer gathering",
-      "-9021: Learned the way to a spring that held water through the dry months",
-      "-9018: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring"
+      "-9055: Took a partner from a band met at the summer gathering",
+      "-9032: An elder died, and with them went the knowledge of country nobody else held",
+      "-9032: The family lost their mother when she died in a lion attack",
+      "-9030: A birth went wrong in the night, and by morning the camp was quieter by two",
+      "-9027: Was caught by an animal that did not die quickly, and carried the scars afterwards"
     ]
   },
   "sahel-9000bce#2": {
     "name": "Dume",
     "gender": "Male",
     "age": 40,
-    "profession": "Trapper",
+    "profession": "Fisher",
     "religion": "Local Beliefs",
     "language": "Nilo-Saharan ancestor (hypothetical)",
     "languageBasis": "ssa-early",
@@ -4907,20 +4907,20 @@
     "name": "Ama",
     "gender": "Female",
     "age": 75,
-    "profession": "Honey Gatherer",
+    "profession": "Forager",
     "religion": "Local Beliefs",
     "language": "Proto-Niger-Congo",
     "languageBasis": "attested-table",
     "languageConfidence": "reconstructed",
     "odds": "prehistory in sub-Saharan Africa",
-    "head": "Woad Seed Headband [Strung Seeds]",
-    "torso": "White Bark Wrap [Fig Bark]",
+    "head": null,
+    "torso": "Hide Wrap Skirt [Treated Hide]",
     "feet": "Woad Barefoot [None]",
     "portrait": {
-      "headwearKind": "band",
-      "headwearColor": "#3a4f6d",
+      "headwearKind": null,
+      "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#e8e4d9",
+      "garmentColor": "#6b482f",
       "legwear": null,
       "backgroundBase": "#3e4d51",
       "pose": null
@@ -4933,13 +4933,13 @@
     ],
     "events": [
       "-4375: Born to the band that ranged this country",
+      "-4362: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
       "-4361: Learned to read the weather and the water from a parent",
-      "-4358: An elder died, and with them went the knowledge of country nobody else held",
-      "-4356: Received the marks that say who this person is and who they may speak to",
-      "-4338: Walked with the band to the far camp, further than the children had ever been",
-      "-4323: Took a partner from a band met at the summer gathering",
-      "-4321: Learned the way to a spring that held water through the dry months",
-      "-4318: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring"
+      "-4355: Took a partner from a band met at the summer gathering",
+      "-4332: An elder died, and with them went the knowledge of country nobody else held",
+      "-4332: The family lost their mother when she died in a lion attack",
+      "-4330: A birth went wrong in the night, and by morning the camp was quieter by two",
+      "-4327: Was caught by an animal that did not die quickly, and carried the scars afterwards"
     ]
   },
   "kongo-4300bce#2": {
@@ -5026,7 +5026,7 @@
     "name": "Taytu",
     "gender": "Female",
     "age": 75,
-    "profession": "Millet Farmer",
+    "profession": "Goat Herder",
     "religion": "Ethiopian Orthodox Christianity",
     "language": "Tigrinya",
     "languageBasis": "attested-table",
@@ -5055,13 +5055,10 @@
     ],
     "events": [
       "1025: Born in a small settlement to a Laboring Poor family",
-      "1039: Learned to read weather signs and predict harvest yields from a parent",
-      "1042: A brother's marriage brought valuable new trade connections and opportunities",
-      "1046: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "1053: Divided the land among the children, keeping the best field for old age",
-      "1065: Took over the family business after a parent retired from active work",
-      "1071: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
-      "1083: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit"
+      "1039: Learned to read weather signs and where the water would still be running",
+      "1052: Took over the family business after a parent retired from active work",
+      "1058: A father's death changed everything for the household",
+      "1060: A sister married into a well-connected trading family, improving the family's social standing"
     ]
   },
   "ethiopia-1100#2": {
@@ -5139,21 +5136,21 @@
     ]
   },
   "swahili-1400#1": {
-    "name": "Joke",
+    "name": "Wunmi, mother of Gbemi",
     "gender": "Female",
     "age": 75,
-    "profession": "Millet Farmer",
+    "profession": "Goat Herder",
     "religion": "Local Beliefs",
     "language": "Classical Swahili",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in sub-Saharan Africa",
-    "head": "Ivory Cotton Headwrap [Linen]",
+    "head": "White Cotton Headwrap [Linen]",
     "torso": "Olive Cotton Wrap Dress [Wool]",
     "feet": "Barefoot [Wool]",
     "portrait": {
       "headwearKind": "wrapped_cloth",
-      "headwearColor": "#e5ddd0",
+      "headwearColor": "#e8e4d9",
       "garmentKind": "gown",
       "garmentColor": "#6e6b3a",
       "legwear": null,
@@ -5161,23 +5158,17 @@
       "pose": null
     },
     "family": [
-      "father: Hakeem",
-      "mother: Nike Akinwale",
-      "sister: Kemi daughter of Gbenga",
-      "brother: Emeka",
-      "spouse: Chinedu son of Pelumi",
-      "daughter: Yemi",
-      "son: Tunde, father of Dayo"
+      "father: Muyiwa son of Adamu",
+      "mother: Kemi daughter of Gbenga",
+      "brother: Bolaji Traoré",
+      "sister: Ebun"
     ],
     "events": [
       "1325: Born in a small settlement to a Laboring Poor family",
-      "1339: Learned to read weather signs and predict harvest yields from a parent",
-      "1342: A brother's marriage brought valuable new trade connections and opportunities",
-      "1346: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "1353: Divided the land among the children, keeping the best field for old age",
-      "1365: Took over the family business after a parent retired from active work",
-      "1371: Heavy flooding washed away the precious topsoil and seed, setting back years of careful cultivation",
-      "1383: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit"
+      "1339: Learned to read weather signs and where the water would still be running",
+      "1352: Took over the family business after a parent retired from active work",
+      "1358: A father's death changed everything for the household",
+      "1360: A sister married into a well-connected royal lineage, improving the family's social standing"
     ]
   },
   "swahili-1400#2": {
@@ -5334,20 +5325,20 @@
     "name": "Phumelelo Nkomo",
     "gender": "Male",
     "age": 21,
-    "profession": "Railway Labourer",
+    "profession": "Shop Assistant",
     "religion": "Christianity",
     "language": "Afrikaans",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in sub-Saharan Africa",
     "head": "White Kofia [Cotton Twill]",
-    "torso": "Walnut Work Shirt [Rough Cotton]",
+    "torso": "Brown Work Shirt [Rough Cotton]",
     "feet": "Barefoot [None]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#e8e4d9",
       "garmentKind": "work_shirt",
-      "garmentColor": "#785736",
+      "garmentColor": "#75563a",
       "legwear": "Khaki Shorts [canvas] shorts",
       "backgroundBase": "#505759",
       "pose": "build:broad"
@@ -5360,7 +5351,7 @@
     ],
     "events": [
       "1869: Born in a small settlement to a Working Class family",
-      "1884: Began learning the trade of railway labourer from an experienced practitioner",
+      "1884: Began learning the trade of shop assistant from an experienced practitioner",
       "1888: Inherited valuable tools and a workshop from a childless uncle",
       "1889: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
@@ -5411,7 +5402,7 @@
     "name": "Fariborz Bandar",
     "gender": "Male",
     "age": 61,
-    "profession": "Field Labourer",
+    "profession": "Cotton Grower",
     "religion": "Hinduism",
     "language": "Marathi",
     "languageBasis": "attested-table",
@@ -5440,18 +5431,19 @@
     ],
     "events": [
       "1589: Born in a small settlement to a Laboring Poor family",
-      "1601: Began learning the trade of field labourer from an experienced practitioner",
-      "1609: Learned sacred texts under a guru's guidance",
-      "1643: Secured pepper contract with Arab traders",
-      "1646: A brother's marriage brought valuable new trade connections and opportunities",
-      "1648: Took over the family business after a parent retired from active work"
+      "1601: Began learning the trade of cotton grower from an experienced practitioner",
+      "1605: A sister married into a well-connected Brahmin family, improving the family's social standing",
+      "1607: Became the first in the village to successfully grow opium poppies, earning respect from neighbors",
+      "1610: Learned sacred texts under a guru's guidance",
+      "1645: Inherited valuable tools and a workshop from a childless uncle",
+      "1646: Timed voyage perfectly with monsoon winds"
     ]
   },
   "deccan-1650#3": {
     "name": "Omid",
     "gender": "Male",
     "age": 52,
-    "profession": "Tenant Cultivator",
+    "profession": "Field Labourer",
     "religion": "Hinduism",
     "language": "Kannada",
     "languageBasis": "attested-table",
@@ -5480,33 +5472,31 @@
     ],
     "events": [
       "1598: Born in a small settlement to a Laboring Poor family",
-      "1613: Helped with the harvest for the first season and proved capable despite a young age",
-      "1619: After years of careful selection, successfully bred a hardier variety of wheat",
-      "1627: Completed temple service during festival season",
-      "1628: Experimenting with a new plowing method led to a marked increase in field productivity",
-      "1634: Timed voyage perfectly with monsoon winds",
-      "1641: Took over the family business after a parent retired from active work",
-      "1645: Arranged a sibling's marriage carefully to strengthen the family's position in society"
+      "1613: Began learning the trade of field labourer from an experienced practitioner",
+      "1627: Bathed in the Ganges during Kumbh Mela",
+      "1629: Took over the family business after a parent retired from active work",
+      "1634: Established textile workshop with English backing",
+      "1638: A sister married into a well-connected Brahmin family, improving the family's social standing"
     ]
   },
   "tamil-1200#1": {
     "name": "Shakti",
     "gender": "Female",
     "age": 75,
-    "profession": "Spice Grower",
+    "profession": "Cotton Farmer",
     "religion": "Hinduism",
     "language": "Tamil",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in South Asia",
     "head": null,
-    "torso": "Safflower Odhani [Plain Cotton]",
-    "feet": "Barefoot [None]",
+    "torso": "Olive Cotton Sari, Field-Tucked [Burlap]",
+    "feet": "Barefoot [Rough Wool]",
     "portrait": {
-      "headwearKind": null,
-      "headwearColor": null,
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#d9607a",
+      "headwearKind": "brimmed_hat",
+      "headwearColor": "#c2a463",
+      "garmentKind": "gown",
+      "garmentColor": "#6e6b3a",
       "legwear": null,
       "backgroundBase": "#4d4870",
       "pose": null
@@ -5521,32 +5511,33 @@
     ],
     "events": [
       "1125: Born in a small settlement to a Laboring Poor family",
-      "1139: Began learning the trade of spice grower from an experienced practitioner",
-      "1142: A sister married into a well-connected artisan guild, improving the family's social standing",
-      "1160: Inherited valuable tools and a workshop from a childless uncle",
-      "1169: Mother was killed in the raids, and the family faced new responsibilities",
-      "1198: After years of careful selection, successfully bred a hardier variety of rice",
-      "1199: Learned sacred texts under a guru's guidance"
+      "1139: Learned to read weather signs and predict harvest yields from a parent",
+      "1157: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1161: A sister married into a well-connected family of temple trustees, improving the family's social standing",
+      "1172: Experimenting with a new plowing method led to a marked increase in field productivity",
+      "1175: Took over the family business after a parent retired from active work",
+      "1191: Bathed in the Ganges during Kumbh Mela",
+      "1192: The harvest yielded double the normal grain, allowing the surplus to be sold at a healthy profit"
     ]
   },
   "tamil-1200#2": {
     "name": "Mahesh Goel",
     "gender": "Male",
     "age": 61,
-    "profession": "Cowherd",
+    "profession": "Herbalist",
     "religion": "Hinduism",
     "language": "Tamil",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in South Asia",
-    "head": "Natural Cotton Head Cloth [Rough Wool]",
-    "torso": "Bronze Cotton Dhoti [Rough Wool]",
-    "feet": "Natural Barefoot [Rough Linen]",
+    "head": "Natural Topi [Cotton Khadi]",
+    "torso": "Turmeric Cotton Kurta [Coarse Cotton]",
+    "feet": "Natural Barefoot [None]",
     "portrait": {
-      "headwearKind": "wrapped_cloth",
+      "headwearKind": "cap",
       "headwearColor": "#d8cdb6",
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#7e592f",
+      "garmentKind": "tunic",
+      "garmentColor": "#dfa62c",
       "legwear": null,
       "backgroundBase": "#464267",
       "pose": null
@@ -5562,27 +5553,28 @@
     ],
     "events": [
       "1139: Born in a small settlement to a Laboring Poor family",
-      "1152: Spent a first season away with the herd and came back taller",
-      "1158: Inherited valuable tools and a workshop from a childless uncle",
-      "1184: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1191: Learned sacred texts under a guru's guidance"
+      "1151: Began learning the trade of herbalist from an experienced practitioner",
+      "1160: Arranged a sibling's marriage carefully to strengthen the family's position in society",
+      "1161: The family pooled their resources to purchase a market stall, a significant investment",
+      "1164: Mother was killed in the raids, and the family faced new responsibilities",
+      "1194: Completed temple service during festival season"
     ]
   },
   "tamil-1200#3": {
     "name": "Sanjay",
     "gender": "Male",
     "age": 52,
-    "profession": "Fisher",
+    "profession": "Cotton Farmer",
     "religion": "Hinduism",
     "language": "Tamil",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the medieval period in South Asia",
-    "head": "Cream Palm-Leaf Hat [Hemp]",
-    "torso": "Olive Cotton Lungi [Rough Wool]",
+    "head": "Cream Cotton Head Cloth [Hemp]",
+    "torso": "Olive Cotton Dhoti [Rough Wool]",
     "feet": "Cream Barefoot [Rough Wool]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "wrapped_cloth",
       "headwearColor": "#ddd3ba",
       "garmentKind": "wrapped_garment",
       "garmentColor": "#424023",
@@ -5598,11 +5590,13 @@
     ],
     "events": [
       "1148: Born in a small settlement to a Laboring Poor family",
-      "1162: Went out with the adults for the first time and came back carrying a share",
-      "1164: A brother's marriage brought valuable new trade connections and opportunities",
-      "1176: Tragedy struck when a parent died from plague",
-      "1185: Bathed in the Ganges during Kumbh Mela",
-      "1191: Took over the family business after a parent retired from active work"
+      "1162: Began working family fields, learning the rotation from elders",
+      "1172: Broke ground on land nobody had ploughed before, and it paid",
+      "1174: Became the first in the village to successfully grow jute, earning respect from neighbors",
+      "1175: A sister married into a well-connected lineage holding a village grant from the king, improving the family's social standing",
+      "1181: Divided the land among the children, keeping the best field for old age",
+      "1183: Swarms of locusts descended on the fields and consumed the grain stores before harvest could be completed",
+      "1187: The family pooled their resources to purchase a mill share, a significant investment"
     ]
   },
   "indus-8000bce#1": {
@@ -5690,20 +5684,20 @@
     "name": "*Arul",
     "gender": "Male",
     "age": 52,
-    "profession": "Root Digger",
+    "profession": "Wood Gatherer",
     "religion": "Local Beliefs",
     "language": "Pre-Harappan Indus (hypothetical)",
     "languageBasis": "sa-early",
     "languageConfidence": "conjectural",
     "odds": "prehistory in South Asia",
     "head": null,
-    "torso": "Bronze Bark Cloth [Tree Bark]",
+    "torso": "Fur Cloak [Fur]",
     "feet": "Turmeric Barefoot [None]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#b88145",
+      "garmentKind": "jacket",
+      "garmentColor": "#9b8062",
       "legwear": null,
       "backgroundBase": "#615d79",
       "pose": "build:broad"
@@ -5718,13 +5712,13 @@
     ],
     "events": [
       "-8052: Born to the band that ranged this country",
-      "-8037: Began hauling loads for merchants, building strength",
-      "-8034: Was among the party that drove a herd into the narrows, and the band ate well for many days",
-      "-8033: Was taken from the camp by the elders, kept apart, and came back changed and marked",
-      "-8030: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
-      "-8023: A birth went wrong in the night, and by morning the camp was quieter by two",
-      "-8019: Fell badly on the rocks, and the leg never set straight",
-      "-8016: Left the band of birth to live with another, as is the custom"
+      "-8041: Met a band nobody knew at the river, and there was trading and wariness and then singing",
+      "-8038: Went out with the adults for the first time and came back carrying a share",
+      "-8036: Left the band of birth to live with another, as is the custom",
+      "-8034: Found an outcrop of workable stone, and the band returned to it for years afterwards",
+      "-8027: Brought down a large animal alone for the first time, and carried the meat back to the camp",
+      "-8021: A birth went wrong in the night, and by morning the camp was quieter by two",
+      "-8018: Buried a kinsman with ochre and with the things they had made"
     ]
   },
   "mesoamerica-700#1": {
@@ -5770,7 +5764,7 @@
     "name": "Hummingbird of the Wide Water",
     "gender": "Male",
     "age": 61,
-    "profession": "Beekeeper",
+    "profession": "Water Carrier",
     "religion": "Aztec Polytheism",
     "language": "Oto-Manguean (reconstructed)",
     "languageBasis": "na-mesoamerica-late",
@@ -5796,7 +5790,7 @@
     ],
     "events": [
       "639: Born in a small settlement to a Peasant family",
-      "651: Began learning the trade of beekeeper from an experienced practitioner",
+      "651: Began learning the trade of water carrier from an experienced practitioner",
       "657: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "658: Inherited valuable tools and a workshop from a childless uncle",
       "673: Was made keeper of a sacred bundle, and of what is owed to it"
@@ -5848,20 +5842,20 @@
     "name": "Weeko",
     "gender": "Female",
     "age": 75,
-    "profession": "Carpenter",
+    "profession": "Leatherworker",
     "religion": "Great Spirit Worship",
     "language": "Pawnee",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in pre-Columbian North America",
     "head": null,
-    "torso": "Walnut Fringed Shawl [Woven Wool]",
+    "torso": "Red Fringed Shawl [Woven Wool]",
     "feet": "Beaded Moccasins [Decorated Hide]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#45321f",
+      "garmentColor": "#a33327",
       "legwear": null,
       "backgroundBase": "#4a594d",
       "pose": null
@@ -5877,28 +5871,28 @@
     ],
     "events": [
       "1425: Born in a small settlement to a Peasant family",
-      "1439: Took up the carpenter's craft in the way of the household, by being there for it",
-      "1450: A brother's marriage brought valuable new trade connections and opportunities"
+      "1439: Began learning the trade of leatherworker from an experienced practitioner",
+      "1455: A sister married into a well-connected household of a band's pipe-keeper, improving the family's social standing"
     ]
   },
   "plains-1500#2": {
     "name": "Takoda Mahpiya-Icahtagya",
     "gender": "Male",
     "age": 61,
-    "profession": "Miller",
+    "profession": "Porter",
     "religion": "Great Spirit Worship",
     "language": "Pawnee",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in pre-Columbian North America",
     "head": null,
-    "torso": "Red Hide Shirt [Buckskin]",
+    "torso": "Bronze Hide Shirt [Buckskin]",
     "feet": "Simple Moccasins [Raw Hide]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#a33327",
+      "garmentColor": "#7e592f",
       "legwear": null,
       "backgroundBase": "#38433a",
       "pose": null
@@ -5914,32 +5908,32 @@
     ],
     "events": [
       "1439: Born in a small settlement to a Peasant family",
-      "1451: Began learning the trade of miller from an experienced practitioner",
-      "1457: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1467: The family lost their father when he died from starvation"
+      "1451: Started working alongside father in backbreaking toil",
+      "1455: A sister married into a well-connected family whose men are counted in the warrior societies, improving the family's social standing",
+      "1474: The mother's death changed the household"
     ]
   },
   "plains-1500#3": {
     "name": "Nashoba",
     "gender": "Male",
     "age": 52,
-    "profession": "Cook",
+    "profession": "Water Carrier",
     "religion": "Sun Dance Religion",
     "language": "Pawnee",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the early modern period in pre-Columbian North America",
     "head": null,
-    "torso": "Buckskin Wrap [Raw Hide]",
-    "feet": "Hide Moccasins [Raw Hide]",
+    "torso": "Walnut Hide Shirt [Buckskin]",
+    "feet": "Simple Moccasins [Raw Hide]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#6b482f",
+      "garmentColor": "#5b4229",
       "legwear": null,
       "backgroundBase": "#38433a",
-      "pose": "build:broad"
+      "pose": "build:broad+proud"
     },
     "family": [
       "father: Cried Little",
@@ -5952,8 +5946,8 @@
     ],
     "events": [
       "1448: Born in a small settlement to a Peasant family",
-      "1462: Began learning the trade of cook from an experienced practitioner",
-      "1485: A sister married into a well-connected medicine society, improving the family's social standing"
+      "1463: Began learning the trade of water carrier from an experienced practitioner",
+      "1488: A brother's marriage brought valuable new trade connections and opportunities"
     ]
   },
   "arctic-1400#1": {
@@ -6242,21 +6236,21 @@
     "name": "Maximilian Schmitz",
     "gender": "Male",
     "age": 44,
-    "profession": "Stonemason",
+    "profession": "Publican",
     "religion": "Protestantism",
     "language": "English (attested)",
     "languageBasis": "nac-modern",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "White Slouch Hat [Cotton]",
-    "torso": "Charcoal Duck Canvas Jumper [Wool]",
-    "feet": "Lace-Up Work Boots [Treated Hide]",
+    "head": "White Phrygian Cap [Red Wool]",
+    "torso": "Charcoal Workshop Bottoms [Coarse Wool]",
+    "feet": "Work Boots [Thick Leather]",
     "portrait": {
-      "headwearKind": "brimmed_hat",
+      "headwearKind": "cap",
       "headwearColor": "#e8e4d9",
-      "garmentKind": "work_shirt",
+      "garmentKind": "tunic",
       "garmentColor": "#3a3a38",
-      "legwear": "Trousers [cotton] trousers",
+      "legwear": "Worker Trousers [coarse wool] trousers",
       "backgroundBase": "#4c5354",
       "pose": null
     },
@@ -6271,19 +6265,19 @@
     ],
     "events": [
       "1826: Born in a small settlement to a Working Class family",
-      "1839: Began apprenticeship as a stonemason under skilled master craftsman",
-      "1848: Staked claim during gold rush",
-      "1852: A brother's marriage brought valuable new trade connections and opportunities",
-      "1856: Took over the family business after a parent retired from active work",
-      "1857: Elected to town council",
-      "1865: The guild selected a piece of work for a noble commission"
+      "1839: Began learning the trade of publican from an experienced practitioner",
+      "1850: A sister married into a well-connected family with a mill and a store, improving the family's social standing",
+      "1857: Established homestead on prairie",
+      "1858: Elected to town council",
+      "1859: Inherited valuable tools and a workshop from a childless uncle",
+      "1860: The family lost their mother when she died from typhoid fever"
     ]
   },
   "newengland-1870#3": {
     "name": "Edward Thompson",
     "gender": "Male",
     "age": 21,
-    "profession": "Chapman",
+    "profession": "Saddler",
     "religion": "Protestantism",
     "language": "English (attested)",
     "languageBasis": "nac-modern",
@@ -6309,7 +6303,7 @@
     ],
     "events": [
       "1849: Born in a small settlement to a Working Class family",
-      "1863: Began learning the trade of chapman from an experienced practitioner",
+      "1863: Began learning the trade of saddler from an experienced practitioner",
       "1867: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1868: Inherited valuable tools and a workshop from a childless uncle",
       "1869: Staked claim during gold rush"
@@ -6358,21 +6352,21 @@
     "name": "Séamus Lynch",
     "gender": "Male",
     "age": 42,
-    "profession": "Farm Hand",
+    "profession": "Homesteader",
     "religion": "Protestantism",
     "language": "Louisiana Creole",
     "languageBasis": "attested-table",
     "languageConfidence": "attested",
     "odds": "the industrial era in colonial North America",
-    "head": "Ivory Straw Field Hat [Linen]",
-    "torso": "Walnut Homespun Shirt [Wool]",
-    "feet": "Brogans [Leather]",
+    "head": "Ivory Slouch Hat [Cotton]",
+    "torso": "Walnut Duck Canvas Jumper [Wool]",
+    "feet": "Lace-Up Work Boots [Treated Hide]",
     "portrait": {
       "headwearKind": "brimmed_hat",
       "headwearColor": "#e5ddd0",
       "garmentKind": "work_shirt",
       "garmentColor": "#5b4229",
-      "legwear": "Broadfall Trousers [wool] trousers",
+      "legwear": "Trousers [cotton] trousers",
       "backgroundBase": "#4c5354",
       "pose": null
     },
@@ -6387,7 +6381,7 @@
     ],
     "events": [
       "1778: Born in a small settlement to a Laboring Poor family",
-      "1791: Began learning the trade of farm hand from an experienced practitioner",
+      "1791: Began learning the trade of homesteader from an experienced practitioner",
       "1803: came under the United States, where no state had claimed the place before",
       "1806: The family pooled their resources to purchase a delivery van, a significant investment",
       "1808: Joined wagon train heading west for new land",
@@ -6478,20 +6472,20 @@
     "name": "Huascar Quispe",
     "gender": "Male",
     "age": 40,
-    "profession": "Basket Maker",
+    "profession": "Carpenter",
     "religion": "Local Beliefs",
     "language": "Arawakan (reconstructed)",
     "languageBasis": "sam-amazon",
     "languageConfidence": "reconstructed",
     "odds": "the medieval period in South America",
     "head": "Henna Chullo Hat [Knitted Wool]",
-    "torso": "Natural Decorated Poncho [Colored Wool]",
+    "torso": "Bronze Decorated Poncho [Colored Wool]",
     "feet": "Leather Shoes [Llama Leather]",
     "portrait": {
       "headwearKind": "cap",
       "headwearColor": "#b5502e",
       "garmentKind": "jacket",
-      "garmentColor": "#d8cdb6",
+      "garmentColor": "#7e592f",
       "legwear": null,
       "backgroundBase": "#3d5a48",
       "pose": null
@@ -6505,10 +6499,9 @@
     ],
     "events": [
       "1160: Born in a small settlement to a Peasant family",
-      "1172: Began learning the trade of basket maker from an experienced practitioner",
-      "1185: Learned healing songs from village shaman",
-      "1188: A sister married into a well-connected merchant family, improving the family's social standing",
-      "1188: The family lost their father when he died from starvation"
+      "1172: Took up the carpenter's craft in the way of the household, by being there for it",
+      "1179: Participated in Inti Raymi sun ceremony",
+      "1199: A sister married into a well-connected merchant family, improving the family's social standing"
     ]
   },
   "amazon-1200#3": {
@@ -6553,20 +6546,20 @@
     "name": "Wangülen",
     "gender": "Female",
     "age": 75,
-    "profession": "Leatherworker",
+    "profession": "Carpenter",
     "religion": "Roman Catholicism",
     "language": "Chonan (attested from 1600s)",
     "languageBasis": "sam-patagonia",
     "languageConfidence": "inferred",
     "odds": "the early modern period in South America",
     "head": null,
-    "torso": "White Wool Skirt [Undyed Wool]",
+    "torso": "Indigo Wool Skirt [Undyed Wool]",
     "feet": "Woad Simple Shoes [Canvas]",
     "portrait": {
       "headwearKind": null,
       "headwearColor": null,
       "garmentKind": "wrapped_garment",
-      "garmentColor": "#e8e4d9",
+      "garmentColor": "#2e3f5c",
       "legwear": null,
       "backgroundBase": "#455e4f",
       "pose": null
@@ -6582,13 +6575,13 @@
     ],
     "events": [
       "1525: Born to the band that ranged this country",
-      "1531: A winter came that would not end. The band ate bark and hide, and not everyone rose in the spring",
-      "1539: Began learning the trade of leatherworker from an experienced practitioner",
-      "1542: Followed a river further than anyone in the band had gone, and came back able to describe it",
-      "1547: An elder died, and with them went the knowledge of country nobody else held",
-      "1549: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
-      "1558: Lost a child before it could walk, and buried it under the floor of the shelter",
-      "1559: lived through the sickness that took most of the town in a season"
+      "1539: Took up the carpenter's craft in the way of the household, by being there for it",
+      "1542: An elder died, and with them went the knowledge of country nobody else held",
+      "1544: Received the marks that say who this person is and who they may speak to",
+      "1562: Walked with the band to the far camp, further than the children had ever been",
+      "1572: lived through the sickness that took most of the town in a season",
+      "1577: Took a partner from a band met at the summer gathering",
+      "1579: Learned the way to a spring that held water through the dry months"
     ]
   },
   "patagonia-1600#2": {
@@ -6757,7 +6750,7 @@
     "name": "Amaru Quespi",
     "gender": "Male",
     "age": 21,
-    "profession": "Chapman",
+    "profession": "Glazier",
     "religion": "Roman Catholicism",
     "language": "Modern Portuguese",
     "languageBasis": "attested-table",
@@ -6783,7 +6776,7 @@
     ],
     "events": [
       "1859: Born in a small settlement to a Working Class family",
-      "1874: Began learning the trade of chapman from an experienced practitioner",
+      "1874: Began learning the trade of glazier from an experienced practitioner",
       "1877: Arranged a sibling's marriage carefully to strengthen the family's position in society",
       "1878: Took over the family business after a parent retired from active work",
       "1879: Learned healing songs from village shaman"
@@ -6793,7 +6786,7 @@
     "name": "Heni",
     "gender": "Female",
     "age": 75,
-    "profession": "Scullion",
+    "profession": "Taro Cultivator",
     "religion": "Melanesian Traditional Religion",
     "language": "Papuan highland language (hypothetical)",
     "languageBasis": "oc-new-guinea",
@@ -6821,9 +6814,11 @@
     ],
     "events": [
       "1425: Born in a small settlement to a Commoner family",
-      "1439: Began learning the trade of scullion from an experienced practitioner",
-      "1450: Arranged a sibling's marriage carefully to strengthen the family's position in society",
-      "1469: Inherited responsibility for family fishing grounds"
+      "1439: Learned to read weather signs and predict harvest yields from a parent",
+      "1441: After years of careful selection, successfully bred a hardier variety of coconuts",
+      "1448: A sister married into a well-connected household holding rights in the trading ring, improving the family's social standing",
+      "1455: Mother died from starvation, and the family faced new responsibilities",
+      "1458: Hosted important feast, strengthening clan ties"
     ]
   },
   "newguinea-1500#2": {
@@ -6867,7 +6862,7 @@
     "name": "Hitolo, father of Koani",
     "gender": "Male",
     "age": 20,
-    "profession": "Taro Cultivator",
+    "profession": "Yam Grower",
     "religion": "Melanesian Traditional Religion",
     "language": "Trans-New Guinea (reconstructed)",
     "languageBasis": "oc-new-guinea",
@@ -6893,9 +6888,9 @@
     ],
     "events": [
       "1480: Born in a small settlement to a Commoner family",
-      "1495: Helped with the harvest for the first season and proved capable despite a young age",
-      "1498: Became the first in the village to successfully grow breadfruit, earning respect from neighbors",
-      "1499: A brother's marriage brought valuable new trade connections and opportunities"
+      "1495: Began learning the trade of yam grower from an experienced practitioner",
+      "1497: After years of careful selection, successfully bred a hardier variety of breadfruit",
+      "1498: Arranged a sibling's marriage carefully to strengthen the family's position in society"
     ]
   },
   "hawaii-1700#1": {
@@ -6977,7 +6972,7 @@
     "name": "Kalaniʻōpuʻu, father of Piʻilani",
     "gender": "Male",
     "age": 52,
-    "profession": "Taro Cultivator",
+    "profession": "Yam Grower",
     "religion": "Hawaiian Traditional Religion",
     "language": "Hawaiian",
     "languageBasis": "attested-table",
@@ -7006,10 +7001,10 @@
     ],
     "events": [
       "1648: Born in a small settlement to a Commoner family",
-      "1663: Helped with the harvest for the first season and proved capable despite a young age",
-      "1683: Mother died from typhoid fever despite efforts to save her",
-      "1693: Exchanged gifts with neighboring tribe, preventing conflict",
-      "1698: Became the first in the village to successfully grow pineapple, earning respect from neighbors"
+      "1663: Began learning the trade of yam grower from an experienced practitioner",
+      "1685: Became the first in the village to successfully grow pineapple, earning respect from neighbors",
+      "1687: Inherited responsibility for family fishing grounds",
+      "1688: The mother's death changed the household"
     ]
   },
   "australia-20000bce#1": {
@@ -7097,20 +7092,20 @@
     "name": "Lachlan",
     "gender": "Male",
     "age": 20,
-    "profession": "Forager",
+    "profession": "Honey Gatherer",
     "religion": "Local Beliefs",
     "language": "Unrecorded language of the region",
     "languageBasis": "none",
     "languageConfidence": "conjectural",
     "odds": "prehistory in Oceania",
-    "head": "Fur Hood [Fur]",
-    "torso": "Bronze Kangaroo Hide Wrap [Kangaroo Skin]",
-    "feet": "Hide Foot Wrappings [Hide]",
+    "head": "Madder Feather Band [Bird Feathers]",
+    "torso": "Marigold Fiber Loincloth [Plant Fiber]",
+    "feet": "Madder Barefoot [None]",
     "portrait": {
-      "headwearKind": "hood",
-      "headwearColor": "#8b7358",
-      "garmentKind": "wrapped_garment",
-      "garmentColor": "#a8763f",
+      "headwearKind": "band",
+      "headwearColor": "#a63a2b",
+      "garmentKind": "bare",
+      "garmentColor": "#d9822f",
       "legwear": null,
       "backgroundBase": "#5d7279",
       "pose": "build:broad"
@@ -7125,10 +7120,11 @@
     "events": [
       "-20020: Born to the band that ranged this country",
       "-20014: The herds did not come that year, and the camp moved three times looking for them",
-      "-20012: Fell badly on the rocks, and the leg never set straight",
-      "-20006: Went out with the adults for the first time and came back carrying a share",
-      "-20004: Came back to the band of birth after years away, and was taken in again",
-      "-20003: Carried a gift of stone to kin who lived beyond the hills, and stayed with them a season",
+      "-20012: Was caught by an animal that did not die quickly, and carried the scars afterwards",
+      "-20007: Was among the party that drove a herd into the narrows, and the band ate well for many days",
+      "-20005: Learned which ground gave what, and in which month",
+      "-20004: Walked with the band to the far camp, further than the children had ever been",
+      "-20003: Left the band of birth to live with another, as is the custom",
       "-20002: An elder died, and with them went the knowledge of country nobody else held"
     ]
   }

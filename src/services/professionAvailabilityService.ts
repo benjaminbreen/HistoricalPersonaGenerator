@@ -3,6 +3,7 @@ import type { CulturalZone } from '../types/characterData';
 import { hasCapability } from '../constants/societyCapabilities';
 import { disruptionProfessionMultiplier } from './disruptionResolution';
 import { allEliteOfficeRoles } from '../constants/gameData/eliteOffices';
+import { SEAFARING_TRADE, WATERFRONT_TRADE, waterAccessFor } from './waterAccessService';
 
 /** Titles owned by the office roll rather than by the profession tables. */
 const ELITE_OFFICE_ROLES = new Set(allEliteOfficeRoles().map(role => role.toLowerCase()));
@@ -430,6 +431,17 @@ export function isProfessionHistoricallyAvailable(
   // subsistence pool swamped the Southwestern farming block.
   if (FORAGING_LIVELIHOOD.test(profession) && farms) return false;
 
+  // Water, from the map table rather than from the place name. See
+  // `waterAccessService`: `dry` is a positive statement that this map area has
+  // no coast, no river port and no lake, so the work cannot be here at all.
+  const water = waterAccessFor(context.location, context.region);
+  if (water === 'dry' && (WATERFRONT_TRADE.test(profession) || SEAFARING_TRADE.test(profession))) {
+    return false;
+  }
+  if (water === 'fresh' && SEAFARING_TRADE.test(profession) && !/\b(?:shipwright|ship builder|boatswain|caulker|rigger|sailor|seaman)\b/i.test(profession)) {
+    return false;
+  }
+
   if (
     context.localeType === 'city' &&
     /\b(?:farmer|farmhand|shepherd|herder|cowherd|goatherd|field hand|agricultural laborer|nomad)\b/i.test(profession)
@@ -711,13 +723,17 @@ export function getProfessionSelectionWeight(
 
   // Fishing feeds a coast, not a country. It sits in the same food-producing
   // bracket as farming, which on an inland region made one medieval European in
-  // five a fisherman. Damped by default and restored where there is water to
-  // fish — the region and locale names are the only signal available here, and
-  // they carry it well enough.
-  if (context && /\b(?:fisher\w*|whaler|sealer|pearl diver)\b/i.test(profession)) {
-    const wet = /\b(?:coast|bay|sea|ocean|island|isle|gulf|delta|estuary|harbou?r|port|lake|river|shore|fjord|sound|strait|marsh|swamp|lagoon|atoll|archipelago|maritime|nile|ganges|yangtze|mekong|danube|rhine|volga|amazon)\b/i
-      .test(`${context.region} ${context.location}`);
-    weight *= wet ? 0.9 : 0.25;
+  // five a fisherman. `isProfessionHistoricallyAvailable` has already removed
+  // the water trades from places the map says are dry; this is the softer half
+  // of the same judgement, for places that have water but are not of it — a
+  // river town is not a fishing village.
+  if (context && (WATERFRONT_TRADE.test(profession) || SEAFARING_TRADE.test(profession))) {
+    switch (waterAccessFor(context.location, context.region)) {
+      case 'sea': weight *= 0.9; break;
+      case 'fresh': weight *= 0.5; break;
+      // Nothing known about the place. The old blanket damping, kept.
+      default: weight *= 0.25; break;
+    }
   }
 
   // Cash and luxury crops are grown by a specialised minority even where they

@@ -29,6 +29,7 @@ import {
 import { Ramp } from '../core/color';
 import { makeNoise1D, makeRng } from '../core/rng';
 import { RenderContext } from '../render/context';
+import { isOccasionFormal, leavesChestBare } from '../spec/garmentLayers';
 import { GarmentSpec } from '../spec/types';
 
 export interface GarmentFeature {
@@ -57,6 +58,9 @@ const FEATURES: Array<[RegExp, string, boolean]> = [
   [/ruff|elizabethan|court doublet|spanish jacket/i, 'ruff', false],
   [/smoking jacket|dinner jacket|tuxedo|opera/i, 'shawl_lapel', true],
   [/suit|blazer|tailcoat|frock coat|morning coat|business|savile|dinner/i, 'lapels', true],
+  // Evening dress named for the evening. A dinner jacket on a man; on a woman
+  // the same words mean a gown, and it takes whatever the rules below give it.
+  [/evening wear|formal wear|black tie|white tie|full dress/i, 'shawl_lapel', true],
   [/nehru|zhongshan|mao|bandhgala|sherwani|achkan|jodhpuri|kurta|kurti|dashiki|agbada/i, 'mandarin', true],
   [/qipao|cheongsam|changshan|magua|frog/i, 'frogs', true],
   // Knitwear, which has no seams and no facings and is therefore the one modern
@@ -64,12 +68,33 @@ const FEATURES: Array<[RegExp, string, boolean]> = [
   // cardigan was drawn as an undifferentiated field of colour with a hemmed
   // neck — the same picture a peasant smock got.
   [/cardigan|sweater|jumper|pullover|gansey|guernsey|knitwear|jersey\b|fleece|sweatshirt|hoodie|union suit/i, 'knit', true],
+  // The overlapping Y-front. One construction across East Asia and northern
+  // India, and the thing that tells a kimono from a dressing gown at a glance —
+  // which is what every one of these used to be drawn as.
+  [/cross.?collar|hanfu|kimono|yukata|hanbok|jeogori|\bjama\b|angarkha|shenyi|zhiduo|\bdeel\b/i, 'cross_collar', true],
   [/kente|aso oke|aso ebi|ankara|adire|strip.?weav/i, 'strip_weave', false],
   [/feather|plume/i, 'feathered', false],
   [/fur|pelt|leopard|jaguar|lion mane|buffalo robe|ermine|sable|mink/i, 'fur_collar', false],
+  // Skin that was never cut to a pattern. Read after the fur rule so a trimmed
+  // hide keeps its fur edge, and before the cloth wrap because a hide behaves
+  // differently at the edge: it is torn and tied, not woven and bordered.
+  [/hide|buckskin|deerskin|rawhide|kaross|\bskins?\b|skin (?:wrap|dress|tunic|cloak|garment)/i, 'hide_edge', true],
   [/shawl|stole|mantilla|fichu/i, 'shawl', false],
   [/poncho|ruana/i, 'poncho', true],
-  [/guayabera|polo|aloha|formal shirt|designer shirt|dress shirt|silk shirt|work shirt|flannel shirt|chambray|denim jacket|work jacket|oxford shirt|bush shirt|shirtwaist/i, 'placket', true],
+  // A length of cloth taken round the body and over one shoulder. This is the
+  // single largest hole in the table: `wrapped_garment` is 34% of everything
+  // the generator dresses people in, and every one of them was falling to the
+  // generic construction — a hide wrap, a tapa, a sarong and a wrap dress all
+  // drawn as a plain shirt with a hemmed neck.
+  [/\bwrap(?:s|per|ped|ping)?\b|tapa\b|bark.?cloth|sarong|\bkain\b|lava ?lava|khanga|\bkanga\b|pagne|\bmanta\b|sampot/i, 'wrapped_edge', true],
+  // A buttoned front opening with a collar turned down over it, which is what
+  // an unqualified shirt, blouse or jacket has been since about 1850 — and
+  // between them those three words are the largest single group of names the
+  // industrial and modern tables produce. The rule used to require a qualifier
+  // ("work shirt", "dress shirt"), so "Olive Shirt" and "Charcoal Blouse" got
+  // the same undifferentiated field a peasant smock did. `lapels` above has
+  // already taken anything tailored, so what reaches here is workwear.
+  [/guayabera|polo|aloha|shirt|blouse|chambray|\bjackets?\b|\bcoats?\b|windbreaker|anorak/i, 'placket', true],
   // Cut away at the shoulder, which is the one thing about it: a tank top drawn
   // with a crew rib is a t-shirt.
   [/tank top|singlet|camisole|vest top|bandeau/i, 'tank', true],
@@ -77,10 +102,32 @@ const FEATURES: Array<[RegExp, string, boolean]> = [
   [/embroider|zardozi|kundan|brocade|zari|beaded|jeweled|jewelled/i, 'yoke', false],
 ];
 
-export function garmentFeatureFor(garment: GarmentSpec): GarmentFeature | null {
+/**
+ * The two wrapped features describe cloth crossing the *chest*, so both are
+ * wrong wherever the named garment covers only the lower body: a wrap skirt is
+ * worn with a blouse and a hide kilt with nothing, and a selvedge drawn over
+ * either says the cloth continues up over the shoulder when it does not. The
+ * verdict is already made twice in the codebase — `bodice` for the skirted
+ * constructions, `leavesChestBare` for the loincloth family — so it is read
+ * here rather than made a third time.
+ */
+const CHEST_FEATURES = new Set(['wrapped_edge', 'hide_edge']);
+
+export function garmentFeatureFor(
+  garment: GarmentSpec, gender?: string
+): GarmentFeature | null {
   const subject = `${garment.name} ${garment.material}`;
   for (const [pattern, key, ownsFront] of FEATURES) {
-    if (pattern.test(subject)) return { key, ownsFront };
+    if (!pattern.test(subject)) continue;
+    if (CHEST_FEATURES.has(key)
+      && (garment.bodice === 'separate' || leavesChestBare(garment.name))) continue;
+    // Tailoring is the one verdict in this table that the wearer changes. Only
+    // half the people described as being in evening wear are in a dinner
+    // jacket; the other half are in a gown, and drawing lapels on it is worse
+    // than drawing nothing.
+    if (key === 'shawl_lapel' && gender && gender !== 'Male'
+      && isOccasionFormal(garment.name)) continue;
+    return { key, ownsFront };
   }
   return null;
 }
@@ -123,6 +170,9 @@ export function drawGarmentFeature(
     case 'fur_collar': return drawFurCollar(context, body);
     case 'shawl': return drawShawl(context, body);
     case 'poncho': return drawPoncho(context, shoulders);
+    case 'wrapped_edge': return drawWrappedEdge(context, body, false);
+    case 'hide_edge': return drawWrappedEdge(context, body, true);
+    case 'cross_collar': return drawCrossCollar(context, shoulders);
     case 'placket': return drawPlacket(context, shoulders);
     case 'tee': return drawTee(context, shoulders);
     case 'tank': return drawTank(context, shoulders);
@@ -483,6 +533,184 @@ function drawToga(context: RenderContext, body: Mask): void {
   }
 }
 
+/**
+ * A length of cloth taken round the body and up over one shoulder — a sarong, a
+ * tapa, a khanga, a wrap dress — and, with `hide` set, the same gesture in skin.
+ *
+ * The tell is the *edge*, not the field. A wrapped garment is uncut, so the top
+ * of it is a selvedge running diagonally across the chest with the cloth doubled
+ * below it, and the corner is gathered and tucked at the shoulder it goes over.
+ * Nothing else in this wardrobe has a hard diagonal boundary of its own colour.
+ *
+ * Distinct from the toga, which it would otherwise duplicate: a toga is a thick
+ * soft band thrown across a shallow angle, this is a hard-edged fall at a steep
+ * one, and where the toga has a woven clavus this has a border along the edge.
+ * A hide has neither — an untanned skin is torn rather than woven, and it is
+ * held by a knot rather than a tuck, which is the whole difference between them.
+ */
+function drawWrappedEdge(context: RenderContext, body: Mask, hide: boolean): void {
+  const { raster, anatomy, ramps, spec, book } = context;
+  const { size, centerX } = anatomy;
+  const put = painter(context, body);
+  const noise = makeNoise1D(spec.seed ^ (hide ? 0x2f71 : 0x4d13));
+  // Which shoulder the cloth is carried over. Seeded rather than fixed: a row
+  // of forty personas all wrapped the same way reads as one garment repeated.
+  const side = (spec.seed >> 5) & 1 ? 1 : -1;
+
+  const highX = centerX + side * anatomy.shoulderHalf * 0.5;
+  const highY = anatomy.shoulderTop - 2;
+  // Steep, and it leaves the frame rather than stopping inside it: the cloth
+  // carries on down the body and only the top of it is in this picture.
+  const run = anatomy.shoulderHalf * 1.5;
+  const fall = 30;
+
+  const edgeY = (x: number): number => {
+    const t = (x - highX) * -side / Math.max(1, run);
+    // A hide was cut off an animal and never squared up.
+    const wobble = hide ? noise(x * 0.55) * 2.4 : noise(x * 0.18) * 0.7;
+    return highY + t * fall + wobble;
+  };
+
+  // Where the edge actually exists. Past the shoulder it goes over, the cloth
+  // is continuous and there is nothing to draw — and every pass below has to
+  // agree about that, or the border ends up running on across a shoulder the
+  // selvedge above it stopped at.
+  const onEdge = (x: number) => edgeY(x) >= highY - 4;
+
+  // Below the edge the cloth is doubled, so it sits a step down from the single
+  // layer above it. Two rows is enough to read as a thickness rather than a line.
+  for (let x = 0; x < size; x += 1) {
+    if (!onEdge(x)) continue;
+    const y0 = edgeY(x);
+    for (let dy = 1; dy <= 3; dy += 1) {
+      const y = Math.round(y0 + dy);
+      if (y < 0 || y >= size || !body[y * size + x]) continue;
+      raster.shift(x, y, dy === 3 ? 1 : 2, book);
+    }
+    // The selvedge itself: lit on top, because it is the one surface on a
+    // wrapped garment that faces up.
+    put(x, y0, ramps.clothA, MAT.CLOTH_A, hide ? 1.6 : 0.8);
+    put(x, y0 - 1, ramps.clothA, MAT.CLOTH_A, hide ? 3.2 : 2.4);
+  }
+
+  if (hide) {
+    // The hair side showing along the torn edge, and the thong that holds the
+    // whole thing on. A hide wrap has no fastening but this knot.
+    for (let x = 0; x < size; x += 1) {
+      if (!onEdge(x) || noise(x * 0.9 + 40) < 0.45) continue;
+      put(x, edgeY(x) + 1, ramps.clothC, MAT.CLOTH_C, 5.4);
+    }
+    for (let dy = 0; dy < 3; dy += 1) {
+      for (let dx = -1; dx <= 1; dx += 1) {
+        put(highX + dx, highY + dy + 1, ramps.clothC, MAT.CLOTH_C, dy === 0 ? 1.4 : 3 + Math.abs(dx));
+      }
+    }
+    // A short tail hanging off the knot, which is what makes it a tie rather
+    // than a patch of other colour.
+    for (let i = 1; i <= 4; i += 1) {
+      put(highX - side * Math.round(i * 0.5), highY + 4 + i, ramps.clothC, MAT.CLOTH_C, 4.4);
+    }
+  } else {
+    // The woven border. Almost every wrapped cloth on earth has one along the
+    // long edge, and inset from the selvedge rather than on it, which is what
+    // separates it from an ordinary hem.
+    const band = spec.garment.ornament > 0.25 ? 3 : 2;
+    for (let x = 0; x < size; x += 1) {
+      if (!onEdge(x)) continue;
+      const y0 = edgeY(x) + 4;
+      for (let dy = 0; dy < band; dy += 1) {
+        put(x, y0 + dy, ramps.clothC, MAT.CLOTH_C, dy === 0 ? 1.8 : 3.4 + dy);
+      }
+    }
+    // The corner, gathered into a tuck at the shoulder. Three short folds
+    // radiating from one point: the cloth is pulled through itself there and
+    // everything downstream of the tuck is under tension.
+    for (let i = 0; i < 3; i += 1) {
+      const spread = 2 + i * 3;
+      for (let dy = 0; dy < 6; dy += 1) {
+        const x = highX - side * (dy * 0.35 + i * 0.2);
+        put(x + side * spread * 0.5, highY + dy + 1, ramps.clothA, MAT.CLOTH_A, i === 1 ? 5.6 : 1.4);
+      }
+    }
+  }
+  applyContactShadow(raster, body, book, { dx: 0, dy: 1, strength: 1, depth: 1 });
+}
+
+/**
+ * The overlapping Y-front: kimono, yukata, hanfu, hanbok, jama, angarkha.
+ *
+ * Two panels crossed left over right and closed at the side rather than the
+ * centre, with the under-collar showing as a narrow line inside the fold. That
+ * line is the recognition — it is the reason a kimono reads as a kimono in a
+ * silhouette three pixels wide — and every one of these was previously drawn as
+ * an undifferentiated field with a rounded neck hole in it.
+ */
+function drawCrossCollar(context: RenderContext, shoulders: Mask): void {
+  const { raster, anatomy, ramps, spec, book } = context;
+  const { size, centerX } = anatomy;
+  const put = painter(context, shoulders);
+
+  const top = anatomy.neckBottom - 4;
+  const depth = Math.min(size - top - 1, 18);
+  const spread = anatomy.neckHalf + 5;
+
+  /**
+   * One panel, from the shoulder down to where the two cross. `over` is the one
+   * laid on top, drawn second so it laps the other — and it is always the
+   * wearer's left panel over their right, which is not a stylistic choice: the
+   * reverse dresses a corpse, in Japan and in China alike.
+   *
+   * The lap is the whole point and it has to be *seen*. Run both panels into
+   * the same point and the result is a V-neck, which is what this looked like
+   * on the first pass: at bust crop a V-neck jumper and a kimono were the same
+   * picture. So the top panel crosses the centre line and keeps going, and it
+   * carries a step more light than the one underneath it, because it is in fact
+   * a layer nearer the lamp.
+   */
+  const panel = (dir: -1 | 1, over: boolean) => {
+    const width = over ? 7 : 6;
+    // The top panel does not stop at the crossing: below it the front edge goes
+    // on down and *across*, so the garment closes under the far arm. That
+    // continuing diagonal is the recognition. Stopping both panels at the point
+    // where they meet is what made this a V-neck.
+    const run = over ? size - top : depth;
+    for (let i = 0; i < run; i += 1) {
+      const t = i / depth;
+      const crossed = Math.max(0, t - 1);
+      const inner = spread * (1 - Math.min(1, t))
+        - (over ? Math.min(1, t) * 7 + crossed * depth * 0.3 : 0);
+      // Below the crossing it is a front opening, not a facing: a narrow edge
+      // drifting toward the far side. Kept wide down there it reads as a strap
+      // across the chest, which is a bandolier and not a garment.
+      const at = crossed > 0 ? 2.5 : width;
+      for (let w = 0; w <= at; w += 1) {
+        put(centerX + dir * (inner + w), top + i, ramps.clothA, MAT.CLOTH_A,
+          w < 1 ? (over ? 0.5 : 1.4) : (over ? 1.8 : 3) + w * 0.45);
+      }
+      // The under-collar — the eri, the git — as a pale line along the inside
+      // of the fold. Two pixels, and it does more work than the rest of this
+      // function put together.
+      put(centerX + dir * (inner - 1), top + i, ramps.clothB, MAT.CLOTH_B, 0.6);
+      put(centerX + dir * inner, top + i, ramps.clothB, MAT.CLOTH_B, 2.2);
+    }
+  };
+  panel(-1, false);
+  panel(1, true);
+
+  // A sash across the chest where the crossing closes, on garments rich enough
+  // to have named one. Below the crossing point, so it reads as holding the
+  // panels shut rather than as a stripe painted over them.
+  if (/sash|obi|belt|girdle|kamarband|cummerbund/i.test(spec.garment.name)) {
+    const y = top + depth - 1;
+    for (let dy = 0; dy < 3 && y + dy < size; dy += 1) {
+      for (let x = 0; x < size; x += 1) {
+        put(x, y + dy, ramps.clothC, MAT.CLOTH_C, dy === 0 ? 1.6 : 3.4 + dy);
+      }
+    }
+  }
+  applyContactShadow(raster, shoulders, book, { dx: 0, dy: 1, strength: 1, depth: 1 });
+}
+
 /** The Egyptian broad collar: concentric strung rows from throat to shoulder. */
 function drawBroadCollar(context: RenderContext, body: Mask): void {
   const { raster, anatomy, ramps } = context;
@@ -704,36 +932,68 @@ function drawPoncho(context: RenderContext, body: Mask): void {
   void rng;
 }
 
-/** A collared shirt: two points at the neck and a short buttoned placket. */
+/**
+ * A collared front: two points at the neck and a buttoned opening below them.
+ *
+ * Two variants, because this rule now carries half of everything the industrial
+ * and modern tables produce and one drawing for all of it would put the same
+ * chest on a mill hand, a housemaid and a man in an oilskin. The difference is
+ * real and it is at the centre front: a **shirt** has a placket, a sewn-on strip
+ * of doubled cloth carrying the buttonholes, so it reads as a raised band. A
+ * **jacket** has none — its two front edges simply meet, one lapped over the
+ * other, and the buttons sit on the overlap. So the shirt gets a band with a
+ * lit edge and a shadowed one, and the jacket gets a single hard edge with a
+ * shadow beside it and a wider, heavier collar above.
+ */
 function drawPlacket(context: RenderContext, body: Mask): void {
   const { raster, anatomy, ramps, spec } = context;
   const { size, centerX } = anatomy;
   const put = painter(context, body);
   const name = spec.garment.name.toLowerCase();
+  const outer = /jacket|coat|windbreaker|anorak|slicker|oilskin/.test(name);
 
-  // Collar points, angled down and out from the neck opening.
+  // Collar points, angled down and out from the neck opening. An outer
+  // garment's are longer and lie flatter, which is most of what tells a work
+  // jacket from the shirt under it at this size.
   const top = anatomy.neckBottom - 4;
+  const points = outer ? 11 : 8;
   for (const side of [-1, 1] as const) {
-    for (let i = 0; i < 8; i += 1) {
-      const x = centerX + side * (anatomy.neckHalf + 1 + i * 0.8);
+    for (let i = 0; i < points; i += 1) {
+      const x = centerX + side * (anatomy.neckHalf + 1 + i * (outer ? 1.15 : 0.8));
       const y = top + i;
-      for (let dy = -1; dy <= 1; dy += 1) {
-        put(x, y + dy, ramps.clothA, MAT.CLOTH_A, dy === -1 ? 0.5 : dy === 1 ? 6 : 2);
+      for (let dy = -1; dy <= (outer ? 2 : 1); dy += 1) {
+        put(x, y + dy, ramps.clothA, MAT.CLOTH_A, dy === -1 ? 0.5 : dy >= 1 ? 6 : 2);
       }
     }
   }
 
-  // The placket: a raised strip down the centre with two or three buttons.
-  for (let y = top + 2; y < Math.min(size, top + 16); y += 1) {
-    put(centerX - 2, y, ramps.clothA, MAT.CLOTH_A, 0.8);
-    put(centerX + 2, y, ramps.clothA, MAT.CLOTH_A, 6);
+  const buttons = outer ? 2 : 3;
+  const gap = outer ? 7 : 5;
+  if (outer) {
+    // One edge, where the fronts lap. No band: a jacket has nothing sewn on.
+    for (let y = top + 3; y < Math.min(size, top + 20); y += 1) {
+      put(centerX, y, ramps.clothA, MAT.CLOTH_A, 1);
+      put(centerX + 1, y, ramps.clothA, MAT.CLOTH_A, 6);
+    }
+  } else {
+    // The placket: a raised strip down the centre.
+    for (let y = top + 2; y < Math.min(size, top + 16); y += 1) {
+      put(centerX - 2, y, ramps.clothA, MAT.CLOTH_A, 0.8);
+      put(centerX + 2, y, ramps.clothA, MAT.CLOTH_A, 6);
+    }
   }
-  for (let i = 0; i < 3; i += 1) {
-    const y = top + 5 + i * 5;
+  for (let i = 0; i < buttons; i += 1) {
+    const y = top + (outer ? 8 : 5) + i * gap;
     // `viewHeight`: the canvas is drawn taller than it is shown.
     if (y >= anatomy.viewHeight - 1) break;
-    put(centerX, y, ramps.clothA, MAT.CLOTH_A, 0.6);
-    put(centerX + 1, y, ramps.clothA, MAT.CLOTH_A, 6);
+    if (outer && spec.garment.ornament > 0.2) {
+      // A coat button is a visible object rather than a stitch of the cloth.
+      raster.set(centerX - 1, y, ramps.metal.steps[1], MAT.METAL, 1);
+      raster.set(centerX, y, ramps.metal.steps[4], MAT.METAL, 4);
+    } else {
+      put(centerX - (outer ? 1 : 0), y, ramps.clothA, MAT.CLOTH_A, 0.6);
+      put(centerX + (outer ? 0 : 1), y, ramps.clothA, MAT.CLOTH_A, 6);
+    }
   }
 
   // A guayabera's pintucks: paired vertical tucks either side of the placket,

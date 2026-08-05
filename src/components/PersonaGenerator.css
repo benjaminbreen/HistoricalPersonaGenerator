@@ -3559,6 +3559,11 @@ body.dark-mode .card-header {
   border-radius: 8px 8px 0 0;
   /* Positioning context for the map, which is a layer rather than a column. */
   position: relative;
+  /* And above the body, because the header's hover plates open downward into
+     it. Without this the rarity plate opened *under* the portrait's wax seals,
+     which carry a z-index of 3 in a stacking context of their own. Above the
+     sticky biography tabs (20) as well, and below the mobile action bar. */
+  z-index: 30;
 }
 
 /* The text and the date sit above the map. */

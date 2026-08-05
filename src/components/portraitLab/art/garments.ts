@@ -309,7 +309,7 @@ export function drawGarment(context: RenderContext): BodyMasks {
   // What this garment is called, as opposed to what shape it is. Resolved
   // before the construction pass so that pass can leave the centre front alone
   // when the feature is going to occupy it.
-  const feature = garmentFeatureFor(spec.garment);
+  const feature = garmentFeatureFor(spec.garment, spec.gender);
 
   // The shift worn under everything goes down before the named feature, not
   // after it. It fills the neckline opening, which is exactly where a lapel, a
