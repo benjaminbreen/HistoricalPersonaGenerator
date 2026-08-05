@@ -4,13 +4,14 @@ import fs from 'node:fs'
 import path from 'node:path'
 import personaShareHandler from './api/persona-share.js'
 import aiAccessHandler from './api/ai-access.js'
+import testerAccessHandler from './api/tester-access.js'
 import stripeWebhookHandler from './api/stripe-webhook.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
 import { parseJsonObject } from './api/_lib/llmJson.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
 import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './api/_lib/rateLimit.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
-import { consumeAiCredit, ensureVisitorId } from './api/_lib/aiAccess.js'
+import { consumeAiCredit, ensureVisitorId, hasTesterAccess } from './api/_lib/aiAccess.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
 import { buildAnnotationPrompt, buildOrientationModelSchema, buildSketchPrompt, buildSourcePersonaModelSchema, buildSourcePersonaPrompt } from './api/_lib/personaPrompts.js'
 // @ts-expect-error - plain JS helper shared with the Vercel routes and server.js
@@ -345,6 +346,10 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
         await aiAccessHandler(req, res)
       })
 
+      server.middlewares.use('/api/tester-access', async (req: any, res: any) => {
+        await testerAccessHandler(req, res)
+      })
+
       server.middlewares.use('/api/persona-share', async (req: any, res: any) => {
         await personaShareHandler(req, res)
       })
@@ -390,7 +395,9 @@ const geminiPersonaApiPlugin = (env: Record<string, string>) => {
               return
             }
             const visitorId = ensureVisitorId(req, res)
-            const accessVerdict = await consumeAiCredit(visitorId, billedAction)
+            const accessVerdict = await consumeAiCredit(visitorId, billedAction, Date.now(), {
+              testerAccess: hasTesterAccess(req),
+            })
             if (!accessVerdict.allowed) {
               res.statusCode = 402
               res.setHeader('Content-Type', 'application/json')

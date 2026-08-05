@@ -324,6 +324,18 @@ body.dark-mode .top-bar {
   text-transform: uppercase;
 }
 
+.tester-access-badge {
+  width: max-content;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--color-accent-blue) 55%, var(--color-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-accent-blue) 10%, var(--color-surface));
+  color: var(--color-accent-blue);
+  font: 700 0.62rem var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .source-type-badge {
   flex-shrink: 0;
   padding: 0.22rem 0.45rem;

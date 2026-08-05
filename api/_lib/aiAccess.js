@@ -10,6 +10,8 @@ export const SUPPORTER_CREDITS_PER_DONATION = 50;
 export const SUPPORTER_ACCESS_DAYS = 30;
 
 const COOKIE_NAME = 'hpg_ai_visitor';
+const TESTER_COOKIE_NAME = 'hpg_tester_access';
+const TESTER_COOKIE_MAX_AGE = 30 * 24 * 60 * 60;
 const VISITOR_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const LOCAL_ACCESS_DIRECTORY = path.join(process.cwd(), '.ai-access');
 const DEFAULT_DONATION_URL = 'https://buy.stripe.com/eVqfZhaprgRG7ab1aV4F200';
@@ -87,6 +89,32 @@ export const ensureVisitorId = (req, res) => {
     `${COOKIE_NAME}=${encodeURIComponent(`${id}.${signatureFor(id)}`)}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax${secure ? '; Secure' : ''}`
   );
   return id;
+};
+
+const testerCookieValue = () => signatureFor('historical-persona-generator:deployed-tester:v1');
+
+export const hasTesterAccess = req => {
+  const value = cookiesFromRequest(req)[TESTER_COOKIE_NAME] || '';
+  return Boolean(value) && safeEqual(value, testerCookieValue());
+};
+
+export const grantTesterAccessCookie = (req, res, suppliedToken) => {
+  const configuredToken = String(process.env.HPG_TESTER_TOKEN || '');
+  if (configuredToken.length < 24) {
+    const error = new Error('Deployed tester access is not configured.');
+    error.statusCode = 503;
+    throw error;
+  }
+  if (typeof suppliedToken !== 'string' || !safeEqual(suppliedToken, configuredToken)) {
+    const error = new Error('Tester access token is invalid.');
+    error.statusCode = 403;
+    throw error;
+  }
+  const secure = process.env.VERCEL || String(req.headers?.['x-forwarded-proto'] || '').includes('https');
+  appendSetCookie(
+    res,
+    `${TESTER_COOKIE_NAME}=${encodeURIComponent(testerCookieValue())}; Path=/; Max-Age=${TESTER_COOKIE_MAX_AGE}; HttpOnly; SameSite=Strict${secure ? '; Secure' : ''}`
+  );
 };
 
 export const isValidVisitorId = id => VISITOR_ID_PATTERN.test(String(id || ''));
@@ -204,7 +232,7 @@ export const donationUrlFor = id => {
   return url.toString();
 };
 
-export const publicAiAccessStatus = (record, now = Date.now()) => {
+export const publicAiAccessStatus = (record, now = Date.now(), testerAccess = false) => {
   const supporterActive = supporterIsActive(record, now);
   const freeBiographyRunsRemaining = Math.max(0, FREE_BIOGRAPHY_RUNS - record.freeBiographyRunsUsed);
   const freeSchemaRunsRemaining = Math.max(0, FREE_SCHEMA_RUNS - record.freeSchemaRunsUsed);
@@ -217,8 +245,9 @@ export const publicAiAccessStatus = (record, now = Date.now()) => {
     supporterActive,
     supporterCredits,
     supporterExpiresAt: supporterActive ? record.supporterExpiresAt : null,
-    canUseBiography: supporterCredits >= ACTION_COST.generate_sketch || freeBiographyRunsRemaining > 0,
-    canUseSchema: supporterCredits >= ACTION_COST.generate_annotation || freeSchemaRunsRemaining > 0,
+    testerAccess,
+    canUseBiography: testerAccess || supporterCredits >= ACTION_COST.generate_sketch || freeBiographyRunsRemaining > 0,
+    canUseSchema: testerAccess || supporterCredits >= ACTION_COST.generate_annotation || freeSchemaRunsRemaining > 0,
     biographyCreditCost: ACTION_COST.generate_sketch,
     schemaCreditCost: ACTION_COST.generate_annotation,
     supporterCreditGrant: SUPPORTER_CREDITS_PER_DONATION,
@@ -252,9 +281,17 @@ const mutateAiAccessRecord = async (id, mutate) => {
  * active; otherwise biographies and schema records use their separate free
  * allowances.
  */
-export const consumeAiCredit = async (id, action, now = Date.now()) => {
+export const consumeAiCredit = async (id, action, now = Date.now(), options = {}) => {
   const cost = ACTION_COST[action];
   if (!cost) throw new Error('Unknown AI action.');
+  if (options.testerAccess) {
+    const record = await loadAiAccessRecord(id);
+    if (!record) throw new Error('AI visitor identity is invalid.');
+    return {
+      allowed: true,
+      access: publicAiAccessStatus(record, now, true),
+    };
+  }
   const result = await mutateAiAccessRecord(id, record => {
     if (supporterIsActive(record, now) && record.supporterCredits >= cost) {
       record.supporterCredits -= cost;

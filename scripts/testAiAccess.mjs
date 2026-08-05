@@ -10,11 +10,15 @@ const testDirectory = await mkdtemp(path.join(os.tmpdir(), 'hpg-ai-access-'));
 try {
   process.chdir(testDirectory);
   process.env.AI_ACCESS_STORAGE = 'local';
+  process.env.AI_ACCESS_SECRET = 'test-access-signing-secret';
+  process.env.HPG_TESTER_TOKEN = 'test-deployed-tester-token-1234567890';
   process.env.STRIPE_DONATION_URL = 'https://buy.stripe.com/test';
 
   const {
     consumeAiCredit,
+    grantTesterAccessCookie,
     grantSupporterCredits,
+    hasTesterAccess,
     loadAiAccessRecord,
     publicAiAccessStatus,
     saveAiAccessRecord,
@@ -60,6 +64,32 @@ try {
   assert.equal(deniedSchema.allowed, false);
   assert.equal(deniedSchema.access.freeSchemaRunsRemaining, 0);
   assert.equal(deniedSchema.access.canUseSchema, false);
+
+  const responseHeaders = new Map();
+  const testerResponse = {
+    getHeader: name => responseHeaders.get(name),
+    setHeader: (name, value) => responseHeaders.set(name, value),
+  };
+  grantTesterAccessCookie(
+    { headers: { 'x-forwarded-proto': 'https' } },
+    testerResponse,
+    process.env.HPG_TESTER_TOKEN
+  );
+  const testerSetCookie = responseHeaders.get('Set-Cookie');
+  assert.match(String(testerSetCookie), /hpg_tester_access=/);
+  assert.match(String(testerSetCookie), /HttpOnly/);
+  assert.match(String(testerSetCookie), /SameSite=Strict/);
+  const testerRequest = { headers: { cookie: String(testerSetCookie).split(';')[0] } };
+  assert.equal(hasTesterAccess(testerRequest), true);
+  const testerRun = await consumeAiCredit(visitorId, 'generate_sketch', Date.now(), { testerAccess: true });
+  assert.equal(testerRun.allowed, true);
+  assert.equal(testerRun.access.testerAccess, true);
+  assert.equal(testerRun.access.canUseBiography, true);
+  assert.equal((await loadAiAccessRecord(visitorId)).freeBiographyRunsUsed, 5);
+  assert.throws(
+    () => grantTesterAccessCookie({ headers: {} }, testerResponse, 'wrong-token'),
+    error => error?.statusCode === 403
+  );
 
   const now = Date.UTC(2026, 6, 29);
   const grant = await grantSupporterCredits(visitorId, 'cs_test_supporter', now);

@@ -1,5 +1,6 @@
 import {
   ensureVisitorId,
+  hasTesterAccess,
   loadAiAccessRecord,
   publicAiAccessStatus,
 } from './_lib/aiAccess.js';
@@ -21,7 +22,7 @@ export default async function handler(req, res) {
     }
     const visitorId = ensureVisitorId(req, res);
     const record = await loadAiAccessRecord(visitorId);
-    const access = publicAiAccessStatus(record);
+    const access = publicAiAccessStatus(record, Date.now(), hasTesterAccess(req));
     const requestUrl = new URL(req.url || '/', 'http://localhost');
     if (requestUrl.searchParams.get('checkout') === '1') {
       res.statusCode = 302;

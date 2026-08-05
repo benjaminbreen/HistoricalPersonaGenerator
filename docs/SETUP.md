@@ -160,6 +160,30 @@ uses that opaque ID to grant access to the same browser; it never trusts a
 client-side “I donated” flag. Clearing browser cookies creates a new anonymous
 identity, so account-level enforcement would require adding sign-in.
 
+### Private deployed-tester access
+
+To test production without consuming free runs or supporter credits, set a
+separate random secret of at least 24 characters in Vercel:
+
+```bash
+HPG_TESTER_TOKEN=a-long-random-token-used-only-for-testing
+```
+
+After redeploying, open the production site once with the secret in a URL
+fragment:
+
+```text
+https://historical-persona-generator.vercel.app/#tester=YOUR_TOKEN
+```
+
+The fragment is not sent in the page request or Referer header. The app removes
+it from the address bar immediately and exchanges it for a signed `HttpOnly`,
+`SameSite=Strict` cookie valid for 30 days. A visible **Tester access** badge
+confirms the browser is unlocked. The tester cookie bypasses the five-biography
+and three-schema allowances but keeps the public per-IP rate limits in force.
+Never reuse `AI_ACCESS_SECRET`, an API key, or a Stripe secret as the tester
+token.
+
 ### Rate limits
 
 `/api/gemini-persona` is public, so every route enforces a cost-weighted limit (a persona record counts three times a biography). Defaults, overridable per environment:

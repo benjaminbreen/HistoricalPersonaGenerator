@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseJsonObject } from './_lib/llmJson.js';
 import { checkRateLimit, clientIpFromRequest, rateLimitMessage } from './_lib/rateLimit.js';
-import { consumeAiCredit, ensureVisitorId } from './_lib/aiAccess.js';
+import { consumeAiCredit, ensureVisitorId, hasTesterAccess } from './_lib/aiAccess.js';
 import { buildAnnotationPrompt, buildOrientationModelSchema, buildSketchPrompt, buildSourcePersonaModelSchema, buildSourcePersonaPrompt } from './_lib/personaPrompts.js';
 import { callModel } from './_lib/llm.js';
 
@@ -29,7 +29,9 @@ export default async function handler(req, res) {
         return;
       }
       const visitorId = ensureVisitorId(req, res);
-      const accessVerdict = await consumeAiCredit(visitorId, billedAction);
+      const accessVerdict = await consumeAiCredit(visitorId, billedAction, Date.now(), {
+        testerAccess: hasTesterAccess(req),
+      });
       if (!accessVerdict.allowed) {
         res.status(402).json({
           code: 'AI_SUPPORT_REQUIRED',

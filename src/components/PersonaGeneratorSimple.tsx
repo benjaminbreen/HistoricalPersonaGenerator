@@ -191,6 +191,7 @@ import {
 } from '../services/personaOrientationService';
 import {
   AI_ACCESS_REQUIRED_EVENT,
+  enableTesterAccessFromUrl,
   type AiAccessRequiredDetail,
   getAiAccessStatus,
   type AiAccessStatus,
@@ -1811,11 +1812,22 @@ export default function PersonaGenerator() {
 
   useEffect(() => {
     let active = true;
-    getAiAccessStatus()
-      .then(access => {
+    const testerRequested = new URLSearchParams(window.location.hash.replace(/^#/, '')).has('tester');
+    enableTesterAccessFromUrl()
+      .then(async unlocked => ({
+        access: unlocked || await getAiAccessStatus(),
+        newlyUnlocked: Boolean(unlocked),
+      }))
+      .then(({ access, newlyUnlocked }) => {
         if (active) setAiAccess(access);
+        if (active && newlyUnlocked) {
+          setSourceIngestionStatus('Deployed tester access enabled for this browser. AI usage will not consume free runs or supporter credits.');
+        }
       })
-      .catch(() => {
+      .catch(error => {
+        if (active && testerRequested) {
+          setSourceIngestionStatus(error instanceof Error ? error.message : 'Could not enable deployed tester access.');
+        }
         // The generation endpoint remains authoritative if this advisory read
         // is unavailable.
       });
@@ -4985,6 +4997,9 @@ export default function PersonaGenerator() {
               <IoShareSocial aria-hidden="true" />
               Shared persona
             </span>
+          )}
+          {aiAccess?.testerAccess && (
+            <span className="tester-access-badge">Tester access</span>
           )}
           <span className="controls-disclaimer">
             Prototype – may contain errors
