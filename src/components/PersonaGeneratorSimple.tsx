@@ -5122,7 +5122,7 @@ export default function PersonaGenerator() {
                   {(sourceStudioView === 'wikipedia' || sourceStudioView === 'full') && (
                     <button className="btn btn-secondary" onClick={() => requestAiBiographyRun(generateRandomAnnotationPersona)} disabled={isSourceGenerating} aria-label="Create a day-in-the-life persona from a surprise Wikipedia biography">
                       <IoDocumentText aria-hidden="true" />
-                      {isSourceGenerating ? 'Finding Source...' : 'Surprise Wikipedia Day'}
+                      {isSourceGenerating ? 'Finding Source...' : 'Surprise Wikipedia Persona'}
                     </button>
                   )}
                   {sourceStudioView !== 'full' && (
@@ -7404,7 +7404,7 @@ export default function PersonaGenerator() {
         </motion.div>
       )}
 
-      {aiGate && !showDonate && createPortal(
+      {aiGate && !showDonate && (
         <div
           className="modal-overlay ai-support-overlay"
           onClick={() => setAiGate(null)}
@@ -7464,8 +7464,7 @@ export default function PersonaGenerator() {
               </button>
             </div>
           </div>
-        </div>,
-        document.body
+        </div>
       )}
 
       {costConfirm && !showDonate && (

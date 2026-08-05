@@ -12,6 +12,7 @@ import {
 import { oldBaileyDefendantSubject } from '../api/old-bailey/random.js';
 
 const orientationSchema = JSON.parse(fs.readFileSync('src/schemas/personaOrientation.schema.json', 'utf8'));
+const personaGeneratorUi = fs.readFileSync('src/components/PersonaGeneratorSimple.tsx', 'utf8');
 const modelSchema = buildOrientationModelSchema(orientationSchema);
 const sourcePersonaSchema = buildSourcePersonaModelSchema(orientationSchema);
 const annotationPrompt = buildAnnotationPrompt({
@@ -28,6 +29,13 @@ assert.ok(JSON.stringify(modelSchema).length < 14000, 'compact model schema shou
 assert.ok(annotationPrompt.length < 4200, `orientation prompt grew to ${annotationPrompt.length} characters`);
 assert.match(annotationPrompt, /self|conversation frame|anachronism/i);
 assert.doesNotMatch(annotationPrompt, /Big Five|period_bucket|export_targets/);
+assert.match(personaGeneratorUi, /Surprise Wikipedia Persona/);
+assert.match(personaGeneratorUi, /aiGate && !showDonate && \(/);
+assert.doesNotMatch(
+  personaGeneratorUi,
+  /aiGate && !showDonate && createPortal\(/,
+  'The supporter gate must remain in the main component tree for Safari compatibility',
+);
 
 const sourcePersonaPrompt = buildSourcePersonaPrompt({
   title: 'Eulalia Ramos',
