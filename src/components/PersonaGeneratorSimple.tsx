@@ -164,7 +164,7 @@ import { triggerHaptic } from '../utils/deviceUtils';
 import { EventImportance, EventKind } from '../constants/characterData/lifeHistoryService';
 import { standingRole } from '../constants/characterData/professions';
 import { HistoricalPersonaAnnotationRecord } from '../types/personaAnnotation';
-import type { PersonaOrientationRecord } from '../types/personaOrientation';
+import type { LlmTransparencyRecord, PersonaOrientationRecord } from '../types/personaOrientation';
 import { periodBucketForYear } from '../constants/personaAnnotationTemporal';
 import {
   createAnnotationRecordFromSource,
@@ -178,6 +178,7 @@ import {
   ModelVariant,
   normalizePersonaAnnotationRecord,
   PersonaGenerationTarget,
+  readLastLlmTransparency,
   readModelVariant,
   writeModelVariant,
 } from '../services/geminiPersonaMaterialService';
@@ -868,6 +869,9 @@ const isPopulatedValue = (value: unknown): boolean => {
 const getPathValue = (source: unknown, path: Array<string | number>): unknown =>
   path.reduce((current: any, key) => current?.[key], source as any);
 
+const transparencyText = (value: unknown): string =>
+  typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+
 const setPathValue = (source: any, path: Array<string | number>, value: unknown): any => {
   const clone = Array.isArray(source) ? [...source] : { ...source };
   let cursor = clone;
@@ -1351,6 +1355,9 @@ export default function PersonaGenerator() {
   const [bubblePosition, setBubblePosition] = useState({ top: 0, left: 0 });
   const [annotationRecord, setAnnotationRecord] = useState<HistoricalPersonaAnnotationRecord | null>(null);
   const [orientationRecord, setOrientationRecord] = useState<PersonaOrientationRecord | null>(null);
+  const [llmTransparency, setLlmTransparency] = useState<LlmTransparencyRecord | null>(null);
+  const [showLlmTransparency, setShowLlmTransparency] = useState(false);
+  const [llmCopyStatus, setLlmCopyStatus] = useState<string | null>(null);
   const [sourceText, setSourceText] = useState('');
   const [sourceTitle, setSourceTitle] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
@@ -2101,6 +2108,7 @@ export default function PersonaGenerator() {
       setPersonaSketch('Writing source-grounded sketch...');
       try {
         const sketch = await generatePersonaSketchWithGemini(record);
+        setLlmTransparency(readLastLlmTransparency());
         if (sketch) {
           setPersonaSketch(sketch);
         } else {
@@ -2108,6 +2116,7 @@ export default function PersonaGenerator() {
           noteGenerationFallback('prose', 'The model returned an empty sketch.');
         }
       } catch (error) {
+        setLlmTransparency(readLastLlmTransparency());
         setPersonaSketch(localPersonaSketch(record));
         noteGenerationFallback('prose', error instanceof Error ? error.message : 'Sketch generation failed.');
         setSourceIngestionStatus(error instanceof Error ? `${error.message} Showing local sketch fallback.` : 'Sketch generation failed. Showing local sketch fallback.');
@@ -2179,8 +2188,10 @@ export default function PersonaGenerator() {
         target: options?.target || sourceTarget,
         preferredMoment: preferredMoment.trim() || undefined,
       });
+      setLlmTransparency(generated.transparency || readLastLlmTransparency());
       return { record: generated.annotationRecord, orientationRecord: generated.orientationRecord, sketch: generated.sketch, modelFilled: true };
     } catch (error) {
+      setLlmTransparency(readLastLlmTransparency());
       setSourceIngestionStatus(error instanceof Error ? error.message : 'AI source generation failed.');
       throw error;
     }
@@ -3025,6 +3036,7 @@ export default function PersonaGenerator() {
       if (useGeminiExtraction) {
         setPersonaSketch(`Writing an AI interpretation of ${existingPersona.character.name}...`);
         const sketch = await generatePersonaSketchWithGemini(record);
+        setLlmTransparency(readLastLlmTransparency());
         if (sketch) {
           setPersonaSketch(sketch);
           setSourceIngestionStatus(`AI elaborated ${existingPersona.character.name} without replacing the existing persona.`);
@@ -3042,6 +3054,7 @@ export default function PersonaGenerator() {
         personaCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 120);
     } catch (error) {
+      setLlmTransparency(readLastLlmTransparency());
       setPersonaSketch(localPersonaSketch(record));
       noteGenerationFallback('prose', error instanceof Error ? error.message : 'Sketch generation failed.');
       setSourceIngestionStatus(error instanceof Error
@@ -3119,6 +3132,7 @@ export default function PersonaGenerator() {
         target: 'named_subject',
         preferredMoment: preferredMoment.trim() || undefined,
       });
+      setLlmTransparency(generated.transparency || readLastLlmTransparency());
       const compactRecord = lockProceduralOrientationRecord(generated.orientationRecord, existingPersona);
       const record = applyPersonaOrientationToAnnotationRecord(compactRecord, generated.annotationRecord);
       setAnnotationRecord(record);
@@ -3128,6 +3142,7 @@ export default function PersonaGenerator() {
       setFieldEditStatus(`Generated by ${selectedModelLabel} for ${existingPersona.character.name}.`);
       setSourceIngestionStatus(`Generated a ${selectedModelLabel}-filled Talkie persona record for ${existingPersona.character.name} without replacing the persona.`);
     } catch (error) {
+      setLlmTransparency(readLastLlmTransparency());
       setSourceIngestionStatus(error instanceof Error
         ? `${error.message} No placeholder schema was saved; the existing persona is unchanged.`
         : 'Schema generation failed. No placeholder schema was saved; the existing persona is unchanged.');
@@ -3218,6 +3233,16 @@ export default function PersonaGenerator() {
       setShowShareDialog(false);
     } catch (error) {
       setShareStatus(error instanceof Error ? error.message : 'Could not copy the persona link.');
+    }
+  };
+
+  const copyLlmTransparency = async () => {
+    if (!llmTransparency) return;
+    try {
+      await copyTextToClipboard(JSON.stringify(llmTransparency, null, 2));
+      setLlmCopyStatus('Complete sanitized LLM transcript copied.');
+    } catch (error) {
+      setLlmCopyStatus(error instanceof Error ? error.message : 'Could not copy the LLM transcript.');
     }
   };
 
@@ -5008,6 +5033,7 @@ export default function PersonaGenerator() {
                 className={`source-mode-button ${!sourcePanelCollapsed && sourceStudioView === 'wikipedia' ? 'source-mode-button-active' : ''}`}
                 onClick={() => {
                   setSourceStudioView('wikipedia');
+                  setSourceTarget('named_subject');
                   setSourcePanelCollapsed(false);
                 }}
               >
@@ -5091,9 +5117,16 @@ export default function PersonaGenerator() {
                 </div>
                 )}
                 {!isSourceGenerating && (
-                  <button className="btn btn-secondary" onClick={() => setSourcePanelCollapsed(false)}>
-                    Edit Source
-                  </button>
+                  <div className="source-collapsed-actions">
+                    {llmTransparency && (
+                      <button className="btn btn-secondary" onClick={() => { setLlmCopyStatus(null); setShowLlmTransparency(true); }}>
+                        LLM transparency
+                      </button>
+                    )}
+                    <button className="btn btn-secondary" onClick={() => setSourcePanelCollapsed(false)}>
+                      Edit Source
+                    </button>
+                  </div>
                 )}
               </motion.div>
               )
@@ -5288,6 +5321,11 @@ export default function PersonaGenerator() {
                 {annotationRecord && (
                   <button className="btn btn-secondary" onClick={() => setShowMaterialJson(!showMaterialJson)}>
                     {showMaterialJson ? 'Hide JSONL' : 'Show JSONL'}
+                  </button>
+                )}
+                {llmTransparency && (
+                  <button className="btn btn-secondary" onClick={() => { setLlmCopyStatus(null); setShowLlmTransparency(true); }}>
+                    LLM transparency
                   </button>
                 )}
                 {sourceIngestionStatus && <span className="source-status">{sourceIngestionStatus}</span>}
@@ -7143,6 +7181,91 @@ export default function PersonaGenerator() {
             </div>
           </motion.div>
         </motion.div>
+      )}
+
+      {showLlmTransparency && llmTransparency && (
+        <div
+          className="modal-overlay llm-transparency-overlay"
+          onClick={() => setShowLlmTransparency(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="llm-transparency-title"
+        >
+          <div className="modal llm-transparency-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <h2 id="llm-transparency-title">LLM transparency</h2>
+                <p>Exact sanitized application request, raw model response, and app-side normalization.</p>
+              </div>
+              <button className="modal-close" onClick={() => setShowLlmTransparency(false)} aria-label="Close LLM transparency dialog">
+                <IoClose aria-hidden="true" />
+              </button>
+            </div>
+            <div className="modal-body llm-transparency-body">
+              <p className="llm-transparency-note">
+                API credentials and authorization headers are never included. The prompt, schema, settings, and model text below are otherwise the complete transcript available to the application.
+              </p>
+              <div className="llm-transparency-summary">
+                <div><span>Provider</span><strong>{llmTransparency.request.provider}</strong></div>
+                <div><span>Model</span><strong>{llmTransparency.request.model}</strong></div>
+                <div><span>Action</span><strong>{llmTransparency.request.action}</strong></div>
+                <div><span>Target</span><strong>{llmTransparency.request.application_options?.target || 'n/a'}</strong></div>
+                <div><span>Input tokens</span><strong>{String(llmTransparency.response.usage.input ?? '—')}</strong></div>
+                <div><span>Output tokens</span><strong>{String(llmTransparency.response.usage.output ?? '—')}</strong></div>
+              </div>
+              <details open>
+                <summary>Normalization and source locks</summary>
+                <ul>
+                  {(llmTransparency.normalization_notes || ['No normalization notes were recorded.']).map((note, index) => (
+                    <li key={`${note}-${index}`}>{note}</li>
+                  ))}
+                </ul>
+              </details>
+              <details>
+                <summary>Model settings</summary>
+                <pre>{transparencyText({
+                  provider: llmTransparency.request.provider,
+                  variant: llmTransparency.request.variant,
+                  model: llmTransparency.request.model,
+                  action: llmTransparency.request.action,
+                  prompt_version: llmTransparency.request.prompt_version,
+                  output_format: llmTransparency.request.output_format,
+                  settings: llmTransparency.request.settings,
+                  application_options: llmTransparency.request.application_options,
+                  source_subject: llmTransparency.request.source_subject,
+                  usage: llmTransparency.response.usage,
+                })}</pre>
+              </details>
+              <details open>
+                <summary>Complete prompt</summary>
+                <pre>{llmTransparency.request.prompt}</pre>
+              </details>
+              {llmTransparency.request.schema !== null && (
+                <details>
+                  <summary>Complete JSON schema</summary>
+                  <pre>{transparencyText(llmTransparency.request.schema)}</pre>
+                </details>
+              )}
+              <details open>
+                <summary>Raw model output</summary>
+                <pre>{llmTransparency.response.raw_output}</pre>
+              </details>
+              {llmTransparency.normalized_output !== undefined && (
+                <details>
+                  <summary>Normalized application record</summary>
+                  <pre>{transparencyText(llmTransparency.normalized_output)}</pre>
+                </details>
+              )}
+            </div>
+            <div className="llm-transparency-actions">
+              {llmCopyStatus && <span aria-live="polite">{llmCopyStatus}</span>}
+              <button className="btn btn-secondary" onClick={() => setShowLlmTransparency(false)}>Close</button>
+              <button className="btn btn-primary" onClick={() => void copyLlmTransparency()}>
+                Copy complete transcript
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showAbout && (

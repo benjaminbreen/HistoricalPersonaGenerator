@@ -71,6 +71,11 @@ try {
   assert.deepEqual(requestBody.reasoning, { effort: 'none' });
   assert.equal(requestBody.max_output_tokens, 260);
   assert.equal('temperature' in requestBody, false);
+  assert.equal(result.transparency.request.provider, 'openai');
+  assert.equal(result.transparency.request.prompt, 'Write a short historical persona biography.');
+  assert.equal(result.transparency.request.settings.reasoning_effort, 'none');
+  assert.equal(result.transparency.response.raw_output, 'A source-grounded biography returned by Luna.');
+  assert.equal(JSON.stringify(result.transparency).includes('test-key'), false);
 
   const annotation = await callModel({
     action: 'generate_annotation',
@@ -94,6 +99,8 @@ try {
   assert.equal(requestBody.text.format.name, 'historical_persona_orientation');
   assert.equal(requestBody.text.format.strict, false);
   assert.deepEqual(requestBody.text.format.schema.properties.status.enum, ['valid']);
+  assert.deepEqual(annotation.transparency.request.schema.properties.status.enum, ['valid']);
+  assert.equal(annotation.transparency.request.output_format, 'json_schema');
 
   console.log('LLM transport tests passed.');
 } finally {

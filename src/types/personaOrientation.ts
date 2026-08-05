@@ -100,8 +100,35 @@ export interface PersonaOrientationModelOutput {
   day_in_life?: string;
 }
 
+export interface LlmTransparencyRecord {
+  version: 1;
+  request: {
+    provider: string;
+    variant: string;
+    model: string;
+    action: string;
+    prompt_version: string;
+    output_format: string;
+    settings: Record<string, unknown>;
+    application_options?: {
+      target: string;
+      preferred_moment?: string;
+    };
+    source_subject?: unknown;
+    prompt: string;
+    schema: unknown;
+  };
+  response: {
+    raw_output: string;
+    usage: Record<string, unknown>;
+  };
+  normalized_output?: unknown;
+  normalization_notes?: string[];
+}
+
 export interface GeneratedPersonaOrientation {
   orientationRecord: PersonaOrientationRecord;
   annotationRecord: HistoricalPersonaAnnotationRecord;
   sketch?: string;
+  transparency?: LlmTransparencyRecord;
 }

@@ -30,6 +30,8 @@ assert.ok(annotationPrompt.length < 4200, `orientation prompt grew to ${annotati
 assert.match(annotationPrompt, /self|conversation frame|anachronism/i);
 assert.doesNotMatch(annotationPrompt, /Big Five|period_bucket|export_targets/);
 assert.match(personaGeneratorUi, /Surprise Wikipedia persona/);
+assert.match(personaGeneratorUi, /LLM transparency/);
+assert.match(personaGeneratorUi, /setSourceTarget\('named_subject'\)/);
 assert.match(personaGeneratorUi, /aiGate && !showDonate && \(/);
 assert.doesNotMatch(
   personaGeneratorUi,

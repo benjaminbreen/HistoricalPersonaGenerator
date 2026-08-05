@@ -159,6 +159,7 @@ async function callGemini({ model, prompt, json, schema, temperature, maxOutput,
       output: meta.candidatesTokenCount ?? null,
       reasoning: meta.thoughtsTokenCount ?? null,
     },
+    effectiveSettings: { reasoningEffort: null, temperature },
   };
 }
 
@@ -213,6 +214,7 @@ async function callOpenAI({ model, prompt, json, schema, maxOutput, effort, env 
   };
 
   let response = await send(base);
+  let reasoningEffortApplied = Boolean(effort);
 
   // Which knobs a given model takes is not knowable ahead of time.
   if (response.status === 400) {
@@ -221,6 +223,7 @@ async function callOpenAI({ model, prompt, json, schema, maxOutput, effort, env 
       console.warn('[llm] retrying without reasoning.effort');
       const { reasoning, ...withoutEffort } = base;
       response = await send(withoutEffort);
+      reasoningEffortApplied = false;
     } else {
       response = { ok: false, status: 400, text: async () => complaint };
     }
@@ -248,6 +251,10 @@ async function callOpenAI({ model, prompt, json, schema, maxOutput, effort, env 
       input: usage.input_tokens ?? null,
       output: usage.output_tokens ?? null,
       reasoning: usage.output_tokens_details?.reasoning_tokens ?? null,
+    },
+    effectiveSettings: {
+      reasoningEffort: reasoningEffortApplied ? effort : null,
+      temperature: null,
     },
   };
 }
@@ -289,6 +296,29 @@ export async function callModel({ variant, action, prompt, json = false, schema,
     ms: Date.now() - startedAt,
     truncated: result.truncated || false,
   };
+  const transparency = {
+    version: 1,
+    request: {
+      provider: spec.provider,
+      variant: chosen,
+      model,
+      action,
+      prompt_version: PROMPT_VERSION,
+      output_format: json ? (schema ? 'json_schema' : 'json_object') : 'text',
+      settings: {
+        max_output_tokens: budget.maxOutput,
+        reasoning_effort: result.effectiveSettings?.reasoningEffort ?? null,
+        temperature: result.effectiveSettings?.temperature ?? null,
+        schema_strict: schema ? false : null,
+      },
+      prompt,
+      schema: schema || null,
+    },
+    response: {
+      raw_output: result.text,
+      usage,
+    },
+  };
   // One line per call. A week of these in the platform logs answers which
   // model is actually cheaper on this workload, which no price table can.
   console.log(`[llm] ${JSON.stringify(usage)}`);
@@ -303,5 +333,5 @@ export async function callModel({ variant, action, prompt, json = false, schema,
     throw error;
   }
 
-  return { text: result.text, usage };
+  return { text: result.text, usage, transparency };
 }

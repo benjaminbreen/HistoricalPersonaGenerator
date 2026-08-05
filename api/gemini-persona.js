@@ -43,7 +43,7 @@ export default async function handler(req, res) {
     }
 
     if (body.action === 'generate_source_persona') {
-      const { text, usage } = await callModel({
+      const { text, usage, transparency } = await callModel({
         variant: body.model,
         action: 'generate_source_persona',
         prompt: buildSourcePersonaPrompt(body.source, body.options),
@@ -51,29 +51,29 @@ export default async function handler(req, res) {
         schema: sourcePersonaModelSchema,
       });
       const record = parseJsonObject(text);
-      res.status(200).json({ record, sketch: record.day_in_life || '', usage });
+      res.status(200).json({ record, sketch: record.day_in_life || '', usage, transparency });
       return;
     }
 
     if (body.action === 'generate_annotation') {
-      const { text, usage } = await callModel({
+      const { text, usage, transparency } = await callModel({
         variant: body.model,
         action: 'generate_annotation',
         prompt: buildAnnotationPrompt(body.source, body.options),
         json: true,
         schema: orientationModelSchema,
       });
-      res.status(200).json({ record: parseJsonObject(text), usage });
+      res.status(200).json({ record: parseJsonObject(text), usage, transparency });
       return;
     }
 
     if (body.action === 'generate_sketch') {
-      const { text, usage } = await callModel({
+      const { text, usage, transparency } = await callModel({
         variant: body.model,
         action: 'generate_sketch',
         prompt: buildSketchPrompt(body.record),
       });
-      res.status(200).json({ sketch: text, usage });
+      res.status(200).json({ sketch: text, usage, transparency });
       return;
     }
 

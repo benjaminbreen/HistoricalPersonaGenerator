@@ -342,7 +342,7 @@ const handleGeminiRoute = async (req, res) => {
     }
 
     if (body.action === 'generate_source_persona') {
-      const { text, usage } = await callModel({
+      const { text, usage, transparency } = await callModel({
         variant: body.model,
         action: 'generate_source_persona',
         prompt: buildSourcePersonaPrompt(body.source, body.options),
@@ -350,29 +350,29 @@ const handleGeminiRoute = async (req, res) => {
         schema: sourcePersonaModelSchema,
       });
       const record = parseJsonObject(text);
-      sendJson(res, 200, { record, sketch: record.day_in_life || '', usage });
+      sendJson(res, 200, { record, sketch: record.day_in_life || '', usage, transparency });
       return;
     }
 
     if (body.action === 'generate_annotation') {
-      const { text, usage } = await callModel({
+      const { text, usage, transparency } = await callModel({
         variant: body.model,
         action: 'generate_annotation',
         prompt: buildAnnotationPrompt(body.source, body.options),
         json: true,
         schema: orientationModelSchema,
       });
-      sendJson(res, 200, { record: parseJsonObject(text), usage });
+      sendJson(res, 200, { record: parseJsonObject(text), usage, transparency });
       return;
     }
 
     if (body.action === 'generate_sketch') {
-      const { text, usage } = await callModel({
+      const { text, usage, transparency } = await callModel({
         variant: body.model,
         action: 'generate_sketch',
         prompt: buildSketchPrompt(body.record),
       });
-      sendJson(res, 200, { sketch: text.trim(), usage });
+      sendJson(res, 200, { sketch: text.trim(), usage, transparency });
       return;
     }
 
