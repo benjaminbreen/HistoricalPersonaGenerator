@@ -5122,7 +5122,7 @@ export default function PersonaGenerator() {
                   {(sourceStudioView === 'wikipedia' || sourceStudioView === 'full') && (
                     <button className="btn btn-secondary" onClick={() => requestAiBiographyRun(generateRandomAnnotationPersona)} disabled={isSourceGenerating} aria-label="Create a day-in-the-life persona from a surprise Wikipedia biography">
                       <IoDocumentText aria-hidden="true" />
-                      {isSourceGenerating ? 'Finding Source...' : 'Surprise Wikipedia Persona'}
+                      {isSourceGenerating ? 'Finding Source...' : 'Surprise Wikipedia persona'}
                     </button>
                   )}
                   {sourceStudioView !== 'full' && (
