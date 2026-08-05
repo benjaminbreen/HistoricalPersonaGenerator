@@ -181,6 +181,30 @@ assert.equal(repairedProviderRecord.persona.conversation_frame?.situation, 'Barc
 assert.equal(repairedProviderRecord.persona.clothing_and_possessions?.length, 6);
 assert.equal(repairedProviderRecord.provenance[0].snippet, undefined);
 
+const adamBoryczkaMalformed = structuredClone({
+  persona: {
+    ...wikipediaOrientation.persona,
+    name_and_address: { full_name: 'Adam Boryczka' },
+    household_and_relations: 'wife and close resistance comrades',
+  },
+}) as any;
+delete adamBoryczkaMalformed.persona.anachronism_guards;
+const repairedAdamBoryczka = createPersonaOrientationRecord(adamBoryczkaMalformed, {
+  ...wikipediaSource,
+  title: 'Adam Boryczka',
+  url: 'https://en.wikipedia.org/wiki/Adam_Boryczka',
+  citationLabel: 'Wikipedia: Adam Boryczka',
+  subject: {
+    name: 'Adam Boryczka',
+    birthYear: 1913,
+    deathYear: 1988,
+    externalId: 'Q-adam-boryczka',
+  },
+});
+assert.deepEqual(repairedAdamBoryczka.persona.household_and_relations, ['wife and close resistance comrades']);
+assert.equal(repairedAdamBoryczka.persona.anachronism_guards.length, 2);
+assert.match(repairedAdamBoryczka.persona.anachronism_guards[0], /after the persona's stated year/);
+
 const graceSource = {
   title: 'Grace Sympson. Theft; theft from a specified place. 26th April 1693.',
   text: 'Grace Sympson was tried for stealing in St. John-street. She was found guilty.',

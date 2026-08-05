@@ -36,9 +36,9 @@ const resolveSchemaNode = (node: any): any => {
 
 /**
  * Provider structured output is best-effort because the schema has optional
- * fields and therefore cannot use OpenAI strict mode. Normalize only limits
- * already declared by the canonical schema; missing required values and bad
- * enum/type values are left for AJV to reject.
+ * fields and therefore cannot use OpenAI strict mode. Normalize limits already
+ * declared by the canonical schema and repair the common scalar-for-array
+ * mistake. Substantive missing values and bad enum/type values still go to AJV.
  */
 const normalizeModelValue = (value: unknown, schemaNode: any): any => {
   const node = resolveSchemaNode(schemaNode);
@@ -49,8 +49,13 @@ const normalizeModelValue = (value: unknown, schemaNode: any): any => {
     return node.minLength && trimmed.length < node.minLength ? undefined : trimmed;
   }
 
-  if (node?.type === 'array' && Array.isArray(value)) {
-    const capped = typeof node.maxItems === 'number' ? value.slice(0, node.maxItems) : value;
+  if (node?.type === 'array') {
+    const values = Array.isArray(value)
+      ? value
+      : typeof value === 'string' && Number(node.minItems || 0) > 1
+        ? value.split(/\n+|;\s*/).filter(Boolean)
+        : [value];
+    const capped = typeof node.maxItems === 'number' ? values.slice(0, node.maxItems) : values;
     return capped
       .map(item => normalizeModelValue(item, node.items))
       .filter(item => item !== undefined);
@@ -123,6 +128,19 @@ export function createPersonaOrientationRecord(
     persona.year = finalLivingYear;
     persona.age_and_life_stage.age = Math.max(0, finalLivingYear - subject.birthYear);
   }
+  // Anachronism guards are conditioning instructions rather than historical
+  // claims, so a conservative fallback is safer than discarding an otherwise
+  // valid source persona when Luna omits this required tail field.
+  const guardDefaults = [
+    "Knowledge of events after the persona's stated year",
+    'Modern political, scientific, and social vocabulary',
+  ];
+  const guards = [...new Set(Array.isArray(persona.anachronism_guards) ? persona.anachronism_guards : [])];
+  for (const fallback of guardDefaults) {
+    if (guards.length >= 2) break;
+    if (!guards.includes(fallback)) guards.push(fallback);
+  }
+  persona.anachronism_guards = guards.slice(0, 8);
   const idStem = `${slug(persona.name_and_address.full_name)}-${persona.year}-${Date.now()}`;
   const sourceId = `source-${idStem}`;
   const record: PersonaOrientationRecord = {
