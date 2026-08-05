@@ -16,6 +16,7 @@
     "reach-audit": "esbuild scripts/auditProfessionReach.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditProfessionReach.mjs && node node_modules/.cache/auditProfessionReach.mjs",
     "narrative-audit": "esbuild scripts/auditNarrative.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditNarrative.mjs && node node_modules/.cache/auditNarrative.mjs",
     "wiki-audit": "esbuild scripts/auditWikipediaLinks.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditWikipediaLinks.mjs && node node_modules/.cache/auditWikipediaLinks.mjs",
+    "wikipedia-random-test": "node scripts/testWikipediaRandom.mjs",
     "tier-audit": "esbuild scripts/auditAttributeTiers.ts --bundle --platform=node --format=esm --log-level=error --outfile=node_modules/.cache/auditAttributeTiers.mjs && node node_modules/.cache/auditAttributeTiers.mjs",
     "share-test": "node scripts/testPersonaShare.mjs",
     "ai-access-test": "node scripts/testAiAccess.mjs",

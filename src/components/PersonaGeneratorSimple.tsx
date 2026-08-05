@@ -196,7 +196,7 @@ import {
   getAiAccessStatus,
   type AiAccessStatus,
 } from '../services/aiAccessService';
-import { createPastedTextSource, getRandomWikidataPerson, ingestRandomOldBaileySource, ingestUrlSource, OldBaileyRandomFilters } from '../services/sourceIngestionService';
+import { createPastedTextSource, getRandomWikidataPerson, ingestRandomOldBaileySource, ingestUrlSource, OldBaileyRandomFilters, SourceIngestionError } from '../services/sourceIngestionService';
 import PixelPortrait, { MARK_HOTSPOT } from './portraitLab/PixelPortrait';
 import { portraitMarkFor } from './portraitLab/art/distinctionMark';
 import TraitSeals from './TraitSeals';
@@ -814,6 +814,65 @@ type GenerationFallback = {
   reason: string;
 };
 
+type SourceFailureContext = 'wikipedia' | 'url' | 'text' | 'old_bailey';
+type SourceFailure = {
+  context: SourceFailureContext;
+  title: string;
+  message: string;
+  technicalDetail: string;
+  retryable: boolean;
+  modelCalled: boolean;
+};
+
+const sourceFailureFromError = (error: unknown, context: SourceFailureContext): SourceFailure => {
+  const raw = error instanceof Error ? error.message : String(error || 'Unknown source-generation failure.');
+  if (error instanceof SourceIngestionError) {
+    const title = error.stage === 'discovery'
+      ? 'Wikipedia could not choose a person'
+      : error.stage === 'extract'
+        ? 'The source did not contain readable text'
+        : 'The source could not be reached';
+    return {
+      context,
+      title,
+      message: error.message,
+      technicalDetail: `${error.code}: ${error.technicalDetail || raw}`,
+      retryable: error.retryable,
+      modelCalled: error.modelCalled,
+    };
+  }
+
+  const lower = raw.toLowerCase();
+  if (lower.includes('validation') || lower.includes('required property') || lower.includes('must be')) {
+    return {
+      context,
+      title: 'Luna returned an unusable record',
+      message: 'The source was read, but the model response did not fit the persona contract. The existing persona is unchanged; retrying often produces a valid response.',
+      technicalDetail: raw,
+      retryable: true,
+      modelCalled: true,
+    };
+  }
+  if (lower.includes('429') || lower.includes('rate limit') || lower.includes('too many requests')) {
+    return {
+      context,
+      title: 'A source service is temporarily busy',
+      message: 'The request was throttled before a complete persona could be made. Wait a moment and try again.',
+      technicalDetail: raw,
+      retryable: true,
+      modelCalled: false,
+    };
+  }
+  return {
+    context,
+    title: context === 'old_bailey' ? 'The Old Bailey persona could not be made' : 'The source persona could not be made',
+    message: 'The operation stopped safely and did not replace the persona on screen. You can retry or inspect the technical details below.',
+    technicalDetail: raw,
+    retryable: true,
+    modelCalled: !lower.includes('fetch') && !lower.includes('network'),
+  };
+};
+
 const FALLBACK_STAGE_LABELS: Record<GenerationFallback['stage'], string> = {
   record: 'Schema record filled offline from source keywords',
   prose: 'Biography written from a local template, not by the model',
@@ -1363,6 +1422,7 @@ export default function PersonaGenerator() {
   const [sourceTitle, setSourceTitle] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
   const [sourceIngestionStatus, setSourceIngestionStatus] = useState<string | null>(null);
+  const [sourceFailure, setSourceFailure] = useState<SourceFailure | null>(null);
   const [showMaterialJson, setShowMaterialJson] = useState(false);
   const [sourceTarget, setSourceTarget] = useState<PersonaGenerationTarget>('named_subject');
   const [oldBaileyFilters, setOldBaileyFilters] = useState<OldBaileyRandomFilters>({
@@ -2143,20 +2203,22 @@ export default function PersonaGenerator() {
 
   const generateRandomAnnotationPersona = async () => {
     if (isSourceGenerating) return;
+    setSourceFailure(null);
     setIsSourceGenerating(true);
     setSourcePanelCollapsed(true);
     setSourceTarget('named_subject');
     setSourceIngestionStatus('Finding a surprise historical figure from Wikipedia/Wikidata...');
     try {
       const person = await getRandomWikidataPerson();
-      setSourceIngestionStatus(`Selected ${person.label}${person.birthYear ? ` (${person.birthYear}${person.deathYear ? `-${person.deathYear}` : ''})` : ''}. Fetching Wikipedia source text...`);
+      const backupNote = person.selectionMode === 'curated_fallback' ? ' The live random index is busy, so a real biography was chosen from the backup Wikipedia pool.' : '';
+      setSourceIngestionStatus(`Selected ${person.label}${person.birthYear ? ` (${person.birthYear}${person.deathYear ? `-${person.deathYear}` : ''})` : ''}.${backupNote} Fetching Wikipedia source text...`);
       const source = await ingestUrlSource(person.wikipediaUrl);
       source.subject = {
-        name: person.label,
-        description: person.description,
-        birthYear: person.birthYear,
-        deathYear: person.deathYear,
-        externalId: person.qid,
+        name: person.label || source.subject?.name,
+        description: person.description || source.subject?.description,
+        birthYear: person.birthYear ?? source.subject?.birthYear,
+        deathYear: person.deathYear ?? source.subject?.deathYear,
+        externalId: person.qid || source.subject?.externalId,
       };
       setSourceTitle(source.title);
       setSourceUrl(source.url || person.wikipediaUrl);
@@ -2165,7 +2227,7 @@ export default function PersonaGenerator() {
       setSourceIngestionStatus(useGeminiExtraction ? `Fetched ${source.citationLabel}. Asking ${selectedModelLabel} for a grounded moment and day in the life...` : `Fetched ${source.citationLabel}. Generating a heuristic persona...`);
       const result = await recordFromSource(source, { target: 'named_subject' });
       setSourceIngestionStatus(result.modelFilled
-        ? `${selectedModelLabel} created a source-grounded day in the life from ${source.citationLabel}. The optional Talkie record has not been built.`
+        ? `${selectedModelLabel} created a source-grounded day in the life from ${source.citationLabel}.${person.selectionMode === 'curated_fallback' ? ' Wikimedia throttled live random discovery, so the backup Wikipedia pool supplied the subject.' : ''} The optional Talkie record has not been built.`
         : `Generated a local persona from ${source.citationLabel}; no Talkie record was created.`);
       await generateFromAnnotationRecord(result.record, {
         orientationRecord: result.orientationRecord,
@@ -2177,9 +2239,11 @@ export default function PersonaGenerator() {
         publishAnnotationRecord: false,
       });
     } catch (error) {
-      setSourceIngestionStatus(error instanceof Error
-        ? `${error.message} No random substitute was generated; please try again.`
-        : 'Unable to generate a surprise Wikipedia persona. No random substitute was generated.');
+      const failure = sourceFailureFromError(error, 'wikipedia');
+      setSourceFailure(failure);
+      setSourcePanelCollapsed(false);
+      setSourceStudioView('wikipedia');
+      setSourceIngestionStatus(failure.message);
     } finally {
       setIsSourceGenerating(false);
     }
@@ -2220,6 +2284,7 @@ export default function PersonaGenerator() {
       return;
     }
 
+    setSourceFailure(null);
     setIsSourceGenerating(true);
     setSourcePanelCollapsed(true);
     setSourceIngestionStatus(useGeminiExtraction ? `Asking ${selectedModelLabel} for a source-grounded persona and day in the life...` : 'Generating a heuristic persona...');
@@ -2237,7 +2302,10 @@ export default function PersonaGenerator() {
         publishAnnotationRecord: false,
       });
     } catch (error) {
-      setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to generate from pasted text.');
+      const failure = sourceFailureFromError(error, 'text');
+      setSourceFailure(failure);
+      setSourcePanelCollapsed(false);
+      setSourceIngestionStatus(failure.message);
     } finally {
       setIsSourceGenerating(false);
     }
@@ -2250,6 +2318,7 @@ export default function PersonaGenerator() {
       return;
     }
 
+    setSourceFailure(null);
     setIsSourceGenerating(true);
     setSourcePanelCollapsed(true);
     setSourceIngestionStatus('Fetching source text...');
@@ -2272,7 +2341,10 @@ export default function PersonaGenerator() {
         publishAnnotationRecord: false,
       });
     } catch (error) {
-      setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to ingest that URL.');
+      const failure = sourceFailureFromError(error, 'url');
+      setSourceFailure(failure);
+      setSourcePanelCollapsed(false);
+      setSourceIngestionStatus(failure.message);
     } finally {
       setIsSourceGenerating(false);
     }
@@ -2280,6 +2352,7 @@ export default function PersonaGenerator() {
 
   const ingestRandomOldBailey = async () => {
     if (isSourceGenerating) return;
+    setSourceFailure(null);
     setIsSourceGenerating(true);
     setSourcePanelCollapsed(true);
     setSourceIngestionStatus('Searching the Old Bailey Proceedings...');
@@ -2311,7 +2384,10 @@ export default function PersonaGenerator() {
         publishAnnotationRecord: false,
       });
     } catch (error) {
-      setSourceIngestionStatus(error instanceof Error ? error.message : 'Unable to fetch an Old Bailey record.');
+      const failure = sourceFailureFromError(error, 'old_bailey');
+      setSourceFailure(failure);
+      setSourcePanelCollapsed(false);
+      setSourceIngestionStatus(failure.message);
     } finally {
       setIsSourceGenerating(false);
     }
@@ -2329,6 +2405,20 @@ export default function PersonaGenerator() {
     if (sourceText.trim()) {
       await ingestPastedSource();
       return;
+    }
+  };
+
+  const retrySourceFailure = () => {
+    const context = sourceFailure?.context;
+    setSourceFailure(null);
+    if (context === 'wikipedia') {
+      requestAiBiographyRun(generateRandomAnnotationPersona);
+    } else if (context === 'old_bailey') {
+      requestAiBiographyRun(ingestRandomOldBailey);
+    } else if (context === 'url') {
+      requestAiBiographyRun(ingestUrl);
+    } else if (context === 'text') {
+      requestAiBiographyRun(ingestPastedSource);
     }
   };
 
@@ -5105,6 +5195,34 @@ export default function PersonaGenerator() {
               <IoChevronForward aria-hidden="true" />
             </button>
           </div>
+          {sourceFailure && !isSourceGenerating && (
+            <div className="source-failure" role="alert" aria-live="assertive">
+              <IoAlertCircle aria-hidden="true" />
+              <div className="source-failure-copy">
+                <strong>{sourceFailure.title}</strong>
+                <p>{sourceFailure.message}</p>
+                <p className="source-failure-stage">
+                  {sourceFailure.modelCalled
+                    ? 'The source was loaded and Luna was called, but its response could not be used.'
+                    : 'This stopped before Luna was called; no AI generation was attempted.'}
+                </p>
+                <details>
+                  <summary>Technical details</summary>
+                  <code>{sourceFailure.technicalDetail}</code>
+                </details>
+              </div>
+              <div className="source-failure-actions">
+                {sourceFailure.retryable && (
+                  <button className="btn btn-primary" type="button" onClick={retrySourceFailure}>
+                    <IoRefresh aria-hidden="true" /> Try again
+                  </button>
+                )}
+                <button className="btn btn-secondary" type="button" onClick={() => setSourceFailure(null)}>
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
           <AnimatePresence initial={false} mode="wait">
             {sourcePanelCollapsed ? (
               (annotationRecord || sourceTitle || isSourceGenerating) && (
@@ -5343,7 +5461,7 @@ export default function PersonaGenerator() {
                     LLM transparency
                   </button>
                 )}
-                {sourceIngestionStatus && <span className="source-status">{sourceIngestionStatus}</span>}
+                {sourceIngestionStatus && !sourceFailure && <span className="source-status">{sourceIngestionStatus}</span>}
               </div>
               {orientationRecord && showMaterialJson && (
                 <pre className="annotation-jsonl">{personaOrientationRecordToJsonl(orientationRecord)}</pre>

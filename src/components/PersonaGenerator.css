@@ -509,6 +509,77 @@ body.dark-mode .top-bar {
   font-size: 0.8125rem;
 }
 
+.source-failure {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--sp-md);
+  align-items: start;
+  margin: var(--sp-md);
+  padding: var(--sp-md);
+  border: 1px solid color-mix(in srgb, var(--color-accent-orange) 62%, var(--color-border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-accent-orange) 9%, var(--color-surface));
+  color: var(--color-text-primary);
+}
+
+.source-failure > svg {
+  margin-top: 0.12rem;
+  color: var(--color-accent-orange);
+  font-size: 1.2rem;
+}
+
+.source-failure-copy {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.source-failure-copy p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.source-failure-copy .source-failure-stage {
+  color: var(--color-text-tertiary);
+  font-size: 0.78rem;
+}
+
+.source-failure-copy details {
+  color: var(--color-text-tertiary);
+  font-size: 0.76rem;
+}
+
+.source-failure-copy summary {
+  cursor: pointer;
+}
+
+.source-failure-copy code {
+  display: block;
+  margin-top: 0.35rem;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.source-failure-actions {
+  display: flex;
+  gap: var(--sp-xs);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+@media (max-width: 720px) {
+  .source-failure {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .source-failure-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
 .annotation-jsonl {
   max-height: 18rem;
   overflow: auto;
