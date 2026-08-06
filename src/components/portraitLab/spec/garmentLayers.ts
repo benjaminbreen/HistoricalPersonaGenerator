@@ -40,7 +40,7 @@ export type GarmentLayer =
  * exactly what the word means, and what distinguishes it from a blazer.
  */
 const ATOMIC_WHOLE =
-  /suit\b|coverall|boiler ?suit|jumpsuit|romper|overall|dungaree|kameez|sheath|kaba and slit/i;
+  /suit\b|coverall|boiler ?suit|jumpsuit|romper|overall|dungaree|kameez|sheath|kaba and slit|kurta ?pyjama|wrapper and blouse/i;
 
 /**
  * Garments that cover the legs and stop there.
@@ -57,6 +57,18 @@ const BOTTOM = new RegExp([
   'skirt', 'petticoat', 'lehenga', 'sarong', 'sampot', 'kilt', 'dhoti',
   'veshti', 'lungi', 'loincloth', 'breechcloth', 'breechclout', 'schenti',
   'langot', 'malo\\b', 'perizoma', 'wrapper',
+  // The Andean gathered skirt and the Pacific waist cloth. Both are worn with
+  // something else above them and neither was here, so the generator put
+  // trousers under a pollera.
+  'pollera', 'lava ?lava',
+  // Lower-body garments the regional tables name and this list did not know.
+  // Each one was being read as a top, which puts a pair of trousers under it.
+  // The aprons are the loincloth kind — a *worker's* apron is worn over
+  // clothes and must keep classifying as a top, so they are listed by their
+  // full names rather than on the bare word.
+  'isidwaba', 'longyi', 'htamein', 'piupiu', 'koteka', 'pubic covering',
+  'string apron', 'waist apron', 'hide apron', 'beaded apron',
+  'netted fibre apron', 'rattan apron',
 ].join('|'), 'i');
 
 /**
@@ -79,6 +91,10 @@ const WHOLE = new RegExp([
   'senator wear', 'haute couture', 'aso ebi', 'resort wear', 'evening wear',
   'cloak', 'cape\\b', 'mantle', 'stole\\b', 'shawl', 'poncho', 'ruana',
   'wrap\\b', 'tapa', 'barkcloth', 'bark ?cloth', 'leopard skin', 'skin garment',
+  // Two cloths that cover the whole figure rather than half of it: the
+  // Malagasy lamba is draped over the upper body above an underskirt, and a
+  // kanga is worn as a pair, one at the waist and one over the shoulders.
+  'lamba', 'kanga',
 ].join('|'), 'i');
 
 /**
@@ -184,8 +200,8 @@ export type LegwearForm =
 export function legwearFormFor(name: string): LegwearForm {
   if (/\bshorts\b|bermuda|board short/i.test(name)) return 'shorts';
   if (/hose\b|tights|legging|churidar|stocking/i.test(name)) return 'hose';
-  if (/skirt|petticoat|lehenga|kilt|sampot/i.test(name)) return 'skirt';
-  if (/dhoti|veshti|lungi|sarong|loincloth|breechcloth|breechclout|schenti|wrap/i.test(name)) return 'wrapped';
+  if (/skirt|petticoat|lehenga|kilt|sampot|pollera|isidwaba|piupiu/i.test(name)) return 'skirt';
+  if (/dhoti|veshti|lungi|sarong|loincloth|breechcloth|breechclout|schenti|wrap|lava ?lava|longyi|htamein|koteka|pubic covering|apron/i.test(name)) return 'wrapped';
   return 'trousers';
 }
 

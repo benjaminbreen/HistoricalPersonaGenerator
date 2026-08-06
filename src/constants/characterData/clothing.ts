@@ -5,20 +5,28 @@
 import { HistoricalEra, CulturalZone, WealthLevel, Gender } from '../../types';
 import { random as seededRandom } from '../../utils/seededRandom';
 import { DyeTier, TIER_RANK, hexForName, tierForHex } from '../gameData/colorNames';
+import { REGIONAL_CLOTHING, regionalKey } from './regionalClothing';
+import { SOUTHEAST_ASIAN_CLOTHING } from './southeastAsianClothing';
+import {
+    ClothingPalette,
+    PREHISTORIC_COLORS, ANCIENT_COLORS, MEDIEVAL_COLORS, RENAISSANCE_COLORS,
+    INDUSTRIAL_COLORS, MODERN_COLORS, EAST_ASIAN_COLORS, MENA_COLORS,
+    TROPICAL_COLORS, NORTHERN_COLORS, MEDIEVAL_MENA_COLORS, INDUSTRIAL_MENA_COLORS,
+} from './clothingPalettes';
 
-interface ClothingPiece {
+export type { ClothingPalette };
+export {
+    PREHISTORIC_COLORS, ANCIENT_COLORS, MEDIEVAL_COLORS, RENAISSANCE_COLORS,
+    INDUSTRIAL_COLORS, MODERN_COLORS, TROPICAL_COLORS, NORTHERN_COLORS,
+};
+
+export interface ClothingPiece {
     name: string;
     material: string;
     adjectives?: string[];
 }
 
-interface ClothingPalette {
-    primary: string[];
-    secondary: string[];
-    accent: string[];
-}
-
-interface ClothingSet {
+export interface ClothingSet {
     garments: ClothingPiece[];
     headgear: ClothingPiece[];
     footwear: ClothingPiece[];
@@ -28,10 +36,10 @@ interface ClothingSet {
 }
 
 // Simplified wealth levels - combining similar tiers
-type SimplifiedWealthLevel = 'poor' | 'common' | 'wealthy';
-type GenderClothingMap = Partial<Record<Gender, ClothingSet>>;
-type WealthClothingMap = Partial<Record<SimplifiedWealthLevel, GenderClothingMap>>;
-type EraClothingMap = Partial<Record<HistoricalEra, WealthClothingMap>>;
+export type SimplifiedWealthLevel = 'poor' | 'common' | 'wealthy';
+export type GenderClothingMap = Partial<Record<Gender, ClothingSet>>;
+export type WealthClothingMap = Partial<Record<SimplifiedWealthLevel, GenderClothingMap>>;
+export type EraClothingMap = Partial<Record<HistoricalEra, WealthClothingMap>>;
 export type ClothingData = Partial<Record<CulturalZone, EraClothingMap>>;
 
 // NEW: Fallback logic constants
@@ -66,115 +74,6 @@ const CULTURAL_SIMILARITY: Partial<Record<CulturalZone, CulturalZone[]>> = {
     'OCEANIA': ['SUB_SAHARAN_AFRICAN'],
 };
 
-
-// ERA-SPECIFIC COLOR PALETTES
-//
-// Grounded in what dyers could actually achieve. Before the first aniline dye
-// (mauveine, 1856) every colour on a garment came from madder, weld, woad and
-// indigo, lichens, tannins and insect reds — all of which give softer, slightly
-// greyed hues than a modern screen colour. Fully saturated cloth was not just
-// unusual, it was a statement of wealth: good indigo, kermes scarlet and Tyrian
-// purple were among the most expensive substances in the pre-modern world.
-//
-// So the rule here is that ordinary people wear undyed wool, linen and cheap
-// plant dyes — creams, greys, browns, russets, weld yellows, pale woad — and
-// deep saturated colour is reserved for the wealthy tiers. Pure #FFFFFF and
-// pure #000000 are avoided throughout: bleached linen is warm off-white, and a
-// true fast black was difficult and costly until the early modern period.
-
-const PREHISTORIC_COLORS: ClothingPalette = {
-    // Hide, fur and bast fibre, with ochre and plant dyes over the top.
-    primary: ['#8a5a3c', '#6b4a33', '#9a6b45', '#c8a882', '#6b4226', '#877258'],
-    secondary: ['#e6d5b8', '#cbb493', '#b9a58c', '#ddbf94', '#c8b99c'],
-    accent: ['#6b7a3a', '#8a3324', '#c19a3f', '#a8763f', '#7d8a4a']
-};
-
-const ANCIENT_COLORS: ClothingPalette = {
-    // Undyed wool and linen for most; madder, indigo and — for the very few —
-    // Tyrian purple, which cost more by weight than silver.
-    primary: ['#e8e0cc', '#ddd2b8', '#8c3a2e', '#5b3a6b', '#33456b', '#4a5450'],
-    secondary: ['#e0d3b0', '#b5703c', '#7d5533', '#b98a52', '#96603a'],
-    accent: ['#c9a227', '#b0b3ba', '#9c3a34', '#48618f', '#e8e0cc']
-};
-
-const MEDIEVAL_COLORS: ClothingPalette = {
-    // Woad blue, madder russet, weld yellow and a great deal of undyed cloth.
-    // The old palette led with #251df5 — a pure electric blue no medieval dyer
-    // could reach, and the reason so many peasants were turning up in neon.
-    primary: ['#3f5378', '#5a5f63', '#4a4232', '#7a3a34', '#3a4250', '#6d5326'],
-    secondary: ['#e3d5a8', '#ddd8cf', '#8d8a80', '#c9c4b8', '#efe9dc'],
-    accent: ['#2f4a7a', '#4a6b3a', '#a9702c', '#6e3524', '#c9a227']
-};
-
-const RENAISSANCE_COLORS: ClothingPalette = {
-    // The era black became fashionable and achievable at the top of society,
-    // alongside kermes crimson and murrey.
-    primary: ['#7d2b2e', '#2b3a5e', '#5a3355', '#1c1a19', '#3f4a48', '#6b2f52'],
-    secondary: ['#f0e9d8', '#c9a227', '#b0b3ba', '#e0d3b0', '#d8cbb8'],
-    accent: ['#c9a227', '#b0b3ba', '#7d2b2e', '#2b3a5e', '#f0e9d8']
-};
-
-const INDUSTRIAL_COLORS: ClothingPalette = {
-    // Dark wools and the new cheap blacks; bright aniline colours exist from
-    // 1856 but read as novelty rather than as everyday dress.
-    primary: ['#1c1a19', '#33413f', '#5c5c5c', '#6b4a33', '#2f3a40', '#232323'],
-    secondary: ['#f0ece0', '#e6ddc8', '#cfcfcf', '#d8d8d8', '#e5e2da'],
-    accent: ['#8f2f2c', '#2b3a5e', '#3d6b3f', '#6e2723', '#4a6b8a']
-};
-
-const MODERN_COLORS: ClothingPalette = {
-    // Synthetic dyes: anything goes, so this is the one palette allowed real
-    // saturation — though still short of screen primaries.
-    primary: ['#1c1a19', '#f2efe8', '#6b6b6b', '#2b3a5e', '#33413f', '#6f7a85'],
-    secondary: ['#7a5433', '#4a6b8a', '#b5824f', '#96603a', '#c8ab86'],
-    accent: ['#b02f3f', '#c9a227', '#4f9a4f', '#d4602f', '#3d7fbf']
-};
-
-// CULTURAL ZONE SPECIFIC PALETTES
-const EAST_ASIAN_COLORS: ClothingPalette = {
-    // Indigo above all — the working colour of East Asia — with madder and
-    // safflower reds, and gold and black silk at the top.
-    primary: ['#7d2b26', '#c9a227', '#1f1d1c', '#ece5d6', '#33456b', '#4a6b45'],
-    secondary: ['#b0b3ba', '#ece5d6', '#4a6b45', '#b5563f', '#d8cbb8'],
-    accent: ['#c9a227', '#7d2b26', '#1f1d1c', '#ece5d6', '#33456b']
-};
-
-const MENA_COLORS: ClothingPalette = {
-    // Undyed cotton and wool against strong sun, indigo, saffron and madder.
-    primary: ['#33456b', '#e6dcc2', '#cbb493', '#7a5433', '#3a4a48', '#b5703c'],
-    secondary: ['#2b3a5e', '#7d2b26', '#4a6b3a', '#c9a227', '#b98a52'],
-    accent: ['#c9a227', '#b0b3ba', '#43598f', '#9c3a34', '#e6dcc2']
-};
-
-const TROPICAL_COLORS: ClothingPalette = {
-    // Barkcloth and plant fibre, turmeric, and the reds and browns of local
-    // earths and woods.
-    primary: ['#e0d3b0', '#7a5433', '#ece5d6', '#4a6b45', '#b5703c', '#cbb493'],
-    secondary: ['#c9a227', '#8c3a2e', '#33456b', '#b5563f', '#b98a52'],
-    accent: ['#c9a227', '#8c3a2e', '#4a6b45', '#e0d3b0', '#7a5433']
-};
-
-const NORTHERN_COLORS: ClothingPalette = {
-    // Heavy undyed wool in the natural fleece greys and browns, with woad and
-    // madder where they could be got.
-    primary: ['#3a4a48', '#5c5c5c', '#6b4a33', '#232323', '#2f3a40', '#4a6180'],
-    secondary: ['#efe9dc', '#cfcfcf', '#c8a882', '#b5824f', '#96603a'],
-    accent: ['#8f3330', '#4a6b3a', '#2b3a5e', '#6e2723', '#43598f']
-};
-
-const MEDIEVAL_MENA_COLORS: ClothingPalette = {
-    // The same electric #251df5 appeared here; replaced with the indigo and
-    // deep blues the region actually dyed with.
-    primary: ['#33456b', '#2b3a5e', '#5a3355', '#1f1d1c', '#3a4a48', '#6b2f52'],
-    secondary: ['#f0e9d8', '#c9a227', '#b0b3ba', '#e0d3b0', '#d8cbb8'],
-    accent: ['#c9a227', '#b0b3ba', '#43598f', '#7d2b26', '#f0e9d8']
-};
-
-const INDUSTRIAL_MENA_COLORS: ClothingPalette = {
-    primary: ['#1c1a19', '#33413f', '#5c5c5c', '#6b4a33', '#2f3a40', '#232323'],
-    secondary: ['#f0ece0', '#e6ddc8', '#cfcfcf', '#d8d8d8', '#e5e2da'],
-    accent: ['#8f2f2c', '#2b3a5e', '#3d6b3f', '#6e2723', '#4a6b8a']
-};
 
 // ---------------------------------------------------------------------------
 // Signature dyes
@@ -285,6 +184,15 @@ function tierForName(name: string): DyeTier {
 
 // COMPREHENSIVE CLOTHING DATABASE
 export const CLOTHING_DATA: ClothingData = {
+    /**
+     * Southeast Asia had no table at all until now, and it is not a small gap:
+     * 339 personas in a 4,000-persona sample, one in twelve, were being dressed
+     * by the cross-cultural fallback — Red Odhani and Cotton Lungi from the
+     * South Asian table, Fur Cloak and Skin Tunic from the prehistoric one, in
+     * Java and Luzon and the Mekong delta.
+     */
+    SOUTHEAST_ASIAN: SOUTHEAST_ASIAN_CLOTHING,
+
     EUROPEAN: {
         [HistoricalEra.PREHISTORY]: {
             poor: {
@@ -5798,6 +5706,26 @@ const GENDERED_GARMENT =
  */
 const CONTEMPORARY_FROM_YEAR = 1960;
 
+
+/**
+ * A contemporary outfit, written compactly.
+ *
+ * The era tables above are long literals because each entry differs in shape.
+ * These do not: every cell is the same five lists and the same palette, and
+ * forty-four of them written longhand would be twelve hundred lines in which
+ * the only content is the words. `None` is spelt out where the slot is
+ * genuinely often empty, because an empty list and a list containing nothing
+ * are different things to `getRandomClothingPiece`.
+ */
+const NONE: ClothingPiece = { name: 'None', material: 'None' };
+const wear = (
+    garments: ClothingPiece[],
+    headgear: ClothingPiece[],
+    footwear: ClothingPiece[],
+    belts: ClothingPiece[],
+    accessories: ClothingPiece[]
+): ClothingSet => ({ garments, headgear, footwear, belts, accessories, palette: MODERN_COLORS });
+
 const CONTEMPORARY_CLOTHING: Partial<Record<CulturalZone, Partial<Record<SimplifiedWealthLevel, Partial<Record<Gender, ClothingSet>>>>>> = {
     EUROPEAN: {
         poor: {
@@ -5847,6 +5775,48 @@ const CONTEMPORARY_CLOTHING: Partial<Record<CulturalZone, Partial<Record<Simplif
                 ],
                 palette: MODERN_COLORS
             }
+        },
+        common: {
+            Male: wear(
+                [{ name: 'Shirt', material: 'Cotton' },
+                 { name: 'Chinos', material: 'Cotton Twill' },
+                 { name: 'Jumper', material: 'Lambswool' },
+                 { name: 'Jeans', material: 'Denim' }],
+                [{ name: 'Flat Cap', material: 'Tweed' }, NONE],
+                [{ name: 'Leather Shoes', material: 'Leather' }, { name: 'Trainers', material: 'Leather' }],
+                [{ name: 'Belt', material: 'Leather' }],
+                [{ name: 'Wristwatch', material: 'Steel' }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'Blouse', material: 'Rayon' },
+                 { name: 'Skirt', material: 'Wool' },
+                 { name: 'Knit Cardigan', material: 'Lambswool' },
+                 { name: 'Day Dress', material: 'Jersey' }],
+                [NONE],
+                [{ name: 'Flat Shoes', material: 'Leather' }, { name: 'Heeled Shoes', material: 'Leather' }],
+                [{ name: 'Belt', material: 'Leather' }, NONE],
+                [{ name: 'Wristwatch', material: 'Steel' }, { name: 'Gold Earrings', material: 'Gold' }]
+            )
+        },
+        wealthy: {
+            Male: wear(
+                [{ name: 'Dress Shirt', material: 'Fine Cotton' },
+                 { name: 'Wool Suit', material: 'Worsted Wool' },
+                 { name: 'Blazer', material: 'Cashmere' }],
+                [NONE],
+                [{ name: 'Leather Shoes', material: 'Calfskin' }],
+                [{ name: 'Belt', material: 'Calfskin' }],
+                [{ name: 'Wristwatch', material: 'Gold' }, { name: 'Signet Ring', material: 'Gold' }]
+            ),
+            Female: wear(
+                [{ name: 'Silk Blouse', material: 'Silk' },
+                 { name: 'Tailored Dress', material: 'Crepe' },
+                 { name: 'Skirt Suit', material: 'Wool Crepe' }],
+                [NONE],
+                [{ name: 'Heeled Shoes', material: 'Leather' }],
+                [{ name: 'Belt', material: 'Calfskin' }, NONE],
+                [{ name: 'Pearl Necklace', material: 'Pearl' }, { name: 'Wristwatch', material: 'Gold' }]
+            )
         }
     },
     EAST_ASIAN: {
@@ -5887,6 +5857,451 @@ const CONTEMPORARY_CLOTHING: Partial<Record<CulturalZone, Partial<Record<Simplif
                 accessories: [{ name: 'Wristwatch', material: 'Steel' }, { name: 'None', material: 'None' }],
                 palette: MODERN_COLORS
             }
+        },
+        common: {
+            Male: wear(
+                [{ name: 'Shirt', material: 'Cotton' },
+                 { name: 'Trousers', material: 'Polyester Wool' },
+                 { name: 'Zip Jacket', material: 'Nylon' },
+                 { name: 'Polo Shirt', material: 'Cotton Piqué' }],
+                [NONE],
+                [{ name: 'Leather Shoes', material: 'Leather' }, { name: 'Trainers', material: 'Canvas and Rubber' }],
+                [{ name: 'Belt', material: 'Synthetic Leather' }],
+                [{ name: 'Wristwatch', material: 'Steel' }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'Blouse', material: 'Polyester' },
+                 { name: 'Skirt', material: 'Polyester Wool' },
+                 { name: 'Knit Cardigan', material: 'Acrylic Knit' },
+                 { name: 'Qipao', material: 'Brocade' }],
+                [NONE],
+                [{ name: 'Flat Shoes', material: 'Synthetic Leather' }, { name: 'Heeled Shoes', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Jade Pendant', material: 'Jade' }, { name: 'Wristwatch', material: 'Steel' }]
+            )
+        },
+        wealthy: {
+            Male: wear(
+                [{ name: 'Dress Shirt', material: 'Fine Cotton' },
+                 { name: 'Wool Suit', material: 'Worsted Wool' }],
+                [NONE],
+                [{ name: 'Leather Shoes', material: 'Calfskin' }],
+                [{ name: 'Belt', material: 'Calfskin' }],
+                [{ name: 'Wristwatch', material: 'Gold' }, { name: 'Jade Ring', material: 'Jade' }]
+            ),
+            Female: wear(
+                [{ name: 'Silk Blouse', material: 'Silk' },
+                 { name: 'Tailored Dress', material: 'Crepe' },
+                 { name: 'Qipao', material: 'Silk Brocade' }],
+                [NONE],
+                [{ name: 'Heeled Shoes', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Jade Bangle', material: 'Jade' }, { name: 'Gold Necklace', material: 'Gold' }]
+            )
+        }
+    },
+    /**
+     * Everything below is the same clothing question asked of the rest of the
+     * world, and it had no answer: the table held Europe and East Asia and
+     * nothing else, so a Lagos office worker in 2016 and a Delhi student in
+     * 2003 were both dressed out of the mid-century table — the one written for
+     * a world before ready-made cotton reached everywhere. Measured before
+     * this, t-shirts were 16.7% of modern-era personas.
+     *
+     * The principle throughout: mass-produced cloth is genuinely global after
+     * about 1960 and the poor tier looks broadly similar everywhere, so what
+     * distinguishes these is what is worn *with* it and what the wealthy wear
+     * instead. A kaftan, a sari and a boubou did not stop being worn; they
+     * stopped being the only thing worn.
+     */
+    MENA: {
+        poor: {
+            Male: wear(
+                [{ name: 'T-shirt', material: 'Cotton', adjectives: ['Faded'] },
+                 { name: 'Work Trousers', material: 'Cotton Drill' },
+                 { name: 'Long Shirt', material: 'Cotton' },
+                 { name: 'Thobe', material: 'Polyester Cotton', adjectives: ['Worn'] }],
+                [{ name: 'Knitted Cap', material: 'Acrylic' }, { name: 'Keffiyeh', material: 'Cotton' }, NONE],
+                [{ name: 'Sandals', material: 'Plastic' }, { name: 'Trainers', material: 'Canvas and Rubber' }],
+                [{ name: 'Belt', material: 'Synthetic Leather' }, NONE],
+                [{ name: 'Wristwatch', material: 'Steel', adjectives: ['Cheap'] }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'Long Tunic', material: 'Polyester' },
+                 { name: 'Loose Trousers', material: 'Cotton' },
+                 { name: 'Abaya', material: 'Polyester', adjectives: ['Plain'] }],
+                [{ name: 'Headscarf', material: 'Polyester' }, { name: 'Headscarf', material: 'Cotton' }, NONE],
+                [{ name: 'Sandals', material: 'Plastic' }, { name: 'Flat Shoes', material: 'Synthetic Leather' }],
+                [NONE],
+                [{ name: 'Gold Bangles', material: 'Gold Plate' }, { name: 'Stud Earrings', material: 'Gold Plate' }]
+            )
+        },
+        common: {
+            Male: wear(
+                [{ name: 'Polo Shirt', material: 'Cotton Piqué' },
+                 { name: 'Chinos', material: 'Cotton Twill' },
+                 { name: 'Thobe', material: 'Fine Cotton' }],
+                [{ name: 'Keffiyeh', material: 'Cotton' }, NONE],
+                [{ name: 'Leather Sandals', material: 'Leather' }, { name: 'Leather Shoes', material: 'Leather' }],
+                [{ name: 'Belt', material: 'Leather' }],
+                [{ name: 'Wristwatch', material: 'Steel' }, { name: 'Prayer Beads', material: 'Resin' }]
+            ),
+            Female: wear(
+                [{ name: 'Blouse', material: 'Rayon' },
+                 { name: 'Long Skirt', material: 'Polyester' },
+                 { name: 'Abaya', material: 'Crepe' }],
+                [{ name: 'Headscarf', material: 'Chiffon' }, NONE],
+                [{ name: 'Flat Shoes', material: 'Leather' }, { name: 'Sandals', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Gold Bangles', material: 'Gold' }, { name: 'Hoop Earrings', material: 'Gold' }]
+            )
+        },
+        wealthy: {
+            Male: wear(
+                [{ name: 'Dress Shirt', material: 'Fine Cotton' },
+                 { name: 'Wool Suit', material: 'Worsted Wool' },
+                 { name: 'Thobe', material: 'Egyptian Cotton', adjectives: ['Pressed'] }],
+                [{ name: 'Keffiyeh', material: 'Fine Cotton' }, NONE],
+                [{ name: 'Leather Shoes', material: 'Calfskin' }],
+                [{ name: 'Belt', material: 'Calfskin' }],
+                [{ name: 'Wristwatch', material: 'Gold' }, { name: 'Signet Ring', material: 'Gold' }]
+            ),
+            Female: wear(
+                [{ name: 'Silk Blouse', material: 'Silk' },
+                 { name: 'Tailored Dress', material: 'Crepe' },
+                 { name: 'Abaya', material: 'Embroidered Silk' }],
+                [{ name: 'Headscarf', material: 'Silk' }, NONE],
+                [{ name: 'Heeled Shoes', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Gold Necklace', material: 'Gold' }, { name: 'Wristwatch', material: 'Gold' }]
+            )
+        }
+    },
+    SOUTHEAST_ASIAN: {
+        poor: {
+            Male: wear(
+                [{ name: 'T-shirt', material: 'Cotton', adjectives: ['Faded'] },
+                 { name: 'Sarong', material: 'Printed Cotton' },
+                 { name: 'Work Shirt', material: 'Cotton' },
+                 { name: 'Shorts', material: 'Cotton Drill' }],
+                [{ name: 'Baseball Cap', material: 'Cotton' }, { name: 'Conical Hat', material: 'Palm Leaf' }, NONE],
+                [{ name: 'Rubber Sandals', material: 'Rubber' }, { name: 'Barefoot', material: 'None' }],
+                [{ name: 'Belt', material: 'Synthetic Leather' }, NONE],
+                [{ name: 'Wristwatch', material: 'Steel', adjectives: ['Cheap'] }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'Blouse', material: 'Polyester' },
+                 { name: 'Sarong', material: 'Batik Cotton' },
+                 { name: 'T-shirt', material: 'Cotton' },
+                 { name: 'Daster', material: 'Printed Cotton' }],
+                [{ name: 'Conical Hat', material: 'Palm Leaf' }, { name: 'Headscarf', material: 'Polyester' }, NONE],
+                [{ name: 'Rubber Sandals', material: 'Rubber' }, { name: 'Barefoot', material: 'None' }],
+                [NONE],
+                [{ name: 'Gold Earrings', material: 'Gold Plate' }, NONE]
+            )
+        },
+        common: {
+            Male: wear(
+                [{ name: 'Shirt', material: 'Cotton' },
+                 { name: 'Trousers', material: 'Polyester Cotton' },
+                 { name: 'Batik Shirt', material: 'Batik Cotton' },
+                 { name: 'Polo Shirt', material: 'Cotton Piqué' }],
+                [{ name: 'Songkok', material: 'Velvet' }, NONE],
+                [{ name: 'Sandals', material: 'Leather' }, { name: 'Leather Shoes', material: 'Leather' }],
+                [{ name: 'Belt', material: 'Leather' }],
+                [{ name: 'Wristwatch', material: 'Steel' }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'Blouse', material: 'Rayon' },
+                 { name: 'Kebaya', material: 'Cotton Lace' },
+                 { name: 'Batik Skirt', material: 'Batik Cotton' },
+                 { name: 'Skirt', material: 'Polyester' }],
+                [{ name: 'Hijab', material: 'Polyester' }, NONE],
+                [{ name: 'Sandals', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Gold Earrings', material: 'Gold' }, { name: 'Gold Bangles', material: 'Gold' }]
+            )
+        },
+        wealthy: {
+            Male: wear(
+                [{ name: 'Dress Shirt', material: 'Fine Cotton' },
+                 { name: 'Barong Tagalog', material: 'Piña' },
+                 { name: 'Wool Suit', material: 'Tropical Wool' }],
+                [{ name: 'Songkok', material: 'Velvet' }, NONE],
+                [{ name: 'Leather Shoes', material: 'Calfskin' }],
+                [{ name: 'Belt', material: 'Calfskin' }],
+                [{ name: 'Wristwatch', material: 'Gold' }, { name: 'Signet Ring', material: 'Gold' }]
+            ),
+            Female: wear(
+                [{ name: 'Silk Kebaya', material: 'Silk' },
+                 { name: 'Batik Sarong', material: 'Hand-drawn Batik' },
+                 { name: 'Tailored Dress', material: 'Crepe' }],
+                [{ name: 'Hijab', material: 'Silk' }, NONE],
+                [{ name: 'Heeled Sandals', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Gold Necklace', material: 'Gold' }, { name: 'Gold Bangles', material: 'Gold' }]
+            )
+        }
+    },
+    SOUTH_ASIAN: {
+        poor: {
+            Male: wear(
+                [{ name: 'T-shirt', material: 'Cotton', adjectives: ['Faded'] },
+                 { name: 'Lungi', material: 'Cotton' },
+                 { name: 'Work Shirt', material: 'Cotton', adjectives: ['Worn'] },
+                 { name: 'Kurta', material: 'Cotton' }],
+                [{ name: 'Gamcha', material: 'Cotton' }, NONE],
+                [{ name: 'Rubber Sandals', material: 'Rubber' }, { name: 'Barefoot', material: 'None' }],
+                [NONE],
+                [{ name: 'Thread Bracelet', material: 'Cotton' }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'Cotton Sari', material: 'Cotton', adjectives: ['Faded'] },
+                 { name: 'Salwar Kameez', material: 'Polyester Cotton' },
+                 { name: 'Blouse', material: 'Cotton' }],
+                [{ name: 'Dupatta', material: 'Polyester' }, NONE],
+                [{ name: 'Rubber Sandals', material: 'Rubber' }, { name: 'Barefoot', material: 'None' }],
+                [NONE],
+                [{ name: 'Glass Bangles', material: 'Glass' }, { name: 'Nose Stud', material: 'Gold Plate' }]
+            )
+        },
+        common: {
+            Male: wear(
+                [{ name: 'Shirt', material: 'Cotton' },
+                 { name: 'Trousers', material: 'Polyester Cotton' },
+                 { name: 'Kurta Pyjama', material: 'Cotton' }],
+                [NONE],
+                [{ name: 'Sandals', material: 'Leather' }, { name: 'Leather Shoes', material: 'Leather' }],
+                [{ name: 'Belt', material: 'Synthetic Leather' }],
+                [{ name: 'Wristwatch', material: 'Steel' }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'Silk Sari', material: 'Art Silk' },
+                 { name: 'Salwar Kameez', material: 'Cotton' },
+                 { name: 'Kurti', material: 'Printed Cotton' }],
+                [{ name: 'Dupatta', material: 'Chiffon' }, NONE],
+                [{ name: 'Sandals', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Gold Bangles', material: 'Gold' }, { name: 'Nose Stud', material: 'Gold' }]
+            )
+        },
+        wealthy: {
+            Male: wear(
+                [{ name: 'Dress Shirt', material: 'Fine Cotton' },
+                 { name: 'Wool Suit', material: 'Worsted Wool' },
+                 { name: 'Silk Kurta', material: 'Silk' }],
+                [NONE],
+                [{ name: 'Leather Shoes', material: 'Calfskin' }],
+                [{ name: 'Belt', material: 'Calfskin' }],
+                [{ name: 'Wristwatch', material: 'Gold' }, { name: 'Signet Ring', material: 'Gold' }]
+            ),
+            Female: wear(
+                [{ name: 'Silk Sari', material: 'Banarasi Silk' },
+                 { name: 'Embroidered Salwar Kameez', material: 'Georgette' },
+                 { name: 'Tailored Dress', material: 'Crepe' }],
+                [{ name: 'Dupatta', material: 'Silk' }, NONE],
+                [{ name: 'Heeled Sandals', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Gold Necklace', material: 'Gold' }, { name: 'Gold Bangles', material: 'Gold' }]
+            )
+        }
+    },
+    SUB_SAHARAN_AFRICAN: {
+        poor: {
+            Male: wear(
+                [{ name: 'T-shirt', material: 'Cotton', adjectives: ['Second-hand'] },
+                 { name: 'Trousers', material: 'Polyester', adjectives: ['Worn'] },
+                 { name: 'Work Shirt', material: 'Cotton' }],
+                [{ name: 'Knitted Cap', material: 'Acrylic' }, { name: 'Baseball Cap', material: 'Cotton' }, NONE],
+                [{ name: 'Rubber Sandals', material: 'Rubber' }, { name: 'Trainers', material: 'Canvas and Rubber' }],
+                [{ name: 'Belt', material: 'Synthetic Leather' }, NONE],
+                [{ name: 'Wristwatch', material: 'Steel', adjectives: ['Cheap'] }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'Wrapper and Blouse', material: 'Printed Cotton' },
+                 { name: 'Kanga', material: 'Printed Cotton' },
+                 { name: 'T-shirt', material: 'Cotton', adjectives: ['Second-hand'] }],
+                [{ name: 'Head Tie', material: 'Printed Cotton' }, NONE],
+                [{ name: 'Rubber Sandals', material: 'Rubber' }, { name: 'Barefoot', material: 'None' }],
+                [NONE],
+                [{ name: 'Bead Bracelet', material: 'Glass Beads' }, { name: 'Stud Earrings', material: 'Gold Plate' }]
+            )
+        },
+        common: {
+            Male: wear(
+                [{ name: 'Shirt', material: 'Cotton' },
+                 { name: 'Chinos', material: 'Cotton Twill' },
+                 { name: 'Dashiki', material: 'Printed Cotton' }],
+                [{ name: 'Kufi Cap', material: 'Cotton' }, NONE],
+                [{ name: 'Leather Sandals', material: 'Leather' }, { name: 'Leather Shoes', material: 'Leather' }],
+                [{ name: 'Belt', material: 'Leather' }],
+                [{ name: 'Wristwatch', material: 'Steel' }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'Ankara Dress', material: 'Wax Print Cotton' },
+                 { name: 'Wrapper and Blouse', material: 'Wax Print Cotton' },
+                 { name: 'Blouse', material: 'Polyester' }],
+                [{ name: 'Gele', material: 'Wax Print Cotton' }, { name: 'Head Tie', material: 'Cotton' }, NONE],
+                [{ name: 'Sandals', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Gold Earrings', material: 'Gold' }, { name: 'Bead Necklace', material: 'Glass Beads' }]
+            )
+        },
+        wealthy: {
+            Male: wear(
+                [{ name: 'Agbada', material: 'Embroidered Damask' },
+                 { name: 'Wool Suit', material: 'Worsted Wool' },
+                 { name: 'Dress Shirt', material: 'Fine Cotton' }],
+                [{ name: 'Fila Cap', material: 'Damask' }, NONE],
+                [{ name: 'Leather Shoes', material: 'Calfskin' }],
+                [{ name: 'Belt', material: 'Calfskin' }],
+                [{ name: 'Wristwatch', material: 'Gold' }, { name: 'Signet Ring', material: 'Gold' }]
+            ),
+            Female: wear(
+                [{ name: 'Aso Ebi', material: 'Lace and Damask' },
+                 { name: 'Boubou', material: 'Embroidered Brocade' },
+                 { name: 'Tailored Dress', material: 'Crepe' }],
+                [{ name: 'Gele', material: 'Aso Oke' }, NONE],
+                [{ name: 'Heeled Shoes', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Gold Necklace', material: 'Gold' }, { name: 'Gold Bangles', material: 'Gold' }]
+            )
+        }
+    },
+    SOUTH_AMERICAN: {
+        poor: {
+            Male: wear(
+                [{ name: 'T-shirt', material: 'Cotton', adjectives: ['Faded'] },
+                 { name: 'Jeans', material: 'Denim', adjectives: ['Worn'] },
+                 { name: 'Work Shirt', material: 'Cotton' }],
+                [{ name: 'Baseball Cap', material: 'Cotton', adjectives: ['Worn'] }, { name: 'Straw Hat', material: 'Straw' }, NONE],
+                [{ name: 'Trainers', material: 'Canvas and Rubber' }, { name: 'Rubber Sandals', material: 'Rubber' }],
+                [{ name: 'Belt', material: 'Cracked Leather' }, NONE],
+                [{ name: 'Wristwatch', material: 'Steel', adjectives: ['Cheap'] }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'Blouse', material: 'Polyester' },
+                 { name: 'Jeans', material: 'Denim' },
+                 { name: 'Print Dress', material: 'Cotton', adjectives: ['Faded'] },
+                 { name: 'Pollera', material: 'Wool', adjectives: ['Worn'] }],
+                // The bowler is Andean and unmistakable, and it is worn by a
+                // minority of a continent — one option in four, not the default.
+                [NONE, NONE, { name: 'Bowler Hat', material: 'Felt' }, NONE],
+                [{ name: 'Trainers', material: 'Canvas and Rubber' }, { name: 'Flat Shoes', material: 'Synthetic Leather' }],
+                [NONE],
+                [{ name: 'Stud Earrings', material: 'Gold Plate' }, NONE]
+            )
+        },
+        common: {
+            Male: wear(
+                [{ name: 'Polo Shirt', material: 'Cotton Piqué' },
+                 { name: 'Chinos', material: 'Cotton Twill' },
+                 { name: 'Zip Jacket', material: 'Nylon' }],
+                [{ name: 'Baseball Cap', material: 'Cotton' }, NONE],
+                [{ name: 'Leather Shoes', material: 'Leather' }, { name: 'Trainers', material: 'Leather' }],
+                [{ name: 'Belt', material: 'Leather' }],
+                [{ name: 'Wristwatch', material: 'Steel' }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'Blouse', material: 'Rayon' },
+                 { name: 'Skirt', material: 'Polyester' },
+                 { name: 'Knit Cardigan', material: 'Acrylic Knit' }],
+                [NONE],
+                [{ name: 'Flat Shoes', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Gold Earrings', material: 'Gold' }, { name: 'Wristwatch', material: 'Steel' }]
+            )
+        },
+        wealthy: {
+            Male: wear(
+                [{ name: 'Dress Shirt', material: 'Fine Cotton' },
+                 { name: 'Wool Suit', material: 'Worsted Wool' }],
+                [NONE],
+                [{ name: 'Leather Shoes', material: 'Calfskin' }],
+                [{ name: 'Belt', material: 'Calfskin' }],
+                [{ name: 'Wristwatch', material: 'Gold' }, { name: 'Signet Ring', material: 'Gold' }]
+            ),
+            Female: wear(
+                [{ name: 'Silk Blouse', material: 'Silk' },
+                 { name: 'Tailored Dress', material: 'Crepe' }],
+                [NONE],
+                [{ name: 'Heeled Shoes', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Gold Necklace', material: 'Gold' }, { name: 'Pearl Earrings', material: 'Pearl' }]
+            )
+        }
+    },
+    /**
+     * One zone, and it holds Auckland, Honolulu, Apia and the Sepik.
+     *
+     * So the island-specific garments are options rather than the answer: a
+     * lava-lava is worn every day by a great many people in Samoa and Tonga and
+     * by rather few in Christchurch, and the table cannot tell which of them it
+     * is dressing. Ordinary global clothing comes first in each list for that
+     * reason. The finer question wants a zone split, not a longer list here.
+     */
+    OCEANIA: {
+        poor: {
+            Male: wear(
+                [{ name: 'T-shirt', material: 'Cotton', adjectives: ['Faded'] },
+                 { name: 'Work Shirt', material: 'Cotton' },
+                 { name: 'Shorts', material: 'Cotton Drill' },
+                 { name: 'Lava-lava', material: 'Printed Cotton' },
+                 { name: 'Board Shorts', material: 'Polyester' }],
+                [{ name: 'Baseball Cap', material: 'Cotton' }, NONE],
+                [{ name: 'Rubber Sandals', material: 'Rubber' }, { name: 'Barefoot', material: 'None' }],
+                [NONE],
+                [{ name: 'Shell Necklace', material: 'Shell' }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'T-shirt', material: 'Cotton' },
+                 { name: 'Print Dress', material: 'Cotton' },
+                 { name: 'Island Dress', material: 'Printed Cotton' },
+                 { name: 'Lava-lava', material: 'Printed Cotton' }],
+                [{ name: 'Flower', material: 'Fresh Flower' }, NONE, NONE],
+                [{ name: 'Rubber Sandals', material: 'Rubber' }, { name: 'Trainers', material: 'Canvas and Rubber' }, { name: 'Barefoot', material: 'None' }],
+                [NONE],
+                [{ name: 'Shell Earrings', material: 'Shell' }, NONE]
+            )
+        },
+        common: {
+            Male: wear(
+                [{ name: 'Shirt', material: 'Cotton' },
+                 { name: 'Chinos', material: 'Cotton Twill' },
+                 { name: 'Aloha Shirt', material: 'Printed Cotton' },
+                 { name: 'Board Shorts', material: 'Polyester' }],
+                [{ name: 'Baseball Cap', material: 'Cotton' }, NONE],
+                [{ name: 'Sandals', material: 'Leather' }, { name: 'Trainers', material: 'Canvas and Rubber' }],
+                [{ name: 'Belt', material: 'Leather' }, NONE],
+                [{ name: 'Wristwatch', material: 'Steel' }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'Blouse', material: 'Rayon' },
+                 { name: 'Skirt', material: 'Polyester' },
+                 { name: 'Island Dress', material: 'Printed Cotton' }],
+                [{ name: 'Flower', material: 'Fresh Flower' }, NONE],
+                [{ name: 'Sandals', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Shell Necklace', material: 'Shell' }, { name: 'Stud Earrings', material: 'Gold Plate' }]
+            )
+        },
+        wealthy: {
+            Male: wear(
+                [{ name: 'Dress Shirt', material: 'Fine Cotton' },
+                 { name: 'Linen Suit', material: 'Linen' }],
+                [NONE],
+                [{ name: 'Leather Shoes', material: 'Leather' }],
+                [{ name: 'Belt', material: 'Leather' }],
+                [{ name: 'Wristwatch', material: 'Gold' }, NONE]
+            ),
+            Female: wear(
+                [{ name: 'Silk Dress', material: 'Silk' },
+                 { name: 'Tailored Blouse', material: 'Fine Cotton' }],
+                [NONE],
+                [{ name: 'Heeled Sandals', material: 'Leather' }],
+                [NONE],
+                [{ name: 'Pearl Necklace', material: 'Pearl' }, { name: 'Gold Earrings', material: 'Gold' }]
+            )
         }
     },
 };
@@ -5900,7 +6315,16 @@ export const getClothingData = (
     wealthLevel: WealthLevel,
     gender: Gender,
     /** Where known, the year — `MODERN_ERA` alone cannot tell 1910 from 2016. */
-    year?: number
+    year?: number,
+    /**
+     * The region, where known. A cultural zone is ten values for the whole
+     * world: `OCEANIA` dresses Auckland and the Sepik out of one table, and
+     * `SOUTH_AMERICAN` the Atacama and the Amazon. Adding zones is not an
+     * option — the union is used in seventy-one files and thirty-one exhaustive
+     * `Record` types — so the finer answer arrives as a layer on top, keyed on
+     * the region string the generators already carry. See `regionalClothing.ts`.
+     */
+    region?: string
 ): ClothingSet => {
     // Convert wealth level to simplified version
     const simplifiedWealth: SimplifiedWealthLevel = 
@@ -5910,8 +6334,38 @@ export const getClothingData = (
     
     // Special handling for North American Colonial zones - use European clothing for modern era
     let effectiveCulturalZone = culturalZone;
-    if (culturalZone === 'NORTH_AMERICAN_COLONIAL' && 
+    if (culturalZone === 'NORTH_AMERICAN_COLONIAL' &&
         (era === HistoricalEra.INDUSTRIAL_ERA || era === HistoricalEra.MODERN_ERA)) {
+        effectiveCulturalZone = 'EUROPEAN' as CulturalZone;
+    }
+    /**
+     * Two settler countries inside a zone written for the Pacific islands.
+     *
+     * `OCEANIA` covers Auckland and Perth as well as Apia, and the contemporary
+     * table below is one entry per zone, so a Queenslander in 2024 was being
+     * handed a lava-lava. The region layer would say otherwise but it is read
+     * *before* the contemporary table and therefore never reached for these
+     * years. Ordinary daywear in Australia and New Zealand is the European set;
+     * what makes a persona Māori or Aboriginal is carried by the markings, the
+     * accessories and the prose.
+     */
+    if (culturalZone === 'OCEANIA' && year !== undefined && year >= CONTEMPORARY_FROM_YEAR
+        && /^Australia|New Zealand/.test(region ?? '')) {
+        effectiveCulturalZone = 'EUROPEAN' as CulturalZone;
+    }
+    /**
+     * A zone named for a period cannot dress anyone living after it.
+     *
+     * `NORTH_AMERICAN_PRE_COLUMBIAN` is the only zone in the table whose name is
+     * a date, and a persona placed in it in 1985 was being issued clothing from
+     * the era table — which is to say, a hide tunic. What a Native North
+     * American wears on an ordinary day in 1985 is what everyone around them
+     * wears; what makes them who they are is carried by the markings, the
+     * accessories and the prose, none of which this function touches. The same
+     * substitution the colonial zone already gets, for the same reason.
+     */
+    if (culturalZone === 'NORTH_AMERICAN_PRE_COLUMBIAN' && era === HistoricalEra.MODERN_ERA
+        && year !== undefined && year >= CONTEMPORARY_FROM_YEAR) {
         effectiveCulturalZone = 'EUROPEAN' as CulturalZone;
     }
 
@@ -5921,6 +6375,16 @@ export const getClothingData = (
     if (era === HistoricalEra.MODERN_ERA && year !== undefined && year >= CONTEMPORARY_FROM_YEAR) {
         const contemporary = CONTEMPORARY_CLOTHING[effectiveCulturalZone]?.[simplifiedWealth]?.[gender];
         if (contemporary) return contemporary;
+    }
+
+    // What this *region* wore, where the region has its own answer. Read after
+    // the contemporary table, because mass-produced clothing genuinely did
+    // flatten these differences, and before the zone table, because everywhere
+    // else it is the zone that is too coarse rather than the region too fine.
+    if (region) {
+        const regional = REGIONAL_CLOTHING[regionalKey(culturalZone, region)]
+            ?.[era]?.[simplifiedWealth]?.[gender];
+        if (regional) return regional;
     }
 
     // Try direct lookup first
@@ -6286,7 +6750,10 @@ function generateBasicClothing(
     gender: Gender
 ): ClothingSet {
     const isEarlyEra = era === HistoricalEra.PREHISTORY || era === HistoricalEra.ANTIQUITY;
-    const isTropicalCulture = ['OCEANIA', 'SUB_SAHARAN_AFRICAN', 'SOUTH_AMERICAN'].includes(culturalZone);
+    // Southeast Asia was missing from this list, which is how a Javanese
+    // persona reaching the last fallback came out in Simple Shoes.
+    const isTropicalCulture =
+        ['OCEANIA', 'SUB_SAHARAN_AFRICAN', 'SOUTH_AMERICAN', 'SOUTHEAST_ASIAN'].includes(culturalZone);
     
     const basicMaterial = wealthLevel === 'poor' ? 
         (isEarlyEra ? 'Hide' : 'Rough Wool') :

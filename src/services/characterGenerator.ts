@@ -1549,6 +1549,8 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
         spec?.profession || role,
         dateInfo.year,
         markingPlace,
+        context.location,
+        context.region,
     );
     const markings: any[] = [];
     
@@ -1593,7 +1595,9 @@ export function generateCharacterWithSpec(context: GenerationContext, spec?: Cha
             i === 0 ? 'daily' : (noise.random() < 0.5 ? 'ceremony' : 'daily'),
             markingPlace,
             baseProfile.religion,
-            dateInfo.year
+            dateInfo.year,
+            context.location,
+            context.region,
         ).filter(m => !usedTypes.has(m.type)); // Don't repeat marking types
         
         // devLog(`[CharGen Spec] Found ${availableMarkings.length} available markings for slot ${i+1}`);

@@ -1072,7 +1072,7 @@ export function generateCompleteOutfit(
     belt: ClothingPiece;
     accessory: ClothingPiece;
 } {
-    const baseClothingSet = clothingModule.getClothingData(culturalZone, era, wealthLevel, gender, year);
+    const baseClothingSet = clothingModule.getClothingData(culturalZone, era, wealthLevel, gender, year, region);
 
     // What this persona wears TO WORK, where their trade has its own dress.
     //
@@ -1154,22 +1154,54 @@ export function generateCompleteOutfit(
         if (available.length > 0) return available;
 
         // Nothing in the table is possible this early: fall back to what people
-        // actually wore before weaving.
-        const preTextile: Record<string, ClothingPiece[]> = {
-            garment: [
-                { name: 'Hide Wrap', material: 'Hide' },
-                { name: 'Fur Cloak', material: 'Fur' },
-                { name: 'Skin Tunic', material: 'Hide and Sinew' },
-            ],
-            headgear: [{ name: 'None', material: 'None' }, { name: 'Fur Hood', material: 'Fur' }],
-            footwear: [{ name: 'Hide Foot Wrappings', material: 'Hide' }, { name: 'Barefoot', material: 'None' }],
-            belt: [{ name: 'Sinew Cord', material: 'Sinew' }, { name: 'Hide Thong', material: 'Hide' }],
-            accessory: [
-                { name: 'Shell Pendant', material: 'Shell' },
-                { name: 'Bone Bead Necklace', material: 'Bone' },
-                { name: 'None', material: 'None' },
-            ],
-        };
+        // actually wore before weaving. Which is not one answer.
+        //
+        // Hide and fur is the answer where there is game with a usable pelt and
+        // a reason to want one. In the wet tropics there is neither, and the
+        // older technology is *beaten bark* — tapa and its relatives, which
+        // predate the loom by a long way and are what Island Southeast Asia,
+        // Melanesia and the Amazon actually wore. Handing those regions a fur
+        // cloak put a Spice Islands forager in a Skin Tunic at 9000 BCE:
+        // 21 of 362 Southeast Asian personas, all of them in deep prehistory.
+        //
+        // Australia stays on hide deliberately — the possum-skin and
+        // kangaroo-skin cloaks of the southeast are the real garment there, and
+        // it is the one part of Oceania where that is true.
+        const barkWorld = culturalZone === 'SOUTHEAST_ASIAN'
+            || /new guinea|melanesia|polynesia|micronesia|hawaii|indonesian|philippines|amazon|guiana|orinoco|llanos|congo|central africa/i
+                .test(String(region ?? ''));
+
+        const preTextile: Record<string, ClothingPiece[]> = barkWorld
+            ? {
+                garment: [
+                    { name: 'Bark Cloth Wrap', material: 'Beaten Bark' },
+                    { name: 'Bark Cloth Loincloth', material: 'Beaten Bark' },
+                    { name: 'Plant Fibre Skirt', material: 'Bast Fibre' },
+                ],
+                headgear: [{ name: 'None', material: 'None' }],
+                footwear: [{ name: 'Barefoot', material: 'None' }],
+                belt: [{ name: 'Vine Cord', material: 'Vine' }, { name: 'Bast Fibre Cord', material: 'Bast Fibre' }],
+                accessory: [
+                    { name: 'Shell Pendant', material: 'Shell' },
+                    { name: 'Boar Tusk Pendant', material: 'Boar Tusk' },
+                    { name: 'None', material: 'None' },
+                ],
+            }
+            : {
+                garment: [
+                    { name: 'Hide Wrap', material: 'Hide' },
+                    { name: 'Fur Cloak', material: 'Fur' },
+                    { name: 'Skin Tunic', material: 'Hide and Sinew' },
+                ],
+                headgear: [{ name: 'None', material: 'None' }, { name: 'Fur Hood', material: 'Fur' }],
+                footwear: [{ name: 'Hide Foot Wrappings', material: 'Hide' }, { name: 'Barefoot', material: 'None' }],
+                belt: [{ name: 'Sinew Cord', material: 'Sinew' }, { name: 'Hide Thong', material: 'Hide' }],
+                accessory: [
+                    { name: 'Shell Pendant', material: 'Shell' },
+                    { name: 'Bone Bead Necklace', material: 'Bone' },
+                    { name: 'None', material: 'None' },
+                ],
+            };
         return preTextile[category] || [{ name: 'None', material: 'None' }];
     };
 
@@ -1817,6 +1849,8 @@ export function generateBaseProfile(
             undefined,
             context.year,
             markingPlace,
+            context.localArea,
+            context.region,
         );
         const markings: any[] = [];
         
@@ -1831,7 +1865,9 @@ export function generateBaseProfile(
                 'daily',
                 markingPlace,
                 religion,
-                context.year
+                context.year,
+                context.localArea,
+                context.region,
             );
             
             const selectedMarking = selectRandomMarking(availableMarkings, noise.random());

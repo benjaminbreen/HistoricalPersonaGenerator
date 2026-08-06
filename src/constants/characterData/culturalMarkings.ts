@@ -41,6 +41,21 @@ export interface CulturalMarking {
   type: 'tattoo' | 'paint' | 'scarification' | 'piercing' | 'brand' | 'henna' | 'ash' | 'structural';
   culturalZones: CulturalZone[];
   eras?: HistoricalEra[];
+  /**
+   * The year after which this practice had largely stopped, outside the
+   * communities that kept it.
+   *
+   * `eras` is too coarse to say this — the whole of the twentieth and
+   * twenty-first centuries is one era — and the cultural zone is the wrong
+   * instrument entirely, because what declined was the practice and not the
+   * region. A persona in a traditional community is exempt; see
+   * `traditionalCommunities.ts`.
+   *
+   * Dates are approximate and deliberately late: the intent is to stop a mark
+   * appearing on a city population two generations after it became rare, not
+   * to pin a year on its disappearance.
+   */
+  declinesAfter?: number;
   patterns: MarkingPattern[];
   isPermanent: boolean;
   duration?: number; // Hours for temporary markings
@@ -136,6 +151,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'WAR_PAINT',
     type: 'paint',
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN'],
+    /** Belongs to a way of war that had ended. */
+    declinesAfter: 1900,
     eras: [HistoricalEra.PREHISTORY, HistoricalEra.ANTIQUITY, HistoricalEra.MEDIEVAL, HistoricalEra.RENAISSANCE_EARLY_MODERN, HistoricalEra.INDUSTRIAL_ERA], // Not in MODERN_ERA or FUTURE_ERA
     patterns: [
       {
@@ -179,6 +196,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'VISION_PAINT',
     type: 'paint',
     culturalZones: ['NORTH_AMERICAN_PRE_COLUMBIAN'],
+    /** Survives in ceremony; not something a passer-by would see. */
+    declinesAfter: 1950,
     eras: [HistoricalEra.PREHISTORY, HistoricalEra.ANTIQUITY, HistoricalEra.MEDIEVAL, HistoricalEra.RENAISSANCE_EARLY_MODERN, HistoricalEra.INDUSTRIAL_ERA], // Not in MODERN_ERA or FUTURE_ERA
     patterns: [
       {
@@ -230,6 +249,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'SCARIFICATION',
     type: 'scarification',
     culturalZones: ['SUB_SAHARAN_AFRICAN'],
+    /** Outlawed or discouraged across West and Central Africa from the mid-century; near-absent among people born after about 1980. */
+    declinesAfter: 1970,
     // Widespread across the Sudanic belt and West Africa, and never universal:
     // it was appearing on Swahili-coast and southern-African personas whose
     // communities did not cut. Also in steep decline since independence.
@@ -430,6 +451,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'BERBER_TATTOO',
     type: 'tattoo',
     culturalZones: ['MENA'],
+    /** Facial tattooing among Amazigh women stopped with the generation born before independence. */
+    declinesAfter: 1960,
     patterns: [
       {
         id: 'amazigh_chin',
@@ -749,6 +772,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'WOAD_PAINT',
     type: 'paint',
     culturalZones: ['EUROPEAN'],
+    /** Iron Age Britain, and gone with it. */
+    declinesAfter: 500,
     eras: ['PREHISTORY', 'ANTIQUITY'],
     patterns: [
       {
@@ -821,6 +846,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'PLAGUE_MARK',
     type: 'paint',
     culturalZones: ['EUROPEAN'],
+    /** A mark of epidemic quarantine, and of a medicine that no longer existed. */
+    declinesAfter: 1800,
     eras: ['MEDIEVAL'],
     patterns: [
       {
@@ -907,6 +934,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'EAR_STRETCHING',
     type: 'structural',
     culturalZones: ['SUB_SAHARAN_AFRICAN', 'OCEANIA', 'SOUTH_AMERICAN'],
+    /** The traditional practice, not the modern fashion for it — those are different things and the second is not this marking. */
+    declinesAfter: 1970,
     places: /maasai|masai|samburu|turkana|rift valley|kenya|tanzania|borneo|dayak|kalimantan|sarawak|amazon|xingu|orinoco|new guinea|papua/,
     patterns: [
       {
@@ -934,6 +963,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'LIP_PLATE',
     type: 'structural',
     culturalZones: ['SUB_SAHARAN_AFRICAN', 'SOUTH_AMERICAN'],
+    /** Now worn by a small number of Surma and Mursi women, and by fewer each decade. */
+    declinesAfter: 1970,
     // Mursi, Surma and Suri in the Omo valley; Kayapó and Suyá on the Xingu.
     // Nowhere else, and it was reaching the whole of Africa and South America.
     places: /omo|mursi|surma|suri|ethiopia|sudan|chad|sara|xingu|kayapo|amazon|mato grosso/,
@@ -963,6 +994,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'NECK_RINGS',
     type: 'structural', // Proper structural modification type
     culturalZones: ['SUB_SAHARAN_AFRICAN', 'EAST_ASIAN'],
+    /** Kayan women in Myanmar and Thailand, in decreasing numbers and mostly where tourism pays for it. */
+    declinesAfter: 1970,
     // Ndebele in the south, Kayan Padaung on the Thai–Burmese border.
     places: /ndebele|zimbabwe|transvaal|south africa|southern africa|kayan|padaung|shan|karen|burma|myanmar|thailand/,
     patterns: [
@@ -991,6 +1024,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'TOOTH_BLACKENING',
     type: 'paint', // Technically a dye/stain
     culturalZones: ['EAST_ASIAN', 'OCEANIA'],
+    /** Ohaguro was banned to the court in 1870 and had left ordinary life by the 1920s. */
+    declinesAfter: 1930,
     eras: ['ANTIQUITY', 'MEDIEVAL', 'RENAISSANCE_EARLY_MODERN'],
     patterns: [
       {
@@ -1019,6 +1054,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'TOOTH_FILING',
     type: 'structural', // Permanent dental modification
     culturalZones: ['OCEANIA', 'SUB_SAHARAN_AFRICAN', 'SOUTH_AMERICAN'],
+    /** Suppressed by colonial and then national schooling; survives in a few communities and almost nowhere else. */
+    declinesAfter: 1960,
     places: /bali|java|sumatra|mentawai|borneo|dayak|sulawesi|new guinea|papua|australia|amazon|xingu|orinoco|congo|gabon|angola/,
     patterns: [
       {
@@ -1045,6 +1082,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'TOOTH_INLAY',
     type: 'structural', // Permanent dental modification
     culturalZones: ['SOUTH_AMERICAN', 'OCEANIA'],
+    /** Mesoamerican and Andean, and not practised after the conquest. */
+    declinesAfter: 1600,
     eras: ['ANTIQUITY', 'MEDIEVAL'],
     patterns: [
       {
@@ -1070,6 +1109,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'CRANIAL_SHAPING',
     type: 'structural', // Proper structural modification
     culturalZones: ['SOUTH_AMERICAN', 'NORTH_AMERICAN_PRE_COLUMBIAN'],
+    /** Gone everywhere by the twentieth century; the last recorded cases in France and the Andes are nineteenth. */
+    declinesAfter: 1900,
     eras: ['PREHISTORY', 'ANTIQUITY', 'MEDIEVAL'],
     patterns: [
       {
@@ -1125,6 +1166,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'CHEEK_PLUGS',
     type: 'structural',
     culturalZones: ['SOUTH_AMERICAN'],
+    /** Amazonian, and largely given up outside villages that still hold to it. */
+    declinesAfter: 1960,
     places: /amazon|xingu|orinoco|rio negro|mato grosso|rainforest|guiana/,
     patterns: [
       {
@@ -1151,6 +1194,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'RITUAL_AMPUTATION',
     type: 'scarification',
     culturalZones: ['OCEANIA'],
+    /** Dani finger amputation for mourning was discouraged from the mid-century and is now practised by the old alone. */
+    declinesAfter: 1950,
     // Dani finger amputation in mourning, in the New Guinea highlands.
     places: /new guinea|papua|dani|baliem|highlands|sepik/,
     patterns: [
@@ -1178,6 +1223,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'SUBINCISION',
     type: 'structural',
     culturalZones: ['OCEANIA'],
+    /** Aboriginal initiation, and by the later twentieth century confined to a few communities. */
+    declinesAfter: 1950,
     // Central and Western Desert Aboriginal initiation, not a Pacific practice.
     places: /australia|aboriginal|outback|arnhem|western desert|central desert|alice springs|macdonnell|kimberley|pilbara/,
     patterns: [
@@ -1205,6 +1252,8 @@ export const CULTURAL_MARKINGS: CulturalMarking[] = [
     baseId: 'FOOT_BINDING',
     type: 'structural', // Permanent structural modification
     culturalZones: ['EAST_ASIAN'],
+    /** Banned in 1912 and effectively over within a generation. */
+    declinesAfter: 1930,
     eras: ['MEDIEVAL', 'RENAISSANCE_EARLY_MODERN', 'INDUSTRIAL_ERA'],
     patterns: [
       {
@@ -1244,7 +1293,17 @@ export function getMarkingsForCharacter(
    * of the twentieth and twenty-first centuries is one era, and the question of
    * whether a marking still has anyone to be read by is answered inside it.
    */
-  year?: number
+  year?: number,
+  /**
+   * The location on its own, where `place` is the region and the location
+   * joined. The `places` scoping below wants both — a marking scoped to the
+   * Amazon applies across the Amazon — but the modern gate wants only this,
+   * because a region label in this app names two worlds at once. See
+   * `traditionalCommunities.ts`.
+   */
+  location?: string,
+  /** The region on its own, for the few region terms that stay true of it. */
+  region?: string
 ): CulturalMarking[] {
 
   // Determine age group
@@ -1259,17 +1318,57 @@ export function getMarkingsForCharacter(
     year !== undefined
     && year >= MODERN_MARKING_YEAR
     && ZONES_WITHOUT_A_MODERN_CLAIM.includes(culturalZone)
-    && !livesInTraditionalCommunity(placeLower)
+    && !livesInTraditionalCommunity(
+      (location ?? '').toLowerCase(), (region ?? '').toLowerCase())
   ) {
     return [];
   }
+
+  const locationLower = (location ?? '').toLowerCase();
+  const regionLower = (region ?? '').toLowerCase();
+  const traditional = livesInTraditionalCommunity(locationLower, regionLower);
 
   return CULTURAL_MARKINGS.filter(marking => {
     // Check cultural zone
     if (!marking.culturalZones.includes(culturalZone)) return false;
 
-    // Check sub-zone place scoping
-    if (marking.places && !marking.places.test(placeLower)) return false;
+    /**
+     * Sub-zone place scoping, and *where* the scope was satisfied matters.
+     *
+     * A location match is a real one: "Xingu Headwaters" is in the Xingu. A
+     * region match is much weaker, because a region here covers several ways of
+     * living at once — a marking scoped to `/australia/` matches all four
+     * Australian regions and therefore the Sydney Basin, and one scoped to
+     * `/new zealand/` matches every New Zealander rather than every Māori.
+     *
+     * Before the modern period that is mostly harmless: the region really was
+     * the practice's world, and the app has no finer instrument than the place.
+     * After it the region is a nation state, so a region-only match stops
+     * counting unless the persona is in a community that kept the practice.
+     */
+    if (marking.places) {
+      const byLocation = locationLower !== '' && marking.places.test(locationLower);
+      const byRegion = marking.places.test(regionLower || placeLower);
+      if (!byLocation && !byRegion) return false;
+      if (!byLocation && !traditional
+        && year !== undefined && year >= MODERN_MARKING_YEAR) return false;
+    }
+
+    /**
+     * A practice that did not survive into the present.
+     *
+     * The zone gate above is all-or-nothing and covers one zone. This is per
+     * marking, because the decline was per practice: facial scarification and
+     * tooth filing collapsed across West and Central Africa over the second
+     * half of the twentieth century while kohl, bindi and ear piercing did not,
+     * and a rule at zone level cannot say so. Measured before this existed,
+     * 23% of post-1945 Sub-Saharan African personas carried a permanent mark.
+     *
+     * Someone still living in the community that kept it is exempt — that is
+     * the same test the zone gate uses, and the same reason.
+     */
+    if (marking.declinesAfter !== undefined && year !== undefined
+      && year >= marking.declinesAfter && !traditional) return false;
 
     // A devotional mark requires the devotion.
     if (marking.religions && !marking.religions.test(religion ?? '')) return false;
@@ -1438,7 +1537,10 @@ export function getMarkingProbability(
   profession?: string,
   /** See `getMarkingsForCharacter`: the same modern gate, applied to the roll. */
   year?: number,
-  place?: string
+  place?: string,
+  /** The location alone, and the region alone. Both, for the reason above. */
+  location?: string,
+  region?: string
 ): number {
   // Base probabilities by culture - historically accurate
   // These reflect actual anthropological data on body modification prevalence
@@ -1477,7 +1579,8 @@ export function getMarkingProbability(
     year !== undefined
     && year >= MODERN_MARKING_YEAR
     && ZONES_WITHOUT_A_MODERN_CLAIM.includes(culturalZone)
-    && !livesInTraditionalCommunity((place ?? '').toLowerCase())
+    && !livesInTraditionalCommunity(
+      (location ?? '').toLowerCase(), (region ?? '').toLowerCase())
   ) {
     return 0;
   }
