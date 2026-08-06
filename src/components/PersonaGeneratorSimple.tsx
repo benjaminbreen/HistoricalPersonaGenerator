@@ -60,8 +60,7 @@ import {
   IoSparkles,
   IoTelescope,
   IoHandLeft,
-  IoMusicalNotes,
-  IoEllipsisHorizontal
+  IoMusicalNotes
 } from 'react-icons/io5';
 import {
   FaDumbbell,
@@ -1482,13 +1481,13 @@ export default function PersonaGenerator() {
 
   /* Phone chrome. `showMobileActions` drives the bottom bar, which stands in
      for the generation controls once they have scrolled out of the document;
-     `showOverflowSheet` holds the three toolbar actions that do not fit a
-     44px-target row. Both render at every width — the stylesheet takes them
+     `showMobileOdds` reveals the draw-odds line, which phones hide until the
+     date is tapped. Both render at every width — the stylesheet takes them
      out of the layout above 600px — so there is no width state to keep in
      sync with the media query. */
   const controlsRef = useRef<HTMLDivElement>(null);
   const [showMobileActions, setShowMobileActions] = useState(false);
-  const [showOverflowSheet, setShowOverflowSheet] = useState(false);
+  const [showMobileOdds, setShowMobileOdds] = useState(false);
 
   useEffect(() => {
     logAiFlow('dialog state changed', {
@@ -3197,7 +3196,6 @@ export default function PersonaGenerator() {
     setCostConfirm(null);
     setRandomDonationMilestone(null);
     setShowAbout(false);
-    setShowOverflowSheet(false);
     void requestAiBiographyRun(
       persona ? elaborateExistingPersona : developPersonaProse
     );
@@ -3935,7 +3933,6 @@ export default function PersonaGenerator() {
     setCostConfirm(null);
     setRandomDonationMilestone(null);
     setShowAbout(false);
-    setShowOverflowSheet(false);
     setShowDonate(true);
     logAiFlow('opening donation dialog', { suspendedGate: aiGate?.action || null });
   };
@@ -4964,12 +4961,7 @@ export default function PersonaGenerator() {
             <IoShareSocial aria-hidden="true" />
             <span className="top-bar-label">{isCreatingShare ? 'Saving…' : 'Share'}</span>
           </button>
-          {/* Six 30px buttons fitted a phone row only by being under the touch
-              minimum and close enough together that a thumb covered two. These
-              three are the ones nobody reaches for mid-read, so on phones they
-              move into the overflow sheet and the rest get their 44px. */}
           <button
-            className="top-bar-overflow-hidden"
             onClick={handleSavePDF}
             aria-label="Save persona as PDF"
           >
@@ -4977,7 +4969,6 @@ export default function PersonaGenerator() {
             <span className="top-bar-label">Save as PDF</span>
           </button>
           <button
-            className="top-bar-overflow-hidden"
             onClick={openAbout}
             onPointerEnter={() => { void loadAboutSpriteBanner(); }}
             onPointerDown={() => { void loadAboutSpriteBanner(); }}
@@ -4988,59 +4979,15 @@ export default function PersonaGenerator() {
             <span className="top-bar-label">About</span>
           </button>
           <button
-            className="top-bar-donate top-bar-overflow-hidden"
+            className="top-bar-donate"
             onClick={openDonate}
             aria-label="Support this project"
           >
             <IoHeart aria-hidden="true" />
             <span className="top-bar-label">Donate</span>
           </button>
-          <button
-            className="top-bar-overflow-button"
-            onClick={() => setShowOverflowSheet(true)}
-            aria-label="More actions"
-            aria-haspopup="dialog"
-            aria-expanded={showOverflowSheet}
-          >
-            <IoEllipsisHorizontal aria-hidden="true" />
-            <span className="top-bar-label">More</span>
-          </button>
         </div>
       </div>
-
-      {showOverflowSheet && createPortal(
-        <>
-          <div
-            className="overflow-sheet-scrim"
-            onClick={() => setShowOverflowSheet(false)}
-          />
-          <div className="overflow-sheet" role="dialog" aria-label="More actions">
-            <div className="overflow-sheet-grip" aria-hidden="true" />
-            <button
-              onClick={() => { setShowOverflowSheet(false); handleSavePDF(); }}
-            >
-              <IoSave aria-hidden="true" />
-              Save as PDF
-            </button>
-            <button
-              onPointerDown={() => { void loadAboutSpriteBanner(); }}
-              onFocus={() => { void loadAboutSpriteBanner(); }}
-              onClick={() => { setShowOverflowSheet(false); openAbout(); }}
-            >
-              <IoInformationCircle aria-hidden="true" />
-              About this project
-            </button>
-            <button
-              className="overflow-sheet-donate"
-              onClick={openDonate}
-            >
-              <IoHeart aria-hidden="true" />
-              Support this project
-            </button>
-          </div>
-        </>,
-        document.body
-      )}
 
       {/* The generation controls live at the top of a 2,885px document, so on a
           phone the app's own loop cost a full-page scroll each time round. The
@@ -5101,7 +5048,9 @@ export default function PersonaGenerator() {
             aria-label="Develop the current persona with AI"
           >
             <IoSparkles aria-hidden="true" />
-            {isSourceGenerating ? 'Developing…' : 'Use AI to Develop Persona'}
+            <span className="generation-ai-label">
+              {isSourceGenerating ? 'Developing…' : 'Use AI to Develop Persona'}
+            </span>
           </button>
           <div className="sampling-mode" role="group" aria-label="How personas are sampled">
             <button
@@ -5131,14 +5080,6 @@ export default function PersonaGenerator() {
           {aiAccess?.testerAccess && (
             <span className="tester-access-badge">Tester access</span>
           )}
-          <span className="controls-disclaimer">
-            Prototype – may contain errors
-          </span>
-          <span className="controls-divider" aria-hidden="true">|</span>
-          <span className="controls-info">
-            Created by <a href="https://benjaminpbreen.com" target="_blank" rel="noopener noreferrer">Benjamin Breen</a>, UCSC History.{' '}
-            <a href="https://github.com/benjaminbreen/HistoricalPersonaGenerator" target="_blank" rel="noopener noreferrer">GitHub</a>
-          </span>
         </div>
 
         <div
@@ -5772,7 +5713,6 @@ export default function PersonaGenerator() {
                         >
                           {city.name}
                           {density === 'small' && <span className="city-pill-note"> · town</span>}
-                          {polity && <span className="city-pill-polity">{polity}</span>}
                         </span>
                       );
                     })()}
@@ -5846,9 +5786,26 @@ export default function PersonaGenerator() {
                 </div>
               </div>
               <div className="header-right">
-                <div className="header-date">{formatYear(persona.year)}</div>
-                <div className="exact-date">{getMonthName(persona.month)} {persona.day}</div>
+                {/* Phones hide the draw-odds line to save a header row; the
+                    date is the tap target that brings it back. Inert on
+                    desktop, where the line is always visible. */}
+                <div
+                  className="header-date-tap"
+                  onClick={() => setShowMobileOdds(v => !v)}
+                  aria-expanded={showMobileOdds}
+                >
+                  <div className="header-date">{formatYear(persona.year)}</div>
+                  <div className="exact-date">{getMonthName(persona.month)} {persona.day}</div>
+                </div>
                 {headerPolity && <PolityBadge polity={headerPolity} year={persona.year} />}
+                {showMobileOdds && persona.odds && (
+                  <div className="mobile-odds-popover" role="note">
+                    Roughly <strong>{persona.odds.phrase}</strong> were lived in{' '}
+                    {formatEraInPhrase(persona.era)} in{' '}
+                    {formatCulturalZone(persona.culturalZone, persona.region, persona.location)}
+                    {persona.samplingMode === 'explore' && <span className="draw-odds-mode"> · explore mode</span>}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -5863,6 +5820,14 @@ export default function PersonaGenerator() {
                         ? undefined
                         : { '--portrait-backdrop': portraitBackdropColor } as React.CSSProperties}
                     >
+                      {/* On phones the age and gender sit in the backdrop
+                          gutters either side of the figure, replacing the
+                          stat bar that sat under the portrait. Desktop hides
+                          these and shows `.appearance-text` instead. */}
+                      <div className="portrait-flank portrait-flank-left">
+                        <span className="flank-age">{persona.character.age}</span>
+                        <span className="flank-caption">years</span>
+                      </div>
                       <div
                         ref={portraitContainerRef}
                         className="portrait-container clickable-portrait"
@@ -5910,6 +5875,10 @@ export default function PersonaGenerator() {
                           </HoverPlate>
                         )}
                       </div>
+                      <div className="portrait-flank portrait-flank-right">
+                        <span className="flank-gender">{persona.character.gender}</span>
+                        <span className="flank-caption">{persona.character.appearance.build}</span>
+                      </div>
                       <button
                         type="button"
                         className="portrait-details-button"
@@ -5953,7 +5922,6 @@ export default function PersonaGenerator() {
                     <div className="info-item">
                       <span className="label">Profession</span>
                       <span className="value">
-                        <span className="profession-emoji">{getProfessionEmoji(persona.character.profession)}</span>
                         {persona.character.profession}
                         {/* A standing rather than a trade — "Big Man", "Maharaja" —
                             reads as a joke without the plain-English gloss beside it. */}
@@ -8330,7 +8298,6 @@ export default function PersonaGenerator() {
                     <div className="info-item">
                       <span className="label">Profession</span>
                       <span className="value">
-                        <span className="profession-emoji">{getProfessionEmoji(persona.character.profession)}</span>
                         {persona.character.profession}
                         {/* A standing rather than a trade — "Big Man", "Maharaja" —
                             reads as a joke without the plain-English gloss beside it. */}

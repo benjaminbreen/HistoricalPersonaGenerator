@@ -3734,6 +3734,15 @@ body.dark-mode .card-header {
   padding: 1rem var(--sp-2xl) 1rem 0;
 }
 
+/* Wraps the year and exact date so phones have one tap target for the odds
+   popover; visually it must be indistinguishable from the bare divs. */
+.header-date-tap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--sp-xs);
+}
+
 .header-date {
   font-size: 3.25rem;
   font-weight: 700;
@@ -3944,6 +3953,12 @@ body.dark-mode .area-pill {
   position: relative;
   display: flex;
   justify-content: center;
+}
+
+/* Phone-only: age and gender in the backdrop gutters beside the figure.
+   Desktop shows the same facts in `.appearance-text` below. */
+.portrait-flank {
+  display: none;
 }
 
 .portrait-details-button {
@@ -7177,6 +7192,12 @@ body.dark-mode .death-stat {
   font-weight: 600;
 }
 
+/* Phone-only: the draw-odds line leaves the header and comes back as a plate
+   under the date when the date is tapped. */
+.mobile-odds-popover {
+  display: none;
+}
+
 /* -------------------------------------------------------------------------
    Standing and rarity
    Two different claims that both belong near the name: one is about the
@@ -7473,8 +7494,9 @@ body.dark-mode .sampling-mode {
 /* Build reads as a qualifier of gender rather than its own row. */
 .gender-block {
   display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.35rem;
 }
 
 .gender-build {
@@ -7482,6 +7504,11 @@ body.dark-mode .sampling-mode {
   color: var(--color-text-tertiary);
   text-transform: lowercase;
   letter-spacing: 0.01em;
+}
+
+.gender-build::before {
+  content: '· ';
+  color: var(--color-text-tertiary);
 }
 
 /* ===========================================================================
@@ -7684,39 +7711,55 @@ body.dark-mode .sampling-mode {
     font-size: 0.8rem;
   }
 
+  /* The stat bar under the portrait becomes the flanks beside it: the
+     backdrop gutters either side of the figure were dead space, and the bar
+     was a full row spent on three words. */
   .appearance-text {
-    padding: 0.6rem 0.9rem;
-    border: 0;
-    border-radius: 0;
-    gap: var(--sp-sm);
+    display: none;
   }
 
-  .age-gender-display {
+  .portrait-container {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .portrait-flank {
+    display: flex;
+    flex: 1 1 3.4rem;
+    min-width: 0;
+    flex-direction: column;
     align-items: center;
-    gap: 0.85rem;
-    padding-bottom: 0;
-    border-bottom: 0;
+    justify-content: center;
+    gap: 0.15rem;
+    text-align: center;
+    /* The backdrop is whatever mid-tone the renderer reports; white with a
+       dark shadow holds against the whole range. */
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(26, 22, 18, 0.6);
   }
 
-  .age-number {
-    font-size: 2rem;
+  .flank-age {
+    font-family: var(--font-serif);
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: lining-nums tabular-nums;
   }
 
-  .age-label {
-    font-size: 0.6875rem;
+  .flank-gender {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: capitalize;
   }
 
-  .gender-block {
-    padding-left: 0;
-    border-left: 0;
-  }
-
-  .gender-label {
-    font-size: 1rem;
-  }
-
-  .gender-build {
-    font-size: 0.75rem;
+  .flank-caption {
+    font-family: var(--font-sans);
+    font-size: 0.5625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    opacity: 0.85;
   }
 
   .footer-mobile-details {
@@ -7738,6 +7781,52 @@ body.dark-mode .sampling-mode {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  /* --- Draw odds behind the date ---------------------------------------
+
+     A two-line statistical aside cost the header a row on every persona.
+     The date is the tap target that brings it back; `.header-date-tap`
+     wraps the year and the exact date so either works.
+     -------------------------------------------------------------------- */
+
+  .draw-odds {
+    display: none;
+  }
+
+  .header-right {
+    position: relative;
+  }
+
+  .header-date-tap {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-odds-popover {
+    display: block;
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 7;
+    width: max-content;
+    max-width: min(240px, 72vw);
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--plate-edge, #b59a6a);
+    border-radius: 3px;
+    background: linear-gradient(160deg, #fbf4e4 0%, #f1e6cd 100%);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    color: #4a3f30;
+    font-size: 0.72rem;
+    font-style: italic;
+    line-height: 1.45;
+    text-align: right;
+    text-shadow: none;
+  }
+
+  .mobile-odds-popover strong {
+    font-style: normal;
+    font-weight: 700;
   }
 
   /* --- Biography ------------------------------------------------------- */
@@ -8173,12 +8262,8 @@ body.dark-mode .sampling-mode {
 
 @media (max-width: 600px) {
 
-  /* --- Toolbar: four 44px targets, not six 30px ones -------------------- */
+  /* --- Toolbar: all six actions on one row ------------------------------ */
 
-  /* Six round buttons at 30px were both under the touch minimum and, at 3px
-     apart, close enough that a thumb covered two at once. Save/About/Donate
-     are the three nobody presses mid-read, so they move behind a single
-     overflow control and the four that remain get the full 44px. */
   .top-bar {
     padding-top: calc(var(--sp-xs) + env(safe-area-inset-top, 0px));
     padding-left: calc(var(--sp-sm) + env(safe-area-inset-left, 0px));
@@ -8186,53 +8271,63 @@ body.dark-mode .sampling-mode {
   }
 
   .top-bar-buttons {
-    gap: 5px;
+    gap: 3px;
   }
 
+  /* 32px is under the 44px touch guideline, but every action stays visible
+     instead of three of them hiding behind an overflow sheet. */
   .top-bar button {
-    width: 44px;
-    height: 44px;
-    /* The icons were sized against a 30px button and looked lost at 44. */
+    width: 32px;
+    height: 32px;
     border-width: 1px;
   }
 
   .top-bar button svg {
-    font-size: 17px;
+    font-size: 15px;
   }
 
-  /* Three of the six are now inside the overflow sheet. */
-  .top-bar-buttons .top-bar-overflow-hidden {
-    display: none;
-  }
-
-  /* The wordmark keeps its two lines but can afford to be legible: four 44px
-     buttons leave 175px where six 30px ones left about 140. */
+  /* Six buttons leave the wordmark ~90px at 375px — enough for the three
+     words only as three lines. */
   .top-bar-title {
-    font-size: 0.875rem;
+    -webkit-line-clamp: 3;
   }
 
-  /* --- Sampling toggle: its own row --------------------------------------
+  /* --- Generation controls: two rows -------------------------------------
 
-     `.sampling-mode` is an `inline-flex` with `overflow: hidden`, and the row
-     it shared with the AI button had `flex-wrap: nowrap`. There was never
-     enough width for both, so the second option was clipped — by 22px at
-     390px and by 92px at 320px, where it read "TRUE FREQUENC". As a full
-     width segmented control it fits at every size and the two options finally
-     look like the pair of alternatives they are.
+     Row one is the primary button with the AI action shrunk to a sparkle
+     icon beside it — the sticky bottom bar already carries the same icon, so
+     the full-width labelled button was paying twice for one action. Row two
+     is the sampling toggle at full width; sharing a `nowrap` row with the AI
+     button used to clip "TRUE FREQUENCY" mid-word.
+     `display: contents` dissolves the mode row so all three controls wrap in
+     one flex context.
      -------------------------------------------------------------------- */
 
   .generation-mode-row {
-    flex-wrap: wrap;
-    gap: var(--sp-sm);
+    display: contents;
   }
 
-  /* Matches `.control-buttons .generation-ai-button`, which pins `min-height`
-     to 0 to keep the desktop row tight. */
-  .control-buttons .generation-ai-button,
-  .control-buttons .generation-schema-button {
-    flex: 1 1 auto;
-    min-height: 44px;
+  /* A wider query stacks `.control-buttons` as a column; here it goes back
+     to a wrapping row so the AI icon can share the primary button's line. */
+  .control-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .control-buttons .generation-ai-button {
+    flex: 0 0 auto;
+    width: 48px;
+    min-height: 48px;
+    padding: 0;
     justify-content: center;
+  }
+
+  .control-buttons .generation-ai-button svg {
+    font-size: 19px;
+  }
+
+  .generation-ai-button .generation-ai-label {
+    display: none;
   }
 
   .sampling-mode {
@@ -8254,6 +8349,8 @@ body.dark-mode .sampling-mode {
   /* The one control the whole page exists to serve; it should be the easiest
      thing on the screen to hit. */
   .control-buttons .generation-random-button {
+    flex: 1 1 auto;
+    width: auto;
     min-height: 48px;
   }
 
@@ -8446,122 +8543,28 @@ body.dark-mode .sampling-mode {
 }
 
 /* -------------------------------------------------------------------------
-   Toolbar overflow sheet
-
-   Save as PDF, About and Donate leave the toolbar on phones and arrive here.
-   A sheet rather than a dropdown: it opens against the thumb instead of at
-   the far top corner, and it gives each item a 52px row to be pressed by.
-   ---------------------------------------------------------------------- */
-/* Scoped to `.top-bar` to outrank `.top-bar button`, which sets `display:
-   flex` on every button in the bar and would otherwise show the overflow
-   control at every width. */
-.top-bar .top-bar-overflow-button {
-  display: none;
-}
-
-@media (max-width: 600px) {
-  .top-bar .top-bar-overflow-button {
-    display: flex;
-  }
-}
-
-.overflow-sheet-scrim {
-  position: fixed;
-  inset: 0;
-  z-index: 1200;
-  background: rgba(26, 22, 18, 0.42);
-  animation: overflowSheetFade 0.18s ease-out;
-}
-
-.overflow-sheet {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1201;
-  padding: var(--sp-md) var(--sp-lg);
-  padding-bottom: calc(var(--sp-2xl) + env(safe-area-inset-bottom, 0px));
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-  border-radius: 18px 18px 0 0;
-  box-shadow: 0 -10px 40px -14px rgba(26, 22, 18, 0.5);
-  animation: overflowSheetRise 0.26s cubic-bezier(0.32, 0.72, 0, 1);
-}
-
-.overflow-sheet-grip {
-  width: 38px;
-  height: 4px;
-  margin: 2px auto var(--sp-md);
-  border-radius: 999px;
-  background: var(--color-border-strong);
-  opacity: 0.55;
-}
-
-.overflow-sheet button {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-xl);
-  width: 100%;
-  min-height: 52px;
-  padding: 0 var(--sp-md);
-  border: 0;
-  background: transparent;
-  color: var(--color-text-primary);
-  font: 600 0.9375rem var(--font-sans);
-  text-align: left;
-  cursor: pointer;
-  border-radius: 10px;
-}
-
-.overflow-sheet button + button {
-  border-top: 1px solid var(--color-border);
-  border-radius: 0;
-}
-
-.overflow-sheet button:active {
-  background: var(--color-surface-elevated);
-}
-
-.overflow-sheet button svg {
-  font-size: 19px;
-  color: var(--color-text-tertiary);
-  flex: 0 0 auto;
-}
-
-.overflow-sheet .overflow-sheet-donate svg {
-  color: var(--color-accent-primary);
-}
-
-@keyframes overflowSheetFade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes overflowSheetRise {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .overflow-sheet,
-  .overflow-sheet-scrim {
-    animation: none;
-  }
-}
-
-/* -------------------------------------------------------------------------
    Narrowest screens
 
-   Four 44px targets and their gaps claim 191px, which at 320px leaves the
+   Six 34px targets and their gaps claim 219px, which at 320px leaves the
    wordmark 83px — not wide enough for "Generator" to reach the second line,
    so the clamp ellipsised it to "Historical Persona…". Three smaller lines
-   still measure 40px against the row's 44px, so the name survives intact on
+   still measure 40px against the row height, so the name survives intact on
    the narrowest phones still in use.
    ---------------------------------------------------------------------- */
 @media (max-width: 360px) {
   .top-bar-title {
     font-size: 0.75rem;
     -webkit-line-clamp: 3;
+  }
+
+  /* Six buttons at 34px leave the wordmark ~50px at 320px; 30px buys it back. */
+  .top-bar button {
+    width: 30px;
+    height: 30px;
+  }
+
+  .top-bar button svg {
+    font-size: 14px;
   }
 }
 
