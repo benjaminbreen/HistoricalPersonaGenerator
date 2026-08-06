@@ -169,6 +169,7 @@ import {
   createAnnotationRecordFromSource,
   generateRandomPersonaAnnotationRecord,
 } from '../services/personaAnnotationService';
+import { describePromptSource, parsePromptSource } from '../services/promptSourceService';
 import {
   generatePersonaAnnotationWithGemini,
   generatePersonaSketchWithGemini,
@@ -2295,6 +2296,18 @@ export default function PersonaGenerator() {
       return;
     }
 
+    // "a person in 1896 New York city" is a request, not evidence. The tables
+    // can answer it without a model call, and without a failure path.
+    const promptParams = parsePromptSource(sourceText);
+    if (promptParams) {
+      setSourceFailure(null);
+      setSourcePanelCollapsed(true);
+      const { matchedPlace, ...params } = promptParams;
+      applyProceduralPersona(generateHistoricalPersona({ ...params, samplingMode }));
+      setSourceIngestionStatus(`Read the text as a request for ${describePromptSource(promptParams)} and generated a persona locally. No model was called.`);
+      return;
+    }
+
     setSourceFailure(null);
     setIsSourceGenerating(true);
     setSourcePanelCollapsed(true);
@@ -2405,6 +2418,14 @@ export default function PersonaGenerator() {
   };
 
   const generateFromAvailableSource = async () => {
+    // The Pasted text tab is its own thing: whatever is in the box is the
+    // request, and Old Bailey is a button of its own. Falling back to a random
+    // trial here sent typed prompts to the wrong generator and overwrote the
+    // box with the trial text.
+    if (sourceStudioView === 'text') {
+      await ingestPastedSource();
+      return;
+    }
     if (oldBaileySelectionActive || (!sourceText.trim() && !sourceUrl.trim())) {
       await ingestRandomOldBailey();
       return;
