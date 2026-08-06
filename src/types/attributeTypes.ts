@@ -187,14 +187,15 @@ export interface CharacterAttributes {
   maxBadges: number; // Usually 0-3
 }
 
-// Rarity colors
+// Rarity colors. Muted, valence-neutral scale: an attribute like "Barren"
+// must not wear a cheerful green tag. Order still reads as ascending rarity.
 export const RARITY_COLORS: Record<AttributeRarity, string> = {
-  common: '#6B7280', // Gray
-  uncommon: '#10B981', // Green
-  seldom_seen: '#0EA5E9', // Cyan
-  rare: '#3B82F6', // Blue
-  very_rare: '#8B5CF6', // Purple
-  exceedingly_rare: '#F59E0B', // Gold
+  common: '#8a8577', // warm gray
+  uncommon: '#6e7f76', // gray-sage
+  seldom_seen: '#5f7488', // slate
+  rare: '#56618f', // muted indigo
+  very_rare: '#7a5c85', // muted plum
+  exceedingly_rare: '#9c7a2e', // burnished gold
 };
 
 /**
