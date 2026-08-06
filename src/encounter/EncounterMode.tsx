@@ -19,7 +19,7 @@ import {
   isHostile, Outcome, resolveTurn, Side,
 } from './engine/battle';
 import { displayStats } from './engine/stats';
-import { speakLine, SpokenLine } from './dialogue/speak';
+import { displayLanguageName, speakLine, SpokenLine } from './dialogue/speak';
 import SpriteCanvas, { SpriteAnim, SpriteCommand } from './sprite/SpriteCanvas';
 import { SPRITE_SCALE } from './sprite/skeleton';
 import './encounter.css';
@@ -128,8 +128,9 @@ function TypeText({ text, onTyping }: { text: string; onTyping?: (typing: boolea
 export default function EncounterMode({ a, b, onClose }: Props) {
   const [state, setState] = useState<EncounterState>(() => createEncounter(a, b));
   const [busy, setBusy] = useState(false);
-  const [realMode, setRealMode] = useState(false);
   const [lines, setLines] = useState<Partial<Record<Side, SpokenLine>>>({});
+  const [stale, setStale] = useState(false);
+  const [activeSide, setActiveSide] = useState<Side | null>(null);
   const [typing, setTyping] = useState<Partial<Record<Side, boolean>>>({});
   const [narration, setNarration] = useState<string | null>(null);
   const [floaters, setFloaters] = useState<Floater[]>([]);
@@ -139,8 +140,6 @@ export default function EncounterMode({ a, b, onClose }: Props) {
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [koSides, setKoSides] = useState<Side[]>([]);
   const [selectedAction, setSelectedAction] = useState<ActionId>('talk');
-  const realModeRef = useRef(realMode);
-  realModeRef.current = realMode;
   const floaterId = useRef(1);
   const animKey = useRef(1);
   const timers = useRef<number[]>([]);
@@ -167,30 +166,16 @@ export default function EncounterMode({ a, b, onClose }: Props) {
     for (const event of events) {
       switch (event.type) {
         case 'speak': {
-          const line = speakLine(eventState, event.side, event.intent, realModeRef.current);
-          const hasSpeech = !!(line.text || line.real);
+          const line = speakLine(eventState, event.side, event.intent);
+          setActiveSide(event.side);
+          setLines((current) => ({ ...current, [event.side]: line }));
 
-          if (hasSpeech) {
-            setLines((current) => ({
-              ...current,
-              [event.side]: { ...line, action: null, physicalAnimation: null },
-            }));
-          } else {
-            setLines((current) => ({ ...current, [event.side]: undefined }));
-          }
+          // Always push: reply routing reads the tail to know what was asked.
+          const history = eventState.spokenHistory[event.side];
+          history.push(line.moveId);
+          if (history.length > 12) history.splice(0, history.length - 12);
 
-          if (line.action) {
-            setNarration(line.action);
-            if (line.physicalAnimation) playAnim(event.side, line.physicalAnimation);
-            if (line.cueId) {
-              const history = eventState.nonverbalHistory[event.side];
-              if (!history.includes(line.cueId)) history.push(line.cueId);
-              if (history.length > 12) history.splice(0, history.length - 12);
-            }
-          }
-
-          const spoken = line.real?.text ?? line.text;
-          const contentLength = spoken.length + (line.action?.length ?? 0);
+          const contentLength = line.text.length + line.gloss.length * 0.5;
           const readMs = Math.min(3800, 650 + contentLength * 18);
           await wait(readMs);
           break;
@@ -200,6 +185,7 @@ export default function EncounterMode({ a, b, onClose }: Props) {
           await wait(Math.min(2400, 600 + event.text.length * 16));
           break;
         case 'anim':
+          setActiveSide(event.side);
           playAnim(event.side, event.anim);
           if (event.anim === 'ko') setKoSides((k) => [...k, event.side]);
           await wait(event.anim === 'ko' ? 900 : event.anim === 'celebrate' ? 950 : 520);
@@ -240,11 +226,14 @@ export default function EncounterMode({ a, b, onClose }: Props) {
   const act = useCallback(async (action: ActionId) => {
     if (busy || outcome) return;
     setBusy(true);
-    setLines({});
+    setStale(false);
     setNarration(null);
     const result = resolveTurn(state, action);
     setState(result.state);
     await playEvents(result.events, result.state);
+    // The last exchange lingers, dimmed, as its own transcript.
+    setStale(true);
+    setActiveSide(null);
     setBusy(false);
   }, [busy, outcome, state, playEvents]);
 
@@ -254,30 +243,40 @@ export default function EncounterMode({ a, b, onClose }: Props) {
   );
   const hostile = isHostile(state);
   const scene = sceneTitle(state, outcome);
+  const langL = a.languageData?.name;
+  const langR = b.languageData?.name;
+  const tongueNote = langL && langR
+    ? langL === langR
+      ? `Both speak ${langL}.`
+      : `${langL} meets ${langR} — and each understands the other, as if by magic.`
+    : 'They understand one another, as if by magic.';
   const activeAction = actions.includes(selectedAction) ? selectedAction : actions[0];
   const activeMeta = ACTION_META[activeAction];
-  const ActiveActionIcon = activeMeta.icon;
 
   const renderBubble = (side: Side) => {
     const line = lines[side];
     if (!line) return null;
     return (
-      <div className={`encounter-bubble is-${side}`} key={`${side}-${line.text}-${line.real?.text ?? ''}`}>
+      <div
+        className={`encounter-bubble is-${side} ${stale ? 'is-stale' : ''}`}
+        key={`${side}-${line.moveId}-${line.text}`}
+      >
         <span className="encounter-bubble-name">{line.speakerName}</span>
-        {line.real ? (
+        {line.language ? (
           <>
             <p className="encounter-bubble-real">
-              <TypeText text={line.real.text} onTyping={(t) => setTyping((v) => ({ ...v, [side]: t }))} />
+              <TypeText text={line.text} onTyping={(t) => setTyping((v) => ({ ...v, [side]: t }))} />
             </p>
-            <span className="encounter-bubble-lang">
-              {line.real.language}
-              {line.real.attested ? ' · attested' : line.real.reconstructed ? ' · reconstructed*' : ' · impression'}
-            </span>
-            {line.translation && <p className="encounter-bubble-translation">“{line.translation}”</p>}
+            <span className="encounter-bubble-lang">{line.language}</span>
+            <p className="encounter-bubble-translation">“{line.gloss}”</p>
           </>
-        ) : line.text ? (
-          <p><TypeText text={line.text} onTyping={(t) => setTyping((v) => ({ ...v, [side]: t }))} /></p>
-        ) : null}
+        ) : (
+          // No table for this tongue yet: English dressed as the gloss it is,
+          // never as the speaker's own words.
+          <p className="encounter-bubble-translation">
+            “<TypeText text={line.text} onTyping={(t) => setTyping((v) => ({ ...v, [side]: t }))} />”
+          </p>
+        )}
       </div>
     );
   };
@@ -290,7 +289,7 @@ export default function EncounterMode({ a, b, onClose }: Props) {
     const hpPct = Math.round((combatant.hp / combatant.battle.maxHp) * 100);
     const isHurt = combatant.hp < combatant.battle.maxHp;
     return (
-      <aside className={`encounter-card is-${side}`}>
+      <aside className={`encounter-card is-${side} ${activeSide && activeSide !== side ? 'is-dim' : ''}`}>
         <div className="encounter-card-head">
           <h3>{c.name}</h3>
           <LuStar className="encounter-card-star" aria-hidden="true" />
@@ -301,6 +300,12 @@ export default function EncounterMode({ a, b, onClose }: Props) {
         </div>
         <div className="encounter-card-line">{c.gender} · {c.age} years old</div>
         <div className="encounter-card-profession">{c.profession}</div>
+        {persona.languageData && (
+          <div className="encounter-card-tongue">
+            Speaks {displayLanguageName(persona.languageData.name)}
+            {persona.languageData.isReconstructed ? ' · reconstructed' : ''}
+          </div>
+        )}
         {isHurt && (
           <div className="encounter-hpbar" role="meter" aria-label="Health" aria-valuenow={hpPct}>
             <div
@@ -346,6 +351,16 @@ export default function EncounterMode({ a, b, onClose }: Props) {
             <h2 className="encounter-scene-title">{scene.title}</h2>
             <p className="encounter-scene-sub">{narration ?? scene.sub}</p>
             <div className="encounter-scene-ornament"><span>◇</span></div>
+            <div className="encounter-mood" aria-hidden="true">
+              <span className="encounter-mood-row">
+                <em>rapport</em>
+                <span className="encounter-mood-track is-rapport"><span style={{ width: `${state.rapport}%` }} /></span>
+              </span>
+              <span className="encounter-mood-row">
+                <em>tension</em>
+                <span className="encounter-mood-track is-tension"><span style={{ width: `${state.tension}%` }} /></span>
+              </span>
+            </div>
           </div>
 
           <div className="encounter-figure is-right">
@@ -380,7 +395,7 @@ export default function EncounterMode({ a, b, onClose }: Props) {
               </li>
             ))}
           </ul>
-          <p className="encounter-factors-note">{state.comm.note}</p>
+          <p className="encounter-factors-note">{tongueNote}</p>
         </aside>
       )}
 
@@ -395,9 +410,6 @@ export default function EncounterMode({ a, b, onClose }: Props) {
       ) : (
         <div className="encounter-bottom">
           <section className="encounter-menu" aria-label="Actions">
-            <div className="encounter-menu-title">
-              {busy ? '· · ·' : 'Choose an action.'}
-            </div>
             <div className="encounter-actions">
               {actions.map((id) => {
                 const Icon = ACTION_META[id].icon;
@@ -417,16 +429,10 @@ export default function EncounterMode({ a, b, onClose }: Props) {
               })}
             </div>
             <div className="encounter-action-detail" aria-live="polite">
-              <div className="encounter-action-detail-main">
-                <ActiveActionIcon aria-hidden="true" />
-                <span>{activeMeta.blurb}</span>
-              </div>
-              <p>{busy ? 'The encounter unfolds…' : activeMeta.prompt}</p>
+              <p className="encounter-action-blurb">
+                {busy ? 'The encounter unfolds…' : activeMeta.blurb}
+              </p>
               <div className="encounter-action-detail-tools">
-                <label className="encounter-realmode">
-                  <input type="checkbox" checked={realMode} onChange={(e) => setRealMode(e.target.checked)} />
-                  <span>Real language</span>
-                </label>
                 <button className="encounter-factors-toggle" onClick={() => setShowFactors((v) => !v)}>
                   <LuInfo aria-hidden="true" /> Encounter factors
                 </button>

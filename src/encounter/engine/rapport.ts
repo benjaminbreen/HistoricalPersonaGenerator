@@ -8,7 +8,6 @@
 
 import { HistoricalPersona } from '../../services/personaGenerator';
 import { CulturalZone } from '../../types/characterData';
-import { CommunicationReport } from './communication';
 import { BattleStats, WEALTH_RANK } from './stats';
 
 export interface RapportFactor {
@@ -68,14 +67,9 @@ function faithFamily(religion: string | undefined): string | null {
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 const pct = (v: number | undefined) => clamp(v ?? 50, 0, 100);
 
-const SPEECH_VALUES: Record<CommunicationReport['level'], number> = {
-  fluent: 14, accented: 10, partial: 5, pidgin: 4, fragments: 0, gesture: -8,
-};
-
 export function computeRapport(
   a: HistoricalPersona,
   b: HistoricalPersona,
-  comm: CommunicationReport,
   battleA: BattleStats,
   battleB: BattleStats
 ): RapportReport {
@@ -83,12 +77,6 @@ export function computeRapport(
   const cb = b.character;
   const factors: RapportFactor[] = [];
   const tensionFactors: RapportFactor[] = [];
-
-  factors.push({
-    id: 'speech', label: 'Common tongue',
-    value: SPEECH_VALUES[comm.level],
-    detail: comm.note,
-  });
 
   const yearGap = Math.abs(a.year - b.year);
   const centuries = Math.round(yearGap / 100);
@@ -179,9 +167,6 @@ export function computeRapport(
   if (nerves > 60) {
     tensionFactors.push({ id: 'nerves', label: 'Jumpy company', value: 8, detail: 'Neither is calm by nature.' });
   }
-  if (comm.level === 'gesture' || comm.level === 'fragments') {
-    tensionFactors.push({ id: 'mute', label: 'No way to explain', value: 9, detail: 'A misunderstanding cannot be talked away.' });
-  }
   const martial = /soldier|warrior|guard|mercenar|raider|knight|samurai|archer|hunt/i;
   if (martial.test(ca.profession || '') || martial.test(cb.profession || '')) {
     tensionFactors.push({ id: 'arms', label: 'A fighter present', value: 6, detail: 'At least one of them has drawn blood for a living.' });
@@ -197,8 +182,7 @@ export function computeRapport(
 
   const open = (pct(ca.personality?.openness) + pct(cb.personality?.openness)) / 2;
   const curiosity = clamp(
-    Math.round(open * 0.7) + (yearGap > 600 ? 15 : 0) + (zoneA !== zoneB ? 8 : 0) +
-    (comm.score >= 0.3 ? 5 : 0),
+    Math.round(open * 0.7) + (yearGap > 600 ? 15 : 0) + (zoneA !== zoneB ? 8 : 0),
     5, 95
   );
 

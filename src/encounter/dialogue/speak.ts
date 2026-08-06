@@ -1,143 +1,106 @@
 /**
  * encounter/dialogue/speak.ts
  *
- * Turns a SpeakIntent into what the dialogue box shows. Default mode is the
- * RPG translation convention, degraded by how much the pair can actually
- * understand; real-language mode shows the attested phrase or impressionistic
- * speech, with a translation caption when comprehension allows one.
+ * Turns a SpeakIntent into what the dialogue box shows. Each figure speaks
+ * their own language — the line comes from that language's table — and both
+ * understand one another, as if by magic. The move's English gloss is the
+ * caption the player reads.
  */
 
 import { makeRng, hashString } from '../../components/portraitLab/core/rng';
 import { EncounterState, Side, SpeakIntent } from '../engine/battle';
-import { LINE_BANK, REGISTER_PREFIX } from './lines';
-import { isSpriteOnlyIntent, nonverbalCue, NonverbalAnimation } from './nonverbal';
-import { attestedPhrase, degrade, utterance } from './voice';
+import { Move, MOVES, MoveId, speakerClass } from './moves';
+import { LINE_TABLES } from './lines';
+
+/** "Chadic (reconstructed)" → "Chadic"; the recon flag carries that fact once. */
+export function displayLanguageName(name: string): string {
+  return name.replace(/\s*\([^)]*(?:reconstruct|hypothetic)[^)]*\)/gi, '').trim();
+}
 
 export interface SpokenLine {
   side: Side;
-  /** Spoken words only. Empty when the exchange is entirely nonverbal. */
+  moveId: MoveId;
+  /** The line in the speaker's own language. */
   text: string;
-  /** Physical communication rendered as central narration, never as speech. */
-  action: string | null;
-  /** Stable cue id for per-encounter repetition control. */
-  cueId: string | null;
-  /** Optional sprite motion accompanying a nonverbal cue. */
-  physicalAnimation: NonverbalAnimation | null;
-  /** Real-language rendering, when the toggle is on. */
-  real: { text: string; language: string; reconstructed: boolean; attested: boolean } | null;
-  /** Caption under a real-language line, when the listener would understand. */
-  translation: string | null;
+  /** The English gloss shown beneath it. */
+  gloss: string;
+  language: string | null;
+  reconstructed: boolean;
   speakerName: string;
 }
 
-function fillSlots(line: string, state: EncounterState, side: Side): string {
-  const me = side === 'left' ? state.left.persona : state.right.persona;
-  const them = side === 'left' ? state.right.persona : state.left.persona;
-  return line
-    .replace('{name}', them.character.name.split(' ')[0])
-    .replace('{trade}', (me.character.profession || 'worker').toLowerCase())
-    .replace('{place}', me.location || me.region || 'my country');
+/** The talk move the other side just played — what a reply is replying to. */
+function lastTalkMove(state: EncounterState, side: Side): Move | null {
+  const history = state.spokenHistory[side];
+  for (let i = history.length - 1; i >= 0; i--) {
+    const move = MOVES.find((m) => m.id === history[i]);
+    if (move?.intent === 'talk') return move;
+  }
+  return null;
 }
 
-export function speakLine(
-  state: EncounterState,
-  side: Side,
-  intent: SpeakIntent,
-  realMode: boolean
-): SpokenLine {
+export function speakLine(state: EncounterState, side: Side, intent: SpeakIntent): SpokenLine {
   const me = side === 'left' ? state.left.persona : state.right.persona;
-  const seedText = `${state.seed}|${state.turn}|${side}|${intent}`;
-  const rng = makeRng(hashString(seedText));
-  const bank = LINE_BANK[intent] ?? LINE_BANK.talk;
-  let english = fillSlots(bank[Math.floor(rng() * bank.length)], state, side);
+  const other: Side = side === 'left' ? 'right' : 'left';
+  const c = me.character;
+  const rng = makeRng(hashString(`${state.seed}|${state.turn}|${side}|${intent}`));
 
-  const extraversion = me.character.personality?.extraversion ?? 50;
-  if (extraversion > 70 && rng() < 0.4 && !/^[A-Z]{2}/.test(english)) {
-    const prefixes = REGISTER_PREFIX.effusive;
-    english = prefixes[Math.floor(rng() * prefixes.length)] + english.charAt(0).toLowerCase() + english.slice(1);
+  const cls = speakerClass(c.profession);
+  const pious = !!c.religion && (c.personality?.conscientiousness ?? 50) > 55;
+  const wary = (c.personality?.agreeableness ?? 50) < 40;
+  const weight = (m: Move): number => {
+    if (m.tag === 'any') return 1;
+    if (m.tag === 'pious') return pious ? 4 : 0.15;
+    if (m.tag === 'wary') return wary ? 4 : 0.15;
+    return m.tag === cls ? 4 : 0; // a laborer never claims an elite's work
+  };
+
+  // Replies answer what was actually said: a question gets an answer or an
+  // honest miss, never warm agreement; a proverb earns proverb-shaped warmth.
+  let pool: Move[] | null = null;
+  if (intent === 'talk-warm' || intent === 'talk-miss') {
+    const asked = lastTalkMove(state, other);
+    if (asked?.kind === 'question') {
+      if (intent === 'talk-warm') {
+        pool = asked.id.startsWith('work-')
+          ? MOVES.filter((m) => m.id === `work-${cls}`)
+          : MOVES.filter((m) => m.answers?.includes(asked.id as never) && weight(m) > 0);
+        if (!pool.length) pool = MOVES.filter((m) => m.id === 'miss-custom');
+      } else {
+        pool = MOVES.filter((m) => m.id === 'miss-follow' || m.id === 'miss-nothing');
+      }
+    } else if (asked?.kind === 'proverb' && intent === 'talk-warm') {
+      pool = MOVES.filter((m) => m.id === 'warm-grandmother' || m.id === 'warm-wellsaid');
+    }
   }
 
-  const level = state.comm.level;
-  const speakerName = me.character.name.split(' ')[0];
+  let candidates = pool ?? MOVES.filter((m) => m.intent === intent && !m.answers && weight(m) > 0);
+  if (!candidates.length) candidates = MOVES.filter((m) => m.intent === 'talk' && !m.answers);
+  const spoken = state.spokenHistory[side];
+  const fresh = candidates.filter((m) => !spoken.includes(m.id));
+  if (fresh.length) candidates = fresh;
+
+  const total = candidates.reduce((sum, m) => sum + Math.max(weight(m), 0.05), 0);
+  let roll = rng() * total;
+  let move = candidates[candidates.length - 1];
+  for (const m of candidates) {
+    roll -= Math.max(weight(m), 0.05);
+    if (roll <= 0) { move = m; break; }
+  }
+
   const lang = me.languageData;
-
-  if (level === 'gesture') {
-    const cue = nonverbalCue(state, side, intent);
-    if (cue) {
-      return {
-        side, text: '', action: cue.text, cueId: cue.id,
-        physicalAnimation: cue.animation ?? null, real: null,
-        translation: null, speakerName,
-      };
-    }
-
-    // Kinetic actions are already expressed by sprite animation and combat
-    // narration; do not restate them in a dialogue box.
-    if (isSpriteOnlyIntent(intent)) {
-      return {
-        side, text: '', action: null, cueId: null, physicalAnimation: null,
-        real: null, translation: null, speakerName,
-      };
-    }
-
-    // If this is a genuinely vocal intent without a physical cue, preserve
-    // the sound of the speaker's language rather than inventing hand-waving.
-    if (lang) {
-      const attested = attestedPhrase(lang, intent);
-      return {
-        side, text: '', action: null, cueId: null, physicalAnimation: null,
-        real: {
-          text: attested ?? utterance(lang, seedText, Math.max(2, Math.min(5, english.split(' ').length))),
-          language: lang.name,
-          reconstructed: !!lang.isReconstructed,
-          attested: attested !== null,
-        },
-        translation: null, speakerName,
-      };
-    }
-
-    return {
-      side, text: '', action: null, cueId: null, physicalAnimation: null,
-      real: null, translation: null, speakerName,
-    };
-  }
-
-  if (!realMode) {
-    const text = degrade(english, level, seedText);
-    const cue = level === 'fragments' ? nonverbalCue(state, side, intent) : null;
-    return {
-      side, text, action: cue?.text ?? null, cueId: cue?.id ?? null,
-      physicalAnimation: cue?.animation ?? null, real: null,
-      translation: null, speakerName,
-    };
-  }
-
-  if (!lang) {
-    return {
-      side, text: english, action: null, cueId: null, physicalAnimation: null,
-      real: null, translation: null, speakerName,
-    };
-  }
-
-  const attested = attestedPhrase(lang, intent);
-  const wordCount = Math.max(2, Math.min(9, Math.round(english.split(' ').length * 0.6)));
-  const realText = attested ?? utterance(lang, seedText, wordCount);
-  const understood = state.comm.score >= 0.3;
-  const cue = level === 'fragments' ? nonverbalCue(state, side, intent) : null;
-
+  const table = lang ? LINE_TABLES[lang.id] : undefined;
+  const raw = table?.[move.id];
+  const firstName = c.name.split(' ')[0];
   return {
     side,
-    text: '',
-    action: cue?.text ?? null,
-    cueId: cue?.id ?? null,
-    physicalAnimation: cue?.animation ?? null,
-    real: {
-      text: realText,
-      language: lang.name,
-      reconstructed: !!lang.isReconstructed,
-      attested: attested !== null,
-    },
-    translation: understood ? degrade(english, level, seedText) : null,
-    speakerName,
+    moveId: move.id,
+    text: (raw ?? move.gloss).replace('{name}', firstName),
+    gloss: move.gloss.replace('{name}', firstName),
+    // Untranslated move in a covered language: English must not wear the
+    // language's label, so fall back per line, not per language.
+    language: raw ? displayLanguageName(lang!.name) : null,
+    reconstructed: !!lang?.isReconstructed,
+    speakerName: firstName,
   };
 }

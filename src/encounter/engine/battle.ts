@@ -9,7 +9,6 @@
 
 import { makeRng, Rng } from '../../components/portraitLab/core/rng';
 import { HistoricalPersona } from '../../services/personaGenerator';
-import { assessCommunication, CommunicationReport } from './communication';
 import { computeRapport, RapportReport } from './rapport';
 import { BattleStats, deriveBattleStats } from './stats';
 
@@ -63,9 +62,8 @@ export interface EncounterState {
   tension: number;
   curiosity: number;
   report: RapportReport;
-  comm: CommunicationReport;
-  /** Recently used physical communication cues, used to avoid repetition. */
-  nonverbalHistory: Record<Side, string[]>;
+  /** Recently spoken move ids, used to avoid repetition. */
+  spokenHistory: Record<Side, string[]>;
   outcome: Outcome | null;
 }
 
@@ -79,8 +77,7 @@ function makeCombatant(persona: HistoricalPersona, side: Side): Combatant {
 export function createEncounter(a: HistoricalPersona, b: HistoricalPersona, seed?: number): EncounterState {
   const left = makeCombatant(a, 'left');
   const right = makeCombatant(b, 'right');
-  const comm = assessCommunication(a, b);
-  const report = computeRapport(a, b, comm, left.battle, right.battle);
+  const report = computeRapport(a, b, left.battle, right.battle);
   return {
     seed: seed ?? ((a.character.portraitSeed ?? 1) * 31 + (b.character.portraitSeed ?? 7)) >>> 0,
     turn: 0,
@@ -88,8 +85,8 @@ export function createEncounter(a: HistoricalPersona, b: HistoricalPersona, seed
     rapport: report.rapport,
     tension: report.tension,
     curiosity: report.curiosity,
-    report, comm,
-    nonverbalHistory: { left: [], right: [] },
+    report,
+    spokenHistory: { left: [], right: [] },
     outcome: null,
   };
 }
@@ -110,11 +107,6 @@ function other(side: Side): Side {
 
 function get(state: EncounterState, side: Side): Combatant {
   return side === 'left' ? state.left : state.right;
-}
-
-/** Comprehension gates persuasion: you cannot charm someone who cannot hear you. */
-function speechMultiplier(comm: CommunicationReport): number {
-  return 0.45 + comm.score * 0.55;
 }
 
 interface TurnContext {
@@ -156,8 +148,7 @@ function doTalk(ctx: TurnContext, side: Side) {
   const target = get(ctx.state, other(side));
   const insightBonus = actor.insight ? 0.12 : 0;
   const chance = clamp(
-    (0.45 + (actor.battle.charm - target.battle.nerve) / 45 + ctx.state.rapport / 500 + insightBonus)
-      * speechMultiplier(ctx.state.comm),
+    0.45 + (actor.battle.charm - target.battle.nerve) / 45 + ctx.state.rapport / 500 + insightBonus,
     0.08, 0.95
   );
   actor.insight = false;
@@ -326,7 +317,7 @@ function chooseFoeAction(state: EncounterState, rng: Rng): ActionId {
 
   const weights: Array<[ActionId, number]> = hostile
     ? [
-        ['talk', 1.2 * agree + (state.comm.score > 0.3 ? 0.5 : 0)],
+        ['talk', 1.2 * agree + 0.5],
         ['observe', 0.6 * open + (foe.observed ? 0 : 0.4)],
         ['steal', 0.5 + foe.battle.guile / 30 - agree * 0.4],
         ['attack', 0.4 + state.tension / 120 + foe.battle.attack / 60 - agree * 0.6],
